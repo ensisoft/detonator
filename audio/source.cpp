@@ -30,30 +30,31 @@
 namespace audio
 {
 
-AudioFile::AudioFile(const std::string& filename, const std::string& name)
-    : filename_(filename)
-    , name_(name)
+AudioFile::AudioFile(const std::string& filename, const std::string& name, Format format)
+    : mFilename(filename)
+    , mName(name)
+    , mFormat(format)
 {}
 AudioFile::~AudioFile() = default;
 
 unsigned AudioFile::GetRateHz() const noexcept
-{ return decoder_->GetSampleRate(); }
+{ return mDecoder->GetSampleRate(); }
 
 unsigned AudioFile::GetNumChannels() const noexcept
-{ return decoder_->GetNumChannels(); }
+{ return mDecoder->GetNumChannels(); }
 
 Source::Format AudioFile::GetFormat() const noexcept
-{ return format_; }
+{ return mFormat; }
 
 std::string AudioFile::GetName() const noexcept
-{ return name_; }
+{ return mName; }
 
 unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes) 
 {
-    const auto num_channels = decoder_->GetNumChannels();
-    const auto frame_size = num_channels * ByteSize(format_);
+    const auto num_channels = mDecoder->GetNumChannels();
+    const auto frame_size = num_channels * ByteSize(mFormat);
     const auto possible_num_frames = max_bytes / frame_size;
-    const auto frames_available = decoder_->GetNumFrames() - frames_;
+    const auto frames_available = mDecoder->GetNumFrames() - mFrames;
     const auto frames_to_read = std::min((unsigned)frames_available,
                                          (unsigned)possible_num_frames);
     // change the output format into floats.
@@ -62,20 +63,20 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     // sndfile-play however uses floats and is able to play
     // the same test ogg (mentioned in the bug) without crackles.
     size_t ret = 0;
-    if (format_ == Format::Float32)
-        ret = decoder_->ReadFrames((float*)buff, frames_to_read);
-    else if (format_ == Format::Int32)
-        ret = decoder_->ReadFrames((int*)buff, frames_to_read);
-    else if (format_ == Format::Int16)
-        ret = decoder_->ReadFrames((short*)buff, frames_to_read);
+    if (mFormat == Format::Float32)
+        ret = mDecoder->ReadFrames((float*)buff, frames_to_read);
+    else if (mFormat == Format::Int32)
+        ret = mDecoder->ReadFrames((int*)buff, frames_to_read);
+    else if (mFormat == Format::Int16)
+        ret = mDecoder->ReadFrames((short*)buff, frames_to_read);
     if (ret != frames_to_read)
         WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames_to_read);
-    frames_ += ret;
+    mFrames += ret;
     return ret * frame_size;
 }
 
-bool AudioFile::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
-{ return frames_ < decoder_->GetNumFrames(); }
+bool AudioFile::HasMore(std::uint64_t num_bytes_read) const noexcept
+{ return mFrames < mDecoder->GetNumFrames(); }
 
 bool AudioFile::Reset() noexcept
 {
@@ -85,19 +86,19 @@ bool AudioFile::Reset() noexcept
 bool AudioFile::Open()
 {
     std::unique_ptr<Decoder> decoder;
-    const auto& upper = base::ToUpperUtf8(filename_);
+    const auto& upper = base::ToUpperUtf8(mFilename);
     if (base::EndsWith(upper, ".MP3"))
     {
         SampleType type = SampleType::NotSet;
-        if (format_ == Format::Float32)
+        if (mFormat == Format::Float32)
             type = SampleType::Float32;
-        else if (format_ == Format::Int32)
+        else if (mFormat == Format::Int32)
             type = SampleType::Int32;
-        else if (format_ == Format::Int16)
+        else if (mFormat == Format::Int16)
             type = SampleType::Int16;
         else BUG("Unsupported format.");
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(filename_, type))
+        if (!dec->Open(mFilename, type))
             return false;
         decoder = std::move(dec);
     }
@@ -106,17 +107,17 @@ bool AudioFile::Open()
              base::EndsWith(upper, ".FLAC"))
     {
         auto stream = std::make_unique<SndFileInputStream>();
-        if (!stream->OpenFile(filename_))
+        if (!stream->OpenFile(mFilename))
             return false;
         decoder = std::make_unique<SndFileDecoder>(std::move(stream));
     }
     else
     {
-        ERROR("Unsupported audio file '%1'", filename_);
+        ERROR("Unsupported audio file '%1'", mFilename);
         return false;
     }
-    decoder_ = std::move(decoder);
-    frames_ = 0;
+    mDecoder = std::move(decoder);
+    mFrames = 0;
     return true;
 }
 

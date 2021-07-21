@@ -33,6 +33,29 @@ Graph::Graph(const std::string& name)
   , mPort("out")
 {}
 
+Graph::Graph(Graph&& other)
+  : mName(other.mName)
+  , mId(other.mId)
+  , mSrcMap(std::move(other.mSrcMap))
+  , mDstMap(std::move(other.mDstMap))
+  , mPortMap(std::move(other.mPortMap))
+  , mElements(std::move(other.mElements))
+  , mTopoOrder(std::move(other.mTopoOrder))
+  , mFormat(std::move(other.mFormat))
+  , mPort(std::move(other.mPort))
+  , mDone(other.mDone)
+{
+    for (auto& pair : mPortMap)
+    {
+        auto* port = pair.second;
+        if (port == &other.mPort)
+        {
+            pair.second = &mPort;
+            break;
+        }
+    }
+}
+
 Element* Graph::AddElementPtr(std::unique_ptr<Element> element)
 {
     mElements.push_back(std::move(element));
@@ -68,6 +91,10 @@ const Element* Graph::FindElementByName(const std::string& name) const
 void Graph::LinkElements(Element* src_elem, Port* src_port,
                          Element* dst_elem, Port* dst_port)
 {
+    ASSERT(HasElement(src_elem));
+    ASSERT(HasElement(dst_elem));
+    ASSERT(src_elem->HasOutputPort(src_port));
+    ASSERT(dst_elem->HasInputPort(dst_port));
     mSrcMap[dst_elem].insert(src_elem);
     mDstMap[src_elem].insert(dst_elem);
     mPortMap[src_port] = dst_port;
@@ -75,6 +102,8 @@ void Graph::LinkElements(Element* src_elem, Port* src_port,
 
 void Graph::LinkGraph(Element* src_elem, Port* src_port)
 {
+    ASSERT(HasElement(src_elem));
+    ASSERT(src_elem->HasOutputPort(src_port));
     mPortMap[src_port] = &mPort;
 }
 
@@ -237,6 +266,13 @@ bool Graph::IsDstPortTaken(const Port* dst) const
     return false;
 }
 
+bool Graph::HasElement(Element* element) const
+{
+    for (const auto& e : mElements)
+        if (e.get() == element) return true;
+    return false;
+}
+
 bool Graph::Prepare()
 {
     // This is the so called Kahn's algorithm
@@ -279,10 +315,10 @@ bool Graph::Prepare()
     for (size_t i=0; i < order.size(); ++i)
     {
         Element* src = order[i];
-        DEBUG("Preparing audio element '%1'", src->GetName());
+        DEBUG("Audio graph '%1' preparing audio element '%2'", mName, src->GetName());
         if (!src->Prepare())
         {
-            ERROR("Element '%1' failed to prepare.", src->GetName());
+            ERROR("Audio graph '%1' element '%2' failed to prepare.", mName, src->GetName());
             return false;
         }
         for (unsigned i=0; i<src->GetNumOutputPorts(); ++i)
@@ -305,69 +341,11 @@ bool Graph::Prepare()
     }
     mTopoOrder = std::move(order);
     mFormat    = mPort.GetFormat();
-    DEBUG("Graph output set to %1 with %2 channels @ %3 Hz", mFormat.sample_type,
-          mFormat.channel_count, mFormat.sample_rate);
+    DEBUG("Audio graph '%1' output set to '%2'.", mName, mFormat);
     return true;
 }
 
-unsigned Graph::GetRateHz() const noexcept
-{ return mFormat.sample_rate; }
-
-unsigned Graph::GetNumChannels() const noexcept
-{ return mFormat.channel_count; }
-
-Source::Format Graph::GetFormat() const noexcept
-{
-    if (mFormat.sample_type == SampleType::Int16)
-        return Source::Format::Int16;
-    else if (mFormat.sample_type == SampleType::Int32)
-        return Source::Format::Int32;
-    else if (mFormat.sample_type == SampleType::Float32)
-        return Source::Format::Float32;
-    else BUG("Incorrect audio format.");
-    return Source::Format::Float32;
-}
-std::string Graph::GetName() const noexcept
-{ return mName; }
-
-unsigned Graph::FillBuffer(void* buff, unsigned max_bytes)
-{
-    // compute how many milliseconds worth of data can we
-    // stuff into the current buffer. todo: should the buffering
-    // sizes be fixed somewhere somehow? I.e. we're always dispatching
-    // let's say 5ms worth of audio or whatever ?
-    const auto millis_in_bytes = GetMillisecondByteCount(mFormat);
-    const auto milliseconds = max_bytes / millis_in_bytes;
-    const auto bytes = millis_in_bytes * milliseconds;
-    ASSERT(bytes <= max_bytes);
-
-    Process(milliseconds);
-
-    if (!mPort.HasBuffers())
-    {
-        WARN("No audio buffer available.");
-        return 0;
-    }
-
-    BufferHandle buffer;
-    mPort.PullBuffer(buffer);
-
-    // todo: get rid of the copying.
-    ASSERT(buffer->GetByteSize() <= max_bytes);
-    std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
-    return buffer->GetByteSize();
-}
-bool Graph::HasNextBuffer(std::uint64_t num_bytes_read) const noexcept
-{
-    return !mDone;
-}
-bool Graph::Reset() noexcept
-{
-    // todo:
-    return true;
-}
-
-void Graph::Process(unsigned int milliseconds)
+void Graph::Process(EventQueue& events, unsigned milliseconds)
 {
     // Evaluate the elements in topological order and then
     // dispatch the buffers according to the element/port links.
@@ -379,7 +357,7 @@ void Graph::Process(unsigned int milliseconds)
             continue;
 
         // process the audio buffers.
-        source->Process(milliseconds);
+        source->Process(events, milliseconds);
 
         // dispatch the resulting buffers by iterating over the output
         // ports and finding their assigned input ports.
@@ -428,10 +406,10 @@ void Graph::Process(unsigned int milliseconds)
 
     if (graph_done)
     {
-        DEBUG("Graph is done!");
+        DEBUG("Audio graph '%1 ' is done!", mName);
         for (auto& element : mTopoOrder)
         {
-            DEBUG("Shutting down audio element '%1'", element->GetName());
+            DEBUG("Shutting down audio graph '%1' element '%2'", mName, element->GetName());
             element->Shutdown();
         }
     }
@@ -443,5 +421,148 @@ void Graph::Shutdown()
 
 }
 
+void Graph::Update(float dt)
+{
+    for (auto& elem : mElements)
+    {
+        elem->Update(dt);
+    }
+}
+
+bool Graph::DispatchCommand(const std::string& dest, Element::Command& cmd)
+{
+    // see if the receiver of the command is a direct descendant
+    for (auto& elem : mElements)
+    {
+        if (elem->GetName() != dest)
+            continue;
+        elem->ReceiveCommand(cmd);
+        return true;
+    }
+    // try to dispatch the command recursively.
+    for (auto& elem : mElements)
+    {
+        if (elem->DispatchCommand(dest, cmd))
+            return true;
+    }
+    return false;
+}
+
+struct AudioGraph::GraphCmd {
+    std::unique_ptr<Element::Command> cmd;
+    std::string dest;
+};
+
+AudioGraph::AudioGraph(const std::string& name)
+  : mName(name)
+  , mGraph(name)
+{}
+
+AudioGraph::AudioGraph(const std::string& name, Graph&& graph)
+  : mName(name)
+  , mGraph(std::move(graph))
+{}
+
+AudioGraph::AudioGraph(AudioGraph&& other)
+  : mName(other.mName)
+  , mGraph(std::move(other.mGraph))
+{}
+
+bool AudioGraph::Prepare()
+{
+    if (!mGraph.Prepare())
+        return false;
+    auto& out = mGraph.GetOutputPort(0);
+    mFormat = out.GetFormat();
+    return true;
+}
+
+unsigned AudioGraph::GetRateHz() const noexcept
+{ return mFormat.sample_rate; }
+
+unsigned AudioGraph::GetNumChannels() const noexcept
+{ return mFormat.channel_count; }
+
+Source::Format AudioGraph::GetFormat() const noexcept
+{
+    if (mFormat.sample_type == SampleType::Int16)
+        return Source::Format::Int16;
+    else if (mFormat.sample_type == SampleType::Int32)
+        return Source::Format::Int32;
+    else if (mFormat.sample_type == SampleType::Float32)
+        return Source::Format::Float32;
+    else BUG("Incorrect audio format.");
+    return Source::Format::Float32;
+}
+std::string AudioGraph::GetName() const noexcept
+{ return mName; }
+
+unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
+{
+    // compute how many milliseconds worth of data can we
+    // stuff into the current buffer. todo: should the buffering
+    // sizes be fixed somewhere somehow? I.e. we're always dispatching
+    // let's say 5ms worth of audio or whatever ?
+    const auto millis_in_bytes = GetMillisecondByteCount(mFormat);
+    const auto milliseconds = max_bytes / millis_in_bytes;
+    const auto bytes = millis_in_bytes * milliseconds;
+    ASSERT(bytes <= max_bytes);
+
+    mGraph.Process(mEvents, milliseconds);
+
+    BufferHandle buffer;
+    auto& port = mGraph.GetOutputPort(0);
+    if (!port.PullBuffer(buffer))
+    {
+        WARN("Audio graph '%1' has no output audio buffer available.", mName);
+        return 0;
+    }
+
+    // todo: get rid of the copying.
+    ASSERT(buffer->GetByteSize() <= max_bytes);
+    std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
+    return buffer->GetByteSize();
+}
+bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
+{
+    return !mGraph.IsSourceDone();
+}
+bool AudioGraph::Reset() noexcept
+{
+    // todo:
+    BUG("Unimplemented function.");
+    return false;
+}
+void AudioGraph::RecvCommand(std::unique_ptr<Command> cmd) noexcept
+{
+    if (auto* ptr = cmd->GetIf<GraphCmd>())
+    {
+        if (!mGraph.DispatchCommand(ptr->dest, *ptr->cmd))
+            WARN("Audio graph '%1' command receiver element '%2' not found.", mName, ptr->dest);
+    }
+    else BUG("Unexpected command.");
+}
+
+std::unique_ptr<Event> AudioGraph::GetEvent() noexcept
+{
+    if (mEvents.empty()) return nullptr;
+    auto ret = std::move(mEvents.front());
+    mEvents.pop();
+    return ret;
+}
+
+void AudioGraph::Update(float dt) noexcept
+{
+    mGraph.Update(dt);
+}
+
+// static
+std::unique_ptr<Command> AudioGraph::MakeCommandPtr(const std::string& destination, std::unique_ptr<Element::Command>&& cmd)
+{
+    GraphCmd foo;
+    foo.dest = destination;
+    foo.cmd  = std::move(cmd);
+    return audio::MakeCommand(std::move(foo));
+}
 
 } // namespace

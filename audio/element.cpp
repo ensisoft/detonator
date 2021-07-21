@@ -19,6 +19,7 @@
 #include <sndfile.h>
 #include <fstream>
 #include <type_traits>
+#include <cmath> // for pow
 
 #include <samplerate.h>
 
@@ -30,10 +31,191 @@
 #include "audio/sndfile.h"
 #include "audio/mpg123.h"
 
+namespace {
+using namespace audio;
+template<unsigned ChannelCount>
+void AdjustFrameGain(Frame<float, ChannelCount>* frame, float gain)
+{
+    // float's can exceed the -1.0f - 1.0f range.
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        frame->channels[i] *= gain;
+    }
+}
+template<typename Type, unsigned ChannelCount>
+void AdjustFrameGain(Frame<Type, ChannelCount>* frame, float gain)
+{
+    static_assert(std::is_integral<Type>::value);
+    // for integer formats clamp the values in order to avoid
+    // undefined overflow / wrapping over.
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        const std::int64_t sample = frame->channels[i] * gain;
+        const std::int64_t min = SampleBits<Type>::Bits * -1;
+        const std::int64_t max = SampleBits<Type>::Bits;
+        frame->channels[i] = math::clamp(min, max, sample);
+    }
+}
+
+template<unsigned ChannelCount>
+void MixFrames(Frame<float, ChannelCount>** srcs, unsigned count, float src_gain,
+               Frame<float, ChannelCount>* out)
+{
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        float channel_value = 0.0f;
+
+        for (unsigned j=0; j<count; ++j)
+        {
+            channel_value += (src_gain * srcs[j]->channels[i]);
+        }
+        out->channels[i] = channel_value;
+    }
+}
+template<typename Type, unsigned ChannelCount>
+void MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count, float src_gain,
+               Frame<Type, ChannelCount>* out)
+{
+    static_assert(std::is_integral<Type>::value);
+
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        std::int64_t channel_value = 0;
+        for (unsigned j=0; j<count; ++j)
+        {
+            // todo: this could still wrap around.
+            channel_value += (src_gain * srcs[j]->channels[i]);
+        }
+        constexpr std::int64_t min = SampleBits<Type>::Bits * -1;
+        constexpr std::int64_t max = SampleBits<Type>::Bits;
+        out->channels[i] = math::clamp(min, max, channel_value);
+    }
+}
+
+template<typename Type, unsigned ChannelCount>
+BufferHandle MixBuffers(std::vector<BufferHandle>& src_buffers, float src_gain)
+{
+    using AudioFrame = Frame<Type, ChannelCount>;
+
+    std::vector<AudioFrame*> src_ptrs;
+
+    BufferHandle out_buffer;
+    // find the maximum buffer for computing how many frames must be processed.
+    // also the biggest buffer can be used for the output (mixing in place)
+    unsigned max_buffer_size = 0;
+    for (const auto& buffer : src_buffers)
+    {
+        auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
+        src_ptrs.push_back(ptr);
+        if (buffer->GetByteSize() > max_buffer_size)
+        {
+            max_buffer_size = buffer->GetByteSize();
+            out_buffer = buffer;
+        }
+    }
+
+    const auto frame_size  = sizeof(AudioFrame);
+    const auto max_num_frames = max_buffer_size / frame_size;
+
+    auto* out = static_cast<AudioFrame*>(out_buffer->GetPtr());
+
+    for (unsigned frame=0; frame<max_num_frames; ++frame, ++out)
+    {
+        MixFrames(&src_ptrs[0], src_ptrs.size(), src_gain, out);
+
+        ASSERT(src_buffers.size() == src_ptrs.size());
+        for (size_t i=0; i<src_buffers.size();)
+        {
+            const auto& buffer = src_buffers[i];
+            const auto buffer_size = buffer->GetByteSize();
+            const auto buffer_frames = buffer_size / frame_size;
+            if (buffer_frames == frame+1)
+            {
+                const auto end = src_buffers.size() - 1;
+                std::swap(src_buffers[i], src_buffers[end]);
+                std::swap(src_ptrs[i], src_ptrs[end]);
+                src_buffers.pop_back();
+                src_ptrs.pop_back();
+            }
+            else
+            {
+                ++src_ptrs[i++];
+            }
+        }
+    }
+    return out_buffer;
+}
+
+} // namespace
+
 namespace audio
 {
 
-Joiner::Joiner(const std::string& name)
+StereoMaker::StereoMaker(const std::string& name, Channel which)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mChannel(which)
+  , mOut("out")
+  , mIn("in")
+{}
+
+bool StereoMaker::Prepare()
+{
+    auto format = mIn.GetFormat();
+    format.channel_count = 2;
+    mOut.SetFormat(format);
+    DEBUG("MonoToStereo '%1' out format set to '%2'.", mName, format);
+    return true;
+}
+
+void StereoMaker::Process(EventQueue& events, unsigned milliseconds)
+{
+    BufferHandle buffer;
+    if (!mIn.PullBuffer(buffer))
+    {
+        WARN("No buffer available on MonoToStereo '%1' input port.", mName);
+        return;
+    }
+    const auto& format = mIn.GetFormat();
+    if (format.channel_count == 2)
+    {
+        mOut.PushBuffer(buffer);
+        return;
+    }
+    if (format.sample_type == SampleType::Int32)
+        CopyMono<int>(buffer);
+    else if (format.sample_type == SampleType::Float32)
+        CopyMono<float>(buffer);
+    else if (format.sample_type == SampleType::Int16)
+        CopyMono<short>(buffer);
+    else WARN("Unsupported format %1", format.sample_type);
+}
+
+template<typename Type>
+void StereoMaker::CopyMono(BufferHandle buffer)
+{
+    using StereoFrameType = StereoFrame<Type>;
+    using MonoFrameType   = MonoFrame<Type>;
+
+    const auto frame_size  = sizeof(MonoFrameType);
+    const auto buffer_size = buffer->GetByteSize();
+    const auto num_frames  = buffer_size / frame_size;
+
+    auto stereo = std::make_shared<VectorBuffer>();
+    stereo->AllocateBytes(buffer_size * 2);
+
+    auto* out = static_cast<StereoFrameType*>(stereo->GetPtr());
+
+    const auto* in = static_cast<const MonoFrameType*>(buffer->GetPtr());
+
+    for (unsigned i=0; i<num_frames; ++i, ++out, ++in)
+    {
+        out->channels[static_cast<int>(mChannel)] = in->channels[0];
+    }
+    mOut.PushBuffer(stereo);
+}
+
+StereoJoiner::StereoJoiner(const std::string& name)
   : mName(name)
   , mId(base::RandomString(10))
   , mOut("out")
@@ -41,7 +223,7 @@ Joiner::Joiner(const std::string& name)
   , mInRight("right")
 {}
 
-bool Joiner::Prepare()
+bool StereoJoiner::Prepare()
 {
     const auto left  = mInLeft.GetFormat();
     const auto right = mInRight.GetFormat();
@@ -59,7 +241,7 @@ bool Joiner::Prepare()
     return false;
 }
 
-void Joiner::Process(unsigned int milliseconds)
+void StereoJoiner::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle left;
     BufferHandle right;
@@ -92,7 +274,7 @@ void Joiner::Process(unsigned int milliseconds)
 }
 
 template<typename Type>
-void Joiner::Join(BufferHandle left, BufferHandle right)
+void StereoJoiner::Join(BufferHandle left, BufferHandle right)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -116,7 +298,7 @@ void Joiner::Join(BufferHandle left, BufferHandle right)
     mOut.PushBuffer(stereo);
 }
 
-Splitter::Splitter(const std::string& name)
+StereoSplitter::StereoSplitter(const std::string& name)
   : mName(name)
   , mId(base::RandomString(10))
   , mIn("in")
@@ -124,7 +306,7 @@ Splitter::Splitter(const std::string& name)
   , mOutRight("right")
 {}
 
-bool Splitter::Prepare()
+bool StereoSplitter::Prepare()
 {
     const auto format = mIn.GetFormat();
     if (format.channel_count == 2)
@@ -142,7 +324,7 @@ bool Splitter::Prepare()
     return false;
 }
 
-void Splitter::Process(unsigned milliseconds)
+void StereoSplitter::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.HasBuffers())
@@ -162,7 +344,7 @@ void Splitter::Process(unsigned milliseconds)
 }
 
 template<typename Type>
-void Splitter::Split(BufferHandle buffer)
+void StereoSplitter::Split(BufferHandle buffer)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -217,7 +399,7 @@ bool Mixer::Prepare()
         const auto& format = src.GetFormat();
         if (format != master_format)
         {
-            ERROR("Mixer src '%1' format mismatch. %2 vs. %3", src.GetName(), format, master_format);
+            ERROR("Mixer '%1' format mismatch. %2 vs. %3", src.GetName(), format, master_format);
             return false;
         }
     }
@@ -227,121 +409,121 @@ bool Mixer::Prepare()
     return true;
 }
 
-void Mixer::Process(unsigned int milliseconds)
+void Mixer::Process(EventQueue& events, unsigned milliseconds)
 {
+    const float src_gain = 1.0f/mSrcs.size();
+
+    std::vector<BufferHandle> src_buffers;
+    for (auto& port :mSrcs)
+    {
+        BufferHandle buffer;
+        if (port.PullBuffer(buffer))
+            src_buffers.push_back(buffer);
+    }
+    BufferHandle ret;
+
     const auto& format = mSrcs[0].GetFormat();
     if (format.sample_type == SampleType::Int32)
-        format.channel_count == 1 ? MixSources<int, 1>() : MixSources<int, 2>();
+        ret = format.channel_count == 1 ? MixBuffers<int, 1>(src_buffers, src_gain)
+                                        : MixBuffers<int, 2>(src_buffers, src_gain);
     else if (format.sample_type == SampleType::Float32)
-        format.channel_count == 1 ? MixSources<float, 1>() : MixSources<float, 2>();
+        ret = format.channel_count == 1 ? MixBuffers<float, 1>(src_buffers,src_gain)
+                                        : MixBuffers<float, 2>(src_buffers, src_gain);
     else if (format.sample_type == SampleType::Int16)
-        format.channel_count == 1 ? MixSources<short, 1>() : MixSources<short, 2>();
+        ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
+                                        : MixBuffers<short, 2>(src_buffers, src_gain);
     else WARN("Unsupported format '%1'", format.sample_type);
+    mOut.PushBuffer(ret);
+}
+
+Fade::Fade(const std::string& name)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mIn("in")
+  , mOut("out")
+{}
+
+Fade::Fade(const std::string& name, float duration, Effect effect)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mIn("in")
+  , mOut("out")
+{
+    SetFade(effect, duration);
+}
+
+bool Fade::Prepare()
+{
+    const auto& format = mIn.GetFormat();
+    mSampleRate = format.sample_rate;
+    DEBUG("Fade '%1' output format set to '%2'.", mName, format);
+    mOut.SetFormat(format);
+    return true;
+}
+
+void Fade::Process(EventQueue& events, unsigned milliseconds)
+{
+    BufferHandle buffer;
+    if (!mIn.PullBuffer(buffer))
+    {
+        WARN("No buffer available on Fade '%1' input port.", mName);
+        return;
+    }
+
+    const auto& format = mIn.GetFormat();
+    if (format.sample_type == SampleType::Int32)
+        format.channel_count == 1 ? AdjustGain<int, 1>(buffer) : AdjustGain<int, 2>(buffer);
+    else if (format.sample_type == SampleType::Float32)
+        format.channel_count == 1 ? AdjustGain<float, 1>(buffer) : AdjustGain<float, 2>(buffer);
+    else if (format.sample_type == SampleType::Int16)
+        format.channel_count == 1 ? AdjustGain<short, 1>(buffer) : AdjustGain<short, 2>(buffer);
+    else WARN("Unsupported format %1", format.sample_type);
+}
+
+void Fade::ReceiveCommand(Command& cmd)
+{
+    if (auto* ptr = cmd.GetIf<SetFadeCmd>())
+        SetFade(ptr->effect, ptr->duration);
+    else BUG("Unexpected command.");
+}
+
+void Fade::SetFade(Effect effect, float duration)
+{
+    ASSERT(mDuration >= 0.0f);
+    mFadeDirection = effect == Effect::FadeIn ? 1.0f : -1.0f;
+    mDuration      = duration;
+    mSampleTime    = 0.0f;
+    DEBUG("Set Fade '%1' fade effect to %2 in %3 seconds.", mName, effect, duration);
 }
 
 template<typename DataType, unsigned ChannelCount>
-void Mixer::MixSources()
+void Fade::AdjustGain(BufferHandle buffer)
 {
+    // take a shortcut when done.
+    if (mSampleTime >= mDuration)
+    {
+        mOut.PushBuffer(buffer);
+        return;
+    }
+
     using AudioFrame = Frame<DataType, ChannelCount>;
-
-    std::vector<BufferHandle> src_buffers;
-    std::vector<AudioFrame*> src_ptrs;
-    for (auto& port :mSrcs)
-    {
-        if (port.HasBuffers())
-        {
-            BufferHandle buffer;
-            port.PullBuffer(buffer);
-            src_buffers.push_back(buffer);
-            auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
-            src_ptrs.push_back(ptr);
-        }
-    }
-
-    BufferHandle out_buffer;
-    // find the maximum buffer for computing how many frames must be processed.
-    // also the biggest buffer can be used for the output (mixing in place)
-    unsigned max_buffer_size = 0;
-    for (const auto& buffer : src_buffers)
-    {
-        if (buffer->GetByteSize() > max_buffer_size)
-        {
-            max_buffer_size = buffer->GetByteSize();
-            out_buffer = buffer;
-        }
-    }
-
     const auto frame_size  = sizeof(AudioFrame);
-    const auto max_num_frames = max_buffer_size / frame_size;
+    const auto buffer_size = buffer->GetByteSize();
+    const auto num_frames  = buffer_size / frame_size;
+    ASSERT((buffer_size % frame_size) == 0);
 
-    auto* out = static_cast<AudioFrame*>(out_buffer->GetPtr());
+    // the sample rate tells us the "duration" of the sample in seconds.
+    const auto sample_duration_sec = 1.0f / (float)mSampleRate;
 
-    for (unsigned frame=0; frame<max_num_frames; ++frame, ++out)
+    auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
+    for (unsigned i=0; i<num_frames; ++i)
     {
-        MixFrames(&src_ptrs[0], src_ptrs.size(), out);
-
-        ASSERT(src_buffers.size() == src_ptrs.size());
-        for (size_t i=0; i<src_buffers.size();)
-        {
-            const auto& buffer = src_buffers[i];
-            const auto buffer_size = buffer->GetByteSize();
-            const auto buffer_frames = buffer_size / frame_size;
-            if (buffer_frames == frame+1)
-            {
-                const auto end = src_buffers.size() - 1;
-                std::swap(src_buffers[i], src_buffers[end]);
-                std::swap(src_ptrs[i], src_ptrs[end]);
-                src_buffers.pop_back();
-                src_ptrs.pop_back();
-            }
-            else
-            {
-                ++src_ptrs[i++];
-            }
-        }
+        const auto sample_gain_linear = math::clamp(0.0f, 1.0f, mSampleTime / mDuration) * mFadeDirection;
+        const auto sample_gain = std::pow(sample_gain_linear, 2.2);
+        AdjustFrameGain(&ptr[i], sample_gain);
+        mSampleTime += sample_duration_sec;
     }
-
-    mOut.PushBuffer(out_buffer);
-}
-
-template<unsigned ChannelCount>
-void Mixer::MixFrames(Frame<float, ChannelCount>** srcs, unsigned count,
-                      Frame<float, ChannelCount>* out) const
-{
-    const float src_gain = 1.0f/mSrcs.size();
-
-    for (unsigned i=0; i<ChannelCount; ++i)
-    {
-        float channel_value = 0.0f;
-
-        for (unsigned j=0; j<count; ++j)
-        {
-            channel_value += (src_gain * srcs[j]->channels[i]);
-        }
-        out->channels[i] = channel_value;
-    }
-}
-
-template<typename Type, unsigned ChannelCount>
-void Mixer::MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count,
-                      Frame<Type, ChannelCount>* out) const
-{
-    static_assert(std::is_integral<Type>::value);
-
-    const float src_gain = 1.0f/mSrcs.size();
-
-    for (unsigned i=0; i<ChannelCount; ++i)
-    {
-        std::int64_t channel_value = 0;
-        for (unsigned j=0; j<count; ++j)
-        {
-            // todo: this could still wrap around.
-            channel_value += (src_gain * srcs[j]->channels[i]);
-        }
-        constexpr std::int64_t min = SampleBits<Type>::Bits * -1;
-        constexpr std::int64_t max = SampleBits<Type>::Bits;
-        out->channels[i] = math::clamp(min, max, channel_value);
-    }
+    mOut.PushBuffer(buffer);
 }
 
 Gain::Gain(const std::string& name, float gain)
@@ -355,69 +537,56 @@ Gain::Gain(const std::string& name, float gain)
 bool Gain::Prepare()
 {
     mOut.SetFormat(mIn.GetFormat());
-    DEBUG("Gain output set to %1", mIn.GetFormat());
+    DEBUG("Gain '%1' output format set to %2.", mName, mIn.GetFormat());
     return true;
 }
 
-void Gain::Process(unsigned int milliseconds)
-{
-    const auto& format = mIn.GetFormat();
-    if (format.sample_type == SampleType::Int32)
-        format.channel_count == 1 ? AdjustGain<int, 1>() : AdjustGain<int, 2>();
-    else if (format.sample_type == SampleType::Float32)
-        format.channel_count == 1 ? AdjustGain<float, 1>() : AdjustGain<float, 2>();
-    else if (format.sample_type == SampleType::Int16)
-        format.channel_count == 1 ? AdjustGain<short, 1>() : AdjustGain<short, 2>();
-    else WARN("Unsupported format %1", format.sample_type);
-}
-
-template<typename DataType, unsigned ChannelCount>
-void Gain::AdjustGain()
+void Gain::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
-    if (!mIn.HasBuffers())
+    if (!mIn.PullBuffer(buffer))
     {
         WARN("No buffer available on port %1:%2", mName, mIn.GetName());
         return;
     }
-    mIn.PullBuffer(buffer);
+    const auto& format = mIn.GetFormat();
+    if (format.sample_type == SampleType::Int32)
+        format.channel_count == 1 ? AdjustGain<int, 1>(buffer)
+                                  : AdjustGain<int, 2>(buffer);
+    else if (format.sample_type == SampleType::Float32)
+        format.channel_count == 1 ? AdjustGain<float, 1>(buffer)
+                                  : AdjustGain<float, 2>(buffer);
+    else if (format.sample_type == SampleType::Int16)
+        format.channel_count == 1 ? AdjustGain<short, 1>(buffer)
+                                  : AdjustGain<short, 2>(buffer);
+    else WARN("Unsupported format %1", format.sample_type);
+}
 
+void Gain::ReceiveCommand(Command& cmd)
+{
+    if (auto* ptr = cmd.GetIf<SetGainCmd>())
+    {
+        mGain = ptr->gain;
+        DEBUG("Gain '%1' value set to %2.", mName, mGain);
+    }
+    else BUG("Unexpected command.");
+}
+
+template<typename DataType, unsigned ChannelCount>
+void Gain::AdjustGain(BufferHandle buffer)
+{
     using AudioFrame = Frame<DataType, ChannelCount>;
     const auto frame_size  = sizeof(AudioFrame);
     const auto buffer_size = buffer->GetByteSize();
     const auto num_frames  = buffer_size / frame_size;
-    
     ASSERT((buffer_size % frame_size) == 0);
 
     auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
     for (unsigned i=0; i<num_frames; ++i)
     {
-        AdjustGain(&ptr[i]);
+        AdjustFrameGain(&ptr[i], mGain);
     }
     mOut.PushBuffer(buffer);
-}
-template<unsigned ChannelCount>
-void Gain::AdjustGain(Frame<float, ChannelCount>* frame) const
-{
-    // float's can exceed the -1.0f - 1.0f range.
-    for (unsigned i=0; i<ChannelCount; ++i)
-    {
-        frame->channels[i] *= mGain;
-    }
-}
-template<typename Type, unsigned ChannelCount>
-void Gain::AdjustGain(Frame<Type, ChannelCount>* frame) const
-{
-    static_assert(std::is_integral<Type>::value);
-    // for integer formats clamp the values in order to avoid
-    // undefined overflow / wrapping over.
-    for (unsigned i=0; i<ChannelCount; ++i)
-    {
-        const std::int64_t sample = frame->channels[i] * mGain;
-        const std::int64_t min = SampleBits<Type>::Bits * -1;
-        const std::int64_t max = SampleBits<Type>::Bits;
-        frame->channels[i] = math::clamp(min, max, sample);
-    }
 }
 
 Resampler::Resampler(const std::string& name, unsigned sample_rate)
@@ -461,7 +630,7 @@ bool Resampler::Prepare()
     return true;
 }
 
-void Resampler::Process(unsigned milliseconds)
+void Resampler::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle src_buffer;
     if (!mIn.PullBuffer(src_buffer))
@@ -556,25 +725,21 @@ bool FileSource::Prepare()
     }
     else
     {
-        ERROR("Unsupported audio file '%1'", mFile);
+        ERROR("Unsupported audio file format ('%1').", mFile);
         return false;
     }
     Format format;
     format.channel_count = decoder->GetNumChannels();
     format.sample_rate   = decoder->GetSampleRate();
     format.sample_type   = mFormat.sample_type;
-    DEBUG("Opened '%1' for reading (%2 frames, %3). %4 channels @ %5 Hz.", mFile,
-          decoder->GetNumFrames(),
-          format.sample_type,
-          format.channel_count,
-          format.sample_rate);
+    DEBUG("Opened '%1' for reading (%2 frames) %3.", mFile, decoder->GetNumFrames(), format);
     mDecoder = std::move(decoder);
     mPort.SetFormat(format);
     mFormat = format;
     return true;
 }
 
-void FileSource::Process(unsigned milliseconds)
+void FileSource::Process(EventQueue& events, unsigned milliseconds)
 {
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
@@ -615,6 +780,225 @@ bool FileSource::IsSourceDone() const
     return mFramesRead == mDecoder->GetNumFrames();
 }
 
+MixerSource::MixerSource(const std::string& name, const Format& format)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mFormat(format)
+  , mOut("out")
+{
+    mOut.SetFormat(mFormat);
+}
+MixerSource::MixerSource(MixerSource&& other)
+  : mName(other.mName)
+  , mId(other.mId)
+  , mFormat(other.mFormat)
+  , mSources(std::move(other.mSources))
+  , mOut(std::move(other.mOut))
+{}
+
+Element* MixerSource::AddSourcePtr(std::unique_ptr<Element> source, bool paused)
+{
+    ASSERT(source->IsSource());
+    ASSERT(source->GetNumOutputPorts());
+    for (unsigned i=0; i<source->GetNumOutputPorts(); ++i)
+    {
+        const auto& port = source->GetOutputPort(i);
+        ASSERT(port.GetFormat() == mFormat);
+    }
+    auto* ret = source.get();
+    const auto key = source->GetName();
+
+    Source src;
+    src.element = std::move(source);
+    src.paused  = paused;
+    src.delay   = 0.0f;
+    mSources[key] = std::move(src);
+    DEBUG("Added new MixerSource '%1' (%2) source '%3'.", mName, paused ? "Paused" : "Live", key);
+    return ret;
+}
+
+void MixerSource::DeleteSource(const std::string& name)
+{
+    auto it = mSources.find(name);
+    if (it == mSources.end())
+        return;
+    mSources.erase(it);
+    DEBUG("Deleted MixerSource '%1' source '%2'.", mName, name);
+}
+
+void MixerSource::DelaySource(const std::string& name, float delay)
+{
+    auto it = mSources.find(name);
+    if (it == mSources.end())
+        return;
+    it->second.delay = delay;
+    DEBUG("Delayed MixerSource '%1' source '%2' for %3 seconds.", mName, name, delay);
+}
+void MixerSource::PauseSource(const std::string& name, bool paused)
+{
+    auto it = mSources.find(name);
+    if (it == mSources.end())
+        return;
+    it->second.paused = paused;
+    DEBUG("MixerSource '%1' source '%2' pause is %3.", mName, name, paused ? "On" : "Off");
+}
+
+bool MixerSource::IsSourceDone() const
+{
+    for (const auto& pair : mSources)
+    {
+        const auto& source = pair.second;
+        if (!source.element->IsSourceDone())
+            return false;
+    }
+    return true;
+}
+
+bool MixerSource::Prepare()
+{
+    DEBUG("Prepared MixerSource '%1' with out format '%2'.", mName, mFormat);
+    return true;
+}
+
+void MixerSource::Update(float dt)
+{
+    for (auto& pair : mSources)
+    {
+        auto& source = pair.second;
+        source.delay = math::clamp(0.0f, source.delay, source.delay - dt);
+        source.element->Update(dt);
+    }
+}
+
+void MixerSource::Process(EventQueue& events, unsigned milliseconds)
+{
+    std::vector<BufferHandle> src_buffers;
+
+    for (auto& pair : mSources)
+    {
+        auto& source  = pair.second;
+        auto& element = source.element;
+        if (source.delay > 0.0)
+            continue;
+        else if (source.paused)
+            continue;
+
+        element->Process(events, milliseconds);
+        for (unsigned i=0;i<element->GetNumOutputPorts(); ++i)
+        {
+            auto& port = element->GetOutputPort(i);
+            BufferHandle buffer;
+            if (port.PullBuffer(buffer))
+                src_buffers.push_back(buffer);
+        }
+    }
+
+    if (src_buffers.size() == 0)
+    {
+        WARN("No source buffers available in MixerSource '%1'.", mName);
+        return;
+    }
+    else if (src_buffers.size() == 1)
+    {
+        mOut.PushBuffer(src_buffers[0]);
+        return;
+    }
+
+    BufferHandle ret;
+    const float src_gain = 1.0f; // / src_buffers.size();
+    const auto& format   = mFormat;
+
+    if (format.sample_type == SampleType::Int32)
+        ret = format.channel_count == 1 ? MixBuffers<int, 1>(src_buffers, src_gain)
+                                        : MixBuffers<int, 2>(src_buffers, src_gain);
+    else if (format.sample_type == SampleType::Float32)
+        ret = format.channel_count == 1 ? MixBuffers<float, 1>(src_buffers,src_gain)
+                                        : MixBuffers<float, 2>(src_buffers, src_gain);
+    else if (format.sample_type == SampleType::Int16)
+        ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
+                                        : MixBuffers<short, 2>(src_buffers, src_gain);
+    else WARN("Unsupported format '%1'.", format.sample_type);
+    mOut.PushBuffer(ret);
+
+    for (auto it = mSources.begin(); it != mSources.end();)
+    {
+        auto& source  = it->second;
+        auto& element = source.element;
+        if (element->IsSourceDone())
+        {
+            SourceDoneEvent event;
+            event.mixer = mName;
+            event.src   = std::move(element);
+            events.push(MakeEvent(std::move(event)));
+            DEBUG("MixerSource '%1' source '%2' is done.", mName, it->first);
+
+            it = mSources.erase(it);
+        } else ++it;
+    }
+}
+
+void MixerSource::ReceiveCommand(Command& cmd)
+{
+    if (auto* ptr = cmd.GetIf<AddSourceCmd>())
+        AddSourcePtr(std::move(ptr->src), ptr->paused);
+    else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
+        DeleteSource(ptr->name);
+    else if (auto* ptr = cmd.GetIf<DelaySourceCmd>())
+        DelaySource(ptr->name, ptr->delay);
+    else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
+        PauseSource(ptr->name, ptr->paused);
+    else BUG("Unexpected command.");
+}
+
+bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
+{
+    // see if the receiver of the command is one of the sources.
+    for (auto& pair : mSources)
+    {
+        auto& element = pair.second.element;
+        if (element->GetName() != dest)
+            continue;
+
+        element->ReceiveCommand(cmd);
+        return true;
+    }
+
+    // try to dispatch the command recursively.
+    for (auto& pair : mSources)
+    {
+        auto& element = pair.second.element;
+        if (element->DispatchCommand(dest, cmd))
+            return true;
+    }
+    return false;
+}
+
+ZeroSource::ZeroSource(const std::string& name, const Format& format)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mFormat(format)
+  , mOut("out")
+{
+    mOut.SetFormat(format);
+}
+bool ZeroSource::Prepare()
+{
+    DEBUG("Prepared ZeroSource '%1' with out format '%2'.", mName, mFormat);
+    return true;
+}
+
+void ZeroSource::Process(EventQueue& events, unsigned milliseconds)
+{
+    const auto frame_size = GetFrameSizeInBytes(mFormat);
+    const auto frames_per_ms = mFormat.sample_rate / 1000;
+    const auto frames_wanted = frames_per_ms * milliseconds;
+
+    auto buffer = std::make_shared<VectorBuffer>();
+    buffer->SetFormat(mFormat);
+    buffer->AllocateBytes(frame_size * frames_wanted);
+    mOut.PushBuffer(buffer);
+}
+
 #ifdef AUDIO_ENABLE_TEST_SOUND
 SineSource::SineSource(const std::string& name, unsigned int frequency)
   : mName(name)
@@ -650,7 +1034,7 @@ bool SineSource::Prepare()
     return true;
 }
 
-void SineSource::Process(unsigned int milliseconds)
+void SineSource::Process(EventQueue& events, unsigned milliseconds)
 {
     if (mLimitDuration)
     {

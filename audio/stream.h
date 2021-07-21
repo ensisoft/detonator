@@ -20,13 +20,16 @@
 
 #include <string>
 
+#include "audio/command.h"
+
 namespace audio
 {
     class Source;
 
     // Audio stream is the currently running state of some 
-    // audio stream that exists on the device and is possibly
-    // being played back.
+    // audio stream that exists on the audio device. Typically
+    // represents some audio stream/connection to the platform
+    // specific audio system such as Pulseaudio or Waveout.
     class Stream
     {
     public:
@@ -38,34 +41,42 @@ namespace audio
             // Stream exists on the device and is ready play.
             Ready, 
             // An error has occurred.
-            Error, 
+            Error,
             // Stream playback is complete.
             Complete
         };
         // dtor.
         virtual ~Stream() = default;
-
         // Get current stream state.
         virtual State GetState() const = 0;
-
-        // Gives back the audio source but only when the state of the
+        // Get back the audio source but only when the state of the
         // stream is is either error or complete, i.e. the stream has
         // finished playback and reading data from the source.
         virtual std::unique_ptr<Source> GetFinishedSource() = 0;
-
         // Get the human readable stream name if any.
         virtual std::string GetName() const = 0;
-
         // Start playing the audio stream.
         // This should be called only once, when the stream is initially started. 
         // To control the subsequent playback use Pause and Resume.
         virtual void Play() = 0;
-
         // Pause the stream if currently playing.
         virtual void Pause() = 0;
-
         // Resume the stream if currently paused.
         virtual void Resume() = 0;
+        // Cancel the stream including any pending playback immediately.
+        // This is called before the stream is deleted when stopping
+        // the stream during playback. In other words if the stream has
+        // already completed (either successfully or by error) cancel is
+        // not called.
+        virtual void Cancel() = 0;
+        // Advance/update the stream by dt time step in seconds.
+        // This is only called when then stream is in play state.
+        virtual void Update(float dt) = 0;
+        // Send command to the stream source.
+        virtual void SendCommand(std::unique_ptr<Command> cmd) = 0;
+        // Get next stream event if any. Returns nullptr if no
+        // event was available.
+        virtual std::unique_ptr<Event> GetEvent() = 0;
     protected:
     private:
     };

@@ -123,7 +123,7 @@ private:
         PlaybackStream(std::unique_ptr<Source> source, pa_context* context)
             : source_(std::move(source))
         {
-            DEBUG("Creating new PA playback stream '%1': %2 channel(s) @ %3 Hz, %4",
+            DEBUG("Creating new pulseaudio playback stream '%1': %2 channel(s) @ %3 Hz, %4",
                   source_->GetName(), source_->GetNumChannels(),
                   source_->GetRateHz(), source_->GetFormat());
             const auto& name  = source_->GetName();
@@ -178,16 +178,40 @@ private:
         virtual void Play() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
+            DEBUG("Play pulseaudio stream '%1'.", source_->GetName());
         }
 
         virtual void Pause() override
         {
             pa_stream_cork(stream_, 1, nullptr, nullptr);
+            DEBUG("Pause pulseaudio stream '%1'.", source_->GetName());
         }
 
         virtual void Resume() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
+            DEBUG("Resume pulseaudio stream '%1'.", source_->GetName());
+        }
+
+        virtual void Cancel() override
+        {
+            // anything that needs to be done?
+            DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
+        }
+
+        virtual void Update(float dt) override
+        {
+            source_->Update(dt);
+        }
+
+        virtual void SendCommand(std::unique_ptr<Command> cmd) override
+        {
+            source_->RecvCommand(std::move(cmd));
+        }
+
+        virtual std::unique_ptr<Event> GetEvent() override
+        {
+            return source_->GetEvent();
         }
     private:
         static void underflow_callback(pa_stream* stream, void* user)
@@ -216,7 +240,7 @@ private:
             ASSERT(source);
 
             // callback while the stream is being drained. weird..
-            if (!source->HasNextBuffer(this_->num_pcm_bytes_))
+            if (!source->HasMore(this_->num_pcm_bytes_))
                 return;
 
             // don't let exceptions propagate into the C library...
@@ -256,7 +280,7 @@ private:
 
                 // reaching the end of the stream, i.e. we're providing the last
                 // write of data. schedule the drain operation callback on the stream.
-                if (!source->HasNextBuffer(this_->num_pcm_bytes_))
+                if (!source->HasMore(this_->num_pcm_bytes_))
                     pa_operation_unref(pa_stream_drain(this_->stream_, drain_callback, this_));
                 else if (bytes < length * 0.8)
                     WARN("Write callback requested %1 bytes but only %2 provided", length, bytes);

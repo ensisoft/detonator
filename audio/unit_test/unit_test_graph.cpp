@@ -130,7 +130,7 @@ public:
     }
     virtual bool IsSource() const override
     { return true; }
-    virtual void Process(unsigned milliseconds) override
+    virtual void Process(EventQueue& events, unsigned milliseconds) override
     {
         if (mShouldFinish)
             TEST_REQUIRE(mBufferCount < mNumOutBuffers);
@@ -169,7 +169,7 @@ public:
         mState.prepare_list.push_back(this);
         return !mPrepareError;
     }
-    virtual void Process(unsigned milliseconds) override
+    virtual void Process(EventQueue& events, unsigned milliseconds) override
     {
         TEST_REQUIRE(mInputPorts.size() == mOutputPorts.size());
         for (unsigned i=0; i<mInputPorts.size(); ++i)
@@ -301,9 +301,7 @@ void unit_test_prepare_topologies()
         graph.AddElementPtr(std::move(elem));
         Link(graph, "foo", "src");
         TEST_REQUIRE(graph.Prepare());
-        TEST_REQUIRE(graph.GetFormat() == audio::Source::Format::Float32);
-        TEST_REQUIRE(graph.GetNumChannels() == 5);
-        TEST_REQUIRE(graph.GetRateHz() == 77777);
+        TEST_REQUIRE(graph.GetFormat() == format);
         TEST_REQUIRE(state.prepare_list.size() == 1);
         TEST_REQUIRE(state.prepare_list[0]->GetName() == "foo");
     }
@@ -416,10 +414,12 @@ void unit_test_buffer_flow()
     Link(graph, "b", "out");
     TEST_REQUIRE(graph.Prepare());
 
-    std::string outcome;
-    outcome.resize(1024);
-    const auto ret = graph.FillBuffer(&outcome[0], outcome.size());
-    outcome.resize(ret);
+    audio::Element::EventQueue  queue;
+    audio::BufferHandle buffer;
+    graph.Process(queue, 1);
+    graph.GetOutputPort(0).PullBuffer(buffer);
+
+    const std::string outcome((const char*)buffer->GetPtr(), buffer->GetByteSize());
     //std::cout << outcome;
     TEST_REQUIRE(outcome == "-> a:in -> a:out -> b:in -> b:out ");
 }
@@ -438,14 +438,17 @@ void unit_test_completion()
         src->GetOutputPort(0).SetFormat(format);
         TEST_REQUIRE(graph.LinkGraph("src", "out"));
         TEST_REQUIRE(graph.Prepare());
-        std::size_t bytes_read = 0;
+
+        audio::Element::EventQueue queue;
+
         for (int i=0; i<10; ++i)
         {
-            std::string buffer;
-            buffer.resize(1024);
-            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+            graph.Process(queue, 1);
+            auto& port = graph.GetOutputPort(0);
+            audio::BufferHandle  buffer;
+            TEST_REQUIRE(port.PullBuffer(buffer));
         }
-        TEST_REQUIRE(!graph.HasNextBuffer(bytes_read));
+        TEST_REQUIRE(graph.IsSourceDone());
     }
 
     // test completion with 2 sources.
@@ -472,24 +475,22 @@ void unit_test_completion()
         TEST_REQUIRE(graph.LinkGraph("test", "out0"));
         TEST_REQUIRE(graph.Prepare());
 
+        audio::Element::EventQueue queue;
+
         std::size_t bytes_read = 0;
         for (int i=0; i<10; ++i)
         {
-            std::string buffer;
-            buffer.resize(1024);
-            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+            graph.Process(queue, 1);
         }
-        TEST_REQUIRE(graph.HasNextBuffer(bytes_read));
+        TEST_REQUIRE(graph.IsSourceDone() == false);
         TEST_REQUIRE(src0->IsSourceDone() == true);
         TEST_REQUIRE(src1->IsSourceDone() == false);
 
         for (int i=0; i<10; ++i)
         {
-            std::string buffer;
-            buffer.resize(1024);
-            bytes_read += graph.FillBuffer(&buffer[0], buffer.size());
+            graph.Process(queue, 1);
         }
-        TEST_REQUIRE(graph.HasNextBuffer(bytes_read) == false);
+        TEST_REQUIRE(graph.IsSourceDone() == true);
         TEST_REQUIRE(src0->IsSourceDone() == true);
         TEST_REQUIRE(src1->IsSourceDone() == true);
 
@@ -533,10 +534,12 @@ void unit_test_graph_in_graph()
     Link(graph, "c", "out");
     TEST_REQUIRE(graph.Prepare());
 
-    std::string outcome;
-    outcome.resize(1024);
-    const auto ret = graph.FillBuffer(&outcome[0], outcome.size());
-    outcome.resize(ret);
+    audio::Element::EventQueue queue;
+    audio::BufferHandle buffer;
+    graph.Process(queue, 1);
+    graph.GetOutputPort(0).PullBuffer(buffer);
+
+    const std::string outcome((const char*)buffer->GetPtr(), buffer->GetByteSize());
     //std::cout << outcome;
     TEST_REQUIRE(outcome == "-> a:in -> a:out -> b:in -> b:out -> c:in -> c:out ");
 }

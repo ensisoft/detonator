@@ -21,11 +21,14 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <queue>
+#include <unordered_map>
 
 #include "base/utility.h"
 #include "base/assert.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
+#include "audio/command.h"
 
 typedef struct SRC_STATE_tag SRC_STATE;
 
@@ -142,6 +145,10 @@ namespace audio
     class Element
     {
     public:
+        using Command = audio::Command;
+        using Event   = audio::Event;
+        using EventQueue = std::queue<std::unique_ptr<Event>>;
+
         virtual ~Element() = default;
         // Get the machine generated immutable ID of the element.
         virtual std::string GetId() const = 0;
@@ -158,8 +165,11 @@ namespace audio
         // Request the element to process 'milliseconds' worth of
         // audio data. Any non-source input will likely ignore the
         // milliseconds parameter and process data in whole buffers
-        // instead.
-        virtual void Process(unsigned milliseconds) {}
+        // instead. EventQueue is the queue of outgoing events generated
+        // by the element (and it's descendants).
+        virtual void Process(EventQueue& events, unsigned milliseconds) {}
+        // Update the element by dt time step in seconds.
+        virtual void Update(float dt) {}
         // Perform element shutdown/cleanup.
         virtual void Shutdown() {}
         // Get the number of input ports this element has.
@@ -174,6 +184,11 @@ namespace audio
         // Get an ouput port at the given index. The index must be valid.
         virtual Port& GetOutputPort(unsigned index)
         { BUG("No such output port index."); }
+        // Receive and handle an element specific command.
+        virtual void ReceiveCommand(Command& cmd)
+        { BUG("Unexpected command."); }
+        virtual bool DispatchCommand(const std::string& dest, Command& cmd)
+        { return false; }
 
         // Find an input port by name. Returns nullptr if no such port.
         Port* FindInputPortByName(const std::string& name)
@@ -181,6 +196,19 @@ namespace audio
         // Find an input port by name. Returns nullptr if no such port.
         Port* FindOutputPortByName(const std::string& name)
         { return FindOutputPort([name](auto& port) { return port.GetName() == name; }); }
+
+        bool HasInputPort(Port* port)
+        { return FindInputPort([port](auto& other) { return &other == port; }); }
+        bool HasOutputPort(Port* port)
+        { return FindOutputPort([port](auto& other) { return &other == port; }); }
+
+        template<typename CmdT> static
+        std::unique_ptr<Command> MakeCommand(CmdT&& cmd)
+        {
+            using CmdType = detail::MessageImpl<std::remove_reference_t<CmdT>, 0>;
+            auto ret = std::make_unique<CmdType>(std::forward<CmdT>(cmd));
+            return ret;
+        }
 
     private:
         template<typename Predicate>
@@ -208,19 +236,59 @@ namespace audio
     private:
     };
 
-    // Join 2 mono streams into a stereo stream.
-    // The streams to be joined must have the same
-    // underlying type, sample rate and channel count.
-    class Joiner : public Element
+    // Turn a possible mono audio stream into a stereo stream.
+    // If the input is already a stereo stream nothing is done.
+    class StereoMaker : public Element
     {
     public:
-        Joiner(const std::string& name);
+        enum class Channel {
+            Left = 0, Right = 1
+        };
+        StereoMaker(const std::string& name, Channel which = Channel::Left);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port index.");
+        }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port index.");
+        }
+    private:
+        template<typename Type>
+        void CopyMono(BufferHandle buffer);
+    private:
+        const std::string mName;
+        const std::string mId;
+        const Channel mChannel;
+        SingleSlotPort mOut;
+        SingleSlotPort mIn;
+    };
+
+    // Join 2 mono streams into a stereo stream.
+    // The streams to be joined must have the same
+    // underlying type, sample rate and channel count.
+    class StereoJoiner : public Element
+    {
+    public:
+        StereoJoiner(const std::string& name);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool Prepare() override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
         virtual unsigned GetNumOutputPorts() const override
@@ -248,16 +316,16 @@ namespace audio
     };
 
     // Split a stereo stream into left and right channel streams.
-    class Splitter : public Element
+    class StereoSplitter : public Element
     {
     public:
-        Splitter(const std::string& name);
+        StereoSplitter(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
         virtual unsigned GetNumOutputPorts() const override
@@ -300,7 +368,7 @@ namespace audio
         { return mName; }
         virtual bool Prepare() override
         { return true; }
-        virtual void Process(unsigned milliseconds) override
+        virtual void Process(EventQueue& events, unsigned milliseconds) override
         {
             BufferHandle buffer;
             mIn.PullBuffer(buffer);
@@ -331,7 +399,7 @@ namespace audio
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual unsigned GetNumInputPorts() const override
@@ -344,32 +412,40 @@ namespace audio
         virtual Port& GetInputPort(unsigned index) override
         { return base::SafeIndex(mSrcs, index); }
     private:
-        template<typename DataType, unsigned ChannelCount>
-        void MixSources();
-        template<unsigned ChannelCount>
-        void MixFrames(Frame<float, ChannelCount>** srcs, unsigned count,
-                       Frame<float, ChannelCount>* out) const;
-        template<typename Type, unsigned ChannelCount>
-        void MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count,
-                       Frame<Type, ChannelCount>* out) const;
-    private:
         const std::string mName;
         const std::string mId;
         std::vector<SingleSlotPort> mSrcs;
         SingleSlotPort mOut;
     };
 
-    // Adjust the stream's gain (volume) setting.
-    class Gain : public Element
+    // Manipulate audio stream gain over time in order to create a
+    // fade-in or fade-out effect.
+    class Fade : public Element
     {
     public:
-        Gain(const std::string& name, float gain = 1.0f);
+        // The possible effect.
+        enum class Effect {
+            // Ramp up the stream gain from 0.0f to 1.0f
+            FadeIn,
+            // Ramp down the stream gain from 1.0f to 0.0f
+            FadeOut
+        };
+        // Command to configure and set a new fade effect
+        // parameters. The command will take effect from the
+        // next input buffer onwards.
+        struct SetFadeCmd {
+            float duration = 0.0f;
+            Effect effect  = Effect::FadeIn;
+        };
+
+        Fade(const std::string& name);
+        Fade(const std::string& name, float duration, Effect effect);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual unsigned GetNumInputPorts() const override
@@ -384,15 +460,64 @@ namespace audio
             if (index == 0) return mIn;
             BUG("No such input port.");
         }
+        virtual void ReceiveCommand(Command& cmd) override;
+
+        // Set the fade effect parameters. The effect will start
+        // to place from the next input buffer onwards.
+        void SetFade(Effect effect, float duration);
+    private:
+        template<typename DataType, unsigned ChannelCount>
+        void AdjustGain(BufferHandle buffer);
+    private:
+        const std::string mName;
+        const std::string mId;
+        SingleSlotPort mIn;
+        SingleSlotPort mOut;
+        // fading in (1.0) or out (-1.0f).
+        float mFadeDirection = 1.0f;
+        // duration of the fading effect.
+        float mDuration   = 0.0;
+        // how far into the effect are we.
+        float mSampleTime = 0.0;
+        // current stream sample rate.
+        unsigned mSampleRate = 0;
+    };
+
+    // Adjust the stream's gain (volume) setting.
+    class Gain : public Element
+    {
+    public:
+        struct SetGainCmd {
+            float gain = 1.0f;
+        };
+
+        Gain(const std::string& name, float gain = 1.0f);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool Prepare() override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0)  return mOut;
+            BUG("No such output port.");
+        }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port.");
+        }
+        virtual void ReceiveCommand(Command& cmd) override;
         void SetGain(float gain)
         { mGain = gain; }
     private:
         template<typename DataType, unsigned ChannelCount>
-        void AdjustGain();
-        template<unsigned ChannelCount>
-        void AdjustGain(Frame<float, ChannelCount>* frame) const;
-        template<typename Type, unsigned ChannelCount>
-        void AdjustGain(Frame<Type, ChannelCount>* frame) const;
+        void AdjustGain(BufferHandle buffer);
     private:
         const std::string mName;
         const std::string mId;
@@ -412,7 +537,7 @@ namespace audio
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
 
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -449,7 +574,7 @@ namespace audio
         virtual std::string GetName() const override
         { return mName; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual bool IsSourceDone() const override;
         virtual bool IsSource() const override
@@ -471,11 +596,136 @@ namespace audio
         unsigned mFramesRead = 0;
     };
 
+    // MixerSource wraps multiple (source) elements into a single
+    // source. Each source to be added must have the same format
+    // that has been set in the mixer. Once the sources have been
+    // added their state can be controlled through mixer commands.
+    class MixerSource : public Element
+    {
+    public:
+        // Command to add a new source stream to the mixer.
+        // The element needs to be a source, i.e. IsSource is true.
+        // Subsequent commands can refer to the same source
+        // through its name.
+        struct AddSourceCmd {
+            std::unique_ptr<Element> src;
+            bool paused = false;
+        };
+        // Commands to modify the state of the source identified
+        // by its name. If no such source is found then nothing
+        // is done.
+
+        // Delete the source.
+        struct DeleteSourceCmd {
+            std::string name;
+        };
+        // Add some input processing delay to the source.
+        struct DelaySourceCmd {
+            std::string name;
+            float delay = 0.0f;
+        };
+        // Pause/Resume the source. When the source is paused
+        // no buffers are pulled from it and the source
+        // is no longer mixed into the output stream.
+        struct PauseSourceCmd {
+            std::string name;
+            // Flag to indicate whether to pause / resume the src.
+            bool paused = false;
+        };
+
+        struct SourceDoneEvent {
+            std::string mixer;
+            std::unique_ptr<Element> src;
+        };
+
+        // Create a new mixer with the given name and format.
+        MixerSource(const std::string& name, const Format& format);
+        MixerSource(MixerSource&& other);
+
+        // Add a new source element to the mixer. The element must be a source
+        // and have at least 1 output port with the same format that the
+        // mixer source itself has.
+        Element* AddSourcePtr(std::unique_ptr<Element> source, bool paused=false);
+
+        template<typename Source>
+        Source* AddSource(Source&& source, bool paused=false)
+        {
+            auto src = std::make_unique<std::remove_reference_t<Source>>(std::forward<Source>(source));
+            auto* ret = AddSourcePtr(std::move(src));
+            return static_cast<Source*>(ret);
+        }
+
+        // Delete the named source from the mixer.
+        void DeleteSource(const std::string& name);
+        // Add a processing delay to the source. No buffers are pulled
+        // from the source until the delay elapses.
+        void DelaySource(const std::string& name, float delay);
+        // Pause/resume the named source. If already paused/playing nothing is done.
+        void PauseSource(const std::string& name, bool paused);
+
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool IsSource() const override { return true; }
+        virtual bool IsSourceDone() const override;
+        virtual bool Prepare() override;
+        virtual void Update(float dt) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port index.");
+        }
+        virtual void ReceiveCommand(Command& cmd) override;
+        virtual bool DispatchCommand(const std::string& dest, Command& cmd) override;
+    private:
+        const std::string mName;
+        const std::string mId;
+        const Format mFormat;
+        struct Source {
+            std::unique_ptr<Element> element;
+            bool paused = false;
+            float delay = 0.0;
+        };
+        std::unordered_map<std::string, Source> mSources;
+        SingleSlotPort mOut;
+    };
+
+    // Generate endless audio buffers with 0 (silence) for audio content.
+    class ZeroSource : public Element
+    {
+    public:
+        ZeroSource(const std::string& name, const Format& format);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool IsSource() const override { return true; }
+        virtual bool IsSourceDone() const override { return false; }
+        virtual bool Prepare() override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port index.");
+        }
+    private:
+        const std::string mName;
+        const std::string mId;
+        const Format mFormat;
+        SingleSlotPort mOut;
+    };
+
 #ifdef AUDIO_ENABLE_TEST_SOUND
     class SineSource : public Element
     {
     public:
-        SineSource(const std::string& name, unsigned frequence);
+        SineSource(const std::string& name, unsigned frequency);
         SineSource(const std::string& name, unsigned frequency, unsigned millisecs);
         virtual std::string GetId() const override
         { return mId; }
@@ -494,7 +744,7 @@ namespace audio
         virtual Port& GetOutputPort(unsigned index) override
         { return mPort; }
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         void SetSampleType(SampleType type)
         { mFormat.sample_type = type; }
     private:
