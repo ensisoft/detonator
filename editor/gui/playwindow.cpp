@@ -197,7 +197,9 @@ wdk::Keysym MapVirtualKey(int from_qt)
         {Qt::Key_Up,        wdk::Keysym::ArrowUp},
         {Qt::Key_Down,      wdk::Keysym::ArrowDown},
         {Qt::Key_Right,     wdk::Keysym::ArrowRight},
-        {Qt::Key_Escape,    wdk::Keysym::Escape}
+        {Qt::Key_Escape,    wdk::Keysym::Escape},
+        {Qt::Key_Plus,      wdk::Keysym::Plus},
+        {Qt::Key_Minus,     wdk::Keysym::Minus}
     };
     auto it = KeyMap.find(from_qt);
     if (it == std::end(KeyMap))
