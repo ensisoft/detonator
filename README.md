@@ -92,9 +92,29 @@ https://docs.conan.io/en/latest/installation.html
   $ cd build_d
   $ conan install .. --build missing
   $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
-  $ make -j8 install
+  $ make -j16 install
   $ ctest -j16
 ```
+
+- Build the project for profiling using valgrind / kcachegrind
+```
+  $ git clone https://github.com/ensisoft/gamestudio
+  $ cd gamestudio 
+  $ git submodule update --init --recursive
+  $ mkdir build_profile
+  $ cd build_profile
+  $ conan install .. --build missing 
+  $ cmake -G "Unix Makefiles" --DCMAKE_BUILD_TYPE=RelWithDebInfo
+  $ make -j16 install
+```
+Then in order to profile and analysze the output use the combination of valgrind and kcachegrind.
+For example:
+```
+  $ cd gamestudio/audio/test/
+  $ valgrind --tool=cachegrind ./audio_test --graph
+  $ kcaghegrind cachegrind.out.XXXXX
+```
+
 
 Boring But Stable (Windows)
 ---------------------------------
@@ -115,6 +135,8 @@ https://docs.conan.io/en/latest/installation.html
 
 - Open "Developer Command Prompt for VS 2019"
 
+Build the project in RELEASE mode.
+
 ```
   $ git clone https://github.com/ensisoft/gamestudio
   $ cd gamestudio
@@ -126,6 +148,24 @@ https://docs.conan.io/en/latest/installation.html
   $ cmake --build   . --config Release
   $ cmake --install . --config Release
 ```
+
+Build the project in DEBUG mode. 
+
+* Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels). 
+This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
+
+```
+  $ git clone https://github.com/ensisoft/gamestudio
+  $ cd gamestudio
+  $ git submodule update --init --recursive
+  $ mkdir build_d
+  $ cd build_d
+  $ conan install .. --build missing -s build_type=Debug
+  $ cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Debug ..
+  $ cmake --build   . --config Debug
+  $ cmake --install . --config Debug
+```
+
 
 The Boring Documentation
 =======================
