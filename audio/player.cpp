@@ -22,11 +22,14 @@
 #  include <pthread.h>
 #endif
 
+#include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "audio/player.h"
 #include "audio/device.h"
 #include "audio/source.h"
 #include "audio/stream.h"
+#include "audio/command.h"
 
 namespace audio
 {
@@ -95,7 +98,16 @@ void Player::Cancel(std::size_t id)
     track_actions_.push(a);
 }
 
-bool Player::GetEvent(TrackEvent* event)
+void Player::SendCommand(std::size_t id, std::unique_ptr<Command> cmd)
+{
+    Action a;
+    a.do_what  = Action::Type::Command;
+    a.track_id = id;
+    a.cmd      = cmd.release(); // remember to delete the raw ptr!
+    track_actions_.push(a);
+}
+
+bool Player::GetEvent(Event* event)
 {
     std::lock_guard<std::mutex> lock(event_mutex_);
     if (events_.empty())
@@ -109,8 +121,14 @@ void Player::AudioThreadLoop(Device* ptr)
 {
     std::unique_ptr<Device> dev(ptr);
 
+    auto now = base::GetTime();
+
     while (run_thread_.test_and_set(std::memory_order_acquire))
     {
+        const auto later = base::GetTime();
+        const auto delta = later - now;
+        now = later;
+
         // iterate audio device state once. (dispatches stream/device state changes)
         dev->Poll();
 
@@ -118,6 +136,8 @@ void Player::AudioThreadLoop(Device* ptr)
         Action track_action;    
         while (track_actions_.pop(track_action))
         {
+            std::unique_ptr<Command> cmd(track_action.cmd);
+
             auto it = std::find_if(std::begin(playing_), std::end(playing_),
                 [=](const Track& t) {
                     return t.id == track_action.track_id;
@@ -127,21 +147,43 @@ void Player::AudioThreadLoop(Device* ptr)
 
             auto& p = *it;
             if (track_action.do_what == Action::Type::Pause)
+            {
+                ASSERT(p.paused == false);
                 p.stream->Pause();
+                p.paused = true;
+            }
             else if (track_action.do_what == Action::Type::Resume)
+            {
+                ASSERT(p.paused == true);
                 p.stream->Resume();
+                p.paused = false;
+            }
+            else if (track_action.do_what == Action::Type::Command)
+            {
+                p.stream->SendCommand(std::move(cmd));
+            }
             else if (track_action.do_what == Action::Type::Cancel)
             {
-                p.stream->Pause();
+                p.stream->Cancel();
                 playing_.erase(it);
             }
         }
 
-        // realize the state updates (if any) of currently playing audio  streams
+        // realize the state updates (if any) of currently playing audio streams
         // and create outgoing stream events (if any).
         for (auto it = std::begin(playing_); it != std::end(playing_);)
         {
             auto& track = *it;
+            // propagate events
+            while (auto event = track.stream->GetEvent())
+            {
+                SourceEvent ev;
+                ev.id    = track.id;
+                ev.event = std::move(event);
+                std::lock_guard<std::mutex> lock(event_mutex_);
+                events_.push(std::move(ev));
+            }
+
             const auto state = track.stream->GetState();
             if (state == Stream::State::Complete || state == Stream::State::Error)
             {
@@ -161,7 +203,7 @@ void Player::AudioThreadLoop(Device* ptr)
                     }
                 }
                 // generate a track completion event
-                TrackEvent event;
+                SourceCompleteEvent event;
                 event.id      = track.id;
                 event.when    = track.when;
                 event.looping = track.looping;
@@ -173,6 +215,11 @@ void Player::AudioThreadLoop(Device* ptr)
                 }
                 if (!track.looping)
                     it = playing_.erase(it);
+            }
+            else if (state == Stream::State::Ready && !track.paused)
+            {
+                track.stream->Update(delta);
+                it++;
             }
             else it++;
         }
@@ -206,7 +253,7 @@ void Player::AudioThreadLoop(Device* ptr)
             auto stream = dev->Prepare(std::move(const_cast<pq_value_type&>(top).source));
             if (!stream)
             {
-                TrackEvent event;
+                SourceCompleteEvent event;
                 event.id   = top.id;
                 event.when = top.when;
                 event.looping = top.looping;
@@ -234,7 +281,7 @@ void Player::AudioThreadLoop(Device* ptr)
         // a) it increases latency in terms of starting the playback of new audio sample.
         // b) creates possibility for a buffer underruns in the audio playback stream. 
         // todo: probably need something more sophisticated ?
-        std::this_thread::sleep_for(std::chrono::milliseconds(playing_.empty() ? 5 : 1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 

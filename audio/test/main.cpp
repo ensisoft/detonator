@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
     audio::Player player(audio::Device::Create("audio_test"));
     if (sine)
     {
-        auto source = std::make_unique<audio::SineGenerator>(500);
-        source->SetFormat(format);
+        auto source = std::make_unique<audio::SineGenerator>(500, format);
         const auto id = player.Play(std::move(source), false);
         DEBUG("New sine wave stream = %1", id);        
         INFO("Playing procedural sine audio for 10 seconds.");
@@ -105,25 +104,25 @@ int main(int argc, char* argv[])
 
     if (graph)
     {
-        auto graph = std::make_unique<audio::Graph>("graph");
-        auto* sine = graph->AddElement(audio::SineSource("sine", 500, 5000));
-        auto* file = graph->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
-        auto* gain = graph->AddElement(audio::Gain("gain", 1.0f));
-        auto* mixer = graph->AddElement(audio::Mixer("mixer", 2));
-        auto* splitter = graph->AddElement(audio::Splitter("split"));
-        auto* null = graph->AddElement(audio::Null("null"));
-        auto* resamp = graph->AddElement(audio::Resampler("resamp", 16000));
+        auto graph = std::make_unique<audio::AudioGraph>("graph");
+        auto* sine     = (*graph)->AddElement(audio::SineSource("sine", 500, 5000));
+        auto* file     = (*graph)->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
+        auto* gain     = (*graph)->AddElement(audio::Gain("gain", 1.0f));
+        auto* mixer    = (*graph)->AddElement(audio::Mixer("mixer", 2));
+        auto* splitter = (*graph)->AddElement(audio::StereoSplitter("split"));
+        auto* null     = (*graph)->AddElement(audio::Null("null"));
+        auto* resamp   = (*graph)->AddElement(audio::Resampler("resamp", 16000));
 
-        ASSERT(graph->LinkElements("file", "out", "split", "in"));
-        ASSERT(graph->LinkElements("split", "left", "mixer", "in0"));
-        ASSERT(graph->LinkElements("split", "right", "null", "in"));
-        ASSERT(graph->LinkElements("sine", "out", "mixer", "in1"));
-        ASSERT(graph->LinkElements("mixer", "out", "gain", "in"));
-        ASSERT(graph->LinkElements("gain", "out", "resamp", "in"));
-        ASSERT(graph->LinkGraph("resamp", "out"));
+        ASSERT((*graph)->LinkElements("file", "out", "split", "in"));
+        ASSERT((*graph)->LinkElements("split", "left", "mixer", "in0"));
+        ASSERT((*graph)->LinkElements("split", "right", "null", "in"));
+        ASSERT((*graph)->LinkElements("sine", "out", "mixer", "in1"));
+        ASSERT((*graph)->LinkElements("mixer", "out", "gain", "in"));
+        ASSERT((*graph)->LinkElements("gain", "out", "resamp", "in"));
+        ASSERT((*graph)->LinkGraph("resamp", "out"));
         ASSERT(graph->Prepare());
 
-        const auto& desc = graph->Describe();
+        const auto& desc = (*graph)->Describe();
         for (const auto& str : desc)
             DEBUG(str);
 
@@ -211,8 +210,7 @@ int main(int argc, char* argv[])
         INFO("Testing: '%1'", filename);
         base::FlushGlobalLog();
 
-        auto source = std::make_unique<audio::AudioFile>(filename, "test");
-        source->SetFormat(format);
+        auto source = std::make_unique<audio::AudioFile>(filename, "test", format);
         source->Open();
 
         const auto looping = loops > 1;
@@ -223,13 +221,15 @@ int main(int argc, char* argv[])
         while (completed_loop_count != loops)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            audio::Player::TrackEvent e;
+            audio::Player::Event e;
             if (player.GetEvent(&e))
             {
-                DEBUG("Track id = %1 event", e.id);
-                INFO("Track status %1", e.status == audio::Player::TrackStatus::Failure
-                    ? "Failed" : "Success");
-                completed_loop_count++;
+                if (std::holds_alternative<audio::Player::SourceCompleteEvent>(e))
+                {
+                    const auto& track_event = std::get<audio::Player::SourceCompleteEvent>(e);
+                    INFO("Track id %1 status event %2", track_event.id, track_event.status);
+                    completed_loop_count++;
+                }
             }
         }
         if (looping)

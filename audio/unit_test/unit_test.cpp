@@ -18,6 +18,10 @@
 
 #include <iostream>
 
+#ifndef ENABLE_AUDIO_TEST_SOURCE
+#  define ENABLE_AUDIO_TEST_SOURCE
+#endif
+
 #include "base/test_minimal.h"
 #include "base/logging.h"
 #include "audio/source.h"
@@ -50,7 +54,7 @@ public:
             throw std::runtime_error("something failed");
         return max_bytes;
     }
-    virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const noexcept override
+    virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override
     {
         const auto ret = mFillCount < mBuffers;
         DEBUG("HasNextBuffer: %1", ret);
@@ -59,6 +63,8 @@ public:
 
     virtual bool Reset() noexcept override
     { return true; }
+    virtual void RecvCommand(std::unique_ptr<audio::Command>) noexcept override
+    {}
 private:
     const unsigned mSampleRate = 0;
     const unsigned mNumChannels = 0;
@@ -73,10 +79,12 @@ bool LoopUntilEvent(audio::Player& player, Condition cond)
     for (unsigned i=0; i<1000; ++i)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        audio::Player::TrackEvent e;
+        audio::Player::Event e;
         if (player.GetEvent(&e))
         {
-            if (cond(e))
+            TEST_REQUIRE(std::holds_alternative<audio::Player::SourceCompleteEvent>(e));
+            auto track_event = std::get<audio::Player::SourceCompleteEvent>(e);
+            if (cond(track_event))
                 return true;
         }
     }
@@ -103,10 +111,10 @@ void unit_test_success()
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(3));
             player.Play(std::make_unique<TestSource>(44100, 2, 300, 301));
-            audio::Player::TrackEvent e;
+            audio::Player::Event e;
             while (player.GetEvent(&e))
             {
-                DEBUG("Track %1 event %%2", e.id, e.status);
+                //DEBUG("Track %1 event %%2", e.id, e.status);
             }
         }
     }
@@ -152,6 +160,42 @@ void unit_test_fill_buffer_exception()
     }));
 }
 
+void unit_test_pause_resume()
+{
+    audio::Player player(audio::Device::Create("audio_unit_test"));
+
+    {
+        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        for (unsigned i=0; i<10; ++i)
+        {
+            if ((i & 1) == 0)
+                player.Pause(id);
+            else player.Resume(id);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+}
+
+void unit_test_cancel()
+{
+    // cancel stream while in playback
+    audio::Player player(audio::Device::Create("audio_unit_test"));
+    {
+        const auto id = player.Play(std::make_unique<TestSource>(44100, 2, 500, 501));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        player.Cancel(id);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    {
+        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        player.Cancel(id);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
@@ -161,5 +205,7 @@ int test_main(int argc, char* argv[])
     unit_test_success();
     unit_test_format_fail();
     unit_test_fill_buffer_exception();
+    unit_test_pause_resume();
+    unit_test_cancel();
     return 0;
 }

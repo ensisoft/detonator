@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -28,21 +29,19 @@
 #include "audio/source.h"
 #include "audio/format.h"
 #include "audio/element.h"
+#include "audio/command.h"
 
 namespace audio
 {
-    // Provide PCM encoded audio device data through the evaluation of
-    // an audio graph that is comprised of audio elements. Each element
-    // can take a stream of data as an input, modify it and then provide
-    // an outgoing stream of data.
-    class Graph : public Source,
-                  public Element
+
+    class Graph :  public Element
     {
     public:
-        // Creata new audio graph with the given human readable name.
+        // Create new audio graph with the given human readable name.
         // The name will be audio stream name on the device, and will be
         // shown for example in Pavucontrol on Linux.
         Graph(const std::string& name);
+        Graph(Graph&& other);
         Graph(const Graph&) = delete;
         // Add a new element to the graph. Note that the element is not yet
         // linked anywhere. You'll likely want to call LinkElement after this.
@@ -143,32 +142,24 @@ namespace audio
         // linked to this dst port.
         bool IsDstPortTaken(const Port* dst) const;
 
-        // Source implementation.
-        virtual unsigned GetRateHz() const noexcept override;
-        virtual unsigned GetNumChannels() const noexcept override;
-        virtual Source::Format GetFormat() const noexcept override;
-        virtual std::string GetName() const noexcept override;
-        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
-        virtual bool HasNextBuffer(std::uint64_t num_bytes_read) const noexcept override;
-        virtual bool Reset() noexcept override;
+        bool HasElement(Element* element) const;
+
+        Format GetFormat() const
+        { return mFormat; }
 
         // Element implementation note that  GetName is already part of the Source impl
         virtual std::string GetId() const override
         { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual bool IsSource() const override
         { return true; }
         virtual bool IsSourceDone() const override
         { return mDone; }
-        // Prepare the graph for playback. Prepare should be called
-        // after all the elements have been added and linked to the graph
-        // and before the graph is given to the audio device for playback.
-        // The graph may not contain any cycles.
-        // Returns true on success if all audio elements were prepared
-        // successfully. After this it's possible to send the graph to
-        // the audio device/player for playback.
         virtual bool Prepare() override;
-        virtual void Process(unsigned milliseconds) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
+        virtual void Update(float dt) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
@@ -176,6 +167,7 @@ namespace audio
             if (index == 0) return mPort;
             BUG("No such port index.");
         }
+        virtual bool DispatchCommand(const std::string& dest, Element::Command& cmd) override;
         Graph& operator=(const Graph&) = delete;
     private:
         using AdjacencyList = std::unordered_set<Element*>;
@@ -204,4 +196,68 @@ namespace audio
         // more queued buffers in ports.o
         bool mDone = false;
     };
+
+    // Provide PCM encoded audio device data through the evaluation of
+    // an audio graph that is comprised of audio elements. Each element
+    // can take a stream of data as an input, modify it and then provide
+    // an outgoing stream of data.
+    class AudioGraph : public Source
+    {
+    public:
+        AudioGraph(const std::string& name);
+        AudioGraph(const std::string& name, Graph&& graph);
+        AudioGraph(AudioGraph&& other);
+        AudioGraph(const AudioGraph&) = delete;
+
+        // Prepare the graph for playback. Prepare should be called
+        // after all the elements have been added and linked to the graph
+        // and before the graph is given to the audio device for playback.
+        // The graph may not contain any cycles.
+        // Returns true on success if all audio elements were prepared
+        // successfully. After this it's possible to send the graph to
+        // the audio device/player for playback.
+        bool Prepare();
+
+        // Source implementation.
+        virtual unsigned GetRateHz() const noexcept override;
+        virtual unsigned GetNumChannels() const noexcept override;
+        virtual Source::Format GetFormat() const noexcept override;
+        virtual std::string GetName() const noexcept override;
+        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
+        virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
+        virtual bool Reset() noexcept override;
+        virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
+        virtual std::unique_ptr<Event> GetEvent() noexcept override;
+        virtual void Update(float dt) noexcept override;
+
+        // quick access to the underlying graph.
+        Graph& GetGraph()
+        { return mGraph; }
+        Graph* operator->()
+        { return &mGraph; }
+        const Graph* operator->() const
+        { return &mGraph; }
+        const Graph& GetGraph() const
+        { return mGraph; }
+
+        AudioGraph& operator=(const AudioGraph&) = delete;
+
+        static
+        std::unique_ptr<audio::Command> MakeCommandPtr(const std::string& destination,
+                                                       std::unique_ptr<Element::Command>&& cmd);
+
+        template<typename GraphCommand> static
+        std::unique_ptr<audio::Command> MakeCommand(const std::string& destination, GraphCommand&& cmd)
+        {
+            auto ret = Element::MakeCommand(std::forward<GraphCommand>(cmd));
+            return MakeCommandPtr(destination, std::move(ret));
+        }
+    private:
+        struct GraphCmd;
+        const std::string mName;
+        audio::Graph mGraph;
+        audio::Format mFormat;
+        audio::Element::EventQueue mEvents;
+    };
+
 } // namespace

@@ -26,8 +26,11 @@
 #include <memory>
 #include <list>
 #include <chrono>
+#include <variant>
 
 #include <boost/lockfree/queue.hpp>
+
+#include "audio/command.h"
 
 namespace audio
 {
@@ -51,10 +54,10 @@ namespace audio
             // track failed to play
             Failure
         };
-        // Historical event/record of some sample playback.
-        // you can get this data through a call to get_event
-        struct TrackEvent {
-            // the id of the track that was played.
+
+        // Completion event of audio source.
+        struct SourceCompleteEvent {
+            // the id of the track/source that was played.
             std::size_t id = 0;
             // the time point when the track was played.
             std::chrono::steady_clock::time_point when;
@@ -63,6 +66,17 @@ namespace audio
             // whether set to looping or not
             bool looping = false;
         };
+
+        // Source event during audio playback.
+        struct SourceEvent {
+            // the id of the track/source that generated the event.
+            std::size_t id = 0;
+            // the actual event object. see the source implementations
+            // for possible events.
+            std::unique_ptr<Event> event;
+        };
+
+        using Event = std::variant<SourceCompleteEvent, SourceEvent>;
 
         // Create a new audio player using the given audio device.
         Player(std::unique_ptr<Device> device);
@@ -89,9 +103,12 @@ namespace audio
         // Cancel (stop playback and delete the rest of the stream) of the given audio stream.
         void Cancel(std::size_t id);
 
-        // Get next historical track event.
-        // Returns true if there was a track event otherwise false.
-        bool GetEvent(TrackEvent* event);
+        // Send a command to the audio stream's source object.
+        void SendCommand(std::size_t id, std::unique_ptr<Command> cmd);
+
+        // Get next playback event if any.
+        // Returns true if there was an event otherwise false.
+        bool GetEvent(Event* event);
 
     private:
         void AudioThreadLoop(Device* ptr);
@@ -103,6 +120,7 @@ namespace audio
             std::shared_ptr<Stream> stream;
             std::chrono::steady_clock::time_point when;
             bool looping = false;
+            bool paused  = false;
 
             bool operator<(const Track& other) const {
                 return when < other.when;
@@ -113,10 +131,13 @@ namespace audio
         };
         struct Action {
             enum class Type {
-                None, Resume, Pause,  Cancel
+                None, Resume, Pause,  Cancel, Command
             };
             Type do_what = Type::None;
             std::size_t track_id = 0;
+            // ugly raw ptr because boost::lockfree::queue requires
+            // trivial destructor type trait.
+            Command* cmd = nullptr;
         };
     private:
         std::unique_ptr<std::thread> thread_;
@@ -139,7 +160,7 @@ namespace audio
 
         // list of track completion events of tracks
         // that were played.
-        std::queue<TrackEvent> events_;
+        std::queue<Event> events_;
 
         // audio thread stop flag
         std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;

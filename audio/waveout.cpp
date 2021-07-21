@@ -319,11 +319,33 @@ private:
         virtual void Pause() override
         {
             waveOutPause(handle_);
+            DEBUG("Pause waveout stream '%1'.", source_->GetName());
         }
 
         virtual void Resume() override
         {
             waveOutRestart(handle_);
+            DEBUG("Resume waveout stream '%1'.", source_->GetName());
+        }
+
+        virtual void Cancel() override
+        {
+            // anything that needs to be done?
+            DEBUG("Cancel waveout stream '%1'.", source_->GetName());
+        }
+
+        virtual void Update(float dt) override
+        {
+            source_->Update(dt);
+        }
+
+        virtual void SendCommand(std::unique_ptr<Command> cmd) override
+        {
+            source_->RecvCommand(std::move(cmd));
+        }
+        virtual std::unique_ptr<Event> GetEvent() override
+        {
+            return source_->GetEvent();
         }
 
         void poll()
@@ -365,7 +387,7 @@ private:
                 {
                     auto* buffer = empty_buffers.front();
                     empty_buffers.pop();
-                    if (!source_->HasNextBuffer(num_pcm_bytes_))
+                    if (!source_->HasMore(num_pcm_bytes_))
                     {
                         state_ = Stream::State::Complete;
                         break;
