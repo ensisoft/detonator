@@ -212,7 +212,7 @@ public:
             mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
-            ui->Paint(mUIState, mUIPainter, base::GetRuntimeSec(), nullptr);
+            ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr);
         }
 
         if (mDebug.debug_show_fps || mDebug.debug_show_msg)
@@ -500,7 +500,7 @@ private:
         const glm::vec2 mickey_pos_uik = (mickey_pos_win - viewport_origin) / scale;
 
         uik::Window::MouseEvent event;
-        event.time   = base::GetRuntimeSec();
+        event.time   = base::GetTime();
         event.button = MapMouseButton(mickey.btn);
         event.native_mouse_pos = uik::FPoint(mickey_pos_win.x, mickey_pos_win.y);
         event.window_mouse_pos = uik::FPoint(mickey_pos_uik.x, mickey_pos_uik.y);

@@ -148,8 +148,11 @@ template<typename T, typename Deleter>
 std::unique_ptr<T, Deleter> MakeUniqueHandle(T* ptr, Deleter del)
 { return std::unique_ptr<T, Deleter>(ptr, del); }
 
-// get the time in seconds since the first call to this function.
-double GetRuntimeSec();
+// Get the time in seconds since some undefined point in time i.e. epoch.
+// Only intended purpose is to facilitate measuring elapsed time
+// between consecutive events. Don't assume any relation to any
+// system time etc.
+double GetTime();
 
 // when using these functions with narrow byte strings think about
 // the string encoding and whether that can be a problem!

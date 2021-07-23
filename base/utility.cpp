@@ -35,14 +35,14 @@
 namespace base
 {
 
-double GetRuntimeSec()
+double GetTime()
 {
-    using steady_clock = std::chrono::steady_clock;
+    using steady_clock = std::chrono::high_resolution_clock;
     static const auto start = steady_clock::now();
     const auto now = steady_clock::now();
     const auto gone = now - start;
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(gone);
-    return ms.count() / 1000.0;
+    const auto ms = std::chrono::duration_cast<std::chrono::microseconds>(gone);
+    return ms.count() / (1000.0 * 1000.0);
 }
 
 std::string RandomString(size_t len)
