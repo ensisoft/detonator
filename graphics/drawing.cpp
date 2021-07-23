@@ -95,7 +95,7 @@ void DrawTextRect(Painter& painter,
         const auto fps = 1.5;
         const auto full_period = 2.0 / fps;
         const auto half_period = full_period * 0.5;
-        const auto time = fmodf(base::GetRuntimeSec(), full_period);
+        const auto time = fmodf(base::GetTime(), full_period);
         if (time >= half_period)
             return;
     }
