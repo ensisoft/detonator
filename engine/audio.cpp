@@ -1,0 +1,282 @@
+// Copyright (C) 2020-2021 Sami Väisänen
+// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "config.h"
+
+#include "base/assert.h"
+#include "base/logging.h"
+#include "audio/device.h"
+#include "audio/format.h"
+#include "audio/element.h"
+#include "audio/graph.h"
+#include "audio/player.h"
+#include "engine/audio.h"
+
+namespace game
+{
+AudioEngine::AudioEngine(const std::string& name, const ClassLibrary* loader)
+  : mLoader(loader)
+{
+    mFormat.sample_rate   = 44100;
+    mFormat.channel_count = 2;
+    mFormat.sample_type   = audio::SampleType::Float32;
+
+    auto effect_graph  = std::make_unique<audio::AudioGraph>(name + " FX");
+    auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
+    auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+    effect_mixer->AddSource(audio::ZeroSource("zero", mFormat));
+    ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
+    ASSERT((*effect_graph)->LinkGraph("gain", "out"));
+    ASSERT(effect_graph->Prepare());
+
+    auto music_graph = std::make_unique<audio::AudioGraph>(name + " Music");
+    auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
+    auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+    music_mixer->AddSource(audio::ZeroSource("zero", mFormat));
+    ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
+    ASSERT((*music_graph)->LinkGraph("gain", "out"));
+    ASSERT(music_graph->Prepare());
+
+    mPlayer = std::make_unique<audio::Player>(audio::Device::Create(name.c_str()));
+    mEffectGraphId = mPlayer->Play(std::move(effect_graph), false /* looping */);
+    mMusicGraphId  = mPlayer->Play(std::move(music_graph), false /*looping*/);
+    DEBUG("Audio effect graph playing with stream id '%1'.", mEffectGraphId);
+    DEBUG("Audio music graph playing with stream id '%1'.", mMusicGraphId);
+}
+
+AudioEngine::~AudioEngine()
+{
+    mPlayer->Cancel(mEffectGraphId);
+    mPlayer->Cancel(mMusicGraphId);
+}
+
+bool AudioEngine::AddMusicTrack(const std::string& name, const std::string& uri)
+{
+    auto music = std::make_unique<audio::Graph>(name);
+    music->AddElement(audio::FileSource(name + "/file", uri, audio::SampleType::Float32));
+    music->AddElement(audio::StereoMaker(name + "/stereo"));
+    music->AddElement(audio::Resampler(name + "/resampler", 44100));
+    music->AddElement(audio::Fade(name + "/fader"));
+    ASSERT(music->LinkElements(name + "/file",   "out", name + "/stereo",    "in"));
+    ASSERT(music->LinkElements(name + "/stereo", "out", name + "/fader",     "in"));
+    ASSERT(music->LinkElements(name + "/fader",  "out", name + "/resampler", "in"));
+    ASSERT(music->LinkGraph(name + "/resampler", "out"));
+
+    if (!music->Prepare())
+    {
+        ERROR("Failed to prepare music audio graph.");
+        return false;
+    }
+    const auto& port = music->GetOutputPort(0);
+    if (port.GetFormat() != mFormat)
+    {
+        ERROR("Music '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
+        return false;
+    }
+
+    audio::MixerSource::AddSourceCmd cmd;
+    cmd.src    = std::move(music);
+    cmd.paused = true;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    return true;
+}
+
+void AudioEngine::PlayMusic(const std::string& track, std::chrono::milliseconds when)
+{
+    audio::MixerSource::PauseSourceCmd cmd;
+    cmd.name   = track;
+    cmd.paused = false;
+
+    Command c;
+    c.cmd   = audio::Element::MakeCommand(std::move(cmd));
+    c.when  = std::chrono::steady_clock::now() + when;
+    c.track = mMusicGraphId;
+    c.dest  = "mixer";
+    mCommands.push(std::move(c));
+}
+
+void AudioEngine::PlayMusic(const std::string& track)
+{
+    audio::MixerSource::PauseSourceCmd cmd;
+    cmd.name   = track;
+    cmd.paused = false;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+}
+
+void AudioEngine::PauseMusic(const std::string& track, std::chrono::milliseconds when)
+{
+    audio::MixerSource::PauseSourceCmd cmd;
+    cmd.name   = track;
+    cmd.paused = true;
+
+    Command c;
+    c.cmd   = audio::Element::MakeCommand(std::move(cmd));
+    c.when  = std::chrono::steady_clock::now() + when;
+    c.track = mMusicGraphId;
+    c.dest  = "mixer";
+    mCommands.push(std::move(c));
+}
+
+void AudioEngine::PauseMusic(const std::string& track)
+{
+    audio::MixerSource::PauseSourceCmd cmd;
+    cmd.name   = track;
+    cmd.paused = true;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+}
+
+void AudioEngine::RemoveMusicTrack(const std::string& name)
+{
+    audio::MixerSource::DeleteSourceCmd cmd;
+    cmd.name = name;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+}
+
+void AudioEngine::SetMusicEffect(const std::string& track, float duration, Effect effect)
+{
+    audio::Fade::SetFadeCmd cmd;
+    cmd.duration = duration;
+    cmd.effect   = effect == Effect::FadeIn ? audio::Fade::Effect::FadeIn
+                                            : audio::Fade::Effect::FadeOut;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand(track + "/fader", std::move(cmd)));
+}
+
+void AudioEngine::SetMusicGain(float gain)
+{
+    audio::Gain::SetGainCmd cmd;
+    cmd.gain = gain;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
+}
+
+bool AudioEngine::PlaySoundEffect(const std::string& uri, std::chrono::milliseconds ms)
+{
+    const auto when   = std::chrono::steady_clock::now() + ms;
+    const auto name   = std::to_string(mEffectCounter);
+    const auto paused = ms.count() != 0;
+
+    auto effect = std::make_unique<audio::Graph>(name);
+    effect->AddElement(audio::FileSource("file", uri, audio::SampleType::Float32));
+    effect->AddElement(audio::StereoMaker("stereo"));
+    effect->AddElement(audio::Resampler("resampler", 44100));
+
+    ASSERT(effect->LinkElements("file", "out", "stereo", "in"));
+    ASSERT(effect->LinkElements("stereo", "out", "resampler", "in"));
+    ASSERT(effect->LinkGraph("resampler", "out"));
+
+    if (!effect->Prepare())
+    {
+        ERROR("Failed to prepare effect audio graph.");
+        return false;
+    }
+    const auto& port = effect->GetOutputPort(0);
+    if (port.GetFormat() != mFormat)
+    {
+        ERROR("Effect '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
+        return false;
+    }
+
+    audio::MixerSource::AddSourceCmd cmd;
+    cmd.src    = std::move(effect);
+    cmd.paused = paused;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+
+    if (paused)
+    {
+        audio::MixerSource::PauseSourceCmd cmd;
+        cmd.name   = name;
+        cmd.paused = false;
+
+        Command c;
+        c.dest  = "mixer";
+        c.cmd   = audio::Element::MakeCommand(std::move(cmd));
+        c.when  = when;
+        c.track = mEffectGraphId;
+        mCommands.push(std::move(c));
+    }
+    ++mEffectCounter;
+    return true;
+}
+
+bool AudioEngine::PlaySoundEffect(const std::string& uri)
+{
+    return PlaySoundEffect(uri, std::chrono::milliseconds(0));
+}
+
+void AudioEngine::SetSoundEffectGain(float gain)
+{
+    audio::Gain::SetGainCmd cmd;
+    cmd.gain = gain;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
+}
+
+void AudioEngine::Tick(AudioEventQueue* events)
+{
+    // pump audio events from the audio player thread
+    audio::Player::Event event;
+    while (mPlayer->GetEvent(&event))
+    {
+        if (const auto* ptr = std::get_if<audio::Player::SourceCompleteEvent>(&event))
+            OnAudioPlayerEvent(*ptr, events);
+        else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
+            OnAudioPlayerEvent(*ptr, events);
+        else BUG("Unexpected audio player event.");
+    }
+
+    // dispatch pending commands if any.
+    while (!mCommands.empty())
+    {
+        auto& top = mCommands.top();
+        const auto& now = std::chrono::steady_clock::now();
+        if (now < top.when)
+            break;
+        // std::priority_queue only provides a const public interface
+        // because it tries to protect from people changing parameters
+        // of the contained objects so that the priority order invariable
+        // would no longer hold. however this is also super annoying
+        // in cases where you for example want to get a std::unique_ptr<T>
+        // out of the damn thing.
+        using pq_value_type = std::remove_cv<CmdQueue::value_type>::type;
+
+        const auto track = top.track;
+        const auto& dest = top.dest;
+        auto cmd = std::move(const_cast<pq_value_type&>(top).cmd);
+        mPlayer->SendCommand(track, audio::AudioGraph::MakeCommandPtr(dest, std::move(cmd)));
+        mCommands.pop();
+    }
+}
+
+void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events)
+{
+    DEBUG("Audio track '%1' complete event (%2). ",event.id, event.status);
+
+    // intentionally empty for now.
+}
+void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
+{
+    DEBUG("Audio track '%1' source event.", event.id);
+    if (events == nullptr) return;
+    else if (event.id != mMusicGraphId) return;
+
+    if (auto* done = event.event->GetIf<audio::MixerSource::SourceDoneEvent>())
+    {
+        MusicEvent me;
+        me.track = done->src->GetName();
+        me.type  = MusicEvent::Type::TrackDone;
+        events->push_back(std::move(me));
+    }
+}
+
+} // namespace
