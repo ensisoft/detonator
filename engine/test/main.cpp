@@ -48,6 +48,7 @@
 #include "engine/scene.h"
 #include "engine/format.h"
 #include "engine/ui.h"
+#include "engine/audio.h"
 #include "engine/main/interface.h"
 
 namespace {
@@ -70,6 +71,121 @@ public:
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) {}
     virtual void SetSurfaceSize(unsigned width, unsigned height)  {}
 private:
+};
+
+class AudioMusicTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FRect rect(20, 20, 700, 800);
+        gfx::DrawTextRect(painter,
+            base::FormatString(
+               "Key 1 - music/SkyFire (Title Screen).ogg\n"
+               "Key 2 - music/440Hz_44100Hz_16bit_05sec.mp3\n\n"
+               "Effect Gain %1 (Press +/- to adjust)\n", mMusicGain),
+            "fonts/orbitron-medium.otf", 18, rect,
+            gfx::Color::HotPink,
+            gfx::TextAlign::AlignLeft | gfx::AlignTop);
+    }
+    virtual void Update(float dt) override
+    {
+        std::vector<game::AudioEvent> events;
+        mEngine->Tick(&events);
+        for (auto& event : events)
+        {
+            if (const auto* ptr = std::get_if<game::MusicEvent>(&event))
+                DEBUG("AudioEvent (%1) on track '%2'",ptr->type, ptr->track);
+        }
+    }
+    virtual void Start(game::ClassLibrary* loader) override
+    {
+        mEngine = std::make_unique<game::AudioEngine>("TestApp", loader);
+        mEngine->SetMusicGain(mMusicGain);
+    }
+    virtual void End() override
+    { mEngine.reset(); }
+
+    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    {
+        std::string track;
+        if (key.symbol == wdk::Keysym::Key1)
+            track = "music/SkyFire (Title Screen).ogg";
+        else if (key.symbol == wdk::Keysym::Key2)
+            track = "music/440Hz_44100Hz_16bit_05sec.mp3";
+        else if (key.symbol == wdk::Keysym::Plus)
+            mMusicGain = math::clamp(0.0f, 1.0f, mMusicGain + 0.05f);
+        else if (key.symbol == wdk::Keysym::Minus)
+            mMusicGain = math::clamp(0.0f, 1.0f, mMusicGain - 0.05f);
+        mEngine->SetMusicGain(mMusicGain);
+
+        if (track.empty()) return;
+        const auto& name = base::ToString(key.symbol);
+        mEngine->AddMusicTrack(name, track);
+        mEngine->SetMusicEffect(name, 2.0f, game::AudioEngine::Effect::FadeIn);
+        mEngine->PlayMusic(name);
+    }
+private:
+    std::unique_ptr<game::AudioEngine> mEngine;
+    float mMusicGain = 0.5f;
+};
+
+class AudioEffectTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FRect rect(20, 20, 700, 800);
+        gfx::DrawTextRect(painter,
+            base::FormatString(
+                "Key 1 - sounds/sound 21.ogg\n"
+                "Key 2 - sounds/qubodup-cfork-ccby3-jump.ogg\n"
+                "Key 3 - sounds/completetask_0.mp3\n"
+                "Key 4 - sounds/Laser_05.mp3\n\n"
+                "Effect gain %1 (Press +/- to adjust)\n"
+                "Effect delay %2 (Press Up/Down arrow to adjust)\n", mEffectGain, mDelay),
+            "fonts/orbitron-medium.otf", 18, rect,
+            gfx::Color::HotPink,
+            gfx::TextAlign::AlignLeft | gfx::AlignTop);
+    }
+    virtual void Update(float dt) override
+    {
+        mEngine->Tick(nullptr);
+    }
+    virtual void Start(game::ClassLibrary* loader) override
+    {
+        mEngine = std::make_unique<game::AudioEngine>("TestApp", loader);
+        mEngine->SetSoundEffectGain(mEffectGain);
+    }
+    virtual void End() override
+    { mEngine.reset(); }
+
+    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    {
+        const auto millisec = std::chrono::milliseconds(unsigned(mDelay * 1000u));
+        if (key.symbol == wdk::Keysym::Key1)
+            mEngine->PlaySoundEffect("sounds/sound 21.ogg", millisec);
+        else if (key.symbol == wdk::Keysym::Key2)
+            mEngine->PlaySoundEffect("sounds/qubodup-cfork-ccby3-jump.ogg", millisec);
+        else if (key.symbol == wdk::Keysym::Key3)
+            mEngine->PlaySoundEffect("sounds/completetask_0.mp3", millisec);
+        else if (key.symbol == wdk::Keysym::Key4)
+            mEngine->PlaySoundEffect("sounds/Laser_05.mp3", millisec);
+        else if (key.symbol == wdk::Keysym::Plus)
+            mEffectGain = math::clamp(0.0f, 1.0f, mEffectGain + 0.05f);
+        else if (key.symbol == wdk::Keysym::Minus)
+            mEffectGain = math::clamp(0.0f, 1.0f, mEffectGain - 0.05f);
+        else if (key.symbol == wdk::Keysym::ArrowUp)
+            mDelay = math::clamp(0.0f, 10.0f, mDelay + 0.5f);
+        else if (key.symbol == wdk::Keysym::ArrowDown)
+            mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
+        mEngine->SetSoundEffectGain(mEffectGain);
+
+    }
+private:
+    std::unique_ptr<game::AudioEngine> mEngine;
+    float mEffectGain = 0.5f;
+    float mDelay      = 0.0f;
 };
 
 class ViewportTest : public TestCase
@@ -530,7 +646,7 @@ public:
         bool debug = false;
         for (int i = 1; i < argc; ++i)
         {
-            if (!std::strcmp("--debug", argv[i]))
+            if (!std::strcmp("--debug-log", argv[i]))
                 debug = true;
         }
         base::EnableDebugLog(debug);
@@ -549,6 +665,8 @@ public:
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new ViewportTest);
         mTestList.emplace_back(new UITest);
+        mTestList.emplace_back(new AudioEffectTest);
+        mTestList.emplace_back(new AudioMusicTest);
         mTestList[mTestIndex]->Start(this);
     }
 
@@ -648,8 +766,8 @@ public:
 
     virtual void UpdateStats(const Stats& stats) override
     {
-        DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
-            stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);
+        //DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
+        //    stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);
     }
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {

@@ -97,6 +97,7 @@ message(STATUS "${Boost_LIBRARY_DIRS}")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
 
@@ -143,14 +144,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # combine as many translation units as possible into static libraries
 # in order to reduce the build times by not repeatedly building a translation
 # unit when it's possible to use a library
-#add_library(AudioLib
-#    audio/sndfile.cpp
-#    audio/pulseaudio.cpp
-#    audio/waveout.cpp
-#    audio/source.cpp
-#    audio/player.cpp
-#    audio/element.cpp
-#    audio/graph.cpp)
+add_library(AudioLib
+    audio/sndfile.cpp
+    audio/mpg123.cpp
+    audio/pulseaudio.cpp
+    audio/waveout.cpp
+    audio/source.cpp
+    audio/player.cpp
+    audio/element.cpp
+    audio/graph.cpp)
 add_library(BaseLib
     base/assert.cpp
     base/format.cpp
@@ -174,6 +176,7 @@ add_library(GfxLib
     third_party/base64/base64.cpp)
 add_library(EngineLib
     engine/animation.cpp
+    engine/audio.cpp
     engine/renderer.cpp
     engine/entity.cpp
     engine/scene.cpp
@@ -185,22 +188,28 @@ add_library(UiLib
     uikit/widget.cpp
     uikit/window.cpp)
 
-#target_include_directories(AudioLib  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(AudioLib  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(DataLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(GfxLib    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(UiLib     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 if (UNIX)
-#    target_compile_options(AudioLib  PRIVATE -fPIC)
+    target_compile_options(AudioLib  PRIVATE -fPIC)
     target_compile_options(DataLib   PRIVATE -fPIC)
     target_compile_options(BaseLib   PRIVATE -fPIC)
     target_compile_options(GfxLib    PRIVATE -fPIC)
     target_compile_options(EngineLib PRIVATE -fPIC)
     target_compile_options(UiLib     PRIVATE -fPIC)
+
+    target_link_libraries(AudioLib INTERFACE pulse)
+    target_link_libraries(AudioLib INTERFACE pthread)
+    target_link_libraries(AudioLib INTERFACE samplerate)
 endif()
 if (MSVC)
    target_compile_options(EngineLib  INTERFACE /bigobj)
+
+   target_link_libraries(AudioLib INTERFACE samplerate)
 endif()
 
 # Editor application.
@@ -488,7 +497,7 @@ add_library(TestEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(TestEngine PRIVATE GfxLib EngineLib UiLib DataLib BaseLib)
+target_link_libraries(TestEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 
