@@ -42,11 +42,17 @@
   #define WARN(fmt, ...)  WriteLog(base::LogEvent::Warning, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
   #define INFO(fmt, ...)  WriteLog(base::LogEvent::Info,    __FILE__, __LINE__, fmt, ## __VA_ARGS__)
   #define ERROR(fmt, ...) WriteLog(base::LogEvent::Error,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define ERROR_RETURN(ret, fmt, ...) \
+      do { \
+          WriteLog(base::LogEvent::Error, __FILE__, __LINE__, fmt, ## __VA_ARGS__); \
+          return ret; \
+     } while (0)
 #else
   #define DEBUG(...) while(false)
   #define WARN(...)  while(false)
   #define INFO(...)  while(false)
   #define ERROR(...) while(false)
+  #define ERROR_RETURN(...) while(false)
 #endif
 
 // minimalistic logging interface to get some diagnostics/information.
