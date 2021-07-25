@@ -92,27 +92,47 @@ public:
     // gfx::resource loader impl
     virtual gfx::ResourceHandle LoadResource(const std::string& uri) override
     {
-        auto it = mGraphicsFileBufferCache.find(uri);
+        const auto& filename = ResolveURI(uri);
+        auto it = mGraphicsFileBufferCache.find(filename);
         if (it != mGraphicsFileBufferCache.end())
             return it->second;
+
         std::vector<char> buffer;
-        if (!LoadFileBuffer(ResolveURI(uri), &buffer))
+        if (!LoadFileBuffer(filename, &buffer))
             return nullptr;
+
         auto buff = std::make_shared<GraphicsFileBuffer>(uri, std::move(buffer));
-        mGraphicsFileBufferCache[uri] = buff;
+        mGraphicsFileBufferCache[filename] = buff;
         return buff;
     }
     // GameDataLoader impl
-    virtual GameDataHandle LoadGameData(const std::string& uri) override
+    virtual GameDataHandle LoadGameData(const std::string& uri) const override
     {
-        auto it = mGameDataBufferCache.find(uri);
+        const auto& filename = ResolveURI(uri);
+        auto it = mGameDataBufferCache.find(filename);
         if (it != mGameDataBufferCache.end())
             return it->second;
+
         std::vector<char> buffer;
-        if (!LoadFileBuffer(ResolveURI(uri), &buffer))
+        if (!LoadFileBuffer(filename, &buffer))
             return nullptr;
+
         auto buff = std::make_shared<GameDataFileBuffer>(uri, std::move(buffer));
-        mGameDataBufferCache[uri] = buff;
+        mGameDataBufferCache[filename] = buff;
+        return buff;
+    }
+    virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    {
+        auto it = mGameDataBufferCache.find(filename);
+        if (it != mGameDataBufferCache.end())
+            return it->second;
+
+        std::vector<char> buffer;
+        if (!LoadFileBuffer(filename, &buffer))
+            return nullptr;
+
+        auto buff = std::make_shared<GameDataFileBuffer>(filename, std::move(buffer));
+        mGameDataBufferCache[filename] = buff;
         return buff;
     }
 
@@ -146,9 +166,9 @@ private:
     // names already.
     mutable std::unordered_map<std::string, std::string> mUriCache;
     // cache of graphics file buffers that have already been loaded.
-    std::unordered_map<std::string,
+    mutable std::unordered_map<std::string,
         std::shared_ptr<const GraphicsFileBuffer>> mGraphicsFileBufferCache;
-    std::unordered_map<std::string,
+    mutable std::unordered_map<std::string,
         std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
     // the root of the resource dir against which to resolve the resource URIs.
     std::string mResourcePath;

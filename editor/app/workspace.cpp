@@ -970,11 +970,16 @@ game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const st
     return ret;
 }
 
-game::GameDataHandle Workspace::LoadGameData(const std::string& URI)
+game::GameDataHandle Workspace::LoadGameData(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
     return GameDataFileBuffer::LoadFromFile(file);
+}
+
+game::GameDataHandle Workspace::LoadGameDataFromFile(const std::string& filename) const
+{
+    return GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
 }
 
 gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)

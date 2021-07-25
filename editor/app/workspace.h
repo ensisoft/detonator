@@ -86,7 +86,8 @@ namespace app
         virtual game::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
         virtual game::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
         // game::GameDataLoader implementation.
-        virtual game::GameDataHandle LoadGameData(const std::string& URI) override;
+        virtual game::GameDataHandle LoadGameData(const std::string& URI) const override;
+        virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override;
         // gfx::ResourceLoader implementation
         virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
 
