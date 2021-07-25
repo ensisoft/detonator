@@ -33,9 +33,17 @@ namespace audio
     public:
         using Format = audio::Format;
         virtual ~Buffer() = default;
+        // Get the PCM audio format of the buffer.
+        // The format is only valid when the buffer contains PCM data.
+        // Other times the format will be NotSet.
         virtual Format GetFormat() const = 0;
+        // Get the read pointer for the contents of the buffer.
         virtual const void* GetPtr() const = 0;
+        // Get the write pointer for the buffer contents. It's possible
+        // that this would be a nullptr when the buffer doesn't support
+        // writing into.
         virtual void* GetPtr() = 0;
+        // Get the size of the buffer in bytes for both reading and writing.
         virtual size_t GetByteSize() const = 0;
     private:
 

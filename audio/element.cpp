@@ -786,6 +786,100 @@ bool FileSource::IsSourceDone() const
     return mFramesRead == mDecoder->GetNumFrames();
 }
 
+BufferSource::BufferSource(const std::string& name, std::unique_ptr<Buffer> buffer,
+                 Format format, SampleType type)
+  : mName(name)
+  , mId(base::RandomString(10))
+  , mInputFormat(format)
+  , mBuffer(std::move(buffer))
+  , mPort("out")
+{
+    mOutputFormat.sample_type = type;
+}
+
+BufferSource::BufferSource(BufferSource&& other)
+  : mName(other.mName)
+  , mId(other.mId)
+  , mInputFormat(other.mInputFormat)
+  , mBuffer(std::move(other.mBuffer))
+  , mDecoder(std::move(other.mDecoder))
+  , mPort(std::move(other.mPort))
+  , mOutputFormat(std::move(other.mOutputFormat))
+  , mFramesRead(other.mFramesRead)
+{}
+
+BufferSource::~BufferSource() = default;
+
+bool BufferSource::Prepare()
+{
+    std::unique_ptr<Decoder> decoder;
+    if (mInputFormat == Format::Mp3)
+    {
+        auto stream = std::make_unique<Mpg123Buffer>(mName, std::move(mBuffer));
+        auto dec = std::make_unique<Mpg123Decoder>();
+        if (!dec->Open(std::move(stream), mOutputFormat.sample_type))
+            return false;
+        decoder = std::move(dec);
+    }
+    else
+    {
+        auto stream = std::make_unique<SndFileBuffer>(mName, std::move(mBuffer));
+        auto dec = std::make_unique<SndFileDecoder>();
+        if (!dec->Open(std::move(stream)))
+            return false;
+        decoder = std::move(dec);
+    }
+    audio::Format format;
+    format.channel_count = decoder->GetNumChannels();
+    format.sample_rate   = decoder->GetSampleRate();
+    format.sample_type   = mOutputFormat.sample_type;
+    DEBUG("Opened buffer '%1' for reading (%2 frames) %3.", mName, decoder->GetNumFrames(), format);
+    mDecoder = std::move(decoder);
+    mPort.SetFormat(format);
+    mOutputFormat = format;
+    return true;
+}
+void BufferSource::Process(EventQueue& events, unsigned milliseconds)
+{
+    const auto frame_size = GetFrameSizeInBytes(mOutputFormat);
+    const auto frames_per_ms = mOutputFormat.sample_rate / 1000;
+    const auto frames_wanted = (unsigned)(frames_per_ms * milliseconds);
+    const auto frames_available = mDecoder->GetNumFrames();
+    const auto frames = std::min(frames_available - mFramesRead, frames_wanted);
+
+    auto buffer = std::make_shared<VectorBuffer>();
+    buffer->SetFormat(mOutputFormat);
+    buffer->AllocateBytes(frame_size * frames);
+    void* buff = buffer->GetPtr();
+
+    size_t ret = 0;
+    if (mOutputFormat.sample_type == SampleType::Float32)
+        ret = mDecoder->ReadFrames((float*)buff, frames);
+    else if (mOutputFormat.sample_type == SampleType::Int32)
+        ret = mDecoder->ReadFrames((int*)buff, frames);
+    else if (mOutputFormat.sample_type == SampleType::Int16)
+        ret = mDecoder->ReadFrames((short*)buff, frames);
+
+    if (ret != frames)
+        WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames);
+
+    mFramesRead += ret;
+    if (mFramesRead == frames_available)
+        DEBUG("File source is done. %1 frames read.", mFramesRead);
+
+    mPort.PushBuffer(buffer);
+}
+
+void BufferSource::Shutdown()
+{
+    mDecoder.reset();
+}
+
+bool BufferSource::IsSourceDone() const
+{
+    return mFramesRead == mDecoder->GetNumFrames();
+}
+
 MixerSource::MixerSource(const std::string& name, const Format& format)
   : mName(name)
   , mId(base::RandomString(10))
