@@ -261,11 +261,15 @@ public:
         DEBUG("URI '%1' => '%2'", URI, file);
         return app::GraphicsFileBuffer::LoadFromFile(file);
     }
-    virtual game::GameDataHandle LoadGameData(const std::string& URI) override
+    virtual game::GameDataHandle LoadGameData(const std::string& URI) const override
     {
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
         return app::GameDataFileBuffer::LoadFromFile(file);
+    }
+    virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    {
+        return app::GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
     }
 private:
     QString ResolveURI(const std::string& URI) const

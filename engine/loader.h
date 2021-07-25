@@ -40,7 +40,11 @@ namespace game
     {
     public:
         virtual ~GameDataLoader() = default;
-        virtual GameDataHandle LoadGameData(const std::string& uri) = 0;
+        // Load game data based on a URI. The URI undergoes a resolution
+        // and the content may be loaded from a resource pack etc.
+        virtual GameDataHandle LoadGameData(const std::string& uri) const = 0;
+        // Load game data from a file on the file system.
+        virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const = 0;
     };
 
     // Low level resource loader for loading gfx resource
