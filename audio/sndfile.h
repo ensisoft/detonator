@@ -23,6 +23,7 @@
 #include <fstream>
 
 #include "audio/decoder.h"
+#include "audio/buffer.h"
 
 // todo: maybe move these wrappers out of the audio namespace?
 
@@ -94,13 +95,7 @@ namespace audio
     class SndFileBuffer : public SndFileIODevice
     {
     public:
-        SndFileBuffer(const std::string& name,
-                      const std::vector<std::uint8_t>& buffer)
-            : mName(name)
-            , mBuffer(buffer)
-        {}
-        SndFileBuffer(const std::string& name,
-                      std::vector<std::uint8_t>&& buffer)
+        SndFileBuffer(const std::string& name, std::unique_ptr<const Buffer> buffer)
             : mName(name)
             , mBuffer(std::move(buffer))
         {}
@@ -112,7 +107,7 @@ namespace audio
         { return mName; }
     private:
         const std::string mName;
-        const std::vector<std::uint8_t> mBuffer;
+        std::unique_ptr<const Buffer> mBuffer;
         std::int64_t mOffset = 0;
     };
 

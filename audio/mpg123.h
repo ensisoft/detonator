@@ -25,6 +25,7 @@
 
 #include "audio/decoder.h"
 #include "audio/format.h"
+#include "audio/buffer.h"
 
 typedef struct mpg123_handle_struct mpg123_handle;
 
@@ -63,13 +64,7 @@ namespace audio
     class Mpg123Buffer : public Mpg123IODevice
     {
     public:
-        Mpg123Buffer(const std::string& name,
-                     const std::vector<std::uint8_t>& buffer)
-          : mName(name)
-          , mBuffer(buffer)
-        {}
-        Mpg123Buffer(const std::string& name,
-                     std::vector<std::uint8_t>&& buffer)
+        Mpg123Buffer(const std::string& name, std::unique_ptr<const Buffer> buffer)
           : mName(name)
           , mBuffer(std::move(buffer))
         {}
@@ -79,7 +74,7 @@ namespace audio
         { return mName; }
     private:
         const std::string mName;
-        const std::vector<uint8_t> mBuffer;
+        std::unique_ptr<const Buffer> mBuffer;
         off_t mOffset = 0;
     };
 

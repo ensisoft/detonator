@@ -596,6 +596,44 @@ namespace audio
         unsigned mFramesRead = 0;
     };
 
+    class BufferSource : public Element
+    {
+    public:
+        enum class Format {
+            Mp3, Ogg, Flac, Wav
+        };
+        BufferSource(const std::string& name, std::unique_ptr<Buffer> buffer,
+                     Format format, SampleType type = SampleType::Int16);
+        BufferSource(BufferSource&& other);
+       ~BufferSource();
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual bool Prepare() override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual void Shutdown() override;
+        virtual bool IsSourceDone() const override;
+        virtual bool IsSource() const override
+        { return true; }
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mPort;
+            BUG("No such output port.");
+        }
+    private:
+        const std::string mName;
+        const std::string mId;
+        const Format mInputFormat;
+        std::unique_ptr<Buffer> mBuffer;
+        std::unique_ptr<Decoder> mDecoder;
+        SingleSlotPort mPort;
+        audio::Format mOutputFormat;
+        unsigned mFramesRead = 0;
+    };
+
     // MixerSource wraps multiple (source) elements into a single
     // source. Each source to be added must have the same format
     // that has been set in the mixer. Once the sources have been
