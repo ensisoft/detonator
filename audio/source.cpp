@@ -112,7 +112,10 @@ bool AudioFile::Open()
         auto stream = std::make_unique<SndFileInputStream>();
         if (!stream->OpenFile(mFilename))
             return false;
-        decoder = std::make_unique<SndFileDecoder>(std::move(stream));
+        auto dec = std::make_unique<SndFileDecoder>();
+        if (!dec->Open(std::move(stream)))
+            return false;
+        decoder = std::move(dec);
     }
     else
     {

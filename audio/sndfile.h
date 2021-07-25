@@ -38,13 +38,15 @@ namespace audio
         virtual std::int64_t Seek(std::int64_t offset, int whence) = 0;
         virtual std::int64_t Read(void* ptr, std::int64_t count) = 0;
         virtual std::int64_t Tell() const = 0;
+        virtual std::string GetName() const = 0;
     private:
     };
 
     class SndFileDecoder : public Decoder
     {
     public:
-        SndFileDecoder(std::unique_ptr<SndFileIODevice> device);
+        SndFileDecoder() = default;
+        SndFileDecoder(std::unique_ptr<SndFileIODevice> io);
        ~SndFileDecoder();
         virtual unsigned GetSampleRate() const override
         { return mSampleRate; }
@@ -55,6 +57,10 @@ namespace audio
         virtual size_t ReadFrames(float* ptr, size_t frames) override;
         virtual size_t ReadFrames(short* ptr, size_t frames) override;
         virtual size_t ReadFrames(int* ptr, size_t frames) override;
+
+        // Try to open the decoder based on the given IO device.
+        // Returns true if successful. Errors are logged.
+        bool Open(std::unique_ptr<SndFileIODevice> io);
     private:
         std::unique_ptr<SndFileIODevice> mDevice;
         SNDFILE* mFile = nullptr;
@@ -66,37 +72,47 @@ namespace audio
     class SndFileInputStream : public SndFileIODevice
     {
     public:
-         SndFileInputStream(const std::string& filename);
-         SndFileInputStream() = default;
-        ~SndFileInputStream();
-
-        bool OpenFile(const std::string& filename);
-
+        SndFileInputStream(const std::string& filename);
+        SndFileInputStream() = default;
         virtual std::int64_t GetLength() const override;
         virtual std::int64_t Seek(std::int64_t offset, int whence) override;
         virtual std::int64_t Read(void* ptr, std::int64_t count) override;
         virtual std::int64_t Tell() const override;
+        virtual std::string GetName() const override
+        { return mFilename; }
+
+        // Try to open the given file for input audio streaming.
+        // Returns true if successful. Errors are logged.
+        bool OpenFile(const std::string& filename);
     private:
         mutable std::ifstream mStream;
         std::string mFilename;
         std::int64_t mStreamSize = 0;
     };
 
+    // A named immutable audio buffer.
     class SndFileBuffer : public SndFileIODevice
     {
     public:
-        SndFileBuffer(const std::vector<std::uint8_t>& buffer)
-            : mBuffer(buffer)
+        SndFileBuffer(const std::string& name,
+                      const std::vector<std::uint8_t>& buffer)
+            : mName(name)
+            , mBuffer(buffer)
         {}
-        SndFileBuffer(std::vector<std::uint8_t>&& buffer)
-            : mBuffer(std::move(buffer))
+        SndFileBuffer(const std::string& name,
+                      std::vector<std::uint8_t>&& buffer)
+            : mName(name)
+            , mBuffer(std::move(buffer))
         {}
         virtual std::int64_t GetLength() const override;
         virtual std::int64_t Seek(std::int64_t offset, int whence) override;
         virtual std::int64_t Read(void* ptr, std::int64_t count) override;
         virtual std::int64_t Tell() const override;
+        virtual std::string GetName() const override
+        { return mName; }
     private:
-        std::vector<std::uint8_t> mBuffer;
+        const std::string mName;
+        const std::vector<std::uint8_t> mBuffer;
         std::int64_t mOffset = 0;
     };
 

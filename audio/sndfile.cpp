@@ -44,29 +44,10 @@ struct Trampoline {
 namespace audio
 {
 
-SndFileDecoder::SndFileDecoder(std::unique_ptr<SndFileIODevice> device)
+SndFileDecoder::SndFileDecoder(std::unique_ptr<SndFileIODevice> io)
 {
-    SF_VIRTUAL_IO io = {};
-    io.get_filelen = &Trampoline::GetLength;
-    io.seek        = &Trampoline::Seek;
-    io.read        = &Trampoline::Read;
-    io.tell        = &Trampoline::Tell;
-    SF_INFO info = {};
-    mFile = sf_open_virtual(&io, SFM_READ, &info, (void*)device.get());
-    if (!mFile)
-        throw std::runtime_error("sf_open_virtual failed.");
-    // When reading floating point wavs with the integer read functions
-    // this flag needs to be set for proper conversion.
-    // see Note2 @ http://www.mega-nerd.com/libsndfile/api.html#readf
-    const auto cmd = SF_TRUE;
-    sf_command(mFile, SFC_SET_SCALE_FLOAT_INT_READ, (void*)&cmd, sizeof(cmd));
-
-    mSampleRate = info.samplerate;
-    mChannels   = info.channels;
-    mFrames     = info.frames;
-    mDevice = std::move(device);
-    DEBUG("SndFileDecoder stream has %1 PCM frames in %2 channel(s) @ %3 Hz.",
-          mFrames, mChannels, mSampleRate);
+    if (!Open(std::move(io)))
+        throw std::runtime_error("SndFileDecoder open failed.");
 }
 
 SndFileDecoder::~SndFileDecoder()
@@ -82,16 +63,42 @@ size_t SndFileDecoder::ReadFrames(short* ptr, size_t frames)
 size_t SndFileDecoder::ReadFrames(int* ptr, size_t frames)
 { return sf_readf_int(mFile, ptr, frames); }
 
+bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
+{
+    ASSERT(mDevice == nullptr);
+    ASSERT(mFile   == nullptr);
+
+    SF_VIRTUAL_IO virtual_io = {};
+    virtual_io.get_filelen = &Trampoline::GetLength;
+    virtual_io.seek        = &Trampoline::Seek;
+    virtual_io.read        = &Trampoline::Read;
+    virtual_io.tell        = &Trampoline::Tell;
+    SF_INFO info = {};
+    mFile = sf_open_virtual(&virtual_io, SFM_READ, &info, (void*)io.get());
+    if (!mFile)
+    {
+        ERROR("SndFile decoder open on '%1' failed.", io->GetName());
+        return false;
+    }
+    // When reading floating point wavs with the integer read functions
+    // this flag needs to be set for proper conversion.
+    // see Note2 @ http://www.mega-nerd.com/libsndfile/api.html#readf
+    const auto cmd = SF_TRUE;
+    sf_command(mFile, SFC_SET_SCALE_FLOAT_INT_READ, (void*)&cmd, sizeof(cmd));
+
+    mSampleRate = info.samplerate;
+    mChannels   = info.channels;
+    mFrames     = info.frames;
+    mDevice     = std::move(io);
+    DEBUG("SndFileDecoder stream '%1' has %2 PCM frames in %3 channel(s) @ %4 Hz.",
+          mDevice->GetName(), mFrames, mChannels, mSampleRate);
+    return true;
+}
+
 SndFileInputStream::SndFileInputStream(const std::string& filename)
 {
     if (!OpenFile(filename))
         throw std::runtime_error("Failed to open: " + filename);
-}
-
-SndFileInputStream::~SndFileInputStream()
-{
-    if (mStream.is_open())
-        mStream.close();
 }
 
 bool SndFileInputStream::OpenFile(const std::string& filename)
