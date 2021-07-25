@@ -709,8 +709,11 @@ bool FileSource::Prepare()
     const auto& upper = base::ToUpperUtf8(mFile);
     if (base::EndsWith(upper, ".MP3"))
     {
+        auto stream = std::make_unique<Mpg123FileInputStream>();
+        if (!stream->OpenFile(mFile))
+            return false;
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(mFile, mFormat.sample_type))
+        if (!dec->Open(std::move(stream), mFormat.sample_type))
             return false;
         decoder = std::move(dec);
     }

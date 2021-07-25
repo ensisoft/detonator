@@ -20,6 +20,8 @@
 
 #include <string>
 #include <memory>
+#include <cstddef>
+#include <fstream>
 
 #include "audio/decoder.h"
 #include "audio/format.h"
@@ -28,12 +30,64 @@ typedef struct mpg123_handle_struct mpg123_handle;
 
 namespace audio
 {
-    // todo: provide IO abstractions similar to sndfile here.
+    class Mpg123IODevice
+    {
+    public:
+        virtual ~Mpg123IODevice() = default;
+        // The mpg123 IO abstraction functions are modeled after the
+        // Posix read and lseek.
+        virtual long Read(void* buffer,  size_t bytes) = 0;
+        virtual off_t Seek(off_t offset, int whence) = 0;
+        virtual std::string GetName() const = 0;
+    private:
+    };
+
+    class Mpg123FileInputStream : public Mpg123IODevice
+    {
+    public:
+        Mpg123FileInputStream(const std::string& filename);
+        Mpg123FileInputStream() = default;
+
+        bool OpenFile(const std::string& filename);
+
+        virtual long Read(void* buffer,  size_t bytes) override;
+        virtual off_t Seek(off_t where, int whence) override;
+        virtual std::string GetName() const override
+        { return mFilename; }
+    private:
+        mutable std::ifstream mStream;
+        std::string mFilename;
+        std::int64_t mStreamSize;
+    };
+
+    class Mpg123Buffer : public Mpg123IODevice
+    {
+    public:
+        Mpg123Buffer(const std::string& name,
+                     const std::vector<std::uint8_t>& buffer)
+          : mName(name)
+          , mBuffer(buffer)
+        {}
+        Mpg123Buffer(const std::string& name,
+                     std::vector<std::uint8_t>&& buffer)
+          : mName(name)
+          , mBuffer(std::move(buffer))
+        {}
+        virtual long Read(void* buffer,  size_t bytes) override;
+        virtual off_t Seek(off_t offset, int whence) override;
+        virtual std::string GetName() const override
+        { return mName; }
+    private:
+        const std::string mName;
+        const std::vector<uint8_t> mBuffer;
+        off_t mOffset = 0;
+    };
 
     class Mpg123Decoder : public Decoder
     {
     public:
         Mpg123Decoder();
+        Mpg123Decoder(std::unique_ptr<Mpg123IODevice> io, SampleType format = SampleType::Int16);
        ~Mpg123Decoder();
         virtual unsigned GetSampleRate() const override;
         virtual unsigned GetNumChannels() const override;
@@ -41,13 +95,15 @@ namespace audio
         virtual size_t ReadFrames(float* ptr, size_t frames) override;
         virtual size_t ReadFrames(short* ptr, size_t frames) override;
         virtual size_t ReadFrames(int* ptr, size_t frames) override;
-        bool Open(const std::string& file, SampleType format = SampleType::Int16);
+
+        bool Open(std::unique_ptr<Mpg123IODevice> io, SampleType format = SampleType::Int16);
     private:
         template<typename T>
         size_t ReadFrames(T* ptr, size_t frames);
     private:
         struct Library;
         std::shared_ptr<Library> mLibrary;
+        std::unique_ptr<Mpg123IODevice> mDevice;
         mpg123_handle* mHandle = nullptr;
         unsigned mSampleRate = 0;
         unsigned mFrameCount = 0;

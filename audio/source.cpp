@@ -97,8 +97,11 @@ bool AudioFile::Open()
         else if (mFormat == Format::Int16)
             type = SampleType::Int16;
         else BUG("Unsupported format.");
+        auto stream = std::make_unique<Mpg123FileInputStream>();
+        if (!stream->OpenFile(mFilename))
+            return false;
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(mFilename, type))
+        if (!dec->Open(std::move(stream), type))
             return false;
         decoder = std::move(dec);
     }
