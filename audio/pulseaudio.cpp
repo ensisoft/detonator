@@ -58,12 +58,13 @@ public:
         main_ = pa_mainloop_get_api(loop_);
         context_ = pa_context_new(main_, appname);
 
-        pa_context_set_state_callback(context_, state, this);
+        pa_context_set_state_callback(context_, state_callback, this);
         pa_context_connect(context_, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr);
     }
 
    ~PulseAudio()
     {
+        pa_context_set_state_callback(context_, nullptr, nullptr);
         pa_context_disconnect(context_);
         pa_context_unref(context_);
         pa_mainloop_free(loop_);
@@ -157,8 +158,10 @@ private:
 
        ~PlaybackStream()
         {
-            pa_stream_disconnect(stream_);
-            pa_stream_unref(stream_);
+            if (stream_)
+            {
+                Cancel();
+            }
         }
 
         virtual Stream::State GetState() const override
@@ -195,8 +198,13 @@ private:
 
         virtual void Cancel() override
         {
-            // anything that needs to be done?
-            DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
+            pa_stream_set_state_callback(stream_, nullptr, nullptr);
+            pa_stream_set_write_callback(stream_, nullptr, nullptr);
+            pa_stream_disconnect(stream_);
+            pa_stream_unref(stream_);
+            stream_ = nullptr;
+            if (source_)
+                DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
         }
 
         virtual void Update(float dt) override
@@ -294,6 +302,7 @@ private:
 
         static void state_callback(pa_stream* stream, void* user)
         {
+            DEBUG("Pulseaudio stream state callback %1", stream);
             auto* this_ = static_cast<PlaybackStream*>(user);
             switch (pa_stream_get_state(stream))
             {
@@ -331,7 +340,7 @@ private:
     private:
     };
 private:
-    static void state(pa_context* context, void* user)
+    static void state_callback(pa_context* context, void* user)
     {
         auto* this_ = static_cast<PulseAudio*>(user);
         switch (pa_context_get_state(context))
