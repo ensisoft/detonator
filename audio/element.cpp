@@ -30,6 +30,7 @@
 #include "audio/element.h"
 #include "audio/sndfile.h"
 #include "audio/mpg123.h"
+#include "audio/loader.h"
 
 namespace {
 using namespace audio;
@@ -159,7 +160,7 @@ StereoMaker::StereoMaker(const std::string& name, Channel which)
   , mIn("in")
 {}
 
-bool StereoMaker::Prepare()
+bool StereoMaker::Prepare(const Loader& loader)
 {
     auto format = mIn.GetFormat();
     format.channel_count = 2;
@@ -223,7 +224,7 @@ StereoJoiner::StereoJoiner(const std::string& name)
   , mInRight("right")
 {}
 
-bool StereoJoiner::Prepare()
+bool StereoJoiner::Prepare(const Loader& loader)
 {
     const auto left  = mInLeft.GetFormat();
     const auto right = mInRight.GetFormat();
@@ -306,7 +307,7 @@ StereoSplitter::StereoSplitter(const std::string& name)
   , mOutRight("right")
 {}
 
-bool StereoSplitter::Prepare()
+bool StereoSplitter::Prepare(const Loader& loader)
 {
     const auto format = mIn.GetFormat();
     if (format.channel_count == 2)
@@ -386,7 +387,7 @@ Mixer::Mixer(const std::string& name, unsigned int num_srcs)
     }
 }
 
-bool Mixer::Prepare()
+bool Mixer::Prepare(const Loader& loader)
 {
     // all input ports should have the same format,
     // otherwise no deal! the user can use a re-sampler
@@ -452,7 +453,7 @@ Fade::Fade(const std::string& name, float duration, Effect effect)
     SetFade(effect, duration);
 }
 
-bool Fade::Prepare()
+bool Fade::Prepare(const Loader& loader)
 {
     const auto& format = mIn.GetFormat();
     mSampleRate = format.sample_rate;
@@ -534,7 +535,7 @@ Gain::Gain(const std::string& name, float gain)
   , mGain(gain)
 {}
 
-bool Gain::Prepare()
+bool Gain::Prepare(const Loader& loader)
 {
     mOut.SetFormat(mIn.GetFormat());
     DEBUG("Gain '%1' output format set to %2.", mName, mIn.GetFormat());
@@ -603,7 +604,7 @@ Resampler::~Resampler()
         ::src_delete(mState);
 }
 
-bool Resampler::Prepare()
+bool Resampler::Prepare(const Loader& loader)
 {
     const auto& in = mIn.GetFormat();
     if (in.sample_type != SampleType::Float32)
@@ -703,17 +704,20 @@ FileSource::FileSource(FileSource&& other)
 
 FileSource::~FileSource() = default;
 
-bool FileSource::Prepare()
+bool FileSource::Prepare(const Loader& loader)
 {
+    auto stream = loader.OpenStream(mFile);
+    if (!stream.is_open())
+        return false;
+
     std::unique_ptr<Decoder> decoder;
     const auto& upper = base::ToUpperUtf8(mFile);
     if (base::EndsWith(upper, ".MP3"))
     {
-        auto stream = std::make_unique<Mpg123FileInputStream>();
-        if (!stream->OpenFile(mFile))
-            return false;
+        auto io = std::make_unique<Mpg123FileInputStream>();
+        io->UseStream(mFile, std::move(stream));
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(stream), mFormat.sample_type))
+        if (!dec->Open(std::move(io), mFormat.sample_type))
             return false;
         decoder = std::move(dec);
     }
@@ -721,11 +725,10 @@ bool FileSource::Prepare()
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto stream = std::make_unique<SndFileInputStream>();
-        if (!stream->OpenFile(mFile))
-            return false;
+        auto io = std::make_unique<SndFileInputStream>();
+        io->UseStream(mFile, std::move(stream));
         auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(stream)))
+        if (!dec->Open(std::move(io)))
             return false;
         decoder = std::move(dec);
     }
@@ -810,7 +813,7 @@ BufferSource::BufferSource(BufferSource&& other)
 
 BufferSource::~BufferSource() = default;
 
-bool BufferSource::Prepare()
+bool BufferSource::Prepare(const Loader& loader)
 {
     std::unique_ptr<Decoder> decoder;
     if (mInputFormat == Format::Mp3)
@@ -954,7 +957,7 @@ bool MixerSource::IsSourceDone() const
     return true;
 }
 
-bool MixerSource::Prepare()
+bool MixerSource::Prepare(const Loader& loader)
 {
     DEBUG("Prepared MixerSource '%1' with out format '%2'.", mName, mFormat);
     return true;
@@ -1081,7 +1084,7 @@ ZeroSource::ZeroSource(const std::string& name, const Format& format)
 {
     mOut.SetFormat(format);
 }
-bool ZeroSource::Prepare()
+bool ZeroSource::Prepare(const Loader& loader)
 {
     DEBUG("Prepared ZeroSource '%1' with out format '%2'.", mName, mFormat);
     return true;
@@ -1127,7 +1130,7 @@ SineSource::SineSource(const std::string& name, unsigned int frequency, unsigned
     mPort.SetFormat(mFormat);
 }
 
-bool SineSource::Prepare()
+bool SineSource::Prepare(const Loader& loader)
 {
     mPort.SetFormat(mFormat);
     DEBUG("Sine '%1' output format set to %2", mName, mFormat);

@@ -30,7 +30,6 @@
 
 namespace game
 {
-    class ClassLibrary;
 
     // this is in the namespace scope since it might move to
     // a separate file since scripting interface requires this.
@@ -51,7 +50,7 @@ namespace game
     class AudioEngine
     {
     public:
-        AudioEngine(const std::string& name, const ClassLibrary* loader = nullptr);
+        AudioEngine(const std::string& name, const audio::Loader* loader);
        ~AudioEngine();
 
         // Possible audio effects
@@ -112,7 +111,8 @@ namespace game
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events);
         void OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events);
     private:
-        const ClassLibrary* mLoader = nullptr;
+        class AudioBuffer;
+        const audio::Loader* mLoader = nullptr;
         audio::Format mFormat;
         // A pending audio command to be sent to the audio player.
         struct Command {

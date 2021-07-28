@@ -85,6 +85,8 @@ namespace audio
         // Try to open the given file for input audio streaming.
         // Returns true if successful. Errors are logged.
         bool OpenFile(const std::string& filename);
+
+        void UseStream(const std::string& name, std::ifstream&& stream);
     private:
         mutable std::ifstream mStream;
         std::string mFilename;

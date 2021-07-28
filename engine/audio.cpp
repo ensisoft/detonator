@@ -23,11 +23,40 @@
 #include "audio/element.h"
 #include "audio/graph.h"
 #include "audio/player.h"
+#include "audio/buffer.h"
 #include "engine/audio.h"
+#include "engine/loader.h"
+#include "engine/data.h"
 
 namespace game
 {
-AudioEngine::AudioEngine(const std::string& name, const ClassLibrary* loader)
+
+// adapt game data interface to audio buffer
+class AudioEngine::AudioBuffer : public audio::Buffer
+{
+public:
+    AudioBuffer(GameDataHandle audio): mAudioData(audio)
+    {}
+    virtual Format GetFormat() const override
+    {
+        audio::Format format;
+        return format;
+    }
+    virtual const void* GetPtr() const override
+    { return mAudioData->GetData(); }
+
+    virtual void* GetPtr() override
+    {
+        BUG("Unexpected GetPtr call.");
+        return nullptr;
+    }
+    virtual size_t GetByteSize() const override
+    { return mAudioData->GetSize(); }
+private:
+    GameDataHandle mAudioData;
+};
+
+AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
   : mLoader(loader)
 {
     mFormat.sample_rate   = 44100;
@@ -40,7 +69,7 @@ AudioEngine::AudioEngine(const std::string& name, const ClassLibrary* loader)
     effect_mixer->AddSource(audio::ZeroSource("zero", mFormat));
     ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*effect_graph)->LinkGraph("gain", "out"));
-    ASSERT(effect_graph->Prepare());
+    ASSERT(effect_graph->Prepare(*mLoader));
 
     auto music_graph = std::make_unique<audio::AudioGraph>(name + " Music");
     auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
@@ -48,7 +77,7 @@ AudioEngine::AudioEngine(const std::string& name, const ClassLibrary* loader)
     music_mixer->AddSource(audio::ZeroSource("zero", mFormat));
     ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*music_graph)->LinkGraph("gain", "out"));
-    ASSERT(music_graph->Prepare());
+    ASSERT(music_graph->Prepare(*mLoader));
 
     mPlayer = std::make_unique<audio::Player>(audio::Device::Create(name.c_str()));
     mEffectGraphId = mPlayer->Play(std::move(effect_graph), false /* looping */);
@@ -75,17 +104,12 @@ bool AudioEngine::AddMusicTrack(const std::string& name, const std::string& uri)
     ASSERT(music->LinkElements(name + "/fader",  "out", name + "/resampler", "in"));
     ASSERT(music->LinkGraph(name + "/resampler", "out"));
 
-    if (!music->Prepare())
-    {
-        ERROR("Failed to prepare music audio graph.");
-        return false;
-    }
+    if (!music->Prepare(*mLoader))
+        ERROR_RETURN(false, "Failed to prepare music audio graph.");
+
     const auto& port = music->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-    {
-        ERROR("Music '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
-        return false;
-    }
+        ERROR_RETURN(false, "Music '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
 
     audio::MixerSource::AddSourceCmd cmd;
     cmd.src    = std::move(music);
@@ -168,25 +192,20 @@ bool AudioEngine::PlaySoundEffect(const std::string& uri, std::chrono::milliseco
     const auto paused = ms.count() != 0;
 
     auto effect = std::make_unique<audio::Graph>(name);
-    effect->AddElement(audio::FileSource("file", uri, audio::SampleType::Float32));
+    effect->AddElement(audio::FileSource(uri, uri, audio::SampleType::Float32));
     effect->AddElement(audio::StereoMaker("stereo"));
     effect->AddElement(audio::Resampler("resampler", 44100));
 
-    ASSERT(effect->LinkElements("file", "out", "stereo", "in"));
+    ASSERT(effect->LinkElements(uri, "out", "stereo", "in"));
     ASSERT(effect->LinkElements("stereo", "out", "resampler", "in"));
     ASSERT(effect->LinkGraph("resampler", "out"));
 
-    if (!effect->Prepare())
-    {
-        ERROR("Failed to prepare effect audio graph.");
-        return false;
-    }
+    if (!effect->Prepare(*mLoader))
+        ERROR_RETURN(false, "Failed to prepare effect audio graph.");
+
     const auto& port = effect->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-    {
-        ERROR("Effect '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
-        return false;
-    }
+        ERROR_RETURN(false, "Effect '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
 
     audio::MixerSource::AddSourceCmd cmd;
     cmd.src    = std::move(effect);

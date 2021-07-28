@@ -35,6 +35,7 @@ typedef struct SRC_STATE_tag SRC_STATE;
 namespace audio
 {
     class Decoder;
+    class Loader;
 
     using BufferHandle = std::shared_ptr<Buffer>;
 
@@ -161,7 +162,8 @@ namespace audio
         virtual bool IsSource() const { return false; }
         // Prepare the element for processing. Returns true if
         // successful or false on error and error details are logged.
-        virtual bool Prepare() { return true; }
+        virtual bool Prepare(const Loader& loader)
+        { return true; }
         // Request the element to process 'milliseconds' worth of
         // audio data. Any non-source input will likely ignore the
         // milliseconds parameter and process data in whole buffers
@@ -249,7 +251,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -287,7 +289,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -324,7 +326,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -366,7 +368,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override
+        virtual bool Prepare(const Loader&) override
         { return true; }
         virtual void Process(EventQueue& events, unsigned milliseconds) override
         {
@@ -398,7 +400,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -444,7 +446,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -496,7 +498,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -536,7 +538,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
 
         virtual unsigned GetNumOutputPorts() const override
@@ -573,7 +575,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual bool IsSourceDone() const override;
@@ -610,7 +612,7 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual bool IsSourceDone() const override;
@@ -707,7 +709,7 @@ namespace audio
         { return mName; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override;
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Update(float dt) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -743,7 +745,7 @@ namespace audio
         { return mName; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override { return false; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -781,7 +783,7 @@ namespace audio
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
         { return mPort; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         void SetSampleType(SampleType type)
         { mFormat.sample_type = type; }

@@ -18,25 +18,21 @@
 
 #include "config.h"
 
+#include <fstream>
+
 namespace audio
 {
-    class Loader;
-    class Player;
-    class Device;
-    class Port;
-    class Decoder;
-    class Element;
-    class StereoJoiner;
-    class StereoSplitter;
-    class Null;
-    class Mixer;
-    class Gain;
-    class Resampler;
-    class FileSource;
-    class MixerSource;
-    class Graph;
-#ifdef AUDIO_ENABLE_TEST_SOUND
-    class SineSource;
-#endif
+    // Interface for accessing the audio data.
+    class Loader
+    {
+    public:
+        virtual ~Loader() = default;
+        // TODO: consider getting rid of the std::ifstream and providing
+        // some other abstraction.
+        // Open a stream to the given audio file. Should return a valid
+        // open stream object when successful.
+        virtual std::ifstream OpenStream(const std::string& file) const = 0;
+    private:
+    };
 
 } // namespace

@@ -28,6 +28,7 @@
 #include "audio/player.h"
 #include "audio/source.h"
 #include "audio/element.h"
+#include "audio/loader.h"
 #include "audio/graph.h"
 
 // audio test application
@@ -104,6 +105,14 @@ int main(int argc, char* argv[])
 
     if (graph)
     {
+        class Loader : public audio::Loader {
+        public:
+            virtual std::ifstream OpenStream(const std::string& file) const override
+            { return base::OpenBinaryInputStream(file); }
+        private:
+        };
+        Loader loader;
+
         auto graph = std::make_unique<audio::AudioGraph>("graph");
         auto* sine     = (*graph)->AddElement(audio::SineSource("sine", 500, 5000));
         auto* file     = (*graph)->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
@@ -120,7 +129,7 @@ int main(int argc, char* argv[])
         ASSERT((*graph)->LinkElements("mixer", "out", "gain", "in"));
         ASSERT((*graph)->LinkElements("gain", "out", "resamp", "in"));
         ASSERT((*graph)->LinkGraph("resamp", "out"));
-        ASSERT(graph->Prepare());
+        ASSERT(graph->Prepare(loader));
 
         const auto& desc = (*graph)->Describe();
         for (const auto& str : desc)

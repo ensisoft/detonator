@@ -273,7 +273,7 @@ bool Graph::HasElement(Element* element) const
     return false;
 }
 
-bool Graph::Prepare()
+bool Graph::Prepare(const Loader& loader)
 {
     // This is the so called Kahn's algorithm
     // https://en.wikipedia.org/wiki/Topological_sorting
@@ -316,7 +316,7 @@ bool Graph::Prepare()
     {
         Element* src = order[i];
         DEBUG("Audio graph '%1' preparing audio element '%2'", mName, src->GetName());
-        if (!src->Prepare())
+        if (!src->Prepare(loader))
         {
             ERROR("Audio graph '%1' element '%2' failed to prepare.", mName, src->GetName());
             return false;
@@ -468,9 +468,9 @@ AudioGraph::AudioGraph(AudioGraph&& other)
   , mGraph(std::move(other.mGraph))
 {}
 
-bool AudioGraph::Prepare()
+bool AudioGraph::Prepare(const Loader& loader)
 {
-    if (!mGraph.Prepare())
+    if (!mGraph.Prepare(loader))
         return false;
     auto& out = mGraph.GetOutputPort(0);
     mFormat = out.GetFormat();

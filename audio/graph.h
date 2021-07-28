@@ -156,7 +156,7 @@ namespace audio
         { return true; }
         virtual bool IsSourceDone() const override
         { return mDone; }
-        virtual bool Prepare() override;
+        virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual void Update(float dt) override;
@@ -216,7 +216,7 @@ namespace audio
         // Returns true on success if all audio elements were prepared
         // successfully. After this it's possible to send the graph to
         // the audio device/player for playback.
-        bool Prepare();
+        bool Prepare(const Loader& loader);
 
         // Source implementation.
         virtual unsigned GetRateHz() const noexcept override;
