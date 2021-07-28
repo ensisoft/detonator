@@ -146,6 +146,12 @@ namespace audio
           : mFrequency(frequency)
           , mFormat(format)
         {}
+        SineGenerator(unsigned frequency, unsigned millisecs, Format format = Format::Float32)
+          : mFrequency(frequency)
+          , mFormat(format)
+          , mLimitDuration(true)
+          , mDuration(millisecs)
+        {}
         virtual unsigned GetRateHz() const noexcept
         { return 44100; }
         virtual unsigned GetNumChannels() const noexcept override
@@ -176,12 +182,19 @@ namespace audio
             return frames * frame_size;
         }
         virtual bool HasMore(std::uint64_t) const noexcept override
-        { return true; }
+        {
+            if (!mLimitDuration) return true;
+            const auto seconds = mSampleCounter / 44100.0f;
+            const auto millis  = seconds * 1000.0f;
+            return millis < mDuration;
+        }
         virtual bool Reset() noexcept override
         { return true; /* intentionally empty */ }
     private:
         const unsigned mFrequency = 0;
         const Format mFormat      = Format::Float32;
+        const bool mLimitDuration = false;
+        const unsigned mDuration  = 0;
         unsigned mSampleCounter   = 0;
     };
 #endif

@@ -24,6 +24,7 @@
 
 #include "base/test_minimal.h"
 #include "base/logging.h"
+#include "base/math.h"
 #include "audio/source.h"
 #include "audio/player.h"
 #include "audio/device.h"
@@ -181,18 +182,22 @@ void unit_test_cancel()
 {
     // cancel stream while in playback
     audio::Player player(audio::Device::Create("audio_unit_test"));
-    {
-        const auto id = player.Play(std::make_unique<TestSource>(44100, 2, 500, 501));
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        player.Cancel(id);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
 
+    for (unsigned i=0; i<100; ++i)
     {
-        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300));
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300, 200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<423234>(0, 100)));
         player.Cancel(id);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+void unit_test_shutdown_with_active_streams()
+{
+    for (unsigned i=0; i<100; ++i)
+    {
+        audio::Player player(audio::Device::Create("audio_unit_test"));
+        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300, 200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<22323>(0, 100)));
     }
 }
 
@@ -207,5 +212,6 @@ int test_main(int argc, char* argv[])
     unit_test_fill_buffer_exception();
     unit_test_pause_resume();
     unit_test_cancel();
+    unit_test_shutdown_with_active_streams();
     return 0;
 }
