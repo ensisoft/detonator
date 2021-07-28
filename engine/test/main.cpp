@@ -29,6 +29,7 @@
 
 #include "base/logging.h"
 #include "base/format.h"
+#include "audio/loader.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -73,7 +74,8 @@ public:
 private:
 };
 
-class AudioMusicTest : public TestCase
+class AudioMusicTest : public TestCase,
+                       public audio::Loader
 {
 public:
     virtual void Render(gfx::Painter& painter) override
@@ -100,7 +102,7 @@ public:
     }
     virtual void Start(game::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<game::AudioEngine>("TestApp", loader);
+        mEngine = std::make_unique<game::AudioEngine>("TestApp", this);
         mEngine->SetMusicGain(mMusicGain);
     }
     virtual void End() override
@@ -125,12 +127,15 @@ public:
         mEngine->SetMusicEffect(name, 2.0f, game::AudioEngine::Effect::FadeIn);
         mEngine->PlayMusic(name);
     }
+    virtual std::ifstream OpenStream(const std::string& file) const override
+    { return base::OpenBinaryInputStream(file); }
 private:
     std::unique_ptr<game::AudioEngine> mEngine;
     float mMusicGain = 0.5f;
 };
 
-class AudioEffectTest : public TestCase
+class AudioEffectTest : public TestCase,
+                        public audio::Loader
 {
 public:
     virtual void Render(gfx::Painter& painter) override
@@ -154,7 +159,7 @@ public:
     }
     virtual void Start(game::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<game::AudioEngine>("TestApp", loader);
+        mEngine = std::make_unique<game::AudioEngine>("TestApp", this);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
     virtual void End() override
@@ -180,9 +185,11 @@ public:
         else if (key.symbol == wdk::Keysym::ArrowDown)
             mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
         mEngine->SetSoundEffectGain(mEffectGain);
-
     }
+    virtual std::ifstream OpenStream(const std::string& file) const override
+    { return base::OpenBinaryInputStream(file); }
 private:
+    std::unique_ptr<game::GameDataLoader> mLoader;
     std::unique_ptr<game::AudioEngine> mEngine;
     float mEffectGain = 0.5f;
     float mDelay      = 0.0f;

@@ -24,6 +24,14 @@
 #include "base/logging.h"
 #include "audio/element.h"
 #include "audio/graph.h"
+#include "audio/loader.h"
+
+class Loader : public audio::Loader
+{
+public:
+    virtual std::ifstream OpenStream(const std::string& file) const override
+    { return base::OpenBinaryInputStream(file); }
+};
 
 class TestBuffer : public audio::Buffer
 {
@@ -164,7 +172,7 @@ public:
     { return mId; }
     virtual std::string GetName() const override
     { return mName; }
-    virtual bool Prepare() override
+    virtual bool Prepare(const audio::Loader&) override
     {
         mState.prepare_list.push_back(this);
         return !mPrepareError;
@@ -284,6 +292,8 @@ void unit_test_basic()
 
 void unit_test_prepare_topologies()
 {
+    Loader loader;
+
     // single audio element
     {
         TestState state;
@@ -300,7 +310,7 @@ void unit_test_prepare_topologies()
 
         graph.AddElementPtr(std::move(elem));
         Link(graph, "foo", "src");
-        TEST_REQUIRE(graph.Prepare());
+        TEST_REQUIRE(graph.Prepare(loader));
         TEST_REQUIRE(graph.GetFormat() == format);
         TEST_REQUIRE(state.prepare_list.size() == 1);
         TEST_REQUIRE(state.prepare_list[0]->GetName() == "foo");
@@ -330,7 +340,7 @@ void unit_test_prepare_topologies()
         graph.AddElementPtr(std::move(b));
         Link(graph, "a", "out", "c", "in0");
         Link(graph, "b", "out", "c", "in1");
-        TEST_REQUIRE(graph.Prepare());
+        TEST_REQUIRE(graph.Prepare(loader));
 
         std::string topo = state.ConcatPrepareNames();
         TEST_REQUIRE(topo == "abc" || topo == "bac");
@@ -381,7 +391,7 @@ void unit_test_prepare_topologies()
         Link(graph, "c", "out0", "e", "in1");
         Link(graph, "c", "out1", "d", "in");
         Link(graph, "d", "out", "e", "in2");
-        TEST_REQUIRE(graph.Prepare());
+        TEST_REQUIRE(graph.Prepare(loader));
 
         std::string topo = state.ConcatPrepareNames();
         TEST_REQUIRE(topo == "abcde" || topo == "acbde");
@@ -390,6 +400,8 @@ void unit_test_prepare_topologies()
 
 void unit_test_buffer_flow()
 {
+    Loader loader;
+
     TestState state;
 
     audio::Format format;
@@ -412,7 +424,7 @@ void unit_test_buffer_flow()
     Link(graph, "s", "out", "a", "in");
     Link(graph, "a", "out", "b", "in");
     Link(graph, "b", "out");
-    TEST_REQUIRE(graph.Prepare());
+    TEST_REQUIRE(graph.Prepare(loader));
 
     audio::Element::EventQueue  queue;
     audio::BufferHandle buffer;
@@ -426,6 +438,8 @@ void unit_test_buffer_flow()
 
 void unit_test_completion()
 {
+    Loader loader;
+
     // test completion with just a source element
     {
         audio::Format format;
@@ -437,7 +451,7 @@ void unit_test_completion()
         auto* src = graph.AddElement(SrcElement("src", "src", 10));
         src->GetOutputPort(0).SetFormat(format);
         TEST_REQUIRE(graph.LinkGraph("src", "out"));
-        TEST_REQUIRE(graph.Prepare());
+        TEST_REQUIRE(graph.Prepare(loader));
 
         audio::Element::EventQueue queue;
 
@@ -473,7 +487,7 @@ void unit_test_completion()
         TEST_REQUIRE(graph.LinkElements("src0", "out", "test", "in0"));
         TEST_REQUIRE(graph.LinkElements("src1", "out", "test", "in1"));
         TEST_REQUIRE(graph.LinkGraph("test", "out0"));
-        TEST_REQUIRE(graph.Prepare());
+        TEST_REQUIRE(graph.Prepare(loader));
 
         audio::Element::EventQueue queue;
 
@@ -499,6 +513,8 @@ void unit_test_completion()
 
 void unit_test_graph_in_graph()
 {
+    Loader loader;
+
     TestState state;
 
     audio::Format format;
@@ -532,7 +548,7 @@ void unit_test_graph_in_graph()
 
     Link(graph, "sub-graph", "out", "c", "in");
     Link(graph, "c", "out");
-    TEST_REQUIRE(graph.Prepare());
+    TEST_REQUIRE(graph.Prepare(loader));
 
     audio::Element::EventQueue queue;
     audio::BufferHandle buffer;

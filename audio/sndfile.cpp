@@ -103,18 +103,23 @@ SndFileInputStream::SndFileInputStream(const std::string& filename)
 
 bool SndFileInputStream::OpenFile(const std::string& filename)
 {
-    mStream = base::OpenBinaryInputStream(filename);
-    if (mStream.is_open())
-    {
-        mStream.seekg(0, mStream.end);
-        mStreamSize = mStream.tellg();
-        mStream.seekg(0, mStream.beg);
-        mFilename = filename;
-        DEBUG("Opened audio file stream with %1 bytes from '%2'", mStreamSize, filename);
-        return true;
-    }
-    ERROR("Failed to open '%1'", filename);
-    return false;
+    auto stream = base::OpenBinaryInputStream(filename);
+    if (!stream.is_open()) ERROR_RETURN(false, "Failed to open '%1'.", filename);
+
+    UseStream(filename, std::move(stream));
+    return true;
+}
+
+void SndFileInputStream::UseStream(const std::string& name, std::ifstream&& stream)
+{
+    ASSERT(stream.is_open());
+    mFilename = name;
+    mStream   = std::move(stream);
+
+    mStream.seekg(0, mStream.end);
+    mStreamSize = mStream.tellg();
+    mStream.seekg(0, mStream.beg);
+    DEBUG("Opened audio file stream with %1 bytes from '%2'", mStreamSize, name);
 }
 
 std::int64_t SndFileInputStream::GetLength() const

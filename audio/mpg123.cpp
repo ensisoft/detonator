@@ -59,20 +59,23 @@ Mpg123FileInputStream::Mpg123FileInputStream(const std::string& filename)
 bool Mpg123FileInputStream::OpenFile(const std::string& filename)
 {
     auto stream = base::OpenBinaryInputStream(filename);
-    if (stream.is_open())
-    {
-        stream.seekg(0, mStream.end);
-        auto size = stream.tellg();
-        stream.seekg(0, stream.beg);
+    if (!stream.is_open()) ERROR_RETURN(false, "Failed to open '%1'.", filename);
 
-        mStream     = std::move(stream);
-        mStreamSize = size;
-        mFilename   = filename;
-        DEBUG("Opened audio file stream with %1 bytes from '%2'.", size, filename);
-        return true;
-    }
-    ERROR("Failed to open '%1'.", filename);
-    return false;
+    UseStream(filename, std::move(stream));
+    return true;
+}
+
+void Mpg123FileInputStream::UseStream(const std::string& name, std::ifstream&& stream)
+{
+    ASSERT(stream.is_open());
+    stream.seekg(0, mStream.end);
+    auto size = stream.tellg();
+    stream.seekg(0, stream.beg);
+
+    mStream     = std::move(stream);
+    mStreamSize = size;
+    mFilename   = name;
+    DEBUG("Opened audio file stream with %1 bytes from '%2'.", size, name);
 }
 
 long Mpg123FileInputStream::Read(void* buffer,  size_t bytes)

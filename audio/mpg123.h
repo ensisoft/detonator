@@ -51,6 +51,8 @@ namespace audio
 
         bool OpenFile(const std::string& filename);
 
+        void UseStream(const std::string& name, std::ifstream&& stream);
+
         virtual long Read(void* buffer,  size_t bytes) override;
         virtual off_t Seek(off_t where, int whence) override;
         virtual std::string GetName() const override
