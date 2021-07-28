@@ -123,6 +123,9 @@ void Player::AudioThreadLoop(Device* ptr)
 
     auto now = base::GetTime();
 
+    // currently playing tracks
+    std::list<Track> playing;
+
     while (run_thread_.test_and_set(std::memory_order_acquire))
     {
         const auto later = base::GetTime();
@@ -138,11 +141,11 @@ void Player::AudioThreadLoop(Device* ptr)
         {
             std::unique_ptr<Command> cmd(track_action.cmd);
 
-            auto it = std::find_if(std::begin(playing_), std::end(playing_),
+            auto it = std::find_if(std::begin(playing), std::end(playing),
                 [=](const Track& t) {
                     return t.id == track_action.track_id;
                 });
-            if (it == std::end(playing_))
+            if (it == std::end(playing))
                 continue;
 
             auto& p = *it;
@@ -165,13 +168,13 @@ void Player::AudioThreadLoop(Device* ptr)
             else if (track_action.do_what == Action::Type::Cancel)
             {
                 p.stream->Cancel();
-                playing_.erase(it);
+                playing.erase(it);
             }
         }
 
         // realize the state updates (if any) of currently playing audio streams
         // and create outgoing stream events (if any).
-        for (auto it = std::begin(playing_); it != std::end(playing_);)
+        for (auto it = std::begin(playing); it != std::end(playing);)
         {
             auto& track = *it;
             // propagate events
@@ -214,7 +217,7 @@ void Player::AudioThreadLoop(Device* ptr)
                     events_.push(std::move(event));
                 }
                 if (!track.looping)
-                    it = playing_.erase(it);
+                    it = playing.erase(it);
             }
             else if (state == Stream::State::Ready && !track.paused)
             {
@@ -269,7 +272,7 @@ void Player::AudioThreadLoop(Device* ptr)
                 item.when    = top.when;
                 item.looping = top.looping;
                 item.stream->Play();
-                playing_.push_back(std::move(item));
+                playing.push_back(std::move(item));
             }
 
             waiting_.pop();
@@ -282,6 +285,11 @@ void Player::AudioThreadLoop(Device* ptr)
         // b) creates possibility for a buffer underruns in the audio playback stream. 
         // todo: probably need something more sophisticated ?
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+
+    for (auto& p : playing)
+    {
+        p.stream->Cancel();
     }
 }
 
