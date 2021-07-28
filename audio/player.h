@@ -155,9 +155,6 @@ namespace audio
             std::greater<Track>>;
         audio_pq waiting_;
 
-        // currently playing tracks
-        std::list<Track> playing_;
-
         // list of track completion events of tracks
         // that were played.
         std::queue<Event> events_;
