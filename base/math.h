@@ -106,6 +106,19 @@ namespace math
         return std::abs(goal - value) <= epsilon;
     }
 
+    template<unsigned Seed, typename T>
+    T rand(T min, T max)
+    {
+        static std::default_random_engine engine(Seed);
+        if constexpr (std::is_floating_point<T>::value) {
+            std::uniform_real_distribution<T> dist(min, max);
+            return dist(engine);
+        } else {
+            std::uniform_int_distribution<T> dist(min, max);
+            return dist(engine);
+        }
+    }
+
     // generate a random number in the range of min max (inclusive)
     // the random number generator is automatically seeded.
     template<typename T>
