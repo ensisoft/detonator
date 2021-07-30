@@ -1102,33 +1102,27 @@ void ZeroSource::Process(EventQueue& events, unsigned milliseconds)
     mOut.PushBuffer(buffer);
 }
 
-#ifdef AUDIO_ENABLE_TEST_SOUND
-SineSource::SineSource(const std::string& name, unsigned int frequency)
+SineSource::SineSource(const std::string& name,
+                       const std::string& id,
+                       const Format& format,
+                       unsigned frequency,
+                       unsigned millisecs)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
+  , mDuration(millisecs)
   , mFrequency(frequency)
-  , mLimitDuration(false)
   , mPort("out")
 {
-    mFormat.channel_count = 1;
-    mFormat.sample_rate   = 44100;
-    mFormat.sample_type   = SampleType::Float32;
+    mFormat = format;
     mPort.SetFormat(mFormat);
 }
 
-SineSource::SineSource(const std::string& name, unsigned int frequency, unsigned int millisecs)
-  : mName(name)
-  , mId(base::RandomString(10))
-  , mFrequency(frequency)
-  , mDuration(millisecs)
-  , mLimitDuration(true)
-  , mPort("out")
-{
-    mFormat.channel_count = 1;
-    mFormat.sample_rate   = 44100;
-    mFormat.sample_type   = SampleType::Float32;
-    mPort.SetFormat(mFormat);
-}
+SineSource::SineSource(const std::string& name,
+                       const Format& format,
+                       unsigned frequency,
+                       unsigned millisecs)
+  : SineSource(name, base::RandomString(10), format, frequency, millisecs)
+{}
 
 bool SineSource::Prepare(const Loader& loader)
 {
@@ -1139,7 +1133,7 @@ bool SineSource::Prepare(const Loader& loader)
 
 void SineSource::Process(EventQueue& events, unsigned milliseconds)
 {
-    if (mLimitDuration)
+    if (mDuration)
     {
         ASSERT(mDuration > mMilliSecs);
         milliseconds = std::min(milliseconds, mDuration - mMilliSecs);
@@ -1148,31 +1142,61 @@ void SineSource::Process(EventQueue& events, unsigned milliseconds)
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_in_millisec = mFormat.sample_rate/1000;
     const auto frames = frames_in_millisec * milliseconds;
-    const auto radial_velocity = math::Pi * 2.0 * mFrequency;
-    const auto sample_increment = 1.0/mFormat.sample_rate * radial_velocity;
-    const auto bytes = frames * frame_size;
+    const auto bytes  = frames * frame_size;
 
     auto buffer = std::make_shared<VectorBuffer>();
     buffer->SetFormat(mFormat);
     buffer->AllocateBytes(bytes);
 
-    void* buff = buffer->GetPtr();
+    if (mFormat.sample_type == SampleType::Int32)
+        mFormat.channel_count == 1 ? Generate<int, 1>(buffer, frames)
+                                   : Generate<int, 2>(buffer, frames);
+    else if (mFormat.sample_type == SampleType::Float32)
+        mFormat.channel_count == 1 ? Generate<float, 1>(buffer, frames)
+                                   : Generate<float, 2>(buffer, frames);
+    else if (mFormat.sample_type == SampleType::Int16)
+        mFormat.channel_count == 1 ? Generate<short, 1>(buffer, frames)
+                                   : Generate<short, 2>(buffer, frames);
 
-    for (unsigned i=0; i<frames; ++i)
-    {
-        // http://blog.bjornroche.com/2009/12/int-float-int-its-jungle-out-there.html
-        const float sample = std::sin(mSampleCount++ * sample_increment);
-        if (mFormat.sample_type == SampleType::Float32)
-            ((float*)buff)[i] = sample;
-        else if (mFormat.sample_type  == SampleType::Int32)
-            ((int*)buff)[i] = 0x7fffffff * sample;
-        else if (mFormat.sample_type  == SampleType::Int16)
-            ((short*)buff)[i] = 0x7fff * sample;
-    }
     mPort.PushBuffer(buffer);
     mMilliSecs += milliseconds;
 }
-#endif
+
+template<typename DataType, unsigned ChannelCount>
+void SineSource::Generate(BufferHandle buffer, unsigned frames)
+{
+    using AudioFrame = Frame<DataType, ChannelCount>;
+
+    const auto radial_velocity  = math::Pi * 2.0 * mFrequency;
+    const auto sample_increment = 1.0/mFormat.sample_rate * radial_velocity;
+    auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
+
+    for (unsigned  i=0; i<frames; ++i, ++ptr)
+    {
+        const float sample = std::sin(mSampleCount++ * sample_increment);
+        GenerateFrame(ptr, sample);
+    }
+}
+
+template<unsigned ChannelCount>
+void SineSource::GenerateFrame(Frame<float, ChannelCount>* frame, float value)
+{
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        frame->channels[i] = value;
+    }
+}
+
+template<typename Type, unsigned ChannelCount>
+void SineSource::GenerateFrame(Frame<Type, ChannelCount>* frame, float value)
+{
+    static_assert(std::is_integral<Type>::value);
+
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        frame->channels[i] = SampleBits<Type>::Bits * value;
+    }
+}
 
 } // namespace
 

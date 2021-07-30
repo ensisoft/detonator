@@ -114,7 +114,11 @@ int main(int argc, char* argv[])
         Loader loader;
 
         auto graph = std::make_unique<audio::AudioGraph>("graph");
-        auto* sine     = (*graph)->AddElement(audio::SineSource("sine", 500, 5000));
+        audio::Format sine_format;
+        sine_format.sample_type = audio::SampleType::Float32;
+        sine_format.channel_count = 1;
+        sine_format.sample_rate   = 44100;
+        auto* sine     = (*graph)->AddElement(audio::SineSource("sine", sine_format, 500, 5000));
         auto* file     = (*graph)->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
         auto* gain     = (*graph)->AddElement(audio::Gain("gain", 1.0f));
         auto* mixer    = (*graph)->AddElement(audio::Mixer("mixer", 2));
