@@ -25,6 +25,7 @@
 #include "warnpop.h"
 
 #include <functional>
+#include <variant>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -34,12 +35,34 @@ namespace base
 {
 
 template<typename S, typename T> inline
-S hash_combine(S seed, T value)
+S hash_combine(S seed, const T& value)
 {
-    const auto hash = std::hash<T>()(value);
-    seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    using Type = std::decay_t<decltype(value)>;
+    if constexpr (std::is_trivially_copyable_v<Type> && std::is_class_v<Type>) {
+        const auto* ptr = reinterpret_cast<const uint8_t*>(&value);
+        for (size_t i=0; i<sizeof(T); ++i) {
+            const auto hash = std::hash<uint8_t>()(ptr[i]);
+            seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+    } else {
+        const auto hash = std::hash<T>()(value);
+        seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
     return seed;
 }
+
+template<typename S, typename... Types> inline
+S hash_combine(S seed, const std::variant<Types...>& variant)
+{
+    std::visit([&seed](auto&& val) {
+        seed = hash_combine(seed, val);
+    }, variant);
+    return seed;
+}
+
+template<typename S> inline
+S hash_combine(S seed, const char* str)
+{ return hash_combine(seed, std::string(str)); }
 
 template<typename S> inline
 S hash_combine(S seed, const glm::vec2& value)

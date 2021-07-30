@@ -1525,15 +1525,9 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
 
 std::size_t KinematicsParticleEngineClass::GetHash() const
 {
-    static_assert(std::is_trivially_copyable<Params>::value);
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
-
-    const auto* ptr = reinterpret_cast<const unsigned char*>(&mParams);
-    const auto  len = sizeof(mParams);
-    for (size_t i=0; i<len; ++i)
-        hash = base::hash_combine(hash, ptr[i]);
-
+    hash = base::hash_combine(hash, mParams);
     return hash;
 }
 
