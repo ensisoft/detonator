@@ -761,19 +761,25 @@ namespace audio
         SingleSlotPort mOut;
     };
 
-#ifdef AUDIO_ENABLE_TEST_SOUND
     class SineSource : public Element
     {
     public:
-        SineSource(const std::string& name, unsigned frequency);
-        SineSource(const std::string& name, unsigned frequency, unsigned millisecs);
+        SineSource(const std::string& name,
+                   const std::string& id,
+                   const Format& format,
+                   unsigned frequency,
+                   unsigned millisecs = 0);
+        SineSource(const std::string& name,
+                   const Format& format,
+                   unsigned frequency,
+                   unsigned millisecs = 0);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual bool IsSourceDone() const override
         {
-            if (!mLimitDuration)
+            if (!mDuration)
                 return false;
             return mMilliSecs >= mDuration;
         }
@@ -788,16 +794,21 @@ namespace audio
         void SetSampleType(SampleType type)
         { mFormat.sample_type = type; }
     private:
+        template<typename DataType, unsigned ChannelCount>
+        void Generate(BufferHandle buffer, unsigned frames);
+        template<unsigned ChannelCount>
+        void GenerateFrame(Frame<float, ChannelCount>* frame, float value);
+        template<typename Type, unsigned ChannelCount>
+        void GenerateFrame(Frame<Type, ChannelCount>* frame, float value);
+    private:
         const std::string mName;
         const std::string mId;
-        const unsigned mFrequency = 0;
         const unsigned mDuration  = 0;
-        const bool mLimitDuration = false;
+        unsigned mFrequency = 0;
         unsigned mMilliSecs   = 0;
         unsigned mSampleCount = 0;
         SingleSlotPort mPort;
         Format mFormat;
     };
-#endif
 
 } // namespace
