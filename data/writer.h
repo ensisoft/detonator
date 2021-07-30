@@ -60,8 +60,9 @@ namespace data
         template<typename T>
         void Write(const char* name, T value)
         {
-            static_assert(std::is_enum<T>::value);
-            Write(name, std::string(magic_enum::enum_name(value)));
+            if constexpr (std::is_enum<T>::value)
+                Write(name, std::string(magic_enum::enum_name(value)));
+            else Serialize(*this, name, value);
         }
         template<typename Enum, typename Bits>
         void Write(const char* name, const base::bitflag<Enum, Bits>& bitflag)
