@@ -47,25 +47,8 @@ ScriptVar::Type ScriptVar::GetType() const
 size_t ScriptVar::GetHash() const
 {
     size_t hash = 0;
-    switch (GetType())
-    {
-        case Type::Integer:
-            hash = base::hash_combine(hash, GetValue<int>());
-            break;
-        case Type::Vec2:
-            hash = base::hash_combine(hash, GetValue<glm::vec2>());
-            break;
-        case Type::Boolean:
-            hash = base::hash_combine(hash, GetValue<bool>());
-            break;
-        case Type::String:
-            hash = base::hash_combine(hash, GetValue<std::string>());
-            break;
-        case Type::Float:
-            hash = base::hash_combine(hash, GetValue<float>());
-            break;
-    }
     hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mData);
     hash = base::hash_combine(hash, mReadOnly);
     return hash;
 }
