@@ -58,15 +58,16 @@ namespace data
         template<typename T>
         bool Read(const char* name, T* out) const
         {
-            static_assert(std::is_enum<T>::value);
-            std::string str;
-            if (!Read(name, &str))
-                return false;
-            const auto& enum_val = magic_enum::enum_cast<T>(str);
-            if (!enum_val.has_value())
-                return false;
-            *out = enum_val.value();
-            return true;
+            if constexpr (std::is_enum<T>::value) {
+                std::string str;
+                if (!Read(name, &str))
+                    return false;
+                const auto& enum_val = magic_enum::enum_cast<T>(str);
+                if (!enum_val.has_value())
+                    return false;
+                *out = enum_val.value();
+                return true;
+            } else return Deserialize(*this, name, out);
         }
 
         template<typename Enum, typename Bits>
