@@ -17,20 +17,188 @@
 #include "config.h"
 
 #include <unordered_set>
+#include <set>
 
 #include "base/utility.h"
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/hash.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "audio/graph.h"
 #include "audio/element.h"
 
 namespace audio
 {
 
-Graph::Graph(const std::string& name)
+GraphClass::GraphClass(const std::string& name, const std::string& id)
   : mName(name)
-  , mId(base::RandomString(10))
-  , mPort("out")
+  , mId(id)
+{}
+GraphClass::GraphClass(const std::string& name)
+  : GraphClass(name, base::RandomString(10))
+{}
+
+std::size_t GraphClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mSrcElemId);
+    hash = base::hash_combine(hash, mSrcElemPort);
+    for (const auto& link : mLinks)
+    {
+        hash = base::hash_combine(hash, link.id);
+        hash = base::hash_combine(hash, link.src_port);
+        hash = base::hash_combine(hash, link.src_element);
+        hash = base::hash_combine(hash, link.dst_port);
+        hash = base::hash_combine(hash, link.dst_element);
+    }
+    for (const auto& elem : mElements)
+    {
+        hash = base::hash_combine(hash, elem.id);
+        hash = base::hash_combine(hash, elem.name);
+        hash = base::hash_combine(hash, elem.type);
+
+        std::set<std::string> keys;
+        for (const auto& arg : elem.args)
+            keys.insert(arg.first);
+
+        for (const auto& key : keys)
+        {
+            auto it = elem.args.find(key);
+            ASSERT(it != elem.args.end());
+            hash = base::hash_combine(hash, it->second);
+        }
+    }
+    return hash;
+}
+
+void GraphClass::IntoJson(data::Writer& writer) const
+{
+    writer.Write("name", mName);
+    writer.Write("id",   mId);
+    writer.Write("src_elem_id", mSrcElemId);
+    writer.Write("src_elem_port", mSrcElemPort);
+    for (const auto& link : mLinks)
+    {
+        auto chunk = writer.NewWriteChunk();
+        chunk->Write("id",       link.id);
+        chunk->Write("src_elem", link.src_element);
+        chunk->Write("src_port", link.src_port);
+        chunk->Write("dst_elem", link.dst_element);
+        chunk->Write("dst_port", link.dst_port);
+        writer.AppendChunk("links", std::move(chunk));
+    }
+    for (const auto& elem : mElements)
+    {
+        auto chunk = writer.NewWriteChunk();
+        chunk->Write("id",   elem.id);
+        chunk->Write("name", elem.name);
+        chunk->Write("type", elem.type);
+        for (const auto& pair : elem.args)
+        {
+            const auto& name    = "arg_" + pair.first;
+            const auto& variant = pair.second;
+            std::visit([&chunk, &name](const auto& variant_value) {
+                chunk->Write(name.c_str(), variant_value);
+            }, variant);
+        }
+        writer.AppendChunk("elements", std::move(chunk));
+    }
+}
+
+// static
+std::optional<GraphClass> GraphClass::FromJson(const data::Reader& reader)
+{
+    std::string name;
+    std::string id;
+    if (!reader.Read("name", &name) ||
+        !reader.Read("id",   &id))
+        return std::nullopt;
+
+    GraphClass ret(name, id);
+    if (!reader.Read("src_elem_id",   &ret.mSrcElemId) ||
+        !reader.Read("src_elem_port", &ret.mSrcElemPort))
+        return std::nullopt;
+
+    for (unsigned i=0; i<reader.GetNumChunks("links"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("links", i);
+        Link link;
+        chunk->Read("id",       &link.id);
+        chunk->Read("src_elem", &link.src_element);
+        chunk->Read("src_port", &link.src_port);
+        chunk->Read("dst_elem", &link.dst_element);
+        chunk->Read("dst_port", &link.dst_port);
+        ret.mLinks.push_back(std::move(link));
+    }
+    for (unsigned i=0; i<reader.GetNumChunks("elements"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("elements", i);
+        Element elem;
+        chunk->Read("id",   &elem.id);
+        chunk->Read("name", &elem.name);
+        chunk->Read("type", &elem.type);
+        const auto* desc = FindElementDesc(elem.type);
+        if (desc == nullptr)
+            return std::nullopt;
+        // copy over the list of arguments from the descriptor.
+        // this conveniently gives us the argument names *and*
+        // the expected types for reading the variant args back
+        // from the JSON.
+        elem.args = desc->args;
+        for (auto& pair : elem.args)
+        {
+            const auto& name = "arg_" + pair.first;
+            auto& variant = pair.second;
+            std::visit([&chunk, &name](auto& variant_value) {
+                chunk->Read(name.c_str(), &variant_value);
+            }, variant);
+        }
+        ret.mElements.push_back(std::move(elem));
+    }
+    return ret;
+}
+
+Graph::Graph(const std::string& name, const std::string& id)
+  : mName(name)
+  , mId(id)
+  , mPort("port")
+{}
+Graph::Graph(const std::string& name)
+  : Graph(name, base::RandomString(10))
+{}
+
+Graph::Graph(const GraphClass& klass) :
+  Graph(klass.GetName())
+{
+    for (size_t i=0; i< klass.GetNumElements(); ++i)
+    {
+        const auto& elem = klass.GetElement(i);
+        ElementCreateArgs args;
+        args.args = elem.args;
+        args.id   = elem.id;
+        args.type = elem.type;
+        args.name = elem.name;
+        mElements.push_back(CreateElement(args));
+    }
+    for (size_t i=0; i<klass.GetNumLinks(); ++i)
+    {
+        const auto& link = klass.GetLink(i);
+        auto* src_elem = FindElementById(link.src_element);
+        auto* dst_elem = FindElementById(link.dst_element);
+        auto* src_port = src_elem->FindOutputPortByName(link.src_port);
+        auto* dst_port = dst_elem->FindInputPortByName(link.dst_port);
+        LinkElements(src_elem, src_port, dst_elem, dst_port);
+    }
+    auto* src_elem = FindElementById(klass.GetGraphOutputElementId());
+    auto* src_port = src_elem->FindOutputPortByName(klass.GetGraphOutputElementPort());
+    LinkGraph(src_elem, src_port);
+}
+
+Graph::Graph(std::shared_ptr<const GraphClass> klass)
+  : Graph(*klass)
 {}
 
 Graph::Graph(Graph&& other)
@@ -162,6 +330,8 @@ std::vector<std::string> Graph::DescribePaths(const Element* src) const
         auto& src_port = const_cast<Element*>(src)->GetOutputPort(i);
         auto* dst_port = FindDstPort(&src_port);
         auto* dst_elem = FindInputPortOwner(dst_port);
+        if (dst_elem == nullptr && dst_port == &mPort)
+            dst_elem = this;
         if (dst_elem == nullptr)
         {
             ret.push_back(base::FormatString("%1:%2 -> nil", src->GetName(), src_port.GetName()));
@@ -310,7 +480,7 @@ bool Graph::Prepare(const Loader& loader)
             } else ++it;
         }
     }
-    ASSERT(edges.empty() && "Cycle in audio graph.");
+    if (!edges.empty()) ERROR_RETURN(false, "Audio graph '%1' has a cycle.", mName);
 
     for (size_t i=0; i < order.size(); ++i)
     {
@@ -341,7 +511,12 @@ bool Graph::Prepare(const Loader& loader)
     }
     mTopoOrder = std::move(order);
     mFormat    = mPort.GetFormat();
-    DEBUG("Audio graph '%1' output set to '%2'.", mName, mFormat);
+    if (!IsValid(mFormat))
+    {
+        ERROR("Audio graph '%1' output format (%2) is not valid.", mName, mFormat);
+        return false;
+    }
+    INFO("Audio graph '%1' output set to '%2'.", mName, mFormat);
     return true;
 }
 

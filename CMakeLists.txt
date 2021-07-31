@@ -145,6 +145,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # in order to reduce the build times by not repeatedly building a translation
 # unit when it's possible to use a library
 add_library(AudioLib
+    audio/format.cpp
     audio/sndfile.cpp
     audio/mpg123.cpp
     audio/pulseaudio.cpp
@@ -418,6 +419,7 @@ install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/di
 # audio test application. Simple console application that plays
 # OGG and WAV files in several different formats.
 add_executable(audio_test
+    audio/format.cpp
     audio/sndfile.cpp
     audio/mpg123.cpp
     audio/pulseaudio.cpp
@@ -631,9 +633,13 @@ if (UNIX)
 endif()
 add_executable(unit_test_audio_graph
         audio/unit_test/unit_test_graph.cpp
+        audio/mpg123.cpp
+        audio/sndfile.cpp
+        audio/element.cpp
+        audio/format.cpp
         audio/graph.cpp)
 target_include_directories(unit_test_audio_graph PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
-target_link_libraries(unit_test_audio_graph BaseLib)
+target_link_libraries(unit_test_audio_graph DataLib BaseLib samplerate ${CONAN_LIBS})
 
 add_test(NAME unit_test_audio COMMAND unit_test_audio)
 add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)

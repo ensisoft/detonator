@@ -22,6 +22,7 @@
 #include <memory>
 #include <vector>
 #include <queue>
+#include <variant>
 #include <unordered_map>
 
 #include "base/utility.h"
@@ -155,6 +156,8 @@ namespace audio
         virtual std::string GetId() const = 0;
         // Get the human readable name of the element.
         virtual std::string GetName() const = 0;
+        // Get the dynamic type name of the element.
+        virtual std::string GetType() const = 0;
         // Returns whether the element is done producing audio buffers.
         virtual bool IsSourceDone() const { return false; }
         // Return whether the element is a source element, i.e. producer of
@@ -244,13 +247,16 @@ namespace audio
     {
     public:
         enum class Channel {
-            Left = 0, Right = 1
+            Left = 0, Right = 1, Both
         };
+        StereoMaker(const std::string& name, const std::string& id, Channel which = Channel::Left);
         StereoMaker(const std::string& name, Channel which = Channel::Left);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "StereoMaker"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
@@ -284,11 +290,14 @@ namespace audio
     class StereoJoiner : public Element
     {
     public:
+        StereoJoiner(const std::string& name, const std::string& id);
         StereoJoiner(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "StereoJoiner"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
@@ -321,11 +330,14 @@ namespace audio
     class StereoSplitter : public Element
     {
     public:
+        StereoSplitter(const std::string& name, const std::string& id);
         StereoSplitter(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "StereoSplitter"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
@@ -364,10 +376,17 @@ namespace audio
           , mId(base::RandomString(10))
           , mIn("in")
         {}
+        Null(const std::string& name, const std::string& id)
+          : mName(name)
+          , mId(id)
+          , mIn("in")
+        {}
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Null"; }
         virtual bool Prepare(const Loader&) override
         { return true; }
         virtual void Process(EventQueue& events, unsigned milliseconds) override
@@ -396,10 +415,13 @@ namespace audio
     {
     public:
         Mixer(const std::string& name, unsigned num_srcs = 2);
+        Mixer(const std::string& name, const std::string& id, unsigned num_srcs = 2);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Mixer"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -439,13 +461,15 @@ namespace audio
             float duration = 0.0f;
             Effect effect  = Effect::FadeIn;
         };
-
-        Fade(const std::string& name);
+        Fade(const std::string& name, const std::string& id, float duration, Effect effect);
         Fade(const std::string& name, float duration, Effect effect);
+        Fade(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Fade"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -494,10 +518,13 @@ namespace audio
         };
 
         Gain(const std::string& name, float gain = 1.0f);
+        Gain(const std::string& name, const std::string& id, float gain = 1.0f);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Gain"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -533,14 +560,16 @@ namespace audio
     {
     public:
         Resampler(const std::string& name, unsigned sample_rate);
+        Resampler(const std::string& name, const std::string& id, unsigned sample_rate);
        ~Resampler();
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Resampler"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
-
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual unsigned GetNumInputPorts() const override
@@ -568,13 +597,21 @@ namespace audio
     class FileSource : public Element
     {
     public:
-        FileSource(const std::string& name, const std::string& file, SampleType type = SampleType::Int16);
+        FileSource(const std::string& name,
+                   const std::string& file,
+                   SampleType type = SampleType::Int16);
+        FileSource(const std::string& name,
+                   const std::string& id,
+                   const std::string& file,
+                   SampleType type = SampleType::Int16);
         FileSource(FileSource&& other);
        ~FileSource();
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "FileSource"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
@@ -612,6 +649,8 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "BufferSource"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
@@ -707,6 +746,8 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "MixerSource"; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override;
         virtual bool Prepare(const Loader& loader) override;
@@ -738,11 +779,14 @@ namespace audio
     class ZeroSource : public Element
     {
     public:
+        ZeroSource(const std::string& name, const std::string& id, const Format& format);
         ZeroSource(const std::string& name, const Format& format);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "ZeroSource"; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override { return false; }
         virtual bool Prepare(const Loader& loader) override;
@@ -777,6 +821,8 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "SineSource"; }
         virtual bool IsSourceDone() const override
         {
             if (!mDuration)
@@ -810,5 +856,41 @@ namespace audio
         SingleSlotPort mPort;
         Format mFormat;
     };
+
+    using ElementArg = std::variant<std::string, SampleType, Format, float, unsigned,
+            Fade::Effect, StereoMaker::Channel>;
+
+    template<typename T> inline
+    const T* FindElementArg(const std::unordered_map<std::string, ElementArg>& args,
+                            const std::string& arg_name)
+    {
+        if (const auto* variant = base::SafeFind(args, arg_name))
+        {
+            if (const auto* value = std::get_if<T>(variant))
+                return value;
+        }
+        return nullptr;
+    }
+
+    struct PortDesc {
+        std::string name;
+    };
+
+    struct ElementDesc {
+        std::vector<PortDesc> input_ports;
+        std::vector<PortDesc> output_ports;
+        std::unordered_map<std::string, ElementArg> args;
+    };
+    const ElementDesc* FindElementDesc(const std::string& type);
+
+    std::vector<std::string> ListAudioElements();
+
+    struct ElementCreateArgs {
+        std::string id;
+        std::string name;
+        std::string type;
+        std::unordered_map<std::string, ElementArg> args;
+    };
+    std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc);
 
 } // namespace

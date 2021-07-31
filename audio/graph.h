@@ -24,8 +24,10 @@
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
+#include <variant>
 
 #include "base/utility.h"
+#include "data/fwd.h"
 #include "audio/source.h"
 #include "audio/format.h"
 #include "audio/element.h"
@@ -33,6 +35,100 @@
 
 namespace audio
 {
+    class GraphClass
+    {
+    public:
+        using ElementArg = audio::ElementArg;
+        using Element    = audio::ElementCreateArgs;
+
+        struct Link {
+            std::string id;
+            std::string src_element;
+            std::string src_port;
+            std::string dst_element;
+            std::string dst_port;
+        };
+        GraphClass(const std::string& name, const std::string& id);
+        GraphClass(const std::string& name);
+
+        void AddElement(const Element& element)
+        { mElements.push_back(element); }
+        void AddElement(Element&& element)
+        { mElements.push_back(std::move(element)); }
+        void AddLink(const Link& edge)
+        { mLinks.push_back(edge); }
+        void AddLink(Link&& edge)
+        { mLinks.push_back(std::move(edge)); }
+        void SetName(const std::string& name)
+        { mName = name; }
+        void SetGraphOutputElementId(const std::string& id)
+        { mSrcElemId = id; }
+        void SetGraphOutputElementPort(const std::string& name)
+        { mSrcElemPort = name; }
+        std::size_t GetHash() const;
+        std::string GetName() const
+        { return mName; }
+        std::string GetGraphOutputElementId() const
+        { return mSrcElemId; }
+        std::string GetGraphOutputElementPort() const
+        { return mSrcElemPort; }
+        std::string GetId() const
+        { return mId; }
+        std::size_t GetNumElements() const
+        { return mElements.size(); }
+        std::size_t GetNumLinks() const
+        { return mLinks.size(); }
+        const Element& GetElement(size_t index) const
+        { return base::SafeIndex(mElements, index); }
+        const Link& GetLink(size_t index) const
+        { return base::SafeIndex(mLinks, index); }
+        const Element* FindElementById(const std::string& id) const
+        {
+            return base::SafeFind(mElements, [&id](const auto& elem) {
+                return elem.id == id;
+            });
+        }
+        Element& GetElement(size_t index)
+        { return base::SafeIndex(mElements, index); }
+        Element* FindElementById(const std::string& id)
+        {
+            return base::SafeFind(mElements, [&id](const auto& elem) {
+                return elem.id == id;
+            });
+        }
+        const Link* FindLinkById(const std::string& id) const
+        {
+            return base::SafeFind(mLinks, [&id](const auto& link) {
+                return link.id == id;
+            });
+        }
+        Link& GetLink(size_t index)
+        { return base::SafeIndex(mLinks, index); }
+        Link* FindLinkById(const std::string& id)
+        {
+            return base::SafeFind(mLinks, [&id](const auto& link) {
+                return link.id == id;
+            });
+        }
+        std::unique_ptr<GraphClass> Copy() const
+        { return std::make_unique<GraphClass>(*this); }
+        std::unique_ptr<GraphClass> Clone() const
+        {
+            auto ret = std::make_unique<GraphClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+
+        void IntoJson(data::Writer& writer) const;
+        static std::optional<GraphClass> FromJson(const data::Reader& reader);
+    private:
+        std::string mName;
+        std::string mId;
+        std::string mSrcElemId;
+        std::string mSrcElemPort;
+        std::vector<Link> mLinks;
+        std::vector<Element> mElements;
+    };
 
     class Graph :  public Element
     {
@@ -40,7 +136,10 @@ namespace audio
         // Create new audio graph with the given human readable name.
         // The name will be audio stream name on the device, and will be
         // shown for example in Pavucontrol on Linux.
+        Graph(const std::string& name, const std::string& id);
         Graph(const std::string& name);
+        Graph(const GraphClass& klass);
+        Graph(std::shared_ptr<const GraphClass> klass);
         Graph(Graph&& other);
         Graph(const Graph&) = delete;
         // Add a new element to the graph. Note that the element is not yet
@@ -137,6 +236,7 @@ namespace audio
         // for the given source port. I.e. this src port is already linked
         // with some destination port.
         bool IsSrcPortTaken(const Port* src) const;
+        bool IsSrcPortTaken(const std::string& elem_name, const std::string& port_name) const;
         // Return true if there exists a source-destination mapping
         // for the given destination port. I.e. something is already
         // linked to this dst port.
@@ -152,6 +252,8 @@ namespace audio
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "Graph"; }
         virtual bool IsSource() const override
         { return true; }
         virtual bool IsSourceDone() const override

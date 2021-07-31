@@ -152,12 +152,15 @@ BufferHandle MixBuffers(std::vector<BufferHandle>& src_buffers, float src_gain)
 namespace audio
 {
 
-StereoMaker::StereoMaker(const std::string& name, Channel which)
+StereoMaker::StereoMaker(const std::string& name, const std::string& id, Channel which)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
   , mChannel(which)
   , mOut("out")
   , mIn("in")
+{}
+StereoMaker::StereoMaker(const std::string& name, Channel which)
+  : StereoMaker(name, base::RandomString(10), which)
 {}
 
 bool StereoMaker::Prepare(const Loader& loader)
@@ -211,17 +214,24 @@ void StereoMaker::CopyMono(BufferHandle buffer)
 
     for (unsigned i=0; i<num_frames; ++i, ++out, ++in)
     {
-        out->channels[static_cast<int>(mChannel)] = in->channels[0];
+        if (mChannel == Channel::Both)
+        {
+            out->channels[0] = in->channels[0];
+            out->channels[1] = in->channels[0];
+        } else out->channels[static_cast<int>(mChannel)] = in->channels[0];
     }
     mOut.PushBuffer(stereo);
 }
 
-StereoJoiner::StereoJoiner(const std::string& name)
+StereoJoiner::StereoJoiner(const std::string& name, const std::string& id)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
   , mOut("out")
   , mInLeft("left")
   , mInRight("right")
+{}
+StereoJoiner::StereoJoiner(const std::string& name)
+  : StereoJoiner(name, base::RandomString(10))
 {}
 
 bool StereoJoiner::Prepare(const Loader& loader)
@@ -299,12 +309,15 @@ void StereoJoiner::Join(BufferHandle left, BufferHandle right)
     mOut.PushBuffer(stereo);
 }
 
-StereoSplitter::StereoSplitter(const std::string& name)
+StereoSplitter::StereoSplitter(const std::string& name, const std::string& id)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
   , mIn("in")
   , mOutLeft("left")
   , mOutRight("right")
+{}
+StereoSplitter::StereoSplitter(const std::string& name)
+  : StereoSplitter(name, base::RandomString(10))
 {}
 
 bool StereoSplitter::Prepare(const Loader& loader)
@@ -372,20 +385,22 @@ void StereoSplitter::Split(BufferHandle buffer)
     mOutRight.PushBuffer(right);
 }
 
-Mixer::Mixer(const std::string& name, unsigned int num_srcs)
+Mixer::Mixer(const std::string& name, const std::string& id, unsigned int num_srcs)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
   , mOut("out")
 {
     // mixer requires at least 1 src port.
     ASSERT(num_srcs);
-
     for (unsigned i=0; i<num_srcs; ++i)
     {
         SingleSlotPort p(base::FormatString("in%1", i));
         mSrcs.push_back(std::move(p));
     }
 }
+Mixer::Mixer(const std::string& name, unsigned num_srcs)
+  : Mixer(name, base::RandomString(10), num_srcs)
+{}
 
 bool Mixer::Prepare(const Loader& loader)
 {
@@ -394,13 +409,19 @@ bool Mixer::Prepare(const Loader& loader)
     // to resample/convert the streams in order to make
     // sure that they all have matching format spec.
     const auto& master_format = mSrcs[0].GetFormat();
+    if (!IsValid(master_format))
+    {
+        ERROR("Mixer '%1' input port '%2' format not set.", mName, mSrcs[0].GetName());
+        return false;
+    }
 
     for (const auto& src : mSrcs)
     {
         const auto& format = src.GetFormat();
+        const auto& name   = src.GetName();
         if (format != master_format)
         {
-            ERROR("Mixer '%1' format mismatch. %2 vs. %3", src.GetName(), format, master_format);
+            ERROR("Mixer '%1' port '%2' format (%3) is not compatible with other ports.", mName, name, format);
             return false;
         }
     }
@@ -437,21 +458,24 @@ void Mixer::Process(EventQueue& events, unsigned milliseconds)
     mOut.PushBuffer(ret);
 }
 
+Fade::Fade(const std::string& name, const std::string& id, float duration, Effect effect)
+  : mName(name)
+  , mId(id)
+  , mIn("in")
+  , mOut("out")
+{
+    SetFade(effect, duration);
+}
+
+Fade::Fade(const std::string& name, float duration, Effect effect)
+  : Fade(name, base::RandomString(10), duration, effect)
+{}
 Fade::Fade(const std::string& name)
   : mName(name)
   , mId(base::RandomString(10))
   , mIn("in")
   , mOut("out")
 {}
-
-Fade::Fade(const std::string& name, float duration, Effect effect)
-  : mName(name)
-  , mId(base::RandomString(10))
-  , mIn("in")
-  , mOut("out")
-{
-    SetFade(effect, duration);
-}
 
 bool Fade::Prepare(const Loader& loader)
 {
@@ -534,6 +558,13 @@ Gain::Gain(const std::string& name, float gain)
   , mOut("out")
   , mGain(gain)
 {}
+Gain::Gain(const std::string& name, const std::string& id, float gain)
+  : mName(name)
+  , mId(id)
+  , mIn("in")
+  , mOut("out")
+  , mGain(gain)
+{}
 
 bool Gain::Prepare(const Loader& loader)
 {
@@ -593,6 +624,13 @@ void Gain::AdjustGain(BufferHandle buffer)
 Resampler::Resampler(const std::string& name, unsigned sample_rate)
   : mName(name)
   , mId(base::RandomString(10))
+  , mSampleRate(sample_rate)
+  , mIn("in")
+  , mOut("out")
+{}
+Resampler::Resampler(const std::string& name, const std::string& id,  unsigned sample_rate)
+  : mName(name)
+  , mId(id)
   , mSampleRate(sample_rate)
   , mIn("in")
   , mOut("out")
@@ -686,6 +724,15 @@ void Resampler::Process(EventQueue& events, unsigned milliseconds)
 FileSource::FileSource(const std::string& name, const std::string& file, SampleType type)
   : mName(name)
   , mId(base::RandomString(10))
+  , mFile(file)
+  , mPort("out")
+{
+    mFormat.sample_type = type;
+}
+
+FileSource::FileSource(const std::string& name, const std::string& id, const std::string& file, SampleType type)
+  : mName(name)
+  , mId(id)
   , mFile(file)
   , mPort("out")
 {
@@ -1076,14 +1123,18 @@ bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
     return false;
 }
 
-ZeroSource::ZeroSource(const std::string& name, const Format& format)
+ZeroSource::ZeroSource(const std::string& name, const std::string& id, const Format& format)
   : mName(name)
-  , mId(base::RandomString(10))
+  , mId(id)
   , mFormat(format)
   , mOut("out")
 {
     mOut.SetFormat(format);
 }
+ZeroSource::ZeroSource(const std::string& name, const Format& format)
+  : ZeroSource(name, base::RandomString(10), format)
+{}
+
 bool ZeroSource::Prepare(const Loader& loader)
 {
     DEBUG("Prepared ZeroSource '%1' with out format '%2'.", mName, mFormat);
@@ -1197,6 +1248,188 @@ void SineSource::GenerateFrame(Frame<Type, ChannelCount>* frame, float value)
         frame->channels[i] = SampleBits<Type>::Bits * value;
     }
 }
+
+template<typename T>
+const T* GetArg(const std::unordered_map<std::string, ElementArg>& args,
+                const std::string& arg_name,
+                const std::string& elem)
+{
+    if (const auto* variant = base::SafeFind(args, arg_name))
+    {
+        if (const auto* value = std::get_if<T>(variant))
+            return value;
+        else ERROR("Mismatch in audio element '%1' argument '%2' type.", elem, arg_name);
+    } else ERROR("Missing audio element '%1' argument '%2'.", elem, arg_name);
+    return nullptr;
+}
+
+template<typename Type, typename Arg0> inline
+std::unique_ptr<Element> Construct(const std::string& name,
+                                   const std::string& id,
+                                   const Arg0* arg0)
+{
+    if (!arg0) return nullptr;
+    return std::make_unique<Type>(name, id, *arg0);
+}
+template<typename Type, typename Arg0, typename Arg1> inline
+std::unique_ptr<Element> Construct(const std::string& name,
+                                   const std::string& id,
+                                   const Arg0* arg0,
+                                   const Arg1* arg1)
+{
+    if (!arg0 || !arg1) return nullptr;
+    return std::make_unique<Type>(name, id, *arg0, *arg1);
+}
+template<typename Type, typename Arg0, typename Arg1, typename Arg2> inline
+std::unique_ptr<Element> Construct(const std::string& name,
+                                   const std::string& id,
+                                   const Arg0* arg0,
+                                   const Arg1* arg1,
+                                   const Arg2* arg2)
+{
+    if (!arg0 || !arg1 || !arg2) return nullptr;
+    return std::make_unique<Type>(name, id, *arg0, *arg1, *arg2);
+}
+
+std::vector<std::string> ListAudioElements()
+{
+    static std::vector<std::string> list;
+    if (list.empty())
+    {
+        list.push_back("SineSource");
+        list.push_back("ZeroSource");
+        list.push_back("FileSource");
+        list.push_back("Resampler");
+        list.push_back("Gain");
+        list.push_back("Null");
+        list.push_back("StereoSplitter");
+        list.push_back("StereoJoiner");
+        list.push_back("StereoMaker");
+        list.push_back("Mixer");
+    }
+    return list;
+}
+
+const ElementDesc* FindElementDesc(const std::string& type)
+{
+    static std::unordered_map<std::string, ElementDesc> map;
+    if (map.empty())
+    {
+        {
+            ElementDesc test;
+            test.args["frequency"] = 2000u;
+            test.args["millisecs"] = 0u;
+            test.args["format"]    = audio::Format {audio::SampleType::Float32, 44100, 2};
+            test.output_ports.push_back({"out"});
+            map["SineSource"] = test;
+        }
+        {
+            ElementDesc zero;
+            zero.args["format"] = audio::Format{audio::SampleType::Float32, 44100, 2 };
+            zero.output_ports.push_back({"out"});
+            map["ZeroSource"] = zero;
+        }
+        {
+            ElementDesc file;
+            file.args["file"] = std::string();
+            file.args["type"] = audio::SampleType::Float32;
+            file.output_ports.push_back({"out"});
+            map["FileSource"] = file;
+        }
+        {
+            ElementDesc resampler;
+            resampler.args["sample_rate"] = 44100u;
+            resampler.input_ports.push_back({"in"});
+            resampler.output_ports.push_back({"out"});
+            map["Resampler"] = resampler;
+        }
+        {
+            ElementDesc gain;
+            gain.args["gain"] = 1.0f;
+            gain.input_ports.push_back({"in"});
+            gain.output_ports.push_back({"out"});
+            map["Gain"] = gain;
+        }
+        {
+            ElementDesc null;
+            null.input_ports.push_back({"in"});
+            map["Null"] =  null;
+        }
+        {
+            ElementDesc splitter;
+            splitter.input_ports.push_back({"in"});
+            splitter.output_ports.push_back({"left"});
+            splitter.output_ports.push_back({"right"});
+            map["StereoSplitter"] = splitter;
+        }
+        {
+            ElementDesc joiner;
+            joiner.input_ports.push_back({"left"});
+            joiner.input_ports.push_back({"right"});
+            joiner.output_ports.push_back({"out"});
+            map["StereoJoiner"] = joiner;
+        }
+        {
+            ElementDesc maker;
+            maker.input_ports.push_back({"in"});
+            maker.output_ports.push_back({"out"});
+            maker.args["channel"] = StereoMaker::Channel::Both;
+            map["StereoMaker"] = maker;
+        }
+        {
+            ElementDesc mixer;
+            mixer.args["num_srcs"] = 2u;
+            mixer.input_ports.push_back({"in0"});
+            mixer.input_ports.push_back({"in1"});
+            mixer.output_ports.push_back({"out"});
+            map["Mixer"] = mixer;
+        }
+    }
+    return base::SafeFind(map, type);
+}
+
+std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
+{
+    const auto& args = desc.args;
+    const auto& name = desc.type + "/" + desc.name;
+    if (desc.type == "StereoMaker")
+        return Construct<StereoMaker>(desc.name, desc.id,
+            GetArg<StereoMaker::Channel>(args, "channel", name));
+    else if (desc.type == "StereoJoiner")
+        return std::make_unique<StereoJoiner>(desc.name, desc.id);
+    else if (desc.type == "StereoSplitter")
+        return std::make_unique<StereoSplitter>(desc.name, desc.id);
+    else if (desc.type == "Null")
+        return std::make_unique<Null>(desc.name, desc.id);
+    else if (desc.type == "Mixer")
+        return Construct<Mixer>(desc.name, desc.id,
+            GetArg<unsigned>(args, "num_srcs", name));
+    else if (desc.type == "Fade")
+        return Construct<Fade>(desc.name, desc.id,
+            GetArg<float>(args, "duration", name),
+            GetArg<Fade::Effect>(args, "effect", name));
+    else if (desc.type == "Gain")
+        return Construct<Gain>(desc.name, desc.id, 
+            GetArg<float>(args, "gain", name));
+    else if (desc.type == "Resampler")
+        return Construct<Resampler>(desc.name, desc.id, 
+            GetArg<unsigned>(args, "sample_rate", name));
+    else if (desc.type == "FileSource")
+        return Construct<FileSource>(desc.name, desc.id,
+            GetArg<std::string>(args, "file", name),
+            GetArg<SampleType>(args, "type", name));
+    else if (desc.type == "ZeroSource")
+        return Construct<ZeroSource>(desc.name, desc.id,
+            GetArg<Format>(args, "format", name));
+    else if (desc.type == "SineSource")
+        return Construct<SineSource>(desc.name, desc.id,
+            GetArg<Format>(args, "format", name),
+            GetArg<unsigned>(args, "frequency", name),
+            GetArg<unsigned>(args, "millisecs", name));
+    else BUG("Unsupported audio Element construction.");
+    return nullptr;
+}
+
 
 } // namespace
 
