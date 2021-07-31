@@ -32,6 +32,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
+#include "audio/loader.h"
 #include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -244,7 +245,8 @@ private:
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
 class PlayWindow::ResourceLoader : public gfx::ResourceLoader,
-                                   public game::GameDataLoader
+                                   public game::GameDataLoader,
+                                   public audio::Loader
 {
 public:
     ResourceLoader(const app::Workspace& workspace,
@@ -270,6 +272,15 @@ public:
     virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
     {
         return app::GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
+    }
+    virtual std::ifstream OpenStream(const std::string& URI) const override
+    {
+        const auto& file = ResolveURI(URI);
+        DEBUG("URI '%1' => '%2'", URI, file);
+        auto stream = app::OpenBinaryIStream(file);
+        if (!stream.is_open())
+            ERROR("Failed to open '%1'.", file);
+        return stream;
     }
 private:
     QString ResolveURI(const std::string& URI) const

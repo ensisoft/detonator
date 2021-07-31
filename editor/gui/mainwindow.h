@@ -147,6 +147,7 @@ namespace gui
         void on_btnScene_clicked();
         void on_btnScript_clicked();
         void on_btnUI_clicked();
+        void on_btnAudio_clicked();
         void actionWindowFocus_triggered();
         void RefreshUI();
         void ShowNote(const app::Event& event);

@@ -1,0 +1,1628 @@
+// Copyright (C) 2020-2021 Sami Väisänen
+// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#define LOGTAG "gui"
+
+#include "config.h"
+
+#include "warnpush.h"
+#  include <QFileDialog>
+#  include <QMessageBox>
+#  include <base64/base64.h>
+#include "warnpop.h"
+
+#include <map>
+
+#include "audio/element.h"
+#include "audio/graph.h"
+#include "audio/format.h"
+#include "audio/player.h"
+#include "audio/device.h"
+#include "data/json.h"
+
+#include "editor/app/workspace.h"
+#include "editor/app/eventlog.h"
+#include "editor/gui/audiowidget.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/settings.h"
+
+namespace {
+enum class Channels {
+    Stereo = 2, Mono = 1
+};
+
+struct PortDesc {
+    std::string name;
+    QRectF rect;
+    QPointF link_pos;
+};
+struct ArgDesc {
+    std::string name;
+    audio::GraphClass::ElementArg arg;
+};
+
+struct ElementDesc {
+    std::string type;
+    std::vector<ArgDesc> args;
+    std::vector<PortDesc> input_ports;
+    std::vector<PortDesc> output_ports;
+};
+
+using ElementMap = std::map<std::string, ElementDesc>;
+
+bool FindAudioFileInfo(const std::string& file, audio::FileSource::FileInfo* info)
+{
+    static std::unordered_map<std::string, audio::FileSource::FileInfo> cache;
+    auto it = cache.find(file);
+    if (it != cache.end()) {
+        *info = it->second;
+        return true;
+    }
+    if (!audio::FileSource::ProbeFile(file, info))
+        return false;
+    cache[file] = *info;
+    return true;
+}
+
+ElementMap GetElementMap()
+{
+    static ElementMap map;
+    if (!map.empty())
+        return map;
+
+    const auto& elements = audio::ListAudioElements();
+    for (const auto& name : elements)
+    {
+        const auto* desc = audio::FindElementDesc(name);
+        ElementDesc elem;
+        elem.type = name;
+        for (const auto& pair : desc->args)
+        {
+            ArgDesc arg;
+            arg.name = pair.first;
+            arg.arg  = pair.second;
+            elem.args.push_back(std::move(arg));
+        }
+        for (const auto& p : desc->input_ports)
+        {
+            PortDesc port;
+            port.name = p.name;
+            elem.input_ports.push_back(std::move(port));
+        }
+        for (const auto& p : desc->output_ports)
+        {
+            PortDesc port;
+            port.name = p.name;
+            elem.output_ports.push_back(std::move(port));
+        }
+        map[name] = elem;
+    }
+    return map;
+}
+
+ElementDesc FindElementDescription(const std::string& type)
+{ return GetElementMap()[type]; }
+
+
+class AudioLink : public QGraphicsItem
+{
+public:
+    AudioLink(const AudioLink&) = delete;
+    AudioLink()
+      : mId(base::RandomString(10))
+    {
+        setFlag(QGraphicsItem::ItemIsMovable, false);
+        setFlag(QGraphicsItem::ItemIsSelectable, false);
+    }
+    AudioLink(const audio::GraphClass::Link& link)
+      : mId(link.id)
+    {
+        mSrcElem = link.src_element;
+        mDstElem = link.dst_element;
+        mSrcPort = link.src_port;
+        mDstPort = link.dst_port;
+        setFlag(QGraphicsItem::ItemIsMovable, false);
+        setFlag(QGraphicsItem::ItemIsSelectable, false);
+    }
+    void SetCurve(const QPointF& src, const QPointF& dst)
+    {
+        mSrc = src;
+        mDst = dst;
+        this->update();
+    }
+    void SetSrc(const std::string& src_elem, const std::string& src_port)
+    {
+        mSrcElem = src_elem;
+        mSrcPort = src_port;
+    }
+    void SetDst(const std::string& dst_elem, const std::string& dst_port)
+    {
+        mDstElem = dst_elem;
+        mDstPort = dst_port;
+    }
+
+    void ApplyState(audio::GraphClass& klass) const
+    {
+        audio::GraphClass::Link link;
+        link.id = mId;
+        link.src_element = mSrcElem;
+        link.dst_element = mDstElem;
+        link.src_port = mSrcPort;
+        link.dst_port = mDstPort;
+        klass.AddLink(std::move(link));
+    }
+
+    bool Validate() const
+    {
+        return true;
+    }
+    virtual QRectF boundingRect() const override
+    {
+        const auto& src = mapFromScene(mSrc);
+        const auto& dst = mapFromScene(mDst);
+        const auto top    = std::min(src.y(), dst.y());
+        const auto left   = std::min(src.x(), dst.x());
+        const auto right  = std::max(src.x(), dst.x());
+        const auto bottom = std::max(src.y(), dst.y());
+        return QRectF(left, top, right-left, bottom-top);
+    }
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
+    {
+        const auto& src = mapFromScene(mSrc);
+        const auto& dst = mapFromScene(mDst);
+        const auto& rect = boundingRect();
+
+        QPainterPath path;
+        path.moveTo(src);
+        path.cubicTo(QPointF(dst.x(), src.y()),
+                     QPointF(src.x(), dst.y()),
+                     dst);
+        QPen pen;
+        pen.setColor(QColor(0, 128, 0));
+        pen.setWidth(10);
+        painter->setPen(pen);
+        painter->drawPath(path);
+    }
+    QPointF GetSrcPoint() const
+    { return mSrc; }
+    QPointF GetDstPoint() const
+    { return mDst; }
+    const std::string& GetSrcElem() const
+    { return mSrcElem; }
+    const std::string& GetDstElem() const
+    { return mDstElem; }
+    const std::string& GetSrcPort() const
+    { return mSrcPort; }
+    const std::string& GetDstPort() const
+    { return mDstPort; }
+    const std::string& GetLinkId() const
+    { return mId; }
+
+    void LoadState(const app::Resource& resource)
+    {
+        float src_x, src_y;
+        float dst_x, dst_y;
+        resource.GetProperty(app::FromUtf8("link_" + mId + "_src_x"), &src_x);
+        resource.GetProperty(app::FromUtf8("link_" + mId + "_src_y"), &src_y);
+        resource.GetProperty(app::FromUtf8("link_" + mId + "_dst_x"), &dst_x);
+        resource.GetProperty(app::FromUtf8("link_" + mId + "_dst_y"), &dst_y);
+        mSrc = QPointF(src_x, src_y);
+        mDst = QPointF(dst_x, dst_y);
+    }
+
+    void SaveState(app::Resource& resource) const
+    {
+        resource.SetProperty(app::FromUtf8("link_" + mId + "_src_x"), mSrc.x());
+        resource.SetProperty(app::FromUtf8("link_" + mId + "_src_y"), mSrc.y());
+        resource.SetProperty(app::FromUtf8("link_" + mId + "_dst_x"), mDst.x());
+        resource.SetProperty(app::FromUtf8("link_" + mId + "_dst_y"), mDst.y());
+    }
+
+    void IntoJson(data::Writer& writer) const
+    {
+        writer.Write("id", mId);
+        writer.Write("src_point", gui::ToVec2(mSrc));
+        writer.Write("dst_point", gui::ToVec2(mDst));
+        writer.Write("src_elem", mSrcElem);
+        writer.Write("src_port", mSrcPort);
+        writer.Write("dst_elem", mDstElem);
+        writer.Write("dst_port", mDstPort);
+    }
+    void FromJson(const data::Reader& reader)
+    {
+        glm::vec2 src_point;
+        glm::vec2 dst_point;
+        reader.Read("id", &mId);
+        reader.Read("src_point", &src_point);
+        reader.Read("dst_point", &dst_point);
+        reader.Read("src_elem", &mSrcElem);
+        reader.Read("src_port", &mSrcPort);
+        reader.Read("dst_elem", &mDstElem);
+        reader.Read("dst_port", &mDstPort);
+        mSrc = QPointF(src_point.x, src_point.y);
+        mDst = QPointF(dst_point.x, dst_point.y);
+    }
+    AudioLink& operator=(const AudioLink&) = delete;
+private:
+    std::string mId;
+    QPointF mSrc;
+    QPointF mDst;
+    std::string mSrcElem;
+    std::string mSrcPort;
+    std::string mDstElem;
+    std::string mDstPort;
+};
+
+class AudioElement : public QGraphicsItem
+{
+public:
+    AudioElement(const audio::GraphClass::Element& elem)
+      : mId(elem.id)
+      , mType(elem.type)
+      , mName(elem.name)
+    {
+        setFlag(QGraphicsItem::ItemIsMovable, true);
+        setFlag(QGraphicsItem::ItemIsSelectable, true);
+        setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+        setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
+
+        const auto& desc = FindElementDescription(mType);
+        mIPorts = desc.input_ports;
+        mOPorts = desc.output_ports;
+        mArgs   = desc.args;
+        for (auto& arg : mArgs)
+        {
+            auto it = elem.args.find(arg.name);
+            if (it == elem.args.end())
+                continue;
+            arg.arg = it->second;
+        }
+        ComputePorts();
+    }
+
+    AudioElement(const ElementDesc& desc)
+      : mId(base::RandomString(10))
+      , mType(desc.type)
+      , mIPorts(desc.input_ports)
+      , mOPorts(desc.output_ports)
+      , mArgs(desc.args)
+    {
+        setFlag(QGraphicsItem::ItemIsMovable, true);
+        setFlag(QGraphicsItem::ItemIsSelectable, true);
+        setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+        setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
+        ComputePorts();
+    }
+
+    bool IsFileSource() const
+    { return mType == "FileSource"; }
+    unsigned GetNumOutputPorts() const
+    { return mOPorts.size(); }
+    unsigned GetNumInputPorts() const
+    { return mIPorts.size(); }
+    const PortDesc& GetOutputPort(unsigned index) const
+    { return mOPorts[index]; }
+    const PortDesc& GetInputPort(unsigned index) const
+    { return mIPorts[index]; }
+
+    std::string GetName() const
+    { return mName; }
+    std::string GetId() const
+    { return mId; }
+    void SetName(const std::string& name)
+    { mName = name; }
+
+    bool HasArgument(const std::string& name) const
+    {
+        for (const auto& a : mArgs)
+            if (a.name == name) return true;
+        return false;
+    }
+
+    template<typename T>
+    T* GetArgValue(const std::string& name)
+    {
+        if (auto* desc = FindArg(name))
+        {
+            ASSERT(std::holds_alternative<T>(desc->arg));
+            return &std::get<T>(desc->arg);
+        }
+        return nullptr;
+    }
+
+    template<typename T>
+    const T* GetArgValue(const std::string& name) const
+    {
+        if (const auto* desc = FindArg(name))
+        {
+            ASSERT(std::holds_alternative<T>(desc->arg));
+            return &std::get<T>(desc->arg);
+        }
+        return nullptr;
+    }
+
+    void ApplyState(audio::GraphClass& klass) const
+    {
+        audio::GraphClass::Element element;
+        element.id   = mId;
+        element.name = mName;
+        element.type = mType;
+        for (const auto& arg : mArgs)
+        {
+            element.args[arg.name] = arg.arg;
+        }
+        klass.AddElement(std::move(element));
+    }
+
+    bool Validate() const
+    {
+        for (const auto& arg : mArgs)
+        {
+            if (arg.name == "file")
+            {
+                if (const auto* ptr = GetArgValue<std::string>("file"))
+                    if (ptr->empty()) return SetValid("Invalid source file (none).", false);
+            }
+            else if (arg.name == "type")
+            {
+                if (const auto* ptr = GetArgValue<audio::SampleType>("type"))
+                    if (*ptr == audio::SampleType::NotSet) return SetValid("Invalid sample type.", false);
+            }
+            else if (arg.name == "format")
+            {
+                if (const auto* ptr = GetArgValue<audio::Format>("format"))
+                {
+                    if (ptr->channel_count == 0) return SetValid("Invalid channel count.", false);
+                    else if (ptr->sample_rate == 0) return SetValid("Invalid sample rate.", false);
+                    else if (ptr->sample_type == audio::SampleType::NotSet)
+                        return SetValid("Invalid sample type.", false);
+                }
+            }
+            else if (arg.name == "sample_rate")
+            {
+                if (const auto* ptr = GetArgValue<unsigned>("sample_rate"))
+                    if (*ptr == 0) return SetValid("Invalid sample rate.", false);
+            }
+        }
+        return SetValid("", true);
+    }
+    bool SetValid(const QString& msg, bool valid) const
+    {
+        mMessage = msg;
+        mIsValid = valid;
+        return valid;
+    }
+
+    virtual QRectF boundingRect() const override
+    {
+        qreal penWidth = 1;
+        return QRectF(0.0f, 0.0f, mWidth, mHeight);
+    }
+
+    const PortDesc* MapOutputPort(const QPointF& pos) const
+    {
+        for (const auto& p : mOPorts)
+        {
+            if (p.rect.contains(pos))
+                return &p;
+        }
+        return nullptr;
+    }
+    const PortDesc* MapInputPort(const QPointF& pos) const
+    {
+        for (const auto& p : mIPorts)
+        {
+            if (p.rect.contains(pos))
+                return &p;
+        }
+        return nullptr;
+    }
+
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
+    {
+        const auto& palette = option->palette;
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setRenderHint(QPainter::TextAntialiasing);
+
+        QRectF rc(0.0f, 0.0f, mWidth, mHeight);
+
+        QPainterPath path;
+        path.addRoundedRect(rc, 10, 10);
+
+        if (isSelected())
+        {
+            QPen pen;
+            pen.setColor(palette.color(QPalette::HighlightedText));
+            painter->setPen(pen);
+            painter->fillPath(path, palette.color(QPalette::Highlight));
+            painter->drawPath(path);
+        }
+        else
+        {
+            QPen pen;
+            pen.setColor(palette.color(QPalette::Text));
+            painter->setPen(pen);
+            painter->fillPath(path, palette.color(QPalette::Base));
+            painter->drawPath(path);
+        }
+
+        auto big_font = painter->font();
+        big_font.setPixelSize(20);
+
+        painter->drawText(rc, Qt::AlignVCenter | Qt::AlignHCenter,
+        QString("<%1>\n\n%2")
+                .arg(app::FromUtf8(mType))
+                .arg(app::FromUtf8(mName)));
+
+        for (unsigned i=0; i<mIPorts.size(); ++i)
+        {
+            const auto& port = mIPorts[i];
+            QPainterPath p;
+            p.addRoundedRect(port.rect, 5, 5);
+            painter->fillPath(p, QColor(0, 128, 0));
+            painter->drawText(port.rect, Qt::AlignVCenter | Qt::AlignHCenter, app::FromUtf8(port.name));
+        }
+        for (unsigned i=0; i<mOPorts.size(); ++i)
+        {
+            const auto& port = mOPorts[i];
+            QPainterPath p;
+            p.addRoundedRect(port.rect, 5, 5);
+            painter->fillPath(p, QColor(0, 128, 0));
+            painter->drawText(port.rect, Qt::AlignVCenter | Qt::AlignHCenter, app::FromUtf8(port.name));
+        }
+        //if (mIsValid) return;
+        QPen failure;
+        failure.setColor(QColor(200, 0, 0));
+        painter->setPen(failure);
+        painter->setFont(big_font);
+        painter->drawText(0, mHeight + 25, mMessage);
+    }
+
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value) override
+    {
+        // this is the wrong place to do things, try to fix this API mess
+        // and dispatch the call to the right place, i.e the scene.
+        auto* ugly = dynamic_cast<gui::AudioGraphScene*>(scene());
+        if (ugly == nullptr) return value;
+        ugly->NotifyItemChange(change, this);
+
+        return QGraphicsItem::itemChange(change, value);
+    }
+
+    void LoadState(const app::Resource& resource)
+    {
+        float x = 0.0f, y=0.0f;
+        resource.GetProperty(app::FromUtf8("elem_" + mId + "_pos_x"), &x);
+        resource.GetProperty(app::FromUtf8("elem_" + mId + "_pos_y"), &y);
+        setPos(QPointF(x, y));
+    }
+
+    void SaveState(app::Resource& resource) const
+    {
+        const auto& p = this->pos();
+        resource.SetProperty(app::FromUtf8("elem_" + mId + "_pos_x"), p.x());
+        resource.SetProperty(app::FromUtf8("elem_" + mId + "_pos_y"), p.y());
+    }
+
+    void IntoJson(data::Writer& writer) const
+    {
+        writer.Write("id",   mId);
+        writer.Write("type", mType);
+        writer.Write("name", mName);
+        writer.Write("position", gui::ToVec2(this->pos()));
+        for (const auto& arg : mArgs)
+        {
+            const auto& name    = "arg_" + arg.name;
+            const auto& variant = arg.arg;
+            std::visit([&writer, &name](const auto& variant_value) {
+                writer.Write(name.c_str(), variant_value);
+            }, variant);
+        }
+    }
+    void FromJson(const data::Reader& reader)
+    {
+        glm::vec2 position;
+        reader.Read("id",   &mId);
+        reader.Read("type", &mType);
+        reader.Read("name", &mName);
+        reader.Read("position",   &position);
+        for (auto& arg : mArgs)
+        {
+            const auto& name = "arg_" + arg.name;
+            auto& variant = arg.arg;
+            std::visit([&reader, &name](auto& variant_value) {
+                reader.Read(name.c_str(), &variant_value);
+            }, variant);
+        }
+        this->setPos(QPointF(position.x, position.y));
+    }
+private:
+    ArgDesc* FindArg(const std::string& name)
+    {
+        for (auto& arg : mArgs)
+            if (arg.name == name) return &arg;
+        return nullptr;
+    }
+    const ArgDesc* FindArg(const std::string& name) const
+    {
+        for (auto& arg : mArgs)
+            if (arg.name == name) return &arg;
+        return nullptr;
+    }
+    void ComputePorts()
+    {
+        const auto otop = (mHeight - mOPorts.size() * 30.0f) * 0.5f;
+        const auto itop = (mHeight - mIPorts.size() * 30.0f) * 0.5f;
+        for (unsigned i=0; i<mIPorts.size(); ++i)
+        {
+            const auto top = itop + 30.0f * i + 5;
+            mIPorts[i].rect = QRectF(0.0f, top, 40.0f, 20.0f);
+            mIPorts[i].link_pos = QPointF(0.0f, top + 10.0f);
+        }
+
+        for (unsigned i=0; i<mOPorts.size(); ++i)
+        {
+            const auto top = otop + 30.0f * i + 5;
+            mOPorts[i].rect = QRectF(mWidth - 40.0f, top, 40.0f, 20.0f);
+            mOPorts[i].link_pos = QPointF(mWidth, top + 10.0f);
+        }
+    }
+
+private:
+    float mWidth  = 200.0f;
+    float mHeight = 100.0f;
+    std::string mId;
+    std::string mType;
+    std::string mName;
+    std::vector<PortDesc> mIPorts;
+    std::vector<PortDesc> mOPorts;
+    std::vector<ArgDesc> mArgs;
+    mutable QString mMessage;
+    mutable bool mIsValid = true;
+};
+} // namespace
+
+namespace gui
+{
+
+void AudioGraphScene::NotifyItemChange(QGraphicsItem::GraphicsItemChange change, QGraphicsItem* item)
+{
+    ChangeEvent event;
+    event.change = change;
+    event.item   = item;
+    //mChanges.push(event);
+    ApplyChange(event);
+}
+
+void AudioGraphScene::ApplyItemChanges()
+{
+    while (!mChanges.empty())
+    {
+        ChangeEvent event = mChanges.front();
+        ApplyChange(event);
+        mChanges.pop();
+    }
+}
+
+void AudioGraphScene::DeleteItems(const QList<QGraphicsItem*>& items)
+{
+    UnlinkItems(items);
+
+    qDeleteAll(items);
+}
+
+void AudioGraphScene::UnlinkItems(const QList<QGraphicsItem*>& items)
+{
+    std::unordered_set<AudioLink*> dead_links;
+    for (const auto* item : items)
+    {
+        if (const auto* elem = dynamic_cast<const AudioElement*>(item))
+        {
+            for (unsigned i=0; i<elem->GetNumOutputPorts(); ++i)
+            {
+                const auto& port = elem->GetOutputPort(i);
+                const auto& key  = base::FormatString("%1:%2", elem->GetId(), port.name);
+                auto it = mLinkMap.find(key);
+                if (it == mLinkMap.end()) continue;
+                auto* link = dynamic_cast<AudioLink*>(it->second);
+                dead_links.insert(link);
+            }
+            for (unsigned i=0; i<elem->GetNumInputPorts(); ++i)
+            {
+                const auto& port = elem->GetInputPort(i);
+                const auto& key  = base::FormatString("%1:%2", elem->GetId(), port.name);
+                auto it = mLinkMap.find(key);
+                if (it == mLinkMap.end()) continue;
+                auto* link = dynamic_cast<AudioLink*>(it->second);
+                dead_links.insert(link);
+            }
+        }
+    }
+
+    for (auto it = mLinkMap.begin(); it != mLinkMap.end();)
+    {
+        auto* link = dynamic_cast<AudioLink*>(it->second);
+        auto dl = dead_links.find(link);
+        if (dl == dead_links.end()) {
+            ++it;
+        } else it = mLinkMap.erase(it);
+    }
+    qDeleteAll(dead_links);
+}
+
+void AudioGraphScene::UnlinkPort(const std::string& element, const std::string& port)
+{
+    const auto& key = base::FormatString("%1:%2", element, port);
+    auto it = mLinkMap.find(key);
+    if (it == mLinkMap.end()) return;
+
+    auto* dead_link = it->second;
+    for (auto it = mLinkMap.begin(); it != mLinkMap.end();)
+    {
+        auto* link = dynamic_cast<AudioLink*>(it->second);
+        if (link == dead_link)
+            it = mLinkMap.erase(it);
+        else ++it;
+    }
+    delete dead_link;
+}
+
+void AudioGraphScene::IntoJson(data::Writer& writer) const
+{
+    const auto& items = this->items();
+    for (const auto* item : items)
+    {
+        auto chunk = writer.NewWriteChunk();
+        if (const auto* ptr = dynamic_cast<const AudioElement*>(item))
+        {
+            ptr->IntoJson(*chunk);
+            writer.AppendChunk("element", std::move(chunk));
+        }
+        else if (const auto* ptr = dynamic_cast<const AudioLink*>(item))
+        {
+            ptr->IntoJson(*chunk);
+            writer.AppendChunk("link", std::move(chunk));
+        } else BUG("???");
+    }
+    for (const auto& p : mLinkMap)
+    {
+        const auto* link = dynamic_cast<const AudioLink*>(p.second);
+        auto chunk = writer.NewWriteChunk();
+        chunk->Write("port", p.first);
+        chunk->Write("link", link->GetLinkId());
+        writer.AppendChunk("mapping", std::move(chunk));
+    }
+}
+
+bool AudioGraphScene::FromJson(const data::Reader& reader)
+{
+    for (unsigned i=0; i<reader.GetNumChunks("element"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("element", i);
+        std::string type;
+        chunk->Read("type", &type);
+        auto* element = new AudioElement(FindElementDescription(type));
+        element->FromJson(*chunk);
+        addItem(element);
+    }
+    std::unordered_map<std::string, AudioLink*> links;
+    for (unsigned i=0; i<reader.GetNumChunks("link"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("link", i);
+        auto* link = new AudioLink();
+        link->FromJson(*chunk);
+        links[link->GetLinkId()] = link;
+        addItem(link);
+    }
+    for (unsigned i=0; i<reader.GetNumChunks("mapping"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("mapping", i);
+        std::string port;
+        std::string link;
+        chunk->Read("port", &port);
+        chunk->Read("link", &link);
+        mLinkMap[port] = links[link];
+    }
+    return true;
+}
+
+void AudioGraphScene::ApplyChange(const ChangeEvent& event)
+{
+    if (event.change != QGraphicsItem::ItemPositionChange)
+        return;
+
+    if (const auto* elem = dynamic_cast<AudioElement*>(event.item))
+    {
+        for (unsigned i=0; i<elem->GetNumOutputPorts(); ++i)
+        {
+            const auto& port = elem->GetOutputPort(i);
+            const auto& key  = base::FormatString("%1:%2", elem->GetId(), port.name);
+            auto it = mLinkMap.find(key);
+            if (it == mLinkMap.end()) continue;
+            auto* link = dynamic_cast<AudioLink*>(it->second);
+
+            link->SetCurve(elem->mapToScene(port.link_pos), link->GetDstPoint());
+        }
+        for (unsigned i=0; i<elem->GetNumInputPorts(); ++i)
+        {
+            const auto& port = elem->GetInputPort(i);
+            const auto& key  = base::FormatString("%1:%2", elem->GetId(), port.name);
+            auto it = mLinkMap.find(key);
+            if (it == mLinkMap.end()) continue;
+            auto* link = dynamic_cast<AudioLink*>(it->second);
+
+            link->SetCurve(link->GetSrcPoint(), elem->mapToScene(port.link_pos));
+        }
+    }
+}
+
+void AudioGraphScene::SaveState(app::Resource& resource) const
+{
+    const auto& items = this->items();
+    for (const auto* item : items)
+    {
+        if (const auto* elem = dynamic_cast<const AudioElement*>(item))
+            elem->SaveState(resource);
+        else if (const auto* link = dynamic_cast<const AudioLink*>(item))
+            link->SaveState(resource);
+        else BUG("???");
+    }
+
+    resource.SetProperty("mapping_count", (unsigned)mLinkMap.size());
+    unsigned link_counter = 0;
+    for (const auto& p : mLinkMap)
+    {
+        const auto* link = dynamic_cast<const AudioLink*>(p.second);
+        resource.SetProperty(QString("mapping_%1_port").arg(link_counter), app::FromUtf8(p.first));
+        resource.SetProperty(QString("mapping_%1_link").arg(link_counter), app::FromUtf8(link->GetLinkId()));
+        ++link_counter;
+    }
+}
+void AudioGraphScene::LoadState(const app::Resource& resource)
+{
+    const audio::GraphClass* klass;
+    resource.GetContent(&klass);
+
+    for (size_t i=0; i<klass->GetNumElements(); ++i)
+    {
+        AudioElement* elem = new AudioElement(klass->GetElement(i));
+        elem->LoadState(resource);
+        addItem(elem);
+    }
+    std::unordered_map<std::string, AudioLink*> links;
+    for (size_t i=0; i<klass->GetNumLinks(); ++i)
+    {
+        AudioLink* link = new AudioLink(klass->GetLink(i));
+        links[link->GetLinkId()] = link;
+        link->LoadState(resource);
+        addItem(link);
+    }
+    unsigned link_counter = 0;
+    resource.GetProperty("mapping_count", &link_counter);
+    for (unsigned i=0; i<link_counter; ++i)
+    {
+        QString port;
+        QString link;
+        resource.GetProperty(QString("mapping_%1_port").arg(i), &port);
+        resource.GetProperty(QString("mapping_%1_link").arg(i), &link);
+        mLinkMap[app::ToUtf8(port)] = links[app::ToUtf8(link)];
+    }
+}
+
+void AudioGraphScene::ApplyState(audio::GraphClass& klass) const
+{
+    const auto& items = this->items();
+    for (const auto* item :items)
+    {
+        if (const auto* elem = dynamic_cast<const AudioElement*>(item))
+            elem->ApplyState(klass);
+        else if (const auto* link = dynamic_cast<const AudioLink*>(item))
+            link->ApplyState(klass);
+    }
+}
+
+bool AudioGraphScene::ValidateGraphContent() const
+{
+    bool valid = true;
+    const auto& items = this->items();
+    for (const auto* item : items)
+    {
+        if (const auto* elem = dynamic_cast<const AudioElement*>(item))
+            valid = valid & elem->Validate();
+        else if (const auto* link = dynamic_cast<const AudioLink*>(item))
+            valid = valid & link->Validate();
+    }
+    return valid;
+}
+
+void AudioGraphScene::mousePressEvent(QGraphicsSceneMouseEvent* mickey)
+{
+    if (mickey->button() != Qt::LeftButton)
+        return;
+
+    const auto pos = mickey->scenePos();
+    auto* item = itemAt(pos, QTransform());
+    if (item == nullptr)
+        return QGraphicsScene::mousePressEvent(mickey);
+    const auto* elem = dynamic_cast<AudioElement*>(item);
+    if (elem == nullptr)
+        return QGraphicsScene::mousePressEvent(mickey);
+    const auto item_pos = elem->mapFromScene(pos);
+    const auto* port = elem->MapOutputPort(item_pos);
+    if (port == nullptr)
+        return QGraphicsScene::mousePressEvent(mickey);
+    const auto link_pos = elem->mapToScene(port->link_pos);
+
+    mSrcElem = elem->GetId();
+    mSrcPort = port->name;
+
+    QPen pen;
+    pen.setColor(QColor(0, 128, 0));
+    pen.setWidth(10);
+
+    auto* link = new AudioLink();
+    link->SetCurve(link_pos, link_pos);
+    addItem(link);
+    mLine.reset(link);
+    return QGraphicsScene::mousePressEvent(mickey);
+}
+void AudioGraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent* mickey)
+{
+    if (mLine == nullptr)
+        return QGraphicsScene::mouseMoveEvent(mickey);
+
+    auto* link = dynamic_cast<AudioLink*>(mLine.get());
+    link->SetCurve(link->GetSrcPoint(), mickey->scenePos());
+}
+void AudioGraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mickey)
+{
+    if (mLine == nullptr)
+        return QGraphicsScene::mouseReleaseEvent(mickey);
+
+    auto carcass = std::move(mLine);
+
+    const auto pos = mickey->scenePos();
+    auto* item = itemAt(pos, QTransform());
+    if (item == nullptr)
+        return QGraphicsScene::mouseReleaseEvent(mickey);
+    const auto* elem = dynamic_cast<AudioElement*>(item);
+    if (elem== nullptr)
+        return QGraphicsScene::mouseReleaseEvent(mickey);
+    const auto item_pos = elem->mapFromScene(pos);
+    const auto* port = elem->MapInputPort(item_pos);
+    if (port == nullptr)
+        return QGraphicsScene::mouseReleaseEvent(mickey);
+    const auto link_pos = elem->mapToScene(port->link_pos);
+
+    auto* link = dynamic_cast<AudioLink*>(carcass.get());
+    link->SetSrc(mSrcElem, mSrcPort);
+    link->SetDst(elem->GetId(), port->name);
+    link->SetCurve(link->GetSrcPoint(), link_pos);
+
+    UnlinkPort(mSrcElem, mSrcPort);
+    UnlinkPort(elem->GetId(), port->name);
+
+    mLinkMap[base::FormatString("%1:%2", mSrcElem, mSrcPort)] = link;
+    mLinkMap[base::FormatString("%1:%2", elem->GetId(), port->name)] = link;
+
+    carcass.release();
+    QGraphicsScene::mouseReleaseEvent(mickey);
+}
+
+AudioWidget::AudioWidget(app::Workspace* workspace)
+  : mWorkspace(workspace)
+{
+    DEBUG("Create AudioWidget");
+    mUI.setupUi(this);
+    mScene.reset(new AudioGraphScene);
+
+    connect(mScene.get(), &AudioGraphScene::selectionChanged, this, &AudioWidget::SceneSelectionChanged);
+    mUI.view->setScene(mScene.get());
+    mUI.view->setInteractive(true);
+    mUI.view->setBackgroundBrush(QBrush(QColor(0.2f*255, 0.3f*255, 0.4f*255)));
+
+    PopulateFromEnum<audio::SampleType>(mUI.sampleType);
+    PopulateFromEnum<Channels>(mUI.channels);
+    SetValue(mUI.graphName, QString("My Graph"));
+    SetValue(mUI.graphID, base::RandomString(10));
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, false);
+    GetSelectedElementProperties();
+    mGraphHash = GetHash();
+}
+AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resource)
+  : AudioWidget(workspace)
+{
+    DEBUG("Editing audio graph: '%1'.", resource.GetName());
+    SetValue(mUI.graphName, resource.GetName());
+    SetValue(mUI.graphID,   resource.GetId());
+    mScene->LoadState(resource);
+    mScene->invalidate();
+
+    // initialize our random access cache.
+    auto items = mScene->items();
+    for (auto* item : items) {
+        if (auto* ptr = dynamic_cast<AudioElement*>(item))
+            mItems.push_back(ptr);
+    }
+
+    const audio::GraphClass* klass = nullptr;
+    resource.GetContent(&klass);
+
+    UpdateElementList();
+    SetValue(mUI.outElem, ListItemId(klass->GetGraphOutputElementId()));
+    on_outElem_currentIndexChanged(0);
+    SetValue(mUI.outPort, ListItemId(klass->GetGraphOutputElementPort()));
+    GetSelectedElementProperties();
+    setWindowTitle(GetValue(mUI.graphName));
+
+    mGraphHash = GetHash();
+}
+AudioWidget::~AudioWidget()
+{
+    DEBUG("Destroy AudioWidget");
+
+    if (mCurrentId)
+        mPlayer->Cancel(mCurrentId);
+
+    // BRAIN DAMAGED SIGNALLING!
+    QSignalBlocker hell(mScene.get());
+
+    qDeleteAll(mUI.view->items());
+
+    ClearList(mUI.elements);
+}
+
+bool AudioWidget::IsAccelerated() const
+{ return false; }
+
+bool AudioWidget::CanTakeAction(Actions action, const Clipboard*) const
+{
+    return false;
+}
+void AudioWidget::AddActions(QToolBar& bar)
+{
+    bar.addAction(mUI.actionPlay);
+    bar.addAction(mUI.actionPause);
+    bar.addSeparator();
+    bar.addAction(mUI.actionStop);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSave);
+}
+void AudioWidget::AddActions(QMenu& menu)
+{
+    menu.addAction(mUI.actionPlay);
+    menu.addAction(mUI.actionPause);
+    menu.addSeparator();
+    menu.addAction(mUI.actionStop);
+    menu.addSeparator();
+    menu.addAction(mUI.actionSave);
+}
+void AudioWidget::Save()
+{
+    on_actionSave_triggered();
+}
+
+void AudioWidget::Refresh()
+{
+    audio::Player::Event event;
+    while (mPlayer && mPlayer->GetEvent(&event))
+    {
+        if (const auto* ptr = std::get_if<audio::Player::SourceCompleteEvent>(&event))
+            OnAudioPlayerEvent(*ptr);
+        else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
+            OnAudioPlayerEvent(*ptr);
+        else BUG("Unexpected audio player event.");
+    }
+}
+
+bool AudioWidget::SaveState(Settings& settings) const
+{
+    data::JsonObject json;
+    mScene->IntoJson(json);
+    settings.setValue("Audio", "content", base64::Encode(json.ToString()));
+    settings.setValue("Audio", "graph_out_elem", (QString)GetItemId(mUI.outElem));
+    settings.setValue("Audio", "graph_out_port", (QString)GetItemId(mUI.outPort));
+    settings.setValue("Audio", "hash", mGraphHash);
+    settings.saveWidget("Audio", mUI.graphName);
+    settings.saveWidget("Audio", mUI.graphID);
+    return true;
+}
+bool AudioWidget::LoadState(const Settings& settings)
+{
+    std::string base64;
+    settings.getValue("Audio", "content", &base64);
+    data::JsonObject json;
+    auto [ok, error] = json.ParseString(base64::Decode(base64));
+    if (!ok)
+    {
+        ERROR("Failed to parse content JSON. '%1'", error);
+        return false;
+    }
+    mScene->FromJson(json);
+
+    // initialize our random access cache.
+    auto items = mScene->items();
+    for (auto* item : items) {
+        if (auto* ptr = dynamic_cast<AudioElement*>(item))
+            mItems.push_back(ptr);
+    }
+    UpdateElementList();
+
+    QString graph_out_elem;
+    QString graph_out_port;
+    settings.getValue("Audio", "graph_out_elem", &graph_out_elem);
+    settings.getValue("Audio", "graph_out_port", &graph_out_port);
+    settings.getValue("Audio", "hash", &mGraphHash);
+
+    SetValue(mUI.outElem, ListItemId(graph_out_elem));
+    on_outElem_currentIndexChanged(0);
+    SetValue(mUI.outPort, ListItemId(graph_out_port));
+    settings.loadWidget("Audio", mUI.graphName);
+    settings.loadWidget("Audio", mUI.graphID);
+
+    GetSelectedElementProperties();
+    return true;
+}
+bool AudioWidget::HasUnsavedChanges() const
+{
+    if (!mGraphHash)
+        return false;
+    return GetHash() != mGraphHash;
+}
+bool AudioWidget::ConfirmClose()
+{
+    const auto hash = GetHash();
+    if (hash == mGraphHash)
+        return true;
+
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    msg.setIcon(QMessageBox::Question);
+    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+    const auto ret = msg.exec();
+    if (ret == QMessageBox::Cancel)
+        return false;
+    else if (ret == QMessageBox::No)
+        return true;
+
+    on_actionSave_triggered();
+    return true;
+}
+
+bool AudioWidget::GetStats(Stats* stats) const
+{
+    stats->time = mPlayTime;
+    return true;
+}
+
+void AudioWidget::on_btnSelectFile_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName((QWidget*)this,
+        tr("Select Audio File"), "",
+        tr("Audio (*.mp3 *.ogg *.wav *.flac)"));
+    if (file.isEmpty()) return;
+
+    const QFileInfo info(file);
+    const auto& uri = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
+    SetValue(mUI.fileSource, uri);
+    SetSelectedElementProperties();
+    GetSelectedElementProperties();
+}
+
+void AudioWidget::on_actionPlay_triggered()
+{
+    if (!InitializeAudio())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to connect to the platform audio device.\n"
+                       "Please see the log for more details."));
+        msg.exec();
+        return;
+    }
+
+    if (mCurrentId == 0)
+    {
+        // schedule a view update.
+        mScene->invalidate();
+        if (!mScene->ValidateGraphContent())
+            return;
+
+        const std::string& src_elem = GetItemId(mUI.outElem);
+        const std::string& src_port = GetItemId(mUI.outPort);
+        if (src_elem.empty() || src_port.empty())
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setIcon(QMessageBox::Information);
+            msg.setText(tr("You haven't selected any element for the final graph output.\n"
+                           "You can select an element and a port in 'Graph output'."));
+            msg.exec();
+            return;
+        }
+
+        audio::GraphClass klass(GetValue(mUI.graphName),GetValue(mUI.graphID));
+        klass.SetGraphOutputElementId(src_elem);
+        klass.SetGraphOutputElementPort(src_port);
+        mScene->ApplyState(klass);
+
+        audio::Graph graph(std::move(klass));
+        auto source = std::make_unique<audio::AudioGraph>(GetValue(mUI.graphName), std::move(graph));
+        if (!source->Prepare(*mWorkspace))
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setText(tr("Failed to prepare the audio graph.\n"
+                           "Please see the application log for more details."));
+            msg.exec();
+            return;
+        }
+        const auto& desc_strs = (*source)->Describe();
+        for (const auto& str : desc_strs)
+            DEBUG(str);
+
+        mCurrentId = mPlayer->Play(std::move(source));
+    }
+    else
+    {
+        mPlayer->Resume(mCurrentId);
+    }
+
+    SetEnabled(mUI.actionPlay, false);
+    SetEnabled(mUI.actionPause, true);
+    SetEnabled(mUI.actionStop, true);
+
+}
+void AudioWidget::on_actionPause_triggered()
+{
+    ASSERT(mCurrentId);
+    mPlayer->Pause(mCurrentId);
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionPause, false);
+
+}
+void AudioWidget::on_actionStop_triggered()
+{
+    ASSERT(mCurrentId);
+    mPlayer->Cancel(mCurrentId);
+    mCurrentId = 0;
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, false);
+}
+void AudioWidget::on_actionSave_triggered()
+{
+    if (!MustHaveInput(mUI.graphName))
+        return;
+
+    audio::GraphClass klass(GetValue(mUI.graphName),GetValue(mUI.graphID));
+    klass.SetGraphOutputElementId(GetItemId(mUI.outElem));
+    klass.SetGraphOutputElementPort(GetItemId(mUI.outPort));
+    mScene->ApplyState(klass);
+    mGraphHash = klass.GetHash();
+
+    app::AudioResource resource(std::move(klass), GetValue(mUI.graphName));
+    mScene->SaveState(resource);
+
+    mWorkspace->SaveResource(resource);
+    INFO("Saved audio graph '%1'.", GetValue(mUI.graphName));
+    NOTE("Saved audio graph '%1'.", GetValue(mUI.graphName));
+    setWindowTitle(GetValue(mUI.graphName));
+}
+
+void AudioWidget::on_actionDelete_triggered()
+{
+    QSignalBlocker hell(mScene.get());
+
+    auto selected = mScene->selectedItems();
+    for (auto* carcass : selected)
+    {
+        const std::string& id = GetItemId(mUI.outElem);
+        if (dynamic_cast<AudioElement*>(carcass)->GetId() == id)
+        {
+            SetValue(mUI.outElem, -1);
+            SetValue(mUI.outPort, -1);
+        }
+        auto it = std::find(mItems.begin(), mItems.end(), carcass);
+        ASSERT(it != mItems.end());
+        mItems.erase(it);
+    }
+    mScene->DeleteItems(selected);
+
+    UpdateElementList();
+    GetSelectedElementProperties();
+}
+
+void AudioWidget::on_actionUnlink_triggered()
+{
+    auto selected = mScene->selectedItems();
+
+    mScene->UnlinkItems(selected);
+}
+
+void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
+{
+    QMenu menu(this);
+
+    const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
+    const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
+    const auto* item = mScene->itemAt(scene_pos, QTransform());
+    const auto& selected = mScene->selectedItems();
+    mUI.actionDelete->setEnabled(!selected.isEmpty() && item != nullptr);
+    mUI.actionUnlink->setEnabled(!selected.isEmpty() && item != nullptr);
+    const auto& map = GetElementMap();
+    for (const auto& pair : map)
+    {
+        auto* action = menu.addAction(QIcon("icons:add.png"),
+            QString("New %1").arg(app::FromUtf8(pair.first)));
+        action->setData(app::FromUtf8(pair.first));
+        connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
+    }
+
+    menu.addSeparator();
+    menu.addAction(mUI.actionUnlink);
+    menu.addAction(mUI.actionDelete);
+    menu.exec(QCursor::pos());
+}
+
+void AudioWidget::on_elements_itemSelectionChanged()
+{
+    QSignalBlocker hell(mScene.get());
+
+    for (auto* item : mItems)
+        item->setSelected(false);
+
+    auto selected = mUI.elements->selectedItems();
+
+    for (auto* selected : selected)
+    {
+        const auto& id = app::ToUtf8(selected->data(Qt::UserRole).toString());
+        auto it = std::find_if(mItems.begin(), mItems.end(), [id](const auto* item) {
+            return dynamic_cast<const AudioElement*>(item)->GetId() == id;
+        });
+        ASSERT(it != mItems.end());
+        auto* item = dynamic_cast<AudioElement*>(*it);
+        item->setSelected(true);
+    }
+    mUI.view->update();
+
+    GetSelectedElementProperties();
+}
+
+void AudioWidget::on_outElem_currentIndexChanged(int)
+{
+    const std::string& id = GetItemId(mUI.outElem);
+
+    auto it = std::find_if(mItems.begin(), mItems.end(), [&id](const auto* item) {
+        return dynamic_cast<const AudioElement*>(item)->GetId() == id;
+    });
+    if(it == mItems.end()) return;
+
+    const auto* item = dynamic_cast<const AudioElement*>(*it);
+    std::vector<ListItem> ports;
+    for (unsigned i=0; i<item->GetNumOutputPorts();++i)
+    {
+        const auto& port = item->GetOutputPort(i);
+        ListItem  li;
+        li.name = app::FromUtf8(port.name);
+        li.id   = app::FromUtf8(port.name);
+        ports.push_back(li);
+    }
+    SetList(mUI.outPort, ports);
+}
+
+void AudioWidget::on_elemName_textChanged(QString)
+{
+    SetSelectedElementProperties();
+}
+
+void AudioWidget::on_sampleType_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
+void AudioWidget::on_sampleRate_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
+void AudioWidget::on_channels_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
+void AudioWidget::on_gainValue_valueChanged(double)
+{
+    SetSelectedElementProperties();
+}
+
+void AudioWidget::on_frequency_valueChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
+void AudioWidget::SceneSelectionChanged()
+{
+    GetSelectedElementProperties();
+
+    UpdateElementList();
+}
+
+void AudioWidget::AddElementAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+
+    const auto& type = app::ToUtf8(action->data().toString());
+
+    auto* element = new AudioElement(FindElementDescription(type));
+    std::string name;
+    for (unsigned i=0; i<1000; ++i)
+    {
+        name = i == 0 ? base::FormatString("%1", type)
+                      : base::FormatString("%1_%2", type, i);
+        auto it = std::find_if(mItems.begin(), mItems.end(), [&name](const auto* item) {
+            const auto* elem = dynamic_cast<const AudioElement*>(item);
+            if (elem->GetName() == name) return true;
+            return false;
+        });
+        if (it != mItems.end()) continue;
+        break;
+    }
+    // todo: this is off somehow... weird
+    const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
+    const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
+    element->setPos(scene_pos);
+    element->SetName(name);
+    // scene takes ownership of the graphics item
+    mScene->addItem(element);
+    mItems.push_back(element);
+    UpdateElementList();
+}
+
+bool AudioWidget::InitializeAudio()
+{
+    try
+    {
+        static std::weak_ptr<audio::Player> shared_player;
+        mPlayer = shared_player.lock();
+        if (!mPlayer)
+        {
+            mPlayer = std::make_shared<audio::Player>(audio::Device::Create(APP_TITLE));
+            shared_player = mPlayer;
+            DEBUG("Created new audio player.");
+        }
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Failed to create audio device.'%1'", e.what());
+        return false;
+    }
+    return true;
+}
+
+size_t AudioWidget::GetHash() const
+{
+    audio::GraphClass klass(GetValue(mUI.graphName),GetValue(mUI.graphID));
+    klass.SetGraphOutputElementId(GetItemId(mUI.outElem));
+    klass.SetGraphOutputElementPort(GetItemId(mUI.outPort));
+    mScene->ApplyState(klass);
+    return klass.GetHash();
+}
+
+void AudioWidget::GetSelectedElementProperties()
+{
+    SetValue(mUI.elemName, QString(""));
+    SetValue(mUI.elemID,   QString(""));
+    SetValue(mUI.sampleType, audio::SampleType::Float32);
+    SetValue(mUI.channels, Channels::Stereo);
+    SetValue(mUI.sampleRate,   QString("44100"));
+    SetValue(mUI.fileSource, QString(""));
+    SetValue(mUI.gainValue,    1.0f);
+    SetValue(mUI.frequency, 0);
+    SetValue(mUI.afChannels,   QString(""));
+    SetValue(mUI.afSampleRate, QString(""));
+    SetValue(mUI.afFrames,     QString(""));
+    SetValue(mUI.afDuration,   QString(""));
+
+    SetEnabled(mUI.sampleType, false);
+    SetEnabled(mUI.sampleRate, false);
+    SetEnabled(mUI.channels, false);
+    SetEnabled(mUI.fileSource, false);
+    SetEnabled(mUI.btnSelectFile, false);
+    SetEnabled(mUI.gainValue,  false);
+    SetEnabled(mUI.frequency, false);
+    SetEnabled(mUI.audioFile, false);
+
+    SetEnabled(mUI.actionDelete, false);
+
+    /*
+    SetVisible(mUI.sampleType, false);
+    SetVisible(mUI.sampleRate, false);
+    SetVisible(mUI.channels, false);
+    SetVisible(mUI.fileSource, false);
+    SetVisible(mUI.btnSelectFile, false);
+    SetVisible(mUI.gainValue,  false);
+    SetVisible(mUI.frequency, false);
+    SetVisible(mUI.audioFile, false);
+    SetVisible(mUI.lblSampleType, false);
+    SetVisible(mUI.lblSampleRate, false);
+    SetVisible(mUI.lblFileSource, false);
+    SetVisible(mUI.lblGain, false);
+    SetVisible(mUI.lblChannels, false);
+    SetVisible(mUI.lblFrequency, false);
+    */
+
+    auto items = mScene->selectedItems();
+    if (items.isEmpty()) return;
+    const auto* item = dynamic_cast<AudioElement*>(items[0]);
+
+    SetEnabled(mUI.elemName, true);
+    SetEnabled(mUI.elemID, true);
+    SetValue(mUI.elemName, item->GetName());
+    SetValue(mUI.elemID, item->GetId());
+
+    if (const auto* val = item->GetArgValue<audio::Format>("format"))
+    {
+        SetEnabled(mUI.sampleType, true);
+        SetEnabled(mUI.sampleRate, true);
+        SetEnabled(mUI.channels, true);
+        SetVisible(mUI.sampleType, true);
+        SetVisible(mUI.sampleRate, true);
+        SetVisible(mUI.channels, true);
+        SetVisible(mUI.lblSampleType, true);
+        SetVisible(mUI.lblSampleRate, true);
+        SetVisible(mUI.lblChannels, true);
+        SetValue(mUI.sampleType, val->sample_type);
+        SetValue(mUI.sampleRate, val->sample_rate);
+        SetValue(mUI.channels, static_cast<Channels>(val->channel_count));
+    }
+    if (const auto* val = item->GetArgValue<audio::SampleType>("type"))
+    {
+        SetEnabled(mUI.sampleType, true);
+        SetVisible(mUI.sampleType, true);
+        SetVisible(mUI.lblSampleType, true);
+        SetValue(mUI.sampleType, *val);
+    }
+    if (const auto* val = item->GetArgValue<unsigned>("sample_rate"))
+    {
+        SetEnabled(mUI.sampleRate, true);
+        SetVisible(mUI.sampleRate, true);
+        SetVisible(mUI.lblSampleRate, true);
+        SetValue(mUI.sampleRate, *val);
+    }
+
+    if (const auto* val = item->GetArgValue<std::string>("file"))
+    {
+        SetEnabled(mUI.fileSource, true);
+        SetEnabled(mUI.btnSelectFile, true);
+        SetVisible(mUI.fileSource, true);
+        SetVisible(mUI.btnSelectFile, true);
+        SetVisible(mUI.lblFileSource, true);
+        SetValue(mUI.fileSource, *val);
+    }
+
+    if (const auto* val = item->GetArgValue<float>("gain"))
+    {
+        SetEnabled(mUI.gainValue, true);
+        SetVisible(mUI.gainValue, true);
+        SetVisible(mUI.lblGain, true);
+        SetValue(mUI.gainValue, *val);
+    }
+
+    if (const auto* val = item->GetArgValue<unsigned>("frequency"))
+    {
+        SetEnabled(mUI.frequency, true);
+        SetVisible(mUI.frequency, true);
+        SetVisible(mUI.lblFrequency, true);
+        SetValue(mUI.frequency, *val);
+    }
+
+    if (item->IsFileSource())
+    {
+        SetEnabled(mUI.audioFile, true);
+        SetVisible(mUI.audioFile, true);
+        SetValue(mUI.afChannels,   QString(""));
+        SetValue(mUI.afSampleRate, QString(""));
+        SetValue(mUI.afFrames,     QString(""));
+        SetValue(mUI.afDuration,   QString(""));
+        const std::string& URI = *item->GetArgValue<std::string>("file");
+        if (URI.empty())
+            return;
+
+        const std::string& file = app::ToUtf8(mWorkspace->MapFileToFilesystem(URI));
+        audio::FileSource::FileInfo info;
+        if (FindAudioFileInfo(file, &info))
+        {
+            SetValue(mUI.afChannels,   info.channels);
+            SetValue(mUI.afSampleRate, QString("%1 Hz").arg(info.sample_rate));
+            SetValue(mUI.afFrames,     info.frames);
+            SetValue(mUI.afDuration, QString("%1s").arg(info.seconds));
+        }
+        else ERROR("Failed to probe audio file '%1'.", file);
+    }
+}
+
+void AudioWidget::SetSelectedElementProperties()
+{
+    auto items = mScene->selectedItems();
+    if (items.isEmpty()) return;
+    auto* item = dynamic_cast<AudioElement*>(items[0]);
+
+    item->SetName(GetValue(mUI.elemName));
+
+    if (auto* val = item->GetArgValue<audio::Format>("format"))
+    {
+        val->sample_type = GetValue(mUI.sampleType);
+        val->sample_rate = GetValue(mUI.sampleRate);
+        val->channel_count = static_cast<unsigned>((Channels)GetValue(mUI.channels));
+    }
+    if (auto* val = item->GetArgValue<audio::SampleType>("type"))
+        *val = GetValue(mUI.sampleType);
+    if (auto* val = item->GetArgValue<unsigned>("sample_rate"))
+        *val = GetValue(mUI.sampleRate);
+    if (auto* val = item->GetArgValue<std::string>("file"))
+        *val = GetValue(mUI.fileSource);
+    if (auto* val = item->GetArgValue<float>("gain"))
+        *val = GetValue(mUI.gainValue);
+    if (auto* val = item->GetArgValue<unsigned>("frequency"))
+        *val = GetValue(mUI.frequency);
+
+    mScene->invalidate();
+}
+
+void AudioWidget::UpdateElementList()
+{
+    std::vector<ListItem> items;
+    for (auto* item : mItems)
+    {
+        auto* element = dynamic_cast<AudioElement*>(item);
+        ListItem li;
+        li.id   = app::FromUtf8(element->GetId());
+        li.name = app::FromUtf8(element->GetName());
+        li.selected = element->isSelected();
+        items.push_back(li);
+    }
+    SetList(mUI.elements, items);
+    SetList(mUI.outElem, items);
+}
+
+void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event)
+{
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionStop, false);
+    SetEnabled(mUI.actionPause, false);
+    mCurrentId = 0;
+}
+void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEvent& event)
+{
+
+}
+
+void AudioWidget::keyPressEvent(QKeyEvent* key)
+{
+    // QAction doesn't trrigger unless it's been added
+    // to some widget (toolbar/menu)
+    if (key->key() == Qt::Key_Delete)
+    {
+        on_actionDelete_triggered();
+        return;
+    }
+    QWidget::keyPressEvent(key);
+}
+
+} // namespace
+

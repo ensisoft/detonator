@@ -179,8 +179,7 @@ int main(int argc, char* argv[])
 
         // set the logger object for the subsystem to use, we'll
         // direct all this to the terminal for now.
-        //base::CursesLogger logger;
-        ForwardingLogger logger;
+        base::LockedLogger<ForwardingLogger> logger((ForwardingLogger()));
         base::SetGlobalLog(&logger);
         base::EnableDebugLog(true);
         DEBUG("It's alive!");

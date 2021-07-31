@@ -836,6 +836,43 @@ bool FileSource::IsSourceDone() const
     return mFramesRead == mDecoder->GetNumFrames();
 }
 
+// static
+bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
+{
+    auto stream = base::OpenBinaryInputStream(file);
+    if (!stream.is_open())
+        return false;
+
+    std::unique_ptr<Decoder> decoder;
+    const auto& upper = base::ToUpperUtf8(file);
+    if (base::EndsWith(upper, ".MP3"))
+    {
+        auto io = std::make_unique<Mpg123FileInputStream>();
+        io->UseStream(file, std::move(stream));
+        auto dec = std::make_unique<Mpg123Decoder>();
+        if (!dec->Open(std::move(io), SampleType::Float32))
+            return false;
+        decoder = std::move(dec);
+    }
+    else if (base::EndsWith(upper, ".OGG") ||
+             base::EndsWith(upper, ".WAV") ||
+             base::EndsWith(upper, ".FLAC"))
+    {
+        auto io = std::make_unique<SndFileInputStream>();
+        io->UseStream(file, std::move(stream));
+        auto dec = std::make_unique<SndFileDecoder>();
+        if (!dec->Open(std::move(io)))
+            return false;
+        decoder = std::move(dec);
+    }
+    else return false;
+    info->sample_rate = decoder->GetSampleRate();
+    info->channels    = decoder->GetNumChannels();
+    info->frames      = decoder->GetNumFrames();
+    info->seconds     = (float)info->frames / (float)info->sample_rate;
+    return true;
+}
+
 BufferSource::BufferSource(const std::string& name, std::unique_ptr<Buffer> buffer,
                  Format format, SampleType type)
   : mName(name)

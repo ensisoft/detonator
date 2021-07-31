@@ -232,6 +232,9 @@ add_executable(GSEditor
     editor/app/process.h
     editor/app/process.cpp
     editor/app/ipc.cpp
+    editor/gui/audiowidget.h
+    editor/gui/audiowidget.ui
+    editor/gui/audiowidget.cpp
     editor/gui/animationtrackwidget.h
     editor/gui/animationtrackwidget.ui
     editor/gui/animationtrackwidget.cpp
@@ -382,7 +385,7 @@ target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_par
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(GSEditor EngineLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(GSEditor EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
 target_link_libraries(GSEditor ${CONAN_LIBS})
 install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
