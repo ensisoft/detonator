@@ -22,6 +22,7 @@
 
 #include "base/assert.h"
 #include "base/format.h"
+#include "data/fwd.h"
 
 namespace audio
 {
@@ -40,20 +41,13 @@ namespace audio
         unsigned channel_count = 0;
     };
 
-    inline bool operator==(const Format& lhs, const Format& rhs)
-    {
-        return lhs.sample_type == rhs.sample_type &&
-               lhs.sample_rate == rhs.sample_rate &&
-               lhs.channel_count == rhs.channel_count;
-    }
-    inline bool operator!=(const Format& lhs, const Format& rhs)
-    { return !(lhs == rhs); }
+    void Serialize(data::Writer& writer, const char* name, const Format& format);
+    bool Deserialize(const data::Reader& reader, const char* name, Format* format);
 
-    inline std::string ToString(const Format& fmt)
-    {
-        return base::FormatString("%1, %2 channel(s) @ %3", fmt.sample_type,
-                                  fmt.channel_count, fmt.sample_rate);
-    }
+    bool operator==(const Format& lhs, const Format& rhs);
+    bool operator!=(const Format& lhs, const Format& rhs);
+    bool IsValid(const Format& format);
+    std::string ToString(const Format& fmt);
 
     template<typename DataType, unsigned ChannelCount>
     struct Frame {

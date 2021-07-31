@@ -22,6 +22,7 @@
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/logging.h"
+#include "data/json.h"
 #include "audio/element.h"
 #include "audio/graph.h"
 #include "audio/loader.h"
@@ -129,6 +130,8 @@ public:
     { return mId; }
     virtual std::string GetName() const override
     { return mName; }
+    virtual std::string GetType() const override
+    { return "TestSrcElement"; }
     virtual bool IsSourceDone() const override
     {
         if (!mShouldFinish) return false;
@@ -172,6 +175,8 @@ public:
     { return mId; }
     virtual std::string GetName() const override
     { return mName; }
+    virtual std::string GetType() const override
+    { return "TestElement"; }
     virtual bool Prepare(const audio::Loader&) override
     {
         mState.prepare_list.push_back(this);
@@ -269,6 +274,8 @@ void unit_test_basic()
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetType() const override
+        { return "TestElement"; }
     private:
         const std::string mId;
         const std::string mName;
@@ -302,8 +309,8 @@ void unit_test_prepare_topologies()
         auto elem = std::make_unique<TestElement>("foo", "foo", state);
         auto port = std::make_unique<TestPort>("src");
         audio::Format format;
-        format.sample_rate   = 77777;
-        format.channel_count = 5;
+        format.sample_rate   = 44100;
+        format.channel_count = 2;
         format.sample_type   = audio::SampleType::Float32;
         port->SetFormat(format);
         elem->AddOutputPort(std::move(port));
@@ -321,8 +328,8 @@ void unit_test_prepare_topologies()
         TestState state;
 
         audio::Format format;
-        format.sample_rate   = 77777;
-        format.channel_count = 5;
+        format.sample_rate   = 44100;
+        format.channel_count = 2;
         format.sample_type   = audio::SampleType::Float32;
 
         audio::Graph graph("joo");
@@ -340,6 +347,7 @@ void unit_test_prepare_topologies()
         graph.AddElementPtr(std::move(b));
         Link(graph, "a", "out", "c", "in0");
         Link(graph, "b", "out", "c", "in1");
+        Link(graph, "c", "out");
         TEST_REQUIRE(graph.Prepare(loader));
 
         std::string topo = state.ConcatPrepareNames();
@@ -351,8 +359,8 @@ void unit_test_prepare_topologies()
         TestState state;
 
         audio::Format format;
-        format.sample_rate   = 77777;
-        format.channel_count = 5;
+        format.sample_rate   = 44100;
+        format.channel_count = 2;
         format.sample_type   = audio::SampleType::Float32;
 
         audio::Graph graph("joo");
@@ -391,6 +399,7 @@ void unit_test_prepare_topologies()
         Link(graph, "c", "out0", "e", "in1");
         Link(graph, "c", "out1", "d", "in");
         Link(graph, "d", "out", "e", "in2");
+        Link(graph, "e", "out");
         TEST_REQUIRE(graph.Prepare(loader));
 
         std::string topo = state.ConcatPrepareNames();
@@ -518,8 +527,8 @@ void unit_test_graph_in_graph()
     TestState state;
 
     audio::Format format;
-    format.sample_rate   = 77777;
-    format.channel_count = 5;
+    format.sample_rate   = 44100;
+    format.channel_count = 2;
     format.sample_type   = audio::SampleType::Float32;
 
     auto sub_graph = std::make_unique<audio::Graph>("sub-graph");
@@ -546,7 +555,7 @@ void unit_test_graph_in_graph()
     graph.AddElementPtr(std::move(sub_graph));
     graph.AddElementPtr(std::move(c));
 
-    Link(graph, "sub-graph", "out", "c", "in");
+    Link(graph, "sub-graph", "port", "c", "in");
     Link(graph, "c", "out");
     TEST_REQUIRE(graph.Prepare(loader));
 
@@ -560,6 +569,72 @@ void unit_test_graph_in_graph()
     TEST_REQUIRE(outcome == "-> a:in -> a:out -> b:in -> b:out -> c:in -> c:out ");
 }
 
+void unit_test_graph_class()
+{
+    {
+        const auto test_format = audio::Format {audio::SampleType::Int16, 16000,  1};
+
+        audio::GraphClass klass("graph");
+        audio::GraphClass::Element zero;
+        zero.id = base::RandomString(10);
+        zero.args = audio::FindElementDesc("ZeroSource")->args;
+        zero.args["format"] = test_format;
+        zero.type = "ZeroSource";
+        zero.name = "zero";
+
+        audio::GraphClass::Element gain;
+        gain.id = base::RandomString(10);
+        gain.args = audio::FindElementDesc("Gain")->args;
+        gain.args["gain"] = 1.5f;
+        gain.type = "Gain";
+        gain.name = "gain";
+
+        audio::GraphClass::Link link;
+        link.id = base::RandomString(10);
+        link.src_element = zero.id;
+        link.dst_element = gain.id;
+        link.src_port = "out";
+        link.dst_port = "in";
+
+        klass.AddElement(zero);
+        klass.AddElement(gain);
+        klass.AddLink(link);
+        klass.SetGraphOutputElementId(gain.id);
+        klass.SetGraphOutputElementPort("out");
+
+        // serialization
+        data::JsonObject json;
+        klass.IntoJson(json);
+        auto other = audio::GraphClass::FromJson(json);
+        TEST_REQUIRE(other.has_value());
+        TEST_REQUIRE(other->GetNumElements() == 2);
+        TEST_REQUIRE(other->GetNumLinks() == 1);
+        TEST_REQUIRE(other->FindElementById(zero.id)->name == "zero");
+        TEST_REQUIRE(other->FindElementById(zero.id)->type == "ZeroSource");
+        TEST_REQUIRE(other->FindElementById(zero.id)->args.size() == 1);
+        TEST_REQUIRE(*audio::FindElementArg<audio::Format>(other->FindElementById(zero.id)->args, "format") == test_format);
+        TEST_REQUIRE(other->FindLinkById(link.id)->src_element == zero.id);
+        TEST_REQUIRE(other->FindLinkById(link.id)->dst_element == gain.id);
+        TEST_REQUIRE(other->GetHash() == klass.GetHash());
+
+        class Dummy : public audio::Loader
+        {
+        public:
+            virtual std::ifstream OpenStream(const std::string& file) const override
+            { BUG("Not used"); }
+        } loader;
+
+        // instance creation.
+        audio::Graph graph(klass);
+        TEST_REQUIRE(graph.FindElementById(zero.id)->GetType() == "ZeroSource");
+        TEST_REQUIRE(graph.FindElementById(gain.id)->GetType() == "Gain");
+        TEST_REQUIRE(graph.Prepare(loader));
+        const auto& desc = graph.Describe();
+        //std::cout << desc[0];
+        TEST_REQUIRE(desc[0] == "zero:out -> gain:in gain:out -> graph:port graph:port -> nil");
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -571,5 +646,6 @@ int test_main(int argc, char* argv[])
     unit_test_buffer_flow();
     unit_test_completion();
     unit_test_graph_in_graph();
+    unit_test_graph_class();
     return 0;
 }
