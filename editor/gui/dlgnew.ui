@@ -308,7 +308,41 @@
        </layout>
       </item>
       <item row="3" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_9"/>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QPushButton" name="btnAudio">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Audio</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Create a new audio graph for game music and effects</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -347,6 +381,7 @@
   <tabstop>btnScene</tabstop>
   <tabstop>btnScript</tabstop>
   <tabstop>btnUI</tabstop>
+  <tabstop>btnAudio</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources>

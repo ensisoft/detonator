@@ -52,6 +52,8 @@ inline glm::vec4 ToVec4(const QPoint& point)
 { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
 inline glm::vec2 ToVec2(const QPoint& point)
 { return glm::vec2(point.x(), point.y()); }
+inline glm::vec2 ToVec2(const QPointF& point)
+{ return glm::vec2(point.x(), point.y()); }
 
 inline gfx::Color4f ToGfx(const QColor& color)
 {
@@ -197,9 +199,14 @@ inline void SetList(QListWidget* list, const std::vector<ListItem>& items)
         li->setText(item.name);
         li->setData(Qt::UserRole, item.id);
         li->setIcon(item.icon);
-        if (selected.find(item.id) != selected.end())
-            li->setSelected(true);
         list->addItem(li);
+        // ffs, the selection must be *done* after adding the
+        // item to the list otherwise it doesn't work. lalalalaal!
+        if (item.selected)
+            li->setSelected(true);
+        else if (!item.selected)
+            li->setSelected(false);
+        else  li->setSelected(selected.find(item.id) != selected.end());
     }
 }
 

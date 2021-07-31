@@ -47,6 +47,7 @@
 #include "editor/gui/childwindow.h"
 #include "editor/gui/playwindow.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/audiowidget.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/entitywidget.h"
@@ -125,6 +126,10 @@ gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspac
             if (resource)
                 return new gui::UIWidget(workspace, *resource);
             return new gui::UIWidget(workspace);
+        case app::Resource::Type::AudioGraph:
+            if (resource)
+                return new gui::AudioWidget(workspace, *resource);
+            return new gui::AudioWidget(workspace);
     }
     BUG("Unhandled widget type.");
     return nullptr;
@@ -410,6 +415,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             widget = new ScriptWidget(workspace.get());
         else if (klass == UIWidget::staticMetaObject.className())
             widget = new UIWidget(workspace.get());
+        else if (klass == AudioWidget::staticMetaObject.className())
+            widget = new AudioWidget(workspace.get());
         else BUG("Unhandled widget type.");
         widget->SetId(id);
         if (!widget->LoadState(settings))
@@ -1436,7 +1443,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
-        if (resource.IsAudioFile() || resource.IsDataFile()) {
+        if (resource.IsAudioGraph() || resource.IsDataFile()) {
             mUI.actionEditResource->setEnabled(false);
             mUI.actionEditResourceNewTab->setEnabled(false);
             mUI.actionEditResourceNewWindow->setEnabled(false);
@@ -1507,7 +1514,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     app::Resource* resource = dlg.GetSelected();
     if (resource == nullptr)
         return;
-    else if (resource->IsDataFile() || resource->IsAudioFile())
+    else if (resource->IsDataFile())
     {
         WARN("Can't edit '%1' since it's not a %2 resource.", resource->GetName(), APP_TITLE);
         QMessageBox msg(this);
@@ -1742,6 +1749,12 @@ void MainWindow::on_btnUI_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
     ShowWidget(MakeWidget(app::Resource::Type::UI, mWorkspace.get()), new_window);
+}
+
+void MainWindow::on_btnAudio_clicked()
+{
+    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(MakeWidget(app::Resource::Type::AudioGraph, mWorkspace.get()), new_window);
 }
 
 void MainWindow::RefreshUI()
@@ -2292,8 +2305,7 @@ void MainWindow::EditResources(bool open_new_window)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
         // we don't know how to open these.
-        if (resource.GetType() == app::Resource::Type::DataFile ||
-            resource.GetType() == app::Resource::Type::AudioFile)
+        if (resource.GetType() == app::Resource::Type::DataFile)
         {
             WARN("Can't edit '%1' since it's not a %2 resource.", resource.GetName(), APP_TITLE);
             continue;

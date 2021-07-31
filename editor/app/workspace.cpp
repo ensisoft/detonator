@@ -989,6 +989,16 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
     return GraphicsFileBuffer::LoadFromFile(file);
 }
 
+std::ifstream Workspace::OpenStream(const std::string& URI) const
+{
+    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    DEBUG("URI '%1' => '%2'", URI, file);
+    auto stream = app::OpenBinaryIStream(file);
+    if (!stream.is_open())
+        ERROR("Failed to open '%1'.", file);
+    return stream;
+}
+
 bool Workspace::LoadWorkspace(const QString& dir)
 {
     ASSERT(!mIsOpen);

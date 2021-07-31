@@ -79,6 +79,11 @@ namespace gui
             mSelection = app::Resource::Type::UI;
             accept();
         }
+        void on_btnAudio_clicked()
+        {
+            mSelection = app::Resource::Type::AudioGraph;
+            accept();
+        }
         void on_btnCancel_clicked()
         {
             reject();

@@ -625,6 +625,14 @@ namespace audio
             if (index == 0) return mPort;
             BUG("No such output port.");
         }
+
+        struct FileInfo {
+            unsigned channels    = 0;
+            unsigned frames      = 0;
+            unsigned sample_rate = 0;
+            float seconds = 0;
+        };
+        static bool ProbeFile(const std::string& file, FileInfo* info);
     private:
         const std::string mName;
         const std::string mId;

@@ -24,6 +24,7 @@
 #  include <QJsonObject>
 #  include <QIcon>
 #  include <neargye/magic_enum.hpp>
+#  include <boost/logic/tribool.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -49,6 +50,7 @@ struct ListItem {
     QString name;
     QString id;
     QIcon icon;
+    boost::tribool selected = boost::indeterminate;
 };
 
 // Compute a file hash based on the contents of the file.

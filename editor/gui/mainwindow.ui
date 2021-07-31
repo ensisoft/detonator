@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1429</width>
-    <height>1359</height>
+    <width>1459</width>
+    <height>1396</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -462,6 +462,39 @@
                  </property>
                 </widget>
                </item>
+               <item row="6" column="2">
+                <widget class="QPushButton" name="btnAudio">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Audio</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="2">
+                <widget class="QLabel" name="label_15">
+                 <property name="text">
+                  <string>Create a new audio graph for game music and effects</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
              <item>
@@ -783,7 +816,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1429</width>
+     <width>1459</width>
      <height>22</height>
     </rect>
    </property>
@@ -1562,6 +1595,8 @@
   <tabstop>btnEntity</tabstop>
   <tabstop>btnScene</tabstop>
   <tabstop>btnScript</tabstop>
+  <tabstop>btnUI</tabstop>
+  <tabstop>btnAudio</tabstop>
   <tabstop>eventlist</tabstop>
   <tabstop>workspace</tabstop>
   <tabstop>btnBandit</tabstop>

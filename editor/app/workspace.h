@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "base/assert.h"
+#include "audio/loader.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/resource.h"
@@ -57,7 +58,9 @@ namespace app
                       public QAbstractFileEngineHandler,
                       public game::ClassLibrary,
                       public game::GameDataLoader,
-                      public gfx::ResourceLoader
+                      public gfx::ResourceLoader,
+                      public audio::Loader
+
     {
         Q_OBJECT
 
@@ -90,6 +93,9 @@ namespace app
         virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override;
         // gfx::ResourceLoader implementation
         virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
+        // audio::Loader implementation
+        virtual std::ifstream OpenStream(const std::string& URI) const override;
+
 
         // These are for internal use in the editor and they have different semantics
         // from the similar functions in the ClassLibrary API. Basically trying to access
