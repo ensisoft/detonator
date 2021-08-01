@@ -371,9 +371,14 @@ R"(
     script.SetFileURI(workspace.MapFileToWorkspace(std::string("lua/game_script.lua")));
     app::ScriptResource script_resource(script, "GameScript");
 
-    app::AudioFile audio;
-    audio.SetFileURI(workspace.MapFileToWorkspace(std::string("audio/music.mp3")));
-    app::AudioResource  audio_resource(audio, "music.mp3");
+    audio::GraphClass audio_graph("music_graph");
+    audio::GraphClass::Element music_src;
+    music_src.id   = base::RandomString(10);
+    music_src.name = "music";
+    music_src.type = "FileSource";
+    music_src.args["file"] = workspace.MapFileToWorkspace(std::string("audio/music.mp3"));
+    audio_graph.AddElement(std::move(music_src));
+    app::AudioResource audio_resource(audio_graph, "music.mp3");
 
     app::DataFile data;
     data.SetFileURI(workspace.MapFileToWorkspace(std::string("data/levels.txt")));

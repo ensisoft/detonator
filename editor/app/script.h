@@ -65,7 +65,6 @@ namespace app
         };
     } // detail
     using Script = detail::FileResource<0>;
-    using AudioFile = detail::FileResource<1>;
-    using DataFile = detail::FileResource<2>;
+    using DataFile = detail::FileResource<1>;
 
 } // namespace
