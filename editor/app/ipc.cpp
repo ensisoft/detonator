@@ -296,8 +296,8 @@ void IPCClient::ReadMessage()
             resource = CreateResource<gfx::KinematicsParticleEngineClass>("particles", json, name);
         else if (type == Resource::Type::Script)
             resource = CreateResource<Script>("scripts", json, name);
-        else if (type == Resource::Type::AudioFile)
-            resource = CreateResource<AudioFile>("audio_files", json, name);
+        else if (type == Resource::Type::AudioGraph)
+            resource = CreateResource<audio::GraphClass>("audio_graphs", json, name);
         else if (type == Resource::Type::DataFile)
             resource = CreateResource<DataFile>("data_files", json, name);
         else if (type == Resource::Type::UI)

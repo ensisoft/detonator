@@ -1245,7 +1245,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<game::SceneClass>("scenes", root, mResources);
     LoadResources<Script>("scripts", root, mResources);
     LoadResources<DataFile>("data_files", root, mResources);
-    LoadResources<AudioFile>("audio_files", root, mResources);
+    LoadResources<audio::GraphClass>("audio_graphs", root, mResources);
     LoadResources<uik::Window>("uis", root, mResources);
 
     // setup an invariant that states that the primitive materials
@@ -1916,11 +1916,18 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         else if (suffix == "MP3" || suffix == "WAV" || suffix == "FLAC" || suffix == "OGG")
         {
             const auto& uri = MapFileToWorkspace(file);
-            AudioFile audio;
-            audio.SetFileURI(ToUtf8(uri));
-            AudioResource res(audio, name);
+            audio::GraphClass klass(ToUtf8(name));
+            audio::GraphClass::Element element;
+            element.name = ToUtf8(name);
+            element.id   = base::RandomString(10);
+            element.type = "FileSource";
+            element.args["file"] = ToUtf8(uri);
+            klass.SetGraphOutputElementId(element.id);
+            klass.SetGraphOutputElementPort("out");
+            klass.AddElement(std::move(element));
+            AudioResource res(klass, name);
             SaveResource(res);
-            INFO("Imported new audio file '%1' based on file '%2'", name, info.filePath());
+            INFO("Imported new audio graph '%1' based on file '%2'", name, info.filePath());
         }
         else
         {
@@ -2016,11 +2023,31 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             resource->GetContent(&datafile);
             packer.CopyFile(datafile->GetFileURI(), "data/");
         }
-        else if (resource->IsAudioFile())
+        else if (resource->IsAudioGraph())
         {
-            const AudioFile* audio = nullptr;
+            // todo: this audio packing sucks a little bit since it needs
+            // to know about the details of elements now. maybe this
+            // should be refactored into the audio/ subsystem.. ?
+            audio::GraphClass* audio = nullptr;
             resource->GetContent(&audio);
-            packer.CopyFile(audio->GetFileURI(), "audio/");
+            for (size_t i=0; i<audio->GetNumElements(); ++i)
+            {
+                auto& elem = audio->GetElement(i);
+                for (auto& p : elem.args)
+                {
+                    const auto& name = p.first;
+                    if (name != "file") continue;
+
+                    auto* file_uri = std::get_if<std::string>(&p.second);
+                    ASSERT(file_uri && "Missing audio element 'file' parameter.");
+                    if (file_uri->empty())
+                    {
+                        WARN("Audio element '%1' doesn't have input file set.");
+                        continue;
+                    }
+                    *file_uri = packer.CopyFile(*file_uri, "audio/");
+                }
+            }
         }
         else if (resource->IsUI())
         {

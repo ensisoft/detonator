@@ -30,6 +30,7 @@
 
 #include "base/assert.h"
 #include "data/writer.h"
+#include "audio/graph.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "engine/entity.h"
@@ -70,8 +71,8 @@ namespace app
             Scene,
             // it's a script file.
             Script,
-            // it's an audio file such as .ogg or .mp3
-            AudioFile,
+            // it's an audio graph with a network of audio elements
+            AudioGraph,
             // it's an arbitrary application/game data file
             DataFile,
             // it's a UI / window description
@@ -151,7 +152,7 @@ namespace app
                     return QIcon("icons:scene.png");
                 case Resource::Type::Script:
                     return QIcon("icons:script.png");
-                case Resource::Type::AudioFile:
+                case Resource::Type::AudioGraph:
                     return QIcon("icons:audio.png");
                 case Resource::Type::DataFile:
                     return QIcon("icons:database.png");
@@ -175,8 +176,8 @@ namespace app
         { return GetType() == Type::Scene; }
         inline bool IsScript() const
         { return GetType() == Type::Script; }
-        inline bool IsAudioFile() const
-        { return GetType() == Type::AudioFile; }
+        inline bool IsAudioGraph() const
+        { return GetType() == Type::AudioGraph; }
         inline bool IsDataFile() const
         { return GetType() == Type::DataFile; }
         inline bool IsUI() const
@@ -296,8 +297,8 @@ namespace app
             static constexpr auto Type = app::Resource::Type::Script;
         };
         template<>
-        struct ResourceTypeTraits<AudioFile> {
-            static constexpr auto Type = app::Resource::Type::AudioFile;
+        struct ResourceTypeTraits<audio::GraphClass> {
+            static constexpr auto Type = app::Resource::Type::AudioGraph;
         };
         template<>
         struct ResourceTypeTraits<DataFile> {
@@ -409,8 +410,8 @@ namespace app
                 data.AppendChunk("scenes", std::move(chunk));
             else if (TypeValue == Resource::Type::Script)
                 data.AppendChunk("scripts", std::move(chunk));
-            else if (TypeValue == Resource::Type::AudioFile)
-                data.AppendChunk("audio_files", std::move(chunk));
+            else if (TypeValue == Resource::Type::AudioGraph)
+                data.AppendChunk("audio_graphs", std::move(chunk));
             else if (TypeValue == Resource::Type::DataFile)
                 data.AppendChunk("data_files", std::move(chunk));
             else if (TypeValue == Resource::Type::UI)
@@ -656,8 +657,8 @@ namespace app
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;
+    using AudioResource          = GameResource<audio::GraphClass>;
     using ScriptResource         = GameResource<Script>;
-    using AudioResource          = GameResource<AudioFile>;
     using DataResource           = GameResource<DataFile>;
     using UIResource             = GameResource<uik::Window>;
 
