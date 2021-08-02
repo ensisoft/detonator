@@ -176,10 +176,8 @@ void StereoMaker::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
-    {
-        WARN("No buffer available on MonoToStereo '%1' input port.", mName);
         return;
-    }
+
     const auto& format = mIn.GetFormat();
     if (format.channel_count == 2)
     {
@@ -257,15 +255,10 @@ void StereoJoiner::Process(EventQueue& events, unsigned milliseconds)
     BufferHandle left;
     BufferHandle right;
     if (!mInLeft.HasBuffers())
-    {
-        WARN("No buffer available on Joiner '%1' left channel port.", mName);
         return;
-    }
-    if (!mInRight.HasBuffers())
-    {
-        WARN("No buffer available on Joiner '%1' right channel port.", mName);
+    else if (!mInRight.HasBuffers())
         return;
-    }
+
     mInLeft.PullBuffer(left);
     mInRight.PullBuffer(right);
     if (left->GetByteSize() != right->GetByteSize())
@@ -342,10 +335,8 @@ void StereoSplitter::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.HasBuffers())
-    {
-        WARN("No Buffer available on port %1:%2", mName, mIn.GetName());
         return;
-    }
+
     mIn.PullBuffer(buffer);
     const auto& format = mIn.GetFormat();
     if (format.sample_type == SampleType::Int32)
@@ -442,6 +433,9 @@ void Mixer::Process(EventQueue& events, unsigned milliseconds)
         if (port.PullBuffer(buffer))
             src_buffers.push_back(buffer);
     }
+    if (src_buffers.size() == 0)
+        return;
+
     BufferHandle ret;
 
     const auto& format = mSrcs[0].GetFormat();
@@ -490,10 +484,7 @@ void Fade::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
-    {
-        WARN("No buffer available on Fade '%1' input port.", mName);
         return;
-    }
 
     const auto& format = mIn.GetFormat();
     if (format.sample_type == SampleType::Int32)
@@ -577,10 +568,8 @@ void Gain::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
-    {
-        WARN("No buffer available on port %1:%2", mName, mIn.GetName());
         return;
-    }
+
     const auto& format = mIn.GetFormat();
     if (format.sample_type == SampleType::Int32)
         format.channel_count == 1 ? AdjustGain<int, 1>(buffer)
@@ -673,10 +662,8 @@ void Resampler::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle src_buffer;
     if (!mIn.PullBuffer(src_buffer))
-    {
-        WARN("No input buffer on port %1:%2", mName, mIn.GetName());
         return;
-    }
+
     const auto& src_format = mIn.GetFormat();
     const auto& out_format = mOut.GetFormat();
     if (src_format == out_format)
