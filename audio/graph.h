@@ -364,6 +364,8 @@ namespace audio
         audio::Format mFormat;
         audio::Element::EventQueue mEvents;
         std::uint64_t mMillisecs = 0;
+        std::size_t mPendingOffset = 0;
+        BufferHandle mPendingBuffer;
     };
 
 } // namespace
