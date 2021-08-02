@@ -210,14 +210,18 @@ namespace audio
         std::size_t GetNumElements() const
         { return mElements.size(); }
 
-        // Find out the destination port for the given input/source port.
-        // Returns nullptr if no such port mapping exists, otherwise
-        // the destination port is returned.
+        // Find out the destination port for the given source port.
+        // Returns nullptr if no such port mapping exists.
         Port* FindDstPort(const Port* src);
-        // Find out the destination port for the given input/source port.
-        // Returns nullptr if no such port mapping exists, otherwise
-        // the destination port is returned.
+        // Find out the destination port for the given source port.
+        // Returns nullptr if no such port mapping exists.
         const Port* FindDstPort(const Port* source) const;
+        // Find out the src port for the given destination port.
+        // Returns nullptr if no such port mapping exists.
+        Port* FindSrcPort(const Port* dst);
+        // Find out the src port for the given destination port.
+        // Returns nullptr if no such port mapping exists.
+        const Port* FindSrcPort(const Port* dst) const;
 
         // Find the element that owns the given input port. Returns nullptr
         // if no such element.

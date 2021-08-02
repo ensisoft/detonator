@@ -363,6 +363,26 @@ const Port* Graph::FindDstPort(const Port* src) const
     return it->second;
 }
 
+Port* Graph::FindSrcPort(const Port* dst)
+{
+    for (auto pair : mPortMap)
+    {
+        if (pair.second == dst)
+            return pair.first;
+    }
+    return nullptr;
+}
+
+const Port* Graph::FindSrcPort(const Port* dst) const
+{
+    for (auto pair : mPortMap)
+    {
+        if (pair.second == dst)
+            return pair.first;
+    }
+    return nullptr;
+}
+
 Element* Graph::FindInputPortOwner(const Port* port)
 {
     for (auto& elem : mElements)
@@ -484,29 +504,44 @@ bool Graph::Prepare(const Loader& loader)
 
     for (size_t i=0; i < order.size(); ++i)
     {
-        Element* src = order[i];
-        DEBUG("Audio graph '%1' preparing audio element '%2'", mName, src->GetName());
-        if (!src->Prepare(loader))
+        Element* element = order[i];
+        DEBUG("Audio graph '%1' preparing audio element '%2'", mName, element->GetName());
+        if (!element->Prepare(loader))
         {
-            ERROR("Audio graph '%1' element '%2' failed to prepare.", mName, src->GetName());
+            ERROR("Audio graph '%1' element '%2' failed to prepare.", mName, element->GetName());
             return false;
         }
-        for (unsigned i=0; i<src->GetNumOutputPorts(); ++i)
+        for (unsigned i=0; i < element->GetNumOutputPorts(); ++i)
         {
-            auto& src_port = src->GetOutputPort(i);
+            auto& src_port = element->GetOutputPort(i);
             // does this port have a destination port ?
-            auto it = mPortMap.find(&src_port);
-            if (it == mPortMap.end())
-                continue;
-            auto* dst_port = it->second;
-            if (!dst_port->CanAccept(src_port.GetFormat()))
+            if (auto* dst_port = FindDstPort(&src_port))
             {
-                const auto* dst_elem = FindInputPortOwner(dst_port);
-                ERROR("Ports %1:%2 and %3:%4 are not compatible.", src->GetName(), src_port.GetName(),
-                      dst_elem->GetName(), dst_port->GetName());
-                return false;
+                if (!dst_port->CanAccept(src_port.GetFormat()))
+                {
+                    const auto* dst_elem = FindInputPortOwner(dst_port);
+                    ERROR("Ports %1:%2 and %3:%4 are not compatible.",
+                          element->GetName(), src_port.GetName(),
+                          dst_elem->GetName(), dst_port->GetName());
+                    return false;
+                }
+                dst_port->SetFormat(src_port.GetFormat());
             }
-            dst_port->SetFormat(src_port.GetFormat());
+            else
+            {
+                WARN("Audio graph '%1' source %2:%3 has no input port assigned.",
+                     mName, element->GetName(), src_port.GetName());
+            }
+        }
+        for (unsigned i=0; i < element->GetNumInputPorts(); ++i)
+        {
+            auto& dst_port = element->GetInputPort(i);
+            auto* src_port = FindSrcPort(&dst_port);
+            if (src_port == nullptr)
+            {
+                WARN("Audio graph '%1' input %2:%3 has no source port assigned.",
+                     mName, element->GetName(), dst_port.GetName());
+            }
         }
     }
     mTopoOrder = std::move(order);
@@ -547,10 +582,7 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
             }
             auto it = mPortMap.find(&output);
             if (it == mPortMap.end())
-            {
-                WARN("Audio source %1:%2 has no input port assigned.", source->GetName(), output.GetName());
                 continue;
-            }
 
             auto* input = it->second;
             input->PushBuffer(buffer);
