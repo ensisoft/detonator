@@ -69,9 +69,6 @@ namespace audio
         // already completed (either successfully or by error) cancel is
         // not called.
         virtual void Cancel() = 0;
-        // Advance/update the stream by dt time step in seconds.
-        // This is only called when then stream is in play state.
-        virtual void Update(float dt) = 0;
         // Send command to the stream source.
         virtual void SendCommand(std::unique_ptr<Command> cmd) = 0;
         // Get next stream event if any. Returns nullptr if no

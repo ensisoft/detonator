@@ -628,11 +628,11 @@ void Graph::Shutdown()
 
 }
 
-void Graph::Update(float dt)
+void Graph::Advance(unsigned int ms)
 {
     for (auto& elem : mElements)
     {
-        elem->Update(dt);
+        elem->Advance(ms);
     }
 }
 
@@ -725,6 +725,9 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         return 0;
     }
 
+    mGraph.Advance(milliseconds);
+    mMillisecs += milliseconds;
+
     // todo: get rid of the copying.
     ASSERT(buffer->GetByteSize() <= max_bytes);
     std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
@@ -756,11 +759,6 @@ std::unique_ptr<Event> AudioGraph::GetEvent() noexcept
     auto ret = std::move(mEvents.front());
     mEvents.pop();
     return ret;
-}
-
-void AudioGraph::Update(float dt) noexcept
-{
-    mGraph.Update(dt);
 }
 
 // static

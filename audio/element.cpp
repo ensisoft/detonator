@@ -998,7 +998,6 @@ Element* MixerSource::AddSourcePtr(std::unique_ptr<Element> source, bool paused)
     Source src;
     src.element = std::move(source);
     src.paused  = paused;
-    src.delay   = 0.0f;
     mSources[key] = std::move(src);
     DEBUG("Added new MixerSource '%1' (%2) source '%3'.", mName, paused ? "Paused" : "Live", key);
     return ret;
@@ -1013,14 +1012,6 @@ void MixerSource::DeleteSource(const std::string& name)
     DEBUG("Deleted MixerSource '%1' source '%2'.", mName, name);
 }
 
-void MixerSource::DelaySource(const std::string& name, float delay)
-{
-    auto it = mSources.find(name);
-    if (it == mSources.end())
-        return;
-    it->second.delay = delay;
-    DEBUG("Delayed MixerSource '%1' source '%2' for %3 seconds.", mName, name, delay);
-}
 void MixerSource::PauseSource(const std::string& name, bool paused)
 {
     auto it = mSources.find(name);
@@ -1047,13 +1038,12 @@ bool MixerSource::Prepare(const Loader& loader)
     return true;
 }
 
-void MixerSource::Update(float dt)
+void MixerSource::Advance(unsigned int ms)
 {
     for (auto& pair : mSources)
     {
-        auto& source = pair.second;
-        source.delay = math::clamp(0.0f, source.delay, source.delay - dt);
-        source.element->Update(dt);
+        auto& source  = pair.second;
+        source.element->Advance(ms);
     }
 }
 
@@ -1065,9 +1055,7 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
     {
         auto& source  = pair.second;
         auto& element = source.element;
-        if (source.delay > 0.0)
-            continue;
-        else if (source.paused)
+        if (source.paused)
             continue;
 
         element->Process(events, milliseconds);
@@ -1130,8 +1118,6 @@ void MixerSource::ReceiveCommand(Command& cmd)
         AddSourcePtr(std::move(ptr->src), ptr->paused);
     else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
         DeleteSource(ptr->name);
-    else if (auto* ptr = cmd.GetIf<DelaySourceCmd>())
-        DelaySource(ptr->name, ptr->delay);
     else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
         PauseSource(ptr->name, ptr->paused);
     else BUG("Unexpected command.");

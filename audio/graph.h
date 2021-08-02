@@ -265,7 +265,7 @@ namespace audio
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
-        virtual void Update(float dt) override;
+        virtual void Advance(unsigned int ms) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
@@ -334,7 +334,6 @@ namespace audio
         virtual bool Reset() noexcept override;
         virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
         virtual std::unique_ptr<Event> GetEvent() noexcept override;
-        virtual void Update(float dt) noexcept override;
 
         // quick access to the underlying graph.
         Graph& GetGraph()
@@ -364,6 +363,7 @@ namespace audio
         audio::Graph mGraph;
         audio::Format mFormat;
         audio::Element::EventQueue mEvents;
+        std::uint64_t mMillisecs = 0;
     };
 
 } // namespace
