@@ -706,6 +706,8 @@ std::string AudioGraph::GetName() const noexcept
 
 unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
 {
+    // todo: figure out a way to get rid of this copying whenever possible.
+
     // compute how many milliseconds worth of data can we
     // stuff into the current buffer. todo: should the buffering
     // sizes be fixed somewhere somehow? I.e. we're always dispatching
@@ -714,6 +716,21 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
     const auto milliseconds = max_bytes / millis_in_bytes;
     const auto bytes = millis_in_bytes * milliseconds;
     ASSERT(bytes <= max_bytes);
+
+    if (mPendingBuffer)
+    {
+        const auto pending = mPendingBuffer->GetByteSize() - mPendingOffset;
+        const auto min_bytes = std::min(pending, (size_t)max_bytes);
+        const auto* ptr = static_cast<const uint8_t*>(mPendingBuffer->GetPtr());
+        std::memcpy(buff, ptr + mPendingOffset, min_bytes);
+        mPendingOffset += min_bytes;
+        if (mPendingOffset == mPendingBuffer->GetByteSize())
+        {
+            mPendingBuffer.reset();
+            mPendingOffset = 0;
+        }
+        return min_bytes;
+    }
 
     mGraph.Process(mEvents, milliseconds);
 
@@ -728,14 +745,19 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
     mGraph.Advance(milliseconds);
     mMillisecs += milliseconds;
 
-    // todo: get rid of the copying.
-    ASSERT(buffer->GetByteSize() <= max_bytes);
-    std::memcpy(buff, buffer->GetPtr(), buffer->GetByteSize());
-    return buffer->GetByteSize();
+    const auto min_bytes = std::min(buffer->GetByteSize(), (size_t)max_bytes);
+    std::memcpy(buff, buffer->GetPtr(), min_bytes);
+    if (min_bytes < buffer->GetByteSize())
+    {
+        ASSERT(!mPendingBuffer && !mPendingOffset);
+        mPendingBuffer = buffer;
+        mPendingOffset = min_bytes;
+    }
+    return min_bytes;
 }
 bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
-    return !mGraph.IsSourceDone();
+    return mPendingBuffer || !mGraph.IsSourceDone();
 }
 bool AudioGraph::Reset() noexcept
 {

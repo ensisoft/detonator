@@ -635,6 +635,108 @@ void unit_test_graph_class()
     }
 }
 
+void unit_test_oversized_buffer()
+{
+    class SrcElement : public audio::Element
+    {
+    public:
+        SrcElement() : mOut("out")
+        {}
+        virtual std::string GetId() const override
+        { return "124431"; }
+        virtual std::string GetName() const override
+        { return "foobar"; }
+        virtual std::string GetType() const override
+        { return "TestSrcElement"; }
+        virtual bool IsSourceDone() const override
+        { return mDone; }
+        virtual bool IsSource() const override
+        { return true; }
+        virtual bool Prepare(const audio::Loader& loader) override
+        {
+            audio::Format format;
+            format.channel_count = 2;
+            format.sample_rate = 16000;
+            format.sample_type = audio::SampleType::Int16;
+            mFormat = format;
+            mOut.SetFormat(format);
+            return true;
+        }
+        virtual void Process(EventQueue& events, unsigned milliseconds) override
+        {
+            TEST_REQUIRE(mDone == false);
+            const auto frame_size = audio::GetFrameSizeInBytes(mFormat);
+            const auto frames_per_ms = mFormat.sample_rate  / 1000;
+            const auto frames_wanted = frames_per_ms * milliseconds;
+
+            auto buffer = std::make_shared<audio::VectorBuffer>();
+            buffer->AllocateBytes(frame_size * frames_wanted * 2);
+
+            using Frame = audio::Frame<short, 2>;
+            auto* ptr = static_cast<Frame*>(buffer->GetPtr());
+
+            for (unsigned i=0; i<frames_wanted; ++i, ++ptr)
+            {
+                ptr->channels[0] = 0x1a;
+                ptr->channels[1] = 0x1b;
+            }
+            for (unsigned i=0; i<frames_wanted; ++i, ++ptr)
+            {
+                ptr->channels[0] = 0x2a;
+                ptr->channels[1] = 0x2b;
+            }
+            mOut.PushBuffer(buffer);
+            mDone = true;
+        }
+
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual audio::Port& GetOutputPort(unsigned index)
+        { return mOut; }
+    private:
+        bool mDone = false;
+        audio::SingleSlotPort mOut;
+        audio::Format mFormat;
+    };
+
+    audio::Graph graph("graph");
+    graph.AddElement(SrcElement());
+    TEST_REQUIRE(graph.LinkGraph("foobar", "out"));
+
+    Loader loader;
+
+    auto source = std::make_unique<audio::AudioGraph>("graph", std::move(graph));
+    TEST_REQUIRE(source->Prepare(loader));
+
+    audio::Format format;
+    format.channel_count = 2;
+    format.sample_rate = 16000;
+    format.sample_type = audio::SampleType::Int16;
+    const auto millisec_bytes = audio::GetMillisecondByteCount(format);
+
+    std::vector<uint8_t> buffer;
+    buffer.resize(millisec_bytes);
+    TEST_REQUIRE(source->FillBuffer(&buffer[0], buffer.size()) == buffer.size());
+    const auto* ptr = reinterpret_cast<const short*>(&buffer[0]);
+    for (unsigned i=0; i<buffer.size()/2; ++i, ++ptr)
+    {
+        if (i & 1)
+            TEST_REQUIRE(*ptr == 0x1b);
+        else TEST_REQUIRE(*ptr == 0x1a);
+    }
+    buffer.resize(0);
+    buffer.resize(millisec_bytes);
+    TEST_REQUIRE(source->FillBuffer(&buffer[0], buffer.size()) == buffer.size());
+    ptr = reinterpret_cast<const short*>(&buffer[0]);
+    for (unsigned i=0; i<buffer.size()/2; ++i, ++ptr)
+    {
+        if (i & 1)
+            TEST_REQUIRE(*ptr == 0x2b);
+        else TEST_REQUIRE(*ptr == 0x2a);
+    }
+}
+
+
 int test_main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -647,5 +749,6 @@ int test_main(int argc, char* argv[])
     unit_test_completion();
     unit_test_graph_in_graph();
     unit_test_graph_class();
+    unit_test_oversized_buffer();
     return 0;
 }
