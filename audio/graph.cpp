@@ -566,6 +566,25 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
         if (source->IsSource() && source->IsSourceDone())
             continue;
 
+        bool backpressure = false;
+        // find out if the next element is putting back pressure
+        // on the source element by not consuming the input buffers.
+        // if this is the case the producer evaluation is skipped
+        // and the graph will subsequently likely stop producing
+        // output buffers.
+        for (unsigned i=0; i<source->GetNumOutputPorts(); ++i)
+        {
+            auto& src = source->GetOutputPort(i);
+            auto* dst = FindDstPort(&src);
+            if (dst && dst->IsFull())
+            {
+                backpressure = true;
+                break;
+            }
+        }
+        if (backpressure)
+            continue;
+
         // process the audio buffers.
         source->Process(events, milliseconds);
 
@@ -576,16 +595,10 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
             auto& output = source->GetOutputPort(i);
             BufferHandle buffer;
             if (!output.PullBuffer(buffer))
-            {
-                WARN("No audio buffer available from %1:%2", source->GetName(), output.GetName());
-                continue;
-            }
-            auto it = mPortMap.find(&output);
-            if (it == mPortMap.end())
                 continue;
 
-            auto* input = it->second;
-            input->PushBuffer(buffer);
+            if (auto* dst = FindDstPort(&output))
+                dst->PushBuffer(buffer);
         }
     }
 
@@ -733,27 +746,38 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
     }
 
     mGraph.Process(mEvents, milliseconds);
-
-    BufferHandle buffer;
-    auto& port = mGraph.GetOutputPort(0);
-    if (!port.PullBuffer(buffer))
-    {
-        WARN("Audio graph '%1' has no output audio buffer available.", mName);
-        return 0;
-    }
-
     mGraph.Advance(milliseconds);
     mMillisecs += milliseconds;
 
-    const auto min_bytes = std::min(buffer->GetByteSize(), (size_t)max_bytes);
-    std::memcpy(buff, buffer->GetPtr(), min_bytes);
-    if (min_bytes < buffer->GetByteSize())
+    BufferHandle buffer;
+    auto& port = mGraph.GetOutputPort(0);
+    if (port.PullBuffer(buffer))
     {
-        ASSERT(!mPendingBuffer && !mPendingOffset);
-        mPendingBuffer = buffer;
-        mPendingOffset = min_bytes;
+        const auto min_bytes = std::min(buffer->GetByteSize(), (size_t)max_bytes);
+        std::memcpy(buff, buffer->GetPtr(), min_bytes);
+        if (min_bytes < buffer->GetByteSize())
+        {
+            ASSERT(!mPendingBuffer && !mPendingOffset);
+            mPendingBuffer = buffer;
+            mPendingOffset = min_bytes;
+        }
+        return min_bytes;
     }
-    return min_bytes;
+    else if (!mGraph.IsSourceDone())
+    {
+        // currently if the audio graph isn't producing any data the pulseaudio
+        // playback stream will automatically go into paused state. (done by pulseaudio)
+        // right now we don't have a mechanism to signal the resumption of the
+        // playback i.e. resume the PA stream in order to have another stream
+        // write callback on time when the graph is producing data again.
+        // So in case there's no graph output but the graph is not yet finished
+        // we just fill the buffer with 0s and return that.
+        std::memset(buff, 0, max_bytes);
+        return max_bytes;
+    }
+
+    WARN("Audio graph '%1' has no output audio buffer available.", mName);
+    return 0;
 }
 bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
 {

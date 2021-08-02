@@ -93,6 +93,10 @@ public:
     {
         return !!mBuffer;
     }
+    virtual bool IsFull() const override
+    {
+        return !!mBuffer;
+    }
 private:
     const std::string mName;
     BufferHandle mBuffer;
@@ -499,11 +503,12 @@ void unit_test_completion()
         TEST_REQUIRE(graph.Prepare(loader));
 
         audio::Element::EventQueue queue;
-
+        audio::BufferHandle buffer;
         std::size_t bytes_read = 0;
         for (int i=0; i<10; ++i)
         {
             graph.Process(queue, 1);
+            graph.GetOutputPort(0).PullBuffer(buffer);
         }
         TEST_REQUIRE(graph.IsSourceDone() == false);
         TEST_REQUIRE(src0->IsSourceDone() == true);
@@ -512,6 +517,7 @@ void unit_test_completion()
         for (int i=0; i<10; ++i)
         {
             graph.Process(queue, 1);
+            graph.GetOutputPort(0).PullBuffer(buffer);
         }
         TEST_REQUIRE(graph.IsSourceDone() == true);
         TEST_REQUIRE(src0->IsSourceDone() == true);

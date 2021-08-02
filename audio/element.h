@@ -82,6 +82,8 @@ namespace audio
         virtual bool CanAccept(const Format& format) const = 0;
         // Return true if there are pending buffers in the port's buffer queue.
         virtual bool HasBuffers() const = 0;
+        // Return true if the port is full and cannot queue more.
+        virtual bool IsFull() const = 0;
     private:
     };
 
@@ -104,6 +106,8 @@ namespace audio
                  return true;
              }
              bool HasBuffers() const
+             { return !!mBuffer; }
+             bool IsFull() const
              { return !!mBuffer; }
         private:
             BufferHandle mBuffer;
@@ -131,6 +135,8 @@ namespace audio
             }
             virtual bool HasBuffers() const override
             { return Queue::HasBuffers(); }
+            virtual bool IsFull() const override
+            { return Queue::IsFull(); }
         private:
             const std::string mName;
             Format mFormat;
