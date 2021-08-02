@@ -207,11 +207,6 @@ private:
                 DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
         }
 
-        virtual void Update(float dt) override
-        {
-            source_->Update(dt);
-        }
-
         virtual void SendCommand(std::unique_ptr<Command> cmd) override
         {
             source_->RecvCommand(std::move(cmd));

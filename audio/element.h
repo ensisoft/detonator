@@ -173,8 +173,9 @@ namespace audio
         // instead. EventQueue is the queue of outgoing events generated
         // by the element (and it's descendants).
         virtual void Process(EventQueue& events, unsigned milliseconds) {}
-        // Update the element by dt time step in seconds.
-        virtual void Update(float dt) {}
+        // Advance the element time in milliseconds based on the latest
+        // duration of the latest audio buffer sent to the audio device.
+        virtual void Advance(unsigned int ms) {}
         // Perform element shutdown/cleanup.
         virtual void Shutdown() {}
         // Get the number of input ports this element has.
@@ -706,11 +707,6 @@ namespace audio
         struct DeleteSourceCmd {
             std::string name;
         };
-        // Add some input processing delay to the source.
-        struct DelaySourceCmd {
-            std::string name;
-            float delay = 0.0f;
-        };
         // Pause/Resume the source. When the source is paused
         // no buffers are pulled from it and the source
         // is no longer mixed into the output stream.
@@ -744,9 +740,6 @@ namespace audio
 
         // Delete the named source from the mixer.
         void DeleteSource(const std::string& name);
-        // Add a processing delay to the source. No buffers are pulled
-        // from the source until the delay elapses.
-        void DelaySource(const std::string& name, float delay);
         // Pause/resume the named source. If already paused/playing nothing is done.
         void PauseSource(const std::string& name, bool paused);
 
@@ -759,7 +752,7 @@ namespace audio
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override;
         virtual bool Prepare(const Loader& loader) override;
-        virtual void Update(float dt) override;
+        virtual void Advance(unsigned int ms) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -777,7 +770,6 @@ namespace audio
         struct Source {
             std::unique_ptr<Element> element;
             bool paused = false;
-            float delay = 0.0;
         };
         std::unordered_map<std::string, Source> mSources;
         SingleSlotPort mOut;

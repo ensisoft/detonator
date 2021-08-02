@@ -82,10 +82,6 @@ namespace audio
         // event was available.
         virtual std::unique_ptr<Event> GetEvent() noexcept
         { return nullptr; }
-        // Update the source during play state. dt is the elapsed time
-        // in seconds since the last Update.
-        virtual void Update(float dt) noexcept
-        {}
 
         static int ByteSize(Format format) noexcept
         {

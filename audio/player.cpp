@@ -24,7 +24,6 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
-#include "base/utility.h"
 #include "audio/player.h"
 #include "audio/device.h"
 #include "audio/source.h"
@@ -121,17 +120,11 @@ void Player::AudioThreadLoop(Device* ptr)
 {
     std::unique_ptr<Device> dev(ptr);
 
-    auto now = base::GetTime();
-
     // currently playing tracks
     std::list<Track> playing;
 
     while (run_thread_.test_and_set(std::memory_order_acquire))
     {
-        const auto later = base::GetTime();
-        const auto delta = later - now;
-        now = later;
-
         // iterate audio device state once. (dispatches stream/device state changes)
         dev->Poll();
 
@@ -218,11 +211,6 @@ void Player::AudioThreadLoop(Device* ptr)
                 }
                 if (!track.looping)
                     it = playing.erase(it);
-            }
-            else if (state == Stream::State::Ready && !track.paused)
-            {
-                track.stream->Update(delta);
-                it++;
             }
             else it++;
         }
