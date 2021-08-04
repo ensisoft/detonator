@@ -449,6 +449,43 @@ namespace audio
         SingleSlotPort mOut;
     };
 
+    class Delay : public Element
+    {
+    public:
+        Delay(const std::string& name, const std::string& id, unsigned delay = 0);
+        Delay(const std::string& name, unsigned delay = 0);
+
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual std::string GetType() const override
+        { return "Delay"; }
+        virtual bool Prepare(const Loader& loader) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual void Advance(unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0)  return mOut;
+            BUG("No such output port.");
+        }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port.");
+        }
+    private:
+        const std::string mName;
+        const std::string mId;
+        SingleSlotPort mIn;
+        SingleSlotPort mOut;
+        unsigned mDelay = 0;
+    };
+
     // Manipulate audio stream gain over time in order to create a
     // fade-in or fade-out effect.
     class Fade : public Element
