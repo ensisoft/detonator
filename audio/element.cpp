@@ -452,6 +452,39 @@ void Mixer::Process(EventQueue& events, unsigned milliseconds)
     mOut.PushBuffer(ret);
 }
 
+Delay::Delay(const std::string& name, const std::string& id, unsigned delay)
+  : mName(name)
+  , mId(id)
+  , mIn("in")
+  , mOut("out")
+  , mDelay(delay)
+{}
+Delay::Delay(const std::string& name, unsigned delay)
+  : Delay(name, base::RandomString(10), delay)
+{}
+
+bool Delay::Prepare(const Loader& loader)
+{
+    const auto& format = mIn.GetFormat();
+    mOut.SetFormat(format);
+    DEBUG("Delay '%1' output format set to '%2'.", mName, format);
+    return true;
+}
+void Delay::Process(EventQueue& events, unsigned milliseconds)
+{
+    if (mDelay > 0u)
+        return;
+    BufferHandle buffer;
+    if (mIn.PullBuffer((buffer)))
+        mOut.PushBuffer(buffer);
+}
+
+void Delay::Advance(unsigned milliseconds)
+{
+    const auto min = std::min(mDelay, milliseconds);
+    mDelay -= min;
+}
+
 Fade::Fade(const std::string& name, const std::string& id, float duration, Effect effect)
   : mName(name)
   , mId(id)
@@ -1316,6 +1349,7 @@ std::vector<std::string> ListAudioElements()
         list.push_back("StereoJoiner");
         list.push_back("StereoMaker");
         list.push_back("Mixer");
+        list.push_back("Delay");
     }
     return list;
 }
@@ -1394,6 +1428,13 @@ const ElementDesc* FindElementDesc(const std::string& type)
             mixer.output_ports.push_back({"out"});
             map["Mixer"] = mixer;
         }
+        {
+            ElementDesc delay;
+            delay.args["delay"] = 0u;
+            delay.input_ports.push_back({"in"});
+            delay.output_ports.push_back({"out"});
+            map["Delay"] = delay;
+        }
     }
     return base::SafeFind(map, type);
 }
@@ -1414,6 +1455,9 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     else if (desc.type == "Mixer")
         return Construct<Mixer>(desc.name, desc.id,
             GetArg<unsigned>(args, "num_srcs", name));
+    else if (desc.type == "Delay")
+        return Construct<Delay>(desc.name, desc.id,
+            GetArg<unsigned>(args, "delay", name));
     else if (desc.type == "Fade")
         return Construct<Fade>(desc.name, desc.id,
             GetArg<float>(args, "duration", name),
