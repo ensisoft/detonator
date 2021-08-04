@@ -485,26 +485,25 @@ void Delay::Advance(unsigned milliseconds)
     mDelay -= min;
 }
 
-Fade::Fade(const std::string& name, const std::string& id, float duration, Effect effect)
+Effect::Effect(const std::string& name, const std::string& id, unsigned time, unsigned duration, Kind effect)
   : mName(name)
   , mId(id)
   , mIn("in")
   , mOut("out")
 {
-    SetFade(effect, duration);
+    SetEffect(effect, time, duration);
 }
-
-Fade::Fade(const std::string& name, float duration, Effect effect)
-  : Fade(name, base::RandomString(10), duration, effect)
+Effect::Effect(const std::string& name, unsigned time, unsigned duration, Kind effect)
+  : Effect(name, base::RandomString(10), time, duration, effect)
 {}
-Fade::Fade(const std::string& name)
+Effect::Effect(const std::string& name)
   : mName(name)
   , mId(base::RandomString(10))
   , mIn("in")
   , mOut("out")
 {}
 
-bool Fade::Prepare(const Loader& loader)
+bool Effect::Prepare(const Loader& loader)
 {
     const auto& format = mIn.GetFormat();
     mSampleRate = format.sample_rate;
@@ -513,7 +512,7 @@ bool Fade::Prepare(const Loader& loader)
     return true;
 }
 
-void Fade::Process(EventQueue& events, unsigned milliseconds)
+void Effect::Process(EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
@@ -521,36 +520,40 @@ void Fade::Process(EventQueue& events, unsigned milliseconds)
 
     const auto& format = mIn.GetFormat();
     if (format.sample_type == SampleType::Int32)
-        format.channel_count == 1 ? AdjustGain<int, 1>(buffer) : AdjustGain<int, 2>(buffer);
+        format.channel_count == 1 ? FadeInOut<int, 1>(buffer) : FadeInOut<int, 2>(buffer);
     else if (format.sample_type == SampleType::Float32)
-        format.channel_count == 1 ? AdjustGain<float, 1>(buffer) : AdjustGain<float, 2>(buffer);
+        format.channel_count == 1 ? FadeInOut<float, 1>(buffer) : FadeInOut<float, 2>(buffer);
     else if (format.sample_type == SampleType::Int16)
-        format.channel_count == 1 ? AdjustGain<short, 1>(buffer) : AdjustGain<short, 2>(buffer);
+        format.channel_count == 1 ? FadeInOut<short, 1>(buffer) : FadeInOut<short, 2>(buffer);
     else WARN("Unsupported format %1", format.sample_type);
 }
 
-void Fade::ReceiveCommand(Command& cmd)
+void Effect::ReceiveCommand(Command& cmd)
 {
-    if (auto* ptr = cmd.GetIf<SetFadeCmd>())
-        SetFade(ptr->effect, ptr->duration);
+    if (auto* ptr = cmd.GetIf<SetEffectCmd>())
+        SetEffect(ptr->effect, ptr->time, ptr->duration);
     else BUG("Unexpected command.");
 }
 
-void Fade::SetFade(Effect effect, float duration)
+void Effect::SetEffect(Kind effect, unsigned time, unsigned duration)
 {
-    ASSERT(mDuration >= 0.0f);
-    mFadeDirection = effect == Effect::FadeIn ? 1.0f : -1.0f;
+    mEffect        = effect;
     mDuration      = duration;
+    mStartTime     = time;
     mSampleTime    = 0.0f;
-    DEBUG("Set Fade '%1' fade effect to %2 in %3 seconds.", mName, effect, duration);
+    DEBUG("Set audio effect '%1' effect to %2 in %3s lasting %4s.", mName,
+          effect, time/100.0f, duration/1000.0f);
 }
 
 template<typename DataType, unsigned ChannelCount>
-void Fade::AdjustGain(BufferHandle buffer)
+void Effect::FadeInOut(BufferHandle buffer)
 {
-    // take a shortcut when done.
-    if (mSampleTime >= mDuration)
+    // take a shortcut when possible
+    if (mSampleTime >= (mStartTime + mDuration))
     {
+        if (mEffect == Kind::FadeOut)
+            std::memset(buffer->GetPtr(), 0, buffer->GetByteSize());
+
         mOut.PushBuffer(buffer);
         return;
     }
@@ -561,16 +564,17 @@ void Fade::AdjustGain(BufferHandle buffer)
     const auto num_frames  = buffer_size / frame_size;
     ASSERT((buffer_size % frame_size) == 0);
 
-    // the sample rate tells us the "duration" of the sample in seconds.
-    const auto sample_duration_sec = 1.0f / (float)mSampleRate;
+    const auto sample_duration = 1000.0f / mSampleRate;
 
     auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
     for (unsigned i=0; i<num_frames; ++i)
     {
-        const auto sample_gain_linear = math::clamp(0.0f, 1.0f, mSampleTime / mDuration) * mFadeDirection;
-        const auto sample_gain = std::pow(sample_gain_linear, 2.2);
+        const auto effect_time  = mSampleTime - mStartTime;
+        const auto effect_time_norm = math::clamp(0.0f, 1.0f, effect_time / (float)mDuration);
+        const auto effect_value = mEffect == Kind::FadeIn ? effect_time_norm : 1.0f - effect_time_norm;
+        const auto sample_gain = std::pow(effect_value, 2.2);
         AdjustFrameGain(&ptr[i], sample_gain);
-        mSampleTime += sample_duration_sec;
+        mSampleTime += sample_duration;
     }
     mOut.PushBuffer(buffer);
 }
@@ -1343,6 +1347,7 @@ std::vector<std::string> ListAudioElements()
         list.push_back("ZeroSource");
         list.push_back("FileSource");
         list.push_back("Resampler");
+        list.push_back("Effect");
         list.push_back("Gain");
         list.push_back("Null");
         list.push_back("StereoSplitter");
@@ -1393,6 +1398,15 @@ const ElementDesc* FindElementDesc(const std::string& type)
             gain.input_ports.push_back({"in"});
             gain.output_ports.push_back({"out"});
             map["Gain"] = gain;
+        }
+        {
+            ElementDesc effect;
+            effect.args["time"] = 0u;
+            effect.args["duration"] = 0u;
+            effect.args["effect"] = Effect::Kind::FadeIn;
+            effect.input_ports.push_back({"in"});
+            effect.output_ports.push_back({"out"});
+            map["Effect"] = effect;
         }
         {
             ElementDesc null;
@@ -1458,10 +1472,11 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     else if (desc.type == "Delay")
         return Construct<Delay>(desc.name, desc.id,
             GetArg<unsigned>(args, "delay", name));
-    else if (desc.type == "Fade")
-        return Construct<Fade>(desc.name, desc.id,
-            GetArg<float>(args, "duration", name),
-            GetArg<Fade::Effect>(args, "effect", name));
+    else if (desc.type == "Effect")
+        return Construct<Effect>(desc.name, desc.id,
+            GetArg<unsigned>(args, "time", name),
+            GetArg<unsigned>(args, "duration", name),
+            GetArg<Effect::Kind>(args, "effect", name));
     else if (desc.type == "Gain")
         return Construct<Gain>(desc.name, desc.id, 
             GetArg<float>(args, "gain", name));

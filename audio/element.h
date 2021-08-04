@@ -487,33 +487,32 @@ namespace audio
     };
 
     // Manipulate audio stream gain over time in order to create a
-    // fade-in or fade-out effect.
-    class Fade : public Element
+    // some kind of an audio effect.
+    class Effect : public Element
     {
     public:
         // The possible effect.
-        enum class Effect {
+        enum class Kind {
             // Ramp up the stream gain from 0.0f to 1.0f
             FadeIn,
             // Ramp down the stream gain from 1.0f to 0.0f
             FadeOut
         };
-        // Command to configure and set a new fade effect
-        // parameters. The command will take effect from the
-        // next input buffer onwards.
-        struct SetFadeCmd {
-            float duration = 0.0f;
-            Effect effect  = Effect::FadeIn;
+        struct SetEffectCmd {
+            unsigned time     = 0;
+            unsigned duration = 0;
+            Kind effect = Kind::FadeIn;
         };
-        Fade(const std::string& name, const std::string& id, float duration, Effect effect);
-        Fade(const std::string& name, float duration, Effect effect);
-        Fade(const std::string& name);
+
+        Effect(const std::string& name, const std::string& id, unsigned time, unsigned duration, Kind effect);
+        Effect(const std::string& name, unsigned time, unsigned duration, Kind effect);
+        Effect(const std::string& name);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual std::string GetType() const override
-        { return "Fade"; }
+        { return "Effect"; }
         virtual bool Prepare(const Loader& loader) override;
         virtual void Process(EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -532,21 +531,19 @@ namespace audio
         }
         virtual void ReceiveCommand(Command& cmd) override;
 
-        // Set the fade effect parameters. The effect will start
-        // to place from the next input buffer onwards.
-        void SetFade(Effect effect, float duration);
+        void SetEffect(Kind effect, unsigned time, unsigned duration);
     private:
         template<typename DataType, unsigned ChannelCount>
-        void AdjustGain(BufferHandle buffer);
+        void FadeInOut(BufferHandle buffer);
     private:
         const std::string mName;
         const std::string mId;
         SingleSlotPort mIn;
         SingleSlotPort mOut;
-        // fading in (1.0) or out (-1.0f).
-        float mFadeDirection = 1.0f;
+        Kind mEffect = Kind::FadeIn;
         // duration of the fading effect.
-        float mDuration   = 0.0;
+        unsigned mDuration  = 0;
+        unsigned mStartTime = 0;
         // how far into the effect are we.
         float mSampleTime = 0.0;
         // current stream sample rate.
@@ -901,7 +898,7 @@ namespace audio
     };
 
     using ElementArg = std::variant<std::string, SampleType, Format, float, unsigned,
-            Fade::Effect, StereoMaker::Channel>;
+            Effect::Kind, StereoMaker::Channel>;
 
     template<typename T> inline
     const T* FindElementArg(const std::unordered_map<std::string, ElementArg>& args,
