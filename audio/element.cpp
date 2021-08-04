@@ -1367,7 +1367,7 @@ const ElementDesc* FindElementDesc(const std::string& type)
         {
             ElementDesc test;
             test.args["frequency"] = 2000u;
-            test.args["millisecs"] = 0u;
+            test.args["duration"]  = 0u;
             test.args["format"]    = audio::Format {audio::SampleType::Float32, 44100, 2};
             test.output_ports.push_back({"out"});
             map["SineSource"] = test;
@@ -1494,7 +1494,7 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
         return Construct<SineSource>(desc.name, desc.id,
             GetArg<Format>(args, "format", name),
             GetArg<unsigned>(args, "frequency", name),
-            GetArg<unsigned>(args, "millisecs", name));
+            GetArg<unsigned>(args, "duration", name));
     else BUG("Unsupported audio Element construction.");
     return nullptr;
 }
