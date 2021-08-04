@@ -393,6 +393,19 @@ Mixer::Mixer(const std::string& name, unsigned num_srcs)
   : Mixer(name, base::RandomString(10), num_srcs)
 {}
 
+Mixer::Mixer(const std::string& name, const std::string& id,
+             const std::vector<PortDesc>& srcs)
+  : mName(name)
+  , mId(id)
+  , mOut("out")
+{
+    for (const auto& desc : srcs)
+    {
+        SingleSlotPort p(desc.name);
+        mSrcs.push_back(std::move(p));
+    }
+}
+
 bool Mixer::Prepare(const Loader& loader)
 {
     // all input ports should have the same format,
@@ -1467,8 +1480,7 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     else if (desc.type == "Null")
         return std::make_unique<Null>(desc.name, desc.id);
     else if (desc.type == "Mixer")
-        return Construct<Mixer>(desc.name, desc.id,
-            GetArg<unsigned>(args, "num_srcs", name));
+        return Construct<Mixer>(desc.name, desc.id, &desc.input_ports);
     else if (desc.type == "Delay")
         return Construct<Delay>(desc.name, desc.id,
             GetArg<unsigned>(args, "delay", name));
