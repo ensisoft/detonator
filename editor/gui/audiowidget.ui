@@ -238,7 +238,7 @@
            <enum>Qt::CustomContextMenu</enum>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::MultiSelection</enum>
+           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
           <property name="selectionBehavior">
            <enum>QAbstractItemView::SelectRows</enum>
@@ -290,6 +290,26 @@
             </property>
            </widget>
           </item>
+          <item row="7" column="1">
+           <widget class="QSpinBox" name="frequency">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>22000</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="lblFrequency">
+            <property name="text">
+             <string>Frequency (Hz)</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="elemName">
             <property name="sizePolicy">
@@ -299,6 +319,9 @@
              </sizepolicy>
             </property>
            </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QComboBox" name="effect"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_14">
@@ -310,16 +333,6 @@
             </property>
             <property name="text">
              <string>ID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="sampleType">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
             </property>
            </widget>
           </item>
@@ -342,17 +355,56 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="lblFileSource">
-            <property name="text">
-             <string>File source</string>
+          <item row="8" column="1">
+           <widget class="QSpinBox" name="duration">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <number>0</number>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="lblSampleRate">
             <property name="text">
-             <string>Sample rate</string>
+             <string>Sample rate (Hz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblChannels">
+            <property name="text">
+             <string>Channels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QSpinBox" name="delay">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Delay (ms)</string>
             </property>
            </widget>
           </item>
@@ -369,33 +421,44 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="channels"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="lblChannels">
+          <item row="6" column="0">
+           <widget class="QLabel" name="lblGain">
             <property name="text">
-             <string>Channels</string>
+             <string>Gain</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="sampleRate">
-            <item>
-             <property name="text">
-              <string>8000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>16000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>44100</string>
-             </property>
-            </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblFileSource">
+            <property name="text">
+             <string>File source</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="sampleType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="channels"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Name</string>
+            </property>
            </widget>
           </item>
           <item row="5" column="1">
@@ -431,43 +494,59 @@
             </item>
            </layout>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="lblGain">
+          <item row="3" column="1">
+           <widget class="QComboBox" name="sampleRate">
+            <item>
+             <property name="text">
+              <string>8000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>44100</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Gain</string>
+             <string>Duration (ms)</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="lblFrequency">
-            <property name="text">
-             <string>Frequency</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QSpinBox" name="frequency">
+          <item row="11" column="1">
+           <widget class="QSpinBox" name="time">
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>22000</number>
+             <number>10000</number>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Start time (ms)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Effect</string>
             </property>
            </widget>
           </item>
@@ -698,6 +777,30 @@
     <string>Unlink all ports</string>
    </property>
   </action>
+  <action name="actionAddInputPort">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add input port</string>
+   </property>
+  </action>
+  <action name="actionRemoveInputPort">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove input port</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>graphName</tabstop>
@@ -715,6 +818,10 @@
   <tabstop>btnSelectFile</tabstop>
   <tabstop>gainValue</tabstop>
   <tabstop>frequency</tabstop>
+  <tabstop>duration</tabstop>
+  <tabstop>delay</tabstop>
+  <tabstop>time</tabstop>
+  <tabstop>effect</tabstop>
   <tabstop>afChannels</tabstop>
   <tabstop>afSampleRate</tabstop>
   <tabstop>afFrames</tabstop>

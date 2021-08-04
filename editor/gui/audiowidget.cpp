@@ -936,6 +936,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
 
     PopulateFromEnum<audio::SampleType>(mUI.sampleType);
     PopulateFromEnum<Channels>(mUI.channels);
+    PopulateFromEnum<audio::Effect::Kind>(mUI.effect);
     SetValue(mUI.graphName, QString("My Graph"));
     SetValue(mUI.graphID, base::RandomString(10));
     SetEnabled(mUI.actionPause, false);
@@ -1355,6 +1356,20 @@ void AudioWidget::on_frequency_valueChanged(int)
     SetSelectedElementProperties();
 }
 
+void AudioWidget::on_duration_valueChanged(int)
+{
+    SetSelectedElementProperties();
+}
+void AudioWidget::on_delay_valueChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
+void AudioWidget::on_effect_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
 void AudioWidget::SceneSelectionChanged()
 {
     GetSelectedElementProperties();
@@ -1433,6 +1448,9 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.fileSource, QString(""));
     SetValue(mUI.gainValue,    1.0f);
     SetValue(mUI.frequency, 0);
+    SetValue(mUI.duration, 0);
+    SetValue(mUI.delay, 0);
+    SetValue(mUI.time, 0);
     SetValue(mUI.afChannels,   QString(""));
     SetValue(mUI.afSampleRate, QString(""));
     SetValue(mUI.afFrames,     QString(""));
@@ -1445,8 +1463,11 @@ void AudioWidget::GetSelectedElementProperties()
     SetEnabled(mUI.btnSelectFile, false);
     SetEnabled(mUI.gainValue,  false);
     SetEnabled(mUI.frequency, false);
+    SetEnabled(mUI.duration, false);
+    SetEnabled(mUI.delay, false);
+    SetEnabled(mUI.time, false);
+    SetEnabled(mUI.effect, false);
     SetEnabled(mUI.audioFile, false);
-
     SetEnabled(mUI.actionDelete, false);
 
     /*
@@ -1530,6 +1551,26 @@ void AudioWidget::GetSelectedElementProperties()
         SetVisible(mUI.lblFrequency, true);
         SetValue(mUI.frequency, *val);
     }
+    if (const auto* val = item->GetArgValue<unsigned>("duration"))
+    {
+        SetEnabled(mUI.duration, true);
+        SetValue(mUI.duration, *val);
+    }
+    if (const auto* val = item->GetArgValue<unsigned>("delay"))
+    {
+        SetEnabled(mUI.delay, true);
+        SetValue(mUI.delay, *val);
+    }
+    if (const auto* val = item->GetArgValue<unsigned>("time"))
+    {
+        SetEnabled(mUI.time, true);
+        SetValue(mUI.time, *val);
+    }
+    if (const auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
+    {
+        SetEnabled(mUI.effect, true);
+        SetValue(mUI.effect, *val);
+    }
 
     if (item->IsFileSource())
     {
@@ -1580,6 +1621,14 @@ void AudioWidget::SetSelectedElementProperties()
         *val = GetValue(mUI.gainValue);
     if (auto* val = item->GetArgValue<unsigned>("frequency"))
         *val = GetValue(mUI.frequency);
+    if (auto* val = item->GetArgValue<unsigned>("duration"))
+        *val = GetValue(mUI.duration);
+    if (auto* val = item->GetArgValue<unsigned>("delay"))
+        *val = GetValue(mUI.delay);
+    if (auto* val = item->GetArgValue<unsigned>("time"))
+        *val = GetValue(mUI.time);
+    if (auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
+        *val = GetValue(mUI.effect);
 
     mScene->invalidate();
 }

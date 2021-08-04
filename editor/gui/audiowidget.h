@@ -122,6 +122,9 @@ namespace gui
         void on_channels_currentIndexChanged(int);
         void on_gainValue_valueChanged(double);
         void on_frequency_valueChanged(int);
+        void on_duration_valueChanged(int);
+        void on_delay_valueChanged(int);
+        void on_effect_currentIndexChanged(int);
 
         void SceneSelectionChanged();
         void AddElementAction();
