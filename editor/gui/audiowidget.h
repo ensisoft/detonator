@@ -113,6 +113,8 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionDelete_triggered();
         void on_actionUnlink_triggered();
+        void on_actionAddInputPort_triggered();
+        void on_actionRemoveInputPort_triggered();
         void on_view_customContextMenuRequested(QPoint);
         void on_elements_itemSelectionChanged();
         void on_outElem_currentIndexChanged(int);

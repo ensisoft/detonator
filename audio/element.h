@@ -40,6 +40,10 @@ namespace audio
 
     using BufferHandle = std::shared_ptr<Buffer>;
 
+    struct PortDesc {
+        std::string name;
+    };
+
     // Port provides an input/output /queueing abstraction.
     // I.e. a port is used to push and pull data in and out
     // in buffers. Each port additionally specifies the format
@@ -423,6 +427,7 @@ namespace audio
     public:
         Mixer(const std::string& name, unsigned num_srcs = 2);
         Mixer(const std::string& name, const std::string& id, unsigned num_srcs = 2);
+        Mixer(const std::string& name, const std::string& id, const std::vector<PortDesc>& srcs);
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
@@ -912,10 +917,6 @@ namespace audio
         return nullptr;
     }
 
-    struct PortDesc {
-        std::string name;
-    };
-
     struct ElementDesc {
         std::vector<PortDesc> input_ports;
         std::vector<PortDesc> output_ports;
@@ -930,6 +931,8 @@ namespace audio
         std::string name;
         std::string type;
         std::unordered_map<std::string, ElementArg> args;
+        std::vector<PortDesc> input_ports;
+        std::vector<PortDesc> output_ports;
     };
     std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc);
 

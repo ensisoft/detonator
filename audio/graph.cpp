@@ -70,6 +70,14 @@ std::size_t GraphClass::GetHash() const
             ASSERT(it != elem.args.end());
             hash = base::hash_combine(hash, it->second);
         }
+        for (const auto& port : elem.input_ports)
+        {
+            hash = base::hash_combine(hash, port.name);
+        }
+        for (const auto& port : elem.output_ports)
+        {
+            hash = base::hash_combine(hash, port.name);
+        }
     }
     return hash;
 }
@@ -103,6 +111,18 @@ void GraphClass::IntoJson(data::Writer& writer) const
             std::visit([&chunk, &name](const auto& variant_value) {
                 chunk->Write(name.c_str(), variant_value);
             }, variant);
+        }
+        for (const auto& port : elem.output_ports)
+        {
+            auto port_chunk = writer.NewWriteChunk();
+            port_chunk->Write("name", port.name);
+            chunk->AppendChunk("output_ports", std::move(port_chunk));
+        }
+        for (const auto& port : elem.input_ports)
+        {
+            auto port_chunk = writer.NewWriteChunk();
+            port_chunk->Write("name", port.name);
+            chunk->AppendChunk("input_ports", std::move(port_chunk));
         }
         writer.AppendChunk("elements", std::move(chunk));
     }
@@ -156,6 +176,20 @@ std::optional<GraphClass> GraphClass::FromJson(const data::Reader& reader)
                 chunk->Read(name.c_str(), &variant_value);
             }, variant);
         }
+        for (unsigned i=0; i<chunk->GetNumChunks("output_ports"); ++i)
+        {
+            const auto& port_chunk = chunk->GetReadChunk("output_ports", i);
+            PortDesc port;
+            port_chunk->Read("name", &port.name);
+            elem.output_ports.push_back(std::move(port));
+        }
+        for (unsigned i=0; i<chunk->GetNumChunks("input_ports"); ++i)
+        {
+            const auto& port_chunk = chunk->GetReadChunk("input_ports", i);
+            PortDesc port;
+            port_chunk->Read("name", &port.name);
+            elem.input_ports.push_back(std::move(port));
+        }
         ret.mElements.push_back(std::move(elem));
     }
     return ret;
@@ -181,6 +215,8 @@ Graph::Graph(const GraphClass& klass) :
         args.id   = elem.id;
         args.type = elem.type;
         args.name = elem.name;
+        args.input_ports  = elem.input_ports;
+        args.output_ports = elem.output_ports;
         mElements.push_back(CreateElement(args));
     }
     for (size_t i=0; i<klass.GetNumLinks(); ++i)
