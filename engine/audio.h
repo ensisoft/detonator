@@ -50,18 +50,10 @@ namespace game
     class AudioEngine
     {
     public:
+        using Effect = audio::Effect::Kind;
+
         AudioEngine(const std::string& name, const audio::Loader* loader);
        ~AudioEngine();
-
-        // Possible audio effects
-        enum class Effect {
-            // Fade audio in over time by adjusting the audio
-            // gain from 0.0f to 1.0f gradually.
-            FadeIn,
-            // Fade audio out over time by adjusting the audio
-            // gain from 1.0f to 0.0f gradually.
-            FadeOut
-        };
 
         // Add a new music track identified by name. The name should be unique
         // and can later be used to refer to the track in subsequent calls.

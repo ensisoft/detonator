@@ -98,10 +98,10 @@ bool AudioEngine::AddMusicTrack(const std::string& name, const std::string& uri)
     music->AddElement(audio::FileSource(name + "/file", uri, audio::SampleType::Float32));
     music->AddElement(audio::StereoMaker(name + "/stereo"));
     music->AddElement(audio::Resampler(name + "/resampler", 44100));
-    music->AddElement(audio::Fade(name + "/fader"));
+    music->AddElement(audio::Effect(name + "/effect"));
     ASSERT(music->LinkElements(name + "/file",   "out", name + "/stereo",    "in"));
-    ASSERT(music->LinkElements(name + "/stereo", "out", name + "/fader",     "in"));
-    ASSERT(music->LinkElements(name + "/fader",  "out", name + "/resampler", "in"));
+    ASSERT(music->LinkElements(name + "/stereo", "out", name + "/effect",    "in"));
+    ASSERT(music->LinkElements(name + "/effect", "out", name + "/resampler", "in"));
     ASSERT(music->LinkGraph(name + "/resampler", "out"));
 
     if (!music->Prepare(*mLoader))
@@ -171,11 +171,11 @@ void AudioEngine::RemoveMusicTrack(const std::string& name)
 
 void AudioEngine::SetMusicEffect(const std::string& track, float duration, Effect effect)
 {
-    audio::Fade::SetFadeCmd cmd;
-    cmd.duration = duration;
-    cmd.effect   = effect == Effect::FadeIn ? audio::Fade::Effect::FadeIn
-                                            : audio::Fade::Effect::FadeOut;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand(track + "/fader", std::move(cmd)));
+    audio::Effect::SetEffectCmd cmd;
+    cmd.effect   = effect;
+    cmd.time     = 0;
+    cmd.duration = duration * 1000;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand(track + "/effect", std::move(cmd)));
 }
 
 void AudioEngine::SetMusicGain(float gain)
