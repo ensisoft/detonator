@@ -246,14 +246,18 @@ private:
                 (DWORD_PTR)this,
                 CALLBACK_FUNCTION);
 
-            const auto block_size = wfx.nBlockAlign;
+            const auto sample_size    = Source::ByteSize(source_->GetFormat());
+            const auto samples_per_ms = source_->GetRateHz() / 1000u;
+            const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
+            const auto buffer_size    = bytes_per_ms * 20;
+            const auto block_size     = sample_size * source_->GetNumChannels();
 
             // todo: cache and recycle audio buffers, or maybe
             // we need to cache audio streams since the buffers are per HWAVEOUT ?
             buffers_.resize(5);
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, block_size * 2000, block_size));
+                buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, buffer_size, block_size));
             }
         }
        ~PlaybackStream()

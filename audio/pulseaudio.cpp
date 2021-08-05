@@ -147,9 +147,19 @@ private:
             pa_stream_set_write_callback(stream_, write_callback, this);
             pa_stream_set_underflow_callback(stream_, underflow_callback, this);
 
+            const auto sample_size    = Source::ByteSize(source_->GetFormat());
+            const auto samples_per_ms = source_->GetRateHz() / 1000u;
+            const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
+
+            pa_buffer_attr buffering;
+            buffering.maxlength = bytes_per_ms * 20;
+            buffering.prebuf = -1;
+            buffering.minreq = -1;
+            buffering.tlength = -1;
+
             if (pa_stream_connect_playback(stream_,
                 nullptr, // device
-                nullptr, // pa_buffer_attr
+                &buffering,
                 PA_STREAM_START_CORKED, // stream flags 0 for default
                 nullptr,  // volume
                 nullptr)) // sync stream
