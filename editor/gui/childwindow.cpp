@@ -46,8 +46,12 @@ ChildWindow::ChildWindow(MainWidget* widget, Clipboard* clipboard)
     setWindowIcon(icon);
 
     mUI.verticalLayout->addWidget(widget);
-    mUI.statusBarFrame->setVisible(widget->IsAccelerated());
+    mUI.statusBarFrame->setVisible(widget->HasStats());
     mUI.statusBar->insertPermanentWidget(0, mUI.statusBarFrame);
+    SetVisible(mUI.lblFps,    false);
+    SetVisible(mUI.lblVsync,  false);
+    SetVisible(mUI.statFps,   false);
+    SetVisible(mUI.statVsync, false);
     QString menu_name = klass;
     menu_name.remove("gui::");
     menu_name.remove("Widget");
@@ -102,6 +106,19 @@ void ChildWindow::RefreshUI()
     mUI.actionZoomIn->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
     mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 
+    MainWidget::Stats stats;
+    mWidget->GetStats(&stats);
+    SetValue(mUI.statTime, QString::number(stats.time));
+    SetVisible(mUI.lblFps,    stats.graphics.valid);
+    SetVisible(mUI.lblVsync,  stats.graphics.valid);
+    SetVisible(mUI.statFps,   stats.graphics.valid);
+    SetVisible(mUI.statVsync, stats.graphics.valid);
+    if (stats.graphics.valid)
+    {
+        SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+        SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+    }
+
     if (mWidget->ShouldClose())
     {
         Shutdown();
@@ -133,8 +150,15 @@ void ChildWindow::Render()
     if (mWidget->GetStats(&stats))
     {
         SetValue(mUI.statTime, QString::number(stats.time));
-        SetValue(mUI.statFps,  QString::number((int)stats.fps));
-        SetValue(mUI.statVsync, stats.vsync ? QString("ON") : QString("OFF"));
+        SetVisible(mUI.lblFps, stats.graphics.valid);
+        SetVisible(mUI.lblVsync, stats.graphics.valid);
+        SetVisible(mUI.statFps, stats.graphics.valid);
+        SetVisible(mUI.statVsync, stats.graphics.valid);
+        if (stats.graphics.valid)
+        {
+            SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+            SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+        }
     }
 }
 

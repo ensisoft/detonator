@@ -156,6 +156,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.actionWindowNext->setShortcut(QKeySequence::Forward);
     mUI.actionWindowPrev->setShortcut(QKeySequence::Back);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
+    mUI.statusBarFrame->setVisible(false);
     mUI.statusbar->setVisible(true);
     mUI.mainToolBar->setVisible(true);
     mUI.actionViewToolbar->setChecked(true);
@@ -740,9 +741,16 @@ void MainWindow::iterateGameLoop()
         if (mCurrentWidget->GetStats(&stats))
         {
             SetValue(mUI.statTime, QString::number(stats.time));
-            SetValue(mUI.statFps,  QString::number((int)stats.fps));
-            SetValue(mUI.statVsync, stats.vsync ? QString("ON") : QString("OFF"));
-        }
+            SetVisible(mUI.lblFps,    stats.graphics.valid);
+            SetVisible(mUI.lblVsync,  stats.graphics.valid);
+            SetVisible(mUI.statFps,   stats.graphics.valid);
+            SetVisible(mUI.statVsync, stats.graphics.valid);
+            if (stats.graphics.valid)
+            {
+                SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+                SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+            }
+         }
     }
 
     GfxWindow::EndFrame();
@@ -837,7 +845,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.actionZoomOut->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomOut));
         mUI.actionReloadShaders->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadShaders));
         mUI.actionReloadTextures->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadTextures));
-        mUI.statusBarFrame->setVisible(widget->IsAccelerated());
+        mUI.statusBarFrame->setVisible(widget->HasStats());
     }
     else
     {
@@ -1852,6 +1860,20 @@ void MainWindow::RefreshUI()
     {
         mUI.actionZoomIn->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
         mUI.actionZoomOut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
+        MainWidget::Stats stats;
+        if (mCurrentWidget->GetStats(&stats))
+        {
+            SetValue(mUI.statTime, QString::number(stats.time));
+            SetVisible(mUI.lblFps, stats.graphics.valid);
+            SetVisible(mUI.lblVsync, stats.graphics.valid);
+            SetVisible(mUI.statFps, stats.graphics.valid);
+            SetVisible(mUI.statVsync, stats.graphics.valid);
+            if (stats.graphics.valid)
+            {
+                SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+                SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+            }
+        }
     }
 }
 

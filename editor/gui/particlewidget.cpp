@@ -435,8 +435,9 @@ bool ParticleEditorWidget::ConfirmClose()
 bool ParticleEditorWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
-    stats->vsync = mUI.widget->haveVSYNC();
-    stats->fps   = mUI.widget->getCurrentFPS();
+    stats->graphics.valid = true;
+    stats->graphics.vsync = mUI.widget->haveVSYNC();
+    stats->graphics.fps   = mUI.widget->getCurrentFPS();
     return true;
 }
 

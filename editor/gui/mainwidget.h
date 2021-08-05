@@ -187,11 +187,19 @@ namespace gui
 
         struct Stats {
             double time = 0.0;
-            float  fps  = 0.0f;
-            bool vsync  = false;
+            struct {
+                bool  valid = true;
+                float fps   = 0.0f;
+                bool  vsync = false;
+            } graphics;
+            struct {
+                // nothing here yet.
+            } audio;
         };
         virtual bool GetStats(Stats* stats) const
         { return false; }
+        virtual bool HasStats() const
+        { return true; }
 
         void SetId(QString id)
         { mId = id;}

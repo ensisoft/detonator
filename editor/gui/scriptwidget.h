@@ -44,6 +44,8 @@ namespace gui
 
         virtual bool IsAccelerated() const override
         { return false; }
+        virtual bool HasStats() const override
+        { return false; }
         virtual bool CanTakeAction(Actions action, const Clipboard*) const override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;

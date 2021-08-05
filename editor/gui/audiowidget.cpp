@@ -1199,6 +1199,7 @@ bool AudioWidget::ConfirmClose()
 bool AudioWidget::GetStats(Stats* stats) const
 {
     stats->time = mPlayTime;
+    stats->graphics.valid = false;
     return true;
 }
 
