@@ -53,8 +53,21 @@ public:
     {
         mData += tag;
     }
+    virtual size_t GetNumInfoTags() const override
+    {
+        return mTags.size();
+    }
+    virtual void AddInfoTag(const InfoTag& tag) override
+    {
+        mTags.push_back(tag);
+    }
+    virtual const InfoTag& GetInfoTag(size_t index) const override
+    {
+        return mTags[index];
+    }
 private:
     std::string mData;
+    std::vector<InfoTag> mTags;
 };
 
 class TestPort : public audio::Port

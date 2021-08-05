@@ -633,6 +633,13 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
             if (!output.PullBuffer(buffer))
                 continue;
 
+            Buffer::InfoTag tag;
+            tag.element.name   = source->GetName();
+            tag.element.id     = source->GetId();
+            tag.element.source = source->IsSource();
+            tag.element.source_done = source->IsSourceDone();
+            buffer->AddInfoTag(tag);
+
             if (auto* dst = FindDstPort(&output))
                 dst->PushBuffer(buffer);
         }
