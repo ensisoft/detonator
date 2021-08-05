@@ -387,7 +387,7 @@ public:
         {
             element.args[arg.name] = arg.arg;
         }
-        if (mType == "Mixer")
+        if (mType == "Mixer" || mType == "Playlist")
         {
             std::vector<audio::PortDesc> ports;
             for (const auto& port : mIPorts)
@@ -488,13 +488,13 @@ public:
     }
     bool CanAddInputPort() const
     {
-        if (mType == "Mixer")
+        if (mType == "Mixer" || mType == "Playlist")
             return true;
         return false;
     }
     bool CanRemoveInputPort() const
     {
-        if (mType == "Mixer" && mIPorts.size() > 2)
+        if ((mType == "Mixer" || mType == "Playlist") && mIPorts.size() > 2)
             return true;
         return false;
     }
@@ -599,7 +599,7 @@ public:
                 writer.Write(name.c_str(), variant_value);
             }, variant);
         }
-        if (mType == "Mixer")
+        if (mType == "Mixer" || mType == "Playlist")
             writer.Write("iports", (unsigned)mIPorts.size());
     }
     void FromJson(const data::Reader& reader)

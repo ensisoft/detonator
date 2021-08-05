@@ -152,6 +152,65 @@ BufferHandle MixBuffers(std::vector<BufferHandle>& src_buffers, float src_gain)
 namespace audio
 {
 
+Playlist::Playlist(const std::string& name, const std::string& id, const std::vector<PortDesc>& srcs)
+  : mName(name)
+  , mId(id)
+  , mOut("out")
+{
+    for (const auto& desc : srcs)
+    {
+        SingleSlotPort p(desc.name);
+        mSrcs.push_back(std::move(p));
+    }
+}
+Playlist::Playlist(const std::string& name, const std::vector<PortDesc>& srcs)
+  : Playlist(name, base::RandomString(10), srcs)
+{}
+
+bool Playlist::Prepare(const Loader& loader)
+{
+    // all input ports should have the same format,
+    // otherwise no deal! the user can use a re-sampler
+    // to resample/convert the streams in order to make
+    // sure that they all have matching format spec.
+    const auto& master_format = mSrcs[0].GetFormat();
+    if (!IsValid(master_format))
+    {
+        ERROR("Playlist '%1' input port '%2' format not set.", mName, mSrcs[0].GetName());
+        return false;
+    }
+
+    for (const auto& src : mSrcs)
+    {
+        const auto& format = src.GetFormat();
+        const auto& name   = src.GetName();
+        if (format != master_format)
+        {
+            ERROR("Playlist '%1' port '%2' format (%3) is not compatible with other ports.", mName, name, format);
+            return false;
+        }
+    }
+    DEBUG("Playlist '%1' prepared with %2 input port(s).", mName, mSrcs.size());
+    DEBUG("Playlist '%1' output format set to %2", mName, master_format);
+    mOut.SetFormat(master_format);
+    return true;
+}
+
+void Playlist::Process(EventQueue& events, unsigned milliseconds)
+{
+    if (mSrcIndex == mSrcs.size())
+        return;
+    BufferHandle buffer;
+    if (!mSrcs[mSrcIndex].PullBuffer(buffer))
+        return;
+
+    const auto& tag = buffer->GetInfoTag(0);
+    if (tag.element.source_done)
+        mSrcIndex++;
+
+    mOut.PushBuffer(buffer);
+}
+
 StereoMaker::StereoMaker(const std::string& name, const std::string& id, Channel which)
   : mName(name)
   , mId(id)
@@ -1368,6 +1427,7 @@ std::vector<std::string> ListAudioElements()
         list.push_back("StereoMaker");
         list.push_back("Mixer");
         list.push_back("Delay");
+        list.push_back("Playlist");
     }
     return list;
 }
@@ -1377,6 +1437,13 @@ const ElementDesc* FindElementDesc(const std::string& type)
     static std::unordered_map<std::string, ElementDesc> map;
     if (map.empty())
     {
+        {
+            ElementDesc playlist;
+            playlist.input_ports.push_back({"in0"});
+            playlist.input_ports.push_back({"in1"});
+            playlist.output_ports.push_back({"out"});
+            map["Playlist"] = playlist;
+        }
         {
             ElementDesc test;
             test.args["frequency"] = 2000u;
@@ -1470,7 +1537,9 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
 {
     const auto& args = desc.args;
     const auto& name = desc.type + "/" + desc.name;
-    if (desc.type == "StereoMaker")
+    if (desc.type == "Playlist")
+        return Construct<Playlist>(desc.name, desc.id, &desc.input_ports);
+    else if (desc.type == "StereoMaker")
         return Construct<StereoMaker>(desc.name, desc.id,
             GetArg<StereoMaker::Channel>(args, "channel", name));
     else if (desc.type == "StereoJoiner")
