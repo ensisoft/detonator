@@ -105,6 +105,13 @@ void Player::SendCommand(std::size_t id, std::unique_ptr<Command> cmd)
     a.cmd      = cmd.release(); // remember to delete the raw ptr!
     track_actions_.push(a);
 }
+void Player::AskProgress(std::size_t id)
+{
+    Action a;
+    a.do_what  = Action::Type::Progress;
+    a.track_id = id;
+    track_actions_.push(a);
+}
 
 bool Player::GetEvent(Event* event)
 {
@@ -162,6 +169,15 @@ void Player::AudioThreadLoop(Device* ptr)
             {
                 p.stream->Cancel();
                 playing.erase(it);
+            }
+            else if (track_action.do_what == Action::Type::Progress)
+            {
+                SourceProgressEvent event;
+                event.id    = p.id;
+                event.time  = p.stream->GetStreamTime();
+                event.bytes = p.stream->GetStreamBytes();
+                std::lock_guard<std::mutex> lock(event_mutex_);
+                events_.push(std::move(event));
             }
         }
 

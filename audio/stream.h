@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <string>
+#include <cstdint>
 
 #include "audio/command.h"
 
@@ -55,6 +56,10 @@ namespace audio
         virtual std::unique_ptr<Source> GetFinishedSource() = 0;
         // Get the human readable stream name if any.
         virtual std::string GetName() const = 0;
+        // Get the current stream time in milliseconds.
+        virtual std::uint64_t GetStreamTime() const = 0;
+        // Get the current number of bytes processed by the stream.
+        virtual std::uint64_t GetStreamBytes() const = 0;
         // Start playing the audio stream.
         // This should be called only once, when the stream is initially started. 
         // To control the subsequent playback use Pause and Resume.
