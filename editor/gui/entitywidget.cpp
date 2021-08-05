@@ -842,8 +842,9 @@ void EntityWidget::Refresh()
 bool EntityWidget::GetStats(Stats* stats) const
 {
     stats->time  = mEntityTime;
-    stats->fps   = mUI.widget->getCurrentFPS();
-    stats->vsync = mUI.widget->haveVSYNC();
+    stats->graphics.valid = true;
+    stats->graphics.fps   = mUI.widget->getCurrentFPS();
+    stats->graphics.vsync = mUI.widget->haveVSYNC();
     return true;
 }
 

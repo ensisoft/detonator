@@ -684,8 +684,9 @@ bool UIWidget::ConfirmClose()
 bool UIWidget::GetStats(Stats* stats) const
 {
     stats->time  = mPlayTime;
-    stats->fps   = mUI.widget->getCurrentFPS();
-    stats->vsync = mUI.widget->haveVSYNC();
+    stats->graphics.valid = true;
+    stats->graphics.fps   = mUI.widget->getCurrentFPS();
+    stats->graphics.vsync = mUI.widget->haveVSYNC();
     return true;
 }
 

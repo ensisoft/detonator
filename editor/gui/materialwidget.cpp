@@ -360,8 +360,9 @@ bool MaterialWidget::ConfirmClose()
 bool MaterialWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
-    stats->fps   = mUI.widget->getCurrentFPS();
-    stats->vsync = mUI.widget->haveVSYNC();
+    stats->graphics.valid = true;
+    stats->graphics.fps   = mUI.widget->getCurrentFPS();
+    stats->graphics.vsync = mUI.widget->haveVSYNC();
     return true;
 }
 
