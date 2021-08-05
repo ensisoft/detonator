@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include "ui_audiowidget.h"
 #  include <QGraphicsScene>
+#  include <QTimer>
 #include "warnpop.h"
 
 #include <memory>
@@ -101,8 +102,8 @@ namespace gui
         void SetSelectedElementProperties();
         void UpdateElementList();
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event);
+        void OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& event);
         void OnAudioPlayerEvent(const audio::Player::SourceEvent& event);
-
         virtual void keyPressEvent(QKeyEvent* key) override;
     private slots:
         void on_btnSelectFile_clicked();
@@ -130,6 +131,8 @@ namespace gui
 
         void SceneSelectionChanged();
         void AddElementAction();
+        void RefreshTimer();
+
         bool InitializeAudio();
         size_t GetHash() const;
 
@@ -143,8 +146,8 @@ namespace gui
         std::vector<QGraphicsItem*> mItems;
         std::size_t mCurrentId = 0;
         std::size_t mGraphHash = 0;
-        float mPlayTime = 0.0f;
+        double mPlayTime = 0.0;
     private:
-
+        QTimer mRefreshTimer;
     };
 } // namespace
