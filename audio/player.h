@@ -67,6 +67,18 @@ namespace audio
             bool looping = false;
         };
 
+        // Audio source progress event. This is only generated
+        // when the caller has first requested for a progress event
+        // through a call to AskProgress.
+        struct SourceProgressEvent {
+            // The id of the track/source to which the progress pertains.
+            std::size_t id = 0;
+            // The current stream/source time in milliseconds.
+            std::uint64_t time = 0;
+            // The number of PCM bytes played so far.
+            std::uint64_t bytes = 0;
+        };
+
         // Source event during audio playback.
         struct SourceEvent {
             // the id of the track/source that generated the event.
@@ -76,7 +88,8 @@ namespace audio
             std::unique_ptr<Event> event;
         };
 
-        using Event = std::variant<SourceCompleteEvent, SourceEvent>;
+        using Event = std::variant<SourceCompleteEvent,
+                SourceEvent, SourceProgressEvent>;
 
         // Create a new audio player using the given audio device.
         Player(std::unique_ptr<Device> device);
@@ -106,6 +119,9 @@ namespace audio
         // Send a command to the audio stream's source object.
         void SendCommand(std::size_t id, std::unique_ptr<Command> cmd);
 
+        // Ask for a stream progress event for some particular track.
+        void AskProgress(std::size_t id);
+
         // Get next playback event if any.
         // Returns true if there was an event otherwise false.
         bool GetEvent(Event* event);
@@ -131,7 +147,7 @@ namespace audio
         };
         struct Action {
             enum class Type {
-                None, Resume, Pause,  Cancel, Command
+                None, Resume, Pause,  Cancel, Command, Progress
             };
             Type do_what = Type::None;
             std::size_t track_id = 0;

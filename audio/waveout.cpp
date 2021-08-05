@@ -287,6 +287,10 @@ private:
 
         virtual std::string GetName() const override
         { return source_->GetName(); }
+        virtual std::uint64_t GetStreamTime() const override
+        { return milliseconds_; }
+        virtual std::uint64_t GetStreamBytes() const override 
+        { return num_pcm_bytes_; }
 
         virtual void Play() override
         {
@@ -388,7 +392,13 @@ private:
                         break;
                     }
 
-                    num_pcm_bytes_ += buffer->fill(*source_);
+                    const auto bytes = buffer->fill(*source_);
+                    const auto sample_size    = Source::ByteSize(source_->GetFormat());
+                    const auto samples_per_ms = source_->GetRateHz() / 1000u;
+                    const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
+                    const auto milliseconds   = bytes / bytes_per_ms;
+                    num_pcm_bytes_ += bytes;
+                    milliseconds_ += milliseconds;
                     buffer->play();
                 }
             }
@@ -430,6 +440,7 @@ private:
     private:
         std::unique_ptr<Source> source_;
         std::uint64_t num_pcm_bytes_ = 0;
+        std::uint64_t milliseconds_ = 0;
     private:
         HWAVEOUT handle_ = NULL;
 

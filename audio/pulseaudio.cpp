@@ -177,6 +177,10 @@ private:
 
         virtual std::string GetName() const override
         { return source_->GetName(); }
+        virtual std::uint64_t GetStreamTime() const override
+        { return milliseconds_; }
+        virtual std::uint64_t GetStreamBytes() const override
+        { return num_pcm_bytes_; }
 
         virtual void Play() override
         {
@@ -279,6 +283,11 @@ private:
                 if (pa_stream_write(this_->stream_, buffer, bytes, nullptr, 0, PA_SEEK_RELATIVE))
                     throw std::runtime_error("pa_stream_write failed.");
 
+                const auto sample_size    = Source::ByteSize(source->GetFormat());
+                const auto samples_per_ms = source->GetRateHz() / 1000u;
+                const auto bytes_per_ms   = source->GetNumChannels() * sample_size * samples_per_ms;
+                const auto milliseconds   = bytes / bytes_per_ms;
+                this_->milliseconds_  += milliseconds;
                 this_->num_pcm_bytes_ += bytes;
 
                 // reaching the end of the stream, i.e. we're providing the last
@@ -332,6 +341,7 @@ private:
         pa_stream*  stream_  = nullptr;
         Stream::State state_ = Stream::State::None;
         std::uint64_t num_pcm_bytes_ = 0;
+        std::uint64_t milliseconds_ = 0;
     private:
     };
 private:
