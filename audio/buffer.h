@@ -24,6 +24,7 @@
 #include <cstring>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "audio/format.h"
 
 namespace audio
@@ -32,6 +33,14 @@ namespace audio
     {
     public:
         using Format = audio::Format;
+        struct InfoTag {
+            struct Element {
+                std::string name;
+                std::string id;
+                bool source = false;
+                bool source_done = false;
+            } element;
+        };
         virtual ~Buffer() = default;
         // Get the PCM audio format of the buffer.
         // The format is only valid when the buffer contains PCM data.
@@ -45,6 +54,9 @@ namespace audio
         virtual void* GetPtr() = 0;
         // Get the size of the buffer in bytes for both reading and writing.
         virtual size_t GetByteSize() const = 0;
+        virtual size_t GetNumInfoTags() const = 0;
+        virtual void AddInfoTag(const InfoTag& tag) = 0;
+        virtual const InfoTag& GetInfoTag(size_t index) const = 0;
     private:
 
     };
@@ -75,6 +87,12 @@ namespace audio
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
         size_t GetByteSize() const override
         { return mBuffer.size() - sizeof(canary); }
+        virtual size_t GetNumInfoTags() const override
+        { return mInfos.size(); }
+        virtual void AddInfoTag(const InfoTag& tag) override
+        { mInfos.push_back(tag); }
+        virtual const InfoTag& GetInfoTag(size_t index) const
+        { return base::SafeIndex(mInfos, index); }
     private:
         void Resize(size_t bytes)
         {
@@ -87,6 +105,7 @@ namespace audio
     private:
         Format mFormat;
         std::vector<std::uint8_t> mBuffer;
+        std::vector<InfoTag> mInfos;
     };
 
 } // namespace
