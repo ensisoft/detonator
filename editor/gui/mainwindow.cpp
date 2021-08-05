@@ -2012,6 +2012,27 @@ void MainWindow::OpenNewWidget(MainWidget* widget)
     ShowWidget(widget, open_new_window);
 }
 
+void MainWindow::RefreshWidget()
+{
+    auto* widget = dynamic_cast<MainWidget*>(sender());
+    widget->Refresh();
+    if (widget == mCurrentWidget)
+    {
+        MainWidget::Stats stats;
+        widget->GetStats(&stats);
+        SetValue(mUI.statTime, QString::number(stats.time));
+        SetVisible(mUI.lblFps,    stats.graphics.valid);
+        SetVisible(mUI.lblVsync,  stats.graphics.valid);
+        SetVisible(mUI.statFps,   stats.graphics.valid);
+        SetVisible(mUI.statVsync, stats.graphics.valid);
+        if (stats.graphics.valid)
+        {
+            SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+            SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+        }
+    }
+}
+
 void MainWindow::OpenRecentWorkspace()
 {
     const QAction* action = qobject_cast<const QAction*>(sender());
@@ -2225,11 +2246,13 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     disconnect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
     disconnect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
     disconnect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
+    disconnect(widget, &MainWidget::RefreshRequest,     this, &MainWindow::RefreshWidget);
     // connect the important signals here.
     connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
     connect(widget, &MainWidget::OpenExternalShader,this, &MainWindow::OpenExternalShader);
     connect(widget, &MainWidget::OpenExternalScript,this, &MainWindow::OpenExternalScript);
     connect(widget, &MainWidget::OpenNewWidget,     this, &MainWindow::OpenNewWidget);
+    connect(widget, &MainWidget::RefreshRequest,    this, &MainWindow::RefreshWidget);
 
     if (new_window)
     {

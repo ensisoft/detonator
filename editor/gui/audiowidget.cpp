@@ -1026,6 +1026,12 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     mUI.view->setInteractive(true);
     mUI.view->setBackgroundBrush(QBrush(QColor(0.2f*255, 0.3f*255, 0.4f*255)));
 
+    // start periodic refresh timer. this is low frequency timer that is used
+    // to update the widget UI if needed, such as change the icon/window title
+    // and tick the workspace for periodic cleanup and stuff.
+    QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &AudioWidget::RefreshTimer);
+    mRefreshTimer.setInterval(10);
+
     PopulateFromEnum<audio::SampleType>(mUI.sampleType);
     PopulateFromEnum<Channels>(mUI.channels);
     PopulateFromEnum<audio::Effect::Kind>(mUI.effect);
@@ -1117,6 +1123,8 @@ void AudioWidget::Refresh()
         if (const auto* ptr = std::get_if<audio::Player::SourceCompleteEvent>(&event))
             OnAudioPlayerEvent(*ptr);
         else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
+            OnAudioPlayerEvent(*ptr);
+        else if (const auto* ptr = std::get_if<audio::Player::SourceProgressEvent>(&event))
             OnAudioPlayerEvent(*ptr);
         else BUG("Unexpected audio player event.");
     }
@@ -1277,7 +1285,7 @@ void AudioWidget::on_actionPlay_triggered()
     {
         mPlayer->Resume(mCurrentId);
     }
-
+    mRefreshTimer.start();
     SetEnabled(mUI.actionPlay, false);
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop, true);
@@ -1289,6 +1297,7 @@ void AudioWidget::on_actionPause_triggered()
     mPlayer->Pause(mCurrentId);
     SetEnabled(mUI.actionPlay, true);
     SetEnabled(mUI.actionPause, false);
+    mRefreshTimer.stop();
 
 }
 void AudioWidget::on_actionStop_triggered()
@@ -1296,9 +1305,11 @@ void AudioWidget::on_actionStop_triggered()
     ASSERT(mCurrentId);
     mPlayer->Cancel(mCurrentId);
     mCurrentId = 0;
+    mPlayTime  = 0;
     SetEnabled(mUI.actionPlay, true);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    mRefreshTimer.stop();
 }
 void AudioWidget::on_actionSave_triggered()
 {
@@ -1533,6 +1544,14 @@ void AudioWidget::AddElementAction()
     mScene->addItem(element);
     mItems.push_back(element);
     UpdateElementList();
+}
+
+void AudioWidget::RefreshTimer()
+{
+    if (mCurrentId && mPlayer)
+        mPlayer->AskProgress(mCurrentId);
+
+    emit RefreshRequest();
 }
 
 bool AudioWidget::InitializeAudio()
@@ -1782,7 +1801,16 @@ void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& e
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.actionPause, false);
     mCurrentId = 0;
+    mPlayTime  = 0;
+    mRefreshTimer.stop();
 }
+void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& event)
+{
+    if (mCurrentId == 0)
+        return;
+    mPlayTime = event.time / 1000.0;
+}
+
 void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEvent& event)
 {
 

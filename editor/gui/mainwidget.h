@@ -207,6 +207,8 @@ namespace gui
         { return mId; }
 
     signals:
+        // Request to have the widget (and the MainWindow) refreshed immediately.
+        void RefreshRequest();
         // Request to open the given script file in an external script editor.
         void OpenExternalScript(const QString& file);
         // Request to open the given image file in an external image editor.
