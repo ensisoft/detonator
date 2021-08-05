@@ -252,6 +252,42 @@ namespace audio
     private:
     };
 
+    // Go over a list of sources pulling audio buffers one source
+    // at a time until the buffer's meta information indicates
+    // that the source has finished and then advance to the next
+    // source.
+    class Playlist : public Element
+    {
+    public:
+        Playlist(const std::string& name, const std::string& id,const std::vector<PortDesc>& srcs);
+        Playlist(const std::string&, const std::vector<PortDesc>& srcs);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual std::string GetType() const override
+        { return "Playlist"; }
+        virtual bool Prepare(const Loader& loader) override;
+        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumInputPorts() const override
+        { return mSrcs.size(); }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port index.");
+        }
+        virtual Port& GetInputPort(unsigned index) override
+        { return base::SafeIndex(mSrcs, index); }
+    private:
+        const std::string mName;
+        const std::string mId;
+        std::vector<SingleSlotPort> mSrcs;
+        std::size_t mSrcIndex = 0;
+        SingleSlotPort mOut;
+    };
+
     // Turn a possible mono audio stream into a stereo stream.
     // If the input is already a stereo stream nothing is done.
     class StereoMaker : public Element
