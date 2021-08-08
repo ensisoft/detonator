@@ -1913,7 +1913,7 @@ void MainWindow::OpenExternalImage(const QString& file)
     }
 
     QStringList args;
-    QStringList list = mSettings.image_editor_arguments.split(" ", QString::SkipEmptyParts);
+    QStringList list = mSettings.image_editor_arguments.split(" ", Qt::SkipEmptyParts);
     for (const auto& item : list)
     {
         if (item == "${file}")
@@ -1952,7 +1952,7 @@ void MainWindow::OpenExternalShader(const QString& file)
     }
 
     QStringList args;
-    QStringList list = mSettings.shader_editor_arguments.split(" ", QString::SkipEmptyParts);
+    QStringList list = mSettings.shader_editor_arguments.split(" ", Qt::SkipEmptyParts);
     for (const auto& item : list)
     {
         if (item == "${file}")
@@ -1991,7 +1991,7 @@ void MainWindow::OpenExternalScript(const QString& file)
     }
 
     QStringList args;
-    QStringList list = mSettings.script_editor_arguments.split(" ", QString::SkipEmptyParts);
+    QStringList list = mSettings.script_editor_arguments.split(" ", Qt::SkipEmptyParts);
     for (const auto& item : list)
     {
         if (item == "${file}")
