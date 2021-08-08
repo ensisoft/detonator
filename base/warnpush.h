@@ -54,4 +54,5 @@
 #  pragma warning(disable: 4003) // protobuf, not enough actual parameters
 #  pragma warning(disable: 4267) // protobuf, conversion from size_t to int
 #  pragma warning(disable: 4244) // Qt warning about conversion from int to float
+#  pragma warning(disable: 4966) // Qt spits deprecated warnings.
 #endif
