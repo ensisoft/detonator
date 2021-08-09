@@ -57,8 +57,15 @@ namespace audio
         virtual size_t GetNumInfoTags() const = 0;
         virtual void AddInfoTag(const InfoTag& tag) = 0;
         virtual const InfoTag& GetInfoTag(size_t index) const = 0;
-    private:
 
+        // copy the buffer info tags from source buffer into the
+        // destination buffer.
+        static void CopyInfoTags(const Buffer& src, Buffer& dst)
+        {
+            for (size_t i=0; i<src.GetNumInfoTags(); ++i)
+                dst.AddInfoTag(src.GetInfoTag(i));
+        }
+    private:
     };
 
     // backing data storage.

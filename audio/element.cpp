@@ -114,6 +114,12 @@ BufferHandle MixBuffers(std::vector<BufferHandle>& src_buffers, float src_gain)
             out_buffer = buffer;
         }
     }
+    for (const auto& buffer : src_buffers)
+    {
+        if (buffer == out_buffer)
+            continue;
+        Buffer::CopyInfoTags(*buffer, *out_buffer);
+    }
 
     const auto frame_size  = sizeof(AudioFrame);
     const auto max_num_frames = max_buffer_size / frame_size;
@@ -204,8 +210,19 @@ void Playlist::Process(EventQueue& events, unsigned milliseconds)
     if (!mSrcs[mSrcIndex].PullBuffer(buffer))
         return;
 
-    const auto& tag = buffer->GetInfoTag(0);
-    if (tag.element.source_done)
+    // if all the sources of audio buffers on the current
+    // input port are done based on the buffer info tags
+    // then we move onto to next source port.
+    bool all_sources_done = true;
+    for (size_t i=0; i<buffer->GetNumInfoTags(); ++i)
+    {
+        const auto& tag = buffer->GetInfoTag(i);
+        if (!tag.element.source)
+            continue;
+        if (!tag.element.source_done)
+            all_sources_done = false;
+    }
+    if (all_sources_done)
         mSrcIndex++;
 
     mOut.PushBuffer(buffer);
@@ -264,6 +281,7 @@ void StereoMaker::CopyMono(BufferHandle buffer)
 
     auto stereo = std::make_shared<VectorBuffer>();
     stereo->AllocateBytes(buffer_size * 2);
+    Buffer::CopyInfoTags(*buffer, *stereo);
 
     auto* out = static_cast<StereoFrameType*>(stereo->GetPtr());
 
@@ -348,6 +366,8 @@ void StereoJoiner::Join(BufferHandle left, BufferHandle right)
 
     auto stereo = std::make_shared<VectorBuffer>();
     stereo->AllocateBytes(buffer_size * 2);
+    Buffer::CopyInfoTags(*left, *stereo);
+    Buffer::CopyInfoTags(*right, *stereo);
 
     auto* out = static_cast<StereoFrameType*>(stereo->GetPtr());
 
@@ -423,6 +443,8 @@ void StereoSplitter::Split(BufferHandle buffer)
     auto right = std::make_shared<VectorBuffer>();
     left->AllocateBytes(buffer_size / 2);
     right->AllocateBytes(buffer_size / 2);
+    Buffer::CopyInfoTags(*buffer, *left);
+    Buffer::CopyInfoTags(*buffer, *right);
     auto* L = static_cast<MonoFrameType *>(left->GetPtr());
     auto* R = static_cast<MonoFrameType *>(right->GetPtr());
 
@@ -791,6 +813,7 @@ void Resampler::Process(EventQueue& events, unsigned milliseconds)
     auto out_buffer = std::make_shared<VectorBuffer>();
     out_buffer->AllocateBytes(out_frame_count * src_frame_size);
     out_buffer->SetFormat(out_format);
+    Buffer::CopyInfoTags(*src_buffer, *out_buffer);
 
     SRC_DATA data;
     data.data_in       = static_cast<const float*>(src_buffer->GetPtr());
