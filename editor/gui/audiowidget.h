@@ -124,6 +124,7 @@ namespace gui
         void on_actionRemoveInputPort_triggered();
         void on_view_customContextMenuRequested(QPoint);
         void on_elements_itemSelectionChanged();
+        void on_elements_customContextMenuRequested(QPoint);
         void on_outElem_currentIndexChanged(int);
         void on_elemName_textChanged(QString);
         void on_sampleType_currentIndexChanged(int);

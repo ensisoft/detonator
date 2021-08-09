@@ -1618,6 +1618,34 @@ void AudioWidget::on_elements_itemSelectionChanged()
     GetSelectedElementProperties();
 }
 
+void AudioWidget::on_elements_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    const auto& selected = mScene->selectedItems();
+    mUI.actionDelete->setEnabled(!selected.isEmpty());
+    mUI.actionUnlink->setEnabled(!selected.isEmpty());
+    mUI.actionAddInputPort->setEnabled(true);
+    mUI.actionRemoveInputPort->setEnabled(true);
+    for (auto* item : selected)
+    {
+        const auto* elem = dynamic_cast<const AudioElement*>(item);
+        if (!elem->CanAddInputPort())
+            mUI.actionAddInputPort->setEnabled(false);
+        if (!elem->CanRemoveInputPort())
+            mUI.actionRemoveInputPort->setEnabled(false);
+    }
+    menu.addSeparator();
+    QMenu input_port_menu("Input Ports");
+    input_port_menu.addAction(mUI.actionAddInputPort);
+    input_port_menu.addAction(mUI.actionRemoveInputPort);
+    menu.addMenu(&input_port_menu);
+    menu.addSeparator();
+    menu.addAction(mUI.actionUnlink);
+    menu.addAction(mUI.actionDelete);
+    menu.exec(QCursor::pos());
+}
+
+
 void AudioWidget::on_outElem_currentIndexChanged(int)
 {
     const std::string& id = GetItemId(mUI.outElem);
