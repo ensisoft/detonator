@@ -50,6 +50,8 @@ namespace gui
                               QGraphicsItem* item);
         void ApplyItemChanges();
         void DeleteItems(const QList<QGraphicsItem*>& items);
+        void LinkItems(const std::string& src_elem, const std::string& src_port,
+                       const std::string& dst_elem, const std::string& dst_port);
         void UnlinkItems(const QList<QGraphicsItem*>& items);
         void UnlinkPort(const std::string& element, const std::string& port);
         void IntoJson(data::Writer& writer) const;
@@ -58,6 +60,7 @@ namespace gui
         void LoadState(const app::Resource& resource);
         void ApplyState(audio::GraphClass& klass) const;
         bool ValidateGraphContent() const;
+        QGraphicsItem* FindItem(const std::string& id);
     protected:
         void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
         void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
@@ -94,6 +97,9 @@ namespace gui
         virtual void Save() override;
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
+        virtual void Cut(Clipboard& clipboard) override;
+        virtual void Copy(Clipboard& clipboard) const override;
+        virtual void Paste(const Clipboard& clipboard) override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool ConfirmClose() override;
         virtual bool GetStats(Stats* stats) const override;

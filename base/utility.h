@@ -25,12 +25,17 @@
 #include <algorithm>
 #include <iterator>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "base/assert.h"
 #include "base/platform.h"
 
 namespace base
 {
+
+template<typename Key> inline
+bool Contains(const std::unordered_set<Key>& map, const Key& k)
+{ return map.find(k) != map.end(); }
 
 template<typename T>
 void AppendVector(std::vector<T>& head, const std::vector<T>& tail)

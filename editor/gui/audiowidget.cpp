@@ -38,6 +38,7 @@
 #include "editor/gui/audiowidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/clipboard.h"
 
 namespace {
 enum class Channels {
@@ -153,6 +154,8 @@ public:
         mDstElem = dst_elem;
         mDstPort = dst_port;
     }
+    void SetId(const std::string& id)
+    { mId = id; }
 
     void ApplyState(audio::GraphClass& klass) const
     {
@@ -347,6 +350,8 @@ public:
     { return mId; }
     void SetName(const std::string& name)
     { mName = name; }
+    void SetId(const std::string& id)
+    { mId = id; }
 
     bool HasArgument(const std::string& name) const
     {
@@ -447,6 +452,12 @@ public:
         return QRectF(0.0f, 0.0f, mWidth, mHeight);
     }
 
+    const PortDesc* FindOutputPort(const std::string& name) const
+    {
+        return base::SafeFind(mOPorts, [&name](const auto& p) {
+            return p.name == name;
+        });
+    }
     const PortDesc* MapOutputPort(const QPointF& pos) const
     {
         for (const auto& p : mOPorts)
@@ -455,6 +466,12 @@ public:
                 return &p;
         }
         return nullptr;
+    }
+    const PortDesc* FindInputPort(const std::string& name) const
+    {
+        return base::SafeFind(mIPorts, [&name](const auto& p) {
+            return p.name == name;
+        });
     }
     const PortDesc* MapInputPort(const QPointF& pos) const
     {
@@ -633,6 +650,25 @@ public:
                 AddOutputPort();
         }
     }
+    void ComputePorts()
+    {
+        mHeight = std::max(100.0f, std::max(mIPorts.size(), mOPorts.size()) * 40.0f);
+        const auto otop = (mHeight - mOPorts.size() * 30.0f) * 0.5f;
+        const auto itop = (mHeight - mIPorts.size() * 30.0f) * 0.5f;
+        for (unsigned i=0; i<mIPorts.size(); ++i)
+        {
+            const auto top = itop + 30.0f * i + 5;
+            mIPorts[i].rect = QRectF(0.0f, top, 40.0f, 20.0f);
+            mIPorts[i].link_pos = QPointF(0.0f, top + 10.0f);
+        }
+
+        for (unsigned i=0; i<mOPorts.size(); ++i)
+        {
+            const auto top = otop + 30.0f * i + 5;
+            mOPorts[i].rect = QRectF(mWidth - 40.0f, top, 40.0f, 20.0f);
+            mOPorts[i].link_pos = QPointF(mWidth, top + 10.0f);
+        }
+    }
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* mickey) override
     {
@@ -653,25 +689,6 @@ private:
         for (auto& arg : mArgs)
             if (arg.name == name) return &arg;
         return nullptr;
-    }
-    void ComputePorts()
-    {
-        mHeight = std::max(100.0f, std::max(mIPorts.size(), mOPorts.size()) * 40.0f);
-        const auto otop = (mHeight - mOPorts.size() * 30.0f) * 0.5f;
-        const auto itop = (mHeight - mIPorts.size() * 30.0f) * 0.5f;
-        for (unsigned i=0; i<mIPorts.size(); ++i)
-        {
-            const auto top = itop + 30.0f * i + 5;
-            mIPorts[i].rect = QRectF(0.0f, top, 40.0f, 20.0f);
-            mIPorts[i].link_pos = QPointF(0.0f, top + 10.0f);
-        }
-
-        for (unsigned i=0; i<mOPorts.size(); ++i)
-        {
-            const auto top = otop + 30.0f * i + 5;
-            mOPorts[i].rect = QRectF(mWidth - 40.0f, top, 40.0f, 20.0f);
-            mOPorts[i].link_pos = QPointF(mWidth, top + 10.0f);
-        }
     }
 private:
     float mWidth  = 200.0f;
@@ -714,6 +731,22 @@ void AudioGraphScene::DeleteItems(const QList<QGraphicsItem*>& items)
     UnlinkItems(items);
 
     qDeleteAll(items);
+}
+void AudioGraphScene::LinkItems(const std::string& src_elem, const std::string& src_port,
+                                const std::string& dst_elem, const std::string& dst_port)
+{
+    auto* src = dynamic_cast<AudioElement*>(FindItem(src_elem));
+    auto* dst = dynamic_cast<AudioElement*>(FindItem(dst_elem));
+    ASSERT(src && dst);
+    const auto* src_p = src->FindOutputPort(src_port);
+    const auto* dst_p = dst->FindInputPort(dst_port);
+    auto link = new AudioLink();
+    link->SetSrc(src_elem, src_port);
+    link->SetDst(dst_elem, dst_port);
+    link->SetCurve(src->mapToScene(src_p->link_pos), dst->mapToScene(dst_p->link_pos));
+    addItem(link);
+    mLinkMap[base::FormatString("%1:%2", src_elem, src_port)] = link;
+    mLinkMap[base::FormatString("%1:%2", dst_elem, dst_port)] = link;
 }
 
 void AudioGraphScene::UnlinkItems(const QList<QGraphicsItem*>& items)
@@ -940,6 +973,18 @@ bool AudioGraphScene::ValidateGraphContent() const
     return valid;
 }
 
+QGraphicsItem* AudioGraphScene::FindItem(const std::string& id)
+{
+    for (auto* item : items())
+    {
+        if (auto* elem = dynamic_cast<AudioElement*>(item))
+            if (elem->GetId() == id) return elem;
+        else if (auto* link = dynamic_cast<AudioLink*>(item))
+            if (link->GetLinkId() == id) return link;
+    }
+    return nullptr;
+}
+
 void AudioGraphScene::mousePressEvent(QGraphicsSceneMouseEvent* mickey)
 {
     if (mickey->button() != Qt::LeftButton)
@@ -1088,8 +1133,28 @@ AudioWidget::~AudioWidget()
 bool AudioWidget::IsAccelerated() const
 { return false; }
 
-bool AudioWidget::CanTakeAction(Actions action, const Clipboard*) const
+bool AudioWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
 {
+    const auto& selection = mScene->selectedItems();
+
+    switch (action)
+    {
+        case Actions::CanPaste:
+            if (!mUI.view->hasFocus())
+                return false;
+            else if (clipboard->IsEmpty())
+                return false;
+            else if (clipboard->GetType() != "application/json/audio-element")
+                return false;
+            return true;
+        case Actions::CanCopy:
+        case Actions::CanCut:
+            if (!mUI.view->hasFocus())
+                return false;
+            if (selection.isEmpty())
+                return false;
+            return true;
+    }
     return false;
 }
 void AudioWidget::AddActions(QToolBar& bar)
@@ -1178,6 +1243,115 @@ bool AudioWidget::LoadState(const Settings& settings)
     GetSelectedElementProperties();
     return true;
 }
+
+void AudioWidget::Cut(Clipboard& clipboard)
+{
+    const auto& selection = mScene->selectedItems();
+    if (selection.isEmpty())
+        return;
+
+    Copy(clipboard);
+
+    on_actionDelete_triggered();
+}
+void AudioWidget::Copy(Clipboard& clipboard) const
+{
+    const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
+    const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
+    const auto& selection = mScene->selectedItems();
+    if (selection.isEmpty())
+        return;
+
+    std::unordered_set<std::string> copied_element_ids;
+
+    data::JsonObject json;
+    for(const auto& item : selection)
+    {
+        if (const auto* elem = dynamic_cast<const AudioElement*>(item))
+        {
+            const auto& pos = elem->pos();
+            const auto& mouse_offset = pos - scene_pos;
+            auto chunk = json.NewWriteChunk();
+            elem->IntoJson(*chunk);
+            chunk->Write("mouse_offset", gui::ToVec2(mouse_offset));
+            json.AppendChunk("elements", std::move(chunk));
+            copied_element_ids.insert(elem->GetId());
+        }
+    }
+    for (const auto& item : mScene->items())
+    {
+        if (const auto* link = dynamic_cast<const AudioLink*>(item))
+        {
+            const auto copied_src_elem = base::Contains(copied_element_ids, link->GetSrcElem());
+            const auto copied_dst_elem = base::Contains(copied_element_ids, link->GetDstElem());
+            if (!copied_src_elem || !copied_dst_elem)
+                continue;
+            auto chunk = json.NewWriteChunk();
+            link->IntoJson(*chunk);
+            json.AppendChunk("links", std::move(chunk));
+        }
+    }
+
+    clipboard.SetType("application/json/audio-element");
+    clipboard.SetText(json.ToString());
+    NOTE("Copied JSON to application clipboard.");
+}
+void AudioWidget::Paste(const Clipboard& clipboard)
+{
+    if (!mUI.view->hasFocus())
+        return;
+    if (clipboard.GetType() != "application/json/audio-element")
+    {
+        NOTE("No audio element JSON data found in clipboard.");
+        return;
+    }
+    data::JsonObject json;
+    auto [success, _] = json.ParseString(clipboard.GetText());
+    if (!success)
+    {
+        NOTE("Clipboard parse failed.");
+        return;
+    }
+
+    std::unordered_map<std::string, std::string> idmap;
+    const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
+    const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
+    for (unsigned i=0; i<json.GetNumChunks("elements"); ++i)
+    {
+        const auto& id = base::RandomString(10);
+        const auto& chunk = json.GetReadChunk("elements", i);
+        std::string type;
+        glm::vec2 mouse_offset;
+        chunk->Read("type", &type);
+        chunk->Read("mouse_offset", &mouse_offset);
+        auto* element = new AudioElement(FindElementDescription(type));
+        element->FromJson(*chunk);
+        idmap[element->GetId()] = id;
+        element->setPos(mouse_offset.x + scene_pos.x(),
+                        mouse_offset.y + scene_pos.y());
+        element->SetId(id);
+        element->SetName(base::FormatString("Copy of %1", element->GetName()));
+        element->ComputePorts();
+        mScene->addItem(element);
+        mItems.push_back(element);
+    }
+
+    for (unsigned i=0; i<json.GetNumChunks("links"); ++i)
+    {
+        const auto& chunk = json.GetReadChunk("links", i);
+        auto link = std::make_unique<AudioLink>();
+        link->FromJson(*chunk);
+        const auto& original_src_id = link->GetSrcElem();
+        const auto& original_dst_id = link->GetDstElem();
+        mScene->LinkItems(idmap[original_src_id], link->GetSrcPort(),
+                          idmap[original_dst_id], link->GetDstPort());
+    }
+
+    mScene->invalidate();
+
+    UpdateElementList();
+}
+
 bool AudioWidget::HasUnsavedChanges() const
 {
     if (!mGraphHash)
