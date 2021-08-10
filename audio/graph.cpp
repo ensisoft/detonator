@@ -669,7 +669,7 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
 
     if (graph_done)
     {
-        DEBUG("Audio graph '%1 ' is done!", mName);
+        DEBUG("Audio graph '%1' is done!", mName);
         for (auto& element : mTopoOrder)
         {
             DEBUG("Shutting down audio graph '%1' element '%2'", mName, element->GetName());

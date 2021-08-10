@@ -1142,6 +1142,8 @@ void MixerSource::PauseSource(const std::string& name, bool paused)
 
 bool MixerSource::IsSourceDone() const
 {
+    if (mNeverDone) return false;
+
     for (const auto& pair : mSources)
     {
         const auto& source = pair.second;
@@ -1189,7 +1191,7 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
     {
         auto& source  = pair.second;
         auto& element = source.element;
-        if (source.paused)
+        if (source.paused || source.element->IsSourceDone())
             continue;
 
         element->Process(events, milliseconds);
@@ -1202,11 +1204,10 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
         }
     }
 
+    RemoveDoneSources(events);
+
     if (src_buffers.size() == 0)
-    {
-        WARN("No source buffers available in MixerSource '%1'.", mName);
         return;
-    }
     else if (src_buffers.size() == 1)
     {
         mOut.PushBuffer(src_buffers[0]);
@@ -1228,22 +1229,6 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
                                         : MixBuffers<short, 2>(src_buffers, src_gain);
     else WARN("Unsupported format '%1'.", format.sample_type);
     mOut.PushBuffer(ret);
-
-    for (auto it = mSources.begin(); it != mSources.end();)
-    {
-        auto& source  = it->second;
-        auto& element = source.element;
-        if (element->IsSourceDone())
-        {
-            SourceDoneEvent event;
-            event.mixer = mName;
-            event.src   = std::move(element);
-            events.push(MakeEvent(std::move(event)));
-            DEBUG("MixerSource '%1' source '%2' is done.", mName, it->first);
-
-            it = mSources.erase(it);
-        } else ++it;
-    }
 }
 
 void MixerSource::ReceiveCommand(Command& cmd)
@@ -1282,6 +1267,26 @@ bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
             return true;
     }
     return false;
+}
+
+void MixerSource::RemoveDoneSources(EventQueue& events)
+{
+    for (auto it = mSources.begin(); it != mSources.end();)
+    {
+        auto& source = it->second;
+        auto& element = source.element;
+        if (element->IsSourceDone())
+        {
+            SourceDoneEvent event;
+            event.mixer = mName;
+            event.src   = std::move(element);
+            events.push(MakeEvent(std::move(event)));
+            DEBUG("MixerSource '%1' source '%2' is done.", mName, it->first);
+
+            it = mSources.erase(it);
+        }
+        else ++it;
+    }
 }
 
 ZeroSource::ZeroSource(const std::string& name, const std::string& id, const Format& format)

@@ -66,7 +66,7 @@ AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
     auto effect_graph  = std::make_unique<audio::AudioGraph>(name + " FX");
     auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
     auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
-    effect_mixer->AddSource(audio::ZeroSource("zero", mFormat));
+    effect_mixer->SetNeverDone(true);
     ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*effect_graph)->LinkGraph("gain", "out"));
     ASSERT(effect_graph->Prepare(*mLoader));
@@ -74,7 +74,7 @@ AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
     auto music_graph = std::make_unique<audio::AudioGraph>(name + " Music");
     auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
     auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
-    music_mixer->AddSource(audio::ZeroSource("zero", mFormat));
+    music_mixer->SetNeverDone(true);
     ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*music_graph)->LinkGraph("gain", "out"));
     ASSERT(music_graph->Prepare(*mLoader));

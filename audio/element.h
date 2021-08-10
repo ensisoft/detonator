@@ -812,6 +812,12 @@ namespace audio
         // mixer source itself has.
         Element* AddSourcePtr(std::unique_ptr<Element> source, bool paused=false);
 
+        // Enable/disable never done flag. When never done flag is one
+        // the source is never considered done regardless of whether the
+        // current sources are done or not.
+        void SetNeverDone(bool on_off)
+        { mNeverDone = on_off; }
+
         template<typename Source>
         Source* AddSource(Source&& source, bool paused=false)
         {
@@ -846,6 +852,8 @@ namespace audio
         virtual void ReceiveCommand(Command& cmd) override;
         virtual bool DispatchCommand(const std::string& dest, Command& cmd) override;
     private:
+        void RemoveDoneSources(EventQueue& events);
+    private:
         const std::string mName;
         const std::string mId;
         const Format mFormat;
@@ -856,6 +864,7 @@ namespace audio
         std::vector<PauseSourceCmd> mPauseCmds;
         std::unordered_map<std::string, Source> mSources;
         SingleSlotPort mOut;
+        bool mNeverDone = false;
     };
 
     // Generate endless audio buffers with 0 (silence) for audio content.
