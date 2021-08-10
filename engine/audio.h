@@ -106,24 +106,6 @@ namespace game
         class AudioBuffer;
         const audio::Loader* mLoader = nullptr;
         audio::Format mFormat;
-        // A pending audio command to be sent to the audio player.
-        struct Command {
-            std::string dest;
-            std::unique_ptr<audio::Element::Command> cmd;
-            std::chrono::steady_clock::time_point  when;
-            std::size_t track = 0;
-            bool operator<(const Command& other) const {
-                return when < other.when;
-            }
-            bool operator>(const Command& other) const {
-                return when > other.when;
-            }
-        };
-        using CmdQueue = std::priority_queue<Command, std::vector<Command>,
-            std::greater<Command>>;
-        // Pending commands that have been scheduled to be sent
-        // to the audio player.
-        CmdQueue mCommands;
         // the audio player.
         std::unique_ptr<audio::Player> mPlayer;
         // Id of the effect audio graph in the audio player.

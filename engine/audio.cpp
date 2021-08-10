@@ -121,15 +121,10 @@ bool AudioEngine::AddMusicTrack(const std::string& name, const std::string& uri)
 void AudioEngine::PlayMusic(const std::string& track, std::chrono::milliseconds when)
 {
     audio::MixerSource::PauseSourceCmd cmd;
-    cmd.name   = track;
-    cmd.paused = false;
-
-    Command c;
-    c.cmd   = audio::Element::MakeCommand(std::move(cmd));
-    c.when  = std::chrono::steady_clock::now() + when;
-    c.track = mMusicGraphId;
-    c.dest  = "mixer";
-    mCommands.push(std::move(c));
+    cmd.name      = track;
+    cmd.paused    = false;
+    cmd.millisecs = when.count();
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
 void AudioEngine::PlayMusic(const std::string& track)
@@ -145,13 +140,8 @@ void AudioEngine::PauseMusic(const std::string& track, std::chrono::milliseconds
     audio::MixerSource::PauseSourceCmd cmd;
     cmd.name   = track;
     cmd.paused = true;
-
-    Command c;
-    c.cmd   = audio::Element::MakeCommand(std::move(cmd));
-    c.when  = std::chrono::steady_clock::now() + when;
-    c.track = mMusicGraphId;
-    c.dest  = "mixer";
-    mCommands.push(std::move(c));
+    cmd.millisecs = when.count();
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
 void AudioEngine::PauseMusic(const std::string& track)
@@ -187,7 +177,6 @@ void AudioEngine::SetMusicGain(float gain)
 
 bool AudioEngine::PlaySoundEffect(const std::string& uri, std::chrono::milliseconds ms)
 {
-    const auto when   = std::chrono::steady_clock::now() + ms;
     const auto name   = std::to_string(mEffectCounter);
     const auto paused = ms.count() != 0;
 
@@ -215,15 +204,10 @@ bool AudioEngine::PlaySoundEffect(const std::string& uri, std::chrono::milliseco
     if (paused)
     {
         audio::MixerSource::PauseSourceCmd cmd;
-        cmd.name   = name;
-        cmd.paused = false;
-
-        Command c;
-        c.dest  = "mixer";
-        c.cmd   = audio::Element::MakeCommand(std::move(cmd));
-        c.when  = when;
-        c.track = mEffectGraphId;
-        mCommands.push(std::move(c));
+        cmd.name      = name;
+        cmd.paused    = false;
+        cmd.millisecs = ms.count();
+        mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
     }
     ++mEffectCounter;
     return true;
@@ -252,28 +236,6 @@ void AudioEngine::Tick(AudioEventQueue* events)
         else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
             OnAudioPlayerEvent(*ptr, events);
         else BUG("Unexpected audio player event.");
-    }
-
-    // dispatch pending commands if any.
-    while (!mCommands.empty())
-    {
-        auto& top = mCommands.top();
-        const auto& now = std::chrono::steady_clock::now();
-        if (now < top.when)
-            break;
-        // std::priority_queue only provides a const public interface
-        // because it tries to protect from people changing parameters
-        // of the contained objects so that the priority order invariable
-        // would no longer hold. however this is also super annoying
-        // in cases where you for example want to get a std::unique_ptr<T>
-        // out of the damn thing.
-        using pq_value_type = std::remove_cv<CmdQueue::value_type>::type;
-
-        const auto track = top.track;
-        const auto& dest = top.dest;
-        auto cmd = std::move(const_cast<pq_value_type&>(top).cmd);
-        mPlayer->SendCommand(track, audio::AudioGraph::MakeCommandPtr(dest, std::move(cmd)));
-        mCommands.pop();
     }
 }
 

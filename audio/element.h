@@ -795,6 +795,7 @@ namespace audio
             std::string name;
             // Flag to indicate whether to pause / resume the src.
             bool paused = false;
+            unsigned millisecs = 0;
         };
 
         struct SourceDoneEvent {
@@ -852,6 +853,7 @@ namespace audio
             std::unique_ptr<Element> element;
             bool paused = false;
         };
+        std::vector<PauseSourceCmd> mPauseCmds;
         std::unordered_map<std::string, Source> mSources;
         SingleSlotPort mOut;
     };

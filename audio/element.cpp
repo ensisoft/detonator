@@ -1159,6 +1159,21 @@ bool MixerSource::Prepare(const Loader& loader)
 
 void MixerSource::Advance(unsigned int ms)
 {
+    for (size_t i=0; i<mPauseCmds.size();)
+    {
+        auto& cmd = mPauseCmds[i];
+        cmd.millisecs -= std::min(ms, cmd.millisecs);
+        if (cmd.millisecs)
+        {
+            ++i;
+            continue;
+        }
+        PauseSource(cmd.name, cmd.paused);
+        const auto last = mPauseCmds.size()-1;
+        std::swap(mPauseCmds[i], mPauseCmds[last]);
+        mPauseCmds.pop_back();
+    }
+
     for (auto& pair : mSources)
     {
         auto& source  = pair.second;
@@ -1238,7 +1253,11 @@ void MixerSource::ReceiveCommand(Command& cmd)
     else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
         DeleteSource(ptr->name);
     else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
-        PauseSource(ptr->name, ptr->paused);
+    {
+        if (ptr->millisecs)
+            mPauseCmds.push_back(*ptr);
+        else PauseSource(ptr->name, ptr->paused);
+    }
     else BUG("Unexpected command.");
 }
 
