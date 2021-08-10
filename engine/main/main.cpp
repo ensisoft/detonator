@@ -106,13 +106,31 @@ std::string GetPath()
 }
 
 #elif defined(WINDOWS_OS)
+std::string FormatError(DWORD error)
+{
+    LPSTR buffer = nullptr;
+    const auto flags = FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                       FORMAT_MESSAGE_FROM_SYSTEM |
+                       FORMAT_MESSAGE_IGNORE_INSERTS;
+    const auto lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+    size_t size = FormatMessageA(flags, NULL, error, lang, (LPSTR)&buffer, 0, NULL);
+    std::string ret(buffer, size);
+    LocalFree(buffer);
+    if (ret.back() == '\n')
+        ret.pop_back();
+    if (ret.back() == '\r')
+        ret.pop_back();
+    return ret;
+}
+
 HMODULE application_library;
 void LoadAppLibrary(const std::string& lib)
 {
     std::string name = lib + ".dll";
     application_library = ::LoadLibraryA(name.c_str());
     if (application_library == NULL)
-        throw std::runtime_error("Load library failed."); // todo: error string message
+        throw std::runtime_error(base::FormatString("Load library ('%1') failed with error '%2'.", name,
+                                                    FormatError(GetLastError())));
 }
 void* LoadFunction(const char* name)
 {
