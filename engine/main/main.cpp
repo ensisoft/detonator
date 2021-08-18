@@ -68,11 +68,8 @@ void* application_library;
 void LoadAppLibrary(const std::string& lib)
 {
     // todo: check for path in the filename
-#if defined(NDEBUG)
+
     const std::string name = "./lib" + lib + ".so";
-#else
-    const std::string name = "./lib" + lib + "d.so";
-#endif
     application_library = ::dlopen(name.c_str(), RTLD_NOW);
     if (application_library == NULL)
         throw std::runtime_error(dlerror());

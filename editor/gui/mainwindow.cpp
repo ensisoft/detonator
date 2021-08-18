@@ -201,7 +201,7 @@ void MainWindow::closeWidget(MainWidget* widget)
 void MainWindow::loadState()
 {
     // Load master settings.
-    Settings settings("Ensisoft", APP_TITLE);
+    Settings settings("Ensisoft", "Gamestudio Editor");
 
     const auto log_bits       = settings.getValue("MainWindow", "log_bits", mEventLog.GetShowBits());
     const auto window_xdim    = settings.getValue("MainWindow", "width",  width());
@@ -2193,7 +2193,7 @@ void MainWindow::BuildRecentWorkspacesMenu()
 bool MainWindow::SaveState()
 {
     // persist the properties of the mainwindow itself.
-    Settings settings("Ensisoft", APP_TITLE);
+    Settings settings("Ensisoft", "Gamestudio Editor");
     settings.setValue("MainWindow", "log_bits", mEventLog.GetShowBits());
     settings.setValue("MainWindow", "width", width());
     settings.setValue("MainWindow", "height", height());

@@ -781,7 +781,11 @@ private:
 extern "C" {
 GAMESTUDIO_EXPORT game::App* Gamestudio_CreateApp()
 {
-    DEBUG("Engine");
+#if defined(NDEBUG)
+    DEBUG("GameEngine in release build.");
+#else
+    DEBUG("GameEngine in DEBUG build.");
+#endif
     return new DefaultGameEngine;
 }
 } // extern C
