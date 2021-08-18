@@ -30,6 +30,7 @@
 #include "base/logging.h"
 #include "base/format.h"
 #include "audio/loader.h"
+#include "audio/graph.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -123,12 +124,59 @@ public:
 
         if (track.empty()) return;
         const auto& name = base::ToString(key.symbol);
-        mEngine->AddMusicTrack(name, track);
+        mEngine->AddMusicGraph(BuildMusicGraph(name, track));
         mEngine->SetMusicEffect(name, 2.0f, game::AudioEngine::Effect::FadeIn);
         mEngine->PlayMusic(name);
     }
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }
+private:
+    game::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
+    {
+        auto graph = std::make_shared<audio::GraphClass>(name);
+
+        audio::GraphClass::Element file;
+        file.id   = base::RandomString(10);
+        file.name = "file";
+        file.type = "FileSource";
+        file.args["file"] = audio_file;
+        file.args["type"] = audio::SampleType::Float32;
+        graph->AddElement(file);
+
+        audio::GraphClass::Element stereo;
+        stereo.id = base::RandomString(10);
+        stereo.name = "stereo";
+        stereo.type = "StereoMaker";
+        stereo.args["channel"] = audio::StereoMaker::Channel::Both;
+        graph->AddElement(stereo);
+
+        audio::GraphClass::Element resampler;
+        resampler.id = base::RandomString(10);
+        resampler.name = "resampler";
+        resampler.type = "Resampler";
+        resampler.args["sample_rate"] = 44100u;
+        graph->AddElement(resampler);
+
+        audio::GraphClass::Link file_to_stereo;
+        file_to_stereo.id = base::RandomString(10);
+        file_to_stereo.src_element = file.id;
+        file_to_stereo.dst_element = stereo.id;
+        file_to_stereo.src_port = "out";
+        file_to_stereo.dst_port = "in";
+        graph->AddLink(file_to_stereo);
+
+        audio::GraphClass::Link stereo_to_resampler;
+        stereo_to_resampler.id = base::RandomString(10);
+        stereo_to_resampler.src_element = stereo.id;
+        stereo_to_resampler.dst_element = resampler.id;
+        stereo_to_resampler.src_port    = "out";
+        stereo_to_resampler.dst_port    = "in";
+        graph->AddLink(stereo_to_resampler);
+
+        graph->SetGraphOutputElementId(resampler.id);
+        graph->SetGraphOutputElementPort("out");
+        return graph;
+    }
 private:
     std::unique_ptr<game::AudioEngine> mEngine;
     float mMusicGain = 0.5f;
@@ -167,15 +215,15 @@ public:
 
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
     {
-        const auto millisec = std::chrono::milliseconds(unsigned(mDelay * 1000u));
+        const auto millisec = unsigned(mDelay * 1000u);
         if (key.symbol == wdk::Keysym::Key1)
-            mEngine->PlaySoundEffect("sounds/sound 21.ogg", millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("21", "sounds/sound 21.ogg"), millisec);
         else if (key.symbol == wdk::Keysym::Key2)
-            mEngine->PlaySoundEffect("sounds/qubodup-cfork-ccby3-jump.ogg", millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("jump", "sounds/qubodup-cfork-ccby3-jump.ogg"), millisec);
         else if (key.symbol == wdk::Keysym::Key3)
-            mEngine->PlaySoundEffect("sounds/completetask_0.mp3", millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("tada", "sounds/completetask_0.mp3"), millisec);
         else if (key.symbol == wdk::Keysym::Key4)
-            mEngine->PlaySoundEffect("sounds/Laser_05.mp3", millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("laser", "sounds/Laser_05.mp3"), millisec);
         else if (key.symbol == wdk::Keysym::Plus)
             mEffectGain = math::clamp(0.0f, 1.0f, mEffectGain + 0.05f);
         else if (key.symbol == wdk::Keysym::Minus)
@@ -188,6 +236,53 @@ public:
     }
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }
+private:
+    game::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)
+    {
+        auto graph = std::make_shared<audio::GraphClass>(name);
+
+        audio::GraphClass::Element file;
+        file.id   = base::RandomString(10);
+        file.name = "file";
+        file.type = "FileSource";
+        file.args["file"] = audio_file;
+        file.args["type"] = audio::SampleType::Float32;
+        graph->AddElement(file);
+
+        audio::GraphClass::Element stereo;
+        stereo.id = base::RandomString(10);
+        stereo.name = "stereo";
+        stereo.type = "StereoMaker";
+        stereo.args["channel"] = audio::StereoMaker::Channel::Both;
+        graph->AddElement(stereo);
+
+        audio::GraphClass::Element resampler;
+        resampler.id = base::RandomString(10);
+        resampler.name = "resampler";
+        resampler.type = "Resampler";
+        resampler.args["sample_rate"] = 44100u;
+        graph->AddElement(resampler);
+
+        audio::GraphClass::Link file_to_stereo;
+        file_to_stereo.id = base::RandomString(10);
+        file_to_stereo.src_element = file.id;
+        file_to_stereo.dst_element = stereo.id;
+        file_to_stereo.src_port = "out";
+        file_to_stereo.dst_port = "in";
+        graph->AddLink(file_to_stereo);
+
+        audio::GraphClass::Link stereo_to_resampler;
+        stereo_to_resampler.id = base::RandomString(10);
+        stereo_to_resampler.src_element = stereo.id;
+        stereo_to_resampler.dst_element = resampler.id;
+        stereo_to_resampler.src_port    = "out";
+        stereo_to_resampler.dst_port    = "in";
+        graph->AddLink(stereo_to_resampler);
+
+        graph->SetGraphOutputElementId(resampler.id);
+        graph->SetGraphOutputElementPort("out");
+        return graph;
+    }
 private:
     std::unique_ptr<game::Loader> mLoader;
     std::unique_ptr<game::AudioEngine> mEngine;

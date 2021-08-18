@@ -30,12 +30,14 @@
 
 namespace game
 {
+    class ClassLibrary;
 
     // this is in the namespace scope since it might move to
     // a separate file since scripting interface requires this.
     struct MusicEvent {
         enum class Type {
-            TrackDone
+            TrackDone,
+            EffectDone
         };
         std::string track;
         Type type = Type::TrackDone;
@@ -51,29 +53,34 @@ namespace game
     {
     public:
         using Effect = audio::Effect::Kind;
+        using GraphHandle = std::shared_ptr<const audio::GraphClass>;
 
         AudioEngine(const std::string& name, const audio::Loader* loader);
        ~AudioEngine();
+        void SetLoader(const audio::Loader* loader)
+        { mLoader = loader; }
+        void SetClassLibrary(const ClassLibrary* library)
+        { mClassLib = library; }
+        const ClassLibrary* GetClassLibrary() const
+        { return mClassLib; }
+        const audio::Loader* GetLoader() const
+        { return mLoader; }
 
-        // Add a new music track identified by name. The name should be unique
-        // and can later be used to refer to the track in subsequent calls.
-        // The audio track is initially only prepared and sent to the audio
-        // player but set to muted state. In order to begin playing the track
+        // Add a new audio graph for music playback.
+        // The audio graph is initially only prepared and sent to the audio
+        // player but set to paused state. In order to begin playing the track
         // PlayMusic must be called separately.
         // Returns false if the music track could not be loaded.
-        // TODO: URI
-        bool AddMusicTrack(const std::string& name, const std::string& uri);
+        bool AddMusicGraph(const GraphHandle& graph);
+        // Similar to AddMusicGraph except that also begins the audio graph
+        // playback immediately.
+        bool PlayMusicGraph(const GraphHandle& graph);
         // Schedule a command to start playing the named music track after
         // 'when' milliseconds elapses.
-        void PlayMusic(const std::string& track, std::chrono::milliseconds when);
-        // Send a command to start playing the named music track immediately.
-        void PlayMusic(const std::string& track);
+        void PlayMusic(const std::string& track, unsigned when = 0);
         // Schedule a command to pause the named music track after 'when' milliseconds elapse.
         // Note that this will not remove the music track from the mixer.
-        void PauseMusic(const std::string& track, std::chrono::milliseconds when);
-        // Send a command to pause the named music track immediately.
-        // Note that this will not remove the music track from the mixer.
-        void PauseMusic(const std::string& track);
+        void PauseMusic(const std::string& track, unsigned when = 0);
         // Set an effect on the music tracks audio graph. The effect will take place
         // immediately when the audio is playing.
         void SetMusicEffect(const std::string& track, float duration, Effect effect);
@@ -82,13 +89,9 @@ namespace game
         // Adjust the gain (volume) on the music stream. There's no strict range
         // for the gain value but you likely want to keep this around (0.0f, 1.0f)
         void SetMusicGain(float gain);
-
         // Schedule a sound effect for playback after 'when' milliseconds elapse.
         // Returns false if the audio effect could not be loaded.
-        bool PlaySoundEffect(const std::string& uri, std::chrono::milliseconds when);
-        // Play a sound effect immediately.
-        // Returns false if the audio effect could not be loaded.
-        bool PlaySoundEffect(const std::string& uri);
+        bool PlaySoundEffect(const GraphHandle& graph, unsigned when = 0);
         // Adjust the gain (volume) on the effects stream. There's no strict range
         // for the gain value but you likely want to keep this around (0.0f, 1.0f)
         void SetSoundEffectGain(float gain);
@@ -105,6 +108,7 @@ namespace game
     private:
         class AudioBuffer;
         const audio::Loader* mLoader = nullptr;
+        const ClassLibrary* mClassLib = nullptr;
         audio::Format mFormat;
         // the audio player.
         std::unique_ptr<audio::Player> mPlayer;
