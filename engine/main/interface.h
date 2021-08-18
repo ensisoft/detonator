@@ -221,13 +221,23 @@ namespace game
         virtual bool ParseArgs(int argc, const char* argv[])
         { return true; }
 
-        // Initialize the application and it's graphics resources.
-        // The context is the current rendering context that can be used
-        // to create the graphics device(s).
-        // Surface width and height are the current rendering surface
-        // (could be window, could be an off-screen buffer) sizes.
-        virtual void Init(gfx::Device::Context* context,
-            unsigned surface_width, unsigned surface_height) {}
+        struct InitParams {
+            // application name/title.
+            std::string application_name;
+            // context is the current rendering context that can be used
+            // to create the graphics device(s).
+            gfx::Device::Context* context = nullptr;
+            // Width (in pixels) of the current rendering surface such as a window
+            // or an off-screen buffer.
+            unsigned surface_width = 0;
+            // Height (in pixels) of the current rendering surface such as a window
+            // or an off-screen buffer.
+            unsigned surface_height = 0;
+        };
+
+        // Initialize the application and its resources and subsystems
+        // such as the graphics and audio.
+        virtual void Init(const InitParams& init) {}
 
         // Load the game and its data and/or previous state.
         // Called once before entering the main game update/render loop.
