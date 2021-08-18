@@ -22,7 +22,7 @@
 
 #include "engine/classlib.h"
 #include "engine/data.h"
-#include "graphics/resource.h"
+#include "graphics/loader.h"
 
 namespace game
 {
@@ -50,7 +50,7 @@ namespace game
     // Low level resource loader for loading gfx resource
     // files (shaders, textures, fonts etc) and game data
     // files such as UI styles.
-    class FileResourceLoader : public gfx::ResourceLoader,
+    class FileResourceLoader : public gfx::Loader,
                                public game::GameDataLoader
     {
     public:

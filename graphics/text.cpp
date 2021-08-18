@@ -33,6 +33,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/resource.h"
+#include "graphics/loader.h"
 #include "graphics/text.h"
 
 // some good information here about text rendering

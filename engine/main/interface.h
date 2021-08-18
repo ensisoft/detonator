@@ -31,7 +31,7 @@
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "graphics/device.h"
-#include "graphics/resource.h"
+#include "graphics/loader.h"
 #include "graphics/color4f.h"
 #include "wdk/events.h"
 #include "wdk/window_listener.h"
@@ -161,7 +161,7 @@ namespace game
             // The low level gfx resource loader that implements loading
             // of graphics resources such as shaders, fonts and textures.
             // The engine should use this with the graphics subsystem.
-            gfx::ResourceLoader* loader = nullptr;
+            gfx::Loader* loader = nullptr;
             // Path to the top level directory where the app/game is
             // I.e. where the GameMain, config.json, content.json etc. files
             // are. UTF-8 encoded.

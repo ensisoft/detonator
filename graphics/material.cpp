@@ -1184,7 +1184,7 @@ bool SpriteClass::FromJson2(const data::Reader& data)
     return true;
 }
 
-void SpriteClass::BeginPacking(ResourcePacker* packer) const
+void SpriteClass::BeginPacking(Packer* packer) const
 {
     for (size_t i=0; i<mSprite.GetNumTextures(); ++i)
     {
@@ -1195,7 +1195,7 @@ void SpriteClass::BeginPacking(ResourcePacker* packer) const
     {
         const auto& rect = mSprite.GetTextureRect(i);
         const auto* source = mSprite.GetTextureSource(i);
-        const ResourcePacker::ObjectHandle handle = source;
+        const Packer::ObjectHandle handle = source;
         packer->SetTextureBox(handle, rect);
 
         // when texture rects are used to address a sub rect within the
@@ -1242,10 +1242,10 @@ void SpriteClass::BeginPacking(ResourcePacker* packer) const
             else if (mTextureScale.y > 1.0f && mWrapY == TextureWrapping::Repeat)
                 can_combine = false;
         }
-        packer->SetTextureFlag(handle, ResourcePacker::TextureFlags::CanCombine, can_combine);
+        packer->SetTextureFlag(handle, Packer::TextureFlags::CanCombine, can_combine);
     }
 }
-void SpriteClass::FinishPacking(const ResourcePacker* packer)
+void SpriteClass::FinishPacking(const Packer* packer)
 {
     for (size_t i=0; i<mSprite.GetNumTextures(); ++i)
     {
@@ -1255,7 +1255,7 @@ void SpriteClass::FinishPacking(const ResourcePacker* packer)
     for (size_t i=0; i<mSprite.GetNumTextures(); ++i)
     {
         auto* source = mSprite.GetTextureSource(i);
-        const ResourcePacker::ObjectHandle handle = source;
+        const Packer::ObjectHandle handle = source;
         mSprite.SetTextureRect(i, packer->GetPackedTextureBox(handle));
     }
 }
@@ -1567,14 +1567,14 @@ bool TextureMap2DClass::FromJson2(const data::Reader& data)
     return true;
 }
 
-void TextureMap2DClass::BeginPacking(ResourcePacker* packer) const
+void TextureMap2DClass::BeginPacking(Packer* packer) const
 {
     auto* source = mTexture.GetTextureSource();
     if (!source) return;
 
     source->BeginPacking(packer);
 
-    const ResourcePacker::ObjectHandle handle = source;
+    const Packer::ObjectHandle handle = source;
     packer->SetTextureBox(handle, mTexture.GetTextureRect());
 
     // when texture rects are used to address a sub rect within the
@@ -1621,15 +1621,15 @@ void TextureMap2DClass::BeginPacking(ResourcePacker* packer) const
         else if (mTextureScale.y > 1.0f && mWrapY == TextureWrapping::Repeat)
             can_combine = false;
     }
-    packer->SetTextureFlag(handle, ResourcePacker::TextureFlags::CanCombine, can_combine);
+    packer->SetTextureFlag(handle, Packer::TextureFlags::CanCombine, can_combine);
 
 }
-void TextureMap2DClass::FinishPacking(const ResourcePacker* packer)
+void TextureMap2DClass::FinishPacking(const Packer* packer)
 {
     auto* source = mTexture.GetTextureSource();
     if (!source) return;
 
-    const ResourcePacker::ObjectHandle handle = source;
+    const Packer::ObjectHandle handle = source;
     source->FinishPacking(packer);
     mTexture.SetTextureRect(packer->GetPackedTextureBox(handle));
 }
@@ -1995,7 +1995,7 @@ bool CustomMaterialClass::FromJson2(const data::Reader& data)
     }
     return true;
 }
-void CustomMaterialClass::BeginPacking(ResourcePacker* packer) const
+void CustomMaterialClass::BeginPacking(Packer* packer) const
 {
     packer->PackShader(this, mShaderUri);
 
@@ -2010,7 +2010,7 @@ void CustomMaterialClass::BeginPacking(ResourcePacker* packer) const
             {
                 const auto& rect   = sprite->GetTextureRect(i);
                 const auto* source = sprite->GetTextureSource(i);
-                const ResourcePacker::ObjectHandle handle = source;
+                const Packer::ObjectHandle handle = source;
                 source->BeginPacking(packer);
                 packer->SetTextureBox(handle, rect);
             }
@@ -2025,7 +2025,7 @@ void CustomMaterialClass::BeginPacking(ResourcePacker* packer) const
         }
     }
 }
-void CustomMaterialClass::FinishPacking(const ResourcePacker* packer)
+void CustomMaterialClass::FinishPacking(const Packer* packer)
 {
     mShaderUri = packer->GetPackedShaderId(this);
     for (auto& pair : mTextureMaps)

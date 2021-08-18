@@ -24,6 +24,7 @@
 
 #include "base/logging.h"
 #include "graphics/image.h"
+#include "graphics/loader.h"
 #include "graphics/resource.h"
 
 namespace gfx

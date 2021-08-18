@@ -82,10 +82,10 @@ QString GetAppDir()
     return dir;
 }
 
-class ResourcePacker : public gfx::ResourcePacker
+class ResourcePacker : public gfx::Packer
 {
 public:
-    using ObjectHandle = gfx::ResourcePacker::ObjectHandle;
+    using ObjectHandle = gfx::Packer::ObjectHandle;
 
     ResourcePacker(const QString& outdir, unsigned max_width, unsigned max_height, unsigned padding, bool resize_large, bool pack_small)
         : kOutDir(outdir)
@@ -109,9 +109,9 @@ public:
     {
         mTextureMap[instance].rect = box;
     }
-    virtual void SetTextureFlag(ObjectHandle instance, gfx::ResourcePacker::TextureFlags flags, bool on_off) override
+    virtual void SetTextureFlag(ObjectHandle instance, gfx::Packer::TextureFlags flags, bool on_off) override
     {
-        ASSERT(flags == gfx::ResourcePacker::TextureFlags::CanCombine);
+        ASSERT(flags == gfx::Packer::TextureFlags::CanCombine);
         mTextureMap[instance].can_be_combined = on_off;
     }
     virtual void PackFont(ObjectHandle instance, const std::string& file) override

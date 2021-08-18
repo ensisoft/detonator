@@ -34,7 +34,7 @@
 #include "base/hash.h"
 #include "data/fwd.h"
 #include "graphics/texture.h"
-#include "graphics/resource.h"
+#include "graphics/packer.h"
 #include "graphics/bitmap.h"
 #include "graphics/color4f.h"
 #include "graphics/device.h"
@@ -98,10 +98,10 @@ namespace gfx
         // otherwise false.
         virtual bool FromJson(const data::Reader& data) = 0;
         // Begin packing the texture source into the packer.
-        virtual void BeginPacking(ResourcePacker* packer) const {}
+        virtual void BeginPacking(Packer* packer) const {}
         // Finish packing the texture source into the packer.
         // Update the state with the details from the packer.
-        virtual void FinishPacking(const ResourcePacker* packer) {}
+        virtual void FinishPacking(const Packer* packer) {}
     private:
     };
 
@@ -144,11 +144,11 @@ namespace gfx
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
 
-            virtual void BeginPacking(ResourcePacker* packer) const override
+            virtual void BeginPacking(Packer* packer) const override
             {
                 packer->PackTexture(this, mFile);
             }
-            virtual void FinishPacking(const ResourcePacker* packer) override
+            virtual void FinishPacking(const Packer* packer) override
             {
                 mFile = packer->GetPackedTextureId(this);
             }
@@ -377,7 +377,7 @@ namespace gfx
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
 
-            virtual void BeginPacking(ResourcePacker* packer) const override
+            virtual void BeginPacking(Packer* packer) const override
             {
                 const size_t num_texts = mTextBuffer.GetNumTexts();
                 for (size_t i=0; i<num_texts; ++i)
@@ -386,7 +386,7 @@ namespace gfx
                     packer->PackFont(&text, text.font);
                 }
             }
-            virtual void FinishPacking(const ResourcePacker* packer) override
+            virtual void FinishPacking(const Packer* packer) override
             {
                 const size_t num_texts = mTextBuffer.GetNumTexts();
                 for (size_t i=0; i<num_texts; ++i)
@@ -800,10 +800,10 @@ namespace gfx
         // Begin the packing process by going over the associated resources
         // in the material and invoking the packer methods to pack
         // those resources.
-        virtual void BeginPacking(ResourcePacker* packer) const = 0;
+        virtual void BeginPacking(Packer* packer) const = 0;
         // Finish the packing process by retrieving the new updated resource
         // information the packer and updating the material's state.
-        virtual void FinishPacking(const ResourcePacker* packer) = 0;
+        virtual void FinishPacking(const Packer* packer) = 0;
 
         // Helpers
         inline BuiltInMaterialClass* AsBuiltIn()
@@ -895,9 +895,9 @@ namespace gfx
         { mSurfaceType = surface; }
         virtual SurfaceType GetSurfaceType() const override
         { return mSurfaceType; }
-        virtual void BeginPacking(ResourcePacker* packer) const override
+        virtual void BeginPacking(Packer* packer) const override
         { /* empty */ }
-        virtual void FinishPacking(const ResourcePacker* packer) override
+        virtual void FinishPacking(const Packer* packer) override
         { /*empty */ }
     protected:
         std::string mClassId;
@@ -1112,8 +1112,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(ResourcePacker* packer) const override;
-        virtual void FinishPacking(const ResourcePacker* packer) override;
+        virtual void BeginPacking(Packer* packer) const override;
+        virtual void FinishPacking(const Packer* packer) override;
         SpriteClass& operator=(const SpriteClass&);
     private:
         bool mBlendFrames = true;
@@ -1216,8 +1216,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(ResourcePacker* packer) const override;
-        virtual void FinishPacking(const ResourcePacker* packer) override;
+        virtual void BeginPacking(Packer* packer) const override;
+        virtual void FinishPacking(const Packer* packer) override;
         TextureMap2DClass& operator=(const TextureMap2DClass&);
     private:
         gfx::Color4f mBaseColor;
@@ -1341,8 +1341,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(ResourcePacker* packer) const override;
-        virtual void FinishPacking(const ResourcePacker* packer) override;
+        virtual void BeginPacking(Packer* packer) const override;
+        virtual void FinishPacking(const Packer* packer) override;
         CustomMaterialClass& operator=(const CustomMaterialClass& other);
     private:
         std::string mClassId;
