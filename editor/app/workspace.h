@@ -57,7 +57,7 @@ namespace app
     class Workspace : public QAbstractTableModel,
                       public QAbstractFileEngineHandler,
                       public game::ClassLibrary,
-                      public game::GameDataLoader,
+                      public game::Loader,
                       public gfx::Loader,
                       public audio::Loader
 
