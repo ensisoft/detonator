@@ -204,8 +204,8 @@ Graph::Graph(const std::string& name)
   : Graph(name, base::RandomString(10))
 {}
 
-Graph::Graph(const GraphClass& klass) :
-  Graph(klass.GetName())
+Graph::Graph(const std::string& name, const GraphClass& klass) :
+  Graph(name)
 {
     for (size_t i=0; i< klass.GetNumElements(); ++i)
     {
@@ -232,9 +232,15 @@ Graph::Graph(const GraphClass& klass) :
     auto* src_port = src_elem->FindOutputPortByName(klass.GetGraphOutputElementPort());
     LinkGraph(src_elem, src_port);
 }
+Graph::Graph(const GraphClass& klass)
+  : Graph(klass.GetName(), klass)
+{}
 
 Graph::Graph(std::shared_ptr<const GraphClass> klass)
   : Graph(*klass)
+{}
+Graph::Graph(const std::string& name, std::shared_ptr<const GraphClass> klass)
+  : Graph(name, *klass)
 {}
 
 Graph::Graph(Graph&& other)

@@ -94,6 +94,33 @@ void MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count, float src_gain,
 }
 
 template<typename Type, unsigned ChannelCount>
+float FadeBuffer(BufferHandle buffer, float current_time, float start_time, float duration, bool fade_in)
+{
+    using AudioFrame = Frame<Type, ChannelCount>;
+
+    const auto frame_size  = sizeof(AudioFrame);
+    const auto format      = buffer->GetFormat();
+    const auto buffer_size = buffer->GetByteSize();
+    const auto num_frames  = buffer_size / frame_size;
+    ASSERT((buffer_size % frame_size) == 0);
+
+    const auto sample_rate = format.sample_rate;
+    const auto sample_duration = 1000.0f / sample_rate;
+
+    auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
+    for (unsigned i=0; i<num_frames; ++i)
+    {
+        const auto effect_time = current_time - start_time;
+        const auto effect_time_norm = math::clamp(0.0f, 1.0f, effect_time / duration);
+        const auto effect_value = fade_in ? effect_time_norm : 1.0f - effect_time_norm;
+        const auto sample_gain = std::pow(effect_value, 2.2);
+        AdjustFrameGain(&ptr[i], sample_gain);
+        current_time += sample_duration;
+    }
+    return current_time;
+}
+
+template<typename Type, unsigned ChannelCount>
 BufferHandle MixBuffers(std::vector<BufferHandle>& src_buffers, float src_gain)
 {
     using AudioFrame = Frame<Type, ChannelCount>;
@@ -281,6 +308,7 @@ void StereoMaker::CopyMono(BufferHandle buffer)
 
     auto stereo = std::make_shared<VectorBuffer>();
     stereo->AllocateBytes(buffer_size * 2);
+    stereo->SetFormat(mOut.GetFormat());
     Buffer::CopyInfoTags(*buffer, *stereo);
 
     auto* out = static_cast<StereoFrameType*>(stereo->GetPtr());
@@ -366,6 +394,7 @@ void StereoJoiner::Join(BufferHandle left, BufferHandle right)
 
     auto stereo = std::make_shared<VectorBuffer>();
     stereo->AllocateBytes(buffer_size * 2);
+    stereo->SetFormat(mOut.GetFormat());
     Buffer::CopyInfoTags(*left, *stereo);
     Buffer::CopyInfoTags(*right, *stereo);
 
@@ -442,7 +471,9 @@ void StereoSplitter::Split(BufferHandle buffer)
     auto left  = std::make_shared<VectorBuffer>();
     auto right = std::make_shared<VectorBuffer>();
     left->AllocateBytes(buffer_size / 2);
+    left->SetFormat(mOutLeft.GetFormat());
     right->AllocateBytes(buffer_size / 2);
+    right->SetFormat(mOutRight.GetFormat());
     Buffer::CopyInfoTags(*buffer, *left);
     Buffer::CopyInfoTags(*buffer, *right);
     auto* L = static_cast<MonoFrameType *>(left->GetPtr());
@@ -652,24 +683,12 @@ void Effect::FadeInOut(BufferHandle buffer)
         return;
     }
 
-    using AudioFrame = Frame<DataType, ChannelCount>;
-    const auto frame_size  = sizeof(AudioFrame);
-    const auto buffer_size = buffer->GetByteSize();
-    const auto num_frames  = buffer_size / frame_size;
-    ASSERT((buffer_size % frame_size) == 0);
+    if (mEffect == Kind::FadeIn)
+        mSampleTime = FadeBuffer<DataType, ChannelCount>(buffer, mSampleTime, mStartTime, mDuration, true);
+    else if (mEffect == Kind::FadeOut)
+        mSampleTime = FadeBuffer<DataType, ChannelCount>(buffer, mSampleTime, mStartTime, mDuration, false);
+    else BUG("???");
 
-    const auto sample_duration = 1000.0f / mSampleRate;
-
-    auto* ptr = static_cast<AudioFrame*>(buffer->GetPtr());
-    for (unsigned i=0; i<num_frames; ++i)
-    {
-        const auto effect_time  = mSampleTime - mStartTime;
-        const auto effect_time_norm = math::clamp(0.0f, 1.0f, effect_time / (float)mDuration);
-        const auto effect_value = mEffect == Kind::FadeIn ? effect_time_norm : 1.0f - effect_time_norm;
-        const auto sample_gain = std::pow(effect_value, 2.2);
-        AdjustFrameGain(&ptr[i], sample_gain);
-        mSampleTime += sample_duration;
-    }
     mOut.PushBuffer(buffer);
 }
 
@@ -1086,6 +1105,40 @@ bool BufferSource::IsSourceDone() const
     return mFramesRead == mDecoder->GetNumFrames();
 }
 
+void MixerSource::FadeIn::Apply(BufferHandle buffer)
+{
+    const auto& format = buffer->GetFormat();
+    if (format.sample_type == SampleType::Int32)
+        format.channel_count == 1 ? ApplyFadeIn<int, 1>(buffer) : ApplyFadeIn<int, 2>(buffer);
+    else if (format.sample_type == SampleType::Float32)
+        format.channel_count == 1 ? ApplyFadeIn<float, 1>(buffer) : ApplyFadeIn<float, 2>(buffer);
+    else if (format.sample_type == SampleType::Int16)
+        format.channel_count == 1 ? ApplyFadeIn<short, 1>(buffer) : ApplyFadeIn<short, 2>(buffer);
+    else WARN("Unsupported format %1", format.sample_type);
+}
+template<typename DataType, unsigned ChannelCount>
+void MixerSource::FadeIn::ApplyFadeIn(BufferHandle buffer)
+{
+    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, true);
+}
+
+void MixerSource::FadeOut::Apply(BufferHandle buffer)
+{
+    const auto& format = buffer->GetFormat();
+    if (format.sample_type == SampleType::Int32)
+        format.channel_count == 1 ? ApplyFadeOut<int, 1>(buffer) : ApplyFadeOut<int, 2>(buffer);
+    else if (format.sample_type == SampleType::Float32)
+        format.channel_count == 1 ? ApplyFadeOut<float, 1>(buffer) : ApplyFadeOut<float, 2>(buffer);
+    else if (format.sample_type == SampleType::Int16)
+        format.channel_count == 1 ? ApplyFadeOut<short, 1>(buffer) : ApplyFadeOut<short, 2>(buffer);
+    else WARN("Unsupported format %1", format.sample_type);
+}
+template<typename DataType, unsigned ChannelCount>
+void MixerSource::FadeOut::ApplyFadeOut(BufferHandle buffer)
+{
+    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, true);
+}
+
 MixerSource::MixerSource(const std::string& name, const Format& format)
   : mName(name)
   , mId(base::RandomString(10))
@@ -1138,6 +1191,16 @@ void MixerSource::PauseSource(const std::string& name, bool paused)
         return;
     it->second.paused = paused;
     DEBUG("MixerSource '%1' source '%2' pause is %3.", mName, name, paused ? "On" : "Off");
+}
+
+void MixerSource::SetSourceEffect(const std::string& name, std::unique_ptr<Effect> effect)
+{
+    auto it = mSources.find(name);
+    if (it == mSources.end())
+        return;
+    it->second.effect = std::move(effect);
+    DEBUG("MixerSource '%1' source '%2' effect '%3' is active.", mName, name,
+          it->second.effect->GetName());
 }
 
 bool MixerSource::IsSourceDone() const
@@ -1200,10 +1263,14 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
             auto& port = element->GetOutputPort(i);
             BufferHandle buffer;
             if (port.PullBuffer(buffer))
+            {
+                if (source.effect)
+                    source.effect->Apply(buffer);
                 src_buffers.push_back(buffer);
+            }
         }
     }
-
+    RemoveDoneEffects(events);
     RemoveDoneSources(events);
 
     if (src_buffers.size() == 0)
@@ -1237,6 +1304,8 @@ void MixerSource::ReceiveCommand(Command& cmd)
         AddSourcePtr(std::move(ptr->src), ptr->paused);
     else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
         DeleteSource(ptr->name);
+    else if (auto* ptr = cmd.GetIf<SetEffectCmd>())
+        SetSourceEffect(ptr->src, std::move(ptr->effect));
     else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
     {
         if (ptr->millisecs)
@@ -1267,6 +1336,24 @@ bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
             return true;
     }
     return false;
+}
+
+void MixerSource::RemoveDoneEffects(EventQueue& events)
+{
+    for (auto& pair : mSources)
+    {
+        auto& source = pair.second;
+        if (!source.effect || !source.effect->IsDone())
+            continue;
+        const auto effect_name = source.effect->GetName();
+        const auto src_name = source.element->GetName();
+        EffectDoneEvent event;
+        event.mixer  = mName;
+        event.src    = source.element->GetName();
+        event.effect = std::move(source.effect);
+        events.push(MakeEvent(std::move(event)));
+        DEBUG("MixerSource '%1' source '%2' effect '%3' is done.", mName, src_name, effect_name);
+    }
 }
 
 void MixerSource::RemoveDoneSources(EventQueue& events)
