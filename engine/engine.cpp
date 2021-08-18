@@ -80,14 +80,14 @@ public:
         DEBUG("Engine starting.");
         mGame->LoadGame(mClasslib);
     }
-    virtual void Init(gfx::Device::Context* context, unsigned surface_width, unsigned surface_height) override
+    virtual void Init(const InitParams& init) override
     {
-        DEBUG("Engine initializing. Surface %1x%2", surface_width, surface_height);
-        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+        DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
+        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
-        mPainter->SetSurfaceSize(surface_width, surface_height);
-        mSurfaceWidth  = surface_width;
-        mSurfaceHeight = surface_height;
+        mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
+        mSurfaceWidth  = init.surface_width;
+        mSurfaceHeight = init.surface_height;
         mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
         mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");

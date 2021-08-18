@@ -432,7 +432,12 @@ int main(int argc, char* argv[])
         DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
 
         // setup application
-        app->Init(context.get(), window.GetSurfaceWidth(), window.GetSurfaceHeight());
+        game::App::InitParams params;
+        params.application_name = title;
+        params.context          = context.get();
+        params.surface_width     = window.GetSurfaceWidth();
+        params.surface_height   = window.GetSurfaceHeight();
+        app->Init(params);
 
         // the times here are in the application timeline which
         // is not the same as the real wall time but can drift

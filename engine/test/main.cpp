@@ -677,14 +677,13 @@ public:
         mTestList[mTestIndex]->Start(this);
     }
 
-    virtual void Init(gfx::Device::Context* context,
-        unsigned surface_width, unsigned surface_height)
+    virtual void Init(const InitParams& init)
     {
-        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
-        mPainter->SetSurfaceSize(surface_width, surface_height);
-        mSurfaceWidth  = surface_width;
-        mSurfaceHeight = surface_height;
+        mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
+        mSurfaceWidth  = init.surface_width;
+        mSurfaceHeight = init.surface_height;
     }
 
     virtual void Draw() override

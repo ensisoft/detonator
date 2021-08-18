@@ -764,9 +764,12 @@ void PlayWindow::DoAppInit()
         env.directory = app::ToUtf8(mGameWorkingDir);
         mApp->SetEnvironment(env);
 
-        const auto surface_width  = mSurface->width();
-        const auto surface_height = mSurface->height();
-        mApp->Init(mWindowContext.get(), surface_width, surface_height);
+        game::App::InitParams params;
+        params.application_name = app::ToUtf8(settings.application_name);
+        params.context          = mWindowContext.get();
+        params.surface_width    = mSurface->width();
+        params.surface_height   = mSurface->height();
+        mApp->Init(params);
 
         game::App::EngineConfig config;
         config.ticks_per_second   = settings.ticks_per_second;
