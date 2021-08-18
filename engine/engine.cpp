@@ -712,7 +712,7 @@ private:
     // such as animations, materials etc.
     game::ClassLibrary* mClasslib = nullptr;
     // Game data/content loader.
-    game::GameDataLoader* mContent = nullptr;
+    game::Loader* mContent = nullptr;
     // The graphics painter device.
     std::unique_ptr<gfx::Painter> mPainter;
     // The graphics device.

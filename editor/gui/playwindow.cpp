@@ -245,7 +245,7 @@ private:
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
 class PlayWindow::ResourceLoader : public gfx::Loader,
-                                   public game::GameDataLoader,
+                                   public game::Loader,
                                    public audio::Loader
 {
 public:

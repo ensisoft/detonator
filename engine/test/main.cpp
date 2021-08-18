@@ -189,7 +189,7 @@ public:
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }
 private:
-    std::unique_ptr<game::GameDataLoader> mLoader;
+    std::unique_ptr<game::Loader> mLoader;
     std::unique_ptr<game::AudioEngine> mEngine;
     float mEffectGain = 0.5f;
     float mDelay      = 0.0f;

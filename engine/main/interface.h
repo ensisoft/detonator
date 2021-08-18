@@ -157,7 +157,7 @@ namespace game
             // Interface for accessing the game data from the game's running
             // environment, i.e. data that is packaged with the game. Not the
             // data *generated* by the game such as save games.
-            game::GameDataLoader* content = nullptr;
+            game::Loader* content = nullptr;
             // The low level gfx resource loader that implements loading
             // of graphics resources such as shaders, fonts and textures.
             // The engine should use this with the graphics subsystem.

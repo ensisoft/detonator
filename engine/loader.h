@@ -26,20 +26,21 @@
 
 namespace game
 {
-    // in order to de-couple the loader application from transitive
-    // dependencies such as the graphics subsystem etc. this header
-    // is  *pure* interface only.  The implementations can be built
-    // into the shared engine library which will need those deps in
-    // any case.
+    // in order to de-couple the loader application (GameMain) from
+    // transitive dependencies such as the graphics subsystem etc.
+    // this header is *pure* interface only. The loader implementations
+    // can then be built into the shared engine library which will need
+    // those deps in any case. This means that GameMain doesn't need to
+    // link against all the various libs such as GfxLib, AudioLib etc.
 
     class GameData;
     using GameDataHandle = std::shared_ptr<const GameData>;
 
-    // Interface for accessing game objects' data.
-    class GameDataLoader
+    // Interface for accessing game objects' data packaged with the game.
+    class Loader
     {
     public:
-        virtual ~GameDataLoader() = default;
+        virtual ~Loader() = default;
         // Load game data based on a URI. The URI undergoes a resolution
         // and the content may be loaded from a resource pack etc.
         virtual GameDataHandle LoadGameData(const std::string& uri) const = 0;
@@ -47,11 +48,10 @@ namespace game
         virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const = 0;
     };
 
-    // Low level resource loader for loading gfx resource
-    // files (shaders, textures, fonts etc) and game data
-    // files such as UI styles.
+    // Loader implementation for loading all kinds of subsystem
+    // resources and game data.
     class FileResourceLoader : public gfx::Loader,
-                               public game::GameDataLoader
+                               public game::Loader
     {
     public:
         // Set the filesystem path of the current running binary on the file system.
