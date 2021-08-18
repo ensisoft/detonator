@@ -19,7 +19,11 @@
 #include "config/config.h"
 
 // Editor build time configuration file.
-#define APP_TITLE "Gamestudio Editor"
+#if defined(NDEBUG)
+#  define APP_TITLE "Gamestudio Editor"
+#else
+#  define APP_TITLE "Gamestudio Editor DEBUG"
+#endif
 #define APP_VERSION "0.1"
 #define APP_COPYRIGHT "Copyright (c) 2020-2021\n" \
                       "Sami Väisänen\n"           \
