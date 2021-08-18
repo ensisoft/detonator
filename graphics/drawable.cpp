@@ -962,7 +962,7 @@ Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable
     return geom;
 }
 
-void RoundRectangleClass::Pack(ResourcePacker* packer) const
+void RoundRectangleClass::Pack(Packer* packer) const
 {
 }
 void RoundRectangleClass::IntoJson(data::Writer& data) const
@@ -1048,7 +1048,7 @@ Geometry* GridClass::Upload(Device& device) const
     return geom;
 }
 
-void GridClass::Pack(ResourcePacker* packer) const
+void GridClass::Pack(Packer* packer) const
 {
 }
 
@@ -1107,7 +1107,7 @@ Geometry* PolygonClass::Upload(Device& device) const
     return geom;
 }
 
-void PolygonClass::Pack(ResourcePacker* packer) const
+void PolygonClass::Pack(Packer* packer) const
 {
 }
 
@@ -1367,7 +1367,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
     return geom;
 }
 
-void KinematicsParticleEngineClass::Pack(ResourcePacker* packer) const
+void KinematicsParticleEngineClass::Pack(Packer* packer) const
 {
 }
 

@@ -171,7 +171,7 @@ add_library(GfxLib
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
-    graphics/resource.cpp
+    graphics/loader.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
@@ -454,7 +454,7 @@ add_executable(graphics_test
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
-    graphics/resource.cpp
+    graphics/loader.cpp
     graphics/image.cpp
     graphics/test/main.cpp
     third_party/stb/stb_image.c
@@ -671,7 +671,7 @@ add_library(GfxLibTesting
         graphics/opengl_es2_device.cpp
         graphics/painter.cpp
         graphics/text.cpp
-        graphics/resource.cpp
+        graphics/loader.cpp
         third_party/stb/stb_image.c
         third_party/stb/stb_image_write.c
         third_party/base64/base64.cpp)

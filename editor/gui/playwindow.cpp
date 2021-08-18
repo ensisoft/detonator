@@ -244,7 +244,7 @@ private:
 // implementation of game asset table for accessing the
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
-class PlayWindow::ResourceLoader : public gfx::ResourceLoader,
+class PlayWindow::ResourceLoader : public gfx::Loader,
                                    public game::GameDataLoader,
                                    public audio::Loader
 {

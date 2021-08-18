@@ -22,21 +22,17 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
-#include "graphics/resource.h"
+#include "graphics/loader.h"
 
 namespace {
-static gfx::ResourceLoader* gLoader;
+static gfx::Loader* gLoader;
 
 class FileResource : public gfx::Resource
 {
 public:
     FileResource(std::string filename)
     {
-#if defined(WINDOWS_OS)
-        std::fstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
-#elif defined(POSIX_OS)
-        std::fstream in(filename, std::ios::in | std::ios::binary);
-#endif
+        auto in = base::OpenBinaryInputStream(filename);
         if (!in.is_open())
         {
             ERROR("Failed to open '%1' file.", filename);
@@ -114,10 +110,10 @@ std::shared_ptr<const FileResource> DefaultLoadFile(const std::string& file)
 namespace gfx
 {
 
-void SetResourceLoader(ResourceLoader* loader)
+void SetResourceLoader(Loader* loader)
 { gLoader = loader; }
 
-ResourceLoader* GetResourceLoader()
+Loader* GetResourceLoader()
 { return gLoader; }
 
 std::shared_ptr<const Resource> LoadResource(const std::string& URI)

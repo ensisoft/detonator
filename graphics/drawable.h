@@ -43,7 +43,7 @@ namespace gfx
     class Shader;
     class Geometry;
     class Program;
-    class ResourcePacker;
+    class Packer;
 
     // DrawableClass defines a new type of drawable.
     // Currently not all drawable shapes have a drawable specific
@@ -82,7 +82,7 @@ namespace gfx
         // Get the hash of the drawable class object  based on its properties.
         virtual std::size_t GetHash() const = 0;
         // Pack the drawable resources.
-        virtual void Pack(ResourcePacker* packer) const = 0;
+        virtual void Pack(Packer* packer) const = 0;
         // Serialize into JSON
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
@@ -224,7 +224,7 @@ namespace gfx
             { return base::hash_combine(0, GetId()); }
             virtual Type GetType() const override
             { return ActualType; }
-            virtual void Pack(ResourcePacker*) const override {}
+            virtual void Pack(Packer*) const override {}
             virtual void IntoJson(data::Writer&) const override
             { }
             virtual bool LoadFromJson(const data::Reader&) override
@@ -384,7 +384,7 @@ namespace gfx
             hash = base::hash_combine(hash, mRadius);
             return hash;
         }
-        virtual void Pack(ResourcePacker* packer) const override;
+        virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
     private:
@@ -472,7 +472,7 @@ namespace gfx
             hash = base::hash_combine(hash, mBorderLines);
             return hash;
         }
-        virtual void Pack(ResourcePacker* packer) const override;
+        virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
     private:
@@ -667,7 +667,7 @@ namespace gfx
         // on the content.
         std::string GetName() const;
 
-        virtual void Pack(ResourcePacker* packer) const override;
+        virtual void Pack(Packer* packer) const override;
         virtual Type GetType() const override
         { return Type::Polygon; }
         virtual std::string GetId() const override
@@ -905,7 +905,7 @@ namespace gfx
         }
         virtual std::unique_ptr<DrawableClass> Copy() const override
         { return std::make_unique<KinematicsParticleEngineClass>(*this); }
-        virtual void Pack(ResourcePacker* packer) const override;
+        virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
         // Get a hash value based on the engine parameters

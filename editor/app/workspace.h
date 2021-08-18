@@ -58,7 +58,7 @@ namespace app
                       public QAbstractFileEngineHandler,
                       public game::ClassLibrary,
                       public game::GameDataLoader,
-                      public gfx::ResourceLoader,
+                      public gfx::Loader,
                       public audio::Loader
 
     {

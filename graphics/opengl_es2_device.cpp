@@ -35,6 +35,7 @@
 #include "graphics/geometry.h"
 #include "graphics/texture.h"
 #include "graphics/color4f.h"
+#include "graphics/loader.h"
 
 #define GL_CALL(x)                                      \
 do {                                                    \
