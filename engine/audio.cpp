@@ -92,63 +92,47 @@ AudioEngine::~AudioEngine()
     mPlayer->Cancel(mMusicGraphId);
 }
 
-bool AudioEngine::AddMusicTrack(const std::string& name, const std::string& uri)
+bool AudioEngine::AddMusicGraph(const GraphHandle& handle)
 {
-    auto music = std::make_unique<audio::Graph>(name);
-    music->AddElement(audio::FileSource(name + "/file", uri, audio::SampleType::Float32));
-    music->AddElement(audio::StereoMaker(name + "/stereo"));
-    music->AddElement(audio::Resampler(name + "/resampler", 44100));
-    music->AddElement(audio::Effect(name + "/effect"));
-    ASSERT(music->LinkElements(name + "/file",   "out", name + "/stereo",    "in"));
-    ASSERT(music->LinkElements(name + "/stereo", "out", name + "/effect",    "in"));
-    ASSERT(music->LinkElements(name + "/effect", "out", name + "/resampler", "in"));
-    ASSERT(music->LinkGraph(name + "/resampler", "out"));
+    ASSERT(handle);
 
-    if (!music->Prepare(*mLoader))
+    auto graph = std::make_unique<audio::Graph>(handle);
+    if (!graph->Prepare(*mLoader))
         ERROR_RETURN(false, "Failed to prepare music audio graph.");
-
-    const auto& port = music->GetOutputPort(0);
+    const auto& port = graph->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-        ERROR_RETURN(false, "Music '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
+        ERROR_RETURN(false, "Music audio graph '%1' has incompatible output PCM format '%2'.", handle->GetName(), port.GetFormat());
 
     audio::MixerSource::AddSourceCmd cmd;
-    cmd.src    = std::move(music);
+    cmd.src    = std::move(graph);
     cmd.paused = true;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
     return true;
 }
 
-void AudioEngine::PlayMusic(const std::string& track, std::chrono::milliseconds when)
+bool AudioEngine::PlayMusicGraph(const GraphHandle& handle)
+{
+    if (!AddMusicGraph(handle))
+        return false;
+    PlayMusic(handle->GetName(), 0);
+    return true;
+}
+
+void AudioEngine::PlayMusic(const std::string& track, unsigned when)
 {
     audio::MixerSource::PauseSourceCmd cmd;
     cmd.name      = track;
     cmd.paused    = false;
-    cmd.millisecs = when.count();
+    cmd.millisecs = when;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
-void AudioEngine::PlayMusic(const std::string& track)
+void AudioEngine::PauseMusic(const std::string& track, unsigned when)
 {
     audio::MixerSource::PauseSourceCmd cmd;
-    cmd.name   = track;
-    cmd.paused = false;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
-}
-
-void AudioEngine::PauseMusic(const std::string& track, std::chrono::milliseconds when)
-{
-    audio::MixerSource::PauseSourceCmd cmd;
-    cmd.name   = track;
-    cmd.paused = true;
-    cmd.millisecs = when.count();
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
-}
-
-void AudioEngine::PauseMusic(const std::string& track)
-{
-    audio::MixerSource::PauseSourceCmd cmd;
-    cmd.name   = track;
-    cmd.paused = true;
+    cmd.name      = track;
+    cmd.paused    = true;
+    cmd.millisecs = when;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
@@ -161,11 +145,16 @@ void AudioEngine::RemoveMusicTrack(const std::string& name)
 
 void AudioEngine::SetMusicEffect(const std::string& track, float duration, Effect effect)
 {
-    audio::Effect::SetEffectCmd cmd;
-    cmd.effect   = effect;
-    cmd.time     = 0;
-    cmd.duration = duration * 1000;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand(track + "/effect", std::move(cmd)));
+    std::unique_ptr<audio::MixerSource::Effect> mixer_effect;
+    if (effect == Effect::FadeIn)
+        mixer_effect = std::make_unique<audio::MixerSource::FadeIn>(duration);
+    else if (effect == Effect::FadeOut)
+        mixer_effect = std::make_unique<audio::MixerSource::FadeOut>(duration);
+
+    audio::MixerSource::SetEffectCmd cmd;
+    cmd.src    = track;
+    cmd.effect = std::move(mixer_effect);
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
 void AudioEngine::SetMusicGain(float gain)
@@ -175,47 +164,32 @@ void AudioEngine::SetMusicGain(float gain)
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
 }
 
-bool AudioEngine::PlaySoundEffect(const std::string& uri, std::chrono::milliseconds ms)
+bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
     const auto name   = std::to_string(mEffectCounter);
-    const auto paused = ms.count() != 0;
+    const auto paused = when != 0;
 
-    auto effect = std::make_unique<audio::Graph>(name);
-    effect->AddElement(audio::FileSource(uri, uri, audio::SampleType::Float32));
-    effect->AddElement(audio::StereoMaker("stereo"));
-    effect->AddElement(audio::Resampler("resampler", 44100));
-
-    ASSERT(effect->LinkElements(uri, "out", "stereo", "in"));
-    ASSERT(effect->LinkElements("stereo", "out", "resampler", "in"));
-    ASSERT(effect->LinkGraph("resampler", "out"));
-
-    if (!effect->Prepare(*mLoader))
+    auto graph = std::make_unique<audio::Graph>(name, handle);
+    if (!graph->Prepare(*mLoader))
         ERROR_RETURN(false, "Failed to prepare effect audio graph.");
 
-    const auto& port = effect->GetOutputPort(0);
+    const auto& port = graph->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-        ERROR_RETURN(false, "Effect '%1' audio graph has incorrect PCM format '%2'.", uri, port.GetFormat());
+        ERROR_RETURN(false, "Effect '%1' audio graph has incorrect PCM format '%2'.", handle->GetName(), port.GetFormat());
 
-    audio::MixerSource::AddSourceCmd cmd;
-    cmd.src    = std::move(effect);
-    cmd.paused = paused;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    audio::MixerSource::AddSourceCmd add_cmd;
+    add_cmd.src    = std::move(graph);
+    add_cmd.paused = true;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(add_cmd)));
 
-    if (paused)
-    {
-        audio::MixerSource::PauseSourceCmd cmd;
-        cmd.name      = name;
-        cmd.paused    = false;
-        cmd.millisecs = ms.count();
-        mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
-    }
+    audio::MixerSource::PauseSourceCmd play_cmd;
+    play_cmd.name      = name;
+    play_cmd.paused    = false;
+    play_cmd.millisecs = when;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(play_cmd)));
+
     ++mEffectCounter;
     return true;
-}
-
-bool AudioEngine::PlaySoundEffect(const std::string& uri)
-{
-    return PlaySoundEffect(uri, std::chrono::milliseconds(0));
 }
 
 void AudioEngine::SetSoundEffectGain(float gain)
@@ -248,15 +222,24 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& e
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
 {
     DEBUG("Audio track '%1' source event.", event.id);
-    if (events == nullptr) return;
-    else if (event.id != mMusicGraphId) return;
+    if (events == nullptr)
+        return;
+    else if (event.id != mMusicGraphId)
+        return;
 
     if (auto* done = event.event->GetIf<audio::MixerSource::SourceDoneEvent>())
     {
-        MusicEvent me;
-        me.track = done->src->GetName();
-        me.type  = MusicEvent::Type::TrackDone;
-        events->push_back(std::move(me));
+        MusicEvent event;
+        event.track = done->src->GetName();
+        event.type  = MusicEvent::Type::TrackDone;
+        events->push_back(std::move(event));
+    }
+    else if (auto* done = event.event->GetIf<audio::MixerSource::EffectDoneEvent>())
+    {
+        MusicEvent event;
+        event.type  = MusicEvent::Type::EffectDone;
+        event.track = done->src;
+        events->push_back(std::move(event));
     }
 }
 
