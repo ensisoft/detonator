@@ -139,7 +139,9 @@ namespace audio
         Graph(const std::string& name, const std::string& id);
         Graph(const std::string& name);
         Graph(const GraphClass& klass);
+        Graph(const std::string& name, const GraphClass& klass);
         Graph(std::shared_ptr<const GraphClass> klass);
+        Graph(const std::string& name, std::shared_ptr<const GraphClass> klass);
         Graph(Graph&& other);
         Graph(const Graph&) = delete;
         // Add a new element to the graph. Note that the element is not yet

@@ -772,6 +772,56 @@ namespace audio
     class MixerSource : public Element
     {
     public:
+        class Effect
+        {
+        public:
+            virtual ~Effect() = default;
+            virtual void Apply(BufferHandle buffer) = 0;
+            virtual bool IsDone() const = 0;
+            virtual std::string GetName() const = 0;
+        private:
+        };
+        // Ramp up the source gain from 0.0f to 1.0f
+        class FadeIn : public Effect
+        {
+        public:
+            FadeIn(float seconds) : mDuration(seconds * 1000.0f)
+            {}
+            FadeIn(unsigned millisecs) : mDuration(millisecs)
+            {}
+            virtual void Apply(BufferHandle buffer) override;
+            virtual bool IsDone() const override
+            { return mTime >= mDuration; }
+            virtual std::string GetName() const override
+            { return "FadeIn"; }
+        private:
+            template<typename Type, unsigned ChannelCount>
+            void ApplyFadeIn(BufferHandle);
+        private:
+            float mDuration = 0.0f;
+            float mTime = 0.0f;
+        };
+        // Ramp down the source gain from 1.0f to 0.0f
+        class FadeOut : public Effect
+        {
+        public:
+            FadeOut(float seconds) : mDuration(seconds * 1000.0f)
+            {}
+            FadeOut(unsigned millisecs) : mDuration(millisecs)
+            {}
+            virtual void Apply(BufferHandle buffer) override;
+            virtual bool IsDone() const override
+            { return mTime >= mDuration; }
+            virtual std::string GetName() const override
+            { return "FadeOut"; }
+        private:
+            template<typename Type, unsigned ChannelCount>
+            void ApplyFadeOut(BufferHandle);
+        private:
+            float mDuration = 0.0f;
+            float mTime = 0.0f;
+        };
+
         // Command to add a new source stream to the mixer.
         // The element needs to be a source, i.e. IsSource is true.
         // Subsequent commands can refer to the same source
@@ -781,8 +831,7 @@ namespace audio
             bool paused = false;
         };
         // Commands to modify the state of the source identified
-        // by its name. If no such source is found then nothing
-        // is done.
+        // by its name. If no such source is found then nothing is done.
 
         // Delete the source.
         struct DeleteSourceCmd {
@@ -798,9 +847,19 @@ namespace audio
             unsigned millisecs = 0;
         };
 
+        struct SetEffectCmd {
+            std::string src;
+            std::unique_ptr<Effect> effect;
+        };
+
         struct SourceDoneEvent {
             std::string mixer;
             std::unique_ptr<Element> src;
+        };
+        struct EffectDoneEvent {
+            std::string mixer;
+            std::string src;
+            std::unique_ptr<Effect> effect;
         };
 
         // Create a new mixer with the given name and format.
@@ -830,6 +889,9 @@ namespace audio
         void DeleteSource(const std::string& name);
         // Pause/resume the named source. If already paused/playing nothing is done.
         void PauseSource(const std::string& name, bool paused);
+        // Set an effect on the source. This will take place immediately
+        // and override any possible previous effect thus creating a discontinuity.
+        void SetSourceEffect(const std::string& name, std::unique_ptr<Effect> effect);
 
         virtual std::string GetId() const override
         { return mId; }
@@ -852,6 +914,7 @@ namespace audio
         virtual void ReceiveCommand(Command& cmd) override;
         virtual bool DispatchCommand(const std::string& dest, Command& cmd) override;
     private:
+        void RemoveDoneEffects(EventQueue& events);
         void RemoveDoneSources(EventQueue& events);
     private:
         const std::string mName;
@@ -859,6 +922,7 @@ namespace audio
         const Format mFormat;
         struct Source {
             std::unique_ptr<Element> element;
+            std::unique_ptr<Effect> effect;
             bool paused = false;
         };
         std::vector<PauseSourceCmd> mPauseCmds;

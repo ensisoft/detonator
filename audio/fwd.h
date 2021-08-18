@@ -34,6 +34,7 @@ namespace audio
     class Resampler;
     class FileSource;
     class MixerSource;
+    class GraphClass;
     class Graph;
 #ifdef AUDIO_ENABLE_TEST_SOUND
     class SineSource;
