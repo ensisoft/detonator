@@ -1,4 +1,100 @@
 {
+  "audio_graphs": [
+    {
+      "elements": [
+        {
+          "arg_file": "ws://music/jump and run - tropics.ogg",
+          "arg_type": "Float32",
+          "id": "NwwdP8ZHwL",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "lQlseaZOEX",
+      "name": "MenuMusic",
+      "resource_id": "lQlseaZOEX",
+      "resource_name": "MenuMusic",
+      "src_elem_id": "NwwdP8ZHwL",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_channel": "Both",
+          "id": "EGGlghTtgy",
+          "name": "StereoMaker",
+          "type": "StereoMaker"
+        },
+        {
+          "arg_file": "ws://sounds/click.wav",
+          "arg_type": "Float32",
+          "id": "qZy6ISYxl7",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "HwObefYJNC",
+      "links": [
+        {
+          "dst_elem": "EGGlghTtgy",
+          "dst_port": "in",
+          "id": "BRzeFhx5Zg",
+          "src_elem": "qZy6ISYxl7",
+          "src_port": "out"
+        }
+      ],
+      "name": "Click",
+      "resource_id": "HwObefYJNC",
+      "resource_name": "Click",
+      "src_elem_id": "EGGlghTtgy",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_channel": "Both",
+          "id": "hs5HughOro",
+          "name": "StereoMaker",
+          "type": "StereoMaker"
+        },
+        {
+          "arg_sample_rate": 44100,
+          "id": "IA8Bo38BRj",
+          "name": "Resampler",
+          "type": "Resampler"
+        },
+        {
+          "arg_file": "ws://sounds/qubodup-cfork-ccby3-jump.ogg",
+          "arg_type": "Float32",
+          "id": "WK3PiWWhSR",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "nQu4kueY9z",
+      "links": [
+        {
+          "dst_elem": "hs5HughOro",
+          "dst_port": "in",
+          "id": "GQOTzYYbUH",
+          "src_elem": "IA8Bo38BRj",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "IA8Bo38BRj",
+          "dst_port": "in",
+          "id": "j78jnE68iZ",
+          "src_elem": "WK3PiWWhSR",
+          "src_port": "out"
+        }
+      ],
+      "name": "Boing",
+      "resource_id": "nQu4kueY9z",
+      "resource_name": "Boing",
+      "src_elem_id": "hs5HughOro",
+      "src_elem_port": "out"
+    }
+  ],
   "entities": [
     {
       "flags": {

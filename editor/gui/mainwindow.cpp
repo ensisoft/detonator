@@ -1323,6 +1323,10 @@ void MainWindow::on_actionNewWorkspace_triggered()
                              app::JoinPath(workspace_dst_dir, "textures"));
         app::CopyRecursively(app::JoinPath(starter_src_dir, "lua"),
                              app::JoinPath(workspace_dst_dir, "lua"));
+        app::CopyRecursively(app::JoinPath(starter_src_dir, "music"),
+                             app::JoinPath(workspace_dst_dir, "music"));
+        app::CopyRecursively(app::JoinPath(starter_src_dir, "sounds"),
+                             app::JoinPath(workspace_dst_dir, "sounds"));
         // copy the resources. todo: maybe just copy the content.json and workspace.json?
         for (size_t i=0; i<starter.GetNumUserDefinedResources(); ++i)
         {

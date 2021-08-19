@@ -28,6 +28,7 @@ end
 function OnBeginContact(flappybird, node, other, other_node)
     if other:GetClassName() == 'Spike' then
         flappybird:PlayAnimationByName('Hurt')
+        Audio:PlaySoundEffect('Boing', 0)
     end
 end
 

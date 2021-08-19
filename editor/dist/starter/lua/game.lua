@@ -8,12 +8,16 @@ State = States.Menu
 function LoadGame()
     Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-500.0, -800.0, 1000, 800))
+    Audio:PlayMusicGraph('MenuMusic')
+    Audio:SetMusicEffect('MenuMusic', 'FadeIn', 2000)
 end
 
 -- Called as a response to Game:Play when an instance
 -- of the scene has been created and the game play begins.
 function BeginPlay(scene)
     Game:DebugPrint('Press Space to fly the bird!')
+    Audio:SetMusicEffect('MenuMusic', 'FadeOut', 2000)
+    Audio:KillMusic('MenuMusic', 2000)
 end
 
 
@@ -21,6 +25,9 @@ end
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
     Game:OpenUI('MainMenu')
+    Audio:CancelMusicCmds('MenuMusic')
+    Audio:PlayMusicGraph('MenuMusic')
+    Audio:SetMusicEffect('MenuMusic', 'FadeIn', 2000)
 end
 
 -- Low frequency game tick. Normally called at a lower frequency
@@ -86,6 +93,7 @@ function OnUIAction(action)
     if action.name == 'play' then
         Game:CloseUI(0)
         Game:Play('My Scene')
+        Audio:PlaySoundEffect('Click', 0)
     elseif action.name == 'quit' then
         Game:Quit(0)
     end

@@ -3,6 +3,21 @@
     },
     "Fj66N4PDUG": {
     },
+    "HwObefYJNC": {
+        "elem_EGGlghTtgy_pos_x": 265,
+        "elem_EGGlghTtgy_pos_y": -110,
+        "elem_qZy6ISYxl7_pos_x": -6,
+        "elem_qZy6ISYxl7_pos_y": -86,
+        "link_BRzeFhx5Zg_dst_x": 265,
+        "link_BRzeFhx5Zg_dst_y": -57,
+        "link_BRzeFhx5Zg_src_x": 194,
+        "link_BRzeFhx5Zg_src_y": -36,
+        "mapping_0_link": "BRzeFhx5Zg",
+        "mapping_0_port": "EGGlghTtgy:in",
+        "mapping_1_link": "BRzeFhx5Zg",
+        "mapping_1_port": "qZy6ISYxl7:out",
+        "mapping_count": 2
+    },
     "IxyHIKNMIn": {
         "checked_for_packing": true
     },
@@ -21,6 +36,36 @@
         "checked_for_packing": true
     },
     "iiKBwhkDbI": {
+    },
+    "lQlseaZOEX": {
+        "elem_NwwdP8ZHwL_pos_x": -108,
+        "elem_NwwdP8ZHwL_pos_y": -68,
+        "mapping_count": 0
+    },
+    "nQu4kueY9z": {
+        "elem_IA8Bo38BRj_pos_x": -147,
+        "elem_IA8Bo38BRj_pos_y": -141,
+        "elem_WK3PiWWhSR_pos_x": -419,
+        "elem_WK3PiWWhSR_pos_y": -83,
+        "elem_hs5HughOro_pos_x": 129,
+        "elem_hs5HughOro_pos_y": -219,
+        "link_GQOTzYYbUH_dst_x": 128,
+        "link_GQOTzYYbUH_dst_y": -168,
+        "link_GQOTzYYbUH_src_x": 53,
+        "link_GQOTzYYbUH_src_y": -90,
+        "link_j78jnE68iZ_dst_x": -147,
+        "link_j78jnE68iZ_dst_y": -90,
+        "link_j78jnE68iZ_src_x": -221,
+        "link_j78jnE68iZ_src_y": -33,
+        "mapping_0_link": "GQOTzYYbUH",
+        "mapping_0_port": "hs5HughOro:in",
+        "mapping_1_link": "GQOTzYYbUH",
+        "mapping_1_port": "IA8Bo38BRj:out",
+        "mapping_2_link": "j78jnE68iZ",
+        "mapping_2_port": "IA8Bo38BRj:in",
+        "mapping_3_link": "j78jnE68iZ",
+        "mapping_3_port": "WK3PiWWhSR:out",
+        "mapping_count": 4
     },
     "project": {
         "application_library_lin": "app://libGameEngine.so",
