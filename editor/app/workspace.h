@@ -80,6 +80,8 @@ namespace app
         // game::ClassLibrary implementation
         // The methods here allow requests for resources that don't exist and return
         // nullptr as specified in the ClassLibrary API.
+        virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override;
+        virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
         virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
         virtual game::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
         virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
@@ -96,6 +98,28 @@ namespace app
         // audio::Loader implementation
         virtual std::ifstream OpenStream(const std::string& URI) const override;
 
+        template<typename T>
+        game::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
+        {
+            for (const auto& resource : mResources)
+            {
+                if (resource->GetType() != type) continue;
+                else if (resource->GetNameUtf8() != name) continue;
+                return ResourceCast<T>(*resource).GetSharedResource();
+            }
+            return nullptr;
+        }
+        template<typename T>
+        game::ClassHandle<T> FindClassHandleById(const std::string& id, Resource::Type type) const
+        {
+            for (const auto& resource : mResources)
+            {
+                if (resource->GetType() != type) continue;
+                else if (resource->GetIdUtf8() != id) continue;
+                return ResourceCast<T>(*resource).GetSharedResource();
+            }
+            return nullptr;
+        }
 
         // These are for internal use in the editor and they have different semantics
         // from the similar functions in the ClassLibrary API. Basically trying to access

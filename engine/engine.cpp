@@ -42,6 +42,7 @@
 #include "graphics/transform.h"
 #include "graphics/resource.h"
 #include "engine/main/interface.h"
+#include "engine/audio.h"
 #include "engine/engine.h"
 #include "engine/animation.h"
 #include "engine/classlib.h"
@@ -83,6 +84,8 @@ public:
     virtual void Init(const InitParams& init) override
     {
         DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
+        mAudio = std::make_unique<game::AudioEngine>(init.application_name, mAudioLoader);
+        mAudio->SetClassLibrary(mClasslib);
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
@@ -90,9 +93,11 @@ public:
         mSurfaceHeight = init.surface_height;
         mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
+        mGame->SetAudioEngine(mAudio.get());
         mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
         mScripting->SetLoader(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
+        mScripting->SetAudioEngine(mAudio.get());
         mUIStyle.SetLoader(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
@@ -111,13 +116,14 @@ public:
 
     virtual void SetEnvironment(const Environment& env) override
     {
-        mClasslib  = env.classlib;
-        mContent   = env.content;
-        mDirectory = env.directory;
+        mClasslib       = env.classlib;
+        mGameDataLoader = env.game_data_loader;
+        mAudioLoader    = env.audio_loader;
+        mDirectory      = env.directory;
         mRenderer.SetLoader(mClasslib);
         mPhysics.SetLoader(mClasslib);
         // set the unfortunate global gfx loader
-        gfx::SetResourceLoader(env.loader);
+        gfx::SetResourceLoader(env.graphics_loader);
     }
     virtual void SetEngineConfig(const EngineConfig& conf) override
     {
@@ -345,6 +351,8 @@ public:
     virtual void Shutdown() override
     {
         DEBUG("Engine shutdown");
+        mAudio.reset();
+
         gfx::SetResourceLoader(nullptr);
         mDevice.reset();
     }
@@ -547,7 +555,7 @@ private:
         mUIStyle.ClearMaterials();
         mUIState.Clear();
 
-        auto style_data = mContent->LoadGameData(window->GetStyleName());
+        auto style_data = mGameDataLoader->LoadGameData(window->GetStyleName());
         if (!style_data || !mUIStyle.LoadStyle(*style_data))
         {
             ERROR("The UI style ('%1') could not be loaded.", window->GetStyleName());
@@ -580,7 +588,7 @@ private:
             mUIStyle.ClearProperties();
             mUIStyle.ClearMaterials();
             mUIState.Clear();
-            auto style_data = mContent->LoadGameData(ui->GetStyleName());
+            auto style_data = mGameDataLoader->LoadGameData(ui->GetStyleName());
             if (!style_data || !mUIStyle.LoadStyle(*style_data))
             {
                 ERROR("The UI style ('%1') could not be loaded.", ui->GetStyleName());
@@ -712,7 +720,9 @@ private:
     // such as animations, materials etc.
     game::ClassLibrary* mClasslib = nullptr;
     // Game data/content loader.
-    game::Loader* mContent = nullptr;
+    game::Loader* mGameDataLoader = nullptr;
+    // audio stream loader
+    audio::Loader* mAudioLoader = nullptr;
     // The graphics painter device.
     std::unique_ptr<gfx::Painter> mPainter;
     // The graphics device.
@@ -724,6 +734,8 @@ private:
     // The UI painter for painting UIs
     game::UIPainter mUIPainter;
     game::UIStyle mUIStyle;
+    // The audio engine.
+    std::unique_ptr<game::AudioEngine> mAudio;
     // The scripting subsystem.
     std::unique_ptr<game::ScriptEngine> mScripting;
     // Current game scene or nullptr if no scene.

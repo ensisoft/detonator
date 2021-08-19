@@ -491,7 +491,7 @@ add_library(GameEngine SHARED
     engine/main/gamelib.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameEngine PRIVATE GfxLib EngineLib UiLib DataLib BaseLib)
+target_link_libraries(GameEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
@@ -589,6 +589,7 @@ add_executable(unit_test_scene engine/unit_test/unit_test_scene.cpp
         engine/entity.cpp)
 add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         base/assert.cpp
+        engine/audio.cpp
         engine/lua.cpp
         engine/animation.cpp
         engine/scene.cpp
@@ -600,7 +601,7 @@ if (MSVC)
 endif()
 target_link_libraries(unit_test_entity   DataLib BaseLib)
 target_link_libraries(unit_test_scene    DataLib BaseLib)
-target_link_libraries(unit_test_lua      UiLib   DataLib BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_lua      DataLib BaseLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
 target_link_libraries(unit_test_settings DataLib BaseLib)
 target_link_libraries(unit_test_anim     DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_tree     DataLib BaseLib)

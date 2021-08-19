@@ -28,6 +28,7 @@
 
 #include "base/platform.h"
 #include "base/logging.h"
+#include "audio/loader.h"
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "graphics/device.h"
@@ -157,11 +158,14 @@ namespace game
             // Interface for accessing the game data from the game's running
             // environment, i.e. data that is packaged with the game. Not the
             // data *generated* by the game such as save games.
-            game::Loader* content = nullptr;
+            game::Loader* game_data_loader = nullptr;
             // The low level gfx resource loader that implements loading
             // of graphics resources such as shaders, fonts and textures.
             // The engine should use this with the graphics subsystem.
-            gfx::Loader* loader = nullptr;
+            gfx::Loader* graphics_loader = nullptr;
+            // The low level audio loader that implements opening
+            // audio streams.
+            audio::Loader* audio_loader = nullptr;
             // Path to the top level directory where the app/game is
             // I.e. where the GameMain, config.json, content.json etc. files
             // are. UTF-8 encoded.

@@ -63,7 +63,7 @@ AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
     mFormat.channel_count = 2;
     mFormat.sample_type   = audio::SampleType::Float32;
 
-    auto effect_graph  = std::make_unique<audio::AudioGraph>(name + " FX");
+    auto effect_graph  = std::make_unique<audio::AudioGraph>("FX");
     auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
     auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
     effect_mixer->SetNeverDone(true);
@@ -71,7 +71,7 @@ AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
     ASSERT((*effect_graph)->LinkGraph("gain", "out"));
     ASSERT(effect_graph->Prepare(*mLoader));
 
-    auto music_graph = std::make_unique<audio::AudioGraph>(name + " Music");
+    auto music_graph = std::make_unique<audio::AudioGraph>("Music");
     auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
     auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
     music_mixer->SetNeverDone(true);
@@ -136,14 +136,21 @@ void AudioEngine::PauseMusic(const std::string& track, unsigned when)
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
-void AudioEngine::RemoveMusicTrack(const std::string& name)
+void AudioEngine::KillMusic(const std::string& track, unsigned when)
 {
     audio::MixerSource::DeleteSourceCmd cmd;
-    cmd.name = name;
+    cmd.name      = track;
+    cmd.millisecs = when;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+}
+void AudioEngine::CancelMusicCmds(const std::string& track)
+{
+    audio::MixerSource::CancelSourceCmdCmd cmd;
+    cmd.name = track;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
-void AudioEngine::SetMusicEffect(const std::string& track, float duration, Effect effect)
+void AudioEngine::SetMusicEffect(const std::string& track, unsigned duration, Effect effect)
 {
     std::unique_ptr<audio::MixerSource::Effect> mixer_effect;
     if (effect == Effect::FadeIn)

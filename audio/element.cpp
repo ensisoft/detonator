@@ -1136,7 +1136,7 @@ void MixerSource::FadeOut::Apply(BufferHandle buffer)
 template<typename DataType, unsigned ChannelCount>
 void MixerSource::FadeOut::ApplyFadeOut(BufferHandle buffer)
 {
-    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, true);
+    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, false);
 }
 
 MixerSource::MixerSource(const std::string& name, const Format& format)
@@ -1173,6 +1173,26 @@ Element* MixerSource::AddSourcePtr(std::unique_ptr<Element> source, bool paused)
     mSources[key] = std::move(src);
     DEBUG("Added new MixerSource '%1' (%2) source '%3'.", mName, paused ? "Paused" : "Live", key);
     return ret;
+}
+
+void MixerSource::CancelSourceCommands(const std::string& name)
+{
+    for (size_t i=0; i<mCommands.size();)
+    {
+        bool match = false;
+        auto& cmd = mCommands[i];
+        std::visit([&match, &name](auto& variant_value) {
+            if (variant_value.name == name)
+                match = true;
+        }, cmd);
+        if (match)
+        {
+            const auto last = mCommands.size()-1;
+            std::swap(mCommands[i], mCommands[last]);
+            mCommands.pop_back();
+        }
+        else ++i;
+    }
 }
 
 void MixerSource::DeleteSource(const std::string& name)
@@ -1224,19 +1244,26 @@ bool MixerSource::Prepare(const Loader& loader)
 
 void MixerSource::Advance(unsigned int ms)
 {
-    for (size_t i=0; i<mPauseCmds.size();)
+    for (size_t i=0; i<mCommands.size();)
     {
-        auto& cmd = mPauseCmds[i];
-        cmd.millisecs -= std::min(ms, cmd.millisecs);
-        if (cmd.millisecs)
+        bool command_done = false;
+        auto& cmd = mCommands[i];
+        std::visit([this, ms, &command_done](auto& variant_value) {
+            variant_value.millisecs -= std::min(ms, variant_value.millisecs);
+            if (!variant_value.millisecs)
+            {
+                command_done = true;
+                ExecuteCommand(variant_value);
+            }
+        }, cmd);
+
+        if (command_done)
         {
-            ++i;
-            continue;
+            const auto last = mCommands.size()-1;
+            std::swap(mCommands[i], mCommands[last]);
+            mCommands.pop_back();
         }
-        PauseSource(cmd.name, cmd.paused);
-        const auto last = mPauseCmds.size()-1;
-        std::swap(mPauseCmds[i], mPauseCmds[last]);
-        mPauseCmds.pop_back();
+        else ++i;
     }
 
     for (auto& pair : mSources)
@@ -1302,14 +1329,20 @@ void MixerSource::ReceiveCommand(Command& cmd)
 {
     if (auto* ptr = cmd.GetIf<AddSourceCmd>())
         AddSourcePtr(std::move(ptr->src), ptr->paused);
-    else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
-        DeleteSource(ptr->name);
+    else if (auto* ptr = cmd.GetIf<CancelSourceCmdCmd>())
+        CancelSourceCommands(ptr->name);
     else if (auto* ptr = cmd.GetIf<SetEffectCmd>())
         SetSourceEffect(ptr->src, std::move(ptr->effect));
+    else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
+    {
+        if (ptr->millisecs)
+            mCommands.push_back(*ptr);
+        else DeleteSource(ptr->name);
+    }
     else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
     {
         if (ptr->millisecs)
-            mPauseCmds.push_back(*ptr);
+            mCommands.push_back(*ptr);
         else PauseSource(ptr->name, ptr->paused);
     }
     else BUG("Unexpected command.");
@@ -1337,6 +1370,10 @@ bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
     }
     return false;
 }
+void MixerSource::ExecuteCommand(const DeleteSourceCmd& cmd)
+{ DeleteSource(cmd.name); }
+void MixerSource::ExecuteCommand(const PauseSourceCmd& cmd)
+{ PauseSource(cmd.name, cmd.paused); }
 
 void MixerSource::RemoveDoneEffects(EventQueue& events)
 {

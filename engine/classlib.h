@@ -22,6 +22,7 @@
 
 #include "graphics/fwd.h"
 #include "uikit/fwd.h"
+#include "audio/fwd.h"
 
 namespace game
 {
@@ -48,6 +49,12 @@ namespace game
     {
     public:
         virtual ~ClassLibrary() = default;
+        // Find an audio subsystem provided audio graph class object by its class id.
+        // If not found will return nullptr.
+        virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const = 0;
+        // Find an audio subsystem provided audio graph class object by its name. 
+        // If not found will return a nullptr.
+        virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const = 0;
         // Find a user interface (UI KIT) provided window object by name.
         // If not found will return a nullptr.
         virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const = 0;

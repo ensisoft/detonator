@@ -593,7 +593,7 @@ bool Graph::Prepare(const Loader& loader)
         ERROR("Audio graph '%1' output format (%2) is not valid.", mName, mFormat);
         return false;
     }
-    INFO("Audio graph '%1' output set to '%2'.", mName, mFormat);
+    DEBUG("Audio graph '%1' output set to '%2'.", mName, mFormat);
     return true;
 }
 

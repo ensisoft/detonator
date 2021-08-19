@@ -759,9 +759,10 @@ void PlayWindow::DoAppInit()
 
         game::App::Environment env;
         env.classlib  = &mWorkspace;
-        env.content   = mResourceLoader.get();
-        env.loader    = mResourceLoader.get();
-        env.directory = app::ToUtf8(mGameWorkingDir);
+        env.game_data_loader   = mResourceLoader.get();
+        env.graphics_loader    = mResourceLoader.get();
+        env.audio_loader       = mResourceLoader.get();
+        env.directory          = app::ToUtf8(mGameWorkingDir);
         mApp->SetEnvironment(env);
 
         game::App::InitParams params;
@@ -776,13 +777,13 @@ void PlayWindow::DoAppInit()
         config.updates_per_second = settings.updates_per_second;
         config.physics.num_velocity_iterations = settings.num_velocity_iterations;
         config.physics.num_position_iterations = settings.num_position_iterations;
-        config.physics.gravity = settings.gravity;
-        config.physics.scale   = settings.physics_scale;
+        config.physics.gravity    = settings.gravity;
+        config.physics.scale      = settings.physics_scale;
         config.default_mag_filter = settings.default_mag_filter;
         config.default_min_filter = settings.default_min_filter;
-        config.clear_color = ToGfx(settings.clear_color);
-
+        config.clear_color        = ToGfx(settings.clear_color);
         mApp->SetEngineConfig(config);
+
         mApp->Load();
         mApp->Start();
 

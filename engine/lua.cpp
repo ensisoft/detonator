@@ -35,6 +35,8 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/format.h"
+#include "audio/graph.h"
+#include "engine/audio.h"
 #include "engine/entity.h"
 #include "engine/game.h"
 #include "engine/scene.h"
@@ -362,9 +364,14 @@ void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
 {
     mPhysicsEngine = engine;
 }
+void LuaGame::SetAudioEngine(const AudioEngine* engine)
+{
+    mAudioEngine = engine;
+}
 void LuaGame::LoadGame(const ClassLibrary* loader)
 {
     mClasslib = loader;
+    (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClasslib;
     (*mLuaState)["Game"]     = this;
@@ -542,6 +549,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     mLuaState = std::move(state);
 
     mScene    = scene;
+    (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClassLib;
     (*mLuaState)["Scene"]    = mScene;
@@ -1076,6 +1084,8 @@ void BindGameLib(sol::state& L)
     classlib["FindSceneClassById"]    = &ClassLibrary::FindSceneClassById;
     classlib["FindUIByName"]          = &ClassLibrary::FindUIByName;
     classlib["FindUIById"]            = &ClassLibrary::FindUIById;
+    classlib["FindAudioGraphClassByName"] = &ClassLibrary::FindAudioGraphClassByName;
+    classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
     drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
@@ -1187,7 +1197,61 @@ void BindGameLib(sol::state& L)
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
 
+    auto audio = table.new_usertype<AudioEngine>("Audio");
+    audio["AddMusicGraph"] = sol::overload(
+            [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
+                if (!klass)
+                    throw std::runtime_error("Nil audio graph class.");
+                return engine.AddMusicGraph(klass);
+            },
+            [](AudioEngine& engine, const std::string& name) {
+                const auto* lib = engine.GetClassLibrary();
+                auto klass = lib->FindAudioGraphClassByName(name);
+                if (!klass)
+                    throw std::runtime_error("No such audio graph: " + name);
+                return engine.AddMusicGraph(klass);
+            });
+    audio["PlayMusicGraph"] = sol::overload(
+            [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
+                if (!klass)
+                    throw std::runtime_error("Nil audio graph class.");
+                return engine.PlayMusicGraph(klass);
+            },
+            [](AudioEngine& engine, const std::string& name) {
+                const auto* lib = engine.GetClassLibrary();
+                auto klass = lib->FindAudioGraphClassByName(name);
+                if (!klass)
+                    throw std::runtime_error("No such audio graph: " + name);
+                return engine.PlayMusicGraph(klass);
+            });
+    audio["PlayMusic"]      = &AudioEngine::PlayMusic;
+    audio["PauseMusic"]     = &AudioEngine::PauseMusic;
+    audio["KillMusic"]      = &AudioEngine::KillMusic;
+    audio["CancelMusicCmds"] = &AudioEngine::CancelMusicCmds;
+    audio["SetMusicGain"]   = &AudioEngine::SetMusicGain;
+    audio["SetMusicEffect"] = [](AudioEngine& engine,
+                                 const std::string& track,
+                                 const std::string& effect,
+                                 unsigned duration) {
+        const auto effect_value = magic_enum::enum_cast<AudioEngine::Effect>(effect);
+        if (!effect_value.has_value())
+            throw std::runtime_error("No such audio effect:" + effect);
+        engine.SetMusicEffect(track, duration, effect_value.value());
+    };
+    audio["PlaySoundEffect"] = sol::overload(
+            [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
+                if (!klass)
+                    throw std::runtime_error("Nil audio effect graph class.");
+                return engine.PlaySoundEffect(klass, when);
+            },
+            [](AudioEngine& engine, const std::string& name, unsigned when) {
+                const auto* lib = engine.GetClassLibrary();
+                auto klass = lib->FindAudioGraphClassByName(name);
+                if (!klass)
+                    throw std::runtime_error("No such audio effect graph:" + name);
+                return engine.PlaySoundEffect(klass, when);
+            });
+    audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
 }
-
 
 } // namespace
