@@ -908,6 +908,8 @@
     <addaction name="actionNewEntity"/>
     <addaction name="actionNewScene"/>
     <addaction name="actionNewScript"/>
+    <addaction name="actionNewUI"/>
+    <addaction name="actionNewAudioGraph"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
     <addaction name="actionImportFiles"/>
@@ -1582,6 +1584,18 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+  </action>
+  <action name="actionNewAudioGraph">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Audio Graph</string>
+   </property>
+   <property name="toolTip">
+    <string>New audio graph</string>
    </property>
   </action>
  </widget>

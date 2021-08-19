@@ -1074,6 +1074,11 @@ void MainWindow::on_actionNewUI_triggered()
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
     ShowWidget(new UIWidget(mWorkspace.get()), open_new_window);
 }
+void MainWindow::on_actionNewAudioGraph_triggered()
+{
+    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+    ShowWidget(new AudioWidget(mWorkspace.get()), open_new_window);
+}
 
 void MainWindow::on_actionImportFiles_triggered()
 {
@@ -1484,6 +1489,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewScene);
     menu.addAction(mUI.actionNewScript);
     menu.addAction(mUI.actionNewUI);
+    menu.addAction(mUI.actionNewAudioGraph);
     menu.addSeparator();
     menu.addAction(mUI.actionImportFiles);
     menu.addSeparator();
@@ -2329,6 +2335,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewScene);
         mUI.mainToolBar->addAction(mUI.actionNewScript);
         mUI.mainToolBar->addAction(mUI.actionNewUI);
+        mUI.mainToolBar->addAction(mUI.actionNewAudioGraph);
         mUI.mainToolBar->addSeparator();
         mUI.mainToolBar->addAction(mUI.actionImportFiles);
     }
