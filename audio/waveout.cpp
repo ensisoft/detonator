@@ -169,9 +169,11 @@ private:
         {
             // todo: should we somehow make sure here not to free the buffer
             // while it's being used in the waveout write??
-            const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
-            ASSERT(ret == MMSYSERR_NOERROR);
-
+            if (prepared_)
+            {
+                const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
+                ASSERT(ret == MMSYSERR_NOERROR);
+            }
             AlignedAllocator::get().free(buffer_);
         }
         std::size_t fill(Source& source)
@@ -183,6 +185,7 @@ private:
             header_.dwBufferLength = pcm_bytes;
             header_.dwUser         = (DWORD_PTR)this;
             CallWaveout(waveOutPrepareHeader, hWave_, &header_, sizeof(header_));
+            prepared_ = true;
             return pcm_bytes;
         }
         void play()
@@ -197,6 +200,7 @@ private:
         WAVEHDR  header_;
         std::size_t size_ = 0;
         void* buffer_ = nullptr;
+        bool prepared_ = false;
     };
 
     class PlaybackStream : public Stream
@@ -307,14 +311,13 @@ private:
             // has occurred 
             try
             {
-
                 for (size_t i = 0; i < buffers_.size(); ++i)
                 {
-                    num_pcm_bytes_ += buffers_[i]->fill(*source_);
-                }
-                for (size_t i = 0; i < buffers_.size(); ++i)
-                {
-                    buffers_[i]->play();
+                    if (source_->HasMore(num_pcm_bytes_))
+                    {
+                        num_pcm_bytes_ += buffers_[i]->fill(*source_);
+                        buffers_[i]->play();
+                    }
                 }
             }
             catch (const std::exception & e)
