@@ -22,6 +22,7 @@
 
 #include "engine/classlib.h"
 #include "engine/data.h"
+#include "audio/loader.h"
 #include "graphics/loader.h"
 
 namespace game
@@ -51,7 +52,8 @@ namespace game
     // Loader implementation for loading all kinds of subsystem
     // resources and game data.
     class FileResourceLoader : public gfx::Loader,
-                               public game::Loader
+                               public game::Loader,
+                               public audio::Loader
     {
     public:
         // Set the filesystem path of the current running binary on the file system.

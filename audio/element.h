@@ -836,6 +836,7 @@ namespace audio
         // Delete the source.
         struct DeleteSourceCmd {
             std::string name;
+            unsigned millisecs = 0;
         };
         // Pause/Resume the source. When the source is paused
         // no buffers are pulled from it and the source
@@ -845,6 +846,10 @@ namespace audio
             // Flag to indicate whether to pause / resume the src.
             bool paused = false;
             unsigned millisecs = 0;
+        };
+        // Cancel pending commands on a source.
+        struct CancelSourceCmdCmd {
+            std::string name;
         };
 
         struct SetEffectCmd {
@@ -884,7 +889,8 @@ namespace audio
             auto* ret = AddSourcePtr(std::move(src));
             return static_cast<Source*>(ret);
         }
-
+        // Cancel any pending commands on the named source.
+        void CancelSourceCommands(const std::string& name);
         // Delete the named source from the mixer.
         void DeleteSource(const std::string& name);
         // Pause/resume the named source. If already paused/playing nothing is done.
@@ -914,6 +920,8 @@ namespace audio
         virtual void ReceiveCommand(Command& cmd) override;
         virtual bool DispatchCommand(const std::string& dest, Command& cmd) override;
     private:
+        void ExecuteCommand(const DeleteSourceCmd& cmd);
+        void ExecuteCommand(const PauseSourceCmd& cmd);
         void RemoveDoneEffects(EventQueue& events);
         void RemoveDoneSources(EventQueue& events);
     private:
@@ -925,7 +933,9 @@ namespace audio
             std::unique_ptr<Effect> effect;
             bool paused = false;
         };
-        std::vector<PauseSourceCmd> mPauseCmds;
+        using LateCommand = std::variant<PauseSourceCmd,
+                DeleteSourceCmd>;
+        std::vector<LateCommand> mCommands;
         std::unordered_map<std::string, Source> mSources;
         SingleSlotPort mOut;
         bool mNeverDone = false;

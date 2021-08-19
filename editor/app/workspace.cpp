@@ -820,44 +820,26 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
+game::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassById(const std::string& id) const
+{
+    return FindClassHandleById<audio::GraphClass>(id, Resource::Type::AudioGraph);
+}
+game::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassByName(const std::string& name) const
+{
+    return FindClassHandleByName<audio::GraphClass>(name, Resource::Type::AudioGraph);
+}
 game::ClassHandle<const uik::Window> Workspace::FindUIByName(const std::string& name) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::UI)
-            continue;
-        else if (resource->GetNameUtf8() != name)
-            continue;
-        return ResourceCast<uik::Window>(*resource).GetSharedResource();
-    }
-    return nullptr;
+    return FindClassHandleByName<uik::Window>(name, Resource::Type::UI);
 }
 game::ClassHandle<const uik::Window> Workspace::FindUIById(const std::string& id) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::UI)
-            continue;
-        else if (resource->GetIdUtf8() != id)
-            continue;
-        return ResourceCast<uik::Window>(*resource).GetSharedResource();
-    }
-    return nullptr;
+    return FindClassHandleById<uik::Window>(id, Resource::Type::UI);
 }
-
 game::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::Material)
-            continue;
-        else if (resource->GetIdUtf8() != klass)
-            continue;
-        return ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
-    }
-    return nullptr;
+    return FindClassHandleById<gfx::MaterialClass>(klass, Resource::Type::Material);
 }
-
 game::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
 {
     for (const auto& resource : mResources)
@@ -874,30 +856,13 @@ game::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(con
     }
     return nullptr;
 }
-
 game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::Entity)
-            continue;
-        else if (resource->GetNameUtf8() != name)
-            continue;
-        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
-    }
-    return nullptr;
+    return FindClassHandleByName<game::EntityClass>(name, Resource::Type::Entity);
 }
 game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
 {
-    for (const auto& resource : mResources)
-    {
-        if (resource->GetType() != Resource::Type::Entity)
-            continue;
-        else if (resource->GetIdUtf8() != id)
-            continue;
-        return ResourceCast<game::EntityClass>(*resource).GetSharedResource();
-    }
-    return nullptr;
+    return FindClassHandleById<game::EntityClass>(id, Resource::Type::Entity);
 }
 
 game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const

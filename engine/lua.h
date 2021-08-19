@@ -41,6 +41,7 @@ namespace game
         LuaGame(const std::string& lua_path);
        ~LuaGame();
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
+        virtual void SetAudioEngine(const AudioEngine* engine) override;
         virtual void LoadGame(const ClassLibrary* loader) override;
         virtual void Tick(double game_time, double dt) override;
         virtual void Update(double game_time,  double dt) override;
@@ -66,6 +67,7 @@ namespace game
     private:
         const ClassLibrary* mClasslib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
+        const AudioEngine* mAudioEngine = nullptr;
         std::shared_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
         FRect mView;
@@ -83,6 +85,8 @@ namespace game
         { mClassLib = loader; }
         void SetPhysicsEngine(const PhysicsEngine* engine)
         { mPhysicsEngine = engine; }
+        void SetAudioEngine(const AudioEngine* engine)
+        { mAudioEngine = engine; }
         void BeginPlay(Scene* scene);
         void EndPlay(Scene* scene);
         void Tick(double game_time, double dt);
@@ -107,6 +111,7 @@ namespace game
         const std::string mLuaPath;
         const ClassLibrary* mClassLib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
+        const AudioEngine* mAudioEngine = nullptr;
         std::unique_ptr<sol::state> mLuaState;
         std::unordered_map<std::string, std::unique_ptr<sol::environment>> mTypeEnvs;
         std::queue<Action> mActionQueue;

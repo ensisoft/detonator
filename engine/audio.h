@@ -52,7 +52,13 @@ namespace game
     class AudioEngine
     {
     public:
-        using Effect = audio::Effect::Kind;
+        // The possible effect.
+        enum class Effect {
+            // Ramp up the stream gain from 0.0f to 1.0f
+            FadeIn,
+            // Ramp down the stream gain from 1.0f to 0.0f
+            FadeOut
+        };
         using GraphHandle = std::shared_ptr<const audio::GraphClass>;
 
         AudioEngine(const std::string& name, const audio::Loader* loader);
@@ -70,22 +76,26 @@ namespace game
         // The audio graph is initially only prepared and sent to the audio
         // player but set to paused state. In order to begin playing the track
         // PlayMusic must be called separately.
-        // Returns false if the music track could not be loaded.
+        // Returns false if the music graph could not be loaded.
         bool AddMusicGraph(const GraphHandle& graph);
         // Similar to AddMusicGraph except that also begins the audio graph
         // playback immediately.
+        // Returns false if the music graph could not be loaded.
         bool PlayMusicGraph(const GraphHandle& graph);
         // Schedule a command to start playing the named music track after
         // 'when' milliseconds elapses.
         void PlayMusic(const std::string& track, unsigned when = 0);
-        // Schedule a command to pause the named music track after 'when' milliseconds elapse.
+        // Schedule a command to pause the named music track after 'when' milliseconds elapses.
         // Note that this will not remove the music track from the mixer.
         void PauseMusic(const std::string& track, unsigned when = 0);
+        // Kill and remove the named music track from the music mixer.
+        void KillMusic(const std::string& track, unsigned when = 0);
+        // Cancel any pending commands on a music track to play/pause/kill.
+        void CancelMusicCmds(const std::string& track);
+
         // Set an effect on the music tracks audio graph. The effect will take place
         // immediately when the audio is playing.
-        void SetMusicEffect(const std::string& track, float duration, Effect effect);
-        // Remove the named music track from the music mixer.
-        void RemoveMusicTrack(const std::string& name);
+        void SetMusicEffect(const std::string& track, unsigned duration, Effect effect);
         // Adjust the gain (volume) on the music stream. There's no strict range
         // for the gain value but you likely want to keep this around (0.0f, 1.0f)
         void SetMusicGain(float gain);

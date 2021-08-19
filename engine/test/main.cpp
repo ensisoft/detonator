@@ -125,7 +125,7 @@ public:
         if (track.empty()) return;
         const auto& name = base::ToString(key.symbol);
         mEngine->AddMusicGraph(BuildMusicGraph(name, track));
-        mEngine->SetMusicEffect(name, 2.0f, game::AudioEngine::Effect::FadeIn);
+        mEngine->SetMusicEffect(name, 2.0f*1000u, game::AudioEngine::Effect::FadeIn);
         mEngine->PlayMusic(name);
     }
     virtual std::ifstream OpenStream(const std::string& file) const override
@@ -879,6 +879,14 @@ public:
     }
 
     // ClassLibrary
+    virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
+    {
+        return nullptr;
+    }
+    virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
+    {
+        return nullptr;
+    }
     virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
     {
         return nullptr;

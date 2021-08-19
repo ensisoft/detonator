@@ -34,6 +34,7 @@ namespace game
     class Scene;
     class SceneClass;
     class PhysicsEngine;
+    class AudioEngine;
     struct ContactEvent;
 
     // This is the main interface for the game engine to interface
@@ -49,6 +50,8 @@ namespace game
         virtual ~Game() = default;
         // Set physics engine instance.
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) = 0;
+        // Set audio engine instance.
+        virtual void SetAudioEngine(const AudioEngine* engine) = 0;
         // Load the game. This is called once by the engine after the
         // application has started. In the implementation you should
         // start with some initial game state and possibly request some

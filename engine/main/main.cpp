@@ -366,10 +366,11 @@ int main(int argc, char* argv[])
         app->SetDebugOptions(debug);
 
         game::App::Environment env;
-        env.classlib  = loaders.ContentLoader.get();
-        env.loader    = loaders.ResourceLoader.get();
-        env.content   = loaders.ResourceLoader.get();
-        env.directory = GetPath();
+        env.classlib         = loaders.ContentLoader.get();
+        env.graphics_loader  = loaders.ResourceLoader.get();
+        env.game_data_loader = loaders.ResourceLoader.get();
+        env.audio_loader     = loaders.ResourceLoader.get();
+        env.directory        = GetPath();
         app->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
@@ -432,7 +433,7 @@ int main(int argc, char* argv[])
         game::App::InitParams params;
         params.application_name = title;
         params.context          = context.get();
-        params.surface_width     = window.GetSurfaceWidth();
+        params.surface_width    = window.GetSurfaceWidth();
         params.surface_height   = window.GetSurfaceHeight();
         app->Init(params);
 

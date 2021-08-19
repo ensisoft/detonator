@@ -34,6 +34,7 @@
 #include "engine/scene.h"
 #include "engine/loader.h"
 #include "uikit/window.h"
+#include "audio/graph.h"
 
 namespace game
 {
@@ -135,6 +136,15 @@ public:
         mGameDataBufferCache[filename] = buff;
         return buff;
     }
+    // audio::Loader impl
+    virtual std::ifstream OpenStream(const std::string& uri) const override
+    {
+        const auto& filename = ResolveURI(uri);
+        auto stream = base::OpenBinaryInputStream(filename);
+        if (!stream.is_open())
+            ERROR("Failed to open '%1'.", filename);
+        return stream;
+    }
 
     // FileResourceLoader impl
     virtual void SetApplicationPath(const std::string& path) override
@@ -183,6 +193,8 @@ class ContentLoaderImpl : public JsonFileClassLoader
 {
 public:
     // ClassLibrary implementation.
+    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const  override;
+    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
     virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
     virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
@@ -219,8 +231,27 @@ private:
     std::unordered_map<std::string, std::string> mSceneNameTable;
     // UI objects (windows)
     std::unordered_map<std::string, std::shared_ptr<uik::Window>> mWindows;
+    // Audio graphs
+    std::unordered_map<std::string, std::shared_ptr<audio::GraphClass>> mAudioGraphs;
 };
 
+ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(const std::string& id) const
+{
+    auto it = mAudioGraphs.find(id);
+    if (it == mAudioGraphs.end())
+        return nullptr;
+    return it->second;
+}
+ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassByName(const std::string& name) const
+{
+    for (auto it=mAudioGraphs.begin(); it != mAudioGraphs.end(); ++it)
+    {
+        auto& graph = it->second;
+        if (graph->GetName() == name)
+            return graph;
+    }
+    return nullptr;
+}
 
 ClassHandle<const uik::Window> ContentLoaderImpl::FindUIByName(const std::string& name) const
 {
@@ -360,6 +391,7 @@ void ContentLoaderImpl::LoadFromFile(const std::string& file)
     game::LoadResources<EntityClass, EntityClass>(root, "entities", mEntities, &mEntityNameTable);
     game::LoadResources<SceneClass, SceneClass>(root, "scenes", mScenes, &mSceneNameTable);
     game::LoadResources<uik::Window, uik::Window>(root, "uis", mWindows, nullptr);
+    game::LoadResources<audio::GraphClass, audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr);
 
     // need to resolve the entity references.
     for (auto& p : mScenes)
