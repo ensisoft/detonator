@@ -381,8 +381,8 @@ namespace game
             Circle
         };
 
-        UIStyle(const ClassLibrary* loader = nullptr)
-          : mLoader(loader)
+        UIStyle(const ClassLibrary* classlib = nullptr)
+          : mClassLib(classlib)
         {}
 
         std::optional<MaterialClass> GetMaterial(const std::string& key) const;
@@ -391,8 +391,8 @@ namespace game
 
         // Set the class library loader. This is needed when a style references a material
         // that needs to be loaded through the class library.
-        void SetLoader(const ClassLibrary* loader)
-        { mLoader = loader; }
+        void SetClassLibrary(const ClassLibrary* classlib)
+        { mClassLib = classlib; }
         // Returns if the style contains a property under the given property key.
         bool HasProperty(const std::string& key) const;
         // Delete a style property under the given property key.
@@ -461,7 +461,7 @@ namespace game
         static bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& materials);
 
     private:
-        const ClassLibrary* mLoader = nullptr;
+        const ClassLibrary* mClassLib = nullptr;
         std::unordered_map<std::string, std::any> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
     };

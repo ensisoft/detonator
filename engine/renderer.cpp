@@ -356,7 +356,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                 {
                     paint_node.material.reset();
                     paint_node.material_class_id = material;
-                    auto klass = mRenderer.mLoader->FindMaterialClassById(item->GetMaterialId());
+                    auto klass = mRenderer.mClassLib->FindMaterialClassById(item->GetMaterialId());
                     if (klass)
                         paint_node.material = gfx::CreateMaterialInstance(klass);
                     if (!paint_node.material)
@@ -367,7 +367,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                     paint_node.drawable.reset();
                     paint_node.drawable_class_id = drawable;
 
-                    auto klass = mRenderer.mLoader->FindDrawableClassById(item->GetDrawableId());
+                    auto klass = mRenderer.mClassLib->FindDrawableClassById(item->GetDrawableId());
                     if (klass)
                         paint_node.drawable = gfx::CreateDrawableInstance(klass);
                     if (!paint_node.drawable)

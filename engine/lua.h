@@ -81,8 +81,8 @@ namespace game
         using Action = game::Action;
         ScriptEngine(const std::string& lua_path);
        ~ScriptEngine();
-        void SetLoader(const ClassLibrary* loader)
-        { mClassLib = loader; }
+        void SetClassLibrary(const ClassLibrary* classlib)
+        { mClassLib = classlib; }
         void SetPhysicsEngine(const PhysicsEngine* engine)
         { mPhysicsEngine = engine; }
         void SetAudioEngine(const AudioEngine* engine)

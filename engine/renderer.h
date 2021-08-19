@@ -93,10 +93,10 @@ namespace game
     class Renderer
     {
     public:
-        Renderer(const ClassLibrary* loader = nullptr)
-          : mLoader(loader) {}
-        void SetLoader(const ClassLibrary* loader)
-        { mLoader = loader; }
+        Renderer(const ClassLibrary* classlib = nullptr)
+          : mClassLib(classlib) {}
+        void SetClassLibrary(const ClassLibrary* classlib)
+        { mClassLib = classlib; }
 
         void BeginFrame();
 
@@ -150,7 +150,7 @@ namespace game
                             gfx::Painter& painter, gfx::Transform& transform,
                             EntityDrawHook<NodeType>* hook);
     private:
-        const ClassLibrary* mLoader = nullptr;
+        const ClassLibrary* mClassLib = nullptr;
         struct PaintNode {
             bool visited = false;
             std::shared_ptr<gfx::Material> material;

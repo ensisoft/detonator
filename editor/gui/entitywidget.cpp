@@ -333,7 +333,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mCustomShapes->menuAction()->setText("Shapes");
 
     mState.workspace = workspace;
-    mState.renderer.SetLoader(workspace);
+    mState.renderer.SetClassLibrary(workspace);
     mState.view = mUI.tree;
 
     // connect tree widget signals

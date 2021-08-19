@@ -146,11 +146,11 @@ void UITexture::IntoJson(nlohmann::json& json) const
 
 std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& key) const
 {
-    ASSERT(mLoader);
+    ASSERT(mClassLib);
     auto it = mMaterials.find(key);
     if (it == mMaterials.end())
         return std::nullopt;
-    return it->second->GetClass(*mLoader);
+    return it->second->GetClass(*mClassLib);
 }
 
 UIProperty UIStyle::GetProperty(const std::string& key) const
@@ -340,7 +340,7 @@ bool UIStyle::PurgeUnavailableMaterialReferences()
     for (auto it = mMaterials.begin(); it != mMaterials.end();)
     {
         auto* source = it->second.get();
-        if (source->IsAvailable(*mLoader))
+        if (source->IsAvailable(*mClassLib))
         {
             ++it;
             continue;

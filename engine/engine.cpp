@@ -95,10 +95,10 @@ public:
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetAudioEngine(mAudio.get());
         mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
-        mScripting->SetLoader(mClasslib);
+        mScripting->SetClassLibrary(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->SetAudioEngine(mAudio.get());
-        mUIStyle.SetLoader(mClasslib);
+        mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
     }
@@ -120,8 +120,8 @@ public:
         mGameDataLoader = env.game_data_loader;
         mAudioLoader    = env.audio_loader;
         mDirectory      = env.directory;
-        mRenderer.SetLoader(mClasslib);
-        mPhysics.SetLoader(mClasslib);
+        mRenderer.SetClassLibrary(mClasslib);
+        mPhysics.SetClassLibrary(mClasslib);
         // set the unfortunate global gfx loader
         gfx::SetResourceLoader(env.graphics_loader);
     }
