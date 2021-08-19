@@ -40,6 +40,7 @@ namespace gui
         void on_btnSelectImageEditor_clicked();
         void on_btnSelectShaderEditor_clicked();
         void on_btnSelectScriptEditor_clicked();
+        void on_btnSelectAudioEditor_clicked();
 
     private:
         Ui::DlgSettings mUI;

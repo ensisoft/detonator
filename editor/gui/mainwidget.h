@@ -215,6 +215,8 @@ namespace gui
         void OpenExternalImage(const QString& file);
         // Request to open the given shader file in an external text/shader editor.
         void OpenExternalShader(const QString& file);
+        // Request to open the given audio file in an external audio editor.
+        void OpenExternalAudio(const QString& file);
         // Request to display the new widget. Will transfer
         // ownership of the widget the mainwindow.
         void OpenNewWidget(MainWidget* widget);

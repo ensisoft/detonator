@@ -113,6 +113,7 @@ namespace gui
         virtual void keyPressEvent(QKeyEvent* key) override;
     private slots:
         void on_btnSelectFile_clicked();
+        void on_btnEditFile_clicked();
 
         void on_actionPlay_triggered();
         void on_actionPause_triggered();

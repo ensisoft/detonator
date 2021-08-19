@@ -47,7 +47,13 @@ namespace gui
         // is expanded to contain the full native absolute path to the
         // file that the user wants to open.
         QString script_editor_arguments = "${file}";
-
+        // The path to the currently set external editor for audio (.wav, .mp3, .ogg) files.
+        // For example /usr/bin/audacity
+        QString audio_editor_executable;
+        // the arguments for the audio editor. The special argument ${file}
+        // is expanded to contain the full native absolute path to the
+        // file that the user wants to open.
+        QString audio_editor_arguments = "${file}";
         // by default open resources in a new window or new tab
         QString default_open_win_or_tab = "Tab";
         // Name of the qt style currently in use.
@@ -70,6 +76,7 @@ namespace gui
             image_editor_executable  = "/usr/bin/gimp";
             shader_editor_executable = "/usr/bin/gedit";
             script_editor_executable = "/usr/bin/gedit";
+            audio_editor_executable  = "/usr/bin/audacity";
 #elif defined(WINDOWS_OS)
             image_editor_executable  = "mspaint.exe";
             shader_editor_executable = "notepad.exe";

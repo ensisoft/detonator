@@ -143,6 +143,33 @@ gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace,
     return widget;
 }
 
+struct ExternalApplicationArgs {
+    QString executable_binary;
+    QString executable_args;
+    QString file;
+};
+
+void LaunchExternalApplication(const ExternalApplicationArgs& args)
+{
+    if (gui::MissingFile(args.file))
+        WARN("Could not find '%1'", args.file);
+
+    QStringList arg_list;
+    QStringList tokens = args.executable_args.split(" ", Qt::SkipEmptyParts);
+    for (const auto& item : tokens)
+    {
+        if (item == "${file}")
+            arg_list << args.file;
+        else arg_list << item;
+    }
+    if (!QProcess::startDetached(args.executable_binary, arg_list))
+    {
+        ERROR("Failed to start application '%1'", args.executable_binary);
+        return;
+    }
+    DEBUG("Start application '%1'", args.executable_binary);
+}
+
 } // namespace
 
 namespace gui
@@ -220,6 +247,8 @@ void MainWindow::loadState()
     settings.getValue("Settings", "shader_editor_arguments",  &mSettings.shader_editor_arguments);
     settings.getValue("Settings", "script_editor_executable", &mSettings.script_editor_executable);
     settings.getValue("Settings", "script_editor_arguments",  &mSettings.script_editor_arguments);
+    settings.getValue("Settings", "audio_editor_executable",  &mSettings.audio_editor_executable);
+    settings.getValue("Settings", "audio_editor_arguments",   &mSettings.audio_editor_arguments);
     settings.getValue("Settings", "default_open_win_or_tab",  &mSettings.default_open_win_or_tab);
     settings.getValue("Settings", "style_name", &mSettings.style_name);
     settings.getValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
@@ -1917,25 +1946,11 @@ void MainWindow::OpenExternalImage(const QString& file)
             return;
         }
     }
-    if (MissingFile(file))
-    {
-        WARN("Could not find '%1'", file);
-    }
-
-    QStringList args;
-    QStringList list = mSettings.image_editor_arguments.split(" ", Qt::SkipEmptyParts);
-    for (const auto& item : list)
-    {
-        if (item == "${file}")
-            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-        else args << item;
-    }
-    if (!QProcess::startDetached(mSettings.image_editor_executable, args))
-    {
-        ERROR("Failed to start application '%1'", mSettings.image_editor_executable);
-
-    }
-    DEBUG("Start application '%1'", mSettings.image_editor_executable);
+    ExternalApplicationArgs args;
+    args.executable_args   = mSettings.image_editor_arguments;
+    args.executable_binary = mSettings.image_editor_executable;
+    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenExternalShader(const QString& file)
@@ -1956,25 +1971,11 @@ void MainWindow::OpenExternalShader(const QString& file)
             return;
         }
     }
-    if (MissingFile(file))
-    {
-        WARN("Could not find '%1'", file);
-    }
-
-    QStringList args;
-    QStringList list = mSettings.shader_editor_arguments.split(" ", Qt::SkipEmptyParts);
-    for (const auto& item : list)
-    {
-        if (item == "${file}")
-            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-        else args << item;
-    }
-    if (!QProcess::startDetached(mSettings.shader_editor_executable, args))
-    {
-        ERROR("Failed to start application '%1'", mSettings.shader_editor_executable);
-
-    }
-    DEBUG("Start application '%1'", mSettings.shader_editor_executable);
+    ExternalApplicationArgs args;
+    args.executable_args   = mSettings.shader_editor_arguments;
+    args.executable_binary = mSettings.shader_editor_executable;
+    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenExternalScript(const QString& file)
@@ -1995,25 +1996,36 @@ void MainWindow::OpenExternalScript(const QString& file)
             return;
         }
     }
-    if (MissingFile(file))
-    {
-        WARN("Could not find '%1'", file);
-    }
+    ExternalApplicationArgs args;
+    args.executable_args   = mSettings.script_editor_arguments;
+    args.executable_binary = mSettings.script_editor_executable;
+    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    LaunchExternalApplication(args);
+}
 
-    QStringList args;
-    QStringList list = mSettings.script_editor_arguments.split(" ", Qt::SkipEmptyParts);
-    for (const auto& item : list)
+void MainWindow::OpenExternalAudio(const QString& file)
+{
+    if (mSettings.audio_editor_executable.isEmpty())
     {
-        if (item == "${file}")
-            args << QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-        else args << item;
+        QMessageBox msg;
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't configured any external application for audio files.\n"
+                    "Would you like to set one now?");
+        if (msg.exec() == QMessageBox::No)
+            return;
+        on_actionSettings_triggered();
+        if (mSettings.audio_editor_executable.isEmpty())
+        {
+            ERROR("No audio editor has been configured.");
+            return;
+        }
     }
-    if (!QProcess::startDetached(mSettings.script_editor_executable, args))
-    {
-        ERROR("Failed to start application '%1'", mSettings.script_editor_executable);
-
-    }
-    DEBUG("Start application '%1'", mSettings.script_editor_executable);
+    ExternalApplicationArgs args;
+    args.executable_args   = mSettings.audio_editor_arguments;
+    args.executable_binary = mSettings.audio_editor_executable;
+    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenNewWidget(MainWidget* widget)
@@ -2220,6 +2232,8 @@ bool MainWindow::SaveState()
     settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
     settings.setValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
     settings.setValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
+    settings.setValue("Settings", "audio_editor_executable", mSettings.audio_editor_executable);
+    settings.setValue("Settings", "audio_editor_arguments", mSettings.audio_editor_arguments);
     settings.setValue("Settings", "style_name", mSettings.style_name);
     settings.setValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
     settings.setValue("MainWindow", "current_workspace",
@@ -2255,12 +2269,14 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     disconnect(widget, &MainWidget::OpenExternalImage,  this, &MainWindow::OpenExternalImage);
     disconnect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
     disconnect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
+    disconnect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
     disconnect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
     disconnect(widget, &MainWidget::RefreshRequest,     this, &MainWindow::RefreshWidget);
     // connect the important signals here.
     connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
     connect(widget, &MainWidget::OpenExternalShader,this, &MainWindow::OpenExternalShader);
     connect(widget, &MainWidget::OpenExternalScript,this, &MainWindow::OpenExternalScript);
+    connect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
     connect(widget, &MainWidget::OpenNewWidget,     this, &MainWindow::OpenNewWidget);
     connect(widget, &MainWidget::RefreshRequest,    this, &MainWindow::RefreshWidget);
 
