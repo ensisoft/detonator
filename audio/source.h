@@ -74,6 +74,10 @@ namespace audio
         // Reset the sample for looped playback, i.e. possibly rewind
         // to the start of the data. Should return true on success.
         virtual bool Reset() noexcept = 0;
+        // Shutdown the source when playback is finished and the source
+        // will no longer be used for playback. (I.e. there will be no
+        // more calls to FillBuffer or HasMore)
+        virtual void Shutdown() noexcept = 0;
         // Receive and handle a source specific command. A command can be
         // used to for example adjust some source specific parameter.
         virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept
@@ -123,6 +127,8 @@ namespace audio
         // Reset the sample for looped playback, i.e. possibly rewind
         // to the start of the data.
         virtual bool Reset() noexcept override;
+        // Shutdown.
+        virtual void Shutdown() noexcept override;
         // Try to open the audio file for reading. Returns true if
         // successful otherwise false and error is logged.
         bool Open();
@@ -186,6 +192,8 @@ namespace audio
         }
         virtual bool Reset() noexcept override
         { return true; /* intentionally empty */ }
+        virtual void Shutdown() noexcept override
+        { /* intentionally empty */ }
     private:
         const unsigned mFrequency = 0;
         const Format mFormat      = Format::Float32;

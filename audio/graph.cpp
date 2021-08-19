@@ -676,18 +676,17 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
     if (graph_done)
     {
         DEBUG("Audio graph '%1' is done!", mName);
-        for (auto& element : mTopoOrder)
-        {
-            DEBUG("Shutting down audio graph '%1' element '%2'", mName, element->GetName());
-            element->Shutdown();
-        }
     }
     mDone = graph_done;
 }
 
 void Graph::Shutdown()
 {
-
+    for (auto& element : mTopoOrder)
+    {
+        DEBUG("Shutting down audio graph '%1' element '%2'", mName, element->GetName());
+        element->Shutdown();
+    }
 }
 
 void Graph::Advance(unsigned int ms)
@@ -838,6 +837,11 @@ bool AudioGraph::Reset() noexcept
     BUG("Unimplemented function.");
     return false;
 }
+void AudioGraph::Shutdown() noexcept
+{
+    mGraph.Shutdown();
+}
+
 void AudioGraph::RecvCommand(std::unique_ptr<Command> cmd) noexcept
 {
     if (auto* ptr = cmd->GetIf<GraphCmd>())

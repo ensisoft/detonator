@@ -1401,6 +1401,8 @@ void MixerSource::RemoveDoneSources(EventQueue& events)
         auto& element = source.element;
         if (element->IsSourceDone())
         {
+            element->Shutdown();
+
             SourceDoneEvent event;
             event.mixer = mName;
             event.src   = std::move(element);

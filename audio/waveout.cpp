@@ -339,6 +339,7 @@ private:
         virtual void Cancel() override
         {
             // anything that needs to be done?
+            source_->Shutdown();
             DEBUG("Cancel waveout stream '%1'.", source_->GetName());
         }
 

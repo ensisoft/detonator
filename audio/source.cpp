@@ -82,6 +82,10 @@ bool AudioFile::Reset() noexcept
 {
     return Open();
 }
+void AudioFile::Shutdown() noexcept
+{
+    mDecoder.reset();
+}
 
 bool AudioFile::Open()
 {
