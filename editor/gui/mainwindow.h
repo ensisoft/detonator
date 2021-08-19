@@ -113,6 +113,7 @@ namespace gui
         void on_actionNewScene_triggered();
         void on_actionNewScript_triggered();
         void on_actionNewUI_triggered();
+        void on_actionNewAudioGraph_triggered();
         void on_actionImportFiles_triggered();
         void on_actionExportJSON_triggered();
         void on_actionEditResource_triggered();
