@@ -59,9 +59,13 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btnFont">
+            <widget class="QToolButton" name="btnFont">
              <property name="text">
               <string>Select Font ...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resource/resource.qrc">
+               <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
              </property>
             </widget>
            </item>

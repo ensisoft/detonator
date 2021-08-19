@@ -75,19 +75,6 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="btnSelectStyle">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QToolButton" name="btnReloadStyle">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -101,6 +88,23 @@
               <property name="icon">
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectStyle">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
               </property>
              </widget>
             </item>
@@ -1005,8 +1009,8 @@
   <tabstop>windowName</tabstop>
   <tabstop>windowID</tabstop>
   <tabstop>baseStyle</tabstop>
-  <tabstop>btnSelectStyle</tabstop>
   <tabstop>btnReloadStyle</tabstop>
+  <tabstop>btnSelectStyle</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
