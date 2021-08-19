@@ -264,7 +264,10 @@ void Player::AudioThreadLoop(Device* ptr)
                     events_.push(std::move(event));
                 }
                 if (!track.looping)
+                {
+                    source->Shutdown();
                     it = playing.erase(it);
+                }
             }
             else it++;
         }

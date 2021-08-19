@@ -218,7 +218,10 @@ private:
             pa_stream_unref(stream_);
             stream_ = nullptr;
             if (source_)
+            {
+                source_->Shutdown();
                 DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
+            }
         }
 
         virtual void SendCommand(std::unique_ptr<Command> cmd) override
