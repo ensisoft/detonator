@@ -168,6 +168,10 @@
               <property name="text">
                <string>...</string>
               </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
               <property name="arrowType">
                <enum>Qt::NoArrow</enum>
               </property>

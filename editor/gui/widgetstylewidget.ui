@@ -280,7 +280,7 @@
         </sizepolicy>
        </property>
        <property name="currentText">
-        <string>Default</string>
+        <string/>
        </property>
        <property name="placeholderText">
         <string>Default</string>
@@ -391,6 +391,10 @@
        <property name="text">
         <string>...</string>
        </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+       </property>
       </widget>
      </item>
     </layout>
@@ -411,7 +415,7 @@
    <item row="2" column="1">
     <widget class="QComboBox" name="widgetTextVAlign">
      <property name="currentText">
-      <string>Default</string>
+      <string/>
      </property>
      <property name="placeholderText">
       <string>Default</string>

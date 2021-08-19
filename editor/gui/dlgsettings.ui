@@ -115,13 +115,6 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtImageEditorExecutable"/>
           </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QPushButton" name="btnSelectImageEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
@@ -133,6 +126,17 @@
            <widget class="QLineEdit" name="edtImageEditorArguments">
             <property name="text">
              <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="2">
+           <widget class="QToolButton" name="btnSelectImageEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -155,13 +159,6 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtShaderEditorExecutable"/>
           </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QPushButton" name="btnSelectShaderEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
@@ -173,6 +170,17 @@
            <widget class="QLineEdit" name="edtShaderEditorArguments">
             <property name="text">
              <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="2">
+           <widget class="QToolButton" name="btnSelectShaderEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -195,13 +203,6 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtScriptEditorExecutable"/>
           </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QPushButton" name="btnSelectScriptEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
@@ -213,6 +214,17 @@
            <widget class="QLineEdit" name="edtScriptEditorArguments">
             <property name="text">
              <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="2">
+           <widget class="QToolButton" name="btnSelectScriptEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -235,13 +247,6 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtAudioEditorExecutable"/>
           </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QPushButton" name="btnSelectAudioEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_12">
             <property name="text">
@@ -253,6 +258,17 @@
            <widget class="QLineEdit" name="edtAudioEditorArguments">
             <property name="text">
              <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="2">
+           <widget class="QToolButton" name="btnSelectAudioEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
