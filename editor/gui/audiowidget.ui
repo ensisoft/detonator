@@ -625,14 +625,14 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>Sample rate</string>
+             <string>Sample rate (Hz)</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_38">
             <property name="text">
-             <string>Duration</string>
+             <string>Duration (ms)</string>
             </property>
            </widget>
           </item>
