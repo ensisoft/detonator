@@ -22,6 +22,8 @@
 #  include <pthread.h>
 #endif
 
+#include <list>
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "audio/player.h"
@@ -29,6 +31,14 @@
 #include "audio/source.h"
 #include "audio/stream.h"
 #include "audio/command.h"
+
+namespace {
+struct EnqueueCmd {
+    std::unique_ptr<audio::Source> source;
+    bool looping = false;
+    bool paused  = false;
+};
+} // namespace
 
 namespace audio
 {
@@ -52,24 +62,24 @@ Player::~Player()
     thread_->join();
 }
 
-std::size_t Player::Play(std::unique_ptr<Source> source, std::chrono::milliseconds ms, bool looping)
-{
-    std::lock_guard<std::mutex> lock(queue_mutex_);
-
-    size_t id = trackid_++;
-    Track track;
-    track.id       = id;
-    track.source   = std::move(source);
-    track.when     = std::chrono::steady_clock::now() + ms;
-    track.looping  = looping;
-    waiting_.push(std::move(track));
-    
-    return id;
-}
-
 std::size_t Player::Play(std::unique_ptr<Source> source, bool looping)
 {
-    return Play(std::move(source), std::chrono::milliseconds(0), looping);
+    const auto id = trackid_;
+
+    EnqueueCmd cmd;
+    cmd.source   = std::move(source);
+    cmd.paused   = false; // todo: take as param
+    cmd.looping  = looping;
+    auto cmd_ptr = MakeCommand(std::move(cmd));
+
+    Action action;
+    action.track_id = id;
+    action.do_what  = Action::Type::Enqueue;
+    action.cmd      = cmd_ptr.release(); // remember to delete the raw ptr!
+    track_actions_.push(action);
+
+    ++trackid_;
+    return id;
 }
 
 void Player::Pause(std::size_t id)
@@ -90,7 +100,6 @@ void Player::Resume(std::size_t id)
 
 void Player::Cancel(std::size_t id)
 {
-    // todo: should maybe be able to cancel currently waiting tracks too?
     Action a;
     a.do_what = Action::Type::Cancel;
     a.track_id = id;
@@ -127,8 +136,13 @@ void Player::AudioThreadLoop(Device* ptr)
 {
     std::unique_ptr<Device> dev(ptr);
 
-    // currently playing tracks
-    std::list<Track> playing;
+    struct Track {
+        std::size_t id = 0;
+        std::shared_ptr<Stream> stream;
+        bool looping = false;
+        bool paused  = false;
+    };
+    std::list<Track> playing;    // currently playing tracks
 
     while (run_thread_.test_and_set(std::memory_order_acquire))
     {
@@ -140,6 +154,31 @@ void Player::AudioThreadLoop(Device* ptr)
         while (track_actions_.pop(track_action))
         {
             std::unique_ptr<Command> cmd(track_action.cmd);
+            if (track_action.do_what == Action::Type::Enqueue)
+            {
+                auto* enqueue_cmd = cmd->GetIf<EnqueueCmd>();
+                auto stream = dev->Prepare(std::move(enqueue_cmd->source));
+                if (!stream)
+                {
+                    SourceCompleteEvent event;
+                    event.id      = track_action.track_id;
+                    event.looping = enqueue_cmd->looping;
+                    event.status  = TrackStatus::Failure;
+                    std::lock_guard<std::mutex> lock(event_mutex_);
+                    events_.push(std::move(event));
+                }
+                else
+                {
+                    Track item;
+                    item.id      = track_action.track_id;
+                    item.looping = enqueue_cmd->looping;
+                    item.paused  = false;
+                    item.stream  = stream;
+                    item.stream->Play();
+                    playing.push_back(std::move(item));
+                }
+                continue;
+            }
 
             auto it = std::find_if(std::begin(playing), std::end(playing),
                 [=](const Track& t) {
@@ -217,7 +256,6 @@ void Player::AudioThreadLoop(Device* ptr)
                 // generate a track completion event
                 SourceCompleteEvent event;
                 event.id      = track.id;
-                event.when    = track.when;
                 event.looping = track.looping;
                 event.status  = state == Stream::State::Complete ? TrackStatus::Success
                                                                  : TrackStatus::Failure;
@@ -230,58 +268,6 @@ void Player::AudioThreadLoop(Device* ptr)
             }
             else it++;
         }
-        // service the waiting queue once
-        do 
-        {
-            // don't wait around if the lock is contended but   
-            // instead just proceed to service the currently playing
-            // audio streams.
-            std::unique_lock<std::mutex> lock(queue_mutex_, std::try_to_lock);
-            if (!lock.owns_lock())
-                break;
-
-            if (waiting_.empty())
-                break;
-    
-            // look at the top item (needs to play earliest)
-            auto& top = waiting_.top();
-            auto now  = std::chrono::steady_clock::now();
-            if (now < top.when)
-                break;
-
-            // std::priority_queue only provides a const public interface
-            // because it tries to protect from people changing parameters
-            // of the contained objects so that the priority order invariable
-            // would no longer hold. however this is also super annoying
-            // in cases where you for example want to get a std::unique_ptr<T>
-            // out of the damn thing. 
-            using pq_value_type = std::remove_cv<audio_pq::value_type>::type;
-
-            auto stream = dev->Prepare(std::move(const_cast<pq_value_type&>(top).source));
-            if (!stream)
-            {
-                SourceCompleteEvent event;
-                event.id   = top.id;
-                event.when = top.when;
-                event.looping = top.looping;
-                event.status  = TrackStatus::Failure;
-                std::lock_guard<std::mutex> lock(event_mutex_);
-                events_.push(std::move(event));
-            }
-            else
-            {
-                Track item;
-                item.id      = top.id;
-                item.stream  = stream;
-                item.when    = top.when;
-                item.looping = top.looping;
-                item.stream->Play();
-                playing.push_back(std::move(item));
-            }
-
-            waiting_.pop();
-        }
-        while (false);
 
         // this wait is here to avoid "overheating the cpu" so to speak.
         // however this creates two problems.
