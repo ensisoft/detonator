@@ -1937,9 +1937,9 @@ void AudioWidget::GetSelectedElementProperties()
         if (FindAudioFileInfo(file, &info))
         {
             SetValue(mUI.afChannels,   info.channels);
-            SetValue(mUI.afSampleRate, QString("%1 Hz").arg(info.sample_rate));
+            SetValue(mUI.afSampleRate, info.sample_rate);
             SetValue(mUI.afFrames,     info.frames);
-            SetValue(mUI.afDuration, QString("%1s").arg(info.seconds));
+            SetValue(mUI.afDuration, unsigned(info.seconds * 1000));
         }
         else ERROR("Failed to probe audio file '%1'.", file);
     }
