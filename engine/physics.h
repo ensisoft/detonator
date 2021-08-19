@@ -59,11 +59,11 @@ namespace game
     class PhysicsEngine
     {
     public:
-        PhysicsEngine(const ClassLibrary* loader = nullptr);
+        PhysicsEngine(const ClassLibrary* classlib = nullptr);
 
-        // Set the loader object for loading runtime resources.
-        void SetLoader(const ClassLibrary* loader)
-        { mLoader = loader; }
+        // Set the class lib object for loading runtime resources.
+        void SetClassLibrary(const ClassLibrary* classlib)
+        { mClassLib = classlib; }
         // Set the gravity vector, i.e. the direction and
         // magnitude of the gravitational pull. Defaults to
         // x=0.0f, y=1.0f
@@ -150,7 +150,7 @@ namespace game
         void AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node);
     private:
         // The class loader instance for loading resources.
-        const ClassLibrary* mLoader = nullptr;
+        const ClassLibrary* mClassLib = nullptr;
         // Physics node.
         struct PhysicsNode {
             std::string debug_name;

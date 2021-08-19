@@ -130,7 +130,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
 {
     DEBUG("Create AnimationTrackWidget");
     mTimelineModel = std::make_unique<TimelineModel>(mState);
-    mRenderer.SetLoader(workspace);
+    mRenderer.SetClassLibrary(workspace);
 
     mUI.setupUi(this);
     mUI.actionPlay->setEnabled(true);
@@ -698,7 +698,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     auto track = game::CreateAnimationTrackInstance(mState.track);
     mPlaybackAnimation = game::CreateEntityInstance(mState.entity);
     mPlaybackAnimation->Play(std::move(track));
-    mPhysics.SetLoader(mWorkspace);
+    mPhysics.SetClassLibrary(mWorkspace);
     mPhysics.SetScale(settings.physics_scale);
     mPhysics.SetGravity(settings.gravity);
     mPhysics.SetNumVelocityIterations(settings.num_velocity_iterations);

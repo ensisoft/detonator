@@ -39,9 +39,8 @@ namespace game
 {
 
 PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
-  : mLoader(loader)
+  : mClassLib(loader)
 {}
-
 
 void PhysicsEngine::UpdateScene(Scene& scene)
 {
@@ -308,7 +307,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
         else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Parallelogram)
             painter.Draw(gfx::Parallelogram(), view, mat);
         else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Polygon) {
-            const auto& klass = mLoader->FindDrawableClassById(physics_node.polygonId);
+            const auto& klass = mClassLib->FindDrawableClassById(physics_node.polygonId);
             if (klass == nullptr) {
                 WARN("No polygon class found for node '%1'", physics_node.debug_name);
             } else {
@@ -611,7 +610,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
             WARN("Rigid body '%1' has no polygon shape id set.", debug_name);
             return;
         }
-        const auto& drawable = mLoader->FindDrawableClassById(polygonId);
+        const auto& drawable = mClassLib->FindDrawableClassById(polygonId);
         if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
             WARN("No polygon class found for rigid body '%1'.", debug_name);
             return;

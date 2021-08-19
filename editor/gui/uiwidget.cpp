@@ -1578,7 +1578,7 @@ bool UIWidget::LoadStyle(const QString& name)
     }
 
     auto style = std::make_unique<game::UIStyle>();
-    style->SetLoader(mState.workspace);
+    style->SetClassLibrary(mState.workspace);
     if (!style->LoadStyle(*data))
     {
         WARN("Errors were found while parsing the style.");

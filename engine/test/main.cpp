@@ -366,7 +366,7 @@ public:
         mScene = game::CreateSceneInstance(klass);
         mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
-        mRenderer.SetLoader(loader);
+        mRenderer.SetClassLibrary(loader);
         mViewport = gfx::FRect(0.0f, 0.0f, 200.0f, 200.0f);
     }
     virtual void SetSurfaceSize(unsigned width, unsigned height) override
@@ -444,7 +444,7 @@ public:
         mScene = game::CreateSceneInstance(klass);
         mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
-        mRenderer.SetLoader(loader);
+        mRenderer.SetClassLibrary(loader);
     }
 private:
     std::unique_ptr<game::Scene> mScene;
@@ -493,7 +493,7 @@ public:
         auto klass = loader->FindEntityClassByName("robot");
         mEntity = game::CreateEntityInstance(klass);
         mEntity->PlayAnimationByName("idle");
-        mRenderer.SetLoader(loader);
+        mRenderer.SetClassLibrary(loader);
     }
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
     {
@@ -574,8 +574,8 @@ public:
         }
 
         mScene = game::CreateSceneInstance(klass);
-        mRenderer.SetLoader(loader);
-        mPhysics.SetLoader(loader);
+        mRenderer.SetClassLibrary(loader);
+        mPhysics.SetClassLibrary(loader);
         mPhysics.SetGravity(glm::vec2(0.0f, 100.0f));
         mPhysics.SetScale(glm::vec2(10.0f, 10.0f));
         mPhysics.DeleteAll();
@@ -621,7 +621,7 @@ public:
     virtual void Start(game::ClassLibrary* loader) override
     {
         mWindow.Resize(500.0f, 500.0f);
-        mStyle.SetLoader(loader);
+        mStyle.SetClassLibrary(loader);
         mPainter.SetStyle(&mStyle);
 
         mStyle.SetMaterial("widget/background", game::detail::UIColor(gfx::Color::Black));
