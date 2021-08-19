@@ -113,6 +113,27 @@ if (MSVC)
     # /wd4305 truncation from double to float
     # /wd4267 conversion from size_t to int (Qt uses ints extensively)
     add_definitions("/wd4251 /wd4275 /wd4018 /wd4244 /wd4305 /wd4267")
+
+    # generate debugging .pdb files for Release builds on MSVS
+    if (CMAKE_BUILD_TYPE MATCHES "Release")
+        #  /Zi turns on the .pdb generation. We want this for the release build
+        # so that we can do post-mortem debugging with the minidump (from the crash)
+        # and the pdb file.
+        # /FS is needed for parallel build. It forces data to be written
+        # through a serialized surrogate process.
+        # NOTE that the /Zi names the .pdb file as vcx0.pdb where the x is
+        # the version number. So for example vc120.pdb
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
+        # http://www.wintellect.com/devcenter/jrobbins/correctly-creating-native-c-release-build-pdbs
+        # need to tell the linker also about the debug data.
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /OPT:REF")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /OPT:ICF")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /OPT:REF")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /OPT:ICF")
+    endif()
 endif()
 
 # we also need Qt for the time being
