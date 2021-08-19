@@ -47,6 +47,8 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Set
     SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
     SetUIValue(mUI.edtScriptEditorExecutable, settings.script_editor_executable);
     SetUIValue(mUI.edtScriptEditorArguments, settings.script_editor_arguments);
+    SetUIValue(mUI.edtAudioEditorExecutable, settings.audio_editor_executable);
+    SetUIValue(mUI.edtAudioEditorArguments,  settings.audio_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
     SetUIValue(mUI.chkSaveAutomatically, settings.save_automatically_on_play);
 
@@ -85,6 +87,8 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtShaderEditorArguments,  &mSettings.shader_editor_arguments);
     GetUIValue(mUI.edtScriptEditorExecutable, &mSettings.script_editor_executable);
     GetUIValue(mUI.edtScriptEditorArguments,  &mSettings.script_editor_arguments);
+    GetUIValue(mUI.edtAudioEditorExecutable,  &mSettings.audio_editor_executable);
+    GetUIValue(mUI.edtAudioEditorArguments,   &mSettings.audio_editor_arguments);
     GetUIValue(mUI.cmbWinOrTab,               &mSettings.default_open_win_or_tab);
     GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
     GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
@@ -156,6 +160,24 @@ void DlgSettings::on_btnSelectScriptEditor_clicked()
     const QFileInfo info(executable);
     mUI.edtScriptEditorExecutable->setText(QDir::toNativeSeparators(executable));
     mUI.edtScriptEditorExecutable->setCursorPosition(0);
+}
+
+void DlgSettings::on_btnSelectAudioEditor_clicked()
+{
+    QString filter;
+
+#if defined(WINDOWS_OS)
+    filter = "Executables (*.exe)";
+#endif
+
+    const QString& executable = QFileDialog::getOpenFileName(this,
+      tr("Select Application"), QString(), filter);
+    if (executable.isEmpty())
+        return;
+
+    const QFileInfo info(executable);
+    mUI.edtAudioEditorExecutable->setText(QDir::toNativeSeparators(executable));
+    mUI.edtAudioEditorExecutable->setCursorPosition(0);
 }
 
 } // namespace

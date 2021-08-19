@@ -1399,6 +1399,11 @@ void AudioWidget::on_btnSelectFile_clicked()
     GetSelectedElementProperties();
 }
 
+void AudioWidget::on_btnEditFile_clicked()
+{
+    emit OpenExternalAudio(GetValue(mUI.fileSource));
+}
+
 void AudioWidget::on_actionPlay_triggered()
 {
     if (!InitializeAudio())

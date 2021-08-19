@@ -155,6 +155,7 @@ namespace gui
         void OpenExternalImage(const QString& file);
         void OpenExternalShader(const QString& file);
         void OpenExternalScript(const QString& file);
+        void OpenExternalAudio(const QString& file);
         void OpenNewWidget(MainWidget* widget);
         void RefreshWidget();
         void OpenRecentWorkspace();
