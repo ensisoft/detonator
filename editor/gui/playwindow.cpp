@@ -544,11 +544,11 @@ void PlayWindow::RunOnce()
         // spent producing a frame. the time is then used to take
         // some number of simulation steps in order for the simulations
         // to catch up for the *next* frame.
-        const auto time_step = mPaused ? 0.0 : ElapsedSeconds();
+        const auto time_step = ElapsedSeconds();
         mTimeTotal += time_step;
 
         // ask the application to take its simulation steps.
-        mApp->Update(mTimeTotal, time_step);
+        mApp->Update(mPaused ? 0.0 : time_step);
 
         // ask the application to draw the current frame.
         mApp->Draw();
@@ -556,7 +556,7 @@ void PlayWindow::RunOnce()
         mNumFrames++;
         mNumFramesTotal++;
         SetValue(mUI.frames, mNumFramesTotal);
-        SetValue(mUI.time, mTimeTotal);
+        SetValue(mUI.wallTime, mTimeTotal);
 
         const auto elapsed = mFrameTimer.elapsed();
         if (elapsed >= 1000)

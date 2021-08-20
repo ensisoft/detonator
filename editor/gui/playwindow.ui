@@ -105,12 +105,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Time (s)</string>
+             <string>Wall time (s)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="time">
+           <widget class="QLineEdit" name="wallTime">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -503,7 +503,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   </action>
  </widget>
  <tabstops>
-  <tabstop>time</tabstop>
+  <tabstop>wallTime</tabstop>
   <tabstop>frames</tabstop>
   <tabstop>fps</tabstop>
   <tabstop>logFilterCaseSensitive</tabstop>

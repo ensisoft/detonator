@@ -37,12 +37,12 @@ namespace base
 
 double GetTime()
 {
-    using steady_clock = std::chrono::high_resolution_clock;
-    static const auto start = steady_clock::now();
-    const auto now = steady_clock::now();
+    using clock = std::chrono::high_resolution_clock;
+    static const auto start = clock::now();
+    const auto now  = clock::now();
     const auto gone = now - start;
-    const auto ms = std::chrono::duration_cast<std::chrono::microseconds>(gone);
-    return ms.count() / (1000.0 * 1000.0);
+    const auto us = std::chrono::duration_cast<std::chrono::microseconds>(gone);
+    return us.count() / (1000.0 * 1000.0);
 }
 
 std::string RandomString(size_t len)
