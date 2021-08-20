@@ -190,13 +190,11 @@ void Player::AudioThreadLoop(Device* ptr)
             auto& p = *it;
             if (track_action.do_what == Action::Type::Pause)
             {
-                ASSERT(p.paused == false);
                 p.stream->Pause();
                 p.paused = true;
             }
             else if (track_action.do_what == Action::Type::Resume)
             {
-                ASSERT(p.paused == true);
                 p.stream->Resume();
                 p.paused = false;
             }
