@@ -92,6 +92,20 @@ AudioEngine::~AudioEngine()
     mPlayer->Cancel(mMusicGraphId);
 }
 
+void AudioEngine::SetDebugPause(bool on_off)
+{
+    if (on_off)
+    {
+        mPlayer->Pause(mEffectGraphId);
+        mPlayer->Pause(mMusicGraphId);
+    }
+    else
+    {
+        mPlayer->Resume(mEffectGraphId);
+        mPlayer->Resume(mMusicGraphId);
+    }
+}
+
 bool AudioEngine::AddMusicGraph(const GraphHandle& handle)
 {
     ASSERT(handle);

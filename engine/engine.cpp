@@ -106,6 +106,9 @@ public:
     {
         mDebug = debug;
         base::EnableDebugLog(mDebug.debug_log);
+
+        if (mAudio)
+            mAudio->SetDebugPause(debug.debug_pause);
     }
     virtual void DebugPrintString(const std::string& message) override
     {
@@ -269,6 +272,9 @@ public:
 
     virtual void Update(double dt) override
     {
+        if (mDebug.debug_pause)
+            dt = 0.0;
+
         // there's plenty of information about different ways to write a basic
         // game rendering loop. here are some suggested references:
         // https://gafferongames.com/post/fix_your_timestep/

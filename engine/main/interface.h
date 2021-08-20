@@ -136,6 +136,7 @@ namespace game
         // It's up to the application whether any of these will be
         // supported in anyway.
         struct DebugOptions {
+            bool debug_pause = false;
             bool debug_draw = false;
             bool debug_log  = false;
             bool debug_show_fps = false;

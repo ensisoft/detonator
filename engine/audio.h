@@ -72,6 +72,8 @@ namespace game
         const audio::Loader* GetLoader() const
         { return mLoader; }
 
+        void SetDebugPause(bool on_off);
+
         // Add a new audio graph for music playback.
         // The audio graph is initially only prepared and sent to the audio
         // player but set to paused state. In order to begin playing the track
