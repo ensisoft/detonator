@@ -267,7 +267,7 @@ public:
         }
     }
 
-    virtual void Update(double wall_time, double dt) override
+    virtual void Update(double dt) override
     {
         // there's plenty of information about different ways to write a basic
         // game rendering loop. here are some suggested references:
@@ -296,7 +296,7 @@ public:
 
         if (HaveOpenUI())
         {
-            mUIPainter.Update(wall_time, dt);
+            mUIPainter.Update(mGameTimeTotal, dt);
         }
 
         mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - (float)dt);

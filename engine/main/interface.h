@@ -261,13 +261,11 @@ namespace game
         // Draw the next frame.
         virtual void Draw() {}
 
-        // Update the application. wall_time is the current total
-        // accumulated wall time since the application started running
-        // and dt is the current time step to take. The time step to take
+        // Update the application.
+        // dt is the current game time step to take. The time step to take
         // is variable and depends on how long previous iteration of the
-        // main game loop took. On each all wall_time already includes the
-        // the time step dt.
-        virtual void Update(double wall_time, double dt) {}
+        // main game loop took.
+        virtual void Update(double dt) {}
 
         // Save the game and its current state.
         // Called once after leaving the main game update/render loop.

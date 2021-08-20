@@ -526,7 +526,7 @@ int main(int argc, char* argv[])
             const auto wall_time = CurrentRuntime();
 
             // ask the application to take its simulation steps.
-            app->Update(wall_time, time_step);
+            app->Update(time_step);
 
             // ask the application to draw the current frame.
             app->Draw();
@@ -543,9 +543,9 @@ int main(int argc, char* argv[])
             {
                 const auto fps = frames / seconds;
                 game::App::Stats stats;
-                stats.current_fps = fps;
+                stats.current_fps         = fps;
                 stats.num_frames_rendered = frames_total;
-                stats.total_wall_time = CurrentRuntime();
+                stats.total_wall_time     = wall_time;
                 app->UpdateStats(stats);
 
                 frames  = 0;

@@ -794,7 +794,7 @@ public:
         mDevice->CleanGarbage(120);
     }
 
-    virtual void Update(double wall_time, double dt) override
+    virtual void Update(double dt) override
     {
         const auto time_step = 1.0/60.0;
         const auto tick_step = 1.0/1.0;
