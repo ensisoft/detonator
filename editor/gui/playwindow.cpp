@@ -548,7 +548,7 @@ void PlayWindow::RunOnce()
         mTimeTotal += time_step;
 
         // ask the application to take its simulation steps.
-        mApp->Update(mPaused ? 0.0 : time_step);
+        mApp->Update(time_step);
 
         // ask the application to draw the current frame.
         mApp->Draw();
@@ -820,11 +820,9 @@ void PlayWindow::ActivateWindow()
     mSurface->requestActivate();
 }
 
-void PlayWindow::on_actionPause_triggered()
+void PlayWindow::on_actionPause_toggled(bool val)
 {
-    mPaused = mUI.actionPause->isChecked();
-    if (!mPaused)
-        ElapsedSeconds(); // reset time to avoid big jumps in dt
+    SetDebugOptions();
 }
 
 void PlayWindow::on_actionClose_triggered()
@@ -1150,6 +1148,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
 void PlayWindow::SetDebugOptions() const
 {
     game::App::DebugOptions debug;
+    debug.debug_pause     = GetValue(mUI.actionPause);
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_log       = GetValue(mUI.actionToggleDebugLog);
     debug.debug_show_msg  = GetValue(mUI.actionToggleDebugMsg);

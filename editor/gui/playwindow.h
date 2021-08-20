@@ -88,7 +88,7 @@ namespace gui
     private slots:
         void DoAppInit();
         void ActivateWindow();
-        void on_actionPause_triggered();
+        void on_actionPause_toggled(bool val);
         void on_actionClose_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowDebug_toggled(bool val);
@@ -147,9 +147,6 @@ namespace gui
         bool mFullScreen = false;
         // Flag to indicate when the window has been closed or not.
         bool mClosed = false;
-        // Flag to indicate if the app is currently "paused".
-        // When pause is true no ticks or updates are called.
-        bool mPaused = false;
         // False until DoInit has run.
         bool mInitDone = false;
         // Logger that we give to the application.
