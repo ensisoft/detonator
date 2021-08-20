@@ -553,6 +553,12 @@ void PlayWindow::RunOnce()
         // ask the application to draw the current frame.
         mApp->Draw();
 
+        game::App::Stats stats;
+        if (mApp->GetStats(&stats))
+        {
+            SetValue(mUI.gameTime, stats.total_game_time);
+        }
+
         mNumFrames++;
         mNumFramesTotal++;
         SetValue(mUI.frames, mNumFramesTotal);
@@ -563,11 +569,11 @@ void PlayWindow::RunOnce()
         {
             const auto seconds = elapsed / 1000.0;
             const auto fps = mNumFrames / seconds;
-            game::App::Stats stats;
+            game::App::HostStats stats;
             stats.num_frames_rendered = mNumFramesTotal;
             stats.total_wall_time     = mTimeTotal;
             stats.current_fps         = fps;
-            mApp->UpdateStats(stats);
+            mApp->SetHostStats(stats);
 
             SetValue(mUI.fps, fps);
             mNumFrames = 0;

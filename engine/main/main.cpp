@@ -542,11 +542,11 @@ int main(int argc, char* argv[])
             if (seconds > 1.0)
             {
                 const auto fps = frames / seconds;
-                game::App::Stats stats;
+                game::App::HostStats stats;
                 stats.current_fps         = fps;
                 stats.num_frames_rendered = frames_total;
                 stats.total_wall_time     = wall_time;
-                app->UpdateStats(stats);
+                app->SetHostStats(stats);
 
                 frames  = 0;
                 seconds = 0.0;
