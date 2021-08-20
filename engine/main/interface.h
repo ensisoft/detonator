@@ -286,19 +286,26 @@ namespace game
         virtual wdk::WindowListener* GetWindowListener()
         { return nullptr; }
 
-        // Some collected statistics of the current application
-        // and it's runtime.
-        struct Stats {
+        // Statistics collected by the host application (process).
+        struct HostStats {
             // The current frames per second.
             float current_fps = 0.0f;
             // The total time the application has been running.
-            double total_wall_time = 0.0f;
+            double total_wall_time = 0.0;
             // The total number of frames rendered.
             unsigned num_frames_rendered = 0;
         };
-        // Update the collected runtime statistics. This is called
-        // approximately once per second.
-        virtual void UpdateStats(const Stats& stats) {}
+        // Set the current statistics collected by the host application (process).
+        // This is called approximately once per second.
+        virtual void SetHostStats(const HostStats& stats) {}
+
+        // Statistics collected/provided by the app/game.
+        struct Stats {
+            double total_game_time = 0.0;
+        };
+        // Get the current statistics collected by the app implementation.
+        // Returns false if not available.
+        virtual bool GetStats(Stats* stats) const { return false; }
 
         // Ask the engine to take a screenshot of the current default (window)
         // rendering surface and write it out as an image file.

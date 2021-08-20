@@ -865,7 +865,7 @@ public:
         mTestList[mTestIndex]->OnMouseMove(mickey);
     }
 
-    virtual void UpdateStats(const Stats& stats) override
+    virtual void SetHostStats(const HostStats& stats) override
     {
         //DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
         //    stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);

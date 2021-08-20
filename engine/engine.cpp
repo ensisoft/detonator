@@ -361,7 +361,7 @@ public:
     virtual wdk::WindowListener* GetWindowListener() override
     { return this; }
 
-    virtual void UpdateStats(const Stats& stats) override
+    virtual void SetHostStats(const HostStats& stats) override
     {
         if (mDebug.debug_show_fps)
         {
@@ -380,6 +380,11 @@ public:
                 it = mDebugPrints.erase(it);
             } else ++it;
         }
+    }
+    virtual bool GetStats(Stats* stats) const override
+    {
+        stats->total_game_time = mGameTimeTotal;
+        return true;
     }
     virtual void TakeScreenshot(const std::string& filename) const override
     {
@@ -757,7 +762,7 @@ private:
     // current debug options.
     game::App::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
-    game::App::Stats mLastStats;
+    game::App::HostStats mLastStats;
     // list of current debug print messages that
     // get printed to the display.
     struct DebugPrint {

@@ -120,6 +120,23 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Game time (s)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="gameTime">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>Frames</string>
@@ -504,6 +521,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
  </widget>
  <tabstops>
   <tabstop>wallTime</tabstop>
+  <tabstop>gameTime</tabstop>
   <tabstop>frames</tabstop>
   <tabstop>fps</tabstop>
   <tabstop>logFilterCaseSensitive</tabstop>
