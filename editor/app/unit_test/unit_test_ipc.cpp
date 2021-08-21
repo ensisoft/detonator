@@ -91,7 +91,7 @@ void unit_test_ipc_send_recv()
 
     for (int i=0; i<100; ++i)
     {
-        app::Workspace workspace;
+        app::Workspace workspace("tmp");
         QObject::connect(&client, &app::IPCClient::ResourceUpdated, &workspace,
                          &app::Workspace::UpdateResource);
         QObject::connect(&host, &app::IPCHost::UserPropertyUpdated, &workspace,
