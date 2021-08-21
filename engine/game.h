@@ -36,6 +36,7 @@ namespace game
     class PhysicsEngine;
     class AudioEngine;
     struct ContactEvent;
+    struct AudioEvent;
 
     // This is the main interface for the game engine to interface
     // with the actual game logic. I.e. implementations of this
@@ -115,6 +116,9 @@ namespace game
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
         virtual void OnContactEvent(const ContactEvent& contact) = 0;
+
+        // Act on audio playback event.
+        virtual void OnAudioEvent(const AudioEvent& event) = 0;
 
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) {}

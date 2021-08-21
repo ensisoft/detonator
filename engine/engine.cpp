@@ -655,6 +655,14 @@ private:
             mRenderer.Update(*mScene, game_time, dt);
             mScripting->Update(game_time, dt);
         }
+
+        std::vector<game::AudioEvent> audio_events;
+        mAudio->Tick(&audio_events);
+        for (const auto& event : audio_events)
+        {
+            mGame->OnAudioEvent(event);
+        }
+
         mGame->Update(game_time, dt);
     }
 

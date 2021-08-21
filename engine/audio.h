@@ -21,7 +21,6 @@
 #include <memory>
 #include <queue> // priority_queue
 #include <chrono>
-#include <variant>
 
 #include "audio/fwd.h"
 #include "audio/format.h"
@@ -34,15 +33,14 @@ namespace game
 
     // this is in the namespace scope since it might move to
     // a separate file since scripting interface requires this.
-    struct MusicEvent {
+    struct AudioEvent {
         enum class Type {
-            TrackDone,
-            EffectDone
+            MusicTrackDone,
+            SoundEffectDone
         };
         std::string track;
-        Type type = Type::TrackDone;
+        Type type = Type::MusicTrackDone;
     };
-    using AudioEvent = std::variant<MusicEvent>;
 
     // AudioEngine is the audio part of the game engine. Currently it
     // provides 2 audio streams for the game to use:
@@ -110,9 +108,7 @@ namespace game
 
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of
-        // audio events that have happened. You must call the tick at some
-        // decent granularity in order to dispatch the scheduled audio commands
-        // without too much latency.
+        // audio events that have happened.
         void Tick(AudioEventQueue* events = nullptr);
     private:
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events);
