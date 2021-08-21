@@ -54,6 +54,7 @@ namespace game
         virtual void OnUIClose(uik::Window* ui, int result) override;
         virtual void OnUIAction(const uik::Window::WidgetAction& action) override;
         virtual void OnContactEvent(const ContactEvent& contact) override;
+        virtual void OnAudioEvent(const AudioEvent& event) override;
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
         virtual void OnChar(const wdk::WindowEventChar& text) override;

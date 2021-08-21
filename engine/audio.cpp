@@ -187,7 +187,7 @@ void AudioEngine::SetMusicGain(float gain)
 
 bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
-    const auto name   = std::to_string(mEffectCounter);
+    const auto name   = "fx " + std::to_string(mEffectCounter);
     const auto paused = when != 0;
 
     auto graph = std::make_unique<audio::Graph>(name, handle);
@@ -236,31 +236,27 @@ void AudioEngine::Tick(AudioEventQueue* events)
 
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio track '%1' complete event (%2). ",event.id, event.status);
+    DEBUG("Audio source '%1' complete event (%2). ",event.id, event.status);
 
     // intentionally empty for now.
 }
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio track '%1' source event.", event.id);
+    DEBUG("Audio '%1' mixer event %2.", event.id == mMusicGraphId ? "Music" : "FX");
     if (events == nullptr)
-        return;
-    else if (event.id != mMusicGraphId)
         return;
 
     if (auto* done = event.event->GetIf<audio::MixerSource::SourceDoneEvent>())
     {
-        MusicEvent event;
-        event.track = done->src->GetName();
-        event.type  = MusicEvent::Type::TrackDone;
-        events->push_back(std::move(event));
-    }
-    else if (auto* done = event.event->GetIf<audio::MixerSource::EffectDoneEvent>())
-    {
-        MusicEvent event;
-        event.type  = MusicEvent::Type::EffectDone;
-        event.track = done->src;
-        events->push_back(std::move(event));
+        AudioEvent ev;
+        ev.track = done->src->GetName();
+        if (event.id == mMusicGraphId)
+            ev.type = AudioEvent::Type::MusicTrackDone;
+        else if (event.id == mEffectGraphId)
+            ev.type = AudioEvent::Type::SoundEffectDone;
+        else BUG("Unexpected audio event id.");
+
+        events->push_back(std::move(ev));
     }
 }
 

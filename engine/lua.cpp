@@ -455,6 +455,11 @@ void LuaGame::OnContactEvent(const ContactEvent& contact)
     }
 }
 
+void LuaGame::OnAudioEvent(const AudioEvent& event)
+{
+    CallLua((*mLuaState)["OnAudioEvent"], event);
+}
+
 void LuaGame::OnKeyDown(const wdk::WindowEventKeydown& key)
 {
     CallLua((*mLuaState)["OnKeyDown"],
@@ -1252,6 +1257,17 @@ void BindGameLib(sol::state& L)
                 return engine.PlaySoundEffect(klass, when);
             });
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
+
+    auto audio_event = table.new_usertype<AudioEvent>("AudioEvent",
+        sol::meta_function::index, [&L](const AudioEvent& event, const char* key) {
+                sol::state_view lua(L);
+                if (!std::strcmp(key, "type"))
+                    return sol::make_object(lua, base::ToString(event.type));
+                else if (!std::strcmp(key, "track"))
+                    return sol::make_object(lua, event.track);
+                throw std::runtime_error(base::FormatString("No such audio event index: %1", key));
+            }
+    );
 }
 
 } // namespace

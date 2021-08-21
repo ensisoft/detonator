@@ -97,8 +97,7 @@ public:
         mEngine->Tick(&events);
         for (auto& event : events)
         {
-            if (const auto* ptr = std::get_if<game::MusicEvent>(&event))
-                DEBUG("AudioEvent (%1) on track '%2'",ptr->type, ptr->track);
+            DEBUG("AudioEvent (%1) on track '%2'", event.type, event.track);
         }
     }
     virtual void Start(game::ClassLibrary* loader) override
