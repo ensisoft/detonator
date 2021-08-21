@@ -22,6 +22,7 @@
 #  include <QtGlobal>
 #  include <QFile>
 #  include <QTextStream>
+#  include <QRandomGenerator>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -229,14 +230,15 @@ QString ReadTextFile(const QString& file)
 
 QString RandomString()
 {
-   const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-   const int randomStringLength = 12; // assuming you want random strings of 12 characters
+   static const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+   static const int randomStringLength = 12; // assuming you want random strings of 12 characters
 
    QString randomString;
    for(int i=0; i<randomStringLength; ++i)
    {
-       int index = qrand() % possibleCharacters.length();
-       QChar nextChar = possibleCharacters.at(index);
+       const auto random   = QRandomGenerator::global()->generate();
+       const auto index    = random % possibleCharacters.length();
+       const auto nextChar = possibleCharacters.at(index);
        randomString.append(nextChar);
    }
    return randomString;
