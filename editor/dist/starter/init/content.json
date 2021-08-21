@@ -1,0 +1,10 @@
+{
+  "scripts": [
+    {
+      "id": "Xg0GdRiaQU",
+      "resource_id": "Xg0GdRiaQU",
+      "resource_name": "game",
+      "uri": "ws://lua/game.lua"
+    }
+  ]
+}

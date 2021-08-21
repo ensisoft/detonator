@@ -21,6 +21,7 @@
 #  include <QByteArray>
 #  include <QtGlobal>
 #  include <QFile>
+#  include <QFileInfo>
 #  include <QTextStream>
 #  include <QRandomGenerator>
 #include "warnpop.h"
@@ -89,31 +90,56 @@ bool MakePath(const QString& path)
     return d.mkpath(path);
 }
 
-bool CopyRecursively(const QString& src, const QString& dst)
+bool IsDirectory(const QString& path)
 {
-    const QFileInfo srcFileInfo(src);
-    if (srcFileInfo.isDir())
+    return QFileInfo(path).isDir();
+}
+
+std::tuple<bool, QString> CopyRecursively(const QString& src, const QString& dst)
+{
+    const auto& list = QDir(src).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const auto& name : list)
     {
-        QDir dstDir(dst);
-        dstDir.cdUp();
-        if (!dstDir.mkdir(QFileInfo(dst).fileName()))
-            return false;
-        const QDir srcDir(src);
-        const QStringList fileNames = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-        for (const QString& fileName : fileNames)
+        const auto& path  = JoinPath(src, name);
+        if (IsDirectory(path))
         {
-            const QString& newSrcFilePath = JoinPath(src, fileName);
-            const QString& newTgtFilePath = JoinPath(dst, fileName);
-            if (!CopyRecursively(newSrcFilePath, newTgtFilePath))
-                return false;
+            QDir dir(dst);
+            if (!dir.mkdir(name))
+                return {false, QString("Failed to create directory '%1'").arg(JoinPath(dst, name)) };
+            const auto [success, error] = CopyRecursively(path, JoinPath(dst, name));
+            if (!success)
+                return std::make_tuple(false, error);
+        }
+        else
+        {
+            const auto& src_file = JoinPath(src, name);
+            const auto& dst_file = JoinPath(dst, name);
+            const auto[success, error] = CopyFile(src_file, dst_file);
+            if (!success)
+                return std::make_tuple(false, error);
         }
     }
-    else
-    {
-        if (!QFile::copy(src, dst))
-            return false;
-    }
-    return true;
+    return std::make_tuple(true, "");
+}
+
+std::tuple<bool, QString> CopyFile(const QString& src, const QString& dst)
+{
+    const QFileInfo src_info(src);
+    const QFileInfo dst_info(dst);
+    if (src_info.canonicalFilePath() == dst_info.canonicalFilePath())
+        return std::make_tuple(true, "");
+    QFile src_io(src);
+    QFile dst_io(dst);
+    if (!src_io.open(QIODevice::ReadOnly))
+        return std::make_tuple(false, src_io.errorString());
+    if (!dst_io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return std::make_tuple(false, dst_io.errorString());
+    const auto& buffer = src_io.readAll();
+    if (dst_io.write(buffer) == -1)
+        return std::make_tuple(false, dst_io.errorString());
+    if (!dst_io.setPermissions(src_io.permissions()))
+        return std::make_tuple(false, dst_io.errorString());
+    return std::make_tuple(true, "");
 }
 
 QString FromUtf8(const std::string& str)

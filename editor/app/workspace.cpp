@@ -82,6 +82,19 @@ QString GetAppDir()
     return dir;
 }
 
+QString FixWorkspacePath(QString path)
+{
+    path = app::CleanPath(path);
+#if defined(POSIX_OS)
+    if (!path.endsWith("/"))
+        path.append("/");
+#elif defined(WINDOWS_OS)
+    if (!path.endsWith("\\"))
+        path.append("\\");
+#endif
+    return path;
+}
+
 class ResourcePacker : public gfx::Packer
 {
 public:
@@ -596,7 +609,8 @@ private:
 namespace app
 {
 
-Workspace::Workspace()
+Workspace::Workspace(const QString& dir)
+  : mWorkspaceDir(FixWorkspacePath(dir))
 {
     DEBUG("Create workspace");
 
@@ -630,11 +644,7 @@ Workspace::Workspace()
     mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>("SemiCircle"));
     mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>("Trapezoid"));
     mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>("Parallelogram"));
-    {
-        gfx::RoundRectangleClass klass("_round_rect", 0.05f);
-        mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(klass, "RoundRect"));
-    }
-
+    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", 0.05f), "RoundRect"));
     for (auto& resource : mResources)
     {
         resource->SetIsPrimitive(true);
@@ -964,12 +974,10 @@ std::ifstream Workspace::OpenStream(const std::string& URI) const
     return stream;
 }
 
-bool Workspace::LoadWorkspace(const QString& dir)
+bool Workspace::LoadWorkspace()
 {
-    ASSERT(!mIsOpen);
-
-    if (!LoadContent(JoinPath(dir, "content.json")) ||
-        !LoadProperties(JoinPath(dir, "workspace.json")))
+    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json")) ||
+        !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
 
     // we don't really care if this fails or not. nothing permanently
@@ -977,50 +985,14 @@ bool Workspace::LoadWorkspace(const QString& dir)
     // will just make the application forget some data that isn't
     // crucial for the operation of the application or for the
     // integrity of the workspace and its content.
-    LoadUserSettings(JoinPath(dir, ".workspace_private.json"));
+    LoadUserSettings(JoinPath(mWorkspaceDir, ".workspace_private.json"));
 
-    INFO("Loaded workspace '%1'", dir);
-    mWorkspaceDir = CleanPath(dir);
-#if defined(POSIX_OS)
-    if (!mWorkspaceDir.endsWith("/"))
-        mWorkspaceDir.append("/");
-#elif defined(WINDOWS_OS)
-    if (!mWorkspaceDir.endsWith("\\"))
-        mWorkspaceDir.append("\\");
-#endif
-    mIsOpen = true;
-    return true;
-}
-
-bool Workspace::MakeWorkspace(const QString& directory)
-{
-    ASSERT(!mIsOpen);
-
-    QDir dir;
-    if (!dir.mkpath(directory))
-    {
-        ERROR("Failed to create workspace directory. '%1'", directory);
-        return false;
-    }
-
-    // this is where we could initialize the workspace with some resources
-    // or whatnot.
-    mWorkspaceDir = CleanPath(directory);
-#if defined(POSIX_OS)
-    if (!mWorkspaceDir.endsWith("/"))
-        mWorkspaceDir.append("/");
-#elif defined(WINDOWS_OS)
-    if (!mWorkspaceDir.endsWith("\\"))
-        mWorkspaceDir.append("\\");
-#endif
-    mIsOpen = true;
+    INFO("Loaded workspace '%1'", mWorkspaceDir);
     return true;
 }
 
 bool Workspace::SaveWorkspace()
 {
-    ASSERT(!mWorkspaceDir.isEmpty());
-
     if (!SaveContent(JoinPath(mWorkspaceDir, "content.json")) ||
         !SaveProperties(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
@@ -1030,24 +1002,6 @@ bool Workspace::SaveWorkspace()
 
     INFO("Saved workspace '%1'", mWorkspaceDir);
     return true;
-}
-
-void Workspace::CloseWorkspace()
-{
-    // remove all non-primitive resources.
-    QAbstractTableModel::beginResetModel();
-    mResources.erase(std::remove_if(mResources.begin(), mResources.end(),
-                                    [](const auto& res) { return !res->IsPrimitive(); }),
-                     mResources.end());
-    QAbstractTableModel::endResetModel();
-
-    mVisibleCount = 0;
-
-    mProperties.clear();
-    mUserProperties.clear();
-    mWorkspaceDir.clear();
-    mSettings = ProjectSettings {};
-    mIsOpen   = false;
 }
 
 QString Workspace::GetName() const

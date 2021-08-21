@@ -65,7 +65,7 @@ namespace app
         Q_OBJECT
 
     public:
-        Workspace();
+        Workspace(const QString& dir);
        ~Workspace();
 
         // QAbstractTableModel implementation
@@ -138,22 +138,12 @@ namespace app
         std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
 
-        // Try to load the content of the workspace from the files in the given
-        // directory. Returns true on success. Any errors are logged.
-        bool LoadWorkspace(const QString& dir);
-        // Make a new workspace in the given directory and then proceed as if
-        // this workspace had been loaded from that directory. This is the
-        // alternative to Load in terms of opening a workspace.
+        // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
-        bool MakeWorkspace(const QString& dir);
-        // Try to save the contents of the workspace in the previously opened
-        // directory.
+        bool LoadWorkspace();
+        // Try to save the contents of the workspace into the current workspace dir.
+        // Returns true on success. Any errors are logged.
         bool SaveWorkspace();
-        // Close the current workspace.
-        void CloseWorkspace();
-        // Returns true if the workspace is currently open.
-        bool IsOpen() const
-        { return mIsOpen; }
 
         // Map a file to the workspace and return a file URI
         QString MapFileToWorkspace(const QString& file) const;
@@ -591,14 +581,13 @@ namespace app
         std::vector<std::unique_ptr<Resource>> mResources;
         std::size_t mVisibleCount = 0;
     private:
-        QString mWorkspaceDir;
+        const QString mWorkspaceDir;
         // workspace specific properties
         QVariantMap mProperties;
         // user specific workspace properties.
         QVariantMap mUserProperties;
         // workspace/project settings.
         ProjectSettings mSettings;
-        bool mIsOpen = false;
     };
 
     class WorkspaceProxy : public QSortFilterProxyModel

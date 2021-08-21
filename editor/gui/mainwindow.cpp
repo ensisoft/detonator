@@ -384,14 +384,11 @@ void MainWindow::LoadDemoWorkspace(const QString& which)
 
 bool MainWindow::LoadWorkspace(const QString& dir)
 {
-    auto workspace = std::make_unique<app::Workspace>();
+    auto workspace = std::make_unique<app::Workspace>(dir);
+    if (!workspace->LoadWorkspace())
+        return false;
 
     gfx::SetResourceLoader(workspace.get());
-
-    if (!workspace->LoadWorkspace(dir))
-    {
-        return false;
-    }
 
     const auto& settings = workspace->GetProjectSettings();
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
@@ -1225,9 +1222,7 @@ void MainWindow::on_actionLoadWorkspace_triggered()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
         msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr(            "The folder"
-                                 "\n\n'%1'\n\n"
-                       "doesn't seem contain workspace files.\n").arg(dir));
+        msg.setText(tr("The selected folder doesn't seem to contain a valid workspace."));
         msg.exec();
         return;
     }
@@ -1253,14 +1248,11 @@ void MainWindow::on_actionLoadWorkspace_triggered()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
         msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Failed to open workspace\n"
-                    "\n\n'%1'\n\n"
-                    "See the application log for more information.").arg(dir));
+        msg.setText(tr("Failed to load workspace.\n"
+                    "Please See the application log for more information.").arg(dir));
         msg.exec();
         return;
     }
-
-    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
 
     if (!mRecentWorkspaces.contains(dir))
         mRecentWorkspaces.insert(0, dir);
@@ -1287,7 +1279,8 @@ void MainWindow::on_actionNewWorkspace_triggered()
 
     // todo: might want to improve the dialog here to be a custom dialog
     // with an option to create some directory for the new workspace
-    const auto& workspace_dst_dir = QFileDialog::getExistingDirectory(this,tr("Select New Workspace Directory"));
+    const auto& workspace_dst_dir = QFileDialog::getExistingDirectory(this,
+        tr("Select New Workspace Directory"));
     if (workspace_dst_dir.isEmpty())
         return;
 
@@ -1317,64 +1310,47 @@ void MainWindow::on_actionNewWorkspace_triggered()
             return;
     }
 
-    auto workspace = std::make_unique<app::Workspace>();
-    if (!workspace->MakeWorkspace(workspace_dst_dir))
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("There was a problem creating the new workspace.\n"
-            "Please see the log for details."));
-        msg.exec();
-        return;
-    }
-
     QMessageBox msg(this);
     msg.setIcon(QMessageBox::Question);
     msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msg.setText(tr("Would you like to initialize the new workspace with some starter content?"));
     if (msg.exec() == QMessageBox::Yes)
     {
-        const QString& starter_src_dir = app::JoinPath(QApplication::applicationDirPath(), "starter");
-        app::Workspace starter;
-        if (!starter.LoadWorkspace(starter_src_dir))
+        const auto& starter_src_dir = app::JoinPath(qApp->applicationDirPath(), "starter/derp/");
+        const auto [success, error] = app::CopyRecursively(starter_src_dir, workspace_dst_dir);
+        if (!success)
         {
             QMessageBox msg(this);
             msg.setIcon(QMessageBox::Critical);
             msg.setStandardButtons(QMessageBox::Ok);
-            msg.setText(tr("Failed to load starter content.\nPlease see the log for details."));
+            msg.setText(tr("Failed to copy starter content.\n%1").arg(error));
             msg.exec();
             return;
         }
-
-        // copy the data files.
-        app::CopyRecursively(app::JoinPath(starter_src_dir, "textures"),
-                             app::JoinPath(workspace_dst_dir, "textures"));
-        app::CopyRecursively(app::JoinPath(starter_src_dir, "lua"),
-                             app::JoinPath(workspace_dst_dir, "lua"));
-        app::CopyRecursively(app::JoinPath(starter_src_dir, "music"),
-                             app::JoinPath(workspace_dst_dir, "music"));
-        app::CopyRecursively(app::JoinPath(starter_src_dir, "sounds"),
-                             app::JoinPath(workspace_dst_dir, "sounds"));
-        // copy the resources. todo: maybe just copy the content.json and workspace.json?
-        for (size_t i=0; i<starter.GetNumUserDefinedResources(); ++i)
+    }
+    else
+    {
+        const auto& starter_src_dir = app::JoinPath(qApp->applicationDirPath(), "starter/init/");
+        const auto [success, error] = app::CopyRecursively(starter_src_dir, workspace_dst_dir);
+        if (!success)
         {
-            const auto& resource = starter.GetUserDefinedResource(i);
-            workspace->SaveResource(resource);
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("Failed to initialize new workspace.\n%1").arg(error));
+            msg.exec();
+            return;
         }
     }
 
-    mUI.workspace->setModel(&mWorkspaceProxy);
-    mUI.actionSaveWorkspace->setEnabled(true);
-    mUI.actionCloseWorkspace->setEnabled(true);
-    mUI.actionSelectResourceForEditing->setEnabled(true);
-    mUI.menuWorkspace->setEnabled(true);
-    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
-    mWorkspace = std::move(workspace);
-    mWorkspaceProxy.SetModel(mWorkspace.get());
-    mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
-    gfx::SetResourceLoader(mWorkspace.get());
+    LoadWorkspace(workspace_dst_dir);
 
+    if (!mRecentWorkspaces.contains(workspace_dst_dir))
+        mRecentWorkspaces.insert(0, workspace_dst_dir);
+    if (mRecentWorkspaces.size() > 10)
+        mRecentWorkspaces.pop_back();
+
+    BuildRecentWorkspacesMenu();
     ShowHelpWidget();
     NOTE("New workspace created.");
 }
@@ -2070,10 +2046,8 @@ void MainWindow::OpenRecentWorkspace()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr(            "The folder"
-                                   "\n\n'%1'\n\n"
-                                   "doesn't seem contain workspace files.\n"
-                                   "Would you like to remove it from the recent workspaces list?").arg(dir));
+        msg.setText(tr("'%1'\n\ndoesn't seem contain workspace files.\n"
+                       "Would you like to remove it from the recent workspaces list?").arg(dir));
         if (msg.exec() == QMessageBox::Yes)
         {
             mRecentWorkspaces.removeAll(dir);
@@ -2108,9 +2082,6 @@ void MainWindow::OpenRecentWorkspace()
         msg.exec();
         return;
     }
-
-    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
-
     NOTE("Loaded workspace.");
 }
 

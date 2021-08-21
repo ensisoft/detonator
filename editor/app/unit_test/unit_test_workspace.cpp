@@ -67,13 +67,13 @@ size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
 
 void unit_test_path_mapping()
 {
-    DeleteDir("TestWorkspace");
-
     const auto& cwd = QDir::currentPath();
     const auto& app = QCoreApplication::applicationDirPath();
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace(app::JoinPath(cwd, "TestWorkspace"));
+    DeleteDir("TestWorkspace");
+    MakeDir(app::JoinPath(cwd, "TestWorkspace"));
+
+    app::Workspace workspace(app::JoinPath(cwd, "TestWorkspace"));
 
 #if defined(WINDOWS_OS)
     TEST_REQUIRE(app::CleanPath("c:/foo/bar.png") == "c:\\foo\\bar.png");
@@ -117,9 +117,9 @@ void unit_test_path_mapping()
 void unit_test_resource()
 {
     DeleteDir("TestWorkspace");
+    MakeDir("TestWorkspace");
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
     TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
     TEST_REQUIRE(workspace.GetNumResources() != 0);
     TEST_REQUIRE(workspace.GetNumPrimitiveResources() != 0);
@@ -184,112 +184,102 @@ void unit_test_resource()
 void unit_test_save_load()
 {
     DeleteDir("TestWorkspace");
+    MakeDir("TestWorkspace"); // initially empty workspace folder.
 
-    app::Workspace workspace;
-    TEST_REQUIRE(workspace.LoadWorkspace("TestWorkspace") == false);
-    TEST_REQUIRE(workspace.GetName().isEmpty());
-    TEST_REQUIRE(workspace.GetDir().isEmpty());
-    TEST_REQUIRE(workspace.IsOpen() == false);
-    TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
-
-    TEST_REQUIRE(workspace.MakeWorkspace("TestWorkspace"));
-    TEST_REQUIRE(workspace.IsOpen());
-    TEST_REQUIRE(workspace.GetDir().contains("TestWorkspace"));
-    TEST_REQUIRE(workspace.GetName().isEmpty() == false);
-
-    // add some user defined content.
-    gfx::ColorClass material;
-    app::MaterialResource resource(material, "TestMaterial");
-    resource.SetProperty("int", 123);
-    resource.SetProperty("str", QString("hello"));
-    resource.SetUserProperty("foo", 444);
-    resource.SetUserProperty("bar", 777);
-    workspace.SaveResource(resource);
-    // workspace properties are specific to the workspace and
-    // are saved in the workspace files.
-    // user properties are private and important only to the particular user
-    // and stored in the dot (.filename) file
-    workspace.SetProperty("int", 123);
-    workspace.SetProperty("str", QString("hello"));
-    workspace.SetUserProperty("user-int", 321);
-    workspace.SetUserProperty("user-str", QString("hullo"));
-
-    // set project settings.
-    app::Workspace::ProjectSettings settings;
-    settings.multisample_sample_count = 16;
-    settings.application_name = "foobar";
-    settings.application_version = "1.1.1";
-    settings.application_library_win = "library.dll";
-    settings.application_library_lin = "liblibrary.so";
-    settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
-    settings.default_mag_filter = gfx::Device::MagFilter::Linear;
-    settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;
-    settings.window_width = 600;
-    settings.window_height = 400;
-    settings.window_has_border = false;
-    settings.window_can_resize = false;
-    settings.window_vsync = true;
-    settings.ticks_per_second = 100;
-    settings.updates_per_second = 100;
-    settings.working_folder = "blah";
-    settings.command_line_arguments = "args";
-    settings.use_gamehost_process = false;
-    workspace.SetProjectSettings(settings);
-
-    TEST_REQUIRE(workspace.SaveWorkspace());
-
-    workspace.CloseWorkspace();
-    TEST_REQUIRE(workspace.GetName().isEmpty());
-    TEST_REQUIRE(workspace.GetDir().isEmpty());
-    TEST_REQUIRE(workspace.IsOpen() == false);
-    TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
-    TEST_REQUIRE(workspace.HasUserProperty("user-int") == false);
-    TEST_REQUIRE(workspace.HasUserProperty("user-str") == false);
-    TEST_REQUIRE(workspace.HasProperty("int") == false);
-    TEST_REQUIRE(workspace.HasProperty("str") == false);
-
-    TEST_REQUIRE(workspace.LoadWorkspace("TestWorkspace"));
-    TEST_REQUIRE(workspace.IsOpen());
-    TEST_REQUIRE(workspace.GetDir().contains("TestWorkspace"));
-    TEST_REQUIRE(workspace.GetName().isEmpty() == false);
-    TEST_REQUIRE(workspace.HasUserProperty("user-int"));
-    TEST_REQUIRE(workspace.HasUserProperty("user-str"));
-    TEST_REQUIRE(workspace.HasProperty("int"));
-    TEST_REQUIRE(workspace.HasProperty("str"));
-    TEST_REQUIRE(workspace.GetProperty("int", 0) == 123);
-    TEST_REQUIRE(workspace.GetProperty("str", QString("")) == "hello");
-    TEST_REQUIRE(workspace.HasUserProperty("user-int"));
-    TEST_REQUIRE(workspace.HasUserProperty("user-str"));
-    TEST_REQUIRE(workspace.GetUserProperty("user-int", 0) == 321);
-    TEST_REQUIRE(workspace.GetUserProperty("user-str", QString("")) == "hullo");
-    TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 1);
+    // save workspace and some content
     {
-        const auto &res = workspace.GetUserDefinedResource(0);
-        TEST_REQUIRE(res.GetName() == "TestMaterial");
-        TEST_REQUIRE(res.GetIdUtf8() == material.GetId());
-        TEST_REQUIRE(res.GetProperty("int", 0) == 123);
-        TEST_REQUIRE(res.GetProperty("str", QString("")) == QString("hello"));
-        TEST_REQUIRE(res.GetUserProperty("foo", 0) == 444);
-        TEST_REQUIRE(res.GetUserProperty("bar", 0) == 777);
+        app::Workspace workspace("TestWorkspace");
+        TEST_REQUIRE(workspace.LoadWorkspace() == false);
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
+
+        // add some user defined content.
+        gfx::ColorClass material;
+        material.SetId("foo123");
+        app::MaterialResource resource(material, "TestMaterial");
+        resource.SetProperty("int", 123);
+        resource.SetProperty("str", QString("hello"));
+        resource.SetUserProperty("foo", 444);
+        resource.SetUserProperty("bar", 777);
+        workspace.SaveResource(resource);
+        // workspace properties are specific to the workspace and
+        // are saved in the workspace files.
+        // user properties are private and important only to the particular user
+        // and stored in the dot (.filename) file
+        workspace.SetProperty("int", 123);
+        workspace.SetProperty("str", QString("hello"));
+        workspace.SetUserProperty("user-int", 321);
+        workspace.SetUserProperty("user-str", QString("hullo"));
+
+        // set project settings.
+        app::Workspace::ProjectSettings settings;
+        settings.multisample_sample_count = 16;
+        settings.application_name = "foobar";
+        settings.application_version = "1.1.1";
+        settings.application_library_win = "library.dll";
+        settings.application_library_lin = "liblibrary.so";
+        settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
+        settings.default_mag_filter = gfx::Device::MagFilter::Linear;
+        settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;
+        settings.window_width = 600;
+        settings.window_height = 400;
+        settings.window_has_border = false;
+        settings.window_can_resize = false;
+        settings.window_vsync = true;
+        settings.ticks_per_second = 100;
+        settings.updates_per_second = 100;
+        settings.working_folder = "blah";
+        settings.command_line_arguments = "args";
+        settings.use_gamehost_process = false;
+        workspace.SetProjectSettings(settings);
+        TEST_REQUIRE(workspace.SaveWorkspace());
     }
-    TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
-    TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");
-    TEST_REQUIRE(workspace.GetProjectSettings().application_version == "1.1.1");
-    TEST_REQUIRE(workspace.GetProjectSettings().application_library_win == "library.dll");
-    TEST_REQUIRE(workspace.GetProjectSettings().application_library_lin == "liblibrary.so");
-    TEST_REQUIRE(workspace.GetProjectSettings().default_min_filter == gfx::Device::MinFilter::Mipmap);
-    TEST_REQUIRE(workspace.GetProjectSettings().default_mag_filter == gfx::Device::MagFilter::Linear);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_mode == app::Workspace::ProjectSettings::WindowMode::Fullscreen);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_width == 600);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_height == 400);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_has_border == false);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_can_resize == false);
-    TEST_REQUIRE(workspace.GetProjectSettings().window_vsync == true);
-    TEST_REQUIRE(workspace.GetProjectSettings().ticks_per_second == 100);
-    TEST_REQUIRE(workspace.GetProjectSettings().updates_per_second == 100);
-    TEST_REQUIRE(workspace.GetProjectSettings().working_folder == "blah");
-    TEST_REQUIRE(workspace.GetProjectSettings().command_line_arguments == "args");
-    TEST_REQUIRE(workspace.GetProjectSettings().use_gamehost_process == false);
+
+    // load workspace
+    {
+        app::Workspace workspace("TestWorkspace");
+        TEST_REQUIRE(workspace.LoadWorkspace());
+        TEST_REQUIRE(workspace.GetDir().contains("TestWorkspace"));
+        TEST_REQUIRE(workspace.GetName().isEmpty() == false);
+        TEST_REQUIRE(workspace.HasUserProperty("user-int"));
+        TEST_REQUIRE(workspace.HasUserProperty("user-str"));
+        TEST_REQUIRE(workspace.HasProperty("int"));
+        TEST_REQUIRE(workspace.HasProperty("str"));
+        TEST_REQUIRE(workspace.GetProperty("int", 0) == 123);
+        TEST_REQUIRE(workspace.GetProperty("str", QString("")) == "hello");
+        TEST_REQUIRE(workspace.HasUserProperty("user-int"));
+        TEST_REQUIRE(workspace.HasUserProperty("user-str"));
+        TEST_REQUIRE(workspace.GetUserProperty("user-int", 0) == 321);
+        TEST_REQUIRE(workspace.GetUserProperty("user-str", QString("")) == "hullo");
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 1);
+        {
+            const auto& res = workspace.GetUserDefinedResource(0);
+            TEST_REQUIRE(res.GetName() == "TestMaterial");
+            TEST_REQUIRE(res.GetIdUtf8() == "foo123");
+            TEST_REQUIRE(res.GetProperty("int", 0) == 123);
+            TEST_REQUIRE(res.GetProperty("str", QString("")) == QString("hello"));
+            TEST_REQUIRE(res.GetUserProperty("foo", 0) == 444);
+            TEST_REQUIRE(res.GetUserProperty("bar", 0) == 777);
+        }
+        TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
+        TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");
+        TEST_REQUIRE(workspace.GetProjectSettings().application_version == "1.1.1");
+        TEST_REQUIRE(workspace.GetProjectSettings().application_library_win == "library.dll");
+        TEST_REQUIRE(workspace.GetProjectSettings().application_library_lin == "liblibrary.so");
+        TEST_REQUIRE(workspace.GetProjectSettings().default_min_filter == gfx::Device::MinFilter::Mipmap);
+        TEST_REQUIRE(workspace.GetProjectSettings().default_mag_filter == gfx::Device::MagFilter::Linear);
+        TEST_REQUIRE(
+                workspace.GetProjectSettings().window_mode == app::Workspace::ProjectSettings::WindowMode::Fullscreen);
+        TEST_REQUIRE(workspace.GetProjectSettings().window_width == 600);
+        TEST_REQUIRE(workspace.GetProjectSettings().window_height == 400);
+        TEST_REQUIRE(workspace.GetProjectSettings().window_has_border == false);
+        TEST_REQUIRE(workspace.GetProjectSettings().window_can_resize == false);
+        TEST_REQUIRE(workspace.GetProjectSettings().window_vsync == true);
+        TEST_REQUIRE(workspace.GetProjectSettings().ticks_per_second == 100);
+        TEST_REQUIRE(workspace.GetProjectSettings().updates_per_second == 100);
+        TEST_REQUIRE(workspace.GetProjectSettings().working_folder == "blah");
+        TEST_REQUIRE(workspace.GetProjectSettings().command_line_arguments == "args");
+        TEST_REQUIRE(workspace.GetProjectSettings().use_gamehost_process == false);
+    }
 
 }
 
@@ -334,8 +324,9 @@ R"(
 )");
     TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace("TestWorkspace");
+    MakeDir("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
+
     // set project settings.
     app::Workspace::ProjectSettings settings;
     settings.multisample_sample_count = 16;
@@ -507,8 +498,8 @@ void unit_test_packing_texture_composition(unsigned padding)
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         app::MaterialResource resource(material, "material");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        MakeDir("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -544,8 +535,8 @@ void unit_test_packing_texture_composition(unsigned padding)
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
         app::MaterialResource resource(material, "material");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        MakeDir("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -582,8 +573,8 @@ void unit_test_packing_texture_composition(unsigned padding)
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
         app::MaterialResource resource(material, "material");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        MakeDir("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -613,13 +604,13 @@ void unit_test_packing_texture_composition(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
         gfx::TextureMap2DClass material;
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap3.png"));
         app::MaterialResource resource(material, "material");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -646,13 +637,13 @@ void unit_test_packing_texture_composition(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
         gfx::TextureMap2DClass material;
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap3.png"));
         app::MaterialResource resource(material, "material");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -682,9 +673,10 @@ void unit_test_packing_texture_composition(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
+
         // first material
         {
             gfx::SpriteClass material;
@@ -738,9 +730,10 @@ void unit_test_packing_texture_composition(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
+
         // first material
         {
             gfx::SpriteClass material;
@@ -809,9 +802,9 @@ void unit_test_packing_texture_rects(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
 
         gfx::TextureMap2DClass material;
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -845,9 +838,9 @@ void unit_test_packing_texture_rects(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
 
         gfx::TextureMap2DClass material;
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -881,9 +874,9 @@ void unit_test_packing_texture_rects(unsigned padding)
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
 
-        app::Workspace workspace;
-        workspace.MakeWorkspace("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
 
         gfx::SpriteClass material;
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -936,12 +929,11 @@ void unit_test_packing_texture_rects(unsigned padding)
 
 void unit_test_packing_texture_name_collision()
 {
-
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
+    MakeDir("TestWorkspace");
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
 
     // when there are multiple source textures with the same name
     // such as ws://textures/foo/1.png and ws://textures/bar/1.png
@@ -1043,8 +1035,9 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(app::WriteTextFile("fonts/widget_font.otf", "widget_font.otf"));
     TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace("TestWorkspace");
+    MakeDir("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
+
     // setup dummy font files
     TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
     TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/style_font.otf", "style_font.otf"));
@@ -1093,9 +1086,9 @@ void unit_test_packing_texture_name_collision_resample_bug()
 {
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
+    MakeDir("TestWorkspace");
 
-    app::Workspace workspace;
-    workspace.MakeWorkspace("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
 
     // when there are multiple source textures with the same name
     // such as ws://textures/foo/1.png and ws://textures/bar/1.png

@@ -35,6 +35,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include <string_view>
+#include <tuple>
 
 #include "base/assert.h"
 
@@ -67,7 +68,11 @@ QString CleanPath(const QString& path);
 // Make path. returns true if successful, otherwise false.
 bool MakePath(const QString& path);
 
-bool CopyRecursively(const QString& src_dir_path, const QString& dst_dir_path);
+bool IsDirectory(const QString& path);
+
+std::tuple<bool, QString> CopyRecursively(const QString& src_dir_path, const QString& dst_dir_path);
+
+std::tuple<bool, QString> CopyFile(const QString& src, const QString& dst);
 
 // Convert the UTF-8 encoded string to a QString.
 QString FromUtf8(const std::string& str);
