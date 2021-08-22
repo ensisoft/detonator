@@ -104,7 +104,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": true
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": false
       },
       "id": "tqHo3nK0b9",
       "idle_track": "",
@@ -315,7 +316,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "Ytj4tDET1a",
       "idle_track": "",
@@ -430,7 +432,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "qv7w7J7Aiv",
       "idle_track": "",
@@ -496,7 +499,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "IxyHIKNMIn",
       "idle_track": "",
@@ -861,7 +865,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -870,7 +875,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "DrCJuFGCIS",
           "idle_animation_id": "",
@@ -896,7 +902,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -905,7 +912,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "ytPpbxGQnZ",
           "idle_animation_id": "",
@@ -931,7 +939,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -940,7 +949,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "X4Wj3RepYI",
           "idle_animation_id": "",
@@ -966,7 +976,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -975,7 +986,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "oYqoig6iog",
           "idle_animation_id": "",

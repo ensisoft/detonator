@@ -23,10 +23,7 @@
 
 #include <string>
 #include <map>
-#include <stdexcept>
-#include <fstream>
 
-#include "base/assert.h"
 #include "base/logging.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -55,17 +52,17 @@ public:
     {
         mPixelRatio = ratio;
     }
-    virtual void SetSurfaceSize(unsigned width, unsigned height) override
+    virtual void SetSurfaceSize(const USize& size)
     {
-        mSurfacesize = ISize((int)width, (int)height);
+        mSurfacesize = ISize(size);
     }
-    virtual void SetViewport(int x, int y, unsigned width, unsigned height) override
+    virtual void SetViewport(const IRect& viewport)
     {
-        mViewport = IRect(x, y, width, height);
+        mViewport = viewport;
     }
-    virtual void SetScissor(int x, int y, unsigned width, unsigned height) override
+    virtual void SetScissor(const IRect& scissor)
     {
-        mScissor = IRect(x, y, width, height);
+        mScissor = scissor;
     }
     virtual void ClearScissor() override
     {
@@ -379,6 +376,19 @@ void Painter::SetOrthographicView(float width, float height)
 {
     const FRect view(0.0f, 0.0f, width, height);
     SetProjectionMatrix(MakeOrthographicProjection(view));
+}
+
+void Painter::SetViewport(int x, int y, unsigned int width, unsigned int height)
+{
+    SetViewport(IRect(x, y, width, height));
+}
+void Painter::SetScissor(int x, int y, unsigned int width, unsigned int height)
+{
+    SetScissor(IRect(x, y, width, height));
+}
+void Painter::SetSurfaceSize(unsigned width, unsigned height)
+{
+    SetSurfaceSize(USize(width, height));
 }
 
 } // namespace

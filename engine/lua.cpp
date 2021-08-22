@@ -45,6 +45,7 @@
 #include "engine/lua.h"
 #include "engine/transform.h"
 #include "engine/util.h"
+#include "engine/event.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "wdk/keys.h"
@@ -476,15 +477,17 @@ void LuaGame::OnChar(const wdk::WindowEventChar& text)
 {
 
 }
-void LuaGame::OnMouseMove(const wdk::WindowEventMouseMove& mouse)
+void LuaGame::OnMouseMove(const MouseEvent& mouse)
 {
-
+    CallLua((*mLuaState)["OnMouseMove"], mouse);
 }
-void LuaGame::OnMousePress(const wdk::WindowEventMousePress& mouse)
+void LuaGame::OnMousePress(const MouseEvent& mouse)
 {
+    CallLua((*mLuaState)["OnMousePress"], mouse);
 }
-void LuaGame::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse)
+void LuaGame::OnMouseRelease(const MouseEvent& mouse)
 {
+    CallLua((*mLuaState)["OnMouseRelease"], mouse);
 }
 
 ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
@@ -687,49 +690,58 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
 }
 void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
 {
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
-    {
-        auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
-            continue;
-        if (auto* env = GetTypeEnv(entity->GetClass()))
-        {
-            CallLua((*env)["OnKeyDown"], entity,
-                    static_cast<int>(key.symbol) ,
-                    static_cast<int>(key.modifiers.value()));
-        }
-    }
+    DispatchKeyboardEvent("OnKeyDown", key);
 }
 void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
 {
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
-    {
-        auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
-            continue;
-        if (auto* env = GetTypeEnv(entity->GetClass()))
-        {
-            CallLua((*env)["OnKeyUp"], entity,
-                    static_cast<int>(key.symbol) ,
-                    static_cast<int>(key.modifiers.value()));
-        }
-    }
+    DispatchKeyboardEvent("OnKeyUp", key);
 }
 void ScriptEngine::OnChar(const wdk::WindowEventChar& text)
 {
 
 }
-void ScriptEngine::OnMouseMove(const wdk::WindowEventMouseMove& mouse)
+void ScriptEngine::OnMouseMove(const MouseEvent& mouse)
 {
-
+    DispatchMouseEvent("OnMouseMove", mouse);
 }
-void ScriptEngine::OnMousePress(const wdk::WindowEventMousePress& mouse)
+void ScriptEngine::OnMousePress(const MouseEvent& mouse)
 {
-
+    DispatchMouseEvent("OnMousePress", mouse);
 }
-void ScriptEngine::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse)
+void ScriptEngine::OnMouseRelease(const MouseEvent& mouse)
 {
+    DispatchMouseEvent("OnMouseRelease", mouse);
+}
 
+template<typename KeyEvent>
+void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
+            continue;
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)[method], entity,
+                    static_cast<int>(key.symbol) ,
+                    static_cast<int>(key.modifiers.value()));
+        }
+    }
+}
+
+void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::WantsMouseEvents))
+            continue;
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)[method], entity, mouse);
+        }
+    }
 }
 
 sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
@@ -905,7 +917,7 @@ void BindGLM(sol::state& L)
         return vector / scalar;
     });
     vec2.set_function(sol::meta_function::to_string, [](const glm::vec2& vector) {
-        return std::to_string(vector.x) + "," + std::to_string(vector.y);
+        return std::to_string(vector.x) + ", " + std::to_string(vector.y);
     });
     glm["dot"]       = [](const glm::vec2 &a, const glm::vec2 &b) { return glm::dot(a, b); };
     glm["length"]    = [](const glm::vec2& vec) { return glm::length(vec); };
@@ -1280,6 +1292,23 @@ void BindGameLib(sol::state& L)
                 else if (!std::strcmp(key, "track"))
                     return sol::make_object(lua, event.track);
                 throw std::runtime_error(base::FormatString("No such audio event index: %1", key));
+            }
+    );
+
+    auto mouse_event = table.new_usertype<MouseEvent>("MouseEvent",
+        sol::meta_function::index, [&L](const MouseEvent& event, const char* key) {
+                sol::state_view lua(L);
+                if (!std::strcmp(key, "window_coord"))
+                    return sol::make_object(lua, event.window_coord);
+                else if (!std::strcmp(key, "scene_coord"))
+                    return sol::make_object(lua, event.scene_coord);
+                else if (!std::strcmp(key, "button"))
+                    return sol::make_object(lua, event.btn);
+                else if (!std::strcmp(key, "modifiers"))
+                    return sol::make_object(lua, event.mods.value());
+                else if (!std::strcmp(key, "over_scene"))
+                    return sol::make_object(lua, event.over_scene);
+                throw std::runtime_error(base::FormatString("No such mouse event index: %1", key));
             }
     );
 }

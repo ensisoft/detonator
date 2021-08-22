@@ -956,7 +956,9 @@ namespace game
             // Invoke the update function on the entity
             UpdateEntity,
             // Whether to pass keyboard events to the entity or not
-            WantsKeyEvents
+            WantsKeyEvents,
+            // Whether to pass mouse events to the entity or not.
+            WantsMouseEvents,
         };
 
         EntityClass()
@@ -969,6 +971,7 @@ namespace game
             mFlags.set(Flags::TickEntity, true);
             mFlags.set(Flags::UpdateEntity, true);
             mFlags.set(Flags::WantsKeyEvents, false);
+            mFlags.set(Flags::WantsMouseEvents, false);
         }
         EntityClass(const EntityClass& other);
 

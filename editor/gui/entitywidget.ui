@@ -32,10 +32,33 @@
         <string>Base  properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="6" column="1">
-         <widget class="QCheckBox" name="chkKillAtLifetime">
+        <item row="7" column="1">
+         <widget class="QCheckBox" name="chkTickEntity">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Kill at lifetime</string>
+           <string>Tick entity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QCheckBox" name="chkKeyEvents">
+          <property name="text">
+           <string>Receive key events</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="entityName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
          </widget>
         </item>
@@ -93,43 +116,39 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_39">
+          <property name="text">
+           <string>Script</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QCheckBox" name="chkEntityLifetime">
+          <property name="text">
+           <string>Limit lifetime</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="entityLifetime">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text">
-           <string>Name</string>
+          <property name="minimum">
+           <double>0.000000000000000</double>
           </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QCheckBox" name="chkTickEntity">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="maximum">
+           <double>99999.000000000000000</double>
           </property>
-          <property name="text">
-           <string>Tick entity</string>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>ID</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_40">
-          <property name="text">
-           <string>Lifetime</string>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
           </property>
          </widget>
         </item>
@@ -197,52 +216,6 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
-         <widget class="QDoubleSpinBox" name="entityLifetime">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimum">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>99999.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="stepType">
-           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QCheckBox" name="chkEntityLifetime">
-          <property name="text">
-           <string>Limit lifetime</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_39">
-          <property name="text">
-           <string>Script</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="entityName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="entityID">
           <property name="sizePolicy">
@@ -256,6 +229,13 @@
           </property>
          </widget>
         </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_40">
+          <property name="text">
+           <string>Lifetime</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
@@ -263,10 +243,37 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="1">
-         <widget class="QCheckBox" name="chkKeyEvents">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Receive key events</string>
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QCheckBox" name="chkKillAtLifetime">
+          <property name="text">
+           <string>Kill at lifetime</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1">
+         <widget class="QCheckBox" name="chkMouseEvents">
+          <property name="text">
+           <string>Receive mouse events</string>
           </property>
          </widget>
         </item>
@@ -2348,6 +2355,7 @@
   <tabstop>chkTickEntity</tabstop>
   <tabstop>chkUpdateEntity</tabstop>
   <tabstop>chkKeyEvents</tabstop>
+  <tabstop>chkMouseEvents</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>trackList</tabstop>
   <tabstop>btnNewTrack</tabstop>

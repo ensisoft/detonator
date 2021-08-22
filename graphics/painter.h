@@ -51,12 +51,12 @@ namespace gfx
         // You should call this whenever the surface (for example the window)
         // has been resized. The setting will be kept until the next call
         // to surface size.
-        virtual void SetSurfaceSize(unsigned width, unsigned height) = 0;
+        virtual void SetSurfaceSize(const USize& size) = 0;
         // Set the current render target/device view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
         // width and height are the dimensions of the viewport.
-        virtual void SetViewport(int x, int y, unsigned with, unsigned height) = 0;
+        virtual void SetViewport(const IRect& viewport) = 0;
         // Set the current clip (scissor) rect that will limit the rasterized
         // fragments inside the scissor rectangle only and discard any fragments
         // that would be rendered outside the scissor rect.
@@ -64,7 +64,7 @@ namespace gfx
         // (i.e window coordinates). X and Y are the top left corner of the
         // scissor rectangle with width extending to the right and height
         // extending towards the bottom.
-        virtual void SetScissor(int x, int y, unsigned width, unsigned  height) = 0;
+        virtual void SetScissor(const IRect& scissor) = 0;
         // Clear any scissor setting.
         virtual void ClearScissor() = 0;
         // Set the current projection matrix for projecting the scene onto a 2D plane.
@@ -128,6 +128,10 @@ namespace gfx
         void SetOrthographicView(const FRect& view);
         void SetOrthographicView(float left, float top, float width, float height);
         void SetOrthographicView(float width, float height);
+
+        void SetViewport(int x, int y, unsigned width, unsigned height);
+        void SetScissor(int x, int y, unsigned width, unsigned height);
+        void SetSurfaceSize(unsigned width, unsigned height);
 
         inline void ResetViewMatrix()
         { SetViewMatrix(glm::mat4(1.0f)); }

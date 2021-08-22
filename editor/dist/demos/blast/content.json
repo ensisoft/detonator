@@ -8,7 +8,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": true
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": false
       },
       "id": "diUlEeS5JH",
       "idle_track": "",
@@ -308,7 +309,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "iH79uGdYNY",
       "idle_track": "",
@@ -431,7 +433,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "pNT0bA0bpw",
       "idle_track": "",
@@ -746,7 +749,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "7NAD3QgFlq",
       "idle_track": "",
@@ -812,7 +816,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "qOIpuPbyL1",
       "idle_track": "",
@@ -886,7 +891,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "7AdsZqt5pg",
       "idle_track": "",
@@ -952,7 +958,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "gMY5RFLgyd",
       "idle_track": "",
@@ -1018,7 +1025,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "5LKG2wBRGq",
       "idle_track": "",
@@ -1141,7 +1149,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "A7Z5jfJF38",
       "idle_track": "shUULfTlQd",
@@ -1230,7 +1239,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "sX3kBAhLxU",
       "idle_track": "",
@@ -1296,7 +1306,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "q4pUEDx2rE",
       "idle_track": "AnvwndODTH",
@@ -1473,7 +1484,8 @@
         "UpdateEntity": true,
         "VisibleInEditor": true,
         "VisibleInGame": true,
-        "WantsKeyEvents": false
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
       },
       "id": "wXtbrxNRpX",
       "idle_track": "",
@@ -2409,10 +2421,10 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseColor",
+          "name": "kColor0",
           "value": {
             "a": 1.0,
-            "b": 0.009170671924948692,
+            "b": 0.0,
             "g": 0.0,
             "r": 1.0
           }
@@ -2422,10 +2434,10 @@
           "value": 1.0
         },
         {
-          "name": "kColor0",
+          "name": "kBaseColor",
           "value": {
             "a": 1.0,
-            "b": 0.0,
+            "b": 0.009170671924948692,
             "g": 0.0,
             "r": 1.0
           }
@@ -2569,6 +2581,10 @@
       "type": "Custom",
       "uniforms": [
         {
+          "name": "kGamma",
+          "value": 1.0
+        },
+        {
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
@@ -2576,10 +2592,6 @@
             "g": 0.607797384262085,
             "r": 0.05098039284348488
           }
-        },
-        {
-          "name": "kGamma",
-          "value": 1.0
         }
       ],
       "wrap_x": "Clamp",
@@ -2723,7 +2735,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -2732,7 +2745,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "v6jMFkJ4BJ",
           "idle_animation_id": "",
@@ -2758,7 +2772,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -2767,7 +2782,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "6bXKmTw71O",
           "idle_animation_id": "",
@@ -2793,7 +2809,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -2802,7 +2819,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "khKJrggLXs",
           "idle_animation_id": "",
@@ -2856,7 +2874,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "flag_val_bits": {
             "KillAtLifetime": false,
@@ -2865,7 +2884,8 @@
             "UpdateEntity": false,
             "VisibleInEditor": true,
             "VisibleInGame": true,
-            "WantsKeyEvents": false
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
           },
           "id": "WYKWrRK5Fj",
           "idle_animation_id": "",
