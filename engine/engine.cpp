@@ -161,22 +161,6 @@ public:
         const float device_viewport_height = height * scale;
         const float device_viewport_x = (surf_width - device_viewport_width) / 2;
         const float device_viewport_y = (surf_height - device_viewport_height) / 2;
-        if (mDebug.debug_draw)
-        {
-            mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-            mPainter->SetOrthographicView(0.0f , 0.0f , mSurfaceWidth , mSurfaceHeight);
-            gfx::DrawRectOutline(*mPainter, gfx::FRect(device_viewport_x, device_viewport_y,
-                                                     device_viewport_width, device_viewport_height),
-                                 gfx::Color::Green, 1.0f);
-        }
-
-        // set the actual viewport for proper clipping.
-        mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
-        // set the pixel ratio for mapping game units to rendering surface units.
-        mPainter->SetPixelRatio(glm::vec2(scale, scale));
-
-        mRenderer.BeginFrame();
-
         if (mScene)
         {
             // low level draw packet filter for culling draw packets
@@ -196,35 +180,46 @@ public:
                 const game::FRect& mViewRect;
             };
             Culler cull(view);
-            // set the logical viewport to whatever the game
-            // has set it.
+
+            // set the actual device viewport for rendering into the window buffer.
+            // the device viewport retains the game's logical viewport aspect ratio
+            // and is centered in the middle of the rendering surface.
+            mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
+            // set the logical viewport to whatever the game has set it.
             mPainter->SetOrthographicView(view);
+            // set the pixel ratio for mapping game units to rendering surface units.
+            mPainter->SetPixelRatio(glm::vec2(scale, scale));
 
             gfx::Transform transform;
+            mRenderer.BeginFrame();
             mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull);
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
                 mPhysics.DebugDrawObjects(*mPainter , transform);
             }
+            mRenderer.EndFrame();
         }
 
         if (auto* ui = GetUI())
         {
             const float width  = ui->GetWidth();
             const float height = ui->GetHeight();
-            const float scale = std::min(surf_width / width, surf_height / height);
+            const float scale  = std::min(surf_width / width, surf_height / height);
             const float device_viewport_width = width * scale;
             const float device_viewport_height = height * scale;
 
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetOrthographicView(0, 0, width, height);
+            // Set the actual device viewport for rendering into the window surface.
+            // the viewport retains the UI's aspect ratio and is centered in the middle
+            // of the rendering surface.
             mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
             ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr);
         }
 
-        if (mDebug.debug_show_fps || mDebug.debug_show_msg)
+        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetOrthographicView(0, 0, surf_width, surf_height);
@@ -255,8 +250,14 @@ public:
                 rect.Translate(0, 20);
             }
         }
+        if (mDebug.debug_draw)
+        {
+            // visualize the game's logical viewport in the window.
+            gfx::DrawRectOutline(*mPainter, gfx::FRect(device_viewport_x, device_viewport_y,
+                                                       device_viewport_width, device_viewport_height),
+                                 gfx::Color::Green, 1.0f);
+        }
 
-        mRenderer.EndFrame();
         mDevice->EndFrame(true);
         mDevice->CleanGarbage(120);
     }
