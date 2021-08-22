@@ -58,9 +58,9 @@ namespace game
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
         virtual void OnChar(const wdk::WindowEventChar& text) override;
-        virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override;
-        virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override;
-        virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override;
+        virtual void OnMouseMove(const MouseEvent& mouse) override;
+        virtual void OnMousePress(const MouseEvent& mouse) override;
+        virtual void OnMouseRelease(const MouseEvent& mouse) override;
         void PushAction(Action action)
         { mActionQueue.push(std::move(action)); }
         const ClassLibrary* GetClassLib() const
@@ -99,15 +99,18 @@ namespace game
         void OnKeyDown(const wdk::WindowEventKeydown& key);
         void OnKeyUp(const wdk::WindowEventKeyup& key);
         void OnChar(const wdk::WindowEventChar& text);
-        void OnMouseMove(const wdk::WindowEventMouseMove& mouse);
-        void OnMousePress(const wdk::WindowEventMousePress& mouse);
-        void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse);
+        void OnMouseMove(const MouseEvent& mouse);
+        void OnMousePress(const MouseEvent& mouse);
+        void OnMouseRelease(const MouseEvent& mouse);
         void PushAction(Action action)
         { mActionQueue.push(std::move(action)); }
         const ClassLibrary* GetClassLib() const
         { return mClassLib; }
     private:
         sol::environment* GetTypeEnv(const EntityClass& klass);
+        template<typename KeyEvent>
+        void DispatchKeyboardEvent(const std::string& method, const KeyEvent& key);
+        void DispatchMouseEvent(const std::string& method, const MouseEvent& mouse);
     private:
         const std::string mLuaPath;
         const ClassLibrary* mClassLib = nullptr;

@@ -41,8 +41,8 @@ end
 
 -- Called when a keyboard key has been pressed.
 -- If you want to perform some game action while a key is
--- continuously held down don't use this OnKeyDown but rather use
--- wdk.TestKeyDown
+-- continuously held down don't use OnKeyDown but rather use
+-- wdk.TestKeyDown.
 -- symbol is the WDK key sym of the currently pressed key.
 -- modifier_bits are the current modifier keys i.e. Ctrl/Alt/Shift
 -- that may or may not be pressed at the time. You can use
@@ -52,7 +52,31 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
-    Game:DebugPrint('KeyDown ' .. tostring(symbol))
+    Game:DebugPrint('KeyDown ' .. wdk.KeyStr(symbol))
+end
+
+function OnKeyUp(symbol, modifier_bits)
+    Game:DebugPrint('KeyUp ' .. wdk.KeyStr(symbol))
+end
+
+-- Called on mouse button press events.
+-- mouse event has the following available fields
+-- 'window_coord' - mouse cursor position in window coordinates.
+-- 'scene_coord'  - mouse cursor position in scene coordinates
+-- 'button'       - mouse button that was pressed (if any)
+-- 'modifiers'    - modifier bits of keyboard mods that were pressed (if any).
+-- 'over_scene'   - true to indicate that the mouse cursor is over the scene viewport in window.
+function OnMousePress(mouse)
+    Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
+end
+
+-- Called on mouse button release events.
+function OnMouseRelease(mouse)
+    Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
+end
+
+-- Called on mouse move events.
+function OnMouseMove(mouse)
 end
 
 -- Called when the UI has been opened through a call to Game:OpenUI

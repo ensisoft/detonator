@@ -38,6 +38,7 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     SetValue(mUI.chkUpdateEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkTickEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkKeyEvents, Qt::PartiallyChecked);
+    SetValue(mUI.chkMouseEvents, Qt::PartiallyChecked);
 
     std::vector<ListItem> tracks;
     for (size_t i=0; i<klass.GetNumTracks(); ++i)
@@ -58,6 +59,7 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     GetFlag(game::SceneNodeClass::Flags::UpdateEntity,   mUI.chkUpdateEntity);
     GetFlag(game::SceneNodeClass::Flags::TickEntity,     mUI.chkTickEntity);
     GetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
+    GetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 }
 
 void DlgEntity::on_btnAccept_clicked()
@@ -73,6 +75,7 @@ void DlgEntity::on_btnAccept_clicked()
     SetFlag(game::SceneNodeClass::Flags::UpdateEntity,   mUI.chkUpdateEntity);
     SetFlag(game::SceneNodeClass::Flags::TickEntity,     mUI.chkTickEntity);
     SetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
+    SetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 
     accept();
 }

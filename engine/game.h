@@ -37,6 +37,7 @@ namespace game
     class AudioEngine;
     struct ContactEvent;
     struct AudioEvent;
+    struct MouseEvent;
 
     // This is the main interface for the game engine to interface
     // with the actual game logic. I.e. implementations of this
@@ -124,9 +125,9 @@ namespace game
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) {}
         virtual void OnKeyUp(const wdk::WindowEventKeyup& key) {}
         virtual void OnChar(const wdk::WindowEventChar& text) {}
-        virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) {}
-        virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) {}
-        virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) {}
+        virtual void OnMouseMove(const MouseEvent& mouse) {}
+        virtual void OnMousePress(const MouseEvent& mouse) {}
+        virtual void OnMouseRelease(const MouseEvent& mouse) {}
     private:
     };
 

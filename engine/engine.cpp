@@ -48,6 +48,7 @@
 #include "engine/classlib.h"
 #include "engine/renderer.h"
 #include "engine/entity.h"
+#include "engine/event.h"
 #include "engine/physics.h"
 #include "engine/game.h"
 #include "engine/lua.h"
@@ -147,22 +148,20 @@ public:
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
 
-        // get the game's logical viewport into the game world.
-        const auto& view = mGame->GetViewport();
-        // map the logical viewport to some area in the rendering surface
-        // so that the rendering area (the device viewport) has the same
-        // aspect ratio as the logical viewport.
-        const float width       = view.GetWidth();
-        const float height      = view.GetHeight();
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
-        const float scale = std::min(surf_width / width, surf_height / height);
-        const float device_viewport_width = width * scale;
-        const float device_viewport_height = height * scale;
-        const float device_viewport_x = (surf_width - device_viewport_width) / 2;
-        const float device_viewport_y = (surf_height - device_viewport_height) / 2;
+
         if (mScene)
         {
+
+            // get the game's logical viewport into the game world.
+            const auto& view = mGame->GetViewport();
+            // map the logical viewport to some area in the rendering surface
+            // so that the rendering area (the device viewport) has the same
+            // aspect ratio as the logical viewport.
+            const float width  = view.GetWidth();
+            const float height = view.GetHeight();
+            const float scale  = std::min(surf_width / width, surf_height / height);
             // low level draw packet filter for culling draw packets
             // that fall outside of the current viewport.
             class Culler : public game::EntityInstanceDrawHook {
@@ -184,7 +183,7 @@ public:
             // set the actual device viewport for rendering into the window buffer.
             // the device viewport retains the game's logical viewport aspect ratio
             // and is centered in the middle of the rendering surface.
-            mPainter->SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
+            mPainter->SetViewport(GetViewport());
             // set the logical viewport to whatever the game has set it.
             mPainter->SetOrthographicView(view);
             // set the pixel ratio for mapping game units to rendering surface units.
@@ -253,9 +252,7 @@ public:
         if (mDebug.debug_draw)
         {
             // visualize the game's logical viewport in the window.
-            gfx::DrawRectOutline(*mPainter, gfx::FRect(device_viewport_x, device_viewport_y,
-                                                       device_viewport_width, device_viewport_height),
-                                 gfx::Color::Green, 1.0f);
+            gfx::DrawRectOutline(*mPainter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
         }
 
         mDevice->EndFrame(true);
@@ -466,36 +463,97 @@ public:
     {
         if (mBlockMouse)
             return;
+
         if (HaveOpenUI())
-        {
-            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseMove);
-        }
-        mGame->OnMouseMove(mouse);
+            SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseMove);
+
+        const auto& mickey = MapGameMouseEvent(mouse);
+        SendGameMouseEvent(mickey, &game::Game::OnMouseMove);
+        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMouseMove);
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
         if (mBlockMouse)
             return;
+
         if (HaveOpenUI())
-        {
-            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MousePress);
-        }
-        mGame->OnMousePress(mouse);
+            SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MousePress);
+
+        const auto& mickey = MapGameMouseEvent(mouse);
+        SendGameMouseEvent(mickey, &game::Game::OnMousePress);
+        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMousePress);
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
         if (mBlockMouse)
             return;
-        if (HaveOpenUI())
-        {
-            SendMouseEvent(MapMouseEvent(mouse), &uik::Window::MouseRelease);
-        }
 
-        mGame->OnMouseRelease(mouse);
+        if (HaveOpenUI())
+            SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseRelease);
+
+        const auto& mickey = MapGameMouseEvent(mouse);
+        SendGameMouseEvent(mickey, &game::Game::OnMouseRelease);
+        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMouseRelease);
     }
 private:
-    using MouseFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
-    void SendMouseEvent(const uik::Window::MouseEvent& mickey, MouseFunc which)
+    game::IRect GetViewport() const
+    {
+        // get the game's logical viewport into the game world.
+        const auto& view = mGame->GetViewport();
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float width       = view.GetWidth();
+        const float height      = view.GetHeight();
+        const float surf_width  = (float)mSurfaceWidth;
+        const float surf_height = (float)mSurfaceHeight;
+        const float scale = std::min(surf_width / width, surf_height / height);
+        const float device_viewport_width = width * scale;
+        const float device_viewport_height = height * scale;
+        const float device_viewport_x = (surf_width - device_viewport_width) / 2;
+        const float device_viewport_y = (surf_height - device_viewport_height) / 2;
+        return game::IRect(device_viewport_x, device_viewport_y,
+                           device_viewport_width, device_viewport_height);
+    }
+
+    using GameMouseFunc = void (game::Game::*)(const game::MouseEvent&);
+    void SendGameMouseEvent(const game::MouseEvent& mickey, GameMouseFunc which)
+    {
+        auto* game = mGame.get();
+        (game->*which)(mickey);
+    }
+    using EntityScriptMouseFunc = void (game::ScriptEngine::*)(const game::MouseEvent&);
+    void SendEntityScriptMouseEvent(const game::MouseEvent& mickey, EntityScriptMouseFunc which)
+    {
+        if (!mScene)
+            return;
+        auto* scripting = mScripting.get();
+        (scripting->*which)(mickey);
+    }
+
+    template<typename WdkMouseEvent>
+    game::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
+    {
+        const auto& viewport = GetViewport();
+        const float width  = viewport.GetWidth();
+        const float height = viewport.GetHeight();
+        const auto& point  = viewport.MapToLocal(mickey.window_x, mickey.window_y);
+        const auto point_norm_x  =  (point.GetX() / width) * 2.0 - 1.0f;
+        const auto point_norm_y  =  (point.GetY() / height) * -2.0 + 1.0f;
+        const auto& projection   = gfx::Painter::MakeOrthographicProjection(mGame->GetViewport());
+        const auto& point_scene  = glm::inverse(projection) * glm::vec4(point_norm_x,
+                                                                        point_norm_y, 1.0f, 1.0f);
+        game::MouseEvent event;
+        event.window_coord = glm::vec2(mickey.window_x, mickey.window_y);
+        event.scene_coord  = glm::vec2(point_scene.x, point_scene.y);
+        event.over_scene   = viewport.TestPoint(mickey.window_x, mickey.window_y);
+        event.btn  = mickey.btn;
+        event.mods = mickey.modifiers;
+        return event;
+    }
+
+    using UIMouseFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
+    void SendUIMouseEvent(const uik::Window::MouseEvent& mickey, UIMouseFunc which)
     {
         auto* ui = GetUI();
 
@@ -506,7 +564,7 @@ private:
         //DEBUG("Widget action: '%1'", action.type);
     }
     template<typename WdkMouseEvent>
-    uik::Window::MouseEvent MapMouseEvent(const WdkMouseEvent& mickey) const
+    uik::Window::MouseEvent MapUIMouseEvent(const WdkMouseEvent& mickey) const
     {
         const auto* ui     = GetUI();
         const float width  = ui->GetWidth();

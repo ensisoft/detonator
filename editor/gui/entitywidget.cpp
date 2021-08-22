@@ -1077,6 +1077,10 @@ void EntityWidget::on_chkKeyEvents_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::WantsKeyEvents, GetValue(mUI.chkKeyEvents));
 }
+void EntityWidget::on_chkMouseEvents_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::WantsMouseEvents, GetValue(mUI.chkMouseEvents));
+}
 
 void EntityWidget::on_btnAddIdleTrack_clicked()
 {
@@ -1150,6 +1154,12 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << QString("function OnKeyDown(%1, symbol, modifier_bits)\nend\n\n").arg(var);
     stream << "-- Called on key up events.\n";
     stream << QString("function OnKeyUp(%1, symbol, modifier_bits)\nend\n\n").arg(var);
+    stream << "-- Called on mouse button press events.\n";
+    stream << QString("function OnMousePress(%1, mouse)\nend\n\n").arg(var);
+    stream << "-- Called on mouse button release events.\n";
+    stream << QString("function OnMouseRelease(%1, mouse)\nend\n\n").arg(var);
+    stream << "-- Called on mouse move events.\n";
+    stream << QString("function OnMouseMove(%1, mouse)\nend\n\n").arg(var);
 
     io.flush();
     io.close();
@@ -2148,6 +2158,7 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
+    SetValue(mUI.chkMouseEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsMouseEvents));
 
     if (!mUI.trackList->selectedItems().isEmpty())
     {
