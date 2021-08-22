@@ -1,3 +1,5 @@
+-- Top level game callbacks.
+-- You're free to delete functions that you don't need.
 
 -- Called when the game is first loaded.
 function LoadGame()
@@ -42,8 +44,13 @@ end
 -- continuously held down don't use this OnKeyDown but rather use
 -- wdk.TestKeyDown
 -- symbol is the WDK key sym of the currently pressed key.
--- modifier bits are the current modifier keys i.e. Ctrl/Alt/Shift
--- that may or may not be pressed at the time.
+-- modifier_bits are the current modifier keys i.e. Ctrl/Alt/Shift
+-- that may or may not be pressed at the time. You can use
+-- wdk.TestMod to check whether any particular modifier bit is set.
+-- Example:
+-- if wdk.TestMod(modifier_bits, wdk.Mods.Control) then
+--    ...
+-- end
 function OnKeyDown(symbol, modifier_bits)
     Game:DebugPrint('KeyDown ' .. tostring(symbol))
 end

@@ -946,9 +946,15 @@ void BindWDK(sol::state& L)
         return std::string(magic_enum::enum_name(key.value()));
     };
     table["ModStr"] = [](int value) {
+        const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
+        if (!mod.has_value())
+            throw std::runtime_error("No such keymod value: " + std::to_string(value));
+        return std::string(magic_enum::enum_name(mod.value()));
+    };
+    table["ModBitStr"] = [](int bits) {
         std::string ret;
         wdk::bitflag<wdk::Keymod> mods;
-        mods.set_from_value(value);
+        mods.set_from_value(bits);
         if (mods.test(wdk::Keymod::Control))
             ret += "Ctrl+";
         if (mods.test(wdk::Keymod::Shift))
@@ -964,6 +970,14 @@ void BindWDK(sol::state& L)
         if (!key.has_value())
             throw std::runtime_error("No such key symbol: " + std::to_string(value));
         return wdk::TestKeyDown(key.value());
+    };
+    table["TestMod"] = [](int bits, int value) {
+        const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
+        if (!mod.has_value())
+            throw std::runtime_error("No such modifier: " + std::to_string(value));
+        wdk::bitflag<wdk::Keymod> mods;
+        mods.set_from_value(bits);
+        return mods.test(mod.value());
     };
 
     // build table for key names.
