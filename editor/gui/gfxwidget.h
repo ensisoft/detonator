@@ -91,6 +91,8 @@ namespace gui
         float getCurrentFPS() const
         { return mCurrentFps; }
 
+        void CreateRenderingSurface(bool vsync);
+
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
@@ -126,7 +128,6 @@ namespace gui
     private:
         void initializeGL();
         void paintGL();
-        void recreateRenderingSurface(bool vsync);
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
@@ -143,7 +144,6 @@ namespace gui
         gfx::Color4f mFocusColor = {1.0f, 1.0f, 1.0f, 1.0f};
     private:
         QElapsedTimer mClock;
-        bool mInitialized = false;
         bool mVsync       = false;
         bool mHasFocus    = false;
     private:

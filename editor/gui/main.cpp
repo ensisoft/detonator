@@ -232,9 +232,9 @@ int main(int argc, char* argv[])
         // up to an order of magnitude difference in rendering perf
         // as measured by frames per second.
         // the problem with this type of loop however is that on a modern
-        // machine with performant GPU were the GPU workloads
-        // and without sync to vblank enabled we're basically going
-        // to be running a busy loop here burning the CPU.
+        // machine with performant GPU were the GPU workloads are small
+        // and without sync to VBLANK enabled we're basically going
+        // to be running a busy loop here burning a lot cycles for nothing.
         while (!window.isClosed())
         {
             app.processEvents();
