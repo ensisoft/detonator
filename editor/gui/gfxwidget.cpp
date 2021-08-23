@@ -26,6 +26,9 @@
 #  include <color_dialog.hpp>
 #include "warnpop.h"
 
+#include <thread>
+#include <chrono>
+
 #include "editor/app/eventlog.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
@@ -40,9 +43,9 @@
 // as possible and the application will likely be rendering
 // more frames than the display can actually show. This leads
 // to waste in terms of CPU and GPU processing. For example
-// when running on the laptop within 5 mins the fan is at 100%
-// the laptop is burning hot and the battery is drained. This
-// is not a great idea.
+// when running on the laptop, within 5 mins the fan is at 100%
+// and the laptop is burning hot and the battery is drained.
+// This doesn't seem like such a great idea.
 // However if all the rendering surfaces have VSYNC setting enabled
 // then swapBuffers call will block on every window swap which means
 // there are as many waits (per second) as there are windows. This
@@ -52,15 +55,18 @@
 // 3 windows -> three swaps -> 20 fps
 // 6 windows -> 6 swaps -> 10 fps.
 //
-// Using timers or inserting waits anywhere in the rendering path will
-// lead to very janky rendering, so these cannot be used.
-//
-// Ultimately it seems that the solution is to enable sync to VBLANK for
+// It would seem that the solution is to enable sync to VBLANK for
 // only a *single* rendering surface. Thus making sure that we're doing
-// only a single wait per second in the call to swap buffers. So what we
-// try to do here is to have a flag to tell us when some surface has vsync
-// enabled and if that surface is destroyed some other surface needs to
-// enable this flag.
+// only a single wait per render loop iteration  when swapping.
+// This however has 2 problems:
+// - Swapping on a non-exposed surface is undefined behaviour (at least
+//   according to the debug output that Qt (libANGLE) produces on Windows.
+//   Means that if the surface with setSwapInterval set is not the active tab
+//   we're invoking undefined behaviour when swapping and if we're not swapping
+//   then we're not syncing and end up in the busy loop again.
+//
+// - With multiple windows open this still somehow begins to feel sluggish
+//   compared to running without VSYNC enabled.
 //
 // Notes about Qt.
 // setSwapInterval is a member of QSurfaceFormat. QSurface and QOpenGLContext
@@ -81,14 +87,8 @@
 // see commit. e14c0325af44512740ad711d0c13fd276efc25b7
 
 namespace {
-    // a global flag to indicate when there's some surface with
-    // VSYNC enabled.
-    bool have_vsync = false;
     // a global flag for toggling vsync on/off.
-    bool should_have_vsync = true;
-    // global flag to indicate whether on this iteration over all gfx widgets
-    // the synced surface was swapped or not.
-    bool did_vsync_on_this_frame = false;
+    bool should_have_vsync = false;
     std::weak_ptr<QOpenGLContext> shared_context;
     std::weak_ptr<gfx::Device> shared_device;
     // current surfaces ugh.
@@ -137,17 +137,19 @@ GfxWindow::GfxWindow()
     // info, etc all provide junk values (0 for texture units.. really??)
     // Moving all context/device creation to take place after a hack delay.
     // yay! 
-
     QTimer::singleShot(10, this, &GfxWindow::doInit);
 }
 
 bool GfxWindow::haveVSYNC() const
 {
-    return have_vsync;
+    return should_have_vsync;
 }
 
 void GfxWindow::dispose()
 {
+    if (!mContext)
+        return;
+
     // Make sure this window's context is current when releasing the graphics
     // resources. If we have multiple GfxWindows each with their own context
     // it's possible that each one might have resources with the same name
@@ -162,7 +164,6 @@ void GfxWindow::dispose()
         // in order to indicate that we have vsync no more and
         // some other surface must be recreated.
         DEBUG("Lost VSYNC GfxWindow.");
-        have_vsync = false;
     }
 
     mCustomGraphicsDevice.reset();
@@ -196,30 +197,13 @@ void GfxWindow::initializeGL()
 
 void GfxWindow::paintGL()
 {
-    if (!mCustomGraphicsDevice)
+    if (!mContext)
+        return;
+    else if (!isExposed())
         return;
 
-    // Remove the check and condition for early exit and skipping of swap buffers.
-    // If the code returns early when the window is not exposed then sync to vlank
-    // is also skipped. (See comment up top about sync to vblank). Why this then
-    // matters is that if all the gfx windows are obscured/not visible, i.e. none
-    // are exposed then the editor's main loop runs unthrottle (since there's no
-    // longer sync to vblank). It looks like the easiest way to counter this issue
-    // is thus simply to omit the check for window exposure.
-    //
-    //if (!isExposed())
-    //    return;
-
-    if (should_have_vsync && !have_vsync && !mVsync)
-    {
-        recreateRenderingSurface(true);
-        have_vsync = true;
-    }
-    else if (!should_have_vsync && have_vsync && mVsync)
-    {
-        recreateRenderingSurface(false);
-        have_vsync = false;
-    }
+    ASSERT(mCustomGraphicsDevice);
+    ASSERT(mCustomGraphicsPainter);
 
     mContext->makeCurrent(this);
 
@@ -263,43 +247,30 @@ void GfxWindow::paintGL()
     // using a shared device means that this must be done now
     // centrally once per render iteration, not once per GfxWidget.
     //mCustomGraphicsDevice->CleanGarbage(60);
-
-    mContext->swapBuffers(this);
-
-    if (mVsync)
-        did_vsync_on_this_frame = true;
 }
 
-void GfxWindow::recreateRenderingSurface(bool vsync)
+void GfxWindow::CreateRenderingSurface(bool vsync)
 {
+    // native resources must be recreated. see the comment up top
+    destroy();
+
     // set swap interval value on the surface format.
     QSurfaceFormat fmt = format();
     fmt.setSwapInterval(vsync ? 1 : 0);
+
     setFormat(fmt);
-    // native resources must be recreated. see the comment up top
-    destroy();
     create();
     show();
 
     mVsync = vsync;
+    DEBUG("Created rendering surface with VSYNC set to %1", vsync);
 }
 
 void GfxWindow::doInit()
 {
-    // if we need a vsynced rendering surface but don't have
-    // any yet then this window should become one that is synced.
-    mVsync = should_have_vsync && !have_vsync;
-
-    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-    format.setSwapInterval(mVsync ? 1 : 0);
-
-    setSurfaceType(QWindow::OpenGLSurface);
-    setFormat(format);
-    destroy();
-    create();
-    show();
-
-    have_vsync = should_have_vsync;
+    if (surfaces.empty() && should_have_vsync)
+        CreateRenderingSurface(true);
+    else CreateRenderingSurface(false);
 
     auto context = shared_context.lock();
     if (!context)
@@ -340,7 +311,6 @@ void GfxWindow::doInit()
     }
     mCustomGraphicsDevice  = device;
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
-
 
     const auto w = width();
     const auto h = height();
@@ -414,25 +384,56 @@ void GfxWindow::CleanGarbage()
 // static
 void GfxWindow::BeginFrame()
 {
-    did_vsync_on_this_frame = false;
+    if (should_have_vsync)
+    {
+        bool have_vsync = false;
+        for (auto* window : surfaces)
+        {
+            if (window->mVsync)
+            {
+                have_vsync = true;
+                break;
+            }
+        }
+        if (!have_vsync && !surfaces.empty())
+        {
+            (*surfaces.begin())->CreateRenderingSurface(true);
+        }
+    }
+    else
+    {
+        for (auto* window : surfaces)
+        {
+            if (window->mVsync)
+                window->CreateRenderingSurface(false);
+        }
+    }
 }
 // static
 void GfxWindow::EndFrame()
 {
-    if (!should_have_vsync)
-        return;
-    else if (did_vsync_on_this_frame)
+    bool did_vsync = false;
+
+    for (auto* window : surfaces)
+    {
+        if (!window->mContext)
+            continue;
+        else if (!window->isExposed())
+            continue;
+
+        window->mContext->makeCurrent(window);
+        window->mContext->swapBuffers(window);
+        if (window->mVsync)
+            did_vsync = true;
+    }
+    if (should_have_vsync && did_vsync)
         return;
 
-    // which surface has vsync ?
-    for (GfxWindow* surface : surfaces)
-    {
-        if (surface->mVsync)
-        {
-            surface->mContext->swapBuffers(surface);
-            return;
-        }
-    }
+    // this is ugly but is there something else we could do?
+    // ideally wait for some time *or* until there's pending user
+    // input/message from the underlying OS.
+    // Maybe a custom QAbstractEventDispatcher implementation could work.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
