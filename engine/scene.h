@@ -34,6 +34,7 @@
 #include "engine/tree.h"
 #include "engine/types.h"
 #include "engine/enum.h"
+#include "engine/scriptvar.h"
 
 namespace game
 {

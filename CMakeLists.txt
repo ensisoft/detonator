@@ -207,7 +207,7 @@ add_library(EngineLib
     engine/renderer.cpp
     engine/entity.cpp
     engine/scene.cpp
-    engine/types.cpp
+    engine/scriptvar.cpp
     engine/physics.cpp
     engine/ui.cpp)
 add_library(UiLib
@@ -595,18 +595,18 @@ add_executable(unit_test_tree engine/unit_test/unit_test_tree.cpp base/assert.cp
 add_executable(unit_test_anim engine/unit_test/unit_test_animation.cpp
         base/assert.cpp
         engine/entity.cpp
-        engine/types.cpp
+        engine/scriptvar.cpp
         engine/animation.cpp)
 add_executable(unit_test_entity engine/unit_test/unit_test_entity.cpp
         base/assert.cpp
         engine/animation.cpp
-        engine/types.cpp
+        engine/scriptvar.cpp
         engine/entity.cpp)
 add_executable(unit_test_scene engine/unit_test/unit_test_scene.cpp
         base/assert.cpp
         engine/scene.cpp
         engine/animation.cpp
-        engine/types.cpp
+        engine/scriptvar.cpp
         engine/entity.cpp)
 add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         base/assert.cpp
@@ -615,7 +615,7 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         engine/animation.cpp
         engine/scene.cpp
         engine/entity.cpp
-        engine/types.cpp
+        engine/scriptvar.cpp
         engine/physics.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
