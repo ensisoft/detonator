@@ -59,6 +59,8 @@ public:
         data.Write("float2", mFloatProp2);
         data.Write("string", mStringProp);
     }
+    void SetName(const std::string& name)
+    {}
 private:
     std::string mClassId;
     float mFloatProp1 = 0.0f;
