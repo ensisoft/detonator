@@ -25,7 +25,7 @@
 #include "data/writer.h"
 #include "data/reader.h"
 #include "base/hash.h"
-#include "engine/types.h"
+#include "engine/scriptvar.h"
 
 namespace game
 {

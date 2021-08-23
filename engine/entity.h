@@ -42,6 +42,7 @@
 #include "engine/enum.h"
 #include "engine/animation.h"
 #include "engine/color.h"
+#include "engine/scriptvar.h"
 
 namespace game
 {
