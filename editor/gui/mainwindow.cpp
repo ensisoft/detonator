@@ -1183,6 +1183,23 @@ void MainWindow::on_actionDeleteResource_triggered()
     mWorkspace->DeleteResources(selected);
 }
 
+void MainWindow::on_actionRenameResource_triggered()
+{
+    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    for (int i=0; i<selected.size(); ++i)
+    {
+        auto& resource = mWorkspace->GetResource(selected[i].row());
+
+        bool accepted = false;
+        const auto& name = QInputDialog::getText(this, tr("Rename Resource"),
+            tr("Resource Name:"), QLineEdit::Normal, resource.GetName(), &accepted);
+        if (!accepted) continue;
+
+        resource.SetName(name);
+        mWorkspace->UpdateResource(&resource);
+    }
+}
+
 void MainWindow::on_actionDuplicateResource_triggered()
 {
     QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
@@ -1459,6 +1476,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
     mUI.actionExportJSON->setEnabled(!indices.isEmpty());
+    mUI.actionRenameResource->setEnabled(!indices.empty());
 
     // disable edit actions if a non-native resources have been
     // selected. these need to be opened through an external editor.
@@ -1506,6 +1524,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
     menu.addSeparator();
+    menu.addAction(mUI.actionRenameResource);
     menu.addAction(mUI.actionDuplicateResource);
     menu.addAction(mUI.actionDeleteResource);
     menu.addAction(mUI.actionExportJSON);
