@@ -2421,10 +2421,10 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kColor0",
+          "name": "kBaseColor",
           "value": {
             "a": 1.0,
-            "b": 0.0,
+            "b": 0.009170671924948692,
             "g": 0.0,
             "r": 1.0
           }
@@ -2434,10 +2434,10 @@
           "value": 1.0
         },
         {
-          "name": "kBaseColor",
+          "name": "kColor0",
           "value": {
             "a": 1.0,
-            "b": 0.009170671924948692,
+            "b": 0.0,
             "g": 0.0,
             "r": 1.0
           }
@@ -2581,10 +2581,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kGamma",
-          "value": 1.0
-        },
-        {
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
@@ -2592,6 +2588,10 @@
             "g": 0.607797384262085,
             "r": 0.05098039284348488
           }
+        },
+        {
+          "name": "kGamma",
+          "value": 1.0
         }
       ],
       "wrap_x": "Clamp",
@@ -2859,7 +2859,8 @@
         "node": null
       },
       "resource_id": "UWF4u1fYHa",
-      "resource_name": "Game"
+      "resource_name": "Game",
+      "script_file": ""
     },
     {
       "id": "Z2zrRug3HP",
@@ -2914,7 +2915,8 @@
         "node": null
       },
       "resource_id": "Z2zrRug3HP",
-      "resource_name": "Menu"
+      "resource_name": "Menu",
+      "script_file": ""
     }
   ],
   "scripts": [

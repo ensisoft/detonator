@@ -350,6 +350,9 @@ namespace game
         // Get the human readable name of the class.
         std::string GetName() const
         { return mName; }
+        // Get the associated script file ID.
+        std::string GetScriptFileId() const
+        { return mScriptFile; }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
@@ -360,6 +363,12 @@ namespace game
 
         void SetName(const std::string& name)
         { mName = name; }
+        void SetScriptFileId(const std::string& file)
+        { mScriptFile = file; }
+        bool HasScriptFile() const
+        { return !mScriptFile.empty(); }
+        void ResetScriptFile()
+        { mScriptFile.clear(); }
 
         // Serialize the scene into JSON.
         void IntoJson(data::Writer& data) const;
@@ -380,6 +389,8 @@ namespace game
         std::string mClassId;
         // the human readable name of the class.
         std::string mName;
+        // the id of the associated script file (if any)
+        std::string mScriptFile;
         // storing by unique ptr so that the pointers
         // given to the render tree don't become invalid
         // when new nodes are added to the scene.

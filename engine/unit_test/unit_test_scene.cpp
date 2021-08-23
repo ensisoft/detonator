@@ -121,6 +121,8 @@ void unit_test_scene_class()
 
     // build-up a test scene with some scene nodes.
     game::SceneClass klass;
+    klass.SetName("my scene");
+    klass.SetScriptFileId("script.lua");
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
     {
@@ -175,6 +177,8 @@ void unit_test_scene_class()
         klass.IntoJson(json);
         auto ret = game::SceneClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
+        TEST_REQUIRE(ret->GetName() == "my scene");
+        TEST_REQUIRE(ret->GetScriptFileId() == "script.lua");
         TEST_REQUIRE(ret->GetNode(0).GetName() == "root");
         TEST_REQUIRE(ret->GetNode(1).GetName() == "child_1");
         TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
@@ -205,6 +209,7 @@ void unit_test_scene_class()
         auto clone = klass.Clone();
         TEST_REQUIRE(clone.GetHash() != klass.GetHash());
         TEST_REQUIRE(clone.GetId() != klass.GetId());
+        TEST_REQUIRE(clone.GetName() == klass.GetName());
         TEST_REQUIRE(clone.GetNumNodes() == 3);
         TEST_REQUIRE(clone.GetNode(0).GetName() == "root");
         TEST_REQUIRE(clone.GetNode(1).GetName() == "child_1");

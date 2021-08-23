@@ -22,6 +22,8 @@
 #  include <QPoint>
 #  include <QMouseEvent>
 #  include <QMessageBox>
+#  include <QFile>
+#  include <QTextStream>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
@@ -39,6 +41,7 @@
 #include "editor/gui/treemodel.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/scenewidget.h"
+#include "editor/gui/scriptwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
@@ -340,7 +343,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 
     RebuildMenus();
     RebuildCombos();
+
+    DisplaySceneProperties();
     DisplayCurrentNodeProperties();
+    DisplayCurrentCameraLocation();
 }
 
 SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -354,12 +360,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     mOriginalHash = mState.scene.GetHash();
     mScriptVarModel->Reset();
 
-    const auto vars = mState.scene.GetNumScriptVars();
-    SetEnabled(mUI.btnEditScriptVar, vars > 0);
-    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
-
-    SetValue(mUI.name, content->GetName());
-    SetValue(mUI.ID, content->GetId());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -373,9 +373,12 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
-    setWindowTitle(resource.GetName());
+
 
     UpdateResourceReferences();
+    DisplayCurrentNodeProperties();
+    DisplaySceneProperties();
+    DisplayCurrentCameraLocation();
 
     mRenderTree.reset(new TreeModel(mState.scene));
     mUI.tree->SetModel(mRenderTree.get());
@@ -416,8 +419,6 @@ void SceneWidget::AddActions(QMenu& menu)
 
 bool SceneWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Scene", mUI.name);
-    settings.saveWidget("Scene", mUI.ID);
     settings.saveWidget("Scene", mUI.scaleX);
     settings.saveWidget("Scene", mUI.scaleY);
     settings.saveWidget("Scene", mUI.rotation);
@@ -441,8 +442,6 @@ bool SceneWidget::SaveState(Settings& settings) const
 }
 bool SceneWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Scene", mUI.name);
-    settings.loadWidget("Scene", mUI.ID);
     settings.loadWidget("Scene", mUI.scaleX);
     settings.loadWidget("Scene", mUI.scaleY);
     settings.loadWidget("Scene", mUI.rotation);
@@ -455,7 +454,6 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.loadWidget("Scene", mUI.widget);
     settings.getValue("Scene", "camera_offset_x", &mState.camera_offset_x);
     settings.getValue("Scene", "camera_offset_y", &mState.camera_offset_y);
-    setWindowTitle(mUI.name->text());
     mCameraWasLoaded = true;
 
     std::string base64;
@@ -477,13 +475,13 @@ bool SceneWidget::LoadState(const Settings& settings)
 
     mState.scene  = std::move(ret.value());
     mOriginalHash = mState.scene.GetHash();
+
     UpdateResourceReferences();
+    DisplaySceneProperties();
+    DisplayCurrentNodeProperties();
+    DisplayCurrentCameraLocation();
 
-    const auto vars = mState.scene.GetNumScriptVars();
-    SetEnabled(mUI.btnEditScriptVar, vars > 0);
-    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     mScriptVarModel->Reset();
-
     mRenderTree.reset(new TreeModel(mState.scene));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
@@ -664,6 +662,7 @@ void SceneWidget::Undo()
     mUndoStack.pop_back();
     mScriptVarModel->Reset();
     DisplayCurrentNodeProperties();
+    DisplaySceneProperties();
     NOTE("Undo!");
 }
 
@@ -894,6 +893,97 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
         node->SetLayer(layer - 1);
     }
     DisplayCurrentNodeProperties();
+}
+
+void SceneWidget::on_btnResetScript_clicked()
+{
+    mState.scene.ResetScriptFile();
+    SetValue(mUI.scriptFile, -1);
+}
+void SceneWidget::on_btnAddScript_clicked()
+{
+    app::Script script;
+    // use the script ID as the file name so that we can
+    // avoid naming clashes and always find the correct lua
+    // file even if the entity is later renamed.
+    const auto& filename = app::FromUtf8(script.GetId());
+    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
+    const auto& filepath = mState.workspace->MapFileToFilesystem(fileuri);
+    const auto& name = GetValue(mUI.name);
+    const QFileInfo info(filepath);
+    if (info.exists())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle(tr("File already exists"));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
+    }
+
+    QFile io;
+    io.setFileName(filepath);
+    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        ERROR("Failed to open '%1' for writing (%2)", filepath, io.error());
+        ERROR(io.errorString());
+        QMessageBox msg;
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle(tr("Error Occurred"));
+        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setStandardButtons(QMessageBox::Ok);
+        return;
+    }
+    QString var = name;
+    var.replace(' ', '_');
+    var = var.toLower();
+
+    QTextStream stream(&io);
+    stream.setCodec("UTF-8");
+    stream << QString("-- Scene '%1' script.\n\n").arg(name);
+    stream << QString("-- This script will be called for every instance of '%1'\n"
+                      "-- during gameplay.\n").arg(name);
+    stream << "-- You're free to delete functions you don't need.\n\n";
+    stream << "-- Called when the scene begins play.\n";
+    stream << QString("function BeginPlay(%1)\nend\n\n").arg(var);
+    stream << "-- Called when the scene ends play.\n";
+    stream << QString("function EndPlay(%1)\nend\n\n").arg(var);
+    stream << "-- Called when a new entity has been spawned in the scene.\n";
+    stream << QString("function SpawnEntity(%1, entity)\n\nend\n\n").arg(var);
+    stream << "-- Called when an entity has been killed from the scene.\n";
+    stream << QString("function KillEntity(%1, entity)\n\nend\n\n").arg(var);
+    stream << "-- Called on every low frequency game tick.\n";
+    stream << QString("function Tick(%1, game_time, dt)\n\nend\n\n").arg(var);
+    stream << "-- Called on every iteration of game loop.\n";
+    stream << QString("function Update(%1, game_time, dt)\n\nend\n\n").arg(var);
+    stream << "-- Called on collision events with other objects.\n";
+    stream << QString("function OnBeginContact(%1, entity, entity_node, other, other_node)\nend\n\n").arg(var);
+    stream << "-- Called on collision events with other objects.\n";
+    stream << QString("function OnEndContact(%1, entity, entity_node, other, other_node)\nend\n\n").arg(var);
+    stream << "-- Called on key down events.\n";
+    stream << QString("function OnKeyDown(%1, symbol, modifier_bits)\nend\n\n").arg(var);
+    stream << "-- Called on key up events.\n";
+    stream << QString("function OnKeyUp(%1, symbol, modifier_bits)\nend\n\n").arg(var);
+    stream << "-- Called on mouse button press events.\n";
+    stream << QString("function OnMousePress(%1, mouse)\nend\n\n").arg(var);
+    stream << "-- Called on mouse button release events.\n";
+    stream << QString("function OnMouseRelease(%1, mouse)\nend\n\n").arg(var);
+    stream << "-- Called on mouse move events.\n";
+    stream << QString("function OnMouseMove(%1, mouse)\nend\n\n").arg(var);
+
+    io.flush();
+    io.close();
+
+    script.SetFileURI(app::ToUtf8(fileuri));
+    app::ScriptResource resource(script, name);
+    mState.workspace->SaveResource(resource);
+    mState.scene.SetScriptFileId(script.GetId());
+
+    ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
+    emit OpenNewWidget(widget);
+
+    SetValue(mUI.scriptFile, ListItemId(script.GetId()));
 }
 
 void SceneWidget::on_btnNewScriptVar_clicked()
@@ -1160,6 +1250,8 @@ void SceneWidget::NewResourceAvailable(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
+    DisplaySceneProperties();
+    DisplayCurrentNodeProperties();
 }
 void SceneWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
@@ -1167,6 +1259,7 @@ void SceneWidget::ResourceToBeDeleted(const app::Resource* resource)
     RebuildCombos();
     RebuildMenus();
     DisplayCurrentNodeProperties();
+    DisplaySceneProperties();
 }
 void SceneWidget::ResourceUpdated(const app::Resource* resource)
 {
@@ -1469,6 +1562,18 @@ void SceneWidget::DisplayCurrentNodeProperties()
     }
 }
 
+void SceneWidget::DisplaySceneProperties()
+{
+    const auto vars = mState.scene.GetNumScriptVars();
+    SetEnabled(mUI.btnEditScriptVar, vars > 0);
+    SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+    SetValue(mUI.name, mState.scene.GetName());
+    SetValue(mUI.ID, mState.scene.GetId());
+    SetValue(mUI.scriptFile, ListItemId(mState.scene.GetScriptFileId()));
+
+    setWindowTitle(GetValue(mUI.name));
+}
+
 void SceneWidget::DisplayCurrentCameraLocation()
 {
     const auto width  = mUI.widget->width();
@@ -1524,6 +1629,7 @@ void SceneWidget::RebuildMenus()
 void SceneWidget::RebuildCombos()
 {
     SetList(mUI.nodeEntity, mState.workspace->ListUserDefinedEntities());
+    SetList(mUI.scriptFile, mState.workspace->ListUserDefinedScripts());
 }
 
 void SceneWidget::UpdateResourceReferences()
@@ -1542,6 +1648,15 @@ void SceneWidget::UpdateResourceReferences()
         }
         // resolve the runtime entity klass object reference.
         node.SetEntity(klass);
+    }
+    if (mState.scene.HasScriptFile())
+    {
+        const auto& scriptId = mState.scene.GetScriptFileId();
+        if (!mState.workspace->IsValidScript(scriptId))
+        {
+            WARN("Scene '%1' script is no longer available.", mState.scene.GetName());
+            mState.scene.ResetScriptFile();
+        }
     }
 }
 

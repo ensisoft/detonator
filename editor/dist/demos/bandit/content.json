@@ -10376,6 +10376,7 @@
       },
       "resource_id": "vWm1hXNdOD",
       "resource_name": "My Scene",
+      "script_file": "",
       "vars": [
         {
           "name": "foobar",

@@ -166,6 +166,8 @@ namespace app
 
         using ResourceList = std::vector<ListItem>;
 
+        // Get a list of user defined script resources.
+        ResourceList ListUserDefinedScripts() const;
         // Get a list of user defined material names in the workspace.
         ResourceList ListUserDefinedMaterials() const;
         // Get a list of all material names in the workspace
