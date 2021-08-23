@@ -374,7 +374,19 @@ namespace app
         virtual Resource::Type GetType() const override
         { return TypeValue; }
         virtual void SetName(const QString& name) override
-        { mName = name; }
+        {
+            mName = name;
+            // not all underlying resource types have the name
+            // property. so hence this mess here.
+            if constexpr (TypeValue == Resource::Type::Entity)
+                mContent->SetName(app::ToUtf8(name));
+            else if constexpr (TypeValue == Resource::Type::Scene)
+                mContent->SetName(app::ToUtf8(name));
+            else if constexpr (TypeValue == Resource::Type::UI)
+                mContent->SetName(app::ToUtf8(name));
+            else if constexpr (TypeValue == Resource::Type::AudioGraph)
+                mContent->SetName(app::ToUtf8(name));
+        }
         virtual void UpdateFrom(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const GameResource*>(&other);
