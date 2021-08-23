@@ -87,6 +87,8 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
+        void on_btnResetScript_clicked();
+        void on_btnAddScript_clicked();
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
@@ -125,6 +127,7 @@ namespace gui
         bool KeyPress(QKeyEvent* key);
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
+        void DisplaySceneProperties();
         void UncheckPlacementActions();
         void TranslateCurrentNode(float dx, float dy);
         void TranslateCamera(float dx, float dy);

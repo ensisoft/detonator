@@ -550,9 +550,26 @@ void ScriptEngine::BeginPlay(Scene* scene)
         envs[klass.GetId()] = std::move(env);
         DEBUG("Entity class '%1' script loaded.", klass.GetName());
     }
+
+    std::unique_ptr<sol::environment> scene_env;
+    if ((*scene)->HasScriptFile())
+    {
+        const auto& klass = scene->GetClass();
+        const auto& script = klass.GetScriptFileId();
+        const auto& file   = base::JoinPath(mLuaPath, script + ".lua");
+        if (!base::FileExists(file)) {
+            ERROR("Scene '%1' Lua file '%2' was not found.", klass.GetName(), file);
+        } else {
+            scene_env = std::make_unique<sol::environment>(*state, sol::create, state->globals());
+            state->script_file(file, *scene_env);
+            DEBUG("Scene class '%1' script loaded.", klass.GetName());
+        }
+    }
+
     // careful here, make sure to clean up the environment objects
     // first since they depend on lua state. changing the order
     // of these two lines will crash.
+    mSceneEnv = std::move(scene_env);
     mTypeEnvs = std::move(envs);
     mLuaState = std::move(state);
 
@@ -566,9 +583,15 @@ void ScriptEngine::BeginPlay(Scene* scene)
     auto engine = table.new_usertype<ScriptEngine>("Engine");
     BindEngine(engine, *this);
 
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)["BeginPlay"], scene);
+
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)["SpawnEntity"], scene, entity);
+
         const auto& klass   = entity->GetClass();
         const auto& klassId = klass.GetId();
         auto it = mTypeEnvs.find(klassId);
@@ -581,6 +604,10 @@ void ScriptEngine::BeginPlay(Scene* scene)
 
 void ScriptEngine::EndPlay(Scene* scene)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)["EndPlay"], scene);
+
+    mSceneEnv.reset();
     mTypeEnvs.clear();
     mScene = nullptr;
     (*mLuaState)["Scene"] = nullptr;
@@ -588,6 +615,9 @@ void ScriptEngine::EndPlay(Scene* scene)
 
 void ScriptEngine::Tick(double game_time, double dt)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt);
+
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
@@ -601,6 +631,9 @@ void ScriptEngine::Tick(double game_time, double dt)
 }
 void ScriptEngine::Update(double game_time, double dt)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)["Update"], mScene, game_time, dt);
+
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
@@ -622,6 +655,9 @@ void ScriptEngine::BeginLoop()
         auto* entity = &mScene->GetEntity(i);
         if (!entity->TestFlag(game::Entity::ControlFlags::Spawned))
             continue;
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)["SpawnEntity"], mScene, entity);
+
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["BeginPlay"], entity, mScene);
@@ -639,6 +675,9 @@ void ScriptEngine::EndLoop()
          auto* entity = &mScene->GetEntity(i);
          if (!entity->TestFlag(game::Entity::ControlFlags::Killed))
              continue;
+         if (mSceneEnv)
+             CallLua((*mSceneEnv)["KillEntity"], mScene, entity);
+
          if (auto* env = GetTypeEnv(entity->GetClass()))
          {
              CallLua((*env)["EndPlay"], entity, mScene);
@@ -679,6 +718,9 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
     const auto& klassA = entityA->GetClass();
     const auto& klassB = entityB->GetClass();
 
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)[function](mScene, entityA, nodeA, entityB, nodeB));
+
     if (auto* env = GetTypeEnv(klassA))
     {
         CallLua((*env)[function], entityA, nodeA, entityB, nodeB);
@@ -716,6 +758,11 @@ void ScriptEngine::OnMouseRelease(const MouseEvent& mouse)
 template<typename KeyEvent>
 void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)[method], mScene,
+                static_cast<int>(key.symbol),
+                static_cast<int>(key.modifiers.value()));
+
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
@@ -732,6 +779,9 @@ void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEve
 
 void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)[method], mScene, mouse);
+
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);

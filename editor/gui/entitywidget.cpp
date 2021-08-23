@@ -507,7 +507,6 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.loadWidget("Entity", mUI.widget);
     settings.getValue("Entity", "camera_offset_x", &mState.camera_offset_x);
     settings.getValue("Entity", "camera_offset_y", &mState.camera_offset_y);
-    setWindowTitle(mUI.entityName->text());
     mCameraWasLoaded = true;
 
     std::string base64;
@@ -553,7 +552,6 @@ bool EntityWidget::LoadState(const Settings& settings)
     DisplayCurrentCameraLocation();
 
     mScriptVarModel->Reset();
-
     mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
@@ -1378,7 +1376,7 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
 {
     if (index == -1)
     {
-        mState.entity->ResetIdleTrack();
+        mState.entity->ResetScriptFile();
         return;
     }
     mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));

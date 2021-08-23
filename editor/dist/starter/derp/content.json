@@ -1031,7 +1031,8 @@
         "node": null
       },
       "resource_id": "iiKBwhkDbI",
-      "resource_name": "My Scene"
+      "resource_name": "My Scene",
+      "script_file": ""
     }
   ],
   "scripts": [

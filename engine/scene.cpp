@@ -121,6 +121,7 @@ SceneClass::SceneClass(const SceneClass& other)
 
     mClassId    = other.mClassId;
     mName       = other.mName;
+    mScriptFile = other.mScriptFile;
     mScriptVars = other.mScriptVars;
     for (const auto& node : other.mNodes)
     {
@@ -487,6 +488,7 @@ size_t SceneClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mScriptFile);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const SceneNodeClass* node) {
@@ -503,6 +505,7 @@ void SceneClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mClassId);
     data.Write("name", mName);
+    data.Write("script_file", mScriptFile);
     for (const auto& node : mNodes)
     {
         auto chunk = data.NewWriteChunk();
@@ -525,7 +528,8 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
 {
     SceneClass ret;
     if (!data.Read("id", &ret.mClassId) ||
-        !data.Read("name", &ret.mName))
+        !data.Read("name", &ret.mName) ||
+        !data.Read("script_file", &ret.mScriptFile))
         return std::nullopt;
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
@@ -564,7 +568,8 @@ SceneClass SceneClass::Clone() const
         ret.mNodes.push_back(std::move(clone));
     }
     ret.mScriptVars = mScriptVars;
-
+    ret.mScriptFile = mScriptFile;
+    ret.mName       = mName;
     ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
         return map[node];
     });
@@ -578,6 +583,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
 
     SceneClass tmp(other);
     mClassId    = std::move(tmp.mClassId);
+    mScriptFile = std::move(tmp.mScriptFile);
     mName       = std::move(tmp.mName);
     mNodes      = std::move(tmp.mNodes);
     mScriptVars = std::move(tmp.mScriptVars);

@@ -1397,6 +1397,11 @@ Workspace::ResourceList Workspace::ListPrimitiveMaterials() const
     return ListResources(Resource::Type::Material, true, true);
 }
 
+Workspace::ResourceList Workspace::ListUserDefinedScripts() const
+{
+    return ListResources(Resource::Type::Script, false, true);
+}
+
 Workspace::ResourceList Workspace::ListUserDefinedMaterials() const
 {
     return ListResources(Resource::Type::Material, false, true);
