@@ -525,29 +525,36 @@ void ScriptEngine::BeginPlay(Scene* scene)
     // a and b, the same script foobar.lua will be invoked
     // for a total of two times (per script function), once
     // per each instance.
-    std::unordered_map<std::string, std::unique_ptr<sol::environment>> envs;
-    std::unordered_set<std::string> ids;
+    std::unordered_map<std::string, std::shared_ptr<sol::environment>> entity_env_map;
+    std::unordered_map<std::string, std::shared_ptr<sol::environment>> script_env_map;
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {
         const auto& entity = scene->GetEntity(i);
         const auto& klass  = entity.GetClass();
-        if (ids.find(klass.GetId()) != ids.end())
+        // have we already seen this entity class id?
+        if (entity_env_map.find(klass.GetId()) != entity_env_map.end())
             continue;
-        ids.insert(klass.GetId());
+
         if (!klass.HasScriptFile())
             continue;
-        else if (envs.find(klass.GetId()) != envs.end())
-            continue;
+
         const auto& script = klass.GetScriptFileId();
-        const auto& file = base::JoinPath(mLuaPath, script + ".lua");
-        if (!base::FileExists(file)) {
-            ERROR("Entity '%1' Lua file '%2' was not found.", klass.GetName(), file);
-            continue;
+        auto it = script_env_map.find(script);
+        if (it == script_env_map.end())
+        {
+            const auto& file = base::JoinPath(mLuaPath, script + ".lua");
+            if (!base::FileExists(file))
+            {
+                ERROR("Entity '%1' Lua file '%2' was not found.", klass.GetName(), file);
+                continue;
+            }
+            auto env = std::make_shared<sol::environment>(*state, sol::create, state->globals());
+            state->script_file(file, *env);
+            it = script_env_map.insert({script, env}).first;
+            //DEBUG("Loaded Lua script file '%1'.", file);
         }
-        auto env = std::make_unique<sol::environment>(*state, sol::create, state->globals());
-        state->script_file(file, *env);
-        envs[klass.GetId()] = std::move(env);
+        entity_env_map[klass.GetId()] = it->second;
         DEBUG("Entity class '%1' script loaded.", klass.GetName());
     }
 
@@ -570,7 +577,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     // first since they depend on lua state. changing the order
     // of these two lines will crash.
     mSceneEnv = std::move(scene_env);
-    mTypeEnvs = std::move(envs);
+    mTypeEnvs = std::move(entity_env_map);
     mLuaState = std::move(state);
 
     mScene    = scene;
