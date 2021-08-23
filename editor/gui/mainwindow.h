@@ -120,6 +120,7 @@ namespace gui
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();
         void on_actionDeleteResource_triggered();
+        void on_actionRenameResource_triggered();
         void on_actionDuplicateResource_triggered();
         void on_actionSaveWorkspace_triggered();
         void on_actionLoadWorkspace_triggered();
