@@ -932,6 +932,7 @@ uniform vec2 kTextureScale;
 uniform vec2 kTextureVelocityXY;
 uniform float kTextureVelocityZ;
 uniform ivec2 kTextureWrap;
+uniform vec2 kAlphaMask;
 
 varying vec2 vTexCoord;
 varying float vRandomValue;
@@ -943,7 +944,7 @@ varying float vAlpha;
 // in a packed texture. (or whenever we're using texture rects)
 // This however can introduce some sampling artifacts depending
 // on fhe filter.
-// TODO: any way to fix those artifacs ?
+// TODO: any way to fix those artifacts ?
 vec2 WrapTextureCoords(vec2 coords, vec2 box)
 {
   float x = coords.x;
@@ -1004,7 +1005,11 @@ void main()
     // only the alpha channel later.
     vec4 tex0 = texture2D(kTexture0, c1);
     vec4 tex1 = texture2D(kTexture1, c2);
-    vec4 color = mix(tex0, tex1, kBlendCoeff) * kBaseColor;
+
+    vec4 col0 = mix(kBaseColor * tex0, kBaseColor * tex0.a, kAlphaMask[0]);
+    vec4 col1 = mix(kBaseColor * tex1, kBaseColor * tex1.a, kAlphaMask[1]);
+
+    vec4 color = mix(col0, col1, kBlendCoeff);
     color.a *= vAlpha;
 
     // apply gamma (in)correction.
@@ -1076,6 +1081,8 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
     TextureMap::BoundState binds;
     mSprite.BindTextures(ts, device,  binds);
 
+    glm::vec2 alpha_mask;
+
     bool need_software_wrap = true;
     for (unsigned i=0; i<2; ++i)
     {
@@ -1086,6 +1093,9 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
         texture->SetFilter(mMagFilter);
         texture->SetWrapX(mWrapX);
         texture->SetWrapY(mWrapY);
+
+        alpha_mask[i] = texture->GetFormat() == Texture::Format::Grayscale
+                        ? 1.0f : 0.0f;
 
         const auto& box = binds.rects[i];
         const float x  = box.GetX();
@@ -1112,8 +1122,10 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
     program.SetUniform("kBlendCoeff", mBlendFrames ? binds.blend_coefficient : 0.0f);
     program.SetUniform("kRuntime", (float)state.material_time);
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
+    program.SetUniform("kAlphaMask", alpha_mask);
     program.SetUniform("kApplyRandomParticleRotation",
                     state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
+
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
     {
