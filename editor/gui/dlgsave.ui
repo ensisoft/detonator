@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Save Changes?</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/32x32_ico_png/save.png</normaloff>:/32x32_ico_png/save.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -80,9 +84,16 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btnAccept">
+      <widget class="QPushButton" name="btnYes">
        <property name="text">
-        <string>OK</string>
+        <string>Yes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnNo">
+       <property name="text">
+        <string>No</string>
        </property>
       </widget>
      </item>
@@ -102,9 +113,12 @@
   <tabstop>btnSelectNone</tabstop>
   <tabstop>listWidget</tabstop>
   <tabstop>chkSaveAutomatically</tabstop>
-  <tabstop>btnAccept</tabstop>
+  <tabstop>btnYes</tabstop>
+  <tabstop>btnNo</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../resource/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

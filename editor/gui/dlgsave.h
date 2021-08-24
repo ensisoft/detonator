@@ -40,7 +40,8 @@ namespace gui
     private slots:
         void on_btnSelectAll_clicked();
         void on_btnSelectNone_clicked();
-        void on_btnAccept_clicked();
+        void on_btnYes_clicked();
+        void on_btnNo_clicked();
         void on_btnCancel_clicked();
     private:
         Ui::DlgSave mUI;

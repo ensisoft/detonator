@@ -1651,6 +1651,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         }
     }
 
+    // The actual saving of resources is in the dlgsave !
     if (!unsaved.empty())
     {
         DlgSave dlg(this, unsaved);
