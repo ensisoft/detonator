@@ -68,7 +68,7 @@ void DlgSave::on_btnSelectNone_clicked()
         item->setCheckState(Qt::Unchecked);
     }
 }
-void DlgSave::on_btnAccept_clicked()
+void DlgSave::on_btnYes_clicked()
 {
     for (int i=0; i<GetCount(mUI.listWidget); ++i)
     {
@@ -79,6 +79,11 @@ void DlgSave::on_btnAccept_clicked()
     }
     accept();
 }
+void DlgSave::on_btnNo_clicked()
+{
+    accept();
+}
+
 void DlgSave::on_btnCancel_clicked()
 {
     reject();
