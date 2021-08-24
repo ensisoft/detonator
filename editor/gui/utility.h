@@ -340,6 +340,23 @@ inline void SetValue(QSpinBox* spin, int value)
     spin->setValue(value);
 }
 
+inline void SetMin(QDoubleSpinBox* spin, double min)
+{
+    QSignalBlocker s(spin);
+    spin->setMinimum(min);
+}
+inline void SetMax(QDoubleSpinBox* spin, double min)
+{
+    QSignalBlocker s(spin);
+    spin->setMinimum(min);
+}
+inline void SetMinMax(QDoubleSpinBox* spin, double min, double max)
+{
+    QSignalBlocker s(spin);
+    spin->setMinimum(min);
+    spin->setMaximum(max);
+}
+
 inline void SetValue(QSlider* slider, int value)
 {
     QSignalBlocker s(slider);
