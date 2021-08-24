@@ -100,6 +100,7 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
+        void on_trackName_textChanged(const QString&);
         void on_duration_valueChanged(double value);
         void on_delay_valueChanged(double value);
         void on_looping_stateChanged(int);
@@ -139,11 +140,15 @@ namespace gui
         void MouseRelease(QMouseEvent* mickey);
         bool KeyPress(QKeyEvent* key);
         void UpdateTransformActuatorUI();
+        void UpdateTrackUI();
         void SetSelectedActuatorProperties();
+        void SetActuatorUIEnabled(bool enabled);
+        void SetActuatorUIDefaults(const std::string& nodeId);
         void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
-        void AddActuator(const std::string& timelineId, const std::string& nodeId,
-                         game::ActuatorClass::Type type,
-                         float start_time, float duration);
+        void AddActuatorFromUI(const std::string& timelineId, const std::string& nodeId,
+                               game::ActuatorClass::Type type,
+                               float start_time, float duration);
+        void DisplayCurrentCameraLocation();
         game::EntityNode* GetCurrentNode();
     private:
         Ui::AnimationTrack mUI;
@@ -174,6 +179,7 @@ namespace gui
             std::vector<Timeline> timelines;
             std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;
+        bool mCameraWasLoaded = false;
         // Current time accumulator.
         float mCurrentTime = 0.0f;
         // Interpolation variables for smoothing view rotations.
@@ -181,9 +187,8 @@ namespace gui
         float mViewTransformRotation = 0.0f;
         // Entity object is used render the animation track
         // while it's being edited. We use an entity object
-        // instead of the entity class object is because there
-        // should be no changes to the entity class object's
-        // render tree. (i.e. node transformations)
+        // instead of the entity class object because there
+        // should be no changes in the entity class object.
         std::unique_ptr<game::Entity> mEntity;
         // State enumeration for the playback state.
         enum class PlayState {
