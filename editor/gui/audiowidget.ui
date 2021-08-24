@@ -528,7 +528,7 @@
            </widget>
           </item>
           <item row="11" column="1">
-           <widget class="QSpinBox" name="time">
+           <widget class="QSpinBox" name="startTime">
             <property name="minimum">
              <number>0</number>
             </property>
@@ -827,7 +827,7 @@
   <tabstop>frequency</tabstop>
   <tabstop>duration</tabstop>
   <tabstop>delay</tabstop>
-  <tabstop>time</tabstop>
+  <tabstop>startTime</tabstop>
   <tabstop>effect</tabstop>
   <tabstop>afChannels</tabstop>
   <tabstop>afSampleRate</tabstop>
