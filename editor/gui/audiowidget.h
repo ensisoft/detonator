@@ -135,6 +135,7 @@ namespace gui
         void on_frequency_valueChanged(int);
         void on_duration_valueChanged(int);
         void on_delay_valueChanged(int);
+        void on_startTime_valueChanged(int);
         void on_effect_currentIndexChanged(int);
 
         void SceneSelectionChanged();

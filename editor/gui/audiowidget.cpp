@@ -1710,6 +1710,11 @@ void AudioWidget::on_delay_valueChanged(int)
     SetSelectedElementProperties();
 }
 
+void AudioWidget::on_startTime_valueChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
 void AudioWidget::on_effect_currentIndexChanged(int)
 {
     SetSelectedElementProperties();
@@ -1803,7 +1808,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.frequency, 0);
     SetValue(mUI.duration, 0);
     SetValue(mUI.delay, 0);
-    SetValue(mUI.time, 0);
+    SetValue(mUI.startTime, 0);
     SetValue(mUI.afChannels,   QString(""));
     SetValue(mUI.afSampleRate, QString(""));
     SetValue(mUI.afFrames,     QString(""));
@@ -1818,7 +1823,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetEnabled(mUI.frequency, false);
     SetEnabled(mUI.duration, false);
     SetEnabled(mUI.delay, false);
-    SetEnabled(mUI.time, false);
+    SetEnabled(mUI.startTime, false);
     SetEnabled(mUI.effect, false);
     SetEnabled(mUI.audioFile, false);
     SetEnabled(mUI.actionDelete, false);
@@ -1916,8 +1921,8 @@ void AudioWidget::GetSelectedElementProperties()
     }
     if (const auto* val = item->GetArgValue<unsigned>("time"))
     {
-        SetEnabled(mUI.time, true);
-        SetValue(mUI.time, *val);
+        SetEnabled(mUI.startTime, true);
+        SetValue(mUI.startTime, *val);
     }
     if (const auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
     {
@@ -1979,7 +1984,7 @@ void AudioWidget::SetSelectedElementProperties()
     if (auto* val = item->GetArgValue<unsigned>("delay"))
         *val = GetValue(mUI.delay);
     if (auto* val = item->GetArgValue<unsigned>("time"))
-        *val = GetValue(mUI.time);
+        *val = GetValue(mUI.startTime);
     if (auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
         *val = GetValue(mUI.effect);
 
