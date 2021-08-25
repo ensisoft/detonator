@@ -120,6 +120,9 @@ namespace game
         void ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse) const;
         void ApplyImpulseToCenter(const std::string& node, const glm::vec2& impulse) const;
 
+        void SetLinearVelocity(const EntityNode& node, const glm::vec2& velocity) const;
+        void SetLinearVelocity(const std::string& node, const glm::vec2& velocity) const;
+
         // Initialize the physics world based on the scene.
         // The scene is traversed and then for each scene entity
         // that has a rigid bodies a physics simulation body is
