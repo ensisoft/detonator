@@ -37,12 +37,12 @@
 #include "base/math.h"
 #include "base/hash.h"
 #include "data/fwd.h"
-#include "engine/tree.h"
-#include "engine/types.h"
-#include "engine/enum.h"
-#include "engine/animation.h"
-#include "engine/color.h"
-#include "engine/scriptvar.h"
+#include "game/tree.h"
+#include "game/types.h"
+#include "game/enum.h"
+#include "game/animation.h"
+#include "game/color.h"
+#include "game/scriptvar.h"
 
 namespace game
 {

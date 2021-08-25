@@ -28,12 +28,9 @@
 #include <vector>
 #include <unordered_map>
 
-class b2World;
+#include "graphics/fwd.h"
 
-namespace gfx {
-    class Painter;
-    class Transform;
-}
+class b2World;
 
 namespace game
 {

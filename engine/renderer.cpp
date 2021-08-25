@@ -30,8 +30,8 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "engine/classlib.h"
-#include "engine/entity.h"
-#include "engine/scene.h"
+#include "game/entity.h"
+#include "game/scene.h"
 #include "engine/renderer.h"
 
 namespace game

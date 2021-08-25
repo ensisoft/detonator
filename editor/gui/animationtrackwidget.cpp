@@ -38,7 +38,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/tool.h"
-#include "engine/animation.h"
+#include "game/animation.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
 

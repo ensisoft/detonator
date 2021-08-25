@@ -26,9 +26,9 @@
 #include "graphics/material.h"
 #include "engine/physics.h"
 #include "engine/loader.h"
-#include "engine/types.h"
-#include "engine/scene.h"
-#include "engine/transform.h"
+#include "game/types.h"
+#include "game/scene.h"
+#include "game/transform.h"
 
 // ADL lookup for math::FindConvexHull in the global
 // namespace for box2d

@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <string>
 
-#include "engine/types.h"
+#include "game/types.h"
 #include "graphics/format.h"
 
 // this header is currently a placeholder shim

@@ -32,8 +32,8 @@
 #include "editor/gui/treemodel.h"
 #include "editor/gui/drawing.h"
 #include "editor/app/workspace.h"
-#include "engine/entity.h"
-#include "engine/animation.h"
+#include "game/entity.h"
+#include "game/animation.h"
 #include "engine/renderer.h"
 #include "engine/physics.h"
 

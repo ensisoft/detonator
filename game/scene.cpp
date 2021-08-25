@@ -28,10 +28,10 @@
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
-#include "engine/scene.h"
-#include "engine/entity.h"
-#include "engine/treeop.h"
-#include "engine/transform.h"
+#include "game/scene.h"
+#include "game/entity.h"
+#include "game/treeop.h"
+#include "game/transform.h"
 
 namespace game
 {

@@ -22,8 +22,8 @@
 
 #include "base/test_minimal.h"
 #include "data/json.h"
-#include "engine/tree.h"
-#include "engine/treeop.h"
+#include "game/tree.h"
+#include "game/treeop.h"
 
 struct MyNode {
     std::string s;

@@ -27,10 +27,10 @@
 #include <vector>
 #include <unordered_map>
 
-#include "engine/animation.h"
-#include "engine/entity.h"
-#include "engine/scene.h"
-#include "engine/tree.h"
+#include "game/animation.h"
+#include "game/entity.h"
+#include "game/scene.h"
+#include "game/tree.h"
 
 namespace gfx {
     class Painter;

@@ -24,7 +24,7 @@
 #include "warnpop.h"
 
 #include "editor/app/workspace.h"
-#include "engine/entity.h"
+#include "game/entity.h"
 
 namespace gui
 {
