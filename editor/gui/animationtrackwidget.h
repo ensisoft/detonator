@@ -84,6 +84,7 @@ namespace gui
         void SetShowViewport(bool on_off);
         void SetSnapGrid(bool on_off);
         void SetGrid(GridDensity grid);
+        void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
@@ -149,6 +150,8 @@ namespace gui
                                game::ActuatorClass::Type type,
                                float start_time, float duration);
         void DisplayCurrentCameraLocation();
+        void CreateTimelines();
+        void RemoveDeletedItems();
         game::EntityNode* GetCurrentNode();
     private:
         Ui::AnimationTrack mUI;
@@ -222,5 +225,6 @@ namespace gui
     void DeleteEntityWidget(EntityWidget* widget);
     void RegisterTrackWidget(AnimationTrackWidget* widget);
     void DeleteTrackWidget(AnimationTrackWidget* widget);
+    void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
 
 } // namespace

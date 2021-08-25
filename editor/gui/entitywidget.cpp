@@ -257,6 +257,7 @@ public:
         mState.entity->LinkChild(nullptr, child);
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(child->GetId()));
+        RealizeEntityChange(mState.entity);
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -618,6 +619,7 @@ void EntityWidget::Cut(Clipboard& clipboard)
         mState.entity->DeleteNode(node);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
+        RealizeEntityChange(mState.entity);
     }
 }
 void EntityWidget::Copy(Clipboard& clipboard) const
@@ -715,6 +717,7 @@ void EntityWidget::Paste(const Clipboard& clipboard)
 
     mUI.tree->Rebuild();
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
+    RealizeEntityChange(mState.entity);
 }
 
 void EntityWidget::Save()
@@ -1002,6 +1005,7 @@ void EntityWidget::on_actionNodeDelete_triggered()
 
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
+        RealizeEntityChange(mState.entity);
     }
 }
 void EntityWidget::on_actionNodeMoveUpLayer_triggered()
@@ -1397,80 +1401,43 @@ void EntityWidget::on_nodeName_textChanged(const QString& text)
 
 void EntityWidget::on_nodeSizeX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto size = node->GetSize();
-        size.x = value;
-        node->SetSize(size);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeSizeY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto size = node->GetSize();
-        size.y = value;
-        node->SetSize(size);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeTranslateX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto translate = node->GetTranslation();
-        translate.x = value;
-        node->SetTranslation(translate);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeTranslateY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto translate = node->GetTranslation();
-        translate.y = value;
-        node->SetTranslation(translate);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeScaleX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto scale = node->GetScale();
-        scale.x = value;
-        node->SetScale(scale);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeScaleY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto scale = node->GetScale();
-        scale.y = value;
-        node->SetScale(scale);
-    }
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeRotation_valueChanged(double value)
 {
     UpdateCurrentNodeProperties();
 }
-
 void EntityWidget::on_nodePlus90_clicked()
 {
-    if (auto* node = GetCurrentNode())
-    {
-        const float value = GetValue(mUI.nodeRotation);
-        // careful, triggers value changed event.
-        mUI.nodeRotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
-    }
+    const float value = GetValue(mUI.nodeRotation);
+    SetValue(mUI.nodeRotation, math::clamp(-180.0f, 180.0f, value + 90.0f));
+    UpdateCurrentNodeProperties();
 }
 void EntityWidget::on_nodeMinus90_clicked()
 {
-    if (auto* node = GetCurrentNode())
-    {
-        const float value = GetValue(mUI.nodeRotation);
-        // careful, triggers value changed event.
-        mUI.nodeRotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
-    }
+    const float value = GetValue(mUI.nodeRotation);
+    SetValue(mUI.nodeRotation,math::clamp(-180.0f, 180.0f, value - 90.0f));
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
@@ -2346,6 +2313,16 @@ void EntityWidget::UpdateCurrentNodeProperties()
     if (node == nullptr)
         return;
 
+    glm::vec2 size, scale, translation;
+    size.x = GetValue(mUI.nodeSizeX);
+    size.y = GetValue(mUI.nodeSizeY);
+    scale.x = GetValue(mUI.nodeScaleX);
+    scale.y = GetValue(mUI.nodeScaleY);
+    translation.x = GetValue(mUI.nodeTranslateX);
+    translation.y = GetValue(mUI.nodeTranslateY);
+    node->SetSize(size);
+    node->SetScale(scale);
+    node->SetTranslation(translation);
     node->SetRotation(qDegreesToRadians((float)GetValue(mUI.nodeRotation)));
 
     if (auto* item = node->GetDrawable())
@@ -2502,6 +2479,7 @@ void EntityWidget::UpdateDeletedResourceReferences()
             mState.entity->ResetScriptFile();
         }
     }
+    RealizeEntityChange(mState.entity);
 }
 
 game::EntityNodeClass* EntityWidget::GetCurrentNode()

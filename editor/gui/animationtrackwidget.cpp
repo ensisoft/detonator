@@ -49,7 +49,7 @@ namespace {
     std::unordered_map<size_t,
             std::weak_ptr<game::EntityClass>> SharedAnimations;
     std::unordered_set<gui::EntityWidget*> EntityWidgets;
-    std::unordered_set<gui::AnimationTrackWidget*> AnimationWidgets;
+    std::unordered_set<gui::AnimationTrackWidget*> TrackWidgets;
 } // namespace
 
 namespace gui
@@ -168,6 +168,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
 
     SetActuatorUIDefaults("");
     SetActuatorUIEnabled(false);
+    RegisterTrackWidget(this);
 }
 
 AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::EntityClass>& entity)
@@ -186,14 +187,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
-    // create timelines, by default 1 per node.
-    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
-    {
-        Timeline tl;
-        tl.selfId = base::RandomString(10);
-        tl.nodeId = mState.entity->GetNode(i).GetId();
-        mState.timelines.push_back(std::move(tl));
-    }
+    CreateTimelines();
     mUI.timeline->SetDuration(mState.track->GetDuration());
     mUI.timeline->Rebuild();
 
@@ -232,6 +226,10 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         const auto& timeline = properties[app::FromUtf8(actuator.GetId())].toString();
         mState.actuator_to_timeline[actuator.GetId()] = app::ToUtf8(timeline);
     }
+
+    RemoveDeletedItems();
+    CreateTimelines();
+
     mUI.timeline->SetDuration(track.GetDuration());
     mUI.timeline->Rebuild();
 
@@ -241,6 +239,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
 AnimationTrackWidget::~AnimationTrackWidget()
 {
     DEBUG("Destroy AnimationTrackWidget");
+
+    DeleteTrackWidget(this);
 }
 
 void AnimationTrackWidget::AddActions(QToolBar& bar)
@@ -365,8 +365,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
         mState.entity = FindSharedEntity(hash);
         if (!mState.entity)
         {
-            mState.entity = std::make_shared<game::EntityClass>(std::move(klass));
-            ShareEntity(mState.entity);
+            auto entity   = std::make_shared<game::EntityClass>(std::move(klass));
+            mState.entity = entity;
+            ShareEntity(entity);
         }
     }
 
@@ -599,6 +600,30 @@ void AnimationTrackWidget::SetShowViewport(bool on_off)
     SetValue(mUI.chkShowViewport, on_off);
 }
 
+void AnimationTrackWidget::RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass)
+{
+    if (klass->GetId() != mState.entity->GetId())
+        return;
+
+    on_actionStop_triggered();
+
+    RemoveDeletedItems();
+    CreateTimelines();
+
+    UpdateTrackUI();
+    SetActuatorUIEnabled(false);
+    SetActuatorUIDefaults("");
+    SelectedItemChanged(nullptr);
+
+    mEntity = game::CreateEntityInstance(mState.entity);
+    mTreeModel.reset(new TreeModel(*mState.entity));
+    mUI.tree->SetModel(mTreeModel.get());
+    mUI.tree->Rebuild();
+    mUI.timeline->ClearSelection();
+    mUI.timeline->Rebuild();
+    mRenderer.ClearPaintState();
+}
+
 void AnimationTrackWidget::on_actionPlay_triggered()
 {
     if (mPlayState == PlayState::Paused)
@@ -693,6 +718,8 @@ void AnimationTrackWidget::on_actionReset_triggered()
     if (mPlayState != PlayState::Stopped)
         return;
     mEntity = game::CreateEntityInstance(mState.entity);
+    mUI.timeline->Rebuild();
+    mUI.tree->Rebuild();
 }
 
 void AnimationTrackWidget::on_actionDeleteActuator_triggered()
@@ -1897,6 +1924,57 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
           start_time * animation_duration, end * animation_duration);
 }
 
+void AnimationTrackWidget::CreateTimelines()
+{
+    // create timelines for nodes that don't have a timeline yet.
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        const auto& id = mState.entity->GetNode(i).GetId();
+        auto it = std::find_if(mState.timelines.begin(),
+                               mState.timelines.end(), [&id](const auto& timeline) {
+            return timeline.nodeId == id;
+        });
+        if (it != mState.timelines.end())
+            continue;
+
+        Timeline timeline;
+        timeline.selfId = base::RandomString(10);
+        timeline.nodeId = id;
+        mState.timelines.push_back(std::move(timeline));
+    }
+}
+
+void AnimationTrackWidget::RemoveDeletedItems()
+{
+    // remove orphaned actuators.
+    std::vector<std::string> dead_actuators;
+    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    {
+        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& node = actuator.GetNodeId();
+        if (mState.entity->FindNodeById(node))
+            continue;
+        dead_actuators.push_back(actuator.GetId());
+    }
+    for (const auto& id : dead_actuators)
+    {
+        mState.track->DeleteActuatorById(id);
+        mState.actuator_to_timeline.erase(id);
+    }
+
+    // remove orphaned timelines.
+    for (auto it = mState.timelines.begin();  it != mState.timelines.end();)
+    {
+        const auto& timeline = *it;
+        if (mState.entity->FindNodeById(timeline.nodeId)) {
+            ++it;
+            continue;
+        } else {
+            it = mState.timelines.erase(it);
+        }
+    }
+}
+
 void AnimationTrackWidget::DisplayCurrentCameraLocation()
 {
     const auto width  = mUI.widget->width();
@@ -1942,11 +2020,22 @@ void DeleteEntityWidget(EntityWidget* widget)
 }
 void RegisterTrackWidget(AnimationTrackWidget* widget)
 {
-
+    TrackWidgets.insert(widget);
 }
+
 void DeleteTrackWidget(AnimationTrackWidget* widget)
 {
+    auto it = TrackWidgets.find(widget);
+    ASSERT(it != TrackWidgets.end());
+    TrackWidgets.erase(it);
+}
 
+void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass)
+{
+    for (auto* widget : TrackWidgets)
+    {
+        widget->RealizeEntityChange(klass);
+    }
 }
 
 } // namespace
