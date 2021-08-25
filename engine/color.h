@@ -18,27 +18,14 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <glm/vec2.hpp>
-#include "warnpop.h"
-
-#include "wdk/keys.h"
-#include "wdk/bitflag.h"
+#include "base/color4f.h"
 
 namespace engine
 {
-    struct MouseEvent {
-        // mouse cursor position in window coordinates.
-        glm::vec2 window_coord;
-        // mouse cursor position in scene coordinates.
-        glm::vec2 scene_coord;
-        // true when the mouse cursor is within/over the viewport
-        // in the window that renders the visible part of the
-        // game/scene.
-        bool over_scene = false;
-        wdk::MouseButton btn = wdk::MouseButton::None;
-        wdk::bitflag<wdk::Keymod> mods;
-    };
-
+    // provide type aliases for now for these types so that we can
+    // use them as if they weren't in graphics where they shouldn't
+    // be for most of the use in engine code. (i.e. not related to
+    // graphics in any way)
+    using Color   = base::Color;
+    using Color4f = base::Color4f;
 } // namespace
-

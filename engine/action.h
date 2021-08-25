@@ -23,7 +23,7 @@
 
 #include "engine/classlib.h"
 
-namespace game
+namespace engine
 {
     // Open a new UI window and place it on top of the stack.
     // The top of the stack UI (if any) will be given the chance
@@ -44,7 +44,7 @@ namespace game
     struct PlayAction {
         // handle of the scene class object for the scene instance
         // creation. This may not be nullptr.
-        ClassHandle<SceneClass> klass;
+        ClassHandle<game::SceneClass> klass;
     };
 
     // Suspend the game play. Suspending keeps the current scene

@@ -34,7 +34,7 @@
 #include "game/transform.h"
 #include "game/tree.h"
 #include "game/types.h"
-#include "engine/util.h"
+#include "game/util.h"
 
 // collection of algorithms that operate on a render tree.
 

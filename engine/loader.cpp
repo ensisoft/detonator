@@ -36,7 +36,7 @@
 #include "uikit/window.h"
 #include "audio/graph.h"
 
-namespace game
+namespace engine
 {
 
 bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
@@ -199,10 +199,10 @@ public:
     virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
     virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
-    virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const override;
-    virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const override;
-    virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const override;
-    virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const override;
+    virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+    virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+    virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+    virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
     // ContentLoader impl
     virtual void LoadFromFile(const std::string& file) override;
 private:
@@ -221,10 +221,10 @@ private:
             std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
     // These are the entities that have been loaded from
     // the resource file.
-    std::unordered_map<std::string, std::shared_ptr<EntityClass>> mEntities;
+    std::unordered_map<std::string, std::shared_ptr<game::EntityClass>> mEntities;
     // These are the scenes that have been loaded from
     // the resource file.
-    std::unordered_map<std::string, std::shared_ptr<SceneClass>> mScenes;
+    std::unordered_map<std::string, std::shared_ptr<game::SceneClass>> mScenes;
     // name table maps entity names to ids.
     std::unordered_map<std::string, std::string> mEntityNameTable;
     // name table maps scene names to ids.
@@ -385,13 +385,13 @@ void ContentLoaderImpl::LoadFromFile(const std::string& file)
     data::JsonFile json(file);
     data::JsonObject root = json.GetRootObject();
 
-    game::LoadResources<gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
-    game::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr);
-    game::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr);
-    game::LoadResources<EntityClass, EntityClass>(root, "entities", mEntities, &mEntityNameTable);
-    game::LoadResources<SceneClass, SceneClass>(root, "scenes", mScenes, &mSceneNameTable);
-    game::LoadResources<uik::Window, uik::Window>(root, "uis", mWindows, nullptr);
-    game::LoadResources<audio::GraphClass, audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr);
+    engine::LoadResources<gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
+    engine::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr);
+    engine::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr);
+    engine::LoadResources<game::EntityClass, game::EntityClass>(root, "entities", mEntities, &mEntityNameTable);
+    engine::LoadResources<game::SceneClass,  game::SceneClass>(root, "scenes", mScenes, &mSceneNameTable);
+    engine::LoadResources<uik::Window, uik::Window>(root, "uis", mWindows, nullptr);
+    engine::LoadResources<audio::GraphClass, audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr);
 
     // need to resolve the entity references.
     for (auto& p : mScenes)
@@ -435,7 +435,7 @@ ClassHandle<const game::EntityClass> ContentLoaderImpl::FindEntityClassById(cons
     return nullptr;
 }
 
-ClassHandle<const SceneClass> ContentLoaderImpl::FindSceneClassByName(const std::string& name) const
+ClassHandle<const game::SceneClass> ContentLoaderImpl::FindSceneClassByName(const std::string& name) const
 {
     auto it = mSceneNameTable.find(name);
     if (it != mSceneNameTable.end())
@@ -443,7 +443,7 @@ ClassHandle<const SceneClass> ContentLoaderImpl::FindSceneClassByName(const std:
 
     return nullptr;
 }
-ClassHandle<const SceneClass> ContentLoaderImpl::FindSceneClassById(const std::string& id) const
+ClassHandle<const game::SceneClass> ContentLoaderImpl::FindSceneClassById(const std::string& id) const
 {
     auto it = mScenes.find(id);
     if (it != mScenes.end())

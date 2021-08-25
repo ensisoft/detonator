@@ -152,8 +152,8 @@ namespace gui
             // design time window but then obviously changes state
             // while the playback happens and events are dispatched.
             std::unique_ptr<uik::Window> active_window;
-            std::unique_ptr<game::UIPainter> painter;
-            std::unique_ptr<game::UIStyle> style;
+            std::unique_ptr<engine::UIPainter> painter;
+            std::unique_ptr<engine::UIStyle> style;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
         } mState;

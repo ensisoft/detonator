@@ -75,6 +75,6 @@ namespace app
     // currently both gfx::Resource and game::GameData share
     // the same interface so the impl can be shared.
     using GraphicsFileBuffer = detail::FileBuffer<gfx::Resource>;
-    using GameDataFileBuffer = detail::FileBuffer<game::GameData>;
+    using GameDataFileBuffer = detail::FileBuffer<engine::GameData>;
 
 } // namespace

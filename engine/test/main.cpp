@@ -45,13 +45,13 @@
 #include "uikit/state.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
-#include "game/entity.h"
 #include "engine/physics.h"
-#include "game/scene.h"
 #include "engine/format.h"
 #include "engine/ui.h"
 #include "engine/audio.h"
 #include "engine/main/interface.h"
+#include "game/entity.h"
+#include "game/scene.h"
 
 namespace {
     gfx::FPoint ToPoint(const glm::vec2& vec)
@@ -64,7 +64,7 @@ public:
     virtual ~TestCase() = default;
     virtual void Render(gfx::Painter& painter) = 0;
     virtual void Update(float dts) {}
-    virtual void Start(game::ClassLibrary* loader) {}
+    virtual void Start(engine::ClassLibrary* loader) {}
     virtual void End() {}
     virtual void Tick() {}
     virtual void OnKeydown(const wdk::WindowEventKeydown& key) {}
@@ -93,16 +93,16 @@ public:
     }
     virtual void Update(float dt) override
     {
-        std::vector<game::AudioEvent> events;
+        std::vector<engine::AudioEvent> events;
         mEngine->Tick(&events);
         for (auto& event : events)
         {
             DEBUG("AudioEvent (%1) on track '%2'", event.type, event.track);
         }
     }
-    virtual void Start(game::ClassLibrary* loader) override
+    virtual void Start(engine::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<game::AudioEngine>("TestApp", this);
+        mEngine = std::make_unique<engine::AudioEngine>("TestApp", this);
         mEngine->SetMusicGain(mMusicGain);
     }
     virtual void End() override
@@ -124,13 +124,13 @@ public:
         if (track.empty()) return;
         const auto& name = base::ToString(key.symbol);
         mEngine->AddMusicGraph(BuildMusicGraph(name, track));
-        mEngine->SetMusicEffect(name, 2.0f*1000u, game::AudioEngine::Effect::FadeIn);
+        mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->PlayMusic(name);
     }
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }
 private:
-    game::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
+    engine::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
     {
         auto graph = std::make_shared<audio::GraphClass>(name);
 
@@ -177,7 +177,7 @@ private:
         return graph;
     }
 private:
-    std::unique_ptr<game::AudioEngine> mEngine;
+    std::unique_ptr<engine::AudioEngine> mEngine;
     float mMusicGain = 0.5f;
 };
 
@@ -204,9 +204,9 @@ public:
     {
         mEngine->Tick(nullptr);
     }
-    virtual void Start(game::ClassLibrary* loader) override
+    virtual void Start(engine::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<game::AudioEngine>("TestApp", this);
+        mEngine = std::make_unique<engine::AudioEngine>("TestApp", this);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
     virtual void End() override
@@ -236,7 +236,7 @@ public:
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }
 private:
-    game::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)
+    engine::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)
     {
         auto graph = std::make_shared<audio::GraphClass>(name);
 
@@ -283,8 +283,8 @@ private:
         return graph;
     }
 private:
-    std::unique_ptr<game::Loader> mLoader;
-    std::unique_ptr<game::AudioEngine> mEngine;
+    std::unique_ptr<engine::Loader> mLoader;
+    std::unique_ptr<engine::AudioEngine> mEngine;
     float mEffectGain = 0.5f;
     float mDelay      = 0.0f;
 };
@@ -328,7 +328,7 @@ public:
         if (mScene)
             mScene->Update(dt);
     }
-    virtual void Start(game::ClassLibrary* loader) override
+    virtual void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
         {
@@ -396,7 +396,7 @@ public:
     }
 private:
     std::unique_ptr<game::Scene> mScene;
-    game::Renderer mRenderer;
+    engine::Renderer mRenderer;
     gfx::FRect  mViewport;
     unsigned mSurfaceWidth = 0;
     unsigned mSurfaceHeight = 0;
@@ -416,7 +416,7 @@ public:
         if (mScene)
             mScene->Update(dt);
     }
-    virtual void Start(game::ClassLibrary* loader) override
+    virtual void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
 
@@ -447,7 +447,7 @@ public:
     }
 private:
     std::unique_ptr<game::Scene> mScene;
-    game::Renderer mRenderer;
+    engine::Renderer mRenderer;
 };
 
 class EntityTest : public TestCase
@@ -487,7 +487,7 @@ public:
         mTime += dt;
         mEntity->Update(dt);
     }
-    virtual void Start(game::ClassLibrary* loader)
+    virtual void Start(engine::ClassLibrary* loader)
     {
         auto klass = loader->FindEntityClassByName("robot");
         mEntity = game::CreateEntityInstance(klass);
@@ -503,7 +503,7 @@ public:
     }
 private:
     std::unique_ptr<game::Entity> mEntity;
-    game::Renderer mRenderer;
+    engine::Renderer mRenderer;
     float mTime = 0.0f;
     bool mDrawBoundingBoxes = true;
     bool mDrawBoundingRects = true;
@@ -526,7 +526,7 @@ public:
             mPhysics.UpdateScene(*mScene);
         }
     }
-    virtual void Start(game::ClassLibrary* loader)
+    virtual void Start(engine::ClassLibrary* loader)
     {
         auto klass = std::make_shared<game::SceneClass>();
         // create ground.
@@ -582,8 +582,8 @@ public:
     }
 private:
     std::unique_ptr<game::Scene>  mScene;
-    game::Renderer mRenderer;
-    game::PhysicsEngine mPhysics;
+    engine::Renderer mRenderer;
+    engine::PhysicsEngine mPhysics;
 };
 
 class UITest : public TestCase
@@ -617,29 +617,29 @@ public:
         mPainter.Update(mTime, dt);
         mTime += dt;
     }
-    virtual void Start(game::ClassLibrary* loader) override
+    virtual void Start(engine::ClassLibrary* loader) override
     {
         mWindow.Resize(500.0f, 500.0f);
         mStyle.SetClassLibrary(loader);
         mPainter.SetStyle(&mStyle);
 
-        mStyle.SetMaterial("widget/background", game::detail::UIColor(gfx::Color::Black));
-        mStyle.SetMaterial("widget/border", game::detail::UIColor(gfx::Color::LightGray));
+        mStyle.SetMaterial("widget/background", engine::detail::UIColor(gfx::Color::Black));
+        mStyle.SetMaterial("widget/border", engine::detail::UIColor(gfx::Color::LightGray));
         mStyle.SetProperty("widget/font-name", "fonts/orbitron-medium.otf");
         mStyle.SetProperty("widget/shape", "RoundRect");
         mStyle.SetProperty("widget/text-color", gfx::Color::White);
 
         mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);
 
-        mStyle.SetMaterial("checkbox/background", game::detail::UINullMaterial());
-        mStyle.SetMaterial("checkbox/border", game::detail::UINullMaterial());
-        mStyle.SetMaterial("checkbox/check-border", game::detail::UIColor(gfx::Color::White));
-        mStyle.SetMaterial("checkbox/check-mark", game::detail::UIColor(gfx::Color::Silver));
-        mStyle.SetMaterial("label/background", game::detail::UINullMaterial());
-        mStyle.SetMaterial("label/border", game::detail::UINullMaterial());
+        mStyle.SetMaterial("checkbox/background", engine::detail::UINullMaterial());
+        mStyle.SetMaterial("checkbox/border", engine::detail::UINullMaterial());
+        mStyle.SetMaterial("checkbox/check-border", engine::detail::UIColor(gfx::Color::White));
+        mStyle.SetMaterial("checkbox/check-mark", engine::detail::UIColor(gfx::Color::Silver));
+        mStyle.SetMaterial("label/background", engine::detail::UINullMaterial());
+        mStyle.SetMaterial("label/border", engine::detail::UINullMaterial());
 
-        mStyle.SetMaterial("push-button/pressed/background", game::detail::UIColor(gfx::Color::Gray));
-        mStyle.SetMaterial("push-button/pressed/border", game::detail::UIColor(gfx::Color::Silver));
+        mStyle.SetMaterial("push-button/pressed/background", engine::detail::UIColor(gfx::Color::Gray));
+        mStyle.SetMaterial("push-button/pressed/border", engine::detail::UIColor(gfx::Color::Silver));
 
         // add some widgets
         {
@@ -733,13 +733,13 @@ private:
     float mOffsetY = 180.0f;
     uik::Window mWindow;
     uik::State mState;
-    game::UIStyle mStyle;
-    game::UIPainter mPainter;
+    engine::UIStyle mStyle;
+    engine::UIPainter mPainter;
     double mTime = 0.0;
     boost::circular_buffer<std::string> mMessageQueue;
 };
 
-class MyApp : public game::App, public game::ClassLibrary, public wdk::WindowListener
+class MyApp : public engine::App, public engine::ClassLibrary, public wdk::WindowListener
 {
 public:
     virtual bool ParseArgs(int argc, const char* argv[]) override
@@ -878,19 +878,19 @@ public:
     }
 
     // ClassLibrary
-    virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
+    virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
     {
         return nullptr;
     }
-    virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
+    virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
     {
         return nullptr;
     }
-    virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
+    virtual engine::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
     {
         return nullptr;
     }
-    virtual game::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
+    virtual engine::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
     {
         return nullptr;
     }
@@ -1110,7 +1110,7 @@ private:
     std::unique_ptr<gfx::Painter> mPainter;
     std::shared_ptr<gfx::Device> mDevice;
     bool mRunning = true;
-    game::AppRequestQueue mRequests;
+    engine::AppRequestQueue mRequests;
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
     double mGameTime = 0.0;
@@ -1120,7 +1120,7 @@ private:
 
 extern "C" {
 
-GAMESTUDIO_EXPORT game::App* Gamestudio_CreateApp()
+GAMESTUDIO_EXPORT engine::App* Gamestudio_CreateApp()
 {
     DEBUG("test app");
     return new MyApp;

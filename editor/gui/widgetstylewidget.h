@@ -34,7 +34,7 @@ namespace uik {
     class Widget;
 } // namespace
 
-namespace game {
+namespace engine {
     class UIStyle;
     class UIPainter;
 }// namespace
@@ -53,9 +53,9 @@ namespace gui
 
         void SetWorkspace(app::Workspace* workspace)
         { mWorkspace = workspace;}
-        void SetStyle(game::UIStyle* style)
+        void SetStyle(engine::UIStyle* style)
         { mStyle = style; }
-        void SetPainter(game::UIPainter* painter)
+        void SetPainter(engine::UIPainter* painter)
         { mPainter = painter;}
         void SetPropertySelector(const std::string& prop)
         { mSelector = prop; }
@@ -91,8 +91,8 @@ namespace gui
     private:
         app::Workspace* mWorkspace = nullptr;
         uik::Widget* mWidget       = nullptr;
-        game::UIStyle* mStyle      = nullptr;
-        game::UIPainter* mPainter  = nullptr;
+        engine::UIStyle* mStyle      = nullptr;
+        engine::UIPainter* mPainter  = nullptr;
         std::string mSelector;
     };
 } // namespace

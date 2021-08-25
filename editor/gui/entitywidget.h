@@ -225,7 +225,7 @@ namespace gui
         struct State {
             // shared with the animation track widget.
             std::shared_ptr<game::EntityClass> entity;
-            game::Renderer renderer;
+            engine::Renderer renderer;
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;

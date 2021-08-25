@@ -30,7 +30,7 @@
 #include "base/json.h"
 #include "base/platform.h"
 
-namespace game
+namespace engine
 {
     // Load game settings from a "settings" file (currently JSON)
     // Expects that the file is "known" and has good content and is accessible

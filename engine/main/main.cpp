@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
     int exit_code = EXIT_SUCCESS;
     try
     {
-        game::App::DebugOptions debug;
+        engine::App::DebugOptions debug;
 
         std::string config_file;
         std::string cmdline_error;
@@ -359,13 +359,13 @@ int main(int argc, char* argv[])
         }
 
         // Create the app instance.
-        std::unique_ptr<game::App> app(GameLibCreateApp());
+        std::unique_ptr<engine::App> app(GameLibCreateApp());
         if (!app->ParseArgs(argc, (const char**)argv))
             return 0;
 
         app->SetDebugOptions(debug);
 
-        game::App::Environment env;
+        engine::App::Environment env;
         env.classlib         = loaders.ContentLoader.get();
         env.graphics_loader  = loaders.ResourceLoader.get();
         env.game_data_loader = loaders.ResourceLoader.get();
@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
         DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
 
         // setup application
-        game::App::InitParams params;
+        engine::App::InitParams params;
         params.application_name = title;
         params.context          = context.get();
         params.surface_width    = window.GetSurfaceWidth();
@@ -445,7 +445,7 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
         DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
 
-        game::App::EngineConfig config;
+        engine::App::EngineConfig config;
         base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
         base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
         config.updates_per_second = updates_per_second;
@@ -498,20 +498,20 @@ int main(int argc, char* argv[])
             }
 
             // Process pending application requests if any.
-            game::App::Request request;
+            engine::App::Request request;
             while (app->GetNextRequest(&request))
             {
-                if (auto* ptr = std::get_if<game::App::ResizeWindow>(&request))
+                if (auto* ptr = std::get_if<engine::App::ResizeWindow>(&request))
                     window.SetSize(ptr->width, ptr->height);
-                else if (auto* ptr = std::get_if<game::App::MoveWindow>(&request))
+                else if (auto* ptr = std::get_if<engine::App::MoveWindow>(&request))
                     window.Move(ptr->xpos, ptr->ypos);
-                else if (auto* ptr = std::get_if<game::App::SetFullScreen>(&request))
+                else if (auto* ptr = std::get_if<engine::App::SetFullScreen>(&request))
                     window.SetFullscreen(ptr->fullscreen);
-                else if (auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
+                else if (auto* ptr = std::get_if<engine::App::ToggleFullScreen>(&request))
                     window.SetFullscreen(!window.IsFullscreen());
-                else if (auto* ptr = std::get_if<game::App::ShowMouseCursor>(&request))
+                else if (auto* ptr = std::get_if<engine::App::ShowMouseCursor>(&request))
                     window.ShowCursor(ptr->show);
-                else if (auto* ptr = std::get_if<game::App::QuitApp>(&request)) {
+                else if (auto* ptr = std::get_if<engine::App::QuitApp>(&request)) {
                     quit = true;
                     exit_code = ptr->exit_code;
                     INFO("Quit with exit code %1", exit_code);
@@ -542,7 +542,7 @@ int main(int argc, char* argv[])
             if (seconds > 1.0)
             {
                 const auto fps = frames / seconds;
-                game::App::HostStats stats;
+                engine::App::HostStats stats;
                 stats.current_fps         = fps;
                 stats.num_frames_rendered = frames_total;
                 stats.total_wall_time     = wall_time;

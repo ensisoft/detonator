@@ -63,9 +63,9 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter,
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.
-class DrawHook : public game::EntityClassDrawHook,
-                 public game::EntityInstanceDrawHook,
-                 public game::SceneClassDrawHook
+class DrawHook : public engine::EntityClassDrawHook,
+                 public engine::EntityInstanceDrawHook,
+                 public engine::SceneClassDrawHook
 {
 public:
     template<typename Node>
@@ -82,24 +82,24 @@ public:
     {}
 
     // EntityNode
-    virtual bool InspectPacket(const game::EntityNode* node, game::DrawPacket& packet) override
+    virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
     {
         return FilterPacket(node, packet);
     }
     virtual void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
-    std::vector<game::DrawPacket>& packets) override
+                               std::vector<engine::DrawPacket>& packets) override
     {
         GenericAppendPackets(node, trans, packets);
     }
 
 
     // EntityNodeClass
-    virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& packet) override
+    virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& packet) override
     {
         return FilterPacket(node, packet);
     }
     virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& trans,
-                               std::vector<game::DrawPacket>& packets) override
+                               std::vector<engine::DrawPacket>& packets) override
     {
         GenericAppendPackets(node, trans, packets);
     }
@@ -126,7 +126,7 @@ public:
     }
 private:
     template<typename Node>
-    bool FilterPacket(const Node* node, game::DrawPacket& packet)
+    bool FilterPacket(const Node* node, engine::DrawPacket& packet)
     {
         if (!node->TestFlag(Node::Flags::VisibleInEditor))
             return false;
@@ -140,7 +140,7 @@ private:
     }
 
     template<typename Node>
-    void GenericAppendPackets(const Node* node, gfx::Transform& trans, std::vector<game::DrawPacket>& packets)
+    void GenericAppendPackets(const Node* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets)
     {
         const auto* drawable   = node->GetDrawable();
         const auto is_selected = mDrawSelection || node == mSelectedItem;
@@ -156,7 +156,7 @@ private:
             static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
             // visualize it.
             trans.Push(node->GetModelTransform());
-                game::DrawPacket box;
+                engine::DrawPacket box;
                 box.transform = trans.GetAsMatrix();
                 box.material  = yellow;
                 box.drawable  = rect;
@@ -177,7 +177,7 @@ private:
 
         // draw the selection rectangle.
         trans.Push(node->GetModelTransform());
-            game::DrawPacket selection;
+            engine::DrawPacket selection;
             selection.transform = trans.GetAsMatrix();
             selection.material  = green;
             selection.drawable  = rect;
@@ -203,7 +203,7 @@ private:
         trans.Push();
             trans.Scale(10.0f/scale.x, 10.0f/scale.y);
             trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-            game::DrawPacket sizing_box;
+            engine::DrawPacket sizing_box;
             sizing_box.transform = trans.GetAsMatrix();
             sizing_box.material  = green;
             sizing_box.drawable  = rect;
@@ -215,7 +215,7 @@ private:
         trans.Push();
             trans.Scale(10.0f/scale.x, 10.0f/scale.y);
             trans.Translate(-size.x*0.5f, -size.y*0.5f);
-            game::DrawPacket rotation_circle;
+            engine::DrawPacket rotation_circle;
             rotation_circle.transform = trans.GetAsMatrix();
             rotation_circle.material  = green;
             rotation_circle.drawable  = circle;

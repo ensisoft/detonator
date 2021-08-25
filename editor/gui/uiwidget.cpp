@@ -305,7 +305,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.window.Resize(1024, 768);
     mState.window.SetName("My UI");
     mState.window.SetStyleName("app://ui/default.json");
-    mState.painter.reset(new game::UIPainter);
+    mState.painter.reset(new engine::UIPainter);
 
     mUI.widgetNormal->SetPropertySelector("");
     mUI.widgetDisabled->SetPropertySelector("/disabled");
@@ -1577,7 +1577,7 @@ bool UIWidget::LoadStyle(const QString& name)
         return false;
     }
 
-    auto style = std::make_unique<game::UIStyle>();
+    auto style = std::make_unique<engine::UIStyle>();
     style->SetClassLibrary(mState.workspace);
     if (!style->LoadStyle(*data))
     {

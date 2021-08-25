@@ -34,7 +34,9 @@
 #include "game/scene.h"
 #include "engine/renderer.h"
 
-namespace game
+using namespace game;
+
+namespace engine
 {
 
 void Renderer::BeginFrame()

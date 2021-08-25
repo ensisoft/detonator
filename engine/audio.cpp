@@ -28,7 +28,7 @@
 #include "engine/loader.h"
 #include "engine/data.h"
 
-namespace game
+namespace engine
 {
 
 // adapt game data interface to audio buffer

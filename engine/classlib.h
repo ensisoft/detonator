@@ -23,12 +23,10 @@
 #include "graphics/fwd.h"
 #include "uikit/fwd.h"
 #include "audio/fwd.h"
+#include "game/fwd.h"
 
-namespace game
+namespace engine
 {
-    class EntityClass;
-    class SceneClass;
-
     // tiny abstraction around the fact that the class objects
     // are passed around as shared_ptrs which should be an
     // implementation detail. Todo: maybe write a proper handle
@@ -69,16 +67,16 @@ namespace game
         virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const = 0;
         // Find a entity class object by the given name.
         // If not found will return a nullptr.
-        virtual ClassHandle<const EntityClass> FindEntityClassByName(const std::string& name) const = 0;
+        virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const = 0;
         // Find a entity class object by the given id.
         // if not found will return a nullptr.
-        virtual ClassHandle<const EntityClass> FindEntityClassById(const std::string& id) const = 0;
+        virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const = 0;
         // Find a scene class object by the given name.
         // If not found will return a nullptr.
-        virtual ClassHandle<const SceneClass> FindSceneClassByName(const std::string& name) const = 0;
+        virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const = 0;
         // Find a scene class object by the given id.
         // if not found will return a nullptr.
-        virtual ClassHandle<const SceneClass> FindSceneClassById(const std::string& id) const = 0;
+        virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const = 0;
     private:
     };
 } // namespace

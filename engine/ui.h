@@ -35,7 +35,7 @@
 #include "graphics/material.h"
 #include "graphics/fwd.h"
 
-namespace game
+namespace engine
 {
     class ClassLibrary;
     class GameData;

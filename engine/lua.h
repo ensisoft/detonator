@@ -30,7 +30,7 @@
 #include "engine/game.h"
 #include "engine/action.h"
 
-namespace game
+namespace engine
 {
     // Implementation for the main game interface that
     // simply delegates the calls to a Lua script.
@@ -45,8 +45,8 @@ namespace game
         virtual void LoadGame(const ClassLibrary* loader) override;
         virtual void Tick(double game_time, double dt) override;
         virtual void Update(double game_time,  double dt) override;
-        virtual void BeginPlay(Scene* scene) override;
-        virtual void EndPlay(Scene* scene) override;
+        virtual void BeginPlay(game::Scene* scene) override;
+        virtual void EndPlay(game::Scene* scene) override;
         virtual void SaveGame() override;
         virtual bool GetNextAction(Action* out) override;
         virtual FRect GetViewport() const override;
@@ -72,14 +72,14 @@ namespace game
         std::shared_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
         FRect mView;
-        Scene* mScene = nullptr;
+        game::Scene* mScene = nullptr;
     };
 
 
     class ScriptEngine
     {
     public:
-        using Action = game::Action;
+        using Action = engine::Action;
         ScriptEngine(const std::string& lua_path);
        ~ScriptEngine();
         void SetClassLibrary(const ClassLibrary* classlib)
@@ -88,8 +88,8 @@ namespace game
         { mPhysicsEngine = engine; }
         void SetAudioEngine(const AudioEngine* engine)
         { mAudioEngine = engine; }
-        void BeginPlay(Scene* scene);
-        void EndPlay(Scene* scene);
+        void BeginPlay(game::Scene* scene);
+        void EndPlay(game::Scene* scene);
         void Tick(double game_time, double dt);
         void Update(double game_time, double dt);
         void BeginLoop();
@@ -107,7 +107,7 @@ namespace game
         const ClassLibrary* GetClassLib() const
         { return mClassLib; }
     private:
-        sol::environment* GetTypeEnv(const EntityClass& klass);
+        sol::environment* GetTypeEnv(const game::EntityClass& klass);
         template<typename KeyEvent>
         void DispatchKeyboardEvent(const std::string& method, const KeyEvent& key);
         void DispatchMouseEvent(const std::string& method, const MouseEvent& mouse);
@@ -119,7 +119,7 @@ namespace game
         std::unique_ptr<sol::state> mLuaState;
         std::unordered_map<std::string, std::shared_ptr<sol::environment>> mTypeEnvs;
         std::queue<Action> mActionQueue;
-        Scene* mScene = nullptr;
+        game::Scene* mScene = nullptr;
         std::unique_ptr<sol::environment> mSceneEnv;
     };
 

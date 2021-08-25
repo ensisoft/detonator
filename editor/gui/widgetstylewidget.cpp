@@ -27,6 +27,7 @@
 
 #include "uikit/widget.h"
 #include "engine/ui.h"
+#include "engine/color.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/widgetstylewidget.h"
 #include "editor/gui/dlgmaterial.h"
@@ -37,8 +38,8 @@ namespace gui
 WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
 {
     mUI.setupUi(this);
-    PopulateFromEnum<game::UIStyle::VerticalTextAlign>(mUI.widgetTextVAlign);
-    PopulateFromEnum<game::UIStyle::HorizontalTextAlign>(mUI.widgetTextHAlign);
+    PopulateFromEnum<engine::UIStyle::VerticalTextAlign>(mUI.widgetTextVAlign);
+    PopulateFromEnum<engine::UIStyle::HorizontalTextAlign>(mUI.widgetTextHAlign);
 
     PopulateFontNames(mUI.widgetFontName);
     PopulateFontSizes(mUI.widgetFontSize);
@@ -187,11 +188,11 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
 
         if (mUI.widgetTextVAlign->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/text-vertical-align");
-        else mStyle->SetProperty(id + mSelector + "/text-vertical-align",(game::UIStyle::VerticalTextAlign)GetValue(mUI.widgetTextVAlign));
+        else mStyle->SetProperty(id + mSelector + "/text-vertical-align",(engine::UIStyle::VerticalTextAlign)GetValue(mUI.widgetTextVAlign));
 
         if (mUI.widgetTextHAlign->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/text-horizontal-align");
-        else mStyle->SetProperty(id + mSelector + "/text-horizontal-align", (game::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
+        else mStyle->SetProperty(id + mSelector + "/text-horizontal-align", (engine::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
 
         if (!mUI.widgetTextColor->hasColor())
             mStyle->DeleteProperty(id + mSelector + "/text-color");
@@ -216,14 +217,14 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
         if (mUI.widgetBackground->currentIndex() == -1)
             mStyle->DeleteMaterial(id + mSelector + "/background");
         else if (mUI.widgetBackground->currentIndex() == 0)
-            mStyle->SetMaterial(id + mSelector + "/background", game::detail::UINullMaterial());
-        else mStyle->SetMaterial(id + mSelector + "/background", game::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
+            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UINullMaterial());
+        else mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
         if (mUI.widgetBorder->currentIndex() == -1)
             mStyle->DeleteMaterial(id + mSelector + "/border");
         else if (mUI.widgetBorder->currentIndex() == 0)
-            mStyle->SetMaterial(id + mSelector + "/border", game::detail::UINullMaterial());
-        else mStyle->SetMaterial(id + mSelector + "/border", game::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
+            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UINullMaterial());
+        else mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         // purge old material instances if any.
         mPainter->DeleteMaterialInstanceByKey(id + mSelector + "/border");
@@ -252,7 +253,7 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
     SetValue(mUI.widgetFontSize, -1);
     SetValue(mUI.widgetTextVAlign, -1);
     SetValue(mUI.widgetTextHAlign, -1);
-    SetValue(mUI.widgetTextColor, game::Color::White);
+    SetValue(mUI.widgetTextColor, engine::Color::White);
     SetValue(mUI.widgetTextBlink, Qt::PartiallyChecked);
     SetValue(mUI.widgetTextUnderline, Qt::PartiallyChecked);
     SetValue(mUI.widgetBackground, -1);
@@ -268,11 +269,11 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
             SetValue(mUI.widgetFontSize, QString::number(prop.GetValue<int>()));
 
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-vertical-align"))
-            SetValue(mUI.widgetTextVAlign , prop.GetValue<game::UIStyle::VerticalTextAlign>());
+            SetValue(mUI.widgetTextVAlign , prop.GetValue<engine::UIStyle::VerticalTextAlign>());
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-horizontal-align"))
-            SetValue(mUI.widgetTextHAlign , prop.GetValue<game::UIStyle::HorizontalTextAlign>());
+            SetValue(mUI.widgetTextHAlign , prop.GetValue<engine::UIStyle::HorizontalTextAlign>());
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
-            SetValue(mUI.widgetTextColor , prop.GetValue<game::Color4f>());
+            SetValue(mUI.widgetTextColor , prop.GetValue<engine::Color4f>());
 
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-blink"))
         {
@@ -287,16 +288,16 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
 
         if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/background"))
         {
-            if (material->GetType() == game::UIMaterial::Type::Null)
+            if (material->GetType() == engine::UIMaterial::Type::Null)
                 SetValue(mUI.widgetBackground, QString("None"));
-            else if (const auto* p = dynamic_cast<const game::detail::UIMaterialReference*>(material))
+            else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBackground, ListItemId(p->GetMaterialId()));
         }
         if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/border"))
         {
-            if (material->GetType() == game::UIMaterial::Type::Null)
+            if (material->GetType() == engine::UIMaterial::Type::Null)
                 SetValue(mUI.widgetBorder, QString("None"));
-            else if (const auto* p = dynamic_cast<const game::detail::UIMaterialReference*>(material))
+            else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBorder, ListItemId(p->GetMaterialId()));
         }
     }

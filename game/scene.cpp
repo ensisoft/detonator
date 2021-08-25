@@ -551,7 +551,7 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
         return std::nullopt;
-    ret.mRenderTree.FromJson(*chunk,  game::TreeNodeFromJson(ret.mNodes));
+    ret.mRenderTree.FromJson(*chunk, game::TreeNodeFromJson(ret.mNodes));
     return ret;
 }
 SceneClass SceneClass::Clone() const

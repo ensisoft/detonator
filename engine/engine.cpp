@@ -59,7 +59,7 @@ namespace
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
 // the game and also to handle input from keyboard and mouse.
-class DefaultGameEngine : public game::App,
+class DefaultGameEngine : public engine::App,
                           public wdk::WindowListener
 {
 public:
@@ -78,17 +78,17 @@ public:
     virtual void Init(const InitParams& init) override
     {
         DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
-        mAudio = std::make_unique<game::AudioEngine>(init.application_name, mAudioLoader);
+        mAudio = std::make_unique<engine::AudioEngine>(init.application_name, mAudioLoader);
         mAudio->SetClassLibrary(mClasslib);
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
-        mGame = std::make_unique<game::LuaGame>(mDirectory + "/lua");
+        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua");
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetAudioEngine(mAudio.get());
-        mScripting = std::make_unique<game::ScriptEngine>(mDirectory + "/lua");
+        mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");
         mScripting->SetClassLibrary(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->SetAudioEngine(mAudio.get());
@@ -157,11 +157,11 @@ public:
             const float scale  = std::min(surf_width / width, surf_height / height);
             // low level draw packet filter for culling draw packets
             // that fall outside of the current viewport.
-            class Culler : public game::EntityInstanceDrawHook {
+            class Culler : public engine::EntityInstanceDrawHook {
             public:
-                Culler(const game::FRect& view) : mViewRect(view)
+                Culler(const engine::FRect& view) : mViewRect(view)
                 {}
-                virtual bool InspectPacket(const game::EntityNode* node, game::DrawPacket& packet) override
+                virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
                 {
                     const auto& rect = game::ComputeBoundingRect(packet.transform);
                     if (!DoesIntersect(rect, mViewRect))
@@ -169,7 +169,7 @@ public:
                     return true;
                 }
             private:
-                const game::FRect& mViewRect;
+                const engine::FRect& mViewRect;
             };
             Culler cull(view);
 
@@ -309,36 +309,36 @@ public:
         if (mActionDelay > 0.0f)
             return;
 
-        game::Action action;
+        engine::Action action;
         while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
         {
-            if (auto* ptr = std::get_if<game::ShowMouseAction>(&action))
+            if (auto* ptr = std::get_if<engine::ShowMouseAction>(&action))
                 ShowMouseCursor(ptr->show);
-            else if (auto* ptr = std::get_if<game::BlockMouseAction>(&action))
+            else if (auto* ptr = std::get_if<engine::BlockMouseAction>(&action))
                 BlockKeyboard(ptr->block);
-            else if (auto* ptr = std::get_if<game::BlockMouseAction>(&action))
+            else if (auto* ptr = std::get_if<engine::BlockMouseAction>(&action))
                 BlockMouse(ptr->block);
-            else if (auto* ptr = std::get_if<game::OpenUIAction>(&action))
+            else if (auto* ptr = std::get_if<engine::OpenUIAction>(&action))
                 OpenUI(ptr->ui);
-            else if (auto* ptr = std::get_if<game::CloseUIAction>(&action))
+            else if (auto* ptr = std::get_if<engine::CloseUIAction>(&action))
                 CloseUI(ptr->result);
-            else if (auto* ptr = std::get_if<game::PlayAction>(&action))
+            else if (auto* ptr = std::get_if<engine::PlayAction>(&action))
                 PlayGame(ptr->klass);
-            else if (auto* ptr = std::get_if<game::SuspendAction>(&action))
+            else if (auto* ptr = std::get_if<engine::SuspendAction>(&action))
                 SuspendGame();
-            else if (auto* ptr = std::get_if<game::ResumeAction>(&action))
+            else if (auto* ptr = std::get_if<engine::ResumeAction>(&action))
                 ResumeGame();
-            else if (auto* ptr = std::get_if<game::QuitAction>(&action))
+            else if (auto* ptr = std::get_if<engine::QuitAction>(&action))
                 QuitGame(ptr->exit_code);
-            else if (auto* ptr = std::get_if<game::StopAction>(&action))
+            else if (auto* ptr = std::get_if<engine::StopAction>(&action))
                 StopGame();
-            else if (auto* ptr = std::get_if<game::RequestFullScreenAction>(&action))
+            else if (auto* ptr = std::get_if<engine::RequestFullScreenAction>(&action))
                 RequestFullScreen(ptr->full_screen);
-            else if (auto* ptr = std::get_if<game::DebugClearAction>(&action))
+            else if (auto* ptr = std::get_if<engine::DebugClearAction>(&action))
                 DebugClear();
-            else if (auto* ptr = std::get_if<game::DebugPrintAction>(&action))  {
+            else if (auto* ptr = std::get_if<engine::DebugPrintAction>(&action))  {
                 DebugPrintString(ptr->message, ptr->clear);
-            } else if (auto* ptr = std::get_if<game::DelayAction>(&action)) {
+            } else if (auto* ptr = std::get_if<engine::DelayAction>(&action)) {
                 DelayGame(ptr->seconds);
                 break;
             }
@@ -461,8 +461,8 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseMove);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &game::Game::OnMouseMove);
-        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMouseMove);
+        SendGameMouseEvent(mickey, &engine::Game::OnMouseMove);
+        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMouseMove);
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
@@ -473,8 +473,8 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MousePress);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &game::Game::OnMousePress);
-        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMousePress);
+        SendGameMouseEvent(mickey, &engine::Game::OnMousePress);
+        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMousePress);
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
@@ -485,11 +485,11 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseRelease);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &game::Game::OnMouseRelease);
-        SendEntityScriptMouseEvent(mickey, &game::ScriptEngine::OnMouseRelease);
+        SendGameMouseEvent(mickey, &engine::Game::OnMouseRelease);
+        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMouseRelease);
     }
 private:
-    game::IRect GetViewport() const
+    engine::IRect GetViewport() const
     {
         // get the game's logical viewport into the game world.
         const auto& view = mGame->GetViewport();
@@ -505,18 +505,18 @@ private:
         const float device_viewport_height = height * scale;
         const float device_viewport_x = (surf_width - device_viewport_width) / 2;
         const float device_viewport_y = (surf_height - device_viewport_height) / 2;
-        return game::IRect(device_viewport_x, device_viewport_y,
-                           device_viewport_width, device_viewport_height);
+        return engine::IRect(device_viewport_x, device_viewport_y,
+                             device_viewport_width, device_viewport_height);
     }
 
-    using GameMouseFunc = void (game::Game::*)(const game::MouseEvent&);
-    void SendGameMouseEvent(const game::MouseEvent& mickey, GameMouseFunc which)
+    using GameMouseFunc = void (engine::Game::*)(const engine::MouseEvent&);
+    void SendGameMouseEvent(const engine::MouseEvent& mickey, GameMouseFunc which)
     {
         auto* game = mGame.get();
         (game->*which)(mickey);
     }
-    using EntityScriptMouseFunc = void (game::ScriptEngine::*)(const game::MouseEvent&);
-    void SendEntityScriptMouseEvent(const game::MouseEvent& mickey, EntityScriptMouseFunc which)
+    using EntityScriptMouseFunc = void (engine::ScriptEngine::*)(const engine::MouseEvent&);
+    void SendEntityScriptMouseEvent(const engine::MouseEvent& mickey, EntityScriptMouseFunc which)
     {
         if (!mScene)
             return;
@@ -525,7 +525,7 @@ private:
     }
 
     template<typename WdkMouseEvent>
-    game::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
+    engine::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
     {
         const auto& viewport = GetViewport();
         const float width  = viewport.GetWidth();
@@ -536,7 +536,7 @@ private:
         const auto& projection   = gfx::Painter::MakeOrthographicProjection(mGame->GetViewport());
         const auto& point_scene  = glm::inverse(projection) * glm::vec4(point_norm_x,
                                                                         point_norm_y, 1.0f, 1.0f);
-        game::MouseEvent event;
+        engine::MouseEvent event;
         event.window_coord = glm::vec2(mickey.window_x, mickey.window_y);
         event.scene_coord  = glm::vec2(point_scene.x, point_scene.y);
         event.over_scene   = viewport.TestPoint(mickey.window_x, mickey.window_y);
@@ -611,7 +611,7 @@ private:
     { return !mUI.empty(); }
 
 
-    void OpenUI(game::ClassHandle<uik::Window> window)
+    void OpenUI(engine::ClassHandle<uik::Window> window)
     {
         // todo: if the style loading somehow fails, then what?
         mUIStyle.ClearProperties();
@@ -660,7 +660,7 @@ private:
             ui->Style(mUIPainter);
         }
     }
-    void PlayGame(game::ClassHandle<game::SceneClass> klass)
+    void PlayGame(engine::ClassHandle<game::SceneClass> klass)
     {
         mScene = game::CreateSceneInstance(klass);
         mPhysics.DeleteAll();
@@ -695,7 +695,7 @@ private:
             mScene->Update(dt);
             if (mPhysics.HaveWorld())
             {
-                std::vector<game::ContactEvent> contacts;
+                std::vector<engine::ContactEvent> contacts;
                 mPhysics.Tick(&contacts);
                 mPhysics.UpdateScene(*mScene);
                 for (const auto& contact : contacts)
@@ -708,7 +708,7 @@ private:
             mScripting->Update(game_time, dt);
         }
 
-        std::vector<game::AudioEvent> audio_events;
+        std::vector<engine::AudioEvent> audio_events;
         mAudio->Tick(&audio_events);
         for (const auto& event : audio_events)
         {
@@ -786,12 +786,12 @@ private:
     // queue of outgoing requests regarding the environment
     // such as the window size/position etc that the game host
     // may/may not support.
-    game::AppRequestQueue mRequests;
+    engine::AppRequestQueue mRequests;
     // Interface for accessing the game classes and resources
     // such as animations, materials etc.
-    game::ClassLibrary* mClasslib = nullptr;
+    engine::ClassLibrary* mClasslib = nullptr;
     // Game data/content loader.
-    game::Loader* mGameDataLoader = nullptr;
+    engine::Loader* mGameDataLoader = nullptr;
     // audio stream loader
     audio::Loader* mAudioLoader = nullptr;
     // The graphics painter device.
@@ -799,20 +799,20 @@ private:
     // The graphics device.
     std::shared_ptr<gfx::Device> mDevice;
     // The rendering subsystem.
-    game::Renderer mRenderer;
+    engine::Renderer mRenderer;
     // The physics subsystem.
-    game::PhysicsEngine mPhysics;
+    engine::PhysicsEngine mPhysics;
     // The UI painter for painting UIs
-    game::UIPainter mUIPainter;
-    game::UIStyle mUIStyle;
+    engine::UIPainter mUIPainter;
+    engine::UIStyle mUIStyle;
     // The audio engine.
-    std::unique_ptr<game::AudioEngine> mAudio;
+    std::unique_ptr<engine::AudioEngine> mAudio;
     // The scripting subsystem.
-    std::unique_ptr<game::ScriptEngine> mScripting;
+    std::unique_ptr<engine::ScriptEngine> mScripting;
     // Current game scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
     // Game logic implementation.
-    std::unique_ptr<game::Game> mGame;
+    std::unique_ptr<engine::Game> mGame;
     // The UI stack onto which UIs are opened.
     // The top of the stack is the currently "active" UI
     // that gets the mouse/keyboard input events. It's
@@ -826,9 +826,9 @@ private:
     // a flag to indicate whether currently in fullscreen or not.
     bool mFullScreen = false;
     // current debug options.
-    game::App::DebugOptions mDebug;
+    engine::App::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
-    game::App::HostStats mLastStats;
+    engine::App::HostStats mLastStats;
     // list of current debug print messages that
     // get printed to the display.
     struct DebugPrint {
@@ -862,7 +862,7 @@ private:
 } //namespace
 
 extern "C" {
-GAMESTUDIO_EXPORT game::App* Gamestudio_CreateApp()
+GAMESTUDIO_EXPORT engine::App* Gamestudio_CreateApp()
 {
 #if defined(NDEBUG)
     DEBUG("GameEngine in release build.");

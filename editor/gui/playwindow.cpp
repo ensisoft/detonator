@@ -245,7 +245,7 @@ private:
 // assets/content created in the editor and sourced from
 // the current workspace instead of from a file.
 class PlayWindow::ResourceLoader : public gfx::Loader,
-                                   public game::Loader,
+                                   public engine::Loader,
                                    public audio::Loader
 {
 public:
@@ -263,13 +263,13 @@ public:
         DEBUG("URI '%1' => '%2'", URI, file);
         return app::GraphicsFileBuffer::LoadFromFile(file);
     }
-    virtual game::GameDataHandle LoadGameData(const std::string& URI) const override
+    virtual engine::GameDataHandle LoadGameData(const std::string& URI) const override
     {
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
         return app::GameDataFileBuffer::LoadFromFile(file);
     }
-    virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
     {
         return app::GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
     }
@@ -508,18 +508,18 @@ void PlayWindow::RunOnce()
     try
     {
         bool quit = false;
-        game::App::Request request;
+        engine::App::Request request;
         while (mApp->GetNextRequest(&request))
         {
-            if (const auto* ptr = std::get_if<game::App::ResizeWindow>(&request))
+            if (const auto* ptr = std::get_if<engine::App::ResizeWindow>(&request))
                 ResizeSurface(ptr->width, ptr->height);
-            else if (const auto* ptr = std::get_if<game::App::MoveWindow>(&request))
+            else if (const auto* ptr = std::get_if<engine::App::MoveWindow>(&request))
                 this->move(ptr->xpos, ptr->ypos);
-            else if (const auto* ptr = std::get_if<game::App::SetFullScreen>(&request))
+            else if (const auto* ptr = std::get_if<engine::App::SetFullScreen>(&request))
                 AskSetFullScreen(ptr->fullscreen);
-            else if (const auto* ptr = std::get_if<game::App::ToggleFullScreen>(&request))
+            else if (const auto* ptr = std::get_if<engine::App::ToggleFullScreen>(&request))
                 AskToggleFullScreen();
-            else if (const auto* ptr = std::get_if<game::App::ShowMouseCursor>(&request)) {
+            else if (const auto* ptr = std::get_if<engine::App::ShowMouseCursor>(&request)) {
                 if (ptr->show) {
                     mContainer->setCursor(Qt::ArrowCursor);
                     mSurface->setCursor(Qt::ArrowCursor);
@@ -527,7 +527,7 @@ void PlayWindow::RunOnce()
                     mContainer->setCursor(Qt::BlankCursor);
                     mSurface->setCursor(Qt::BlankCursor);
                 }
-            } else if (const auto* ptr = std::get_if<game::App::QuitApp>(&request)) {
+            } else if (const auto* ptr = std::get_if<engine::App::QuitApp>(&request)) {
                 INFO("Quit with exit code %1", ptr->exit_code);
                 quit = true;
             }
@@ -553,7 +553,7 @@ void PlayWindow::RunOnce()
         // ask the application to draw the current frame.
         mApp->Draw();
 
-        game::App::Stats stats;
+        engine::App::Stats stats;
         if (mApp->GetStats(&stats))
         {
             SetValue(mUI.gameTime, stats.total_game_time);
@@ -569,7 +569,7 @@ void PlayWindow::RunOnce()
         {
             const auto seconds = elapsed / 1000.0;
             const auto fps = mNumFrames / seconds;
-            game::App::HostStats stats;
+            engine::App::HostStats stats;
             stats.num_frames_rendered = mNumFramesTotal;
             stats.total_wall_time     = mTimeTotal;
             stats.current_fps         = fps;
@@ -619,7 +619,7 @@ bool PlayWindow::LoadGame()
     const auto debug_log = GetValue(mUI.actionToggleDebugLog);
     mGameLibSetGlobalLogger(mLogger.get(), debug_log);
 
-    std::unique_ptr<game::App> app;
+    std::unique_ptr<engine::App> app;
     app.reset(mGameLibCreateApp());
     if (!app)
     {
@@ -763,7 +763,7 @@ void PlayWindow::DoAppInit()
 
         SetDebugOptions();
 
-        game::App::Environment env;
+        engine::App::Environment env;
         env.classlib  = &mWorkspace;
         env.game_data_loader   = mResourceLoader.get();
         env.graphics_loader    = mResourceLoader.get();
@@ -771,14 +771,14 @@ void PlayWindow::DoAppInit()
         env.directory          = app::ToUtf8(mGameWorkingDir);
         mApp->SetEnvironment(env);
 
-        game::App::InitParams params;
+        engine::App::InitParams params;
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();
         params.surface_height   = mSurface->height();
         mApp->Init(params);
 
-        game::App::EngineConfig config;
+        engine::App::EngineConfig config;
         config.ticks_per_second   = settings.ticks_per_second;
         config.updates_per_second = settings.updates_per_second;
         config.physics.num_velocity_iterations = settings.num_velocity_iterations;
@@ -1147,7 +1147,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
 
 void PlayWindow::SetDebugOptions() const
 {
-    game::App::DebugOptions debug;
+    engine::App::DebugOptions debug;
     debug.debug_pause     = GetValue(mUI.actionPause);
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_log       = GetValue(mUI.actionToggleDebugLog);

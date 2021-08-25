@@ -25,7 +25,7 @@
 #include "audio/loader.h"
 #include "graphics/loader.h"
 
-namespace game
+namespace engine
 {
     // in order to de-couple the loader application (GameMain) from
     // transitive dependencies such as the graphics subsystem etc.
@@ -52,7 +52,7 @@ namespace game
     // Loader implementation for loading all kinds of subsystem
     // resources and game data.
     class FileResourceLoader : public gfx::Loader,
-                               public game::Loader,
+                               public engine::Loader,
                                public audio::Loader
     {
     public:

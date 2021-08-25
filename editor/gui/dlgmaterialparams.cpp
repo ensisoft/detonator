@@ -22,6 +22,7 @@
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/utility.h"
 #include "graphics/material.h"
+#include "game/entity.h"
 
 namespace gui
 {

@@ -830,27 +830,27 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
-game::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassById(const std::string& id) const
+engine::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassById(const std::string& id) const
 {
     return FindClassHandleById<audio::GraphClass>(id, Resource::Type::AudioGraph);
 }
-game::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassByName(const std::string& name) const
+engine::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassByName(const std::string& name) const
 {
     return FindClassHandleByName<audio::GraphClass>(name, Resource::Type::AudioGraph);
 }
-game::ClassHandle<const uik::Window> Workspace::FindUIByName(const std::string& name) const
+engine::ClassHandle<const uik::Window> Workspace::FindUIByName(const std::string& name) const
 {
     return FindClassHandleByName<uik::Window>(name, Resource::Type::UI);
 }
-game::ClassHandle<const uik::Window> Workspace::FindUIById(const std::string& id) const
+engine::ClassHandle<const uik::Window> Workspace::FindUIById(const std::string& id) const
 {
     return FindClassHandleById<uik::Window>(id, Resource::Type::UI);
 }
-game::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
+engine::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
     return FindClassHandleById<gfx::MaterialClass>(klass, Resource::Type::Material);
 }
-game::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
+engine::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(const std::string& klass) const
 {
     for (const auto& resource : mResources)
     {
@@ -866,16 +866,16 @@ game::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(con
     }
     return nullptr;
 }
-game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
+engine::ClassHandle<const game::EntityClass> Workspace::FindEntityClassByName(const std::string& name) const
 {
     return FindClassHandleByName<game::EntityClass>(name, Resource::Type::Entity);
 }
-game::ClassHandle<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
+engine::ClassHandle<const game::EntityClass> Workspace::FindEntityClassById(const std::string& id) const
 {
     return FindClassHandleById<game::EntityClass>(id, Resource::Type::Entity);
 }
 
-game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
+engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(const std::string& name) const
 {
     std::shared_ptr<game::SceneClass> ret;
     for (auto& resource : mResources)
@@ -910,7 +910,7 @@ game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(const 
     }
     return ret;
 }
-game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
+engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const std::string& id) const
 {
     std::shared_ptr<game::SceneClass> ret;
     for (const auto& resource : mResources)
@@ -945,14 +945,14 @@ game::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const st
     return ret;
 }
 
-game::GameDataHandle Workspace::LoadGameData(const std::string& URI) const
+engine::GameDataHandle Workspace::LoadGameData(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
     return GameDataFileBuffer::LoadFromFile(file);
 }
 
-game::GameDataHandle Workspace::LoadGameDataFromFile(const std::string& filename) const
+engine::GameDataHandle Workspace::LoadGameDataFromFile(const std::string& filename) const
 {
     return GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
 }
@@ -1995,14 +1995,14 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 errors++;
                 continue;
             }
-            game::UIStyle style;
+            engine::UIStyle style;
             if (!style.LoadStyle(*style_data))
             {
                 ERROR("Failed to load UI style '%1'", window->GetStyleName());
                 errors++;
                 continue;
             }
-            std::vector<game::UIStyle::PropertyKeyValue> props;
+            std::vector<engine::UIStyle::PropertyKeyValue> props;
             style.GatherProperties("font-name", &props);
             for (auto& p : props)
             {
@@ -2023,7 +2023,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 style.ClearProperties();
                 style.ClearMaterials();
                 style.ParseStyleString(widget->GetId(), style_string);
-                std::vector<game::UIStyle::PropertyKeyValue> props;
+                std::vector<engine::UIStyle::PropertyKeyValue> props;
                 style.GatherProperties("font-name", &props);
                 for (auto& p : props)
                 {
