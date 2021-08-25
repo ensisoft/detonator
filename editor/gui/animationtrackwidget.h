@@ -211,9 +211,9 @@ namespace gui
         // used to compare for changes when closing.
         std::size_t mOriginalHash = 0;
         // Renderer for the animation
-        game::Renderer mRenderer;
+        engine::Renderer mRenderer;
         // Physics engine for the animation
-        game::PhysicsEngine mPhysics;
+        engine::PhysicsEngine mPhysics;
     };
 
     // Functions used to share state between AnimationTrackWidget

@@ -108,7 +108,7 @@ void unit_test_kinematic_actuator()
     klass.SetEndAngularVelocity(3.0f);
     klass.SetEndLinearVelocity(glm::vec2(1.0f, 2.0f));
 
-    TEST_REQUIRE(klass.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(klass.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
     TEST_REQUIRE(klass.GetNodeId()              == "1234");
     TEST_REQUIRE(klass.GetStartTime()           == real::float32(0.1f));
     TEST_REQUIRE(klass.GetDuration()            == real::float32(0.5f));
@@ -121,7 +121,7 @@ void unit_test_kinematic_actuator()
         klass.IntoJson(json);
         game::KinematicActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));
@@ -134,7 +134,7 @@ void unit_test_kinematic_actuator()
     // copy assignment and copy ctor
     {
         game::KinematicActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));

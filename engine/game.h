@@ -25,14 +25,14 @@
 #include "wdk/events.h"
 #include "engine/classlib.h"
 #include "game/types.h"
+#include "game/fwd.h"
 #include "engine/action.h"
+#include "engine/types.h"
 #include "uikit/window.h"
 #include "uikit/types.h"
 
-namespace game
+namespace engine
 {
-    class Scene;
-    class SceneClass;
     class PhysicsEngine;
     class AudioEngine;
     struct ContactEvent;
@@ -47,7 +47,7 @@ namespace game
     class Game
     {
     public:
-        using Action = game::Action;
+        using Action = engine::Action;
 
         virtual ~Game() = default;
         // Set physics engine instance.
@@ -63,7 +63,7 @@ namespace game
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
         // of the scene for the duration of the game play.
-        virtual void BeginPlay(Scene* scene) = 0;
+        virtual void BeginPlay(game::Scene* scene) = 0;
         // Tick is called intermittently in order to perform some low frequency
         // game activity. The actual frequency is specified in the game configuration
         // in config.json.
@@ -86,7 +86,7 @@ namespace game
         virtual void ResumePlay()
         {}
         // Called after StopAction has taken place.
-        virtual void EndPlay(Scene* scene) = 0;
+        virtual void EndPlay(game::Scene* scene) = 0;
 
         virtual void SaveGame() = 0;
 

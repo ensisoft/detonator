@@ -40,7 +40,7 @@ void unit_test_util()
     sol::state L;
     L.open_libraries();
 
-    game::BindUtil(L);
+    engine::BindUtil(L);
 
     L.script(R"(
 function test_random_begin()
@@ -69,7 +69,7 @@ void unit_test_glm()
 {
     sol::state L;
     L.open_libraries();
-    game::BindGLM(L);
+    engine::BindGLM(L);
 
     const glm::vec2 a(1.0f, 2.0f);
     const glm::vec2 b(-1.0f, -2.0f);
@@ -182,7 +182,7 @@ void unit_test_base()
     {
         sol::state L;
         L.open_libraries();
-        game::BindBase(L);
+        engine::BindBase(L);
 
         L.script(
             R"(
@@ -247,7 +247,7 @@ end
     {
         sol::state L;
         L.open_libraries();
-        game::BindBase(L);
+        engine::BindBase(L);
         L.script(
                 R"(
 function test_combine()
@@ -331,10 +331,10 @@ void unit_test_scene()
     TEST_REQUIRE(instance.GetNumEntities() == 1);
 
     sol::state L;
-    game::BindBase(L);
-    game::BindGameLib(L);
-    game::BindGLM(L);
-    game::BindUtil(L);
+    engine::BindBase(L);
+    engine::BindGameLib(L);
+    engine::BindGLM(L);
+    engine::BindUtil(L);
 
     L.open_libraries();
     L.script(

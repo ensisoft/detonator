@@ -119,7 +119,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetScale()        == glm::vec2(4.0f, 5.0f));
     TEST_REQUIRE(node.GetRotation()     == real::float32(1.5f));
     TEST_REQUIRE(node.GetDrawable()->GetLineWidth()    == real::float32(5.0f));
-    TEST_REQUIRE(node.GetDrawable()->GetRenderPass()   == game::DrawableItemClass::RenderPass::Mask);
+    TEST_REQUIRE(node.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::Mask);
     TEST_REQUIRE(node.GetDrawable()->GetLayer()        == 10);
     TEST_REQUIRE(node.GetDrawable()->GetDrawableId()   == "rectangle");
     TEST_REQUIRE(node.GetDrawable()->GetMaterialId()   == "test");
@@ -161,7 +161,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret->GetDrawable()->GetDrawableId()   == "rectangle");
         TEST_REQUIRE(ret->GetDrawable()->GetMaterialId()   == "test");
         TEST_REQUIRE(ret->GetDrawable()->GetLineWidth()    == real::float32(5.0f));
-        TEST_REQUIRE(ret->GetDrawable()->GetRenderPass()   == game::DrawableItemClass::RenderPass::Mask);
+        TEST_REQUIRE(ret->GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(ret->GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(ret->GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
         TEST_REQUIRE(node.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);
@@ -203,7 +203,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetDrawable()->GetDrawableId()   == "rectangle");
         TEST_REQUIRE(clone.GetDrawable()->GetMaterialId()   == "test");
         TEST_REQUIRE(clone.GetDrawable()->GetLineWidth()    == real::float32(5.0f));
-        TEST_REQUIRE(clone.GetDrawable()->GetRenderPass()   == game::DrawableItemClass::RenderPass::Mask);
+        TEST_REQUIRE(clone.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
         TEST_REQUIRE(clone.GetTextItem()->GetText() == "jeesus ajaa mopolla");
@@ -225,7 +225,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.HasRigidBody());
         TEST_REQUIRE(instance.HasDrawable());
         TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
-        TEST_REQUIRE(instance.GetDrawable()->GetRenderPass()  == game::DrawableItemClass::RenderPass::Mask);
+        TEST_REQUIRE(instance.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");
         TEST_REQUIRE(instance->GetTextItem());
         TEST_REQUIRE(instance->GetTextItem()->GetText() == "jeesus ajaa mopolla");

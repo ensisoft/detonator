@@ -37,7 +37,7 @@ namespace app {
     class Workspace;
 } // namespace
 
-namespace game {
+namespace engine {
     class App;
 } //
 
@@ -155,7 +155,7 @@ namespace gui
         // proxy model for filtering application event log
         app::EventLogProxy mEventLog;
         // The game/app object we've created and loaded from the library.
-        std::unique_ptr<game::App> mApp;
+        std::unique_ptr<engine::App> mApp;
         // rendering context implementation for the QWindow surface.
         std::unique_ptr<WindowContext> mWindowContext;
         // This resource loader implements the resolveURI to map

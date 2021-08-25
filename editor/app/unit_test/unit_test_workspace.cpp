@@ -439,7 +439,7 @@ R"(
     // UI style files should be copied into ui/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
 
-    auto loader = game::JsonFileClassLoader::Create();
+    auto loader = engine::JsonFileClassLoader::Create();
     loader->LoadFromFile("TestPackage/test/content.json");
     TEST_REQUIRE(loader->FindMaterialClassById(material.GetId()));
     TEST_REQUIRE(loader->FindDrawableClassById(poly.GetId()));
@@ -827,7 +827,7 @@ void unit_test_packing_texture_rects(unsigned padding)
         resources.push_back(&workspace.GetUserDefinedResource(0));
         TEST_REQUIRE(workspace.PackContent(resources, options));
 
-        auto loader = game::JsonFileClassLoader::Create();
+        auto loader = engine::JsonFileClassLoader::Create();
         loader->LoadFromFile("TestPackage/content.json");
         auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->AsTexture()->GetTextureRect();
@@ -863,7 +863,7 @@ void unit_test_packing_texture_rects(unsigned padding)
         resources.push_back(&workspace.GetUserDefinedResource(0));
         TEST_REQUIRE(workspace.PackContent(resources, options));
 
-        auto loader = game::JsonFileClassLoader::Create();
+        auto loader = engine::JsonFileClassLoader::Create();
         loader->LoadFromFile("TestPackage/content.json");
         auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->AsTexture()->GetTextureRect();
@@ -912,7 +912,7 @@ void unit_test_packing_texture_rects(unsigned padding)
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue)    >= 32*32);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow)  >= 32*32);
 
-        auto loader = game::JsonFileClassLoader::Create();
+        auto loader = engine::JsonFileClassLoader::Create();
         loader->LoadFromFile("TestPackage/content.json");
         const auto& mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect0 = mat->AsSprite()->GetTextureRect(0);
@@ -973,8 +973,8 @@ void unit_test_packing_texture_name_collision()
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // verify output
-    auto cloader = game::JsonFileClassLoader::Create();
-    auto floader = game::FileResourceLoader::Create();
+    auto cloader = engine::JsonFileClassLoader::Create();
+    auto floader = engine::FileResourceLoader::Create();
     cloader->LoadFromFile("TestPackage/content.json");
     floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());
@@ -1049,7 +1049,7 @@ void unit_test_packing_ui_style_resources()
     {
         uik::Label label;
 
-        game::UIStyle style;
+        engine::UIStyle style;
         style.SetProperty(label.GetId() + "/font-name", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
         label.SetStyleString(style.MakeStyleString(label.GetId()));
 
@@ -1128,8 +1128,8 @@ void unit_test_packing_texture_name_collision_resample_bug()
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // verify output
-    auto cloader = game::JsonFileClassLoader::Create();
-    auto floader = game::FileResourceLoader::Create();
+    auto cloader = engine::JsonFileClassLoader::Create();
+    auto floader = engine::FileResourceLoader::Create();
     cloader->LoadFromFile("TestPackage/content.json");
     floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());

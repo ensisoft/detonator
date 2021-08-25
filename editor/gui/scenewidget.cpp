@@ -1683,8 +1683,8 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
     // objects returned by the coarse hit test with different colors
     // and then read back the color of the pixel under the click point
     // and see which object/node the color maps back to.
-    class DrawHook : public game::SceneClassDrawHook,
-                     public game::EntityClassDrawHook
+    class DrawHook : public engine::SceneClassDrawHook,
+                     public engine::EntityClassDrawHook
     {
     public:
         DrawHook(const std::vector<game::SceneNodeClass*>& hits) : mHits(hits)
@@ -1714,7 +1714,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
                 }
             }
         }
-        virtual bool InspectPacket(const game::EntityNodeClass* node, game::DrawPacket& draw) override
+        virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& draw) override
         {
             ASSERT(mColorIndex < mColors.size());
             draw.material = gfx::CreateMaterialInstance(gfx::CreateMaterialFromColor(mColors[mColorIndex]));

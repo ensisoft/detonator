@@ -46,7 +46,7 @@
 // and setup the environment specific resources such as the rendering
 // context an device and resource loader.
 
-namespace game
+namespace engine
 {
     // Main callback interface for implementing application specific
     // functionality at certain times during the lifetime of the app.
@@ -155,11 +155,11 @@ namespace game
         struct Environment {
             // Interface for accessing game content such as scenes, entities
             // materials etc.
-            game::ClassLibrary* classlib = nullptr;
+            engine::ClassLibrary* classlib = nullptr;
             // Interface for accessing the game data from the game's running
             // environment, i.e. data that is packaged with the game. Not the
             // data *generated* by the game such as save games.
-            game::Loader* game_data_loader = nullptr;
+            engine::Loader* game_data_loader = nullptr;
             // The low level gfx resource loader that implements loading
             // of graphics resources such as shaders, fonts and textures.
             // The engine should use this with the graphics subsystem.
@@ -336,7 +336,7 @@ namespace game
     class AppRequestQueue
     {
     public:
-        using Request = game::App::Request;
+        using Request = engine::App::Request;
 
         inline bool GetNext(Request* out)
         {
@@ -347,17 +347,17 @@ namespace game
             return true;
         }
         inline void MoveWindow(int x, int y)
-        { mQueue.push(game::App::MoveWindow { x, y }); }
+        { mQueue.push(engine::App::MoveWindow {x, y }); }
         inline void ResizeWindow(unsigned width, unsigned height)
-        { mQueue.push(game::App::ResizeWindow{width, height}); }
+        { mQueue.push(engine::App::ResizeWindow{width, height}); }
         inline void SetFullScreen(bool fullscreen)
-        { mQueue.push(game::App::SetFullScreen{fullscreen}); }
+        { mQueue.push(engine::App::SetFullScreen{fullscreen}); }
         inline void ToggleFullScreen()
-        { mQueue.push(game::App::ToggleFullScreen{}); }
+        { mQueue.push(engine::App::ToggleFullScreen{}); }
         inline void Quit(int exit_code)
-        { mQueue.push(game::App::QuitApp{ exit_code }); }
+        { mQueue.push(engine::App::QuitApp{exit_code }); }
         inline void ShowMouseCursor(bool yes_no)
-        { mQueue.push(game::App::ShowMouseCursor { yes_no } ); }
+        { mQueue.push(engine::App::ShowMouseCursor {yes_no } ); }
     private:
         std::queue<Request> mQueue;
     };
@@ -382,10 +382,10 @@ namespace game
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_API game::App* Gamestudio_CreateApp();
+    GAMESTUDIO_API engine::App* Gamestudio_CreateApp();
 } // extern "C"
 
-typedef game::App* (*Gamestudio_CreateAppFunc)();
+typedef engine::App* (*Gamestudio_CreateAppFunc)();
 
 // The below interface only exists currently for simplifying
 // the structure of the builds. I.e the dependencies for creating
@@ -397,8 +397,8 @@ typedef game::App* (*Gamestudio_CreateAppFunc)();
 // do the wrapping and then expect the game libs to include the right
 // translation unit in their builds.
 struct Gamestudio_Loaders {
-    std::unique_ptr<game::JsonFileClassLoader> ContentLoader;
-    std::unique_ptr<game::FileResourceLoader> ResourceLoader;
+    std::unique_ptr<engine::JsonFileClassLoader> ContentLoader;
+    std::unique_ptr<engine::FileResourceLoader> ResourceLoader;
 };
 
 extern "C" {

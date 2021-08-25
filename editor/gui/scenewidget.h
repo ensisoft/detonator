@@ -150,7 +150,7 @@ namespace gui
         };
         struct State {
             game::SceneClass scene;
-            game::Renderer renderer;
+            engine::Renderer renderer;
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;

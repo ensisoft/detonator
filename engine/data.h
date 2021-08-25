@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <string>
 
-namespace game
+namespace engine
 {
     class GameData
     {

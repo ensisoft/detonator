@@ -23,9 +23,7 @@
 #  include <QDialog>
 #include "warnpop.h"
 
-namespace game {
-    class ScriptVar;
-} // namespace
+#include "game/fwd.h"
 
 namespace gui
 {

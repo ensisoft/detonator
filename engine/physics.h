@@ -29,17 +29,13 @@
 #include <unordered_map>
 
 #include "graphics/fwd.h"
+#include "game/fwd.h"
 
 class b2World;
 
-namespace game
+namespace engine
 {
     class ClassLibrary;
-    class EntityNode;
-    class Entity;
-    class SceneNode;
-    class Scene;
-    class FBox;
 
     struct ContactEvent {
         enum class Type {
@@ -95,12 +91,12 @@ namespace game
         { return !!mWorld; }
 
         // Update the scene with the changes from the physics simulation.
-        void UpdateScene(Scene& scene);
+        void UpdateScene(game::Scene& scene);
 
         // Update a single entity with the changes from the physics simulation.
         // This is intended to be used when the world is created with a
         // single entity instance.
-        void UpdateEntity(Entity& entity);
+        void UpdateEntity(game::Entity& entity);
 
         // Tick the physics simulation forward by one time step.
         void Tick(std::vector<ContactEvent>* contacts = nullptr);
@@ -109,15 +105,15 @@ namespace game
         void DeleteAll();
         // Delete a physics body with the given node id.
         void DeleteBody(const std::string& node);
-        void DeleteBody(const EntityNode& node);
+        void DeleteBody(const game::EntityNode& node);
 
         // Apply an impulse (defined as a vector with magnitude and direction) to
         // the center of the node's rigid body. The body must be dynamic in order for
         // this to work. Newtons per seconds or Kgs per meters per second.
-        void ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse) const;
+        void ApplyImpulseToCenter(const game::EntityNode& node, const glm::vec2& impulse) const;
         void ApplyImpulseToCenter(const std::string& node, const glm::vec2& impulse) const;
 
-        void SetLinearVelocity(const EntityNode& node, const glm::vec2& velocity) const;
+        void SetLinearVelocity(const game::EntityNode& node, const glm::vec2& velocity) const;
         void SetLinearVelocity(const std::string& node, const glm::vec2& velocity) const;
 
         // Initialize the physics world based on the scene.
@@ -127,7 +123,7 @@ namespace game
         // create a new physics world object. So you should make
         // sure to set all the desired parameters (such as gravity)
         // before calling this.
-        void CreateWorld(const Scene& scene);
+        void CreateWorld(const game::Scene& scene);
 
         // Initialize the physics world based on a single entity.
         // This is mostly useful when visualizing the effect of
@@ -138,16 +134,16 @@ namespace game
         // This will create a new physics world, so you should make
         // sure to set all the desired physics parameters (such as gravity)
         // before calling this.
-        void CreateWorld(const Entity& entity);
+        void CreateWorld(const game::Entity& entity);
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
     private:
-        void UpdateEntity(const glm::mat4& model_to_world, Entity& scene);
-        void AddEntity(const glm::mat4& model_to_world, const Entity& entity);
-        void AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node);
+        void UpdateEntity(const glm::mat4& model_to_world, game::Entity& scene);
+        void AddEntity(const glm::mat4& model_to_world, const game::Entity& entity);
+        void AddEntityNode(const glm::mat4& model_to_world, const game::Entity& entity, const game::EntityNode& node);
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mClassLib = nullptr;

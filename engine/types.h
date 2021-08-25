@@ -18,27 +18,16 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <glm/vec2.hpp>
-#include "warnpop.h"
+#include <cmath>
 
-#include "wdk/keys.h"
-#include "wdk/bitflag.h"
+#include "base/types.h"
 
-namespace engine
-{
-    struct MouseEvent {
-        // mouse cursor position in window coordinates.
-        glm::vec2 window_coord;
-        // mouse cursor position in scene coordinates.
-        glm::vec2 scene_coord;
-        // true when the mouse cursor is within/over the viewport
-        // in the window that renders the visible part of the
-        // game/scene.
-        bool over_scene = false;
-        wdk::MouseButton btn = wdk::MouseButton::None;
-        wdk::bitflag<wdk::Keymod> mods;
-    };
-
-} // namespace
-
+namespace engine {
+    // type aliases for base types
+    using FRect = base::FRect;
+    using IRect = base::IRect;
+    using IPoint = base::IPoint;
+    using FPoint = base::FPoint;
+    using FSize = base::FSize;
+    using ISize = base::ISize;
+}

@@ -25,8 +25,8 @@
 extern "C" {
 GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
 {
-    out->ContentLoader  = game::JsonFileClassLoader::Create();
-    out->ResourceLoader = game::FileResourceLoader::Create();
+    out->ContentLoader  = engine::JsonFileClassLoader::Create();
+    out->ResourceLoader = engine::FileResourceLoader::Create();
 }
 
 GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug)

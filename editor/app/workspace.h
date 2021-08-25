@@ -56,8 +56,8 @@ namespace app
     // that can useful for various purposes.
     class Workspace : public QAbstractTableModel,
                       public QAbstractFileEngineHandler,
-                      public game::ClassLibrary,
-                      public game::Loader,
+                      public engine::ClassLibrary,
+                      public engine::Loader,
                       public gfx::Loader,
                       public audio::Loader
 
@@ -80,26 +80,26 @@ namespace app
         // game::ClassLibrary implementation
         // The methods here allow requests for resources that don't exist and return
         // nullptr as specified in the ClassLibrary API.
-        virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
-        virtual game::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
-        virtual game::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
-        virtual game::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual game::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual game::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual game::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
+        virtual engine::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
+        virtual engine::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
+        virtual engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        virtual engine::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        virtual engine::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
         // game::GameDataLoader implementation.
-        virtual game::GameDataHandle LoadGameData(const std::string& URI) const override;
-        virtual game::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override;
+        virtual engine::GameDataHandle LoadGameData(const std::string& URI) const override;
+        virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override;
         // gfx::ResourceLoader implementation
         virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
         // audio::Loader implementation
         virtual std::ifstream OpenStream(const std::string& URI) const override;
 
         template<typename T>
-        game::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
+        engine::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
         {
             for (const auto& resource : mResources)
             {
@@ -110,7 +110,7 @@ namespace app
             return nullptr;
         }
         template<typename T>
-        game::ClassHandle<T> FindClassHandleById(const std::string& id, Resource::Type type) const
+        engine::ClassHandle<T> FindClassHandleById(const std::string& id, Resource::Type type) const
         {
             for (const auto& resource : mResources)
             {

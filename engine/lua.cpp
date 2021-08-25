@@ -36,20 +36,22 @@
 #include "base/color4f.h"
 #include "base/format.h"
 #include "audio/graph.h"
-#include "engine/audio.h"
 #include "game/entity.h"
-#include "engine/game.h"
+#include "game/util.h"
 #include "game/scene.h"
+#include "game/transform.h"
+#include "engine/game.h"
+#include "engine/audio.h"
 #include "engine/classlib.h"
 #include "engine/physics.h"
 #include "engine/lua.h"
-#include "game/transform.h"
-#include "engine/util.h"
 #include "engine/event.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "wdk/keys.h"
 #include "wdk/system.h"
+
+using namespace game;
 
 // About Lua error handling. The binding code here must be careful
 // to understand what is a BUG, a logical error condition and an
@@ -120,7 +122,7 @@ void CallLua(const sol::protected_function& func, const Args&... args)
 template<typename LuaGame>
 void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
 {
-    using namespace game;
+    using namespace engine;
     engine["Play"] = sol::overload(
         [](LuaGame& self, ClassHandle<SceneClass> klass) {
             if (!klass)
@@ -238,7 +240,7 @@ void SetFlag(Type& object, const std::string& name, bool on_off)
 template<typename Type>
 sol::object GetScriptVar(const Type& object, const char* key, sol::this_state state)
 {
-    using namespace game;
+    using namespace engine;
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVar(key);
     if (var && var->GetType() == ScriptVar::Type::Boolean)
@@ -257,7 +259,7 @@ sol::object GetScriptVar(const Type& object, const char* key, sol::this_state st
 template<typename Type>
 void SetScriptVar(Type& object, const char* key, sol::object value)
 {
-    using namespace game;
+    using namespace engine;
     const ScriptVar* var = object.FindScriptVar(key);
     if (var == nullptr)
         throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
@@ -320,7 +322,7 @@ boost::random::mt19937 RandomEngine::mTwister;
 
 } // namespace
 
-namespace game
+namespace engine
 {
 
 LuaGame::LuaGame(std::shared_ptr<sol::state> state)

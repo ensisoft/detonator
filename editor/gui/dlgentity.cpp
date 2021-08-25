@@ -54,10 +54,10 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     if (mNodeClass.HasLifetimeSetting())
         SetValue(mUI.entityLifetime, mNodeClass.GetLifetime());
 
-    GetFlag(game::SceneNodeClass::Flags::LimitLifetime,  mUI.chkEntityLifetime);
+    GetFlag(game::SceneNodeClass::Flags::LimitLifetime, mUI.chkEntityLifetime);
     GetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
-    GetFlag(game::SceneNodeClass::Flags::UpdateEntity,   mUI.chkUpdateEntity);
-    GetFlag(game::SceneNodeClass::Flags::TickEntity,     mUI.chkTickEntity);
+    GetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
+    GetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
     GetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
     GetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 }
@@ -70,10 +70,10 @@ void DlgEntity::on_btnAccept_clicked()
     if (lifetime != -1.0)
         mNodeClass.SetLifetime(lifetime);
 
-    SetFlag(game::SceneNodeClass::Flags::LimitLifetime,  mUI.chkEntityLifetime);
+    SetFlag(game::SceneNodeClass::Flags::LimitLifetime, mUI.chkEntityLifetime);
     SetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
-    SetFlag(game::SceneNodeClass::Flags::UpdateEntity,   mUI.chkUpdateEntity);
-    SetFlag(game::SceneNodeClass::Flags::TickEntity,     mUI.chkTickEntity);
+    SetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
+    SetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
     SetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
     SetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 

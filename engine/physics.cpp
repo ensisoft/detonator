@@ -30,21 +30,23 @@
 #include "game/scene.h"
 #include "game/transform.h"
 
+using namespace game;
+
 // ADL lookup for math::FindConvexHull in the global
 // namespace for box2d
 inline b2Vec2 GetPosition(const b2Vec2& vec2)
 { return vec2; }
 
-namespace game
+namespace engine
 {
 
 PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
   : mClassLib(loader)
 {}
 
-void PhysicsEngine::UpdateScene(Scene& scene)
+void PhysicsEngine::UpdateScene(game::Scene& scene)
 {
-    using RenderTree = Scene::RenderTree ;
+    using RenderTree = game::Scene::RenderTree ;
 
     for (auto& pair : mNodes)
         pair.second.alive = false;

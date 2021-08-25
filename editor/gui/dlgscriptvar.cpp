@@ -20,7 +20,7 @@
 
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/utility.h"
-#include "game/types.h"
+#include "game/scriptvar.h"
 
 namespace gui
 {

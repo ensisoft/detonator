@@ -48,7 +48,7 @@ bool ReadColor(const nlohmann::json& json, const std::string& name, gfx::Color4f
 }
 } // namespace
 
-namespace game
+namespace engine
 {
 namespace detail {
 
