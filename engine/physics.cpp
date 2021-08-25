@@ -231,6 +231,28 @@ void PhysicsEngine::ApplyImpulseToCenter(const EntityNode& node, const glm::vec2
     ApplyImpulseToCenter(node.GetId(), impulse);
 }
 
+void PhysicsEngine::SetLinearVelocity(const EntityNode& node, const glm::vec2& velocity) const
+{
+    SetLinearVelocity(node.GetId(), velocity);
+}
+void PhysicsEngine::SetLinearVelocity(const std::string& id, const glm::vec2& velocity) const
+{
+    auto it = mNodes.find(id);
+    if (it == mNodes.end())
+    {
+        WARN("Setting linear velocity on a physics body that doesn't exist: '%1'", id);
+        return;
+    }
+    auto& node = it->second;
+    auto* body = node.world_body;
+    if (body->GetType() == b2_staticBody)
+    {
+        WARN("Setting linear velocity on a static body will have no effect.", id);
+        return;
+    }
+    body->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
+}
+
 void PhysicsEngine::CreateWorld(const Scene& scene)
 {
     const b2Vec2 gravity(mGravity.x, mGravity.y);
