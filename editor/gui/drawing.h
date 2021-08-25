@@ -24,7 +24,7 @@
 #include "warnpop.h"
 
 #include "engine/renderer.h"
-#include "engine/treeop.h"
+#include "game/treeop.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"

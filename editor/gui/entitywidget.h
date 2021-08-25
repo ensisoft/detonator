@@ -30,7 +30,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
-#include "engine/entity.h"
+#include "game/entity.h"
 #include "engine/renderer.h"
 
 namespace gfx {

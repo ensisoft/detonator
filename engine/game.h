@@ -24,7 +24,7 @@
 
 #include "wdk/events.h"
 #include "engine/classlib.h"
-#include "engine/types.h"
+#include "game/types.h"
 #include "engine/action.h"
 #include "uikit/window.h"
 #include "uikit/types.h"

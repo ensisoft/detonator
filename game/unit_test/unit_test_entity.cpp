@@ -26,7 +26,7 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "data/json.h"
-#include "engine/entity.h"
+#include "game/entity.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order

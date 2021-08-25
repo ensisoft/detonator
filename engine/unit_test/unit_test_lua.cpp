@@ -25,7 +25,7 @@
 #include "base/test_float.h"
 #include "base/test_help.h"
 #include "base/color4f.h"
-#include "engine/scene.h"
+#include "game/scene.h"
 #include "engine/lua.h"
 
 // the test coverage here is quite poor but OTOH the binding code is

@@ -28,7 +28,7 @@
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
-#include "engine/types.h"
+#include "game/types.h"
 #include "base/math.h"
 
 namespace gui

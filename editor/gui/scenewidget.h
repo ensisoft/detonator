@@ -29,7 +29,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
-#include "engine/scene.h"
+#include "game/scene.h"
 #include "engine/renderer.h"
 
 namespace gfx {

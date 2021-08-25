@@ -30,10 +30,10 @@
 #include "base/format.h"
 #include "data/reader.h"
 #include "data/writer.h"
-#include "engine/types.h"
-#include "engine/transform.h"
-#include "engine/tree.h"
-#include "engine/types.h"
+#include "game/types.h"
+#include "game/transform.h"
+#include "game/tree.h"
+#include "game/types.h"
 #include "engine/util.h"
 
 // collection of algorithms that operate on a render tree.

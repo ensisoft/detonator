@@ -25,8 +25,8 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "data/json.h"
-#include "engine/animation.h"
-#include "engine/entity.h"
+#include "game/animation.h"
+#include "game/entity.h"
 
 
 void unit_test_setflag_actuator()

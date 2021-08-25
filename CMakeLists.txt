@@ -202,12 +202,12 @@ add_library(GfxLib
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
 add_library(EngineLib
-    engine/animation.cpp
+    game/animation.cpp
+    game/entity.cpp
+    game/scriptvar.cpp
+    game/scene.cpp
     engine/audio.cpp
     engine/renderer.cpp
-    engine/entity.cpp
-    engine/scene.cpp
-    engine/scriptvar.cpp
     engine/physics.cpp
     engine/ui.cpp)
 add_library(UiLib
@@ -591,47 +591,43 @@ target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivat
 
 # engine tests
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
-add_executable(unit_test_tree engine/unit_test/unit_test_tree.cpp base/assert.cpp)
-add_executable(unit_test_anim engine/unit_test/unit_test_animation.cpp
-        base/assert.cpp
-        engine/entity.cpp
-        engine/scriptvar.cpp
-        engine/animation.cpp)
-add_executable(unit_test_entity engine/unit_test/unit_test_entity.cpp
-        base/assert.cpp
-        engine/animation.cpp
-        engine/scriptvar.cpp
-        engine/entity.cpp)
-add_executable(unit_test_scene engine/unit_test/unit_test_scene.cpp
-        base/assert.cpp
-        engine/scene.cpp
-        engine/animation.cpp
-        engine/scriptvar.cpp
-        engine/entity.cpp)
+add_executable(unit_test_tree game/unit_test/unit_test_tree.cpp base/assert.cpp)
+add_executable(unit_test_anim game/unit_test/unit_test_animation.cpp
+        game/entity.cpp
+        game/scriptvar.cpp
+        game/animation.cpp)
+add_executable(unit_test_entity game/unit_test/unit_test_entity.cpp
+        game/animation.cpp
+        game/scriptvar.cpp
+        game/entity.cpp)
+add_executable(unit_test_scene game/unit_test/unit_test_scene.cpp
+        game/scene.cpp
+        game/animation.cpp
+        game/scriptvar.cpp
+        game/entity.cpp)
 add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
-        base/assert.cpp
+        game/animation.cpp
+        game/scene.cpp
+        game/entity.cpp
+        game/scriptvar.cpp
         engine/audio.cpp
         engine/lua.cpp
-        engine/animation.cpp
-        engine/scene.cpp
-        engine/entity.cpp
-        engine/scriptvar.cpp
         engine/physics.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
 target_link_libraries(unit_test_entity   DataLib BaseLib)
 target_link_libraries(unit_test_scene    DataLib BaseLib)
-target_link_libraries(unit_test_lua      DataLib BaseLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_lua      DataLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
 target_link_libraries(unit_test_settings DataLib BaseLib)
 target_link_libraries(unit_test_anim     DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_tree     DataLib BaseLib)
 
-target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
-target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
+target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
+target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
+target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_settings PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
-target_include_directories(unit_test_entity   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
-target_include_directories(unit_test_scene    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_lua      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 add_test(NAME unit_test_tree     COMMAND unit_test_tree)
 add_test(NAME unit_test_anim     COMMAND unit_test_anim)

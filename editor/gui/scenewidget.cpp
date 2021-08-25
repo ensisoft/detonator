@@ -56,7 +56,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-#include "engine/treeop.h"
+#include "game/treeop.h"
 
 namespace gui
 {

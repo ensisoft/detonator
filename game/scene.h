@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "config.h"
+
 #include "warnpush.h"
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
@@ -30,11 +32,11 @@
 
 #include "base/bitflag.h"
 #include "data/fwd.h"
-#include "engine/entity.h"
-#include "engine/tree.h"
-#include "engine/types.h"
-#include "engine/enum.h"
-#include "engine/scriptvar.h"
+#include "game/entity.h"
+#include "game/tree.h"
+#include "game/types.h"
+#include "game/enum.h"
+#include "game/scriptvar.h"
 
 namespace game
 {

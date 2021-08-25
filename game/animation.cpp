@@ -27,8 +27,8 @@
 #include "base/hash.h"
 #include "data/writer.h"
 #include "data/reader.h"
-#include "engine/animation.h"
-#include "engine/entity.h"
+#include "game/animation.h"
+#include "game/entity.h"
 
 namespace game
 {

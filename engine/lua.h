@@ -26,8 +26,8 @@
 #include <queue>
 #include <unordered_map>
 
+#include "game/types.h"
 #include "engine/game.h"
-#include "engine/types.h"
 #include "engine/action.h"
 
 namespace game

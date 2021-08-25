@@ -26,7 +26,7 @@
 
 #include <algorithm> // for min/max
 
-#include "engine/types.h"
+#include "game/types.h"
 
 namespace game
 {
