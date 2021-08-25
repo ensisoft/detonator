@@ -1250,6 +1250,8 @@ void BindGameLib(sol::state& L)
     entity["SetLayer"]             = &Entity::SetLayer;
     entity["IsPlaying"]            = &Entity::IsPlaying;
     entity["HasExpired"]           = &Entity::HasExpired;
+    entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
+    entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
@@ -1284,6 +1286,8 @@ void BindGameLib(sol::state& L)
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
     physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
+    physics["SetLinearVelocity"]    = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::SetLinearVelocity;
+    physics["SetLinearVelocity"]    = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::SetLinearVelocity;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["AddMusicGraph"] = sol::overload(
@@ -1332,12 +1336,24 @@ void BindGameLib(sol::state& L)
                     throw std::runtime_error("Nil audio effect graph class.");
                 return engine.PlaySoundEffect(klass, when);
             },
+            [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
+                if (!klass)
+                    throw std::runtime_error("Nil audio effect graph class.");
+                return engine.PlaySoundEffect(klass, 0);
+            },
             [](AudioEngine& engine, const std::string& name, unsigned when) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
                     throw std::runtime_error("No such audio effect graph:" + name);
                 return engine.PlaySoundEffect(klass, when);
+            },
+            [](AudioEngine& engine, const std::string& name) {
+                const auto* lib = engine.GetClassLibrary();
+                auto klass = lib->FindAudioGraphClassByName(name);
+                if (!klass)
+                    throw std::runtime_error("No such audio effect graph:" + name);
+                return engine.PlaySoundEffect(klass, 0);
             });
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
 
