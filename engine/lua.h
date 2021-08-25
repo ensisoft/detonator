@@ -117,7 +117,7 @@ namespace game
         const PhysicsEngine* mPhysicsEngine = nullptr;
         const AudioEngine* mAudioEngine = nullptr;
         std::unique_ptr<sol::state> mLuaState;
-        std::unordered_map<std::string, std::unique_ptr<sol::environment>> mTypeEnvs;
+        std::unordered_map<std::string, std::shared_ptr<sol::environment>> mTypeEnvs;
         std::queue<Action> mActionQueue;
         Scene* mScene = nullptr;
         std::unique_ptr<sol::environment> mSceneEnv;
