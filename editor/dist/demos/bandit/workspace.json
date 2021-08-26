@@ -1,5 +1,6 @@
 {
     "26DgI88X5u": {
+        "checked_for_packing": true,
         "material": "w26YsP04pJ"
     },
     "2Q2vkLGDEg": {
@@ -12,6 +13,7 @@
         "checked_for_packing": true
     },
     "4rBCnTGuXK": {
+        "checked_for_packing": true,
         "material": "90E8gRgYDP"
     },
     "5GPKkIzzUf": {
@@ -24,6 +26,7 @@
         "checked_for_packing": true
     },
     "8636ofEjei": {
+        "checked_for_packing": true,
         "material": "RnL44evfW5"
     },
     "8Prh114uxP": {
@@ -52,6 +55,7 @@
         "material": "Bush (2)"
     },
     "FNUUxWSBTe": {
+        "checked_for_packing": true,
         "track_4FKDqoTRqr": {
             "JByFlM7KOG": "FqRgn3KqOb",
             "OD52kANM1i": "7xS9z3T2Bo",
@@ -195,6 +199,7 @@
         "checked_for_packing": true
     },
     "FgJP6uJzoG": {
+        "checked_for_packing": true,
         "material": "bvJqe9fGu5"
     },
     "Fm5ByqI6xo": {
@@ -207,6 +212,7 @@
         "checked_for_packing": true
     },
     "HpAo2l11sT": {
+        "checked_for_packing": true
     },
     "IM3dwFG7wS": {
         "checked_for_packing": true
@@ -215,12 +221,14 @@
         "checked_for_packing": true
     },
     "IfEi7dQdbW": {
+        "checked_for_packing": true,
         "material": "QR14nEb7T3"
     },
     "ImTnUuKMDu": {
         "checked_for_packing": true
     },
     "JQAP7v0ZUJ": {
+        "checked_for_packing": true,
         "material": "gzjp7PwMQd"
     },
     "Jn0SpbgGSY": {
@@ -296,6 +304,7 @@
         "checked_for_packing": true
     },
     "PBPIRCm9MB": {
+        "checked_for_packing": true,
         "material": "9aRwE7zov7"
     },
     "PiCFlSf9Gm": {
@@ -308,6 +317,7 @@
         "checked_for_packing": true
     },
     "QwLaM5bEqx": {
+        "checked_for_packing": true,
         "material": "IM3dwFG7wS"
     },
     "RhslGRtQQR": {
@@ -332,6 +342,7 @@
         "checked_for_packing": true
     },
     "W27ZFgJKAJ": {
+        "checked_for_packing": true,
         "material": "f2rOXhvzDy"
     },
     "WKsCpHkbNw": {
@@ -354,6 +365,7 @@
         "material": "Bandit Idle"
     },
     "YkK6SEnX2R": {
+        "checked_for_packing": true,
         "material": "xrUzM3pdBZ"
     },
     "ZNaUsmn31R": {
@@ -381,6 +393,7 @@
         "checked_for_packing": true
     },
     "dWDAODzq3M": {
+        "checked_for_packing": true,
         "material": "Ca4GgRWjP2"
     },
     "dfb84OzuRo": {
@@ -393,6 +406,7 @@
         "checked_for_packing": true
     },
     "fW1kOmDCo0": {
+        "checked_for_packing": true,
         "material": "wrSRezqUfj"
     },
     "fmxJ24RhUE": {
@@ -402,6 +416,7 @@
         "checked_for_packing": true
     },
     "gUmNEBelRm": {
+        "checked_for_packing": true,
         "material": "bBSpmT5CN0"
     },
     "gwm3bTflRn": {
@@ -420,6 +435,7 @@
         "checked_for_packing": true
     },
     "l9oab5XQTK": {
+        "checked_for_packing": true,
         "material": "IPqp1SooOX"
     },
     "mgo2XI2toK": {
@@ -429,9 +445,11 @@
         "checked_for_packing": true
     },
     "oDE09YOPk9": {
+        "checked_for_packing": true,
         "material": "zgwqXHtABU"
     },
     "oNJA4jNZF9": {
+        "checked_for_packing": true,
         "material": "pQ2O7Ekypd"
     },
     "pQ2O7Ekypd": {
@@ -440,7 +458,7 @@
     "project": {
         "application_library_lin": "app://libGameEngine.so",
         "application_library_win": "app://GameEngine.dll",
-        "application_name": "",
+        "application_name": "Bandit",
         "application_version": "",
         "clear_color": "4278190080",
         "command_line_arguments": "",
@@ -534,6 +552,7 @@
         "checked_for_packing": true
     },
     "zoqnFP5Gvz": {
+        "checked_for_packing": true,
         "material": "mgo2XI2toK"
     }
 }
