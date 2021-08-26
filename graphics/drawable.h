@@ -58,6 +58,7 @@ namespace gfx
             Arrow,
             Capsule,
             SemiCircle,
+            Cursor,
             Circle,
             Grid,
             IsoscelesTriangle,
@@ -68,7 +69,7 @@ namespace gfx
             Rectangle,
             RightTriangle,
             RoundRectangle,
-            Trapezoid
+            Trapezoid,
         };
         virtual ~DrawableClass() = default;
         // Get the type of the drawable.
@@ -724,6 +725,72 @@ namespace gfx
         std::shared_ptr<const PolygonClass> mClass;
         Culling mCulling = Culling::Back;
         float mLineWidth = 1.0f;
+    };
+
+    class CursorClass : public DrawableClass
+    {
+    public:
+        enum class Shape {
+            Arrow,
+            Block
+        };
+        CursorClass(const std::string& id, Shape shape)
+          : mId(id)
+          , mShape(shape)
+        {}
+        CursorClass(Shape shape)
+          : mId(base::RandomString(10))
+          , mShape(shape)
+        {}
+        Shape GetShape() const
+        { return mShape; }
+
+        virtual Type GetType() const override
+        { return Type::Cursor; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        {
+            auto ret = std::make_unique<CursorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<CursorClass>(*this); }
+        virtual std::size_t GetHash() const override
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, mId);
+            hash = base::hash_combine(hash, mShape);
+            return hash;
+        }
+        virtual void Pack(Packer* packer) const override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
+
+    private:
+        std::string mId;
+        Shape mShape = Shape::Arrow;
+    };
+
+    class Cursor : public Drawable
+    {
+    public:
+        using Shape = CursorClass::Shape;
+        Cursor(std::shared_ptr<const CursorClass> klass) : mClass(klass) {}
+        Cursor(Shape shape)
+        { mClass = std::make_shared<CursorClass>(shape); }
+        Cursor(const CursorClass& klass)
+        { mClass = std::make_shared<CursorClass>(klass); }
+
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual Style GetStyle() const override
+        { return Style::Solid; }
+        Shape GetShape() const
+        { return mClass->GetShape(); }
+    private:
+        std::shared_ptr<const CursorClass> mClass;
     };
 
 
