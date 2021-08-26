@@ -695,7 +695,15 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 
 void Scene::KillEntity(Entity* entity)
 {
-    mKillList.push_back(entity);
+    // if the entity still exists but it has been killed
+    // it means it'll be deleted at the end of this loop iteration
+    // in EndLoop. Make sure not to add it again in the
+    // kill set for next iteration even if the application tries
+    // to kill it again.
+    if (entity->HasBeenKilled())
+        return;
+
+    mKillSet.insert(entity);
 }
 
 Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
@@ -716,7 +724,7 @@ void Scene::BeginLoop()
 {
     // turn on the kill flag for entities that were killed
     // during the last iteration of the game play.
-    for (auto* entity : mKillList)
+    for (auto* entity : mKillSet)
     {
         // Set entity kill flag to indicate that it's been killed from the scene.
         // Note that this isn't the same as the c++ lifetime of the object!
@@ -738,7 +746,7 @@ void Scene::BeginLoop()
         mRenderTree.LinkChild(nullptr, entity.get());
         mEntities.push_back(std::move(entity));
     }
-    mKillList.clear();
+    mKillSet.clear();
     mSpawnList.clear();
 }
 
@@ -751,7 +759,7 @@ void Scene::EndLoop()
 
         if (!entity->TestFlag(Entity::ControlFlags::Killed))
             continue;
-        DEBUG("Delete entity '%1/%2'.", entity->GetClassName(), entity->GetName());
+        DEBUG("Entity '%1/%2' was deleted.", entity->GetClassName(), entity->GetName());
         mRenderTree.DeleteNode(entity.get());
         mIdMap.erase(entity->GetId());
         mNameMap.erase(entity->GetName());
