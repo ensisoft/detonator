@@ -1283,6 +1283,74 @@ std::string PolygonClass::GetName() const
     return mName;
 }
 
+void CursorClass::Pack(Packer* packer) const
+{
+
+}
+void CursorClass::IntoJson(data::Writer& data) const
+{
+    data.Write("id", mId);
+    data.Write("shape", mShape);
+}
+bool CursorClass::LoadFromJson(const data::Reader& data)
+{
+    if (!data.Read("id", &mId) ||
+        !data.Read("shape", &mShape))
+        return false;
+    return true;
+}
+
+Shader* Cursor::GetShader(Device& device) const
+{ return MakeVertexArrayShader(device); }
+Geometry* Cursor::Upload(const Environment& env, Device& device) const
+{
+    if (GetShape() == Shape::Arrow)
+    {
+        Geometry* geom = device.FindGeometry("ArrowCursor");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                {{0.0f,  0.0f}, {0.0f, 0.0f}},
+                {{0.0f, -0.6f}, {0.0f, 0.6f}},
+                {{0.6f, 0.0f}, {0.6f, 0.0f}},
+
+                {{0.3f, 0.0f}, {0.3f, 0.0f}},
+                {{0.0f, -0.3f}, {0.0f, 0.3f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
+
+                {{0.3f, 0.0f}, {0.3f, 0.0f}},
+                {{0.7f, -1.0f}, {0.7f, 1.0f}},
+                {{1.0f, -0.7f}, {1.0f, 0.7f}}
+            };
+            geom = device.MakeGeometry("ArrowCursor");
+            geom->SetVertexBuffer(verts, 9);
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        }
+        return geom;
+    }
+    else if (GetShape() == Shape::Block)
+    {
+        Geometry* geom = device.FindGeometry("BlockCursor");
+        if (!geom)
+        {
+            const Vertex verts[] = {
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {0.0f, -1.0f}, {0.0f, 1.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
+
+                { {0.0f,  0.0f}, {0.0f, 0.0f} },
+                { {1.0f, -1.0f}, {1.0f, 1.0f} },
+                { {1.0f,  0.0f}, {1.0f, 0.0f} }
+            };
+            geom = device.MakeGeometry("Rectangle");
+            geom->SetVertexBuffer(verts, 6);
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        }
+        return geom;
+    }
+    return nullptr;
+}
+
 Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
 {
     Shader* shader = device.FindShader("particle-shader");
@@ -1685,6 +1753,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<KinematicsParticleEngine>(std::static_pointer_cast<const KinematicsParticleEngineClass>(klass));
         case DrawableClass::Type::Polygon:
             return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
+        case DrawableClass::Type::Cursor:
+            return std::make_unique<Cursor>(std::static_pointer_cast<const CursorClass>(klass));
     }
     BUG("Unhandled drawable class type");
     return {};
