@@ -29,6 +29,7 @@
 #include <memory>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "base/bitflag.h"
 #include "data/fwd.h"
@@ -574,9 +575,9 @@ namespace game
         // spawn list of new entities that have been spawned
         // but not yet placed in the scene's entity list.
         std::vector<std::unique_ptr<Entity>> mSpawnList;
-        // kill list of entities that were killed but have
+        // kill set of entities that were killed but have
         // not yet been removed from the scene.
-        std::vector<Entity*> mKillList;
+        std::unordered_set<Entity*> mKillSet;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);
