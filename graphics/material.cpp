@@ -1916,33 +1916,39 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
     data.Write("mag_filter", mMagFilter);
     data.Write("wrap_x", mWrapX);
     data.Write("wrap_y", mWrapY);
+
+    // use an ordered set for persisting the data to make sure
+    // that the order in which the uniforms are written out is
+    // defined in order to avoid unnecessary changes (as perceived
+    // by a version control such as Git) when there's no actual
+    // change in the data.
+    std::set<std::string> uniform_keys;
     for (const auto& uniform : mUniforms)
+        uniform_keys.insert(uniform.first);
+
+    std::set<std::string> texture_keys;
+    for (const auto& map : mTextureMaps)
+        texture_keys.insert(map.first);
+
+    for (const auto& key : uniform_keys)
     {
+        const auto& uniform = *base::SafeFind(mUniforms, key);
         auto chunk = data.NewWriteChunk();
-        chunk->Write("name", uniform.first);
-        if (const auto* ptr = std::get_if<float>(&uniform.second))
-           chunk->Write("value", *ptr);
-        else if (const auto* ptr = std::get_if<int>(&uniform.second))
-            chunk->Write("value", *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec2>(&uniform.second))
-            chunk->Write("value", *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec3>(&uniform.second))
-            chunk->Write("value", *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec4>(&uniform.second))
-            chunk->Write("value", *ptr);
-        else if (const auto* ptr = std::get_if<Color4f>(&uniform.second))
-            chunk->Write("value", *ptr);
-        else BUG("Unhandled uniform type.");
+        chunk->Write("name", key);
+        std::visit([&chunk](const auto& variant_value) {
+            chunk->Write("value", variant_value);
+        }, uniform);
         data.AppendChunk("uniforms", std::move(chunk));
     }
-    for (const auto& map : mTextureMaps)
+    for (const auto& key : texture_keys)
     {
+        const auto& map = SafeFind(mTextureMaps, key);
         auto chunk = data.NewWriteChunk();
-        map.second->IntoJson(*chunk);
+        map->IntoJson(*chunk);
         ASSERT(chunk->HasValue("name") == false);
         ASSERT(chunk->HasValue("type") == false);
-        chunk->Write("name", map.first);
-        chunk->Write("type", map.second->GetType());
+        chunk->Write("name", key);
+        chunk->Write("type", map->GetType());
         data.AppendChunk("texture_maps", std::move(chunk));
     }
 }
