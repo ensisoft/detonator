@@ -1757,6 +1757,10 @@ void MainWindow::on_btnBlast_clicked()
 {
     LoadDemoWorkspace("demos/blast");
 }
+void MainWindow::on_btnBreak_clicked()
+{
+    LoadDemoWorkspace("demos/breakout");
+}
 
 void MainWindow::on_btnMaterial_clicked()
 {
@@ -2327,6 +2331,7 @@ void MainWindow::ShowHelpWidget()
 
     mUI.lblBanditDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/bandit"));
     mUI.lblBlastDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/blast"));
+    mUI.lblBreakDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/breakout"));
 
     if (mWorkspace && mCurrentWidget)
     {

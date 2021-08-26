@@ -1,0 +1,187 @@
+{
+    "2yOBoPmBaI": {
+        "checked_for_packing": true
+    },
+    "3B08easM4q": {
+        "checked_for_packing": true
+    },
+    "4RNSFQ1Pyg": {
+        "checked_for_packing": true,
+        "elem_2Qlif27snN_pos_x": 0,
+        "elem_2Qlif27snN_pos_y": 0,
+        "mapping_count": 0
+    },
+    "4zi9n5RIXq": {
+        "checked_for_packing": true
+    },
+    "7kkLq83FnE": {
+        "checked_for_packing": true
+    },
+    "7tJg4l9xmT": {
+        "checked_for_packing": true
+    },
+    "8xZogKY3K1": {
+        "checked_for_packing": true
+    },
+    "9G2p8G3zMT": {
+        "checked_for_packing": true
+    },
+    "9wG7A0qhYE": {
+        "checked_for_packing": true
+    },
+    "B3ANINBSbA": {
+        "checked_for_packing": true
+    },
+    "BCh1h8kEOP": {
+        "checked_for_packing": true
+    },
+    "E8G5MCkSFp": {
+        "checked_for_packing": true
+    },
+    "EtyRugQve2": {
+        "checked_for_packing": true
+    },
+    "HRXSPeXFUN": {
+        "checked_for_packing": true
+    },
+    "HjhabB4y2A": {
+        "checked_for_packing": true,
+        "elem_hsNS566ktU_pos_x": 0,
+        "elem_hsNS566ktU_pos_y": 0,
+        "mapping_count": 0
+    },
+    "J160KPStMB": {
+        "checked_for_packing": true
+    },
+    "Jw14oLX1CD": {
+        "checked_for_packing": true
+    },
+    "KA0GT192DW": {
+        "checked_for_packing": true
+    },
+    "KeITJIrx1I": {
+        "checked_for_packing": true
+    },
+    "MUQDA03a25": {
+        "checked_for_packing": true
+    },
+    "OgRnbBquEI": {
+        "checked_for_packing": true
+    },
+    "Rs00QF2N4E": {
+        "checked_for_packing": true
+    },
+    "WGNKEJwulf": {
+        "checked_for_packing": true
+    },
+    "Xg0GdRiaQU": {
+        "checked_for_packing": true
+    },
+    "YOZ0Sp88fq": {
+        "checked_for_packing": true
+    },
+    "eX85urYgUe": {
+        "checked_for_packing": true
+    },
+    "gRY0JNbDCj": {
+        "checked_for_packing": true
+    },
+    "ijOB1QBrNK": {
+        "checked_for_packing": true,
+        "track_rbr7LGLiqL": {
+            "4LEx6XZQ7S": "spgQgyanGo",
+            "OGQodhrM9m": "4ANxKMjuR2",
+            "U6G6Ii7dtx": "4ANxKMjuR2",
+            "ZiNu8RX2Ca": "spgQgyanGo",
+            "num_timelines": 7,
+            "timeline_0_node_id": "OwEjn76unJ",
+            "timeline_0_self_id": "pT3meaGgFk",
+            "timeline_1_node_id": "gW6NjEkLfo",
+            "timeline_1_self_id": "LRUsPj9wuo",
+            "timeline_2_node_id": "zlLdZaGRmN",
+            "timeline_2_self_id": "5FN9I2GkKZ",
+            "timeline_3_node_id": "KL3ejlwasA",
+            "timeline_3_self_id": "4ANxKMjuR2",
+            "timeline_4_node_id": "evEknn2QO5",
+            "timeline_4_self_id": "spgQgyanGo",
+            "timeline_5_node_id": "gaM59OlYN3",
+            "timeline_5_self_id": "XGMoD37vI9",
+            "timeline_6_node_id": "nEW3oA2dak",
+            "timeline_6_self_id": "HrUMBDSW8j"
+        }
+    },
+    "kkBOwiYNRn": {
+        "checked_for_packing": true
+    },
+    "ltMbxDy6wk": {
+        "checked_for_packing": true
+    },
+    "mCZ77Xsgvh": {
+        "checked_for_packing": true,
+        "elem_lI3HDnTgut_pos_x": 0,
+        "elem_lI3HDnTgut_pos_y": 0,
+        "mapping_count": 0
+    },
+    "mSF0NAZ4A5": {
+        "checked_for_packing": true
+    },
+    "project": {
+        "application_library_lin": "app://libGameEngine.so",
+        "application_library_win": "app://GameEngine.dll",
+        "application_name": "Braek",
+        "application_version": "",
+        "clear_color": "4278190080",
+        "command_line_arguments": "",
+        "config_srgb": true,
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "game_viewport_height": 800,
+        "game_viewport_width": 1000,
+        "mouse_pointer_drawable": "_arrow_cursor",
+        "mouse_pointer_hotspot": {
+            "x": 0,
+            "y": 0
+        },
+        "mouse_pointer_material": "_Silver",
+        "mouse_pointer_size": {
+            "x": 20,
+            "y": 20
+        },
+        "mouse_pointer_visible": false,
+        "multisample_sample_count": 4,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 10,
+        "phys_scale_x": 100,
+        "phys_scale_y": 100,
+        "ticks_per_second": 1,
+        "updates_per_second": 60,
+        "use_gamehost_process": true,
+        "window_can_resize": true,
+        "window_cursor": false,
+        "window_has_border": true,
+        "window_height": 800,
+        "window_mode": "Windowed",
+        "window_vsync": false,
+        "window_width": 1000,
+        "working_folder": "${workspace}"
+    },
+    "vSs0xqS3fS": {
+        "checked_for_packing": true
+    },
+    "viXTDKHRIB": {
+        "checked_for_packing": true
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_delete_prev": true,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_output_dir": "ws://dist",
+        "packing_param_resize_large_textures": true,
+        "packing_param_tex_padding": 2,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
+    }
+}

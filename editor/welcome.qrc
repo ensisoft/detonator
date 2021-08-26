@@ -3,5 +3,6 @@
     <qresource>
       <file>dist/demos/bandit/screenshot.png</file>
       <file>dist/demos/blast/screenshot.png</file>
+      <file>dist/demos/breakout/screenshot.png</file>
    </qresource>
 </RCC>
