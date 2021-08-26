@@ -79,6 +79,17 @@
         "default_min_filter": "Trilinear",
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
+        "mouse_pointer_drawable": "_arrow_cursor",
+        "mouse_pointer_hotspot": {
+            "x": 0,
+            "y": 0
+        },
+        "mouse_pointer_material": "_Silver",
+        "mouse_pointer_size": {
+            "x": 20,
+            "y": 20
+        },
+        "mouse_pointer_visible": false,
         "multisample_sample_count": 4,
         "num_position_iterations": 3,
         "num_velocity_iterations": 8,

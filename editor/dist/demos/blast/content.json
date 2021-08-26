@@ -2684,6 +2684,50 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "pGHzP0FH33",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "pGHzP0FH33",
+      "resource_name": "Cursor",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/cursor/crosshair158.png",
+        "id": "rtMnrhrbtN",
+        "name": "crosshair158",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "particles": [

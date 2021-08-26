@@ -108,6 +108,8 @@
     "nQUmTOnClw": {
         "checked_for_packing": true
     },
+    "pGHzP0FH33": {
+    },
     "pNT0bA0bpw": {
         "checked_for_packing": true
     },
@@ -126,6 +128,17 @@
         "default_min_filter": "Trilinear",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
+        "mouse_pointer_drawable": "_block_cursor",
+        "mouse_pointer_hotspot": {
+            "x": 0.5,
+            "y": 0.5
+        },
+        "mouse_pointer_material": "pGHzP0FH33",
+        "mouse_pointer_size": {
+            "x": 40,
+            "y": 40
+        },
+        "mouse_pointer_visible": true,
         "multisample_sample_count": 8,
         "num_position_iterations": 3,
         "num_velocity_iterations": 8,
@@ -137,7 +150,7 @@
         "updates_per_second": 60,
         "use_gamehost_process": true,
         "window_can_resize": true,
-        "window_cursor": true,
+        "window_cursor": false,
         "window_has_border": true,
         "window_height": 768,
         "window_mode": "Windowed",
