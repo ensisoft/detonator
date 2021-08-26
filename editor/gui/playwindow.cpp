@@ -429,7 +429,24 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     DEBUG("Host working directory set to '%1'", mHostWorkingDir);
     DEBUG("Game working directory set to '%1'", mGameWorkingDir);
 
+    QSurfaceFormat format;
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setVersion(2, 0);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setAlphaBufferSize(8);
+    format.setStencilBufferSize(8);
+    format.setDepthBufferSize(0);
+    format.setSamples(settings.multisample_sample_count);
+    format.setSwapInterval(settings.window_vsync ? 1 : 0);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setColorSpace(settings.config_srgb ? QSurfaceFormat::ColorSpace::sRGBColorSpace
+                                              : QSurfaceFormat::ColorSpace::DefaultColorSpace);
+
     mSurface = new QWindow();
+    mSurface->setFormat(format);
     mSurface->setSurfaceType(QWindow::OpenGLSurface);
     mSurface->installEventFilter(this);
     // the container takes ownership of the window.
