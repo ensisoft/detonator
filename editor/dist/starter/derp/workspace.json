@@ -1,9 +1,12 @@
 {
     "8UZOHE5ijx": {
+        "checked_for_packing": true
     },
     "Fj66N4PDUG": {
+        "checked_for_packing": true
     },
     "HwObefYJNC": {
+        "checked_for_packing": true,
         "elem_EGGlghTtgy_pos_x": 265,
         "elem_EGGlghTtgy_pos_y": -110,
         "elem_qZy6ISYxl7_pos_x": -6,
@@ -22,6 +25,7 @@
         "checked_for_packing": true
     },
     "LPH6tgo9eN": {
+        "checked_for_packing": true
     },
     "SfDYJTRhGz": {
         "checked_for_packing": true
@@ -30,19 +34,23 @@
         "checked_for_packing": true
     },
     "e1zlPY8HTm": {
+        "checked_for_packing": true,
         "material": "Fj66N4PDUG"
     },
     "id5BsoCSrO": {
         "checked_for_packing": true
     },
     "iiKBwhkDbI": {
+        "checked_for_packing": true
     },
     "lQlseaZOEX": {
+        "checked_for_packing": true,
         "elem_NwwdP8ZHwL_pos_x": -108,
         "elem_NwwdP8ZHwL_pos_y": -68,
         "mapping_count": 0
     },
     "nQu4kueY9z": {
+        "checked_for_packing": true,
         "elem_IA8Bo38BRj_pos_x": -147,
         "elem_IA8Bo38BRj_pos_y": -141,
         "elem_WK3PiWWhSR_pos_x": -419,
@@ -70,7 +78,7 @@
     "project": {
         "application_library_lin": "app://libGameEngine.so",
         "application_library_win": "app://GameEngine.dll",
-        "application_name": "",
+        "application_name": "Derpo Bird",
         "application_version": "",
         "clear_color": "4281486692",
         "command_line_arguments": "",
@@ -113,8 +121,10 @@
         "checked_for_packing": true
     },
     "sUAHqYkAPp": {
+        "checked_for_packing": true
     },
     "tqHo3nK0b9": {
+        "checked_for_packing": true,
         "track_0YxK4CGXbf": {
             "KG5fOHpMYa": "AzUofLOAMl",
             "OHFoxLJrUF": "xzg62aztGL",

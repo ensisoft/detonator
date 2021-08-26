@@ -2421,6 +2421,15 @@
       "type": "Custom",
       "uniforms": [
         {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.009170671924948692,
+            "g": 0.0,
+            "r": 1.0
+          }
+        },
+        {
           "name": "kColor0",
           "value": {
             "a": 1.0,
@@ -2432,15 +2441,6 @@
         {
           "name": "kGamma",
           "value": 1.0
-        },
-        {
-          "name": "kBaseColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.009170671924948692,
-            "g": 0.0,
-            "r": 1.0
-          }
         }
       ],
       "wrap_x": "Clamp",
@@ -2581,10 +2581,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kGamma",
-          "value": 1.0
-        },
-        {
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
@@ -2592,6 +2588,10 @@
             "g": 0.607797384262085,
             "r": 0.05098039284348488
           }
+        },
+        {
+          "name": "kGamma",
+          "value": 1.0
         }
       ],
       "wrap_x": "Clamp",
