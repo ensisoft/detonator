@@ -1,0 +1,287 @@
+{
+    "2yOBoPmBaI": {
+    },
+    "3B08easM4q": {
+        "camera_offset_x": 727,
+        "camera_offset_y": 559,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": false,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1.2
+    },
+    "4RNSFQ1Pyg": {
+    },
+    "4zi9n5RIXq": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.5
+    },
+    "7kkLq83FnE": {
+        "camera_offset_x": 727,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": false,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1.2
+    },
+    "7tJg4l9xmT": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.2
+    },
+    "8xZogKY3K1": {
+    },
+    "9G2p8G3zMT": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 559,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid50x50",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "9wG7A0qhYE": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.5
+    },
+    "B3ANINBSbA": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.4
+    },
+    "BCh1h8kEOP": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 559,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid50x50",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "E8G5MCkSFp": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 559,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid50x50",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "EtyRugQve2": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.8
+    },
+    "HRXSPeXFUN": {
+    },
+    "HjhabB4y2A": {
+    },
+    "J160KPStMB": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "Jw14oLX1CD": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "KA0GT192DW": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 559,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid50x50",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "KeITJIrx1I": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.5
+    },
+    "MUQDA03a25": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "OgRnbBquEI": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.7
+    },
+    "Rs00QF2N4E": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.1
+    },
+    "WGNKEJwulf": {
+    },
+    "Xg0GdRiaQU": {
+    },
+    "YOZ0Sp88fq": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "eX85urYgUe": {
+        "camera_offset_x": 732.1500244140625,
+        "camera_offset_y": 565.3002319335938,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": false,
+        "show_origin": false,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1.1
+    },
+    "gRY0JNbDCj": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.5
+    },
+    "ijOB1QBrNK": {
+        "camera_offset_x": 764.5,
+        "camera_offset_y": 617.5,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid50x50",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 0.8
+    },
+    "kkBOwiYNRn": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "ltMbxDy6wk": {
+        "camera_offset_x": 699.0003051757812,
+        "camera_offset_y": 548.5999755859375,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": false,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1.2
+    },
+    "mCZ77Xsgvh": {
+    },
+    "mSF0NAZ4A5": {
+        "camera_offset_x": 738.5,
+        "camera_offset_y": 574,
+        "camera_rotation": 0,
+        "camera_scale_x": 1,
+        "camera_scale_y": 1,
+        "grid": "Grid20x20",
+        "show_grid": true,
+        "show_origin": true,
+        "show_viewport": true,
+        "snap": true,
+        "widget_clear_color": "#334d66",
+        "zoom": 1
+    },
+    "user": {
+        "focused_widget_index": 1,
+        "play_window_debug_draw": false,
+        "play_window_debug_log": true,
+        "play_window_debug_msg": true,
+        "play_window_geometry": "AdnQywADAAAAAALGAAAARQAAB3AAAAV+AAACxwAAAFkAAAdvAAAFeAAAAAAAAAAACgAAAALHAAAAWQAAB28AAAV4",
+        "play_window_log_bits": 31,
+        "play_window_log_filter": "engine",
+        "play_window_log_filter_case_sensitive": false,
+        "play_window_show_eventlog": true,
+        "play_window_show_statusbar": true,
+        "play_window_toolbar_and_dock_state": "AAAA/wAAAAD9AAAAAQAAAAMAAASpAAABG/wBAAAAAfsAAAAUAGQAbwBjAGsAVwBpAGQAZwBlAHQBAAAAAAAABKkAAAE3AP///wAABKkAAAODAAAABAAAAAQAAAAIAAAACPwAAAABAAAAAgAAAAEAAAAOAHQAbwBvAGwAQgBhAHIBAAAAAP////8AAAAAAAAAAA==",
+        "session_files": [
+        ],
+        "show_resource_bits": 4294967295
+    },
+    "vSs0xqS3fS": {
+        "model": "Rectangle",
+        "widget_clear_color": "#334d66",
+        "zoom": 0.5
+    },
+    "viXTDKHRIB": {
+    }
+}
