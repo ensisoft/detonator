@@ -27,6 +27,7 @@
 
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgproject.h"
+#include "editor/gui/dlgmaterial.h"
 #include "editor/gui/utility.h"
 #include "graphics/device.h"
 
@@ -43,6 +44,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
+    SetList(mUI.mouseDrawable, workspace.ListCursors());
+    SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
     SetUIValue(mUI.cmbMagFilter, mSettings.default_mag_filter);
@@ -71,6 +74,13 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.viewportWidth, mSettings.viewport_width);
     SetUIValue(mUI.viewportHeight, mSettings.viewport_height);
     SetUIValue(mUI.clearColor, mSettings.clear_color);
+    SetUIValue(mUI.mouseDrawable, ListItemId(mSettings.mouse_pointer_drawable));
+    SetUIValue(mUI.mouseMaterial, ListItemId(mSettings.mouse_pointer_material));
+    SetUIValue(mUI.mouse, mSettings.mouse_pointer_visible);
+    SetUIValue(mUI.hotspotX, mSettings.mouse_pointer_hotspot.x);
+    SetUIValue(mUI.hotspotY, mSettings.mouse_pointer_hotspot.y);
+    SetUIValue(mUI.cursorWidth, mSettings.mouse_pointer_size.x);
+    SetUIValue(mUI.cursorHeight, mSettings.mouse_pointer_size.y);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -102,6 +112,14 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.viewportWidth, &mSettings.viewport_width);
     GetUIValue(mUI.viewportHeight, &mSettings.viewport_height);
     GetUIValue(mUI.clearColor, &mSettings.clear_color);
+    GetUIValue(mUI.mouse, &mSettings.mouse_pointer_visible);
+    GetUIValue(mUI.hotspotX, &mSettings.mouse_pointer_hotspot.x);
+    GetUIValue(mUI.hotspotY, &mSettings.mouse_pointer_hotspot.y);
+    GetUIValue(mUI.cursorWidth,  &mSettings.mouse_pointer_size.x);
+    GetUIValue(mUI.cursorHeight, &mSettings.mouse_pointer_size.y);
+    mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
+    mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
+
     QString library;
     GetUIValue(mUI.edtAppLibrary, &library);
     mSettings.SetApplicationLibrary(library);
@@ -124,6 +142,20 @@ void DlgProject::on_btnSelectEngine_clicked()
         return;
     const auto& file = mWorkspace.MapFileToWorkspace(list[0]);
     SetValue(mUI.edtAppLibrary, file);
+}
+
+void DlgProject::on_btnResetClearColor_clicked()
+{
+    SetUIValue(mUI.clearColor, QColor(50, 77, 100, 255));
+}
+
+void DlgProject::on_btnSelectMaterial_clicked()
+{
+    DlgMaterial dlg(this, &mWorkspace, GetItemId(mUI.mouseMaterial));
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    SetValue(mUI.mouseMaterial, ListItemId(dlg.GetSelectedMaterialId()));
 }
 
 } // namespace

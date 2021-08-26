@@ -783,11 +783,16 @@ void PlayWindow::DoAppInit()
         config.updates_per_second = settings.updates_per_second;
         config.physics.num_velocity_iterations = settings.num_velocity_iterations;
         config.physics.num_position_iterations = settings.num_position_iterations;
-        config.physics.gravity    = settings.gravity;
-        config.physics.scale      = settings.physics_scale;
-        config.default_mag_filter = settings.default_mag_filter;
-        config.default_min_filter = settings.default_min_filter;
-        config.clear_color        = ToGfx(settings.clear_color);
+        config.physics.gravity       = settings.gravity;
+        config.physics.scale         = settings.physics_scale;
+        config.default_mag_filter    = settings.default_mag_filter;
+        config.default_min_filter    = settings.default_min_filter;
+        config.clear_color           = ToGfx(settings.clear_color);
+        config.mouse_cursor.show     = settings.mouse_pointer_visible;
+        config.mouse_cursor.material = app::ToUtf8(settings.mouse_pointer_material);
+        config.mouse_cursor.drawable = app::ToUtf8(settings.mouse_pointer_drawable);
+        config.mouse_cursor.hotspot  = settings.mouse_pointer_hotspot;
+        config.mouse_cursor.size     = settings.mouse_pointer_size;
         mApp->SetEngineConfig(config);
 
         mApp->Load();

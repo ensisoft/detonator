@@ -25,6 +25,7 @@
 #  include <QIcon>
 #  include <neargye/magic_enum.hpp>
 #  include <boost/logic/tribool.hpp>
+#  include <glm/vec2.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -199,11 +200,31 @@ inline void JsonWrite(QJsonObject& object, const char* name, bool value)
 {
     object[name] = value;
 }
+inline void JsonWrite(QJsonObject& object, const char* name, const glm::vec2& value)
+{
+    QJsonObject vec;
+    vec["x"] = value.x;
+    vec["y"] = value.y;
+    object[name] = vec;
+}
+
 template<typename Enum>
 inline void JsonWrite(QJsonObject& object, const char* name, Enum value)
 {
     static_assert(std::is_enum<Enum>::value);
     object[name] = EnumToString(value);
+}
+
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, glm::vec2* out)
+{
+    if (!object.contains(name) || !object[name].isObject())
+        return false;
+    const auto& vec = object[name].toObject();
+    if (!vec.contains("x") || !vec.contains("y"))
+        return false;
+    out->x = vec["x"].toDouble();
+    out->y = vec["y"].toDouble();
+    return true;
 }
 
 inline bool JsonReadSafe(const QJsonObject& object, const char* name, QColor* out)

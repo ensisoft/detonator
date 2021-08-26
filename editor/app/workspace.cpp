@@ -645,6 +645,10 @@ Workspace::Workspace(const QString& dir)
     mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>("Trapezoid"));
     mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>("Parallelogram"));
     mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", 0.05f), "RoundRect"));
+    mResources.emplace_back(new DrawableResource<gfx::CursorClass>(gfx::CursorClass("_arrow_cursor",
+                                                                          gfx::CursorClass::Shape::Arrow),"Arrow Cursor"));
+    mResources.emplace_back(new DrawableResource<gfx::CursorClass>(gfx::CursorClass("_block_cursor",
+                                                                                    gfx::CursorClass::Shape::Block),"Block Cursor"));
     for (auto& resource : mResources)
     {
         resource->SetIsPrimitive(true);
@@ -1260,6 +1264,11 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "game_viewport_width"     , mSettings.viewport_width);
     JsonWrite(project, "game_viewport_height"    , mSettings.viewport_height);
     JsonWrite(project, "clear_color"             , mSettings.clear_color);
+    JsonWrite(project, "mouse_pointer_material"  , mSettings.mouse_pointer_material);
+    JsonWrite(project, "mouse_pointer_drawable"  , mSettings.mouse_pointer_drawable);
+    JsonWrite(project, "mouse_pointer_visible"   , mSettings.mouse_pointer_visible);
+    JsonWrite(project, "mouse_pointer_hotspot"   , mSettings.mouse_pointer_hotspot);
+    JsonWrite(project, "mouse_pointer_size"      , mSettings.mouse_pointer_size);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1348,6 +1357,11 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "game_viewport_width",      &mSettings.viewport_width);
     JsonReadSafe(project, "game_viewport_height",     &mSettings.viewport_height);
     JsonReadSafe(project, "clear_color",              &mSettings.clear_color);
+    JsonReadSafe(project, "mouse_pointer_material",   &mSettings.mouse_pointer_material);
+    JsonReadSafe(project, "mouse_pointer_drawable",   &mSettings.mouse_pointer_drawable);
+    JsonReadSafe(project, "mouse_pointer_visible",    &mSettings.mouse_pointer_visible);
+    JsonReadSafe(project, "mouse_pointer_hotspot",    &mSettings.mouse_pointer_hotspot);
+    JsonReadSafe(project, "mouse_pointer_size",       &mSettings.mouse_pointer_size);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -1478,6 +1492,20 @@ Workspace::ResourceList Workspace::ListResources(Resource::Type type, bool primi
             return a.name < b.name;
         });
     }
+    return list;
+}
+
+Workspace::ResourceList Workspace::ListCursors() const
+{
+    ResourceList list;
+    ListItem arrow;
+    arrow.name = "Arrow Cursor";
+    arrow.id   = "_arrow_cursor";
+    list.push_back(arrow);
+    ListItem block;
+    block.name = "Block Cursor";
+    block.id   = "_block_cursor";
+    list.push_back(block);
     return list;
 }
 
@@ -2171,6 +2199,11 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
         base::JsonWrite(json["physics"], "scale",   mSettings.physics_scale);
         base::JsonWrite(json["engine"], "clear_color", ToGfx(mSettings.clear_color));
+        base::JsonWrite(json["mouse_cursor"], "material", ToUtf8(mSettings.mouse_pointer_material));
+        base::JsonWrite(json["mouse_cursor"], "drawable", ToUtf8(mSettings.mouse_pointer_drawable));
+        base::JsonWrite(json["mouse_cursor"], "show", mSettings.mouse_pointer_visible);
+        base::JsonWrite(json["mouse_cursor"], "hotspot", mSettings.mouse_pointer_hotspot);
+        base::JsonWrite(json["mouse_cursor"], "size", mSettings.mouse_pointer_size);
 
         // resolves the path.
         const QFileInfo engine_dll(mSettings.GetApplicationLibrary());

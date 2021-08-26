@@ -50,6 +50,7 @@
 #include "wdk/window.h"
 #include "wdk/events.h"
 #include "wdk/system.h"
+#include "interface.h"
 
 // this application will read the given JSON file and
 // create window and open gl rendering context based on
@@ -462,6 +463,15 @@ int main(int argc, char* argv[])
         {
             const auto& engine_settings = json["engine"];
             base::JsonReadSafe(engine_settings, "clear_color", &config.clear_color);
+        }
+        if (json.contains("mouse_cursor"))
+        {
+            const auto& mouse_cursor = json["mouse_cursor"];
+            base::JsonReadSafe(mouse_cursor, "show", &config.mouse_cursor.show);
+            base::JsonReadSafe(mouse_cursor, "drawable", &config.mouse_cursor.drawable);
+            base::JsonReadSafe(mouse_cursor, "material", &config.mouse_cursor.material);
+            base::JsonReadSafe(mouse_cursor, "hotspot", &config.mouse_cursor.hotspot);
+            base::JsonReadSafe(mouse_cursor, "size", &config.mouse_cursor.size);
         }
         app->SetEngineConfig(config);
         app->Load();

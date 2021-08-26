@@ -189,6 +189,8 @@ namespace app
         // Get a list of resources with the matching type and primitive flag
         ResourceList ListResources(Resource::Type type, bool primitive, bool sort = true) const;
 
+        ResourceList ListCursors() const;
+
         // Map material id to its human readable name.
         QString MapMaterialIdToName(const QString& id) const;
         QString MapMaterialIdToName(const std::string& id) const
@@ -484,7 +486,18 @@ namespace app
             unsigned viewport_height = 768;
             // The default engine clear color.
             QColor clear_color = {50, 77, 100, 255};
+            // Whether the game should render a custom mouse pointer or not.
+            bool mouse_pointer_visible = true;
+            // What is the drawable shape of the game's custom mouse pointer.
+            QString mouse_pointer_drawable = "_arrow_cursor";
+            // What is the material of the game's custom mouse pointer.
+            QString mouse_pointer_material = "_silver";
+            // Where is the custom mouse pointer hotspot. (Normalized)
+            glm::vec2 mouse_pointer_hotspot = {0.0f, 0.0f};
+            // What is the pixel size of the game's custom mouse pointer.
+            glm::vec2 mouse_pointer_size = {20.0f, 20.0f};
         };
+
 
         const ProjectSettings& GetProjectSettings() const
         { return mSettings; }
