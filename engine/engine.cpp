@@ -38,6 +38,7 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
+#include "graphics/material.h"
 #include "engine/main/interface.h"
 #include "engine/audio.h"
 #include "engine/classlib.h"
@@ -134,6 +135,25 @@ public:
         mClearColor = conf.clear_color;
         mGameTimeStep = 1.0f / conf.updates_per_second;
         mGameTickStep = 1.0f / conf.ticks_per_second;
+        auto mouse_drawble = mClasslib->FindDrawableClassById(conf.mouse_cursor.drawable);
+        DEBUG("Mouse material='%1',drawable='%2'", conf.mouse_cursor.material, conf.mouse_cursor.drawable);
+        if (!mouse_drawble) {
+            WARN("No such mouse cursor drawable found '%1'.", conf.mouse_cursor.drawable);
+            mouse_drawble = std::make_shared<gfx::CursorClass>(gfx::CursorClass::Shape::Arrow);
+            mCursorSize    = glm::vec2(20.0f, 20.0f);
+            mCursorHotspot = glm::vec2(0.0f, 0.0f);
+        } else {
+            mCursorSize    = conf.mouse_cursor.size;
+            mCursorHotspot = conf.mouse_cursor.hotspot;
+        }
+        auto mouse_material = mClasslib->FindMaterialClassById(conf.mouse_cursor.material);
+        if (!mouse_material) {
+            WARN("No such mouse cursor drawable found '%1'.", conf.mouse_cursor.material);
+            mouse_material = std::make_shared<gfx::ColorClass>(gfx::Color::HotPink);
+        }
+        mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawble);
+        mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
+        mShowMouseCursor = conf.mouse_cursor.show;
     }
 
     virtual void Draw() override
@@ -211,7 +231,7 @@ public:
             ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr);
         }
 
-        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw)
+        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mShowMouseCursor)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetOrthographicView(0, 0, surf_width, surf_height);
@@ -246,6 +266,16 @@ public:
         {
             // visualize the game's logical viewport in the window.
             gfx::DrawRectOutline(*mPainter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
+        }
+
+        if (mShowMouseCursor)
+        {
+            const auto& offset = -mCursorHotspot*mCursorSize;
+            gfx::FRect rect;
+            rect.Resize(mCursorSize.x, mCursorSize.y);
+            rect.Move(mCursorPos.x, mCursorPos.y);
+            rect.Translate(offset.x, offset.y);
+            gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
         mDevice->EndFrame(true);
@@ -456,6 +486,8 @@ public:
     {
         if (mBlockMouse)
             return;
+        mCursorPos.x = mouse.window_x;
+        mCursorPos.y = mouse.window_y;
 
         if (HaveOpenUI())
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseMove);
@@ -716,6 +748,9 @@ private:
         }
 
         mGame->Update(game_time, dt);
+
+        mMouseMaterial->Update(dt);
+        mMouseDrawable->Update(dt);
     }
 
     void TickGame(double game_time, double dt)
@@ -744,8 +779,8 @@ private:
     }
     void ShowMouseCursor(bool show)
     {
-        mRequests.ShowMouseCursor(show);
-        DEBUG("Requesting mouse cursor %1", show ? "ON" : "OFF");
+        mShowMouseCursor = show;
+        DEBUG("Mouse cursor is %1", show ? "ON" : "OFF");
     }
     void BlockKeyboard(bool block)
     {
@@ -780,6 +815,12 @@ private:
 private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
+    // current mouse cursor details
+    glm::vec2 mCursorPos;
+    glm::vec2 mCursorHotspot;
+    glm::vec2 mCursorSize;
+    std::unique_ptr<gfx::Material> mMouseMaterial;
+    std::unique_ptr<gfx::Drawable> mMouseDrawable;
     gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
     // game dir where the executable is.
     std::string mDirectory;
@@ -855,6 +896,8 @@ private:
     bool mBlockKeyboard = false;
     // block mouse event processing.
     bool mBlockMouse = false;
+    // whether to show or not mouse cursor
+    bool mShowMouseCursor = true;
     // flag to control the debug string printing.
     bool mShowDebugs = true;
 };

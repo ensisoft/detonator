@@ -313,6 +313,10 @@ ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(c
         return std::make_shared<gfx::TrapezoidClass>();
     else if (name == "_parallelogram")
         return std::make_shared<gfx::ParallelogramClass>();
+    else if (name == "_arrow_cursor")
+        return std::make_shared<gfx::CursorClass>(gfx::CursorClass("_arrow_cursor",gfx::CursorClass::Shape::Arrow));
+    else if (name == "_block_cursor")
+        return std::make_shared<gfx::CursorClass>(gfx::CursorClass("_block_cursor", gfx::CursorClass::Shape::Block));
 
     // todo: perhaps need an identifier for the type of resource in question.
     // currently there's a name conflict that objects of different types but

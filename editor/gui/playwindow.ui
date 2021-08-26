@@ -202,6 +202,8 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <addaction name="actionToggleDebugDraw"/>
     <addaction name="actionToggleDebugLog"/>
     <addaction name="separator"/>
+    <addaction name="actionScreenshot"/>
+    <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
    </widget>
    <widget class="QMenu" name="menuView">

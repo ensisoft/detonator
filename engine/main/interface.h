@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <variant>
+#include <string>
 #include <queue>
 
 #include "base/platform.h"
@@ -31,9 +32,9 @@
 #include "audio/loader.h"
 #include "engine/classlib.h"
 #include "engine/loader.h"
+#include "engine/color.h"
 #include "graphics/device.h"
 #include "graphics/loader.h"
-#include "graphics/color4f.h"
 #include "wdk/events.h"
 #include "wdk/window_listener.h"
 
@@ -210,8 +211,21 @@ namespace engine
                 // to a single physics world unit. 
                 glm::vec2 scale = {1.0f, 1.0f};
             } physics;
+            struct {
+                // initial visibility.
+                bool show = true;
+                // the cursors shape id
+                std::string drawable;
+                // the cursors material id.
+                std::string material;
+                // normalized hotspot of the cursor
+                glm::vec2 hotspot = {0.0f, 0.0f};
+                // size of the cursor in pixels.
+                glm::vec2 size = {20.0f, 20.0f};
+            } mouse_cursor;
+
             // the default clear color.
-            gfx::Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
+            Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
         };
         // Set the game engine configuration. Called once in the beginning
         // before Start is called.
