@@ -911,6 +911,9 @@ namespace gfx
     {
     public:
         ColorClass() = default;
+        ColorClass(const Color4f& color)
+          : mColor(color)
+        {}
         void SetBaseColor(const Color4f& color)
         { mColor = color; }
         void SetBaseAlpha(float alpha)
