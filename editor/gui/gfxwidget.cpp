@@ -243,6 +243,8 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->Draw(rect, transform, *material);
     }
 
+    mContext->swapBuffers(this);
+
     mCustomGraphicsDevice->EndFrame(false /*display*/);
     // using a shared device means that this must be done now
     // centrally once per render iteration, not once per GfxWidget.
@@ -421,8 +423,11 @@ void GfxWindow::EndFrame()
         else if (!window->isExposed())
             continue;
 
-        window->mContext->makeCurrent(window);
-        window->mContext->swapBuffers(window);
+        // can't be done here because this will not work
+        // with dialogs since those don't put the application
+        // in the "accelerated" render loop. 
+        //window->mContext->makeCurrent(window);
+        //window->mContext->swapBuffers(window);
         if (window->mVsync)
             did_vsync = true;
     }
