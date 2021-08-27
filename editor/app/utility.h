@@ -40,6 +40,9 @@
 
 #include "base/assert.h"
 
+// Win32 macro poisoning
+#undef CopyFile
+
 // general dumping ground for utility type of functionality
 // preferably not specific to any GUI or application.
 // inherited from previous projects.

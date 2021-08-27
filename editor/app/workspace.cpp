@@ -547,34 +547,15 @@ private:
             DEBUG("Skipping copy of '%1' to '%2'", src, dst);
             return;
         }
-
-        // we're doing this silly copying here since Qt doesn't
-        // have a copy operation that's without race condition,
-        // i.e. QFile::copy won't overwrite.
-        QFile src_io(src);
-        QFile dst_io(dst);
-        if (!src_io.open(QIODevice::ReadOnly))
+        auto [success, error] = app::CopyFile(src, dst);
+        if (!success)
         {
-            ERROR("Failed to open '%1' for reading (%2).", src, src_io.error());
+            ERROR("Failed to copy '%1' into '%2' (%3).", src, dst, error);
             mNumErrors++;
             return;
         }
-        if (!dst_io.open(QIODevice::WriteOnly | QIODevice::Truncate))
-        {
-            ERROR("Failed to open '%1 for writing (%2).", dst, dst_io.error());
-            mNumErrors++;
-            return;
-        }
-        const auto& buffer = src_io.readAll();
-        if (dst_io.write(buffer) == -1)
-        {
-            ERROR("Failed to write file '%1' (%2)", dst, dst_io.error());
-            mNumErrors++;
-            return;
-        }
-        dst_io.setPermissions(src_io.permissions());
         mNumFilesCopied++;
-        DEBUG("Copied %1 bytes from %2 to %3", buffer.count(), src, dst);
+        DEBUG("Copied '%1' into '%2'.", src, dst);
     }
 private:
     const QString kOutDir;
