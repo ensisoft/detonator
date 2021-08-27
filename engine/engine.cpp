@@ -86,7 +86,7 @@ public:
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
-        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua");
+        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script);
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetAudioEngine(mAudio.get());
         mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");

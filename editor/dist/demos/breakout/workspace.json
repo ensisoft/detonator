@@ -135,6 +135,7 @@
         "config_srgb": true,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
+        "game_script": "game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
         "mouse_pointer_drawable": "_arrow_cursor",

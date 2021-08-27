@@ -329,7 +329,8 @@ LuaGame::LuaGame(std::shared_ptr<sol::state> state)
   : mLuaState(state)
 { }
 
-LuaGame::LuaGame(const std::string& lua_path)
+LuaGame::LuaGame(const std::string& lua_path,
+                 const std::string& game_script)
 {
     mLuaState = std::make_shared<sol::state>();
     // todo: should this specify which libraries to load?
@@ -356,9 +357,7 @@ LuaGame::LuaGame(const std::string& lua_path)
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
     };
-
-    // todo: maybe this needs some configuring or whatever?
-    mLuaState->script_file(lua_path + "/game.lua");
+    mLuaState->script_file(base::JoinPath(lua_path, game_script));
 }
 
 LuaGame::~LuaGame() = default;

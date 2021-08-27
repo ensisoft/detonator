@@ -789,6 +789,7 @@ void PlayWindow::DoAppInit()
         mApp->SetEnvironment(env);
 
         engine::App::InitParams params;
+        params.game_script      = app::ToUtf8(settings.game_script);
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();

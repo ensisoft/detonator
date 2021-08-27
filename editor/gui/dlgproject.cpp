@@ -58,6 +58,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkVsync, mSettings.window_vsync);
     SetUIValue(mUI.chkCursor, mSettings.window_cursor);
     SetUIValue(mUI.edtAppName, mSettings.application_name);
+    SetUIValue(mUI.edtGameScript, mSettings.game_script);
     SetUIValue(mUI.edtAppVersion, mSettings.application_version);
     SetUIValue(mUI.edtAppLibrary, library);
     SetUIValue(mUI.ticksPerSecond, mSettings.ticks_per_second);
@@ -98,6 +99,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkCursor, &mSettings.window_cursor);
     GetUIValue(mUI.edtAppName, &mSettings.application_name);
     GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
+    GetUIValue(mUI.edtGameScript, &mSettings.game_script);
     GetUIValue(mUI.ticksPerSecond, &mSettings.ticks_per_second);
     GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
     GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
