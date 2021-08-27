@@ -2125,6 +2125,16 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         json_file.close();
     }
 
+    // resolves the path.
+    const QFileInfo engine_dll(mSettings.GetApplicationLibrary());
+    QString engine_name = engine_dll.fileName();
+    if (engine_name.startsWith("lib"))
+        engine_name.remove(0, 3);
+    if (engine_name.endsWith(".so"))
+        engine_name.chop(3);
+    else if (engine_name.endsWith(".dll"))
+        engine_name.chop(4);
+
     // write config file?
     if (options.write_config_file)
     {
@@ -2169,6 +2179,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
             base::JsonWrite(json["window"], "set_fullscreen", true);
 
+        base::JsonWrite(json["application"], "library", ToUtf8(engine_name));
         base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
         base::JsonWrite(json["application"], "ticks_per_second",   (float)mSettings.ticks_per_second);
@@ -2187,18 +2198,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["mouse_cursor"], "show", mSettings.mouse_pointer_visible);
         base::JsonWrite(json["mouse_cursor"], "hotspot", mSettings.mouse_pointer_hotspot);
         base::JsonWrite(json["mouse_cursor"], "size", mSettings.mouse_pointer_size);
-
-        // resolves the path.
-        const QFileInfo engine_dll(mSettings.GetApplicationLibrary());
-        QString engine_name = engine_dll.fileName();
-        if (engine_name.startsWith("lib"))
-            engine_name.remove(0, 3);
-        if (engine_name.endsWith(".so"))
-            engine_name.chop(3);
-        else if (engine_name.endsWith(".dll"))
-            engine_name.chop(4);
-        json["application"]["library"] = ToUtf8(engine_name);
-
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
         {
@@ -2217,13 +2216,22 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         return false;
     }
     // Copy game main executable.
-    std::string runner = "GameMain";
+    QString src_exec = "GameMain";
+    QString dst_exec = mSettings.application_name;
+    if (dst_exec.isEmpty())
+        dst_exec = "GameMain";
 #if defined(WINDOWS_OS)
-    runner.append(".exe");
+    src_exec.append(".exe");
+    dst_exec.append(".exe");
+    engine_name.append(".dll");
+#elif defined(LINUX_OS)
+    engine_name.prepend("lib");
+    engine_name.append(".so");
 #endif
-    packer.CopyFile(runner, "");
-    // copy the engine dll.
-    packer.CopyFile(ToUtf8(mSettings.GetApplicationLibrary()), "");
+    // todo: refactor the test cases and add error checking here.
+    app::CopyFile(src_exec, app::JoinPath(options.directory, dst_exec));
+    app::CopyFile(MapFileToFilesystem(mSettings.GetApplicationLibrary()),
+            app::JoinPath(options.directory,engine_name));
 
     INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), outdir);
     return true;
