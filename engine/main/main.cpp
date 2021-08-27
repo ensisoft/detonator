@@ -432,6 +432,7 @@ int main(int argc, char* argv[])
 
         // setup application
         engine::App::InitParams params;
+        base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         params.application_name = title;
         params.context          = context.get();
         params.surface_width    = window.GetSurfaceWidth();

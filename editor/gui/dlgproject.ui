@@ -29,15 +29,32 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="grpApplication">
          <property name="title">
           <string>Application settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_2">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbMinFilter"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>Application version</string>
+             <string>Window mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Window width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Window height</string>
             </property>
            </widget>
           </item>
@@ -66,127 +83,6 @@
               <string>16</string>
              </property>
             </item>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Window width</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Default MSAA</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Default texture min filter</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbMagFilter"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbMinFilter"/>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Window height</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Application name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="wndWidth">
-            <property name="minimum">
-             <number>256</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-            <property name="value">
-             <number>1024</number>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Window flags</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Window mode</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QSpinBox" name="ticksPerSecond">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbWindowMode"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Default texture mag filter</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="QLineEdit" name="edtAppVersion"/>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Updates per second</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QSpinBox" name="updatesPerSecond">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>60</number>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QSpinBox" name="wndHeight">
-            <property name="minimum">
-             <number>256</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-            <property name="value">
-             <number>768</number>
-            </property>
            </widget>
           </item>
           <item row="7" column="1">
@@ -231,6 +127,79 @@
             </item>
            </layout>
           </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Window flags</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbWindowMode"/>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Updates per second</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="1">
+           <widget class="QLineEdit" name="edtAppVersion"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Default MSAA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cmbMagFilter"/>
+          </item>
+          <item row="10" column="1">
+           <widget class="QSpinBox" name="updatesPerSecond">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>60</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="wndHeight">
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+            <property name="value">
+             <number>768</number>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Application name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Default texture min filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLineEdit" name="edtAppName"/>
+          </item>
           <item row="9" column="0">
            <widget class="QLabel" name="label_14">
             <property name="text">
@@ -238,8 +207,53 @@
             </property>
            </widget>
           </item>
-          <item row="11" column="1">
-           <widget class="QLineEdit" name="edtAppName"/>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="wndWidth">
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Application version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Default texture mag filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QSpinBox" name="ticksPerSecond">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Main game script</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="1">
+           <widget class="QLineEdit" name="edtGameScript">
+            <property name="text">
+             <string>game.lua</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -979,6 +993,7 @@
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>
   <tabstop>edtAppVersion</tabstop>
+  <tabstop>edtGameScript</tabstop>
   <tabstop>edtAppLibrary</tabstop>
   <tabstop>btnSelectEngine</tabstop>
   <tabstop>clearColor</tabstop>

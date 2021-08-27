@@ -223,7 +223,6 @@ namespace engine
                 // size of the cursor in pixels.
                 glm::vec2 size = {20.0f, 20.0f};
             } mouse_cursor;
-
             // the default clear color.
             Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
         };
@@ -241,6 +240,8 @@ namespace engine
         { return true; }
 
         struct InitParams {
+            // name of the "main" game script for loading the game.
+            std::string game_script;
             // application name/title.
             std::string application_name;
             // context is the current rendering context that can be used

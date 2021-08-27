@@ -1269,6 +1269,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "mouse_pointer_visible"   , mSettings.mouse_pointer_visible);
     JsonWrite(project, "mouse_pointer_hotspot"   , mSettings.mouse_pointer_hotspot);
     JsonWrite(project, "mouse_pointer_size"      , mSettings.mouse_pointer_size);
+    JsonWrite(project, "game_script"             ,mSettings.game_script);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1362,6 +1363,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "mouse_pointer_visible",    &mSettings.mouse_pointer_visible);
     JsonReadSafe(project, "mouse_pointer_hotspot",    &mSettings.mouse_pointer_hotspot);
     JsonReadSafe(project, "mouse_pointer_size",       &mSettings.mouse_pointer_size);
+    JsonReadSafe(project, "game_script",              &mSettings.game_script);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -2186,7 +2188,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
             base::JsonWrite(json["window"], "set_fullscreen", true);
 
-
         base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
         base::JsonWrite(json["application"], "ticks_per_second",   (float)mSettings.ticks_per_second);
@@ -2194,6 +2195,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "content", "content.json");
         base::JsonWrite(json["application"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_mag_filter);
+        base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["physics"], "num_velocity_iterations", mSettings.num_velocity_iterations);
         base::JsonWrite(json["physics"], "num_position_iterations", mSettings.num_position_iterations);
         base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
