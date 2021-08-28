@@ -97,6 +97,7 @@ namespace gui
         void on_actionZoomOut_triggered();
 
     private:
+        virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void closeEvent(QCloseEvent* event) override;
     private:
         Ui::ChildWindow mUI;

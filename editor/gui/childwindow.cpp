@@ -299,6 +299,13 @@ void ChildWindow::on_actionZoomOut_triggered()
     mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 }
 
+void ChildWindow::keyPressEvent(QKeyEvent* key)
+{
+    if (key->key() != Qt::Key_Escape)
+        return QMainWindow::keyPressEvent(key);
+    mWidget->OnEscape();
+}
+
 void ChildWindow::closeEvent(QCloseEvent* event)
 {
     DEBUG("Child window close event.");

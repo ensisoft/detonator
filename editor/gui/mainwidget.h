@@ -185,6 +185,9 @@ namespace gui
         virtual bool ConfirmClose() // const
         { return true; }
 
+        virtual bool OnEscape()
+        { return false; }
+
         struct Stats {
             double time = 0.0;
             struct {
