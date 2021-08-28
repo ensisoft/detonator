@@ -532,7 +532,6 @@ void GfxWidget::triggerPaint()
     mWindow->triggerPaint();
 }
 
-
 void GfxWidget::resizeEvent(QResizeEvent* resize)
 {
     // resize the container to be same size as this shim
@@ -540,6 +539,29 @@ void GfxWidget::resizeEvent(QResizeEvent* resize)
     // the container has taken ownership of the window and
     // will then in turn resize the window.
     mContainer->resize(resize->size());
+}
+
+void GfxWidget::focusInEvent(QFocusEvent* focus)
+{
+    //DEBUG("GfxWidget got focus");
+
+    // try to delegate the focus to the embedded QWindow since this
+    // widget is just a shim.
+    mWindow->requestActivate();
+    // And try the same with a timer as a fallback for the case when the
+    // widget has just been created and the call to requestActivate fails
+    QTimer::singleShot(100, mWindow, &QWindow::requestActivate);
+    // there's still the problem that the QWindow will not activate
+    // when swapping between applications. For example when the GfxWindow
+    // isActive swapping to another application and then back to the editor
+    // will not activate the previous GfxWindow but the mainwindow window
+    // which will then activate some of the widgets in the main window.
+    // I don't know how to solve this problem reliably yet.
+}
+
+void GfxWidget::focusOutEvent(QFocusEvent* focus)
+{
+    //DEBUG("GfxWidget lost focus");
 }
 
 void GfxWidget::showColorDialog()

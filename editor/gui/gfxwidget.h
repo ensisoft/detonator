@@ -222,6 +222,8 @@ namespace gui
 
     private:
         virtual void resizeEvent(QResizeEvent* event) override;
+        virtual void focusInEvent(QFocusEvent* focus) override;
+        virtual void focusOutEvent(QFocusEvent* focus) override;
     private:
         GfxWindow* mWindow = nullptr;
         QWidget* mContainer = nullptr;
