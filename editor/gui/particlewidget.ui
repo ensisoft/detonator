@@ -224,6 +224,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
          </widget>
         </item>
         <item>
@@ -994,6 +997,13 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>resetTransform</tabstop>
+  <tabstop>widget</tabstop>
+  <tabstop>materials</tabstop>
+  <tabstop>btnSelectMaterial</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>chkShowBounds</tabstop>
+  <tabstop>chkShowGrid</tabstop>
   <tabstop>simWidth</tabstop>
   <tabstop>simHeight</tabstop>
   <tabstop>motion</tabstop>
@@ -1025,12 +1035,6 @@
   <tabstop>alphaDerivatives</tabstop>
   <tabstop>timeAlphaDerivative</tabstop>
   <tabstop>distAlphaDerivative</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowBounds</tabstop>
-  <tabstop>cmbGrid</tabstop>
-  <tabstop>zoom</tabstop>
-  <tabstop>btnSelectMaterial</tabstop>
-  <tabstop>materials</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

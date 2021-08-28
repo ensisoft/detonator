@@ -899,6 +899,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
          </widget>
         </item>
         <item>
@@ -1473,6 +1476,9 @@
   <tabstop>magFilter</tabstop>
   <tabstop>wrapX</tabstop>
   <tabstop>wrapY</tabstop>
+  <tabstop>widget</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>cmbModel</tabstop>
   <tabstop>textures</tabstop>
   <tabstop>textureFile</tabstop>
   <tabstop>textureID</tabstop>
@@ -1486,8 +1492,6 @@
   <tabstop>rectH</tabstop>
   <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
-  <tabstop>cmbModel</tabstop>
-  <tabstop>zoom</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
