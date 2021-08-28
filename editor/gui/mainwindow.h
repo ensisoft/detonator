@@ -177,10 +177,10 @@ namespace gui
         void ImportFiles(const QStringList& files);
 
     private:
-        bool event(QEvent* event)  override;
-        void closeEvent(QCloseEvent* event) override;
-        void dragEnterEvent(QDragEnterEvent* drag) override;
-        void dropEvent(QDropEvent* event) override;
+        virtual bool event(QEvent* event)  override;
+        virtual void closeEvent(QCloseEvent* event) override;
+        virtual void dragEnterEvent(QDragEnterEvent* drag) override;
+        virtual void dropEvent(QDropEvent* event) override;
 
     private:
         Ui::MainWindow mUI;

@@ -992,7 +992,7 @@ void MainWindow::on_actionWindowPopOut_triggered()
     widget->show();
     widget->updateGeometry();
     window->updateGeometry();
-    // seems that we need some delay (presumaly to allow some
+    // seems that we need some delay (presumably to allow some
     // event processing to take place) on Windows before
     // calling the update geometry. Without this the window is  
     // somewhat fucked up in its appearance. (Layout is off)
@@ -2038,21 +2038,22 @@ void MainWindow::RefreshWidget()
 {
     auto* widget = dynamic_cast<MainWidget*>(sender());
     widget->Refresh();
-    if (widget == mCurrentWidget)
-    {
-        MainWidget::Stats stats;
-        widget->GetStats(&stats);
-        SetValue(mUI.statTime, QString::number(stats.time));
-        SetVisible(mUI.lblFps,    stats.graphics.valid);
-        SetVisible(mUI.lblVsync,  stats.graphics.valid);
-        SetVisible(mUI.statFps,   stats.graphics.valid);
-        SetVisible(mUI.statVsync, stats.graphics.valid);
-        if (stats.graphics.valid)
-        {
-            SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-            SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
-        }
-    }
+
+    if (widget != mCurrentWidget)
+        return;
+
+    MainWidget::Stats stats;
+    widget->GetStats(&stats);
+    SetValue(mUI.statTime, QString::number(stats.time));
+    SetVisible(mUI.lblFps,    stats.graphics.valid);
+    SetVisible(mUI.lblVsync,  stats.graphics.valid);
+    SetVisible(mUI.statFps,   stats.graphics.valid);
+    SetVisible(mUI.statVsync, stats.graphics.valid);
+    if (!stats.graphics.valid)
+        return;
+
+    SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -2265,24 +2266,16 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 {
     ASSERT(widget->parent() == nullptr);
 
-    // disconnect the signals if already connected. why?
-    // because this function is also called when a widget is
-    // moved from main tab to a window or vice versa.
-    // without disconnect the connections are duped and problems
-    // will happen.
-    disconnect(widget, &MainWidget::OpenExternalImage,  this, &MainWindow::OpenExternalImage);
-    disconnect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
-    disconnect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
-    disconnect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
-    disconnect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
-    disconnect(widget, &MainWidget::RefreshRequest,     this, &MainWindow::RefreshWidget);
-    // connect the important signals here.
-    connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
-    connect(widget, &MainWidget::OpenExternalShader,this, &MainWindow::OpenExternalShader);
-    connect(widget, &MainWidget::OpenExternalScript,this, &MainWindow::OpenExternalScript);
-    connect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
-    connect(widget, &MainWidget::OpenNewWidget,     this, &MainWindow::OpenNewWidget);
-    connect(widget, &MainWidget::RefreshRequest,    this, &MainWindow::RefreshWidget);
+    if (!widget->property("_main_window_connected_").toBool())
+    {
+        connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
+        connect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
+        connect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
+        connect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
+        connect(widget, &MainWidget::OpenNewWidget, this, &MainWindow::OpenNewWidget);
+        connect(widget, &MainWidget::RefreshRequest, this, &MainWindow::RefreshWidget);
+        widget->setProperty("_main_window_connected_", true);
+    }
 
     if (new_window)
     {

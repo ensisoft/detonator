@@ -339,7 +339,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.name, mState.scene.GetName());
-    setWindowTitle("My Scene");
 
     RebuildMenus();
     RebuildCombos();
@@ -1274,7 +1273,6 @@ void SceneWidget::ResourceUpdated(const app::Resource* resource)
     RebuildCombos();
     RebuildMenus();
 }
-
 void SceneWidget::InitScene(unsigned width, unsigned height)
 {
     if (!mCameraWasLoaded)
