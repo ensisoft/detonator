@@ -461,6 +461,9 @@
             <height>100</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
          </widget>
         </item>
         <item>
@@ -1114,6 +1117,13 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnViewReset</tabstop>
+  <tabstop>widget</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>chkSnap</tabstop>
+  <tabstop>chkShowViewport</tabstop>
+  <tabstop>chkShowOrigin</tabstop>
+  <tabstop>chkShowGrid</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeEntity</tabstop>
@@ -1128,12 +1138,6 @@
   <tabstop>nodeRotation</tabstop>
   <tabstop>btnNodePlus90</tabstop>
   <tabstop>btnNodeMinus90</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowViewport</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>cmbGrid</tabstop>
-  <tabstop>zoom</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

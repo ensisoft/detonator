@@ -136,6 +136,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
          </widget>
         </item>
         <item>
@@ -357,6 +360,7 @@
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
   <tabstop>staticInstance</tabstop>
+  <tabstop>widget</tabstop>
   <tabstop>blueprints</tabstop>
   <tabstop>btnResetBlueprint</tabstop>
   <tabstop>alpha</tabstop>

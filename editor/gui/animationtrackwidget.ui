@@ -378,6 +378,9 @@
               <height>100</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
            </widget>
           </item>
           <item>
@@ -1408,6 +1411,7 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnViewReset</tabstop>
+  <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>chkSnap</tabstop>
@@ -1438,6 +1442,7 @@
   <tabstop>kinematicEndVeloZ</tabstop>
   <tabstop>itemFlags</tabstop>
   <tabstop>flagAction</tabstop>
+  <tabstop>btnAddActuator</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
