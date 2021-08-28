@@ -734,6 +734,14 @@ bool SceneWidget::ConfirmClose()
     on_actionSave_triggered();
     return true;
 }
+bool SceneWidget::OnEscape()
+{
+    if (mCurrentTool)
+        mCurrentTool.reset();
+    else mUI.tree->ClearSelection();
+    return true;
+}
+
 void SceneWidget::Refresh()
 {
     // don't take an undo snapshot while the mouse tool is in
