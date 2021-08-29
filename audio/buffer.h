@@ -88,6 +88,44 @@ namespace audio
     };
     using BufferHandle = std::shared_ptr<Buffer>;
 
+    class BufferView : public Buffer
+    {
+    public:
+        BufferView(void* data, size_t capacity)
+          : mCapacity(capacity)
+          , mData(data)
+        {}
+        virtual void SetFormat(const Format& format)
+        { mFormat = format; }
+        virtual Format GetFormat() const override
+        { return mFormat; }
+        virtual const void* GetPtr() const override
+        { return mData; }
+        virtual void* GetPtr() override
+        { return mData; }
+        virtual size_t GetByteSize() const override
+        { return mSize; }
+        virtual size_t GetCapacity() const override
+        { return mCapacity; }
+        virtual void SetByteSize(size_t bytes) override
+        {
+            ASSERT(bytes <= mCapacity);
+            mSize = bytes;
+        }
+        virtual size_t GetNumInfoTags() const override
+        { return mInfos.size(); }
+        virtual void AddInfoTag(const InfoTag& tag) override
+        { mInfos.push_back(tag); }
+        virtual const InfoTag& GetInfoTag(size_t index) const
+        { return base::SafeIndex(mInfos, index); }
+    private:
+        const std::size_t mCapacity = 0;
+        void* mData = nullptr;
+        std::size_t mSize = 0;
+        std::vector<InfoTag> mInfos;
+        Format mFormat;
+    };
+
     // backing data storage.
     class VectorBuffer : public Buffer
     {

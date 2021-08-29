@@ -792,7 +792,29 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         }
         return min_bytes;
     }
-    BufferAllocator allocator;
+
+    class Allocator : public BufferAllocator {
+    public:
+        Allocator(void* native_buffer, unsigned native_buffer_size)
+        {
+            mDeviceBuffer = std::make_shared<BufferView>(native_buffer,
+                                                         native_buffer_size);
+        }
+        virtual BufferHandle Allocate(size_t bytes) override
+        {
+            if (mDeviceBuffer && mDeviceBuffer->GetCapacity() >= bytes)
+            {
+                auto ret  = mDeviceBuffer;
+                mDeviceBuffer.reset();
+                return ret;
+            }
+            return std::make_shared<VectorBuffer>(bytes);
+            mDeviceBuffer.reset();
+        }
+    private:
+        BufferHandle mDeviceBuffer;
+    } allocator(buff, max_bytes);
+
     mGraph.Process(allocator, mEvents, milliseconds);
     mGraph.Advance(milliseconds);
     mMillisecs += milliseconds;
@@ -802,6 +824,16 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
     if (port.PullBuffer(buffer))
     {
         const auto min_bytes = std::min(buffer->GetByteSize(), (size_t)max_bytes);
+        // if the graph's output buffer is a buffer view for the buffer
+        // given to us by the audio API then we don't need to copy any
+        // data around and we're on the happy path!
+        if (buffer->GetPtr() == buff)
+            return min_bytes;
+        // if the graph's output buffer is not the native buffer then
+        // a copy must be done unfortunately. it's also possible that the
+        // output buffer is now larger than the maximum device's PCM buffer.
+        // This can happen if the graph delivers a late buffer that has been
+        // queued before.
         std::memcpy(buff, buffer->GetPtr(), min_bytes);
         if (min_bytes < buffer->GetByteSize())
         {
