@@ -265,7 +265,7 @@ namespace audio
         virtual bool IsSourceDone() const override
         { return mDone; }
         virtual bool Prepare(const Loader& loader) override;
-        virtual void Process(EventQueue& events, unsigned milliseconds) override;
+        virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual void Advance(unsigned int ms) override;
         virtual unsigned GetNumOutputPorts() const override

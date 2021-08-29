@@ -229,7 +229,7 @@ bool Playlist::Prepare(const Loader& loader)
     return true;
 }
 
-void Playlist::Process(EventQueue& events, unsigned milliseconds)
+void Playlist::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     if (mSrcIndex == mSrcs.size())
         return;
@@ -275,7 +275,7 @@ bool StereoMaker::Prepare(const Loader& loader)
     return true;
 }
 
-void StereoMaker::Process(EventQueue& events, unsigned milliseconds)
+void StereoMaker::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
@@ -288,16 +288,16 @@ void StereoMaker::Process(EventQueue& events, unsigned milliseconds)
         return;
     }
     if (format.sample_type == SampleType::Int32)
-        CopyMono<int>(buffer);
+        CopyMono<int>(allocator, buffer);
     else if (format.sample_type == SampleType::Float32)
-        CopyMono<float>(buffer);
+        CopyMono<float>(allocator, buffer);
     else if (format.sample_type == SampleType::Int16)
-        CopyMono<short>(buffer);
+        CopyMono<short>(allocator, buffer);
     else WARN("Unsupported format %1", format.sample_type);
 }
 
 template<typename Type>
-void StereoMaker::CopyMono(BufferHandle buffer)
+void StereoMaker::CopyMono(BufferAllocator& allocator, BufferHandle buffer)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -306,8 +306,8 @@ void StereoMaker::CopyMono(BufferHandle buffer)
     const auto buffer_size = buffer->GetByteSize();
     const auto num_frames  = buffer_size / frame_size;
 
-    auto stereo = std::make_shared<VectorBuffer>();
-    stereo->AllocateBytes(buffer_size * 2);
+    auto stereo = allocator.Allocate(buffer_size * 2);
+    stereo->SetByteSize(buffer_size * 2);
     stereo->SetFormat(mOut.GetFormat());
     Buffer::CopyInfoTags(*buffer, *stereo);
 
@@ -355,7 +355,7 @@ bool StereoJoiner::Prepare(const Loader& loader)
     return false;
 }
 
-void StereoJoiner::Process(EventQueue& events, unsigned milliseconds)
+void StereoJoiner::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle left;
     BufferHandle right;
@@ -374,16 +374,16 @@ void StereoJoiner::Process(EventQueue& events, unsigned milliseconds)
 
     const auto& format = mInLeft.GetFormat();
     if (format.sample_type == SampleType::Int32)
-        Join<int>(left, right);
+        Join<int>(allocator, left, right);
     else if (format.sample_type == SampleType::Float32)
-        Join<float>(left, right);
+        Join<float>(allocator, left, right);
     else if (format.sample_type == SampleType::Int16)
-        Join<short>(left, right);
+        Join<short>(allocator, left, right);
     else WARN("Unsupported format %1", format.sample_type);
 }
 
 template<typename Type>
-void StereoJoiner::Join(BufferHandle left, BufferHandle right)
+void StereoJoiner::Join(Allocator& allocator, BufferHandle left, BufferHandle right)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -392,8 +392,8 @@ void StereoJoiner::Join(BufferHandle left, BufferHandle right)
     const auto buffer_size = left->GetByteSize();
     const auto num_frames  = buffer_size / frame_size;
 
-    auto stereo = std::make_shared<VectorBuffer>();
-    stereo->AllocateBytes(buffer_size * 2);
+    auto stereo = allocator.Allocate(buffer_size * 2);
+    stereo->SetByteSize(buffer_size * 2);
     stereo->SetFormat(mOut.GetFormat());
     Buffer::CopyInfoTags(*left, *stereo);
     Buffer::CopyInfoTags(*right, *stereo);
@@ -439,7 +439,7 @@ bool StereoSplitter::Prepare(const Loader& loader)
     return false;
 }
 
-void StereoSplitter::Process(EventQueue& events, unsigned milliseconds)
+void StereoSplitter::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.HasBuffers())
@@ -448,16 +448,16 @@ void StereoSplitter::Process(EventQueue& events, unsigned milliseconds)
     mIn.PullBuffer(buffer);
     const auto& format = mIn.GetFormat();
     if (format.sample_type == SampleType::Int32)
-        Split<int>(buffer);
+        Split<int>(allocator, buffer);
     else if (format.sample_type == SampleType::Float32)
-        Split<float>(buffer);
+        Split<float>(allocator, buffer);
     else if (format.sample_type == SampleType::Int16)
-        Split<short>(buffer);
+        Split<short>(allocator, buffer);
     else WARN("Unsupported format %1", format.sample_type);
 }
 
 template<typename Type>
-void StereoSplitter::Split(BufferHandle buffer)
+void StereoSplitter::Split(Allocator& allocator, BufferHandle buffer)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;
@@ -468,11 +468,11 @@ void StereoSplitter::Split(BufferHandle buffer)
 
     const auto* in = static_cast<StereoFrameType*>(buffer->GetPtr());
 
-    auto left  = std::make_shared<VectorBuffer>();
-    auto right = std::make_shared<VectorBuffer>();
-    left->AllocateBytes(buffer_size / 2);
+    auto left  = allocator.Allocate(buffer_size / 2);
+    auto right = allocator.Allocate(buffer_size / 2);
+    left->SetByteSize(buffer_size / 2);
     left->SetFormat(mOutLeft.GetFormat());
-    right->AllocateBytes(buffer_size / 2);
+    right->SetByteSize(buffer_size / 2);
     right->SetFormat(mOutRight.GetFormat());
     Buffer::CopyInfoTags(*buffer, *left);
     Buffer::CopyInfoTags(*buffer, *right);
@@ -547,7 +547,7 @@ bool Mixer::Prepare(const Loader& loader)
     return true;
 }
 
-void Mixer::Process(EventQueue& events, unsigned milliseconds)
+void Mixer::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     const float src_gain = 1.0f/mSrcs.size();
 
@@ -595,7 +595,7 @@ bool Delay::Prepare(const Loader& loader)
     DEBUG("Delay '%1' output format set to '%2'.", mName, format);
     return true;
 }
-void Delay::Process(EventQueue& events, unsigned milliseconds)
+void Delay::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     if (mDelay > 0u)
         return;
@@ -637,7 +637,7 @@ bool Effect::Prepare(const Loader& loader)
     return true;
 }
 
-void Effect::Process(EventQueue& events, unsigned milliseconds)
+void Effect::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
@@ -714,7 +714,7 @@ bool Gain::Prepare(const Loader& loader)
     return true;
 }
 
-void Gain::Process(EventQueue& events, unsigned milliseconds)
+void Gain::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
@@ -808,7 +808,7 @@ bool Resampler::Prepare(const Loader& loader)
     return true;
 }
 
-void Resampler::Process(EventQueue& events, unsigned milliseconds)
+void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     BufferHandle src_buffer;
     if (!mIn.PullBuffer(src_buffer))
@@ -829,8 +829,7 @@ void Resampler::Process(EventQueue& events, unsigned milliseconds)
     const auto out_frame_count = std::min((unsigned)max_frame_count, (unsigned)src_frame_count);
     ASSERT((src_buffer_size % src_frame_size) == 0);
 
-    auto out_buffer = std::make_shared<VectorBuffer>();
-    out_buffer->AllocateBytes(out_frame_count * src_frame_size);
+    auto out_buffer = allocator.Allocate(out_frame_count * src_frame_size);
     out_buffer->SetFormat(out_format);
     Buffer::CopyInfoTags(*src_buffer, *out_buffer);
 
@@ -855,7 +854,7 @@ void Resampler::Process(EventQueue& events, unsigned milliseconds)
         WARN("Resampler '%1' discarding %2 pending input frames.", mName, pending);
     }
 
-    out_buffer->ResizeBytes(src_frame_size * data.output_frames_gen);
+    out_buffer->SetByteSize(src_frame_size * data.output_frames_gen);
     mOut.PushBuffer(out_buffer);
 }
 
@@ -933,7 +932,7 @@ bool FileSource::Prepare(const Loader& loader)
     return true;
 }
 
-void FileSource::Process(EventQueue& events, unsigned milliseconds)
+void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
@@ -941,9 +940,9 @@ void FileSource::Process(EventQueue& events, unsigned milliseconds)
     const auto frames_available = mDecoder->GetNumFrames();
     const auto frames = std::min(frames_available - mFramesRead, frames_wanted);
 
-    auto buffer = std::make_shared<VectorBuffer>();
+    auto buffer = allocator.Allocate(frame_size * frames);
     buffer->SetFormat(mFormat);
-    buffer->AllocateBytes(frame_size * frames);
+    buffer->SetByteSize(frame_size * frames);
     void* buff = buffer->GetPtr();
 
     size_t ret = 0;
@@ -1064,7 +1063,7 @@ bool BufferSource::Prepare(const Loader& loader)
     mOutputFormat = format;
     return true;
 }
-void BufferSource::Process(EventQueue& events, unsigned milliseconds)
+void BufferSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     const auto frame_size = GetFrameSizeInBytes(mOutputFormat);
     const auto frames_per_ms = mOutputFormat.sample_rate / 1000;
@@ -1072,9 +1071,9 @@ void BufferSource::Process(EventQueue& events, unsigned milliseconds)
     const auto frames_available = mDecoder->GetNumFrames();
     const auto frames = std::min(frames_available - mFramesRead, frames_wanted);
 
-    auto buffer = std::make_shared<VectorBuffer>();
+    auto buffer = allocator.Allocate(frame_size * frames);
     buffer->SetFormat(mOutputFormat);
-    buffer->AllocateBytes(frame_size * frames);
+    buffer->SetByteSize(frame_size * frames);
     void* buff = buffer->GetPtr();
 
     size_t ret = 0;
@@ -1273,7 +1272,7 @@ void MixerSource::Advance(unsigned int ms)
     }
 }
 
-void MixerSource::Process(EventQueue& events, unsigned milliseconds)
+void MixerSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     std::vector<BufferHandle> src_buffers;
 
@@ -1284,7 +1283,7 @@ void MixerSource::Process(EventQueue& events, unsigned milliseconds)
         if (source.paused || source.element->IsSourceDone())
             continue;
 
-        element->Process(events, milliseconds);
+        element->Process(allocator, events, milliseconds);
         for (unsigned i=0;i<element->GetNumOutputPorts(); ++i)
         {
             auto& port = element->GetOutputPort(i);
@@ -1433,15 +1432,15 @@ bool ZeroSource::Prepare(const Loader& loader)
     return true;
 }
 
-void ZeroSource::Process(EventQueue& events, unsigned milliseconds)
+void ZeroSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
     const auto frames_wanted = frames_per_ms * milliseconds;
 
-    auto buffer = std::make_shared<VectorBuffer>();
+    auto buffer = allocator.Allocate(frame_size * frames_wanted);
     buffer->SetFormat(mFormat);
-    buffer->AllocateBytes(frame_size * frames_wanted);
+    buffer->SetByteSize(frame_size * frames_wanted);
     mOut.PushBuffer(buffer);
 }
 
@@ -1474,7 +1473,7 @@ bool SineSource::Prepare(const Loader& loader)
     return true;
 }
 
-void SineSource::Process(EventQueue& events, unsigned milliseconds)
+void SineSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     if (mDuration)
     {
@@ -1487,9 +1486,9 @@ void SineSource::Process(EventQueue& events, unsigned milliseconds)
     const auto frames = frames_in_millisec * milliseconds;
     const auto bytes  = frames * frame_size;
 
-    auto buffer = std::make_shared<VectorBuffer>();
+    auto buffer = allocator.Allocate(bytes);
     buffer->SetFormat(mFormat);
-    buffer->AllocateBytes(bytes);
+    buffer->SetByteSize(bytes);
 
     if (mFormat.sample_type == SampleType::Int32)
         mFormat.channel_count == 1 ? Generate<int, 1>(buffer, frames)

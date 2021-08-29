@@ -37,6 +37,10 @@ public:
 class TestBuffer : public audio::Buffer
 {
 public:
+    virtual void SetFormat(const audio::Format& format)
+    {
+        TEST_REQUIRE(!"not implemented.");
+    }
     virtual Format GetFormat() const
     {
         Format format;
@@ -48,6 +52,15 @@ public:
     { return mData.data(); }
     virtual size_t GetByteSize() const override
     { return mData.size(); }
+    virtual size_t GetCapacity() const override
+    {
+        TEST_REQUIRE(!"not implemented.");
+        return 0;
+    }
+    virtual void SetByteSize(size_t bytes) override
+    {
+        TEST_REQUIRE(!"not implemented.");
+    }
 
     void AppendTag(const std::string& tag)
     {
@@ -158,7 +171,7 @@ public:
     }
     virtual bool IsSource() const override
     { return true; }
-    virtual void Process(EventQueue& events, unsigned milliseconds) override
+    virtual void Process(audio::BufferAllocator& allocator, EventQueue& events, unsigned milliseconds) override
     {
         if (mShouldFinish)
             TEST_REQUIRE(mBufferCount < mNumOutBuffers);
@@ -199,7 +212,7 @@ public:
         mState.prepare_list.push_back(this);
         return !mPrepareError;
     }
-    virtual void Process(EventQueue& events, unsigned milliseconds) override
+    virtual void Process(audio::BufferAllocator& allocator, EventQueue& events, unsigned milliseconds) override
     {
         TEST_REQUIRE(mInputPorts.size() == mOutputPorts.size());
         for (unsigned i=0; i<mInputPorts.size(); ++i)
@@ -454,7 +467,8 @@ void unit_test_buffer_flow()
 
     audio::Element::EventQueue  queue;
     audio::BufferHandle buffer;
-    graph.Process(queue, 1);
+    audio::BufferAllocator allocator;
+    graph.Process(allocator, queue, 1);
     graph.GetOutputPort(0).PullBuffer(buffer);
 
     const std::string outcome((const char*)buffer->GetPtr(), buffer->GetByteSize());
@@ -480,10 +494,11 @@ void unit_test_completion()
         TEST_REQUIRE(graph.Prepare(loader));
 
         audio::Element::EventQueue queue;
+        audio::BufferAllocator allocator;
 
         for (int i=0; i<10; ++i)
         {
-            graph.Process(queue, 1);
+            graph.Process(allocator, queue, 1);
             auto& port = graph.GetOutputPort(0);
             audio::BufferHandle  buffer;
             TEST_REQUIRE(port.PullBuffer(buffer));
@@ -517,10 +532,11 @@ void unit_test_completion()
 
         audio::Element::EventQueue queue;
         audio::BufferHandle buffer;
+        audio::BufferAllocator allocator;
         std::size_t bytes_read = 0;
         for (int i=0; i<10; ++i)
         {
-            graph.Process(queue, 1);
+            graph.Process(allocator, queue, 1);
             graph.GetOutputPort(0).PullBuffer(buffer);
         }
         TEST_REQUIRE(graph.IsSourceDone() == false);
@@ -529,7 +545,7 @@ void unit_test_completion()
 
         for (int i=0; i<10; ++i)
         {
-            graph.Process(queue, 1);
+            graph.Process(allocator, queue, 1);
             graph.GetOutputPort(0).PullBuffer(buffer);
         }
         TEST_REQUIRE(graph.IsSourceDone() == true);
@@ -580,7 +596,8 @@ void unit_test_graph_in_graph()
 
     audio::Element::EventQueue queue;
     audio::BufferHandle buffer;
-    graph.Process(queue, 1);
+    audio::BufferAllocator allocator;
+    graph.Process(allocator, queue, 1);
     graph.GetOutputPort(0).PullBuffer(buffer);
 
     const std::string outcome((const char*)buffer->GetPtr(), buffer->GetByteSize());
@@ -681,15 +698,16 @@ void unit_test_oversized_buffer()
             mOut.SetFormat(format);
             return true;
         }
-        virtual void Process(EventQueue& events, unsigned milliseconds) override
+        virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override
         {
             TEST_REQUIRE(mDone == false);
             const auto frame_size = audio::GetFrameSizeInBytes(mFormat);
             const auto frames_per_ms = mFormat.sample_rate  / 1000;
             const auto frames_wanted = frames_per_ms * milliseconds;
 
-            auto buffer = std::make_shared<audio::VectorBuffer>();
-            buffer->AllocateBytes(frame_size * frames_wanted * 2);
+            auto buffer = allocator.Allocate(frame_size * frames_wanted * 2);
+            buffer->SetByteSize(frame_size * frames_wanted * 2);
+            buffer->SetFormat(mFormat);
 
             using Frame = audio::Frame<short, 2>;
             auto* ptr = static_cast<Frame*>(buffer->GetPtr());
