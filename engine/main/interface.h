@@ -36,7 +36,7 @@
 #include "graphics/device.h"
 #include "graphics/loader.h"
 #include "wdk/events.h"
-#include "wdk/window_listener.h"
+#include "wdk/listener.h"
 
 // this header defines the interface between a app/game that
 // is built into a shared object (.dll or .so) and the runner/main
