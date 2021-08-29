@@ -29,11 +29,19 @@
 
 namespace audio
 {
+    // Interface for accessing and dealing with buffers of PCM audio data.
+    // Each buffer contains the actual PCM data and also carries some
+    // meta information related to the contents of the buffer, i.e it's
+    // expected current PCM format details and also information about
+    // the audio elements that have produced/modified the buffer data.
     class Buffer
     {
     public:
         using Format = audio::Format;
+        // Collection of information regarding the element
+        // that has touched/produced the buffer and it's contents.
         struct InfoTag {
+            // Details of the element.
             struct Element {
                 std::string name;
                 std::string id;
@@ -42,6 +50,8 @@ namespace audio
             } element;
         };
         virtual ~Buffer() = default;
+        // Set the current format for the contents of the buffer.
+        virtual void SetFormat(const Format& format) = 0;
         // Get the PCM audio format of the buffer.
         // The format is only valid when the buffer contains PCM data.
         // Other times the format will be NotSet.
@@ -52,10 +62,19 @@ namespace audio
         // that this would be a nullptr when the buffer doesn't support
         // writing into.
         virtual void* GetPtr() = 0;
-        // Get the size of the buffer in bytes for both reading and writing.
+        // Set the size of the buffer's content in bytes.
+        virtual void SetByteSize(size_t bytes) = 0;
+        // Get the size of the buffer's contents in bytes.
         virtual size_t GetByteSize() const = 0;
+        // Get the capacity of the buffer in bytes.
+        virtual size_t GetCapacity() const = 0;
+        // Get the number of info tags associated with this buffer.
+        // the info tags are accumulated in the buffer as it passes
+        // from one element to another for processing.
         virtual size_t GetNumInfoTags() const = 0;
+        // Add (append) a new info tag to this buffer.
         virtual void AddInfoTag(const InfoTag& tag) = 0;
+        // Get an info tag at the specified index.
         virtual const InfoTag& GetInfoTag(size_t index) const = 0;
 
         // copy the buffer info tags from source buffer into the
@@ -67,33 +86,39 @@ namespace audio
         }
     private:
     };
+    using BufferHandle = std::shared_ptr<Buffer>;
 
     // backing data storage.
     class VectorBuffer : public Buffer
     {
     public:
+        VectorBuffer(size_t capacity)
+        { Resize(capacity); }
        ~VectorBuffer()
         {
             ASSERT(mBuffer.size() >= sizeof(canary));
-            ASSERT(!std::memcmp(&mBuffer[GetByteSize()], &canary, sizeof(canary)) &&
+            const auto canary_offset = mBuffer.size() - sizeof(canary);
+            ASSERT(!std::memcmp(&mBuffer[canary_offset], &canary, sizeof(canary)) &&
                    "Audio buffer out of bounds write detected.");
         }
-
-        void SetFormat(const Format& format)
+        virtual void SetFormat(const Format& format)
         { mFormat = format; }
-        void AllocateBytes(size_t bytes)
-        { Resize(bytes); }
-        void ResizeBytes(size_t bytes)
-        { Resize(bytes); }
-
         virtual Format GetFormat() const override
         { return mFormat; }
         virtual const void* GetPtr() const override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
         virtual void* GetPtr() override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-        size_t GetByteSize() const override
-        { return mBuffer.size() - sizeof(canary); }
+        virtual size_t GetByteSize() const override
+        { return mSize; }
+        virtual size_t GetCapacity() const override
+        { return mSize - sizeof(canary); }
+        virtual void SetByteSize(size_t bytes) override
+        {
+            const auto limit = mBuffer.size() - sizeof(canary);
+            ASSERT(bytes <= limit);
+            mSize = bytes;
+        }
         virtual size_t GetNumInfoTags() const override
         { return mInfos.size(); }
         virtual void AddInfoTag(const InfoTag& tag) override
@@ -110,9 +135,24 @@ namespace audio
     private:
         static constexpr auto canary = 0xF4F5ABCD;
     private:
+        // Buffer content format for the PCM data.
         Format mFormat;
+        // the backing store for the buffer's PMC data.
         std::vector<std::uint8_t> mBuffer;
+        // The collection of info tags accumulated as the buffer
+        // has passed over a number of audio elements.
         std::vector<InfoTag> mInfos;
+        // Size of PCM data content in bytes. can be less than
+        // the buffer's actual capacity.
+        std::size_t mSize = 0;
+    };
+
+    class BufferAllocator
+    {
+    public:
+        virtual BufferHandle Allocate(size_t bytes)
+        { return std::make_shared<VectorBuffer>(bytes); }
+    private:
     };
 
 } // namespace

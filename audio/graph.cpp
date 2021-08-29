@@ -597,7 +597,7 @@ bool Graph::Prepare(const Loader& loader)
     return true;
 }
 
-void Graph::Process(EventQueue& events, unsigned milliseconds)
+void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     // Evaluate the elements in topological order and then
     // dispatch the buffers according to the element/port links.
@@ -628,7 +628,7 @@ void Graph::Process(EventQueue& events, unsigned milliseconds)
             continue;
 
         // process the audio buffers.
-        source->Process(events, milliseconds);
+        source->Process(allocator, events, milliseconds);
 
         // dispatch the resulting buffers by iterating over the output
         // ports and finding their assigned input ports.
@@ -792,8 +792,8 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         }
         return min_bytes;
     }
-
-    mGraph.Process(mEvents, milliseconds);
+    BufferAllocator allocator;
+    mGraph.Process(allocator, mEvents, milliseconds);
     mGraph.Advance(milliseconds);
     mMillisecs += milliseconds;
 
