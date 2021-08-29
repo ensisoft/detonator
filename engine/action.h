@@ -63,7 +63,6 @@ namespace engine
     struct DelayAction {
         float seconds = 0.0;
     };
-
     struct DebugPrintAction {
         std::string message;
         bool clear = false;
@@ -73,7 +72,9 @@ namespace engine
     struct ShowDebugAction {
         bool show = true;
     };
-
+    struct GrabMouseAction {
+        bool grab = true;
+    };
     struct ShowMouseAction {
         bool show = true;
     };
@@ -83,7 +84,6 @@ namespace engine
     struct BlockMouseAction {
         bool block = true;
     };
-
     struct RequestFullScreenAction {
         bool full_screen = true;
     };
@@ -104,6 +104,7 @@ namespace engine
             ShowMouseAction,
             BlockKeyboardAction,
             BlockMouseAction,
+            GrabMouseAction,
             RequestFullScreenAction>;
 
 } // namespace

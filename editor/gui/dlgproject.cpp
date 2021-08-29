@@ -57,6 +57,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkSrgb, mSettings.config_srgb);
     SetUIValue(mUI.chkVsync, mSettings.window_vsync);
     SetUIValue(mUI.chkCursor, mSettings.window_cursor);
+    SetUIValue(mUI.chkGrabMouse, mSettings.grab_mouse);
     SetUIValue(mUI.edtAppName, mSettings.application_name);
     SetUIValue(mUI.edtGameScript, mSettings.game_script);
     SetUIValue(mUI.edtAppVersion, mSettings.application_version);
@@ -97,6 +98,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkVsync, &mSettings.window_vsync);
     GetUIValue(mUI.chkSrgb, &mSettings.config_srgb);
     GetUIValue(mUI.chkCursor, &mSettings.window_cursor);
+    GetUIValue(mUI.chkGrabMouse, &mSettings.grab_mouse);
     GetUIValue(mUI.edtAppName, &mSettings.application_name);
     GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
     GetUIValue(mUI.edtGameScript, &mSettings.game_script);

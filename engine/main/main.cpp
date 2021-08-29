@@ -403,6 +403,7 @@ int main(int argc, char* argv[])
         bool window_set_fullscreen = false;
         bool window_vsync = false;
         bool window_show_cursor = false;
+        bool window_grab_mouse  = false;
         base::JsonReadSafe(json["window"], "width", &window_width);
         base::JsonReadSafe(json["window"], "height", &window_height);
         base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
@@ -410,6 +411,7 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["window"], "set_fullscreen", &window_set_fullscreen);
         base::JsonReadSafe(json["window"], "vsync", &window_vsync);
         base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
+        base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
 
         wdk::Window window;
         // makes sure to connect the listener before creating the window
@@ -424,6 +426,7 @@ int main(int argc, char* argv[])
             window_can_resize, window_has_border, true);
         window.SetFullscreen(window_set_fullscreen);
         window.ShowCursor(window_show_cursor);
+        window.GrabMouse(window_grab_mouse);
 
         // Setup context to render in the window.
         context->SetWindowSurface(window);
@@ -522,6 +525,8 @@ int main(int argc, char* argv[])
                     window.SetFullscreen(!window.IsFullscreen());
                 else if (auto* ptr = std::get_if<engine::App::ShowMouseCursor>(&request))
                     window.ShowCursor(ptr->show);
+                else if (auto* ptr = std::get_if<engine::App::GrabMouse>(&request))
+                    window.GrabMouse(ptr->grab);
                 else if (auto* ptr = std::get_if<engine::App::QuitApp>(&request)) {
                     quit = true;
                     exit_code = ptr->exit_code;
