@@ -162,6 +162,11 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         delay.seconds = value;
         self.PushAction(delay);
     };
+    engine["GrabMouse"] = [](LuaGame& self, bool grab) {
+        GrabMouseAction mickey;
+        mickey.grab = grab;
+        self.PushAction(mickey);
+    };
     engine["ShowMouse"] = [](LuaGame& self, bool show) {
         ShowMouseAction mickey;
         mickey.show = show;

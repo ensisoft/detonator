@@ -454,6 +454,9 @@ namespace app
             bool window_cursor = true;
             // whether to use sRGB color space or not (not using sRGB implies linear)
             bool config_srgb = true;
+            // flag to indicate whether the mouse should be
+            // grabbed and confined within the window.
+            bool grab_mouse = false;
             // how many times the app ticks per second.
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.
@@ -499,7 +502,6 @@ namespace app
             // name of the game's main script
             QString game_script = "game.lua";
         };
-
 
         const ProjectSettings& GetProjectSettings() const
         { return mSettings; }

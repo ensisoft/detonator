@@ -1231,6 +1231,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "window_vsync"            , mSettings.window_vsync);
     JsonWrite(project, "window_cursor"           , mSettings.window_cursor);
     JsonWrite(project, "config_srgb"             , mSettings.config_srgb);
+    JsonWrite(project, "grab_mouse"              , mSettings.grab_mouse);
     JsonWrite(project, "ticks_per_second"        , mSettings.ticks_per_second);
     JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
@@ -1325,6 +1326,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "window_vsync",             &mSettings.window_vsync);
     JsonReadSafe(project, "window_cursor",            &mSettings.window_cursor);
     JsonReadSafe(project, "config_srgb",              &mSettings.config_srgb);
+    JsonReadSafe(project, "grab_mouse",               &mSettings.grab_mouse);
     JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
     JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
@@ -2174,6 +2176,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["window"], "has_border", mSettings.window_has_border);
         base::JsonWrite(json["window"], "vsync",      mSettings.window_vsync);
         base::JsonWrite(json["window"], "cursor",     mSettings.window_cursor);
+        base::JsonWrite(json["window"], "grab_mouse", mSettings.grab_mouse);
         if (mSettings.window_mode == ProjectSettings::WindowMode::Windowed)
             base::JsonWrite(json["window"], "set_fullscreen", false);
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)

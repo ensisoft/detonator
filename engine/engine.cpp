@@ -348,6 +348,8 @@ public:
                 BlockKeyboard(ptr->block);
             else if (auto* ptr = std::get_if<engine::BlockMouseAction>(&action))
                 BlockMouse(ptr->block);
+            else if (auto* ptr = std::get_if<engine::GrabMouseAction>(&action))
+                GrabMouse(ptr->grab);
             else if (auto* ptr = std::get_if<engine::OpenUIAction>(&action))
                 OpenUI(ptr->ui);
             else if (auto* ptr = std::get_if<engine::CloseUIAction>(&action))
@@ -791,6 +793,11 @@ private:
     {
         mBlockMouse = block;
         DEBUG("Mouse block is %1", block ? "ON" : "OFF");
+    }
+    void GrabMouse(bool grab)
+    {
+        mRequests.GrabMouse(grab);
+        DEBUG("Requesting to %1 mouse grabbing.", grab ? "enable" : "disable");
     }
     void RequestFullScreen(bool full_screen)
     {

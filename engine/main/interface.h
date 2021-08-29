@@ -110,6 +110,10 @@ namespace engine
             bool show = true;
         };
 
+        struct GrabMouse {
+            bool grab = false;
+        };
+
         // Union of possible window requests.
         using Request = std::variant<
             ResizeWindow,
@@ -117,6 +121,7 @@ namespace engine
             SetFullScreen,
             ToggleFullScreen,
             QuitApp,
+            GrabMouse,
             ShowMouseCursor>;
 
         // During the runtime of the application the application may request
@@ -373,6 +378,8 @@ namespace engine
         { mQueue.push(engine::App::QuitApp{exit_code }); }
         inline void ShowMouseCursor(bool yes_no)
         { mQueue.push(engine::App::ShowMouseCursor {yes_no } ); }
+        inline void GrabMouse(bool yes_no)
+        { mQueue.push(engine::App::GrabMouse {yes_no} ); }
     private:
         std::queue<Request> mQueue;
     };
