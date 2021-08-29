@@ -68,6 +68,9 @@ class DrawHook : public engine::EntityClassDrawHook,
                  public engine::SceneClassDrawHook
 {
 public:
+    DrawHook()
+    {}
+
     template<typename Node>
     DrawHook(const Node* selected, bool playing)
         : mSelectedItem(selected)
