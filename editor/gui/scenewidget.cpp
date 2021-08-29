@@ -188,9 +188,11 @@ public:
     }
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
+        DrawHook hook;
+
         view.Push();
             view.Translate(mWorldPos.x, mWorldPos.y);
-            mState.renderer.Draw(*mClass, painter, view, nullptr);
+            mState.renderer.Draw(*mClass, painter, view, &hook);
         view.Pop();
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
