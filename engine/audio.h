@@ -59,19 +59,25 @@ namespace engine
         };
         using GraphHandle = std::shared_ptr<const audio::GraphClass>;
 
-        AudioEngine(const std::string& name, const audio::Loader* loader);
+        AudioEngine(const std::string& name);
        ~AudioEngine();
         void SetLoader(const audio::Loader* loader)
         { mLoader = loader; }
+        void SetFormat(const audio::Format& format)
+        { mFormat = format; }
         void SetClassLibrary(const ClassLibrary* library)
         { mClassLib = library; }
+        void SetBufferSize(unsigned milliseconds)
+        { mBufferSize = milliseconds; }
         const ClassLibrary* GetClassLibrary() const
         { return mClassLib; }
         const audio::Loader* GetLoader() const
         { return mLoader; }
-
+        // Start the audio engine. You must call this before calling any
+        // actual playback functions.
+        void Start();
+        // Pause current audio streams.
         void SetDebugPause(bool on_off);
-
         // Add a new audio graph for music playback.
         // The audio graph is initially only prepared and sent to the audio
         // player but set to paused state. In order to begin playing the track
@@ -117,7 +123,10 @@ namespace engine
         class AudioBuffer;
         const audio::Loader* mLoader = nullptr;
         const ClassLibrary* mClassLib = nullptr;
+        const std::string mName;
         audio::Format mFormat;
+        // approximate default audio buffer size in milliseconds.
+        unsigned mBufferSize = 20;
         // the audio player.
         std::unique_ptr<audio::Player> mPlayer;
         // Id of the effect audio graph in the audio player.

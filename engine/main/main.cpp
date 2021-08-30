@@ -477,6 +477,14 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(mouse_cursor, "hotspot", &config.mouse_cursor.hotspot);
             base::JsonReadSafe(mouse_cursor, "size", &config.mouse_cursor.size);
         }
+        if (json.contains("audio"))
+        {
+            const auto& audio = json["audio"];
+            base::JsonReadSafe(audio, "channels", &config.audio.channels);
+            base::JsonReadSafe(audio, "sample_rate", &config.audio.sample_rate);
+            base::JsonReadSafe(audio, "sample_type", &config.audio.sample_type);
+            base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
+        }
         app->SetEngineConfig(config);
         app->Load();
         app->Start();

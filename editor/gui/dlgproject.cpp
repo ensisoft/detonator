@@ -44,6 +44,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
+    PopulateFromEnum<audio::SampleType>(mUI.audioFormat);
+    PopulateFromEnum<audio::Channels>(mUI.audioChannels);
     SetList(mUI.mouseDrawable, workspace.ListCursors());
     SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
@@ -83,6 +85,10 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.hotspotY, mSettings.mouse_pointer_hotspot.y);
     SetUIValue(mUI.cursorWidth, mSettings.mouse_pointer_size.x);
     SetUIValue(mUI.cursorHeight, mSettings.mouse_pointer_size.y);
+    SetUIValue(mUI.audioFormat, mSettings.audio_sample_type);
+    SetUIValue(mUI.audioChannels, mSettings.audio_channels);
+    SetUIValue(mUI.audioSampleRate, mSettings.audio_sample_rate);
+    SetUIValue(mUI.audioBufferSize, mSettings.audio_buffer_size);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -121,6 +127,10 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.hotspotY, &mSettings.mouse_pointer_hotspot.y);
     GetUIValue(mUI.cursorWidth,  &mSettings.mouse_pointer_size.x);
     GetUIValue(mUI.cursorHeight, &mSettings.mouse_pointer_size.y);
+    GetUIValue(mUI.audioFormat, &mSettings.audio_sample_type);
+    GetUIValue(mUI.audioChannels, &mSettings.audio_channels);
+    GetUIValue(mUI.audioSampleRate, &mSettings.audio_sample_rate);
+    GetUIValue(mUI.audioBufferSize, &mSettings.audio_buffer_size);
     mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
 

@@ -56,12 +56,28 @@ private:
     GameDataHandle mAudioData;
 };
 
-AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
-  : mLoader(loader)
+AudioEngine::AudioEngine(const std::string& name)
+  : mName(name)
 {
     mFormat.sample_rate   = 44100;
     mFormat.channel_count = 2;
     mFormat.sample_type   = audio::SampleType::Float32;
+}
+
+AudioEngine::~AudioEngine()
+{
+    if (mPlayer)
+    {
+        mPlayer->Cancel(mEffectGraphId);
+        mPlayer->Cancel(mMusicGraphId);
+    }
+}
+
+void AudioEngine::Start()
+{
+    ASSERT(!mPlayer);
+    ASSERT(mEffectGraphId == 0);
+    ASSERT(mMusicGraphId  == 0);
 
     auto effect_graph  = std::make_unique<audio::AudioGraph>("FX");
     auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
@@ -79,17 +95,13 @@ AudioEngine::AudioEngine(const std::string& name, const audio::Loader* loader)
     ASSERT((*music_graph)->LinkGraph("gain", "out"));
     ASSERT(music_graph->Prepare(*mLoader));
 
-    mPlayer = std::make_unique<audio::Player>(audio::Device::Create(name.c_str()));
+    auto device = audio::Device::Create(mName.c_str());
+    device->SetBufferSize(mBufferSize);
+    mPlayer = std::make_unique<audio::Player>(std::move(device));
     mEffectGraphId = mPlayer->Play(std::move(effect_graph), false /* looping */);
     mMusicGraphId  = mPlayer->Play(std::move(music_graph), false /*looping*/);
     DEBUG("Audio effect graph playing with stream id '%1'.", mEffectGraphId);
     DEBUG("Audio music graph playing with stream id '%1'.", mMusicGraphId);
-}
-
-AudioEngine::~AudioEngine()
-{
-    mPlayer->Cancel(mEffectGraphId);
-    mPlayer->Cancel(mMusicGraphId);
 }
 
 void AudioEngine::SetDebugPause(bool on_off)

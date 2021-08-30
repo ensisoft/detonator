@@ -1251,7 +1251,11 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "mouse_pointer_visible"   , mSettings.mouse_pointer_visible);
     JsonWrite(project, "mouse_pointer_hotspot"   , mSettings.mouse_pointer_hotspot);
     JsonWrite(project, "mouse_pointer_size"      , mSettings.mouse_pointer_size);
-    JsonWrite(project, "game_script"             ,mSettings.game_script);
+    JsonWrite(project, "game_script"             , mSettings.game_script);
+    JsonWrite(project, "audio_channels"          , mSettings.audio_channels);
+    JsonWrite(project, "audio_sample_rate"       , mSettings.audio_sample_rate);
+    JsonWrite(project, "audio_sample_type"       , mSettings.audio_sample_type);
+    JsonWrite(project, "audio_buffer_size"       , mSettings.audio_buffer_size);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1347,6 +1351,10 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "mouse_pointer_hotspot",    &mSettings.mouse_pointer_hotspot);
     JsonReadSafe(project, "mouse_pointer_size",       &mSettings.mouse_pointer_size);
     JsonReadSafe(project, "game_script",              &mSettings.game_script);
+    JsonReadSafe(project, "audio_channels",           &mSettings.audio_channels);
+    JsonReadSafe(project, "audio_sample_rate",        &mSettings.audio_sample_rate);
+    JsonReadSafe(project, "audio_sample_type",        &mSettings.audio_sample_type);
+    JsonReadSafe(project, "audio_buffer_size",        &mSettings.audio_buffer_size);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -2201,6 +2209,10 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["mouse_cursor"], "show", mSettings.mouse_pointer_visible);
         base::JsonWrite(json["mouse_cursor"], "hotspot", mSettings.mouse_pointer_hotspot);
         base::JsonWrite(json["mouse_cursor"], "size", mSettings.mouse_pointer_size);
+        base::JsonWrite(json["audio"], "channels", mSettings.audio_channels);
+        base::JsonWrite(json["audio"], "sample_rate", mSettings.audio_sample_rate);
+        base::JsonWrite(json["audio"], "sample_type", mSettings.audio_sample_type);
+        base::JsonWrite(json["audio"], "buffer_size", mSettings.audio_buffer_size);
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
         {

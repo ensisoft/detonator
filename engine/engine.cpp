@@ -74,13 +74,16 @@ public:
     virtual void Start()
     {
         DEBUG("Engine starting.");
+        mAudio->Start();
+
         mGame->LoadGame(mClasslib);
     }
     virtual void Init(const InitParams& init) override
     {
         DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
-        mAudio = std::make_unique<engine::AudioEngine>(init.application_name, mAudioLoader);
+        mAudio = std::make_unique<engine::AudioEngine>(init.application_name);
         mAudio->SetClassLibrary(mClasslib);
+        mAudio->SetLoader(mAudioLoader);
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
@@ -125,6 +128,15 @@ public:
     }
     virtual void SetEngineConfig(const EngineConfig& conf) override
     {
+        audio::Format audio_format;
+        audio_format.channel_count = static_cast<unsigned>(conf.audio.channels); // todo: use enum
+        audio_format.sample_rate   = conf.audio.sample_rate;
+        audio_format.sample_type   = conf.audio.sample_type;
+        mAudio->SetFormat(audio_format);
+        mAudio->SetBufferSize(conf.audio.buffer_size);
+        DEBUG("Audio format set to %1", audio_format);
+        DEBUG("Audio buffer size set to %1ms", conf.audio.buffer_size);
+
         mPhysics.SetScale(conf.physics.scale);
         mPhysics.SetGravity(conf.physics.gravity);
         mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
