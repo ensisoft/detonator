@@ -93,7 +93,7 @@ bool AudioFile::Open()
     const auto& upper = base::ToUpperUtf8(mFilename);
     if (base::EndsWith(upper, ".MP3"))
     {
-        SampleType type = SampleType::NotSet;
+        SampleType type = SampleType::Float32;
         if (mFormat == Format::Float32)
             type = SampleType::Float32;
         else if (mFormat == Format::Int32)

@@ -412,19 +412,12 @@ public:
                 if (const auto* ptr = GetArgValue<std::string>("file"))
                     if (ptr->empty()) return SetValid("Invalid source file (none).", false);
             }
-            else if (arg.name == "type")
-            {
-                if (const auto* ptr = GetArgValue<audio::SampleType>("type"))
-                    if (*ptr == audio::SampleType::NotSet) return SetValid("Invalid sample type.", false);
-            }
             else if (arg.name == "format")
             {
                 if (const auto* ptr = GetArgValue<audio::Format>("format"))
                 {
                     if (ptr->channel_count == 0) return SetValid("Invalid channel count.", false);
                     else if (ptr->sample_rate == 0) return SetValid("Invalid sample rate.", false);
-                    else if (ptr->sample_type == audio::SampleType::NotSet)
-                        return SetValid("Invalid sample type.", false);
                 }
             }
             else if (arg.name == "sample_rate")
