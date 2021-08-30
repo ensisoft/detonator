@@ -28,7 +28,6 @@ namespace audio
 {
     // The underlying sample data type.
     enum class SampleType {
-        NotSet,
         Float32,
         Int16,
         Int32
@@ -39,7 +38,7 @@ namespace audio
 
     struct Format
     {
-        SampleType sample_type = SampleType::NotSet;
+        SampleType sample_type = SampleType::Float32;
         unsigned sample_rate   = 0;
         unsigned channel_count = 0;
     };
@@ -100,8 +99,6 @@ namespace audio
             return format.channel_count * 2;
         else if (format.sample_type == SampleType::Int32)
             return format.channel_count * 4;
-        else if (format.sample_type == SampleType::NotSet)
-            BUG("Unset audio format data type.");
         else BUG("Unhandled sample type.");
         return 0;
     }

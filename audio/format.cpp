@@ -55,9 +55,7 @@ bool operator!=(const Format& lhs, const Format& rhs)
 
 bool IsValid(const Format& format)
 {
-    if (format.sample_type == SampleType::NotSet)
-        return false;
-    else if (format.sample_rate == 0)
+    if (format.sample_rate == 0)
         return false; // todo: use some predefined list of valid formats ?
     else if (!(format.channel_count == 1 ||format.channel_count == 2))
         return false;
