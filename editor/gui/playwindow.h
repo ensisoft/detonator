@@ -38,7 +38,7 @@ namespace app {
 } // namespace
 
 namespace engine {
-    class App;
+    class Engine;
 } //
 
 namespace gui
@@ -132,7 +132,7 @@ namespace gui
         // loader for the game/app library.
         QLibrary mLibrary;
         // entry point functions into the game/app library.
-        Gamestudio_CreateAppFunc       mGameLibCreateApp = nullptr;
+        Gamestudio_CreateEngineFunc mGameLibCreateEngine = nullptr;
         Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
         // Qt's Open GL context for the QWindow.
         QOpenGLContext mContext;
@@ -154,8 +154,8 @@ namespace gui
         std::unique_ptr<SessionLogger> mLogger;
         // proxy model for filtering application event log
         app::EventLogProxy mEventLog;
-        // The game/app object we've created and loaded from the library.
-        std::unique_ptr<engine::App> mApp;
+        // The game engine loaded from the game library.
+        std::unique_ptr<engine::Engine> mEngine;
         // rendering context implementation for the QWindow surface.
         std::unique_ptr<WindowContext> mWindowContext;
         // This resource loader implements the resolveURI to map

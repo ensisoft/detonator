@@ -480,14 +480,14 @@ PlayWindow::~PlayWindow()
 
 void PlayWindow::BeginMainLoop()
 {
-    if (!mApp || !mInitDone)
+    if (!mEngine || !mInitDone)
         return;
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
     try
     {
-        mApp->BeginMainLoop();
+        mEngine->BeginMainLoop();
     }
     catch (const std::exception& e)
     {
@@ -498,14 +498,14 @@ void PlayWindow::BeginMainLoop()
 
 void PlayWindow::EndMainLoop()
 {
-    if (!mApp || !mInitDone)
+    if (!mEngine || !mInitDone)
         return;
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
     try
     {
-        mApp->EndMainLoop();
+        mEngine->EndMainLoop();
     }
     catch (const std::exception& e)
     {
@@ -516,7 +516,7 @@ void PlayWindow::EndMainLoop()
 
 void PlayWindow::RunOnce()
 {
-    if (!mApp || !mInitDone)
+    if (!mEngine || !mInitDone)
         return;
 
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
@@ -525,18 +525,18 @@ void PlayWindow::RunOnce()
     try
     {
         bool quit = false;
-        engine::App::Request request;
-        while (mApp->GetNextRequest(&request))
+        engine::Engine::Request request;
+        while (mEngine->GetNextRequest(&request))
         {
-            if (const auto* ptr = std::get_if<engine::App::ResizeWindow>(&request))
+            if (const auto* ptr = std::get_if<engine::Engine::ResizeWindow>(&request))
                 ResizeSurface(ptr->width, ptr->height);
-            else if (const auto* ptr = std::get_if<engine::App::MoveWindow>(&request))
+            else if (const auto* ptr = std::get_if<engine::Engine::MoveWindow>(&request))
                 this->move(ptr->xpos, ptr->ypos);
-            else if (const auto* ptr = std::get_if<engine::App::SetFullScreen>(&request))
+            else if (const auto* ptr = std::get_if<engine::Engine::SetFullScreen>(&request))
                 AskSetFullScreen(ptr->fullscreen);
-            else if (const auto* ptr = std::get_if<engine::App::ToggleFullScreen>(&request))
+            else if (const auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
                 AskToggleFullScreen();
-            else if (const auto* ptr = std::get_if<engine::App::ShowMouseCursor>(&request)) {
+            else if (const auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request)) {
                 if (ptr->show) {
                     mContainer->setCursor(Qt::ArrowCursor);
                     mSurface->setCursor(Qt::ArrowCursor);
@@ -544,12 +544,12 @@ void PlayWindow::RunOnce()
                     mContainer->setCursor(Qt::BlankCursor);
                     mSurface->setCursor(Qt::BlankCursor);
                 }
-            } else if (const auto* ptr = std::get_if<engine::App::QuitApp>(&request)) {
+            } else if (const auto* ptr = std::get_if<engine::Engine::QuitApp>(&request)) {
                 INFO("Quit with exit code %1", ptr->exit_code);
                 quit = true;
             }
         }
-        if (!mApp->IsRunning() || quit)
+        if (!mEngine->IsRunning() || quit)
         {
             // trigger close event.
             this->close();
@@ -565,13 +565,13 @@ void PlayWindow::RunOnce()
         mTimeTotal += time_step;
 
         // ask the application to take its simulation steps.
-        mApp->Update(time_step);
+        mEngine->Update(time_step);
 
         // ask the application to draw the current frame.
-        mApp->Draw();
+        mEngine->Draw();
 
-        engine::App::Stats stats;
-        if (mApp->GetStats(&stats))
+        engine::Engine::Stats stats;
+        if (mEngine->GetStats(&stats))
         {
             SetValue(mUI.gameTime, stats.total_game_time);
         }
@@ -586,11 +586,11 @@ void PlayWindow::RunOnce()
         {
             const auto seconds = elapsed / 1000.0;
             const auto fps = mNumFrames / seconds;
-            engine::App::HostStats stats;
+            engine::Engine::HostStats stats;
             stats.num_frames_rendered = mNumFramesTotal;
             stats.total_wall_time     = mTimeTotal;
             stats.current_fps         = fps;
-            mApp->SetHostStats(stats);
+            mEngine->SetHostStats(stats);
 
             SetValue(mUI.fps, fps);
             mNumFrames = 0;
@@ -624,26 +624,25 @@ bool PlayWindow::LoadGame()
         return false;
     }
 
-    mGameLibCreateApp       = (Gamestudio_CreateAppFunc)mLibrary.resolve("Gamestudio_CreateApp");
+    mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
     mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
-    if (!mGameLibCreateApp)
-        ERROR("Failed to resolve 'Gamestudio_CreateApp'.");
+    if (!mGameLibCreateEngine)
+        ERROR("Failed to resolve 'Gamestudio_CreateEngine'.");
     else if (!mGameLibSetGlobalLogger)
         ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
-    if (!mGameLibCreateApp || !mGameLibSetGlobalLogger)
+    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
         return false;
 
     const auto debug_log = GetValue(mUI.actionToggleDebugLog);
     mGameLibSetGlobalLogger(mLogger.get(), debug_log);
 
-    std::unique_ptr<engine::App> app;
-    app.reset(mGameLibCreateApp());
-    if (!app)
+    std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
+    if (!engine)
     {
-        ERROR("Failed to create app instance.");
+        ERROR("Failed to create engine instance.");
         return false;
     }
-    mApp = std::move(app);
+    mEngine = std::move(engine);
 
     // do one time delayed init on timer.
     QTimer::singleShot(10, this, &PlayWindow::DoAppInit);
@@ -655,12 +654,12 @@ void PlayWindow::Shutdown()
     mContext.makeCurrent(mSurface);
     try
     {
-        if (mApp)
+        if (mEngine)
         {
             DEBUG("Shutting down game...");
             TemporaryCurrentDirChange cwd(mGameWorkingDir);
-            mApp->Save();
-            mApp->Shutdown();
+            mEngine->Save();
+            mEngine->Shutdown();
         }
     }
     catch (const std::exception &e)
@@ -668,13 +667,13 @@ void PlayWindow::Shutdown()
         DEBUG("Exception in app shutdown.");
         ERROR(e.what());
     }
-    mApp.reset();
+    mEngine.reset();
 
     if (mGameLibSetGlobalLogger)
         mGameLibSetGlobalLogger(nullptr, false);
 
     mLibrary.unload();
-    mGameLibCreateApp = nullptr;
+    mGameLibCreateEngine = nullptr;
     mGameLibSetGlobalLogger = nullptr;
 }
 
@@ -751,7 +750,7 @@ void PlayWindow::SaveState()
 
 void PlayWindow::DoAppInit()
 {
-    if (!mApp)
+    if (!mEngine)
         return;
 
     // assumes that the current working directory has not been changed!
@@ -776,27 +775,27 @@ void PlayWindow::DoAppInit()
         {
             arg_pointers.push_back(str.c_str());
         }
-        mApp->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
+        mEngine->ParseArgs(static_cast<int>(arg_pointers.size()), &arg_pointers[0]);
 
         SetDebugOptions();
 
-        engine::App::Environment env;
+        engine::Engine::Environment env;
         env.classlib  = &mWorkspace;
         env.game_data_loader   = mResourceLoader.get();
         env.graphics_loader    = mResourceLoader.get();
         env.audio_loader       = mResourceLoader.get();
         env.directory          = app::ToUtf8(mGameWorkingDir);
-        mApp->SetEnvironment(env);
+        mEngine->SetEnvironment(env);
 
-        engine::App::InitParams params;
+        engine::Engine::InitParams params;
         params.game_script      = app::ToUtf8(settings.game_script);
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();
         params.surface_height   = mSurface->height();
-        mApp->Init(params);
+        mEngine->Init(params);
 
-        engine::App::EngineConfig config;
+        engine::Engine::EngineConfig config;
         config.ticks_per_second   = settings.ticks_per_second;
         config.updates_per_second = settings.updates_per_second;
         config.physics.num_velocity_iterations = settings.num_velocity_iterations;
@@ -815,10 +814,10 @@ void PlayWindow::DoAppInit()
         config.audio.sample_rate     = settings.audio_sample_rate;
         config.audio.buffer_size     = settings.audio_buffer_size;
         config.audio.channels        = settings.audio_channels;
-        mApp->SetEngineConfig(config);
+        mEngine->SetEngineConfig(config);
 
-        mApp->Load();
-        mApp->Start();
+        mEngine->Load();
+        mEngine->Start();
 
         // try to give the keyboard focus to the window
         // looks like this has to be done through a timer again.
@@ -909,13 +908,13 @@ void PlayWindow::on_actionFullscreen_triggered()
 
 void PlayWindow::on_actionScreenshot_triggered()
 {
-    if (!mApp || !mInitDone)
+    if (!mEngine || !mInitDone)
         return;
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
     try
     {
         mContext.makeCurrent(mSurface);
-        mApp->TakeScreenshot("screenshot.png");
+        mEngine->TakeScreenshot("screenshot.png");
         INFO("Wrote screenshot '%1'", "screenshot.png");
     }
     catch (const std::exception& e)
@@ -967,11 +966,11 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         return QMainWindow::event(event);
 
     // no app? return
-    if (!mApp || !mInitDone)
+    if (!mEngine || !mInitDone)
         return QMainWindow::event(event);
 
     // app not providing a listener? return
-    auto* listener = mApp->GetWindowListener();
+    auto* listener = mEngine->GetWindowListener();
     if (!listener)
         return QMainWindow::event(event);
 
@@ -1051,7 +1050,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         {
             const auto width = mSurface->width();
             const auto height = mSurface->height();
-            mApp->OnRenderingSurfaceResized(width, height);
+            mEngine->OnRenderingSurfaceResized(width, height);
 
             // try to give the keyboard focus to the window
             QTimer::singleShot(100, this, &PlayWindow::ActivateWindow);
@@ -1129,9 +1128,9 @@ void PlayWindow::SetFullScreen(bool fullscreen)
         // todo: this should probably only be called after some transition
         // event is detected indicating that the window did in fact go into
         // full screen mode.
-        mApp->OnEnterFullScreen();
+        mEngine->OnEnterFullScreen();
 
-        mApp->DebugPrintString("Press F11 to return to windowed mode.");
+        mEngine->DebugPrintString("Press F11 to return to windowed mode.");
     }
     else if (!fullscreen && InFullScreen())
     {
@@ -1161,7 +1160,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
             mSurface->setCursor(Qt::BlankCursor);
 
         // todo: this can be wrong if the window never did go into fullscreen mode.
-        mApp->OnLeaveFullScreen();
+        mEngine->OnLeaveFullScreen();
     }
     // todo: should really only set this flag when the window *did* go into
     // fullscreen mode.
@@ -1174,7 +1173,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
 
 void PlayWindow::SetDebugOptions() const
 {
-    engine::App::DebugOptions debug;
+    engine::Engine::DebugOptions debug;
     debug.debug_pause     = GetValue(mUI.actionPause);
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_log       = GetValue(mUI.actionToggleDebugLog);
@@ -1182,13 +1181,13 @@ void PlayWindow::SetDebugOptions() const
     debug.debug_font      = "app://fonts/orbitron-medium.otf";
     debug.debug_show_fps  = InFullScreen();
     debug.debug_print_fps = false;
-    mApp->SetDebugOptions(debug);
+    mEngine->SetDebugOptions(debug);
 }
 
 void PlayWindow::Barf(const std::string& msg)
 {
     ERROR(msg);
-    mApp.reset();
+    mEngine.reset();
     mContainer->setVisible(false);
     mUI.problem->setVisible(true);
     SetValue(mUI.lblError, msg);

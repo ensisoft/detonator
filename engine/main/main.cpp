@@ -60,7 +60,7 @@
 // provided by the game module.
 
 // entry point functions that are resolved when the game library is loaded.
-Gamestudio_CreateAppFunc         GameLibCreateApp;
+Gamestudio_CreateEngineFunc      GameLibCreateEngine;
 Gamestudio_CreateFileLoadersFunc GameLibCreateLoaders;
 Gamestudio_SetGlobalLoggerFunc   GameLibSetGlobalLogger;
 
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
     int exit_code = EXIT_SUCCESS;
     try
     {
-        engine::App::DebugOptions debug;
+        engine::Engine::DebugOptions debug;
 
         std::string config_file;
         std::string cmdline_error;
@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
         LoadAppLibrary(library);
         DEBUG("Loaded library: '%1'", library);
 
-        GameLibCreateApp       = (Gamestudio_CreateAppFunc)LoadFunction("Gamestudio_CreateApp");
+        GameLibCreateEngine    = (Gamestudio_CreateEngineFunc)LoadFunction("Gamestudio_CreateEngine");
         GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
         GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
 
@@ -360,19 +360,19 @@ int main(int argc, char* argv[])
         }
 
         // Create the app instance.
-        std::unique_ptr<engine::App> app(GameLibCreateApp());
-        if (!app->ParseArgs(argc, (const char**)argv))
+        std::unique_ptr<engine::Engine> engine(GameLibCreateEngine());
+        if (!engine->ParseArgs(argc, (const char**)argv))
             return 0;
 
-        app->SetDebugOptions(debug);
+        engine->SetDebugOptions(debug);
 
-        engine::App::Environment env;
+        engine::Engine::Environment env;
         env.classlib         = loaders.ContentLoader.get();
         env.graphics_loader  = loaders.ResourceLoader.get();
         env.game_data_loader = loaders.ResourceLoader.get();
         env.audio_loader     = loaders.ResourceLoader.get();
         env.directory        = GetPath();
-        app->SetEnvironment(env);
+        engine->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
         attrs.surfaces.window = true;
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
         wdk::Window window;
         // makes sure to connect the listener before creating the window
         // so that the listener can get the initial events, (resize, etc)
-        if (auto* listener = app->GetWindowListener())
+        if (auto* listener = engine->GetWindowListener())
         {
             wdk::Connect(window, *listener);
         }
@@ -434,13 +434,13 @@ int main(int argc, char* argv[])
         DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
 
         // setup application
-        engine::App::InitParams params;
+        engine::Engine::InitParams params;
         base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         params.application_name = title;
         params.context          = context.get();
         params.surface_width    = window.GetSurfaceWidth();
         params.surface_height   = window.GetSurfaceHeight();
-        app->Init(params);
+        engine->Init(params);
 
         // the times here are in the application timeline which
         // is not the same as the real wall time but can drift
@@ -450,7 +450,7 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
         DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
 
-        engine::App::EngineConfig config;
+        engine::Engine::EngineConfig config;
         base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
         base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
         config.updates_per_second = updates_per_second;
@@ -485,9 +485,9 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(audio, "sample_type", &config.audio.sample_type);
             base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
         }
-        app->SetEngineConfig(config);
-        app->Load();
-        app->Start();
+        engine->SetEngineConfig(config);
+        engine->Load();
+        engine->Start();
 
         bool quit = false;
         // initialize to false, so that if the window was requested to go into full screen
@@ -495,10 +495,10 @@ int main(int argc, char* argv[])
         // invoke the application handlers.
         bool fullscreen = false;
 
-        while (app->IsRunning() && !quit)
+        while (engine->IsRunning() && !quit)
         {
             // indicate beginning of the main loop iteration.
-            app->BeginMainLoop();
+            engine->BeginMainLoop();
 
             // process pending window events if any.
             wdk::native_event_t event;
@@ -508,34 +508,34 @@ int main(int argc, char* argv[])
                 // if the window was resized notify the app that the rendering
                 // surface has been resized.
                 if (event.identity() == wdk::native_event_t::type::window_resize)
-                    app->OnRenderingSurfaceResized(window.GetSurfaceWidth(), window.GetSurfaceHeight());
+                    engine->OnRenderingSurfaceResized(window.GetSurfaceWidth(), window.GetSurfaceHeight());
 
                 if (fullscreen != window.IsFullscreen())
                 {
                     if (window.IsFullscreen())
-                        app->OnEnterFullScreen();
-                    else app->OnLeaveFullScreen();
+                        engine->OnEnterFullScreen();
+                    else engine->OnLeaveFullScreen();
                     fullscreen = window.IsFullscreen();
                 }
             }
 
             // Process pending application requests if any.
-            engine::App::Request request;
-            while (app->GetNextRequest(&request))
+            engine::Engine::Request request;
+            while (engine->GetNextRequest(&request))
             {
-                if (auto* ptr = std::get_if<engine::App::ResizeWindow>(&request))
+                if (auto* ptr = std::get_if<engine::Engine::ResizeWindow>(&request))
                     window.SetSize(ptr->width, ptr->height);
-                else if (auto* ptr = std::get_if<engine::App::MoveWindow>(&request))
+                else if (auto* ptr = std::get_if<engine::Engine::MoveWindow>(&request))
                     window.Move(ptr->xpos, ptr->ypos);
-                else if (auto* ptr = std::get_if<engine::App::SetFullScreen>(&request))
+                else if (auto* ptr = std::get_if<engine::Engine::SetFullScreen>(&request))
                     window.SetFullscreen(ptr->fullscreen);
-                else if (auto* ptr = std::get_if<engine::App::ToggleFullScreen>(&request))
+                else if (auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
                     window.SetFullscreen(!window.IsFullscreen());
-                else if (auto* ptr = std::get_if<engine::App::ShowMouseCursor>(&request))
+                else if (auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request))
                     window.ShowCursor(ptr->show);
-                else if (auto* ptr = std::get_if<engine::App::GrabMouse>(&request))
+                else if (auto* ptr = std::get_if<engine::Engine::GrabMouse>(&request))
                     window.GrabMouse(ptr->grab);
-                else if (auto* ptr = std::get_if<engine::App::QuitApp>(&request)) {
+                else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request)) {
                     quit = true;
                     exit_code = ptr->exit_code;
                     INFO("Quit with exit code %1", exit_code);
@@ -550,10 +550,10 @@ int main(int argc, char* argv[])
             const auto wall_time = CurrentRuntime();
 
             // ask the application to take its simulation steps.
-            app->Update(time_step);
+            engine->Update(time_step);
 
             // ask the application to draw the current frame.
-            app->Draw();
+            engine->Draw();
 
             // do some simple statistics bookkeeping.
             static auto frames_total = 0;
@@ -566,22 +566,22 @@ int main(int argc, char* argv[])
             if (seconds > 1.0)
             {
                 const auto fps = frames / seconds;
-                engine::App::HostStats stats;
+                engine::Engine::HostStats stats;
                 stats.current_fps         = fps;
                 stats.num_frames_rendered = frames_total;
                 stats.total_wall_time     = wall_time;
-                app->SetHostStats(stats);
+                engine->SetHostStats(stats);
 
                 frames  = 0;
                 seconds = 0.0;
             }
             // indicate end of iteration.
-            app->EndMainLoop();
+            engine->EndMainLoop();
         } // main loop
 
-        app->Save();
-        app->Shutdown();
-        app.reset();
+        engine->Save();
+        engine->Shutdown();
+        engine.reset();
 
         context->Dispose();
 

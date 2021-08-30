@@ -60,11 +60,11 @@ namespace
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
 // the game and also to handle input from keyboard and mouse.
-class DefaultGameEngine : public engine::App,
-                          public wdk::WindowListener
+class GameStudioEngine : public engine::Engine,
+                         public wdk::WindowListener
 {
 public:
-    DefaultGameEngine() : mDebugPrints(10)
+    GameStudioEngine() : mDebugPrints(10)
     {}
 
     virtual bool GetNextRequest(Request* out) override
@@ -886,9 +886,9 @@ private:
     // a flag to indicate whether currently in fullscreen or not.
     bool mFullScreen = false;
     // current debug options.
-    engine::App::DebugOptions mDebug;
+    engine::Engine::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
-    engine::App::HostStats mLastStats;
+    engine::Engine::HostStats mLastStats;
     // list of current debug print messages that
     // get printed to the display.
     struct DebugPrint {
@@ -924,13 +924,13 @@ private:
 } //namespace
 
 extern "C" {
-GAMESTUDIO_EXPORT engine::App* Gamestudio_CreateApp()
+GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
 #if defined(NDEBUG)
-    DEBUG("GameEngine in release build.");
+    DEBUG("GameStudioEngine in release build.");
 #else
-    DEBUG("GameEngine in DEBUG build.");
+    DEBUG("GameStudioEngine in DEBUG build.");
 #endif
-    return new DefaultGameEngine;
+    return new GameStudioEngine;
 }
 } // extern C
