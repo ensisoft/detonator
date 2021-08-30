@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>545</height>
+    <width>522</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
-       <string>General</string>
+       <string>Application</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -34,71 +34,37 @@
           <string>Application settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="12" column="1">
-           <widget class="QLineEdit" name="edtAppName"/>
-          </item>
-          <item row="10" column="1">
-           <widget class="QSpinBox" name="ticksPerSecond">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="wndWidth">
-            <property name="minimum">
-             <number>256</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-            <property name="value">
-             <number>1024</number>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_5">
+          <item row="23" column="1">
+           <widget class="QCheckBox" name="chkVsync">
             <property name="text">
-             <string>Window flags</string>
+             <string>VSYNC</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_9">
+          <item row="11" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>Window mode</string>
+             <string>Application name</string>
             </property>
            </widget>
           </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Ticks per second</string>
+          <item row="9" column="2">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
-          <item row="11" column="1">
-           <widget class="QSpinBox" name="updatesPerSecond">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>60</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Default MSAA</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QComboBox" name="cmbMSAA">
             <property name="editable">
              <bool>false</bool>
@@ -125,158 +91,259 @@
             </item>
            </widget>
           </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_13">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Updates per second</string>
+             <string>Engine library</string>
             </property>
            </widget>
           </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Application version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Window height</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbMinFilter"/>
-          </item>
-          <item row="7" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QCheckBox" name="chkWndCanResize">
-              <property name="text">
-               <string>Resizeable</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkWndHasBorder">
-              <property name="text">
-               <string>Border</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkCursor">
-              <property name="text">
-               <string>Cursor</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkVsync">
-              <property name="text">
-               <string>VSYNC</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkSrgb">
-              <property name="text">
-               <string>sRGB</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Window width</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="1">
-           <widget class="QLineEdit" name="edtAppVersion"/>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Application name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="1">
-           <widget class="QLineEdit" name="edtGameScript">
-            <property name="text">
-             <string>game.lua</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbWindowMode"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Default texture min filter</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QSpinBox" name="wndHeight">
-            <property name="minimum">
-             <number>256</number>
-            </property>
-            <property name="maximum">
-             <number>8192</number>
-            </property>
-            <property name="value">
-             <number>768</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Default texture mag filter</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="label_26">
-            <property name="text">
-             <string>Main game script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbMagFilter"/>
-          </item>
-          <item row="8" column="1">
+          <item row="22" column="1">
            <widget class="QCheckBox" name="chkGrabMouse">
             <property name="text">
              <string>Grab mouse</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_27">
+          <item row="10" column="1">
+           <widget class="QSpinBox" name="updatesPerSecond">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>60</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLineEdit" name="edtAppLibrary">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectEngine">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QSpinBox" name="wndWidth">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimum">
+               <number>256</number>
+              </property>
+              <property name="maximum">
+               <number>8192</number>
+              </property>
+              <property name="value">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="wndHeight">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimum">
+               <number>256</number>
+              </property>
+              <property name="maximum">
+               <number>8192</number>
+              </property>
+              <property name="value">
+               <number>768</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Global grabs</string>
+             <string>Default MSAA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="21" column="1">
+           <widget class="QCheckBox" name="chkSrgb">
+            <property name="text">
+             <string>Use sRGB color buffer</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Window mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Window size (w,h)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLineEdit" name="edtAppName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cmbWindowMode"/>
+          </item>
+          <item row="17" column="1">
+           <widget class="QCheckBox" name="chkWndHasBorder">
+            <property name="text">
+             <string>Window has border</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Application version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Main game script</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="1">
+           <widget class="QLineEdit" name="edtGameScript">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>game.lua</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Ticks per second</string>
+            </property>
+           </widget>
+          </item>
+          <item row="16" column="1">
+           <widget class="QCheckBox" name="chkCursor">
+            <property name="text">
+             <string>Window has cursor</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Updates per second</string>
+            </property>
+           </widget>
+          </item>
+          <item row="15" column="1">
+           <widget class="QCheckBox" name="chkWndCanResize">
+            <property name="text">
+             <string>Window is resizable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QSpinBox" name="ticksPerSecond">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="1">
+           <widget class="QLineEdit" name="edtAppVersion">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -286,398 +353,87 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Engine settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Engine library</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLineEdit" name="edtAppLibrary"/>
-              </item>
-              <item>
-               <widget class="QToolButton" name="btnSelectEngine">
-                <property name="text">
-                 <string>Browse ...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Clear color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="color_widgets::ColorSelector" name="clearColor">
-                <property name="focusPolicy">
-                 <enum>Qt::StrongFocus</enum>
-                </property>
-                <property name="color">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-                <property name="display_mode" stdset="0">
-                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                </property>
-                <property name="background">
-                 <brush brushstyle="Dense3Pattern">
-                  <color alpha="255">
-                   <red>128</red>
-                   <green>128</green>
-                   <blue>128</blue>
-                  </color>
-                 </brush>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="btnResetClearColor">
-                <property name="text">
-                 <string>Browse ...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="mouse">
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-            <property name="title">
-             <string>Mouse pointer</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_6">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_15">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Drawable</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QDoubleSpinBox" name="hotspotX">
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>0.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="hotspotY">
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>0.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="mouseDrawable">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_24">
-               <property name="text">
-                <string>Hotspot (x,y)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_23">
-               <property name="text">
-                <string>Material</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QComboBox" name="mouseMaterial"/>
-               </item>
-               <item>
-                <widget class="QToolButton" name="btnSelectMaterial">
-                 <property name="text">
-                  <string>...</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
-                 </property>
-                 <property name="arrowType">
-                  <enum>Qt::NoArrow</enum>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_25">
-               <property name="text">
-                <string>Pixel size (x,y) </string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_7">
-               <item>
-                <widget class="QDoubleSpinBox" name="cursorWidth">
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>100.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>20.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="cursorHeight">
-                 <property name="minimum">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>100.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                 <property name="value">
-                  <double>20.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-             <string>Audio settings</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_7">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_28">
-               <property name="text">
-                <string>Format</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="audioFormat">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_29">
-               <property name="text">
-                <string>Channels</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="audioChannels"/>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_30">
-               <property name="text">
-                <string>Sample rate (Hz)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="audioSampleRate">
-               <item>
-                <property name="text">
-                 <string>8000</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>16000</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>44100</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_31">
-               <property name="text">
-                <string>Buffer size (ms)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QSpinBox" name="audioBufferSize">
-               <property name="minimum">
-                <number>5</number>
-               </property>
-               <property name="maximum">
-                <number>500</number>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-               <property name="value">
-                <number>20</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabPhysics">
-      <attribute name="title">
-       <string>Physics</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
           <string>Physics settings</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <layout class="QGridLayout" name="gridLayout_4">
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_17">
-              <property name="text">
-               <string>Position iterations</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_19">
-              <property name="text">
-               <string>Scale (x,y)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_16">
-              <property name="text">
-               <string>Velocity iterations</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_18">
-              <property name="text">
-               <string>Gravity (x,y)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Gravity (x,y)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="numPosIterations">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="whatsThis">
+             <string>Higher number of velocity/position iterations improve the accuracy of the physics simulation but at increased computational cost.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Velocity iterations</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Scale (x,y)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Position iterations</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="numVeloIterations">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="whatsThis">
+             <string>Higher number of velocity/position iterations improve the accuracy of the physics simulation but at increased computational cost.</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>8</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
              <widget class="QDoubleSpinBox" name="gravityX">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -695,8 +451,14 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
+            <item>
              <widget class="QDoubleSpinBox" name="gravityY">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -714,142 +476,466 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+           </layout>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
              <widget class="QDoubleSpinBox" name="scaleX">
-              <property name="minimum">
-               <double>-1000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1000.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="2">
-             <widget class="QDoubleSpinBox" name="scaleY">
-              <property name="minimum">
-               <double>-1000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1000.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="value">
-               <double>100.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QSpinBox" name="numPosIterations">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="value">
-               <number>3</number>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QSpinBox" name="numVeloIterations">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="whatsThis">
+               <string>Scale is used to transform units from game world units into physics world units and vice versa. It expresses the number of game units to a physics unit. I.e. 100 game units equals 1 physics unit. (I.e. 1 meter) Box2D works well with physics units from approx 0.1m to 50m.
+
+</string>
+              </property>
               <property name="minimum">
-               <number>1</number>
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
               </property>
               <property name="value">
-               <number>8</number>
+               <double>100.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="scaleY">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="whatsThis">
+               <string>Scale is used to transform units from game world units into physics world units and vice versa. It expresses the number of game units to a physics unit. I.e. 100 game units equals 1 physics unit. (I.e. 1 meter) Box2D works well with physics units from approx 0.1m to 50m.
+
+</string>
+              </property>
+              <property name="minimum">
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item>
-           <spacer name="verticalSpacer_4">
+          <item row="2" column="2">
+           <spacer name="horizontalSpacer_7">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblInfo">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Higher number of velocity/position iterations improve the accuracy of the physics simulation but at increased computational cost.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblScale">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Scale is used to transform units from game world units into physics world units and vice versa. It expresses the number of game units to a physics unit. I.e. 100 game units equals 1 physics unit. (I.e. 1 meter) Box2D works well with physics units from approx 0.1m to 50m.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="scaledContents">
-             <bool>false</bool>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>10</height>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Graphics settings</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Default texture mag filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Clear color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="color_widgets::ColorSelector" name="clearColor">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnResetClearColor">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbMinFilter">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Default texture min filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbMagFilter"/>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Audio settings</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="audioBufferSize">
+            <property name="minimum">
+             <number>5</number>
+            </property>
+            <property name="maximum">
+             <number>500</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <number>20</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="audioFormat">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="audioChannels"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_31">
+            <property name="text">
+             <string>Buffer size (ms)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_28">
+            <property name="text">
+             <string>Format</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="audioSampleRate">
+            <item>
+             <property name="text">
+              <string>8000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>44100</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>Channels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_30">
+            <property name="text">
+             <string>Sample rate (Hz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="mouse">
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="title">
+          <string>Pointer settings</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="mouseDrawable">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QDoubleSpinBox" name="hotspotX">
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="hotspotY">
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Hotspot (x,y)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Drawable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QComboBox" name="mouseMaterial"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectMaterial">
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Pixel size (x,y) </string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QSpinBox" name="cursorWidth">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="cursorHeight">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Material</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -868,13 +954,6 @@
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>Arguments</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="btnSelectWorkingFolder">
-            <property name="text">
-             <string>Browse ...</string>
             </property>
            </widget>
           </item>
@@ -899,6 +978,17 @@
            <widget class="QCheckBox" name="chkGameProcess">
             <property name="text">
              <string>Launch in separate process</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btnSelectWorkingFolder">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -1083,27 +1173,37 @@
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>edtAppLibrary</tabstop>
+  <tabstop>btnSelectEngine</tabstop>
   <tabstop>cmbMSAA</tabstop>
-  <tabstop>cmbMinFilter</tabstop>
-  <tabstop>cmbMagFilter</tabstop>
   <tabstop>cmbWindowMode</tabstop>
   <tabstop>wndWidth</tabstop>
   <tabstop>wndHeight</tabstop>
-  <tabstop>chkWndCanResize</tabstop>
-  <tabstop>chkWndHasBorder</tabstop>
-  <tabstop>chkCursor</tabstop>
-  <tabstop>chkVsync</tabstop>
-  <tabstop>chkSrgb</tabstop>
   <tabstop>ticksPerSecond</tabstop>
-  <tabstop>chkGrabMouse</tabstop>
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>edtAppName</tabstop>
   <tabstop>edtAppVersion</tabstop>
   <tabstop>edtGameScript</tabstop>
-  <tabstop>edtAppLibrary</tabstop>
-  <tabstop>btnSelectEngine</tabstop>
+  <tabstop>chkWndCanResize</tabstop>
+  <tabstop>chkCursor</tabstop>
+  <tabstop>chkWndHasBorder</tabstop>
+  <tabstop>chkSrgb</tabstop>
+  <tabstop>chkGrabMouse</tabstop>
+  <tabstop>chkVsync</tabstop>
+  <tabstop>numVeloIterations</tabstop>
+  <tabstop>numPosIterations</tabstop>
+  <tabstop>gravityX</tabstop>
+  <tabstop>gravityY</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>cmbMinFilter</tabstop>
+  <tabstop>cmbMagFilter</tabstop>
   <tabstop>clearColor</tabstop>
   <tabstop>btnResetClearColor</tabstop>
+  <tabstop>audioFormat</tabstop>
+  <tabstop>audioChannels</tabstop>
+  <tabstop>audioSampleRate</tabstop>
+  <tabstop>audioBufferSize</tabstop>
   <tabstop>mouse</tabstop>
   <tabstop>mouseDrawable</tabstop>
   <tabstop>mouseMaterial</tabstop>
@@ -1112,16 +1212,6 @@
   <tabstop>hotspotY</tabstop>
   <tabstop>cursorWidth</tabstop>
   <tabstop>cursorHeight</tabstop>
-  <tabstop>audioFormat</tabstop>
-  <tabstop>audioChannels</tabstop>
-  <tabstop>audioSampleRate</tabstop>
-  <tabstop>audioBufferSize</tabstop>
-  <tabstop>numVeloIterations</tabstop>
-  <tabstop>numPosIterations</tabstop>
-  <tabstop>gravityX</tabstop>
-  <tabstop>gravityY</tabstop>
-  <tabstop>scaleX</tabstop>
-  <tabstop>scaleY</tabstop>
   <tabstop>edtWorkingFolder</tabstop>
   <tabstop>btnSelectWorkingFolder</tabstop>
   <tabstop>edtArguments</tabstop>
