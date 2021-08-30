@@ -33,6 +33,9 @@ namespace audio
         Int16,
         Int32
     };
+    enum class Channels {
+        Stereo = 2, Mono = 1
+    };
 
     struct Format
     {

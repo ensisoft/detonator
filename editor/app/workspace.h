@@ -34,6 +34,7 @@
 
 #include "base/assert.h"
 #include "audio/loader.h"
+#include "audio/format.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/resource.h"
@@ -501,6 +502,14 @@ namespace app
             glm::vec2 mouse_pointer_size = {20.0f, 20.0f};
             // name of the game's main script
             QString game_script = "game.lua";
+            // Audio PCM data type.
+            audio::SampleType audio_sample_type = audio::SampleType::Float32;
+            // Number of audio output channels. 1 = monoaural, 2 stereo.
+            audio::Channels audio_channels = audio::Channels::Stereo;
+            // Audio output sample rate.
+            unsigned audio_sample_rate = 44100;
+            // Expected approximate audio buffer size in milliseconds.
+            unsigned audio_buffer_size = 20;
         };
 
         const ProjectSettings& GetProjectSettings() const

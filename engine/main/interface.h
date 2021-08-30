@@ -30,6 +30,7 @@
 #include "base/platform.h"
 #include "base/logging.h"
 #include "audio/loader.h"
+#include "audio/format.h"
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "engine/color.h"
@@ -228,6 +229,16 @@ namespace engine
                 // size of the cursor in pixels.
                 glm::vec2 size = {20.0f, 20.0f};
             } mouse_cursor;
+            struct Audio {
+                // PCM sample rate of the audio output.
+                unsigned sample_rate = 44100;
+                // number of output channels. 1 = monoaural, 2 stereo.
+                audio::Channels channels = audio::Channels::Stereo;
+                // PCM audio data type.
+                audio::SampleType sample_type = audio::SampleType::Float32;
+                // Expected approximate audio buffer size in milliseconds.
+                unsigned buffer_size = 20;
+            } audio;
             // the default clear color.
             Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
         };

@@ -102,7 +102,9 @@ public:
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<engine::AudioEngine>("TestApp", this);
+        mEngine = std::make_unique<engine::AudioEngine>("TestApp");
+        mEngine->SetLoader(this);
+        mEngine->Start();
         mEngine->SetMusicGain(mMusicGain);
     }
     virtual void End() override
@@ -206,7 +208,9 @@ public:
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
-        mEngine = std::make_unique<engine::AudioEngine>("TestApp", this);
+        mEngine = std::make_unique<engine::AudioEngine>("TestApp");
+        mEngine->SetLoader(this);
+        mEngine->Start();
         mEngine->SetSoundEffectGain(mEffectGain);
     }
     virtual void End() override

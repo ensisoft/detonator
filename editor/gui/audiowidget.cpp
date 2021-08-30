@@ -41,10 +41,6 @@
 #include "editor/gui/clipboard.h"
 
 namespace {
-enum class Channels {
-    Stereo = 2, Mono = 1
-};
-
 struct PortDesc {
     std::string name;
     QRectF rect;
@@ -1078,7 +1074,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     mRefreshTimer.setInterval(10);
 
     PopulateFromEnum<audio::SampleType>(mUI.sampleType);
-    PopulateFromEnum<Channels>(mUI.channels);
+    PopulateFromEnum<audio::Channels>(mUI.channels);
     PopulateFromEnum<audio::Effect::Kind>(mUI.effect);
     SetValue(mUI.graphName, QString("My Graph"));
     SetValue(mUI.graphID, base::RandomString(10));
@@ -1801,7 +1797,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.elemName, QString(""));
     SetValue(mUI.elemID,   QString(""));
     SetValue(mUI.sampleType, audio::SampleType::Float32);
-    SetValue(mUI.channels, Channels::Stereo);
+    SetValue(mUI.channels, audio::Channels::Stereo);
     SetValue(mUI.sampleRate,   QString("44100"));
     SetValue(mUI.fileSource, QString(""));
     SetValue(mUI.gainValue,    1.0f);
@@ -1867,7 +1863,7 @@ void AudioWidget::GetSelectedElementProperties()
         SetVisible(mUI.lblChannels, true);
         SetValue(mUI.sampleType, val->sample_type);
         SetValue(mUI.sampleRate, val->sample_rate);
-        SetValue(mUI.channels, static_cast<Channels>(val->channel_count));
+        SetValue(mUI.channels, static_cast<audio::Channels>(val->channel_count));
     }
     if (const auto* val = item->GetArgValue<audio::SampleType>("type"))
     {
@@ -1967,7 +1963,7 @@ void AudioWidget::SetSelectedElementProperties()
     {
         val->sample_type = GetValue(mUI.sampleType);
         val->sample_rate = GetValue(mUI.sampleRate);
-        val->channel_count = static_cast<unsigned>((Channels)GetValue(mUI.channels));
+        val->channel_count = static_cast<unsigned>((audio::Channels)GetValue(mUI.channels));
     }
     if (auto* val = item->GetArgValue<audio::SampleType>("type"))
         *val = GetValue(mUI.sampleType);
