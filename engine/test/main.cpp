@@ -743,7 +743,7 @@ private:
     boost::circular_buffer<std::string> mMessageQueue;
 };
 
-class MyApp : public engine::App, public engine::ClassLibrary, public wdk::WindowListener
+class MyApp : public engine::Engine, public engine::ClassLibrary, public wdk::WindowListener
 {
 public:
     virtual bool ParseArgs(int argc, const char* argv[]) override
@@ -1124,7 +1124,7 @@ private:
 
 extern "C" {
 
-GAMESTUDIO_EXPORT engine::App* Gamestudio_CreateApp()
+GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
     DEBUG("test app");
     return new MyApp;

@@ -39,30 +39,28 @@
 #include "wdk/events.h"
 #include "wdk/listener.h"
 
-// this header defines the interface between a app/game that
-// is built into a shared object (.dll or .so) and the runner/main
-// application that loads the shared object.
-// The library needs to implement the MakeApp function and return
-// a new app instance.
-// The host application will invoke methods on the app as appropriate
-// and setup the environment specific resources such as the rendering
-// context an device and resource loader.
+// this header defines the interface between the main application and the
+// actual game engine that is built into a shared library (.dll or .so).
+// The library needs to implement the CreateEngine function and return
+// a new engine instance.
+// The host application will provide for the engine the environment specific
+// resources such as the rendering context, resource loaders etc.
+// Once the engine has been created the host application will enter the
+// main loop and start calling the engine functions to update, draw etc.
 
 namespace engine
 {
-    // Main callback interface for implementing application specific
-    // functionality at certain times during the lifetime of the app.
-    // A game/app specific implementation of this interface is created
-    // by the library level function MakeApp. Then the host (the callee)
-    // application will start invoking the interface methods. Some methods
-    // are only called once per lifetime while some are called repeatedly.
-    // The idea is that using this application "template" it'd be simple
-    // to write a new application typical to this "framework" (i.e. a simple
-    // game).
-    class App
+    // The engine interface provides an abstract interface and a binary
+    // firewall for separating the actual game engine implementation from
+    // the host application and its environment. The host application will
+    // be responsible for creating resources such as windows, rendering context
+    // etc and providing those to the engine. The engine will then respond
+    // to the events coming from the host application and also perform the
+    // normal game activities such as updating state, drawing etc.
+    class Engine
     {
     public:
-        virtual ~App() = default;
+        virtual ~Engine() = default;
 
         // Request to resize the host window to some particular size.
         // The size specifies the *inside* area of the window i.e. the
@@ -367,7 +365,7 @@ namespace engine
     class AppRequestQueue
     {
     public:
-        using Request = engine::App::Request;
+        using Request = engine::Engine::Request;
 
         inline bool GetNext(Request* out)
         {
@@ -378,19 +376,19 @@ namespace engine
             return true;
         }
         inline void MoveWindow(int x, int y)
-        { mQueue.push(engine::App::MoveWindow {x, y }); }
+        { mQueue.push(engine::Engine::MoveWindow {x, y }); }
         inline void ResizeWindow(unsigned width, unsigned height)
-        { mQueue.push(engine::App::ResizeWindow{width, height}); }
+        { mQueue.push(engine::Engine::ResizeWindow{width, height}); }
         inline void SetFullScreen(bool fullscreen)
-        { mQueue.push(engine::App::SetFullScreen{fullscreen}); }
+        { mQueue.push(engine::Engine::SetFullScreen{fullscreen}); }
         inline void ToggleFullScreen()
-        { mQueue.push(engine::App::ToggleFullScreen{}); }
+        { mQueue.push(engine::Engine::ToggleFullScreen{}); }
         inline void Quit(int exit_code)
-        { mQueue.push(engine::App::QuitApp{exit_code }); }
+        { mQueue.push(engine::Engine::QuitApp{exit_code }); }
         inline void ShowMouseCursor(bool yes_no)
-        { mQueue.push(engine::App::ShowMouseCursor {yes_no } ); }
+        { mQueue.push(engine::Engine::ShowMouseCursor {yes_no } ); }
         inline void GrabMouse(bool yes_no)
-        { mQueue.push(engine::App::GrabMouse {yes_no} ); }
+        { mQueue.push(engine::Engine::GrabMouse {yes_no} ); }
     private:
         std::queue<Request> mQueue;
     };
@@ -415,10 +413,10 @@ namespace engine
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
-    GAMESTUDIO_API engine::App* Gamestudio_CreateApp();
+    GAMESTUDIO_API engine::Engine* Gamestudio_CreateEngine();
 } // extern "C"
 
-typedef engine::App* (*Gamestudio_CreateAppFunc)();
+typedef engine::Engine* (*Gamestudio_CreateEngineFunc)();
 
 // The below interface only exists currently for simplifying
 // the structure of the builds. I.e the dependencies for creating

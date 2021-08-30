@@ -3,7 +3,7 @@
 
 FOO {
   # explicitly list symbols to be exported.
-  global: Gamestudio_CreateApp;
+  global: Gamestudio_CreateEngine;
           Gamestudio_CreateFileLoaders;
           Gamestudio_SetGlobalLogger;
 
