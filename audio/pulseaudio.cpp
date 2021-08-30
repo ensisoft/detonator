@@ -75,7 +75,7 @@ public:
         const auto name = source->GetName();
         try
         {
-            auto stream = std::make_shared<PlaybackStream>(std::move(source), context_);
+            auto stream = std::make_shared<PlaybackStream>(std::move(source), context_, buffer_size_);
 
             // todo: fix this silly looping
             while (stream->GetState() == Stream::State::None)
@@ -115,13 +115,18 @@ public:
         return state_;
     }
 
+    virtual void SetBufferSize(unsigned milliseconds) override
+    {
+        buffer_size_ = milliseconds;
+    }
+
     PulseAudio(const PulseAudio&) = delete;
     PulseAudio& operator=(const PulseAudio&) = delete;
 private:
     class PlaybackStream  : public Stream
     {
     public:
-        PlaybackStream(std::unique_ptr<Source> source, pa_context* context)
+        PlaybackStream(std::unique_ptr<Source> source, pa_context* context, unsigned buffer_size_ms)
             : source_(std::move(source))
         {
             DEBUG("Creating new pulseaudio playback stream '%1': %2 channel(s) @ %3 Hz, %4",
@@ -152,7 +157,7 @@ private:
             const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
 
             pa_buffer_attr buffering;
-            buffering.maxlength = bytes_per_ms * 20;
+            buffering.maxlength = bytes_per_ms * buffer_size_ms;
             buffering.prebuf = -1;
             buffering.minreq = -1;
             buffering.tlength = -1;
@@ -394,6 +399,7 @@ private:
     pa_context* context_   = nullptr;
 private:
     State state_ = Device::State::None;
+    unsigned buffer_size_ = 20;
 };
 
 // static
