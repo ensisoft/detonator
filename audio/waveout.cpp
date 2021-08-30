@@ -60,7 +60,7 @@ public:
         const auto name = source->GetName();
         try
         {
-            auto stream = std::make_shared<PlaybackStream>(std::move(source));
+            auto stream = std::make_shared<PlaybackStream>(std::move(source), buffer_size_);
             streams_.push_back(stream);
             return stream;
         } 
@@ -94,6 +94,9 @@ public:
 
     virtual State GetState() const override
     { return Device::State::Ready; }
+
+    virtual void SetBufferSize(unsigned milliseconds)
+    { buffer_size_ = milliseconds; }
 private:
     class AlignedAllocator
     {
@@ -206,7 +209,7 @@ private:
     class PlaybackStream : public Stream
     {
     public:
-        PlaybackStream(std::unique_ptr<Source> source)
+        PlaybackStream(std::unique_ptr<Source> source, unsigned buffer_size_ms)
         {
             std::lock_guard<decltype(mutex_)> lock(mutex_);
 
@@ -253,7 +256,7 @@ private:
             const auto sample_size    = Source::ByteSize(source_->GetFormat());
             const auto samples_per_ms = source_->GetRateHz() / 1000u;
             const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
-            const auto buffer_size    = bytes_per_ms * 20;
+            const auto buffer_size    = bytes_per_ms * buffer_size_ms;
             const auto block_size     = sample_size * source_->GetNumChannels();
 
             // todo: cache and recycle audio buffers, or maybe
@@ -465,6 +468,7 @@ private:
 private:
     // currently active streams that we have to pump
     std::list<std::weak_ptr<PlaybackStream>> streams_;
+    unsigned buffer_size_ = 20;
 };
 
 // static
