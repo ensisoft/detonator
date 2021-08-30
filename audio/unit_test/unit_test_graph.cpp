@@ -607,6 +607,13 @@ void unit_test_graph_in_graph()
 
 void unit_test_graph_class()
 {
+    class Dummy : public audio::Loader
+    {
+    public:
+        virtual std::ifstream OpenStream(const std::string& file) const override
+        { BUG("Not used"); }
+    } loader;
+
     {
         const auto test_format = audio::Format {audio::SampleType::Int16, 16000,  1};
 
@@ -653,13 +660,6 @@ void unit_test_graph_class()
         TEST_REQUIRE(other->FindLinkById(link.id)->dst_element == gain.id);
         TEST_REQUIRE(other->GetHash() == klass.GetHash());
 
-        class Dummy : public audio::Loader
-        {
-        public:
-            virtual std::ifstream OpenStream(const std::string& file) const override
-            { BUG("Not used"); }
-        } loader;
-
         // instance creation.
         audio::Graph graph(klass);
         TEST_REQUIRE(graph.FindElementById(zero.id)->GetType() == "ZeroSource");
@@ -668,6 +668,50 @@ void unit_test_graph_class()
         const auto& desc = graph.Describe();
         //std::cout << desc[0];
         TEST_REQUIRE(desc[0] == "zero:out -> gain:in gain:out -> graph:port graph:port -> nil");
+    }
+
+    // extraneous entity that isn't linked anywhere.
+    {
+        const auto test_format = audio::Format {audio::SampleType::Int16, 16000,  1};
+
+        audio::GraphClass klass("graph");
+        audio::GraphClass::Element zero;
+        zero.id = base::RandomString(10);
+        zero.args = audio::FindElementDesc("ZeroSource")->args;
+        zero.args["format"] = test_format;
+        zero.type = "ZeroSource";
+        zero.name = "zero";
+
+        audio::GraphClass::Element gain;
+        gain.id = base::RandomString(10);
+        gain.args = audio::FindElementDesc("Gain")->args;
+        gain.args["gain"] = 1.5f;
+        gain.type = "Gain";
+        gain.name = "gain";
+
+        klass.AddElement(zero);
+        klass.AddElement(gain);
+        klass.SetGraphOutputElementId(zero.id);
+        klass.SetGraphOutputElementPort("out");
+
+        audio::Graph graph(klass);
+        TEST_REQUIRE(graph.Prepare(loader));
+    }
+
+    {
+        const auto test_format = audio::Format {audio::SampleType::Int16, 16000,  1};
+
+        audio::GraphClass klass("graph");
+        audio::GraphClass::Element zero;
+        zero.id = base::RandomString(10);
+        zero.args = audio::FindElementDesc("ZeroSource")->args;
+        zero.args["format"] = test_format;
+        zero.type = "ZeroSource";
+        zero.name = "zero";
+        klass.AddElement(zero);
+
+        audio::Graph graph(klass);
+        TEST_REQUIRE(!graph.Prepare(loader));
     }
 }
 

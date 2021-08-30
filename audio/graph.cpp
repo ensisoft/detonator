@@ -224,12 +224,20 @@ Graph::Graph(const std::string& name, const GraphClass& klass) :
         const auto& link = klass.GetLink(i);
         auto* src_elem = FindElementById(link.src_element);
         auto* dst_elem = FindElementById(link.dst_element);
+        if (!src_elem || !dst_elem)
+            continue;
         auto* src_port = src_elem->FindOutputPortByName(link.src_port);
         auto* dst_port = dst_elem->FindInputPortByName(link.dst_port);
+        if (!src_port || !dst_port)
+            continue;
         LinkElements(src_elem, src_port, dst_elem, dst_port);
     }
     auto* src_elem = FindElementById(klass.GetGraphOutputElementId());
+    if (src_elem == nullptr)
+        return;
     auto* src_port = src_elem->FindOutputPortByName(klass.GetGraphOutputElementPort());
+    if (src_port == nullptr)
+        return;
     LinkGraph(src_elem, src_port);
 }
 Graph::Graph(const GraphClass& klass)
@@ -542,7 +550,8 @@ bool Graph::Prepare(const Loader& loader)
             } else ++it;
         }
     }
-    if (!edges.empty()) ERROR_RETURN(false, "Audio graph '%1' has a cycle.", mName);
+    if (!edges.empty())
+        ERROR_RETURN(false, "Audio graph '%1' has a cycle.", mName);
 
     for (size_t i=0; i < order.size(); ++i)
     {
