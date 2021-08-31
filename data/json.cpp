@@ -227,6 +227,15 @@ std::tuple<bool, std::string> JsonObject::ParseString(const std::string& str)
     return std::make_tuple(true, "");
 }
 
+std::tuple<bool, std::string> JsonObject::ParseString(const char* str, size_t len)
+{
+    auto [ok, json, error] = base::JsonParse(str, str + len);
+    if (!ok)
+        return std::make_tuple(false, error);
+    (*mJson) = std::move(json);
+    return std::make_tuple(true, "");
+}
+
 std::string JsonObject::ToString() const
 { return mJson->dump(2); }
 
@@ -266,7 +275,7 @@ std::tuple<bool, std::string> JsonFile::Save(const std::string& file) const
     const auto& string = mJson->dump(2);
     io.write(string.c_str(), string.size());
     if (io.fail())
-        throw std::make_tuple(false, "JSON file write failed");
+        return std::make_tuple(false, "JSON file write failed");
     return std::make_tuple(true, "");
 }
 
@@ -275,5 +284,33 @@ JsonObject JsonFile::GetRootObject()
 
 void JsonFile::SetRootObject(JsonObject& object)
 { mJson = object.GetJson(); }
+
+std::tuple<std::unique_ptr<JsonObject>, std::string> ReadJsonFile(const std::string& file)
+{
+    std::unique_ptr<JsonObject> json;
+    auto io = base::OpenBinaryInputStream(file);
+    if (!io.is_open())
+        return std::make_tuple(std::move(json), "failed to open: " + file);
+    try
+    {
+        auto json_object = nlohmann::json::parse(std::istreambuf_iterator<char>(io),
+                                                 std::istreambuf_iterator<char>{});
+        json.reset(new JsonObject(std::move(json_object)));
+    }
+    catch (const std::exception& e)
+    { return std::make_tuple(std::move(json), std::string("JSON parse error: ") + e.what()); }
+    return std::make_tuple(std::move(json), "");
+}
+std::tuple<bool, std::string> WriteJsonFile(const JsonObject& json, const std::string& file)
+{
+    auto io = base::OpenBinaryOutputStream(file);
+    if (!io.is_open())
+        return std::make_tuple(false, "failed to open: " + file);
+    const auto& string = json.ToString();
+    io.write(string.c_str(), string.size());
+    if (io.fail())
+        return std::make_tuple(false, "JSON file write failed");
+    return std::make_tuple(true, "");
+}
 
 } // namespace

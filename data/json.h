@@ -93,6 +93,7 @@ namespace data
         std::shared_ptr<const nlohmann::json> GetJson() const
         { return mJson; }
         std::tuple<bool, std::string> ParseString(const std::string& str);
+        std::tuple<bool, std::string> ParseString(const char* str, size_t len);
         std::string ToString() const;
     private:
         std::shared_ptr<nlohmann::json> mJson;
@@ -128,5 +129,8 @@ namespace data
     private:
         std::shared_ptr<nlohmann::json> mJson;
     };
+
+    std::tuple<std::unique_ptr<JsonObject>, std::string> ReadJsonFile(const std::string& file);
+    std::tuple<bool, std::string> WriteJsonFile(const JsonObject& json, const std::string& file);
 
 } // namespace

@@ -25,6 +25,7 @@
 #include "base/test_float.h"
 #include "base/test_help.h"
 #include "base/color4f.h"
+#include "data/json.h"
 #include "game/scene.h"
 #include "engine/lua.h"
 
@@ -213,7 +214,7 @@ function set_blue()
 end
 function set_junk()
     local ret = base.Color4f:new()
-    ret.SetColor(1234)
+    ret:SetColor(1234)
     return ret
 end
 function from_enum()
@@ -269,6 +270,122 @@ end
         ret = L["test_intersect"]();
         TEST_REQUIRE(ret == base::Intersect(base::FRect(10.0, 10.0, 20.0, 20.0),
                                             base::FRect(-5.0, 3.0, 10.0, 45.0)));
+    }
+}
+
+void unit_test_data()
+{
+    sol::state L;
+    L.open_libraries();
+    engine::BindBase(L);
+    engine::BindData(L);
+    engine::BindGLM(L);
+
+    // JSON writer
+    {
+        L.script(
+                R"(
+function write_json()
+   local json = data.JsonObject:new()
+   json:Write('float', 1.0)
+   json:Write('int', 123)
+   json:Write('str', 'hello world')
+   json:Write('vec2', glm.vec2:new(1.0, 2.0))
+   json:Write('vec3', glm.vec3:new(1.0, 2.0, 3.0))
+   json:Write('vec4', glm.vec4:new(1.0, 2.0, 3.0, 4.0))
+   local banana = json:NewWriteChunk('banana')
+   banana:Write('name', 'banana')
+   local apple = json:NewWriteChunk('apple')
+   apple:Write('name', 'apple')
+   json:AppendChunk('fruits', banana)
+   json:AppendChunk('fruits', apple)
+   return json:ToString()
+end
+        )");
+
+        const std::string& json = L["write_json"]();
+        std::cout << json;
+
+        L.script(
+            R"(
+function read_chunk_oob(json)
+   local chunk = json:GetReadChunk('fruits', 2)
+end
+
+function read_json(json_string)
+    local json = data.JsonObject:new()
+    local ok, error = json:ParseString('asgasgasgas')
+    if ok then
+       return 'parse string fail'
+    end
+    ok, error = json:ParseString('{ "float": 1.0 ')
+    if ok then
+       return 'parse string fail'
+    end
+
+    ok, error = json:ParseString(json_string)
+    if not ok then
+      return 'parse string fail'
+    end
+
+    local success, val = json:ReadString('doesnt_exist')
+    if  success then
+        return 'fail read string'
+    end
+    success, val = json:ReadString('str')
+    if not success then
+        return 'fail read string'
+    end
+
+    _, val = json:ReadFloat('float')
+    if val ~= 1.0 then
+       return 'fail'
+    end
+    _, val = json:ReadInt('int')
+    if val ~= 123 then
+       return 'fail'
+    end
+    _, val = json:ReadString('str')
+    if val ~= 'hello world' then
+       return 'fail'
+    end
+    _, val = json:ReadVec2('vec2')
+    if val.x ~= 1.0 or val.y ~= 2.0 then
+       return 'fail'
+    end
+    _, val = json:ReadVec3('vec3')
+    if val.x ~= 1.0 or val.y ~= 2.0 or val.z ~= 3.0 then
+       return 'fail'
+    end
+    _, val = json:ReadVec4('vec4')
+    if val.x ~= 1.0 or val.y ~= 2.0 or val.z ~= 3.0 or val.w ~= 4.0 then
+       return 'fail'
+    end
+    local num_chunks = json:GetNumChunks('fruits')
+    if num_chunks ~= 2 then
+        return 'fail'
+    end
+    local chunk = json:GetReadChunk('fruits', 0)
+    _, val = chunk:ReadString('name')
+    if val ~= 'banana' then
+        return  'fail'
+    end
+    chunk = json:GetReadChunk('fruits', 1)
+    _, val = chunk:ReadString('name')
+    if val ~= 'apple' then
+        return 'fail'
+    end
+
+    -- out of bounds on chunk index test
+    if pcall(read_chunk_oob, json) then
+        return 'fail on chunk out of bounds'
+    end
+    return 'ok'
+end
+)");
+        const std::string& ret = L["read_json"](json);
+        std::cout << ret;
+        TEST_REQUIRE(ret == "ok");
     }
 }
 
@@ -488,6 +605,7 @@ int test_main(int argc, char* argv[])
     unit_test_util();
     unit_test_glm();
     unit_test_base();
+    unit_test_data();
     unit_test_scene();
     return 0;
 }

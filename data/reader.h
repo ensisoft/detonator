@@ -24,6 +24,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <tuple>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -92,6 +93,22 @@ namespace data
             return true;
         }
 
+        template<typename T>
+        std::tuple<bool, T> Read(const char* name) const
+        {
+            T value;
+            if (!Read(name, &value))
+                return std::make_tuple(false, value);
+            return std::make_tuple(true, value);
+        }
+        template<typename T>
+        std::tuple<bool, T> Read(const char* name, const T& default_value) const
+        {
+            T value;
+            if (!Read(name, &value))
+                return std::make_tuple(false, default_value);
+            return std::make_tuple(true, value);
+        }
     private:
     };
 } // namespace
