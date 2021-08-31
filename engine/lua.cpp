@@ -433,6 +433,7 @@ LuaGame::LuaGame(const std::string& lua_path,
     (*mLuaState)["package"]["path"] = path;
     BindBase(*mLuaState);
     BindUtil(*mLuaState);
+    BindData(*mLuaState);
     BindGLM(*mLuaState);
     BindGFX(*mLuaState);
     BindWDK(*mLuaState);
@@ -604,6 +605,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
 
     BindBase(*state);
     BindUtil(*state);
+    BindData(*state);
     BindGLM(*state);
     BindGFX(*state);
     BindWDK(*state);
@@ -952,6 +954,10 @@ void BindUtil(sol::state& L)
     box["GetRotation"] = &FBox::GetRotation;
     box["Transform"]   = &FBox::Transform;
     box["Reset"]       = &FBox::Reset;
+
+    util["JoinPath"] = &base::JoinPath;
+    util["FileExists"] = &base::FileExists;
+    util["RandomString"] = &base::RandomString;
 }
 
 void BindBase(sol::state& L)
