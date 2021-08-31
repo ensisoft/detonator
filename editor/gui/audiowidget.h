@@ -150,7 +150,6 @@ namespace gui
     private:
         app::Workspace* mWorkspace = nullptr;
         std::unique_ptr<AudioGraphScene> mScene;
-        //std::unique_ptr<audio::Graph> mGraph;
         std::shared_ptr<audio::Player> mPlayer;
         std::vector<QGraphicsItem*> mItems;
         std::size_t mCurrentId = 0;

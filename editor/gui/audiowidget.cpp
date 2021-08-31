@@ -1448,6 +1448,8 @@ void AudioWidget::on_actionPlay_triggered()
         for (const auto& str : desc_strs)
             DEBUG(str);
 
+        const auto& port = (*source)->GetOutputPort(0);
+        NOTE("Graph output %1", port.GetFormat());
         mCurrentId = mPlayer->Play(std::move(source));
     }
     else
@@ -1803,13 +1805,19 @@ bool AudioWidget::InitializeAudio()
 {
     try
     {
+        const auto& settings = mWorkspace->GetProjectSettings();
         static std::weak_ptr<audio::Player> shared_player;
+        static unsigned audio_buffer_size = 0;
+
         mPlayer = shared_player.lock();
-        if (!mPlayer)
+        if (!mPlayer || audio_buffer_size != settings.audio_buffer_size)
         {
-            mPlayer = std::make_shared<audio::Player>(audio::Device::Create(APP_TITLE));
+            auto device = audio::Device::Create(APP_TITLE);
+            device->SetBufferSize(settings.audio_buffer_size);
+            mPlayer = std::make_shared<audio::Player>(std::move(device));
             shared_player = mPlayer;
-            DEBUG("Created new audio player.");
+            audio_buffer_size = settings.audio_buffer_size;
+            DEBUG("Created new audio player with audio buffer set to %1ms.", audio_buffer_size);
         }
     }
     catch (const std::exception& e)
@@ -2042,18 +2050,20 @@ void AudioWidget::UpdateElementList()
 
 void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event)
 {
-    SetEnabled(mUI.actionPlay, true);
-    SetEnabled(mUI.actionStop, false);
-    SetEnabled(mUI.actionPause, false);
-    mCurrentId = 0;
-    mPlayTime  = 0;
-    mRefreshTimer.stop();
+    if (event.id == mCurrentId)
+    {
+        SetEnabled(mUI.actionPlay, true);
+        SetEnabled(mUI.actionStop, false);
+        SetEnabled(mUI.actionPause, false);
+        mCurrentId = 0;
+        mPlayTime = 0;
+        mRefreshTimer.stop();
+    }
 }
 void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& event)
 {
-    if (mCurrentId == 0)
-        return;
-    mPlayTime = event.time / 1000.0;
+    if (event.id == mCurrentId)
+        mPlayTime = event.time / 1000.0;
 }
 
 void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEvent& event)
