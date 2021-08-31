@@ -97,4 +97,9 @@ QString toString(QProcess::ProcessError error)
     return "";
 }
 
+QString toString(const audio::Format& format)
+{
+    return app::FromUtf8(audio::ToString(format));
+}
+
 } // app
