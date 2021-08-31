@@ -35,7 +35,8 @@
 #include <cstring>
 #include <type_traits>
 
-#include "utility.h"
+#include "audio/format.h"
+#include "editor/app/utility.h"
 
 namespace app
 {
@@ -43,6 +44,7 @@ namespace app
     QString toString(QLocalSocket::LocalSocketError error);
     QString toString(QProcess::ProcessState state);
     QString toString(QProcess::ProcessError error);
+    QString toString(const audio::Format& format);
 
     inline QString toString(const std::string& s)
     { return FromUtf8(s); }
