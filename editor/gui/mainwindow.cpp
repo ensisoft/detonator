@@ -1361,6 +1361,8 @@ void MainWindow::on_actionNewWorkspace_triggered()
     }
 
     LoadWorkspace(workspace_dst_dir);
+    if (mWorkspace)
+        mWorkspace->SetProjectId(app::RandomString());
 
     if (!mRecentWorkspaces.contains(workspace_dst_dir))
         mRecentWorkspaces.insert(0, workspace_dst_dir);

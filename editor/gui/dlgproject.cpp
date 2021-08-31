@@ -48,6 +48,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<audio::Channels>(mUI.audioChannels);
     SetList(mUI.mouseDrawable, workspace.ListCursors());
     SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
+    SetUIValue(mUI.edtAppIdentifier, mSettings.application_identifier);
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
     SetUIValue(mUI.cmbMagFilter, mSettings.default_mag_filter);

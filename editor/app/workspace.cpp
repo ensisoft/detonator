@@ -634,6 +634,7 @@ Workspace::Workspace(const QString& dir)
     {
         resource->SetIsPrimitive(true);
     }
+    mSettings.application_identifier = app::RandomString();
 }
 
 Workspace::~Workspace()
@@ -1217,6 +1218,7 @@ bool Workspace::SaveProperties(const QString& filename) const
 
     QJsonObject project;
     JsonWrite(project, "multisample_sample_count", mSettings.multisample_sample_count);
+    JsonWrite(project, "application_identifier"  , mSettings.application_identifier);
     JsonWrite(project, "application_name"        , mSettings.application_name);
     JsonWrite(project, "application_version"     , mSettings.application_version);
     JsonWrite(project, "application_library_win" , mSettings.application_library_win);
@@ -1316,6 +1318,7 @@ bool Workspace::LoadProperties(const QString& filename)
 
     const QJsonObject& project = docu["project"].toObject();
     JsonReadSafe(project, "multisample_sample_count", &mSettings.multisample_sample_count);
+    JsonReadSafe(project, "application_identifier",   &mSettings.application_identifier);
     JsonReadSafe(project, "application_name",         &mSettings.application_name);
     JsonReadSafe(project, "application_version",      &mSettings.application_version);
     JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
@@ -2191,6 +2194,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             base::JsonWrite(json["window"], "set_fullscreen", true);
 
         base::JsonWrite(json["application"], "library", ToUtf8(engine_name));
+        base::JsonWrite(json["application"], "identifier", ToUtf8(mSettings.application_identifier));
         base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
         base::JsonWrite(json["application"], "ticks_per_second",   (float)mSettings.ticks_per_second);

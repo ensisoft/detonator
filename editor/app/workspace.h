@@ -408,6 +408,8 @@ namespace app
             };
             // sample count when using multi-sampled render targets.
             unsigned multisample_sample_count = 4;
+            // Unique identifier for the project.
+            QString application_identifier;
             // user defined name of the application.
             QString application_name;
             // User defined version of the application.
@@ -518,6 +520,8 @@ namespace app
         { return mSettings; }
         void SetProjectSettings(const ProjectSettings& settings)
         { mSettings = settings; }
+        void SetProjectId(const QString& id)
+        { mSettings.application_identifier = id; }
 
         struct ContentPackingOptions {
             // the output directory into which place the packed content.
