@@ -37,8 +37,10 @@ namespace engine
     class LuaGame : public Game
     {
     public:
-        LuaGame(std::shared_ptr<sol::state> state);
-        LuaGame(const std::string& lua_path, const std::string& main_script);
+        LuaGame(const std::string& lua_path,
+                const std::string& game_script,
+                const std::string& game_home,
+                const std::string& game_name);
        ~LuaGame();
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void SetAudioEngine(const AudioEngine* engine) override;

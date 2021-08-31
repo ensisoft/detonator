@@ -24,6 +24,7 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
+#include <filesystem>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -32,8 +33,11 @@
 #  include <fenv.h>
 #  include <dlfcn.h>
 #  include <unistd.h>
+#  include <sys/types.h>
+#  include <pwd.h>
 #elif defined(WINDOWS_OS)
 #  include <Windows.h>
+#  include <Shlobj.h>
 #endif
 
 #include "base/platform.h"
@@ -103,6 +107,14 @@ std::string GetPath()
     return buffer.substr(0, last);
 }
 
+std::string DiscoverUserHome()
+{
+    struct passwd* pw = ::getpwuid(::getuid());
+    if (pw == nullptr || pw->pw_dir == nullptr)
+        throw std::runtime_error("user's home directory location not found");
+    return pw->pw_dir;
+}
+
 #elif defined(WINDOWS_OS)
 std::string FormatError(DWORD error)
 {
@@ -152,7 +164,26 @@ std::string GetPath()
     buffer = buffer.substr(0, last);
     return base::ToUtf8(buffer);
 }
+
+std::string DiscoverUserHome()
+{
+    WCHAR path[MAX_PATH] = {};
+    if (!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, path)))
+        throw std::runtime_error("user's home directory location not found");
+    return base::ToUtf8(std::wstring(path));
+}
+
 #endif
+
+std::string GenerateGameHome(const std::string& user_home, const std::string& title)
+{
+    std::filesystem::path p(user_home);
+    p /= ".GameStudio";
+    std::filesystem::create_directory(p);
+    p /= title;
+    std::filesystem::create_directory(p);
+    return p.generic_u8string(); // std::string until c++20 (u8string)
+}
 
 // Glue class to connect the window and device
 class WindowContext : public gfx::Device::Context
@@ -260,7 +291,7 @@ int main(int argc, char* argv[])
         opt.Add("--debug", "Enable all debug features.");
         opt.Add("--debug-log", "Enable debug logging.");
         opt.Add("--debug-draw", "Enable debug drawing.");
-        opt.Add("--debug-font", "Debug font for debug messages.", std::string(""));
+        opt.Add("--debug-font", "Set debug font for debug messages.", std::string(""));
         opt.Add("--debug-show-fps", "Show FPS counter and stats. You'll need to use --debug-font.");
         opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
         opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
@@ -332,10 +363,12 @@ int main(int argc, char* argv[])
 
         std::string library;
         std::string content;
-        std::string title = "MainWindow";
-        base::JsonReadSafe(json["application"], "title", &title);
+        std::string title;
+        std::string identifier;
+        base::JsonReadSafe(json["application"], "title",   &title);
         base::JsonReadSafe(json["application"], "library", &library);
         base::JsonReadSafe(json["application"], "content", &content);
+        base::JsonReadSafe(json["application"], "identifier", &identifier);
         LoadAppLibrary(library);
         DEBUG("Loaded library: '%1'", library);
 
@@ -372,6 +405,8 @@ int main(int argc, char* argv[])
         env.game_data_loader = loaders.ResourceLoader.get();
         env.audio_loader     = loaders.ResourceLoader.get();
         env.directory        = GetPath();
+        env.user_home        = DiscoverUserHome();
+        env.game_home        = GenerateGameHome(env.user_home, identifier);
         engine->SetEnvironment(env);
 
         wdk::Config::Attributes attrs;
