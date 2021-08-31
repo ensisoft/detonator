@@ -120,10 +120,15 @@
         "material": "nQUmTOnClw"
     },
     "project": {
+        "application_identifier": "dD8e2yH4h45Y",
         "application_library_lin": "app://libGameEngine.so",
         "application_library_win": "app://GameEngine.dll",
         "application_name": "Blast!",
         "application_version": "",
+        "audio_buffer_size": 20,
+        "audio_channels": "Stereo",
+        "audio_sample_rate": 44100,
+        "audio_sample_type": "Float32",
         "clear_color": "4278190080",
         "command_line_arguments": "",
         "config_srgb": true,
@@ -132,6 +137,7 @@
         "game_script": "game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
+        "grab_mouse": false,
         "mouse_pointer_drawable": "_block_cursor",
         "mouse_pointer_hotspot": {
             "x": 0.5,
