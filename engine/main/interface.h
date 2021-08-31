@@ -158,35 +158,32 @@ namespace engine
 
         // Parameters pertaining to the environment of the application.
         struct Environment {
-            // Interface for accessing game content such as scenes, entities
+            // Interface for accessing resource classes such as scenes, entities
             // materials etc.
             engine::ClassLibrary* classlib = nullptr;
-            // Interface for accessing the game data from the game's running
-            // environment, i.e. data that is packaged with the game. Not the
-            // data *generated* by the game such as save games.
+            // Interface for accessing game data packaged with the game.
+            // Not the data *generated* by the game such as save games.
             engine::Loader* game_data_loader = nullptr;
-            // The low level gfx resource loader that implements loading
-            // of graphics resources such as shaders, fonts and textures.
-            // The engine should use this with the graphics subsystem.
+            // Interface for accessing low level graphics resources such as shaders
+            // textures and fonts.
             gfx::Loader* graphics_loader = nullptr;
-            // The low level audio loader that implements opening
-            // audio streams.
+            // Interface for accessing low level audio resources.
             audio::Loader* audio_loader = nullptr;
             // Path to the top level directory where the app/game is
             // I.e. where the GameMain, config.json, content.json etc. files
             // are. UTF-8 encoded.
             std::string directory;
+            // Path to the user's home directory. for example /home/roger/
+            // or c:\Documents and Settings\roger
+            // UTF-8 encoded.
+            std::string user_home;
+            // Path to the recommended game data directory for data generated
+            // by the game such as save games etc.
+            std::string game_home;
         };
 
-        // Called whenever there are changes to the current environment
-        // of the application. The provided environment object contains
-        // a collection of interface objects for accessing the game
-        // content at various levels from file based access (i.e. things
-        // such as textures, fonts, shaders) to more derived resources
-        // i.e. materials and drawable shapes to high level game assets
-        // such as animations.
-        // The pointers will remain valid until the next call of
-        // SetEnvironment.
+        // Set the engine execution environment. Called once in the
+        // beginning before entering the main loop.
         virtual void SetEnvironment(const Environment& env)
         {}
 

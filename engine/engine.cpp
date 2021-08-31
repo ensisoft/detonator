@@ -89,7 +89,7 @@ public:
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
-        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script);
+        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script, mGameHome, init.application_name);
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetAudioEngine(mAudio.get());
         mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");
@@ -99,6 +99,8 @@ public:
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
+        mRenderer.SetClassLibrary(mClasslib);
+        mPhysics.SetClassLibrary(mClasslib);
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -121,10 +123,13 @@ public:
         mGameDataLoader = env.game_data_loader;
         mAudioLoader    = env.audio_loader;
         mDirectory      = env.directory;
-        mRenderer.SetClassLibrary(mClasslib);
-        mPhysics.SetClassLibrary(mClasslib);
+        mGameHome       = env.game_home;
+
         // set the unfortunate global gfx loader
         gfx::SetResourceLoader(env.graphics_loader);
+        DEBUG("Install directory '%1'.", env.directory);
+        DEBUG("Game home '%1'.", env.game_home);
+        DEBUG("User home '%1'.", env.user_home);
     }
     virtual void SetEngineConfig(const EngineConfig& conf) override
     {
@@ -843,6 +848,8 @@ private:
     gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
     // game dir where the executable is.
     std::string mDirectory;
+    // home directory for the game generated data.
+    std::string mGameHome;
     // queue of outgoing requests regarding the environment
     // such as the window size/position etc that the game host
     // may/may not support.

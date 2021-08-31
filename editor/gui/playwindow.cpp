@@ -779,12 +779,18 @@ void PlayWindow::DoAppInit()
 
         SetDebugOptions();
 
+        const auto& user_home = QDir::homePath();
+        const auto& game_home = app::JoinPath(".GameStudio", settings.application_identifier);
+        app::MakePath(app::JoinPath(user_home, ".GameStudio"));
+        app::MakePath(app::JoinPath(user_home, game_home));
         engine::Engine::Environment env;
         env.classlib  = &mWorkspace;
         env.game_data_loader   = mResourceLoader.get();
         env.graphics_loader    = mResourceLoader.get();
         env.audio_loader       = mResourceLoader.get();
         env.directory          = app::ToUtf8(mGameWorkingDir);
+        env.user_home          = app::ToUtf8(QDir::toNativeSeparators(user_home));
+        env.game_home          = app::ToUtf8(app::JoinPath(user_home, game_home));
         mEngine->SetEnvironment(env);
 
         engine::Engine::InitParams params;

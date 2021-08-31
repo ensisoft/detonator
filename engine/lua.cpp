@@ -416,12 +416,10 @@ void BindGlmVectorOp(sol::usertype<Vector>& vec)
 namespace engine
 {
 
-LuaGame::LuaGame(std::shared_ptr<sol::state> state)
-  : mLuaState(state)
-{ }
-
 LuaGame::LuaGame(const std::string& lua_path,
-                 const std::string& game_script)
+                 const std::string& game_script,
+                 const std::string& game_home,
+                 const std::string& game_name)
 {
     mLuaState = std::make_shared<sol::state>();
     // todo: should this specify which libraries to load?
@@ -443,6 +441,8 @@ LuaGame::LuaGame(const std::string& lua_path,
 
     // bind engine interface.
     auto table  = (*mLuaState)["game"].get_or_create<sol::table>();
+    table["home"] = game_home;
+    table["name"] = game_name;
     auto engine = table.new_usertype<LuaGame>("Engine");
     BindEngine(engine, *this);
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
