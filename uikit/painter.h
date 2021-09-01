@@ -97,10 +97,17 @@ namespace uik
         // implementation can support either one (or even nothing).
         virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const = 0;
 
-        // Draw the widget text. This is used for texts such as labels, button texts, or
+        // Draw the static text. This is used for texts such as labels, button texts, or
         // texts that are part of the widget's "static" interface. Widget items such as
         // combobox dropdown items or list box items are drawn using separate functionality.
-        virtual void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const = 0;
+        virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const = 0;
+
+        struct EditableText {
+            std::string text;
+        };
+        virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const = 0;
+
+        virtual void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const = 0;
 
         // Draw a checkbox.
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const = 0;

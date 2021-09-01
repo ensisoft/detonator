@@ -476,7 +476,7 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
     }
 }
 
-void UIPainter::DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const
+void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const
 {
     if (text.empty())
         return;
@@ -511,6 +511,34 @@ void UIPainter::DrawText(const WidgetId& id, const PaintStruct& ps, const std::s
         alignment |= gfx::TextAlign::AlignBottom;
 
     gfx::DrawTextRect(*mPainter, text, font_name, font_size, ps.rect, text_color, alignment, properties, line_height);
+}
+
+void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const
+{
+    if (text.text.empty())
+        return;
+
+    const auto& text_color = GetWidgetProperty(id, ps, "edit-text-color", uik::Color4f(uik::Color::White));
+    const auto& font_name  = GetWidgetProperty(id, ps, "edit-text-font",std::string(""));
+    const auto  font_size  = GetWidgetProperty(id, ps, "edit-text-size",16);
+    const unsigned alignment  = gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignLeft;
+    const unsigned properties = 0;
+    gfx::DrawTextRect(*mPainter, text.text, font_name, font_size, ps.rect, text_color, alignment, properties, 1.0f);
+}
+
+void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
+{
+    if (const auto* material = GetWidgetMaterial(id, ps, "text-edit-background"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, "text-edit-border"))
+    {
+        const auto width = GetWidgetProperty(id, ps, "text-edit-border-width", 1.0f);
+        const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
 }
 
 void UIPainter::DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const

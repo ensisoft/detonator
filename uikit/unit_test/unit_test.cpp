@@ -58,7 +58,7 @@ public:
         cmd.ps     = ps;
         cmds.push_back(std::move(cmd));
     }
-    void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override
+    void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override
     {
         Command cmd;
         cmd.name   = "draw-widget-text";
@@ -68,7 +68,11 @@ public:
         cmd.line_height = line_height;
         cmds.push_back(std::move(cmd));
     }
+    void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText&) const override
+    {}
     void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override
+    {}
+    void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override
     {}
     void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override
     {}

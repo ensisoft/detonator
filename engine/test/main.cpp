@@ -631,14 +631,29 @@ public:
         mStyle.SetClassLibrary(loader);
         mPainter.SetStyle(&mStyle);
 
+        // generic properties that apply across all widget types.
         mStyle.SetMaterial("widget/background", engine::detail::UIColor(gfx::Color::Black));
         mStyle.SetMaterial("widget/border", engine::detail::UIColor(gfx::Color::LightGray));
         mStyle.SetProperty("widget/shape", "RoundRect");
+        // static text properties
         mStyle.SetProperty("widget/text-font", "fonts/orbitron-medium.otf");
+        mStyle.SetProperty("widget/text-size", 16);
         mStyle.SetProperty("widget/text-color", gfx::Color::White);
+        // button properties.
+        mStyle.SetMaterial("widget/button-background", engine::detail::UIColor(gfx::Color::Black));
+        mStyle.SetMaterial("widget/button-border", engine::detail::UIColor(gfx::Color::Gray));
+        mStyle.SetMaterial("widget/button-icon", engine::detail::UIColor(gfx::Color::Gold));
+        mStyle.SetMaterial("widget/pressed/button-background", engine::detail::UIColor(gfx::Color::Gray));
+        mStyle.SetMaterial("widget/pressed/button-border", engine::detail::UIColor(gfx::Color::Silver));
+        // editable text properties.
+        mStyle.SetProperty("widget/edit-text-font", "fonts/orbitron-medium.otf");
+        mStyle.SetProperty("widget/edit-text-size", 16);
+        mStyle.SetProperty("widget/edit-text-color", gfx::Color::Black);
+        // text edit box properties.
+        mStyle.SetMaterial("widget/text-edit-background", engine::detail::UIColor(gfx::Color::White));
 
+        // some assorted properties
         mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);
-
         mStyle.SetMaterial("checkbox/background", engine::detail::UINullMaterial());
         mStyle.SetMaterial("checkbox/border", engine::detail::UINullMaterial());
         mStyle.SetMaterial("checkbox/check-border", engine::detail::UIColor(gfx::Color::White));
@@ -646,8 +661,6 @@ public:
         mStyle.SetMaterial("label/background", engine::detail::UINullMaterial());
         mStyle.SetMaterial("label/border", engine::detail::UINullMaterial());
 
-        mStyle.SetMaterial("push-button/pressed/background", engine::detail::UIColor(gfx::Color::Gray));
-        mStyle.SetMaterial("push-button/pressed/border", engine::detail::UIColor(gfx::Color::Silver));
 
         // add some widgets
         {
@@ -678,6 +691,13 @@ public:
             lbl.SetText("Hello world");
             lbl.SetPosition(30.0f, 80.0f);
             mWindow.AddWidget(lbl);
+        }
+
+        {
+            uik::SpinBox spin;
+            spin.SetName("spin");
+            spin.SetPosition(200.0f, 80.0f);
+            mWindow.AddWidget(spin);
         }
 
         mState.Clear();

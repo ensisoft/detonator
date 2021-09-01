@@ -47,7 +47,9 @@ namespace uik
             CheckBox,
             // Groupbox is a container widget for grouping widgets together
             // within a visually representable container.
-            GroupBox
+            GroupBox,
+            // Spinbox has 2 buttons for incrementing and decrementing an integer value.
+            SpinBox
         };
 
         enum class Flags {
@@ -280,6 +282,36 @@ namespace uik
         private:
         };
 
+        class SpinBoxModel
+        {
+        public:
+            SpinBoxModel();
+            void SetMin(int min)
+            { mMinVal = min; }
+            void SetMax(int max)
+            { mMaxVal = max; }
+            void SetValue(int value)
+            { mValue = value; }
+            int GetValue() const
+            { return mValue; }
+            std::size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+            WidgetAction PollAction(const PollStruct& poll);
+            WidgetAction MouseEnter(const MouseStruct&);
+            WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseLeave(const MouseStruct&);
+        private:
+           void ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit =nullptr) const;
+           WidgetAction UpdateValue(const std::string& id, State& state);
+        private:
+            int mValue  = 0;
+            int mMinVal = 0;
+            int mMaxVal = 0;
+        };
 
         class LabelModel
         {
@@ -427,6 +459,13 @@ namespace uik
             static constexpr auto Type = Widget::Type::GroupBox;
             static constexpr auto InitialWidth  = 200;
             static constexpr auto InitialHeight = 200;
+        };
+        template<>
+        struct WidgetModelTraits<SpinBoxModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::SpinBox;
+            static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsPoll = true;
         };
 
         class WidgetBase
@@ -730,5 +769,6 @@ namespace uik
     using CheckBox   = detail::BasicWidget<detail::CheckBoxModel>;
     using GroupBox   = detail::BasicWidget<detail::GroupBoxModel, detail::WidgetContainer>;
     using Form       = detail::BasicWidget<detail::FormModel, detail::WidgetContainer>;
+    using SpinBox    = detail::BasicWidget<detail::SpinBoxModel>;
 
 } // namespace

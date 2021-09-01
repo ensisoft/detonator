@@ -75,6 +75,190 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
+SpinBoxModel::SpinBoxModel()
+{
+    mMinVal = std::numeric_limits<int>::min();
+    mMaxVal = std::numeric_limits<int>::max();
+}
+
+std::size_t SpinBoxModel::GetHash(size_t hash) const
+{
+    hash = base::hash_combine(hash, mValue);
+    hash = base::hash_combine(hash, mMinVal);
+    hash = base::hash_combine(hash, mMaxVal);
+    return hash;
+}
+
+void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.enabled = paint.enabled;
+    p.focused = paint.focused;
+    p.moused  = paint.moused;
+    p.time    = paint.time;
+    p.clip    = paint.clip;
+    p.rect    = paint.rect;
+    p.pressed = false;
+    p.klass   = "spinbox";
+
+    FRect edt, btn_inc, btn_dec;
+    ComputeBoxes(paint.rect, &btn_inc, &btn_dec, &edt);
+
+    ps.painter->DrawWidgetBackground(ps.widgetId, p);
+
+    p.rect = edt;
+    ps.painter->DrawTextEditBox(ps.widgetId, p);
+
+    Painter::EditableText text;
+    text.text = std::to_string(mValue);
+    edt.Grow(-4, -4);
+    edt.Translate(2, 2);
+    p.rect = edt;
+    ps.painter->DrawEditableText(ps.widgetId, p, text);
+
+    p.rect    = btn_inc;
+    p.moused  = ps.state->GetValue(ps.widgetId + "/btn-inc-mouse-over", false);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-inc-pressed", false);
+    p.enabled = paint.enabled && mValue < mMaxVal;
+    ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowUp);
+
+    p.rect    = btn_dec;
+    p.moused  = ps.state->GetValue(ps.widgetId + "/btn-dec-mouse-over", false);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-dec-pressed", false);
+    p.enabled = paint.enabled && mValue > mMinVal;
+    ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowDown);
+
+    p.rect    = paint.rect;
+    p.moused  = paint.moused;
+    p.enabled = paint.enabled;
+    p.pressed = false;
+    ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+void SpinBoxModel::IntoJson(data::Writer& data) const
+{
+    data.Write("value", mValue);
+    data.Write("min", mMinVal);
+    data.Write("max", mMaxVal);
+}
+bool SpinBoxModel::FromJson(const data::Reader& data)
+{
+    if (!data.Read("value", &mValue) ||
+        !data.Read("min", &mMinVal) ||
+        !data.Read("max", &mMaxVal))
+        return false;
+    return true;
+}
+
+WidgetAction SpinBoxModel::PollAction(const PollStruct& poll)
+{
+    // if the mouse button is keeping either the increment
+    // or the decrement button down then generate continuous
+    // value update events.
+
+    WidgetAction ret;
+    float time = poll.state->GetValue(poll.widgetId + "/btn-interval", 0.3f);
+    time -= poll.dt;
+    if (time <= 0.0f)
+    {
+        ret = UpdateValue(poll.widgetId, *poll.state);
+        // run a little bit faster next time.
+        time = math::clamp(0.01f, 0.3f, time * 0.8f);
+    }
+    poll.state->SetValue(poll.widgetId + "/btn-interval", time);
+    return ret;
+}
+
+WidgetAction SpinBoxModel::MouseEnter(const MouseStruct&)
+{ return WidgetAction {}; }
+
+WidgetAction SpinBoxModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect btn_inc, btn_dec;
+    ComputeBoxes(mouse.widget_window_rect, &btn_inc, &btn_dec);
+    ms.state->SetValue(ms.widgetId + "/btn-inc-pressed", btn_inc.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/btn-dec-pressed", btn_dec.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/btn-interval", 0.3f);
+    return UpdateValue(ms.widgetId, *ms.state);
+}
+
+WidgetAction SpinBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect btn_inc, btn_dec;
+    ComputeBoxes(mouse.widget_window_rect, &btn_inc, &btn_dec);
+    const auto btn_inc_under_mouse = btn_inc.TestPoint(mouse.window_mouse_pos);
+    const auto btn_dec_under_mouse = btn_dec.TestPoint(mouse.window_mouse_pos);
+    ms.state->SetValue(ms.widgetId + "/btn-inc-mouse-over", btn_inc_under_mouse);
+    ms.state->SetValue(ms.widgetId + "/btn-dec-mouse-over", btn_dec_under_mouse);
+    if (!btn_inc_under_mouse)
+        ms.state->SetValue(ms.widgetId + "/btn-inc-pressed", false);
+    if (!btn_dec_under_mouse)
+        ms.state->SetValue(ms.widgetId + "/btn-dec-pressed", false);
+    return WidgetAction {};
+}
+WidgetAction SpinBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/btn-inc-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/btn-dec-pressed", false);
+    return WidgetAction {};
+}
+
+WidgetAction SpinBoxModel::MouseLeave(const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/btn-inc-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/btn-dec-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/btn-inc-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/btn-dec-pressed", false);
+    return WidgetAction {};
+}
+
+void SpinBoxModel::ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit) const
+{
+    const auto widget_width  = rect.GetWidth();
+    const auto widget_height = rect.GetHeight();
+    const auto edit_width    = widget_width * 0.8;
+    const auto edit_height   = widget_height;
+    const auto button_width  = widget_width - edit_width;
+    const auto button_height = widget_height * 0.5;
+
+    FRect edt;
+    edt.SetWidth(edit_width);
+    edt.SetHeight(edit_height);
+    edt.Move(rect.GetPosition());
+    if (edit) *edit = edt;
+
+    FRect btn;
+    btn.SetWidth(button_width);
+    btn.SetHeight(button_height);
+    btn.Move(rect.GetPosition());
+    btn.Translate(edit_width, 0);
+    *btn_inc = btn;
+
+    btn.Translate(0, button_height);
+    *btn_dec = btn;
+}
+
+WidgetAction SpinBoxModel::UpdateValue(const std::string& id, State& state)
+{
+    const auto inc_down = state.GetValue(id + "/btn-inc-pressed", false);
+    const auto dec_down = state.GetValue(id + "/btn-dec-pressed", false);
+    auto value = mValue;
+    if (inc_down)
+        value = math::clamp(mMinVal, mMaxVal, value + 1);
+    else if (dec_down)
+        value = math::clamp(mMinVal, mMaxVal, value - 1);
+
+    if (mValue != value)
+    {
+        mValue = value;
+        WidgetAction action;
+        action.type = WidgetActionType::ValueChanged;
+        action.value = value;
+        return action;
+    }
+    return WidgetAction {};
+}
+
+
 std::size_t LabelModel::GetHash(size_t hash) const
 {
     hash = base::hash_combine(hash, mText);
@@ -93,7 +277,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "label";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawText(ps.widgetId, p, mText, mLineHeight);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -128,7 +312,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.klass   = "push-button";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
-    ps.painter->DrawText(ps.widgetId, p, mText, 1.0f);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -208,7 +392,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
         text.Resize(width - 30 , height);
         text.Move(pos);
         p.rect = text;
-        ps.painter->DrawText(ps.widgetId, p, mText, 1.0f);
+        ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
     }
 
     p.rect = paint.rect;
