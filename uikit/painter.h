@@ -92,21 +92,23 @@ namespace uik
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const = 0;
         // Draw the widget border if any.
         virtual void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const = 0;
-        // Draw the widget text. This is used for texts such as labels, button texts, or
-        // texts that are part of the widget's "static" interface. Widget items such as
-        // combobox dropdown items or list box items are drawn using separate functionality.
-        virtual void DrawWidgetText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const = 0;
         // Draw a focus rect to indicate that the widget has focus. This is a generic
         // "one" shot impl alternative to using the PaintStruct::focused flag. A painter
         // implementation can support either one (or even nothing).
-        virtual void DrawFocusRect(const WidgetId& id, const PaintStruct& ps) const = 0;
+        virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const = 0;
+
+        // Draw the widget text. This is used for texts such as labels, button texts, or
+        // texts that are part of the widget's "static" interface. Widget items such as
+        // combobox dropdown items or list box items are drawn using separate functionality.
+        virtual void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const = 0;
+
         // Draw a checkbox.
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const = 0;
 
-        enum class Button {
-            ArrowUp, ArrowDown
+        enum class ButtonIcon {
+            None, ArrowUp, ArrowDown
         };
-        virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, Button btn) const = 0;
+        virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const = 0;
 
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentagen) const = 0;
 

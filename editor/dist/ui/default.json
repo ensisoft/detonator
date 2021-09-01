@@ -68,6 +68,44 @@
     },
 
     {
+      "key": "widget/button-icon",
+      "type": "Color",
+      "color": "White"
+    },
+    {
+      "key": "widget/button-background",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+    {
+      "key": "widget/pressed/button-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+    {
+      "key": "widget/pressed/button-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray"
+    },
+    {
+      "key": "widget/mouse-over/button-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+
+    {
       "key": "form/background",
       "type": "Color",
       "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
@@ -151,6 +189,32 @@
       "color2": "Black",
       "color3": "Black"
     },
+    {
+      "key": "push-button/button-background",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/button-border",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/mouse-over/button-background",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/mouse-over/button-border",
+      "type": "Null"
+    },
+
+    {
+      "key": "push-button/pressed/button-background",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/pressed/button-border",
+      "type": "Null"
+    },
+
 
     {
       "key": "groupbox/background",

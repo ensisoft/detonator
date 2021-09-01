@@ -58,7 +58,7 @@ public:
         cmd.ps     = ps;
         cmds.push_back(std::move(cmd));
     }
-    void DrawWidgetText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override
+    void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override
     {
         Command cmd;
         cmd.name   = "draw-widget-text";
@@ -68,11 +68,11 @@ public:
         cmd.line_height = line_height;
         cmds.push_back(std::move(cmd));
     }
-    void DrawFocusRect(const WidgetId& id, const PaintStruct& ps) const override
+    void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override
     {}
     void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override
     {}
-    void DrawButton(const WidgetId& id, const PaintStruct& ps, Button btn) const override
+    void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override
     {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const override
     {}

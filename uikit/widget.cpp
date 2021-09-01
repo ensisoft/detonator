@@ -93,7 +93,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "label";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawWidgetText(ps.widgetId, p, mText, mLineHeight);
+    ps.painter->DrawText(ps.widgetId, p, mText, mLineHeight);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -127,7 +127,8 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.pressed = ps.state->GetValue(ps.widgetId + "/pressed", false);
     p.klass   = "push-button";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawWidgetText(ps.widgetId, p, mText, 1.0);
+    ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
+    ps.painter->DrawText(ps.widgetId, p, mText, 1.0f);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -207,7 +208,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
         text.Resize(width - 30 , height);
         text.Move(pos);
         p.rect = text;
-        ps.painter->DrawWidgetText(ps.widgetId , p , mText , 1.0f);
+        ps.painter->DrawText(ps.widgetId, p, mText, 1.0f);
     }
 
     p.rect = paint.rect;
