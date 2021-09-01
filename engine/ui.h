@@ -480,11 +480,11 @@ namespace engine
         // uik::Painter implementation.
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawWidgetText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
-        virtual void DrawFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
+        virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
+        virtual void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
-        virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, Button btn) const;
-        virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const;
+        virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
+        virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const override;
         virtual bool ParseStyle(const WidgetId& id, const std::string& style) override;
 
         // About deleting material instances.

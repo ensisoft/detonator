@@ -26,10 +26,12 @@
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "base/math.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
+#include "graphics/transform.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
@@ -474,7 +476,7 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
     }
 }
 
-void UIPainter::DrawWidgetText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const
+void UIPainter::DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const
 {
     if (text.empty())
         return;
@@ -511,7 +513,7 @@ void UIPainter::DrawWidgetText(const WidgetId& id, const PaintStruct& ps, const 
     gfx::DrawTextRect(*mPainter, text, font_name, font_size, ps.rect, text_color, alignment, properties, line_height);
 }
 
-void UIPainter::DrawFocusRect(const WidgetId& id, const PaintStruct& ps) const
+void UIPainter::DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const
 {
     // todo:
 }
@@ -544,10 +546,52 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
     }
 }
 
-void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, Button btn) const
+void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const
 {
-    // todo:
+    if  (const auto* material = GetWidgetMaterial(id, ps, "button-background"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, "button-border"))
+    {
+        const auto width = GetWidgetProperty(id, ps, "button-border-width", 1.0f);
+        const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
+    if (btn == ButtonIcon::None)
+        return;
+
+    if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+    {
+        const auto btn_width  = ps.rect.GetWidth();
+        const auto btn_height = ps.rect.GetHeight();
+        const auto min_side = std::min(btn_width, btn_height);
+        const auto ico_size = min_side * 0.4f;
+        if (btn == ButtonIcon::ArrowUp)
+        {
+            gfx::Transform icon;
+            icon.Resize(ico_size, ico_size);
+            icon.MoveTo(ps.rect.GetPosition());
+            icon.Translate(btn_width*0.5, btn_height*0.5);
+            icon.Translate(ico_size*-0.5, ico_size*-0.5);
+            mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
+        else if (btn == ButtonIcon::ArrowDown)
+        {
+            gfx::Transform icon;
+            icon.Resize(ico_size, ico_size);
+            icon.Translate(ico_size*-0.5, ico_size*-0.5);
+            icon.Rotate(math::Pi);
+            icon.Translate(ico_size*0.5, ico_size*0.5);
+            icon.Translate(ps.rect.GetPosition());
+            icon.Translate(btn_width*0.5, btn_height*0.5);
+            icon.Translate(ico_size*-0.5, ico_size*-0.5);
+            mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
+    }
 }
+
 void UIPainter::DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const
 {
     // todo:
