@@ -296,6 +296,25 @@ void Window::IntoJson(data::Writer& data) const
     Serializer::IntoJson(data, *mRoot);
 }
 
+Window::WidgetAction Window::PollAction(State& state, double time, float dt)
+{
+    Widget* active_widget = nullptr;
+    state.GetValue(mId + "/active-widget", &active_widget);
+    if (!active_widget)
+        return WidgetAction {};
+
+    const auto& ret = active_widget->PollAction(state, time, dt);
+    if (ret.type == WidgetActionType::None)
+        return WidgetAction {};
+
+    WidgetAction action;
+    action.id    = active_widget->GetId();
+    action.name  = active_widget->GetName();
+    action.type  = ret.type;
+    action.value = ret.value;
+    return action;
+}
+
 Window::WidgetAction Window::MousePress(const MouseEvent& mouse, State& state)
 {
     return send_mouse_event(mouse, &Widget::MousePress, state);
@@ -423,6 +442,7 @@ Window::WidgetAction Window::send_mouse_event(const MouseEvent& mouse, MouseHand
             new_widget_under_mouse->MouseEnter(state);
     }
     state.SetValue(mId + "/widget-under-mouse", new_widget_under_mouse);
+    state.SetValue(mId + "/active-widget", new_widget_under_mouse);
 
     if (new_widget_under_mouse == nullptr)
         return WidgetAction{};
