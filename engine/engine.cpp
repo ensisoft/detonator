@@ -338,9 +338,12 @@ public:
             }
         }
 
-        if (HaveOpenUI())
+        if (auto* ui = GetUI())
         {
             mUIPainter.Update(mGameTimeTotal, dt);
+            const auto& action = ui->PollAction(mUIState, mGameTickStep, dt);
+            if (action.type != uik::WidgetActionType::None)
+                mGame->OnUIAction(action);
         }
 
         mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - (float)dt);
