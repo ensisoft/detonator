@@ -481,7 +481,9 @@ namespace engine
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
+        virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
+        virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
+        virtual void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const override;

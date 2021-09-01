@@ -406,6 +406,8 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
                 return std::make_unique<uik::CheckBox>();
             else if (type == Widget::Type::GroupBox)
                 return std::make_unique<uik::GroupBox>();
+            else if (type == Widget::Type::SpinBox)
+                return std::make_unique<uik::SpinBox>();
             else return nullptr;
         }
     };
