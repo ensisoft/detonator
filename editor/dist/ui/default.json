@@ -38,6 +38,21 @@
       "value": "Center"
     },
 
+
+    {
+      "key": "widget/edit-text-font",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/edit-text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/edit-text-color",
+      "value": "Black"
+    },
+
+
     {
       "key": "form/shape",
       "value": "Rect"
@@ -99,6 +114,27 @@
     },
     {
       "key": "widget/mouse-over/button-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black"
+    },
+
+    {
+      "key": "widget/text-edit-background",
+      "type": "Color",
+      "color": "White"
+    },
+
+    {
+      "key": "widget/slider-background",
+      "type": "Color",
+      "color": "White"
+    },
+
+    {
+      "key": "widget/slider-knob",
       "type": "Gradient",
       "color0": "LightGray",
       "color1": "LightGray",
