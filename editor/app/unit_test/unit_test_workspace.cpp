@@ -1017,7 +1017,7 @@ void unit_test_packing_ui_style_resources()
        "value": 1.0
      },
      {
-       "key": "widget/font-name",
+       "key": "widget/text-font",
        "value": "ws://fonts/style_font.otf"
      }
    ],
@@ -1050,7 +1050,7 @@ void unit_test_packing_ui_style_resources()
         uik::Label label;
 
         engine::UIStyle style;
-        style.SetProperty(label.GetId() + "/font-name", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
+        style.SetProperty(label.GetId() + "/text-font", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
         label.SetStyleString(style.MakeStyleString(label.GetId()));
 
         uik::Window window;

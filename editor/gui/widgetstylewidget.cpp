@@ -179,12 +179,12 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
         const auto& id = widget->GetId();
         const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
         if (font.empty())
-            mStyle->DeleteProperty(id + mSelector + "/font-name");
-        else mStyle->SetProperty(id + mSelector + "/font-name", font);
+            mStyle->DeleteProperty(id + mSelector + "/text-font");
+        else mStyle->SetProperty(id + mSelector + "/text-font", font);
 
         if (mUI.widgetFontSize->currentIndex() == -1)
-            mStyle->DeleteProperty(id + mSelector + "/font-size");
-        else mStyle->SetProperty(id + mSelector + "/font-size", (int)GetValue(mUI.widgetFontSize));
+            mStyle->DeleteProperty(id + mSelector + "/text-size");
+        else mStyle->SetProperty(id + mSelector + "/text-size", (int)GetValue(mUI.widgetFontSize));
 
         if (mUI.widgetTextVAlign->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/text-vertical-align");
@@ -263,9 +263,9 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
     {
         const auto& id = widget->GetId();
 
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/font-name"))
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-font"))
             SetValue(mUI.widgetFontName, prop.GetValue<std::string>());
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/font-size"))
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-size"))
             SetValue(mUI.widgetFontSize, QString::number(prop.GetValue<int>()));
 
         if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-vertical-align"))

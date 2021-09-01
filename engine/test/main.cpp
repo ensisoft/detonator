@@ -633,8 +633,8 @@ public:
 
         mStyle.SetMaterial("widget/background", engine::detail::UIColor(gfx::Color::Black));
         mStyle.SetMaterial("widget/border", engine::detail::UIColor(gfx::Color::LightGray));
-        mStyle.SetProperty("widget/font-name", "fonts/orbitron-medium.otf");
         mStyle.SetProperty("widget/shape", "RoundRect");
+        mStyle.SetProperty("widget/text-font", "fonts/orbitron-medium.otf");
         mStyle.SetProperty("widget/text-color", gfx::Color::White);
 
         mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);

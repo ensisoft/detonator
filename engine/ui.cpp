@@ -484,8 +484,8 @@ void UIPainter::DrawText(const WidgetId& id, const PaintStruct& ps, const std::s
     const auto& text_color = GetWidgetProperty(id, ps, "text-color", uik::Color4f(uik::Color::White));
     const auto& text_blink = GetWidgetProperty(id, ps, "text-blink", false);
     const auto& text_underline = GetWidgetProperty(id, ps, "text-underline",false);
-    const auto& font_name = GetWidgetProperty(id, ps, "font-name",std::string(""));
-    const auto  font_size = GetWidgetProperty(id, ps, "font-size",16);
+    const auto& font_name = GetWidgetProperty(id, ps, "text-font",std::string(""));
+    const auto  font_size = GetWidgetProperty(id, ps, "text-size",16);
     const auto va = GetWidgetProperty(id, ps, "text-vertical-align", UIStyle::VerticalTextAlign::Center);
     const auto ha = GetWidgetProperty(id, ps, "text-horizontal-align", UIStyle::HorizontalTextAlign::Center);
 
