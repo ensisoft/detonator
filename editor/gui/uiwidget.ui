@@ -990,6 +990,30 @@
     <string>Place a new group box</string>
    </property>
   </action>
+  <action name="actionNewSpinBox">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spinbox</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new spinbox</string>
+   </property>
+  </action>
+  <action name="actionNewSlider">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Slider</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new slider</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

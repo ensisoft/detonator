@@ -78,6 +78,8 @@ namespace gui
         void on_actionNewPushButton_triggered();
         void on_actionNewGroupBox_triggered();
         void on_actionNewCheckBox_triggered();
+        void on_actionNewSpinBox_triggered();
+        void on_actionNewSlider_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_windowName_textChanged(const QString& text);

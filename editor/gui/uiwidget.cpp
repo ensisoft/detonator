@@ -380,6 +380,8 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewPushButton);
     bar.addAction(mUI.actionNewCheckBox);
     bar.addAction(mUI.actionNewGroupBox);
+    bar.addAction(mUI.actionNewSpinBox);
+    bar.addAction(mUI.actionNewSlider);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -394,6 +396,8 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewPushButton);
     menu.addAction(mUI.actionNewCheckBox);
     menu.addAction(mUI.actionNewGroupBox);
+    menu.addAction(mUI.actionNewSpinBox);
+    menu.addAction(mUI.actionNewSlider);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -605,6 +609,9 @@ void UIWidget::Update(double dt)
         mPlayTime += dt;
         mState.painter->Update(mPlayTime, dt);
         mState.active_window->Update(*mState.active_state, mPlayTime, dt);
+        const auto& action = mState.active_window->PollAction(*mState.active_state, mPlayTime, dt);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
     }
     mCurrentTime += dt;
 }
@@ -749,6 +756,8 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.widgetStyle,         false);
     SetEnabled(mUI.widgetData,          false);
     SetEnabled(mUI.actionNewCheckBox,   false);
+    SetEnabled(mUI.actionNewSpinBox,    false);
+    SetEnabled(mUI.actionNewSlider,     false);
     SetEnabled(mUI.actionNewGroupBox,   false);
     SetEnabled(mUI.actionNewLabel,      false);
     SetEnabled(mUI.actionNewPushButton, false);
@@ -785,6 +794,8 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewLabel,      true);
     SetEnabled(mUI.actionNewPushButton, true);
     SetEnabled(mUI.actionNewGroupBox,   true);
+    SetEnabled(mUI.actionNewSpinBox,    true);
+    SetEnabled(mUI.actionNewSlider,     true);
     SetEnabled(mUI.cmbGrid,       true);
     SetEnabled(mUI.zoom,          true);
     SetEnabled(mUI.chkSnap,       true);
@@ -839,6 +850,20 @@ void UIWidget::on_actionNewCheckBox_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::CheckBox>(), snap, (unsigned)grid));
+}
+
+void UIWidget::on_actionNewSpinBox_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::SpinBox>(), snap, (unsigned)grid));
+}
+
+void UIWidget::on_actionNewSlider_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Slider>(), snap, (unsigned)grid));
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
