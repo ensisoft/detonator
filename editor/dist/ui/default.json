@@ -1,16 +1,17 @@
 {
   "properties": [
     {
-      "key": "widget/text-color",
-      "value": "White"
-    },
-    {
       "key": "widget/shape",
       "value": "RoundRect"
     },
     {
       "key": "widget/border-width",
       "value": 1.0
+    },
+
+    {
+      "key": "widget/text-color",
+      "value": "White"
     },
     {
       "key": "widget/text-blink",
@@ -21,11 +22,11 @@
       "value": false
     },
     {
-      "key": "widget/font-name",
+      "key": "widget/text-font",
       "value": "app://fonts/orbitron-medium.otf"
     },
     {
-      "key": "widget/font-size",
+      "key": "widget/text-size",
       "value": 16
     },
     {

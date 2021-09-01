@@ -2027,7 +2027,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 continue;
             }
             std::vector<engine::UIStyle::PropertyKeyValue> props;
-            style.GatherProperties("font-name", &props);
+            style.GatherProperties("-font", &props);
             for (auto& p : props)
             {
                 std::string src_font_uri;
@@ -2048,7 +2048,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 style.ClearMaterials();
                 style.ParseStyleString(widget->GetId(), style_string);
                 std::vector<engine::UIStyle::PropertyKeyValue> props;
-                style.GatherProperties("font-name", &props);
+                style.GatherProperties("-font", &props);
                 for (auto& p : props)
                 {
                     std::string src_font_uri;
