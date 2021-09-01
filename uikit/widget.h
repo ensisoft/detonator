@@ -156,6 +156,13 @@ namespace uik
             WidgetActionValue value;
         };
 
+        // Poll the widget for an action. The widget might generate
+        // actions when for example a button is being held.
+        // Time is the current time and dt is the delta time since
+        // the last PollAction call.
+        virtual Action PollAction(State& state, double time, float dt)
+        { return Action {}; }
+
         // Mouse event handler to indicate that the mouse has moved
         // on top of the widget. This will always be called before any
         // other mouse event will be called.
@@ -244,6 +251,20 @@ namespace uik
             std::string widgetId;
             std::string widgetName;
             State* state = nullptr;
+        };
+        struct UpdateStruct {
+            std::string widgetId;
+            std::string widgetName;
+            State* state = nullptr;
+            double time  = 0.0;
+            float dt = 0.0f;
+        };
+        struct PollStruct {
+            std::string widgetId;
+            std::string widgetName;
+            State* state = nullptr;
+            double time  = 0.0;
+            float dt     = 0.0f;
         };
 
         class FormModel
@@ -369,19 +390,18 @@ namespace uik
             static constexpr auto InitialHeight = 30;
             static constexpr auto WantsMouseEvents = false;
             static constexpr auto WantsUpdate = false;
+            static constexpr auto WantsPoll = false;
         };
 
         template<typename WidgetModel>
         struct WidgetModelTraits;
 
         template<>
-        struct WidgetModelTraits<FormModel>
+        struct WidgetModelTraits<FormModel> : public WidgetTraits
         {
             static constexpr auto Type = Widget::Type::Form;
             static constexpr auto InitialWidth  = 1024;
             static constexpr auto InitialHeight = 768;
-            static constexpr auto WantsMouseEvents = false;
-            static constexpr auto WantsUpdate = false;
         };
 
         template<>
@@ -575,7 +595,15 @@ namespace uik
             virtual void Update(State& state, double time, float dt) override
             {
                 if constexpr (Traits::WantsUpdate)
-                    WidgetModel::Update(state, time, dt);
+                {
+                    UpdateStruct update;
+                    update.state = &state;
+                    update.widgetId = mId;
+                    update.widgetName = mName;
+                    update.time = time;
+                    update.dt   = dt;
+                    WidgetModel::Update(update);
+                }
             }
 
             virtual void IntoJson(data::Writer& data) const override
@@ -589,6 +617,21 @@ namespace uik
                     return false;
                 return true;
             }
+            virtual WidgetAction PollAction(State& state, double time, float dt) override
+            {
+                if constexpr (Traits::WantsPoll)
+                {
+                    PollStruct ps;
+                    ps.state = &state;
+                    ps.widgetId = mId;
+                    ps.widgetName = mName;
+                    ps.time = time;
+                    ps.dt   = dt;
+                    return WidgetModel::PollAction(ps);
+                }
+                else return WidgetAction {};
+            }
+
             virtual WidgetAction MouseEnter(State& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
