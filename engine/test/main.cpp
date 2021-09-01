@@ -651,6 +651,10 @@ public:
         mStyle.SetProperty("widget/edit-text-color", gfx::Color::Black);
         // text edit box properties.
         mStyle.SetMaterial("widget/text-edit-background", engine::detail::UIColor(gfx::Color::White));
+        // slider properties.
+        mStyle.SetMaterial("slider/slider-background", engine::detail::UIColor(gfx::Color::White));
+        mStyle.SetMaterial("slider/slider-knob", engine::detail::UIColor(gfx::Color::Black));
+        mStyle.SetMaterial("slider/pressed/slider-knob", engine::detail::UIColor(gfx::Color::Gray));
 
         // some assorted properties
         mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);
@@ -698,6 +702,14 @@ public:
             spin.SetName("spin");
             spin.SetPosition(200.0f, 80.0f);
             mWindow.AddWidget(spin);
+        }
+
+        {
+            uik::Slider slider;
+            slider.SetName("slider");
+            slider.SetPosition(30.0f, 150.0f);
+            slider.SetSize(250.f, 30.0f);
+            mWindow.AddWidget(slider);
         }
 
         mState.Clear();

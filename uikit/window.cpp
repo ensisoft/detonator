@@ -408,6 +408,8 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
                 return std::make_unique<uik::GroupBox>();
             else if (type == Widget::Type::SpinBox)
                 return std::make_unique<uik::SpinBox>();
+            else if (type == Widget::Type::Slider)
+                return std::make_unique<uik::Slider>();
             else return nullptr;
         }
     };

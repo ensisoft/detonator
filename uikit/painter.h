@@ -117,6 +117,8 @@ namespace uik
         };
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const = 0;
 
+        virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const FRect& knob) const = 0;
+
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentagen) const = 0;
 
         // todo: more sub widget draw ops.
