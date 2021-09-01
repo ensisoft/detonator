@@ -78,6 +78,8 @@ public:
     {}
     void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override
     {}
+    virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override
+    {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const override
     {}
     bool ParseStyle(const WidgetId& id, const std::string& style) override

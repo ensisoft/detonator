@@ -620,6 +620,26 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     }
 }
 
+void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const
+{
+    if (const auto* material = GetWidgetMaterial(id, ps, "slider-background"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(knob, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, "slider-border"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "slider-border-width", 1.0f);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
+}
+
 void UIPainter::DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const
 {
     // todo:

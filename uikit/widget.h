@@ -49,7 +49,9 @@ namespace uik
             // within a visually representable container.
             GroupBox,
             // Spinbox has 2 buttons for incrementing and decrementing an integer value.
-            SpinBox
+            SpinBox,
+            // A slider with a knob that moves left/right or up/down
+            Slider
         };
 
         enum class Flags {
@@ -282,6 +284,28 @@ namespace uik
         private:
         };
 
+        class SliderModel
+        {
+        public:
+            void SetValue(float value)
+            { mValue = value; }
+            float GetValue() const
+            { return mValue; }
+            std::size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+            WidgetAction MouseEnter(const MouseStruct&);
+            WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseLeave(const MouseStruct&);
+        private:
+            void ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) const;
+        private:
+            float mValue = 0.5f;
+        };
+
         class SpinBoxModel
         {
         public:
@@ -466,6 +490,13 @@ namespace uik
             static constexpr auto Type = Widget::Type::SpinBox;
             static constexpr auto WantsMouseEvents = true;
             static constexpr auto WantsPoll = true;
+        };
+        template<>
+        struct WidgetModelTraits<SliderModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::Slider;
+            static constexpr auto InitialWidth     = 200;
+            static constexpr auto WantsMouseEvents = true;
         };
 
         class WidgetBase
@@ -770,5 +801,6 @@ namespace uik
     using GroupBox   = detail::BasicWidget<detail::GroupBoxModel, detail::WidgetContainer>;
     using Form       = detail::BasicWidget<detail::FormModel, detail::WidgetContainer>;
     using SpinBox    = detail::BasicWidget<detail::SpinBoxModel>;
+    using Slider     = detail::BasicWidget<detail::SliderModel>;
 
 } // namespace

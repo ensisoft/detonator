@@ -75,6 +75,108 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
+std::size_t SliderModel::GetHash(size_t hash) const
+{
+    return base::hash_combine(hash, mValue);
+}
+void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.enabled = paint.enabled;
+    p.focused = paint.focused;
+    p.moused  = paint.moused;
+    p.time    = paint.time;
+    p.clip    = paint.clip;
+    p.rect    = paint.rect;
+    p.pressed = false;
+    p.klass   = "slider";
+    ps.painter->DrawWidgetBackground(ps.widgetId, p);
+
+    FRect slider;
+    FRect knob;
+    ComputeLayout(paint.rect, &slider, &knob);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/slider-down", false);
+    ps.painter->DrawSlider(ps.widgetId, p, knob);
+
+    p.pressed = false;
+    ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+void SliderModel::IntoJson(data::Writer& data) const
+{
+    data.Write("value", mValue);
+}
+bool SliderModel::FromJson(const data::Reader& data)
+{
+    return data.Read("value", &mValue);
+}
+WidgetAction SliderModel::MouseEnter(const MouseStruct&)
+{
+    return WidgetAction {};
+}
+WidgetAction SliderModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect slider, knob;
+    ComputeLayout(mouse.widget_window_rect, &slider, &knob);
+    ms.state->SetValue(ms.widgetId + "/slider-down", knob.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
+    return WidgetAction {};
+}
+WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    const auto slider_down = ms.state->GetValue(ms.widgetId + "/slider-down", false);
+    if (!slider_down)
+        return WidgetAction {};
+
+    FRect slider, knob;
+    ComputeLayout(mouse.widget_window_rect, &slider, &knob);
+
+    const auto slider_distance = slider.GetWidth() - knob.GetWidth();
+    const auto& mouse_before = ms.state->GetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
+    const auto& mouse_delta  = mouse.widget_mouse_pos - mouse_before;
+    const auto delta = mouse_delta.GetX();
+    const auto dx = delta / slider_distance;
+    mValue = math::clamp(0.0f, 1.0f, mValue + dx);
+
+    ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
+
+    WidgetAction action;
+    action.type  = WidgetActionType::ValueChanged;
+    action.value = mValue;
+    return action;
+}
+WidgetAction SliderModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/slider-down", false);
+
+    return WidgetAction {};
+}
+WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/slider-down", false);
+    return WidgetAction {};
+}
+
+void SliderModel::ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) const
+{
+    const auto width  = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    const auto min_side = std::min(width, height);
+    const auto knob_size = min_side;
+
+    const auto slide_distance = width - knob_size;
+    const auto slide_pos = math::clamp(0.0f, 1.0f, mValue);
+
+    FRect k;
+    k.SetWidth(min_side);
+    k.SetHeight(min_side);
+    k.Move(rect.GetPosition());
+    k.Translate(slide_distance * slide_pos, 0.0f);
+
+    *slider = rect;
+    *knob   = k;
+}
+
+
 SpinBoxModel::SpinBoxModel()
 {
     mMinVal = std::numeric_limits<int>::min();
