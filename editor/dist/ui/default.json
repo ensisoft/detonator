@@ -11,7 +11,7 @@
 
     {
       "key": "widget/text-color",
-      "value": "White"
+      "value": "LightGray"
     },
     {
       "key": "widget/text-blink",
@@ -49,9 +49,8 @@
     },
     {
       "key": "widget/edit-text-color",
-      "value": "Black"
+      "value": "LightGray"
     },
-
 
     {
       "key": "form/shape",
@@ -63,30 +62,17 @@
   "materials": [
     {
       "key": "widget/background",
-      "type": "Color",
-      "color": {
-        "r": 1.0,
-        "g": 0.0,
-        "b": 0.0,
-        "a": 1.0
-      }
+      "type": "Null"
     },
-
     {
       "key": "widget/border",
-      "type": "Color",
-      "color": {
-        "r": 1.0,
-        "g": 1.0,
-        "b": 1.0,
-        "a": 1.0
-      }
+      "type": "Null"
     },
 
     {
       "key": "widget/button-icon",
       "type": "Color",
-      "color": "White"
+      "color": "LightGray"
     },
     {
       "key": "widget/button-background",
@@ -94,7 +80,8 @@
       "color0": "Gray",
       "color1": "Gray",
       "color2": "Black",
-      "color3": "Black"
+      "color3": "Black",
+      "gamma": 2.2
     },
     {
       "key": "widget/pressed/button-background",
@@ -102,15 +89,8 @@
       "color0": "LightGray",
       "color1": "LightGray",
       "color2": "Black",
-      "color3": "Black"
-    },
-    {
-      "key": "widget/pressed/button-border",
-      "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Gray",
-      "color3": "Gray"
+      "color3": "Black",
+      "gamma": 2.2
     },
     {
       "key": "widget/mouse-over/button-background",
@@ -118,28 +98,76 @@
       "color0": "LightGray",
       "color1": "LightGray",
       "color2": "Black",
-      "color3": "Black"
+      "color3": "Black",
+      "gamma": 2.2
     },
+    {
+      "key": "widget/pressed/button-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.2
+    },
+
 
     {
       "key": "widget/text-edit-background",
-      "type": "Color",
-      "color": "White"
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
     },
 
     {
-      "key": "widget/slider-background",
-      "type": "Color",
-      "color": "White"
+      "key": "slider/slider-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
     },
 
     {
-      "key": "widget/slider-knob",
+      "key": "slider/slider-knob",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "slider/mouse-over/slider-knob",
       "type": "Gradient",
       "color0": "LightGray",
       "color1": "LightGray",
       "color2": "Black",
-      "color3": "Black"
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "slider/pressed/slider-knob",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+
+    },
+    {
+      "key": "slider/pressed/slider-knob-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.0
     },
 
     {
@@ -154,29 +182,13 @@
     },
 
     {
-      "key": "label/background",
-      "type": "Null"
-    },
-    {
-      "key": "label/border",
-      "type": "Null"
-    },
-
-    {
-      "key": "checkbox/background",
-      "type": "Null"
-    },
-    {
-      "key": "checkbox/border",
-      "type": "Null"
-    },
-    {
       "key": "checkbox/check-background",
       "type": "Gradient",
-      "color0": "Gray",
-      "color1": "Gray",
-      "color2": "Black",
-      "color3": "Black"
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
     },
     {
       "key": "checkbox/check-border",
@@ -186,70 +198,26 @@
     {
       "key": "checkbox/check-mark",
       "type": "Color",
-      "color": "Silver"
+      "color": "LightGray"
     },
 
-
     {
-      "key": "push-button/background",
+      "key": "progress-bar/progress-bar-background",
       "type": "Gradient",
-      "color0": "Gray",
-      "color1": "Gray",
-      "color2": "Black",
-      "color3": "Black"
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
     },
     {
-      "key": "push-button/border",
-      "type": "Null"
-    },
-    {
-      "key": "push-button/pressed/border",
-      "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Gray",
-      "color3": "Gray"
-    },
-    {
-      "key": "push-button/mouse-over/background",
+      "key": "progress-bar/progress-bar-fill",
       "type": "Gradient",
       "color0": "LightGray",
       "color1": "LightGray",
       "color2": "Black",
-      "color3": "Black"
-    },
-    {
-      "key": "push-button/pressed/background",
-      "type": "Gradient",
-      "color0": "DarkGray",
-      "color1": "DarkGray",
-      "color2": "Black",
-      "color3": "Black"
-    },
-    {
-      "key": "push-button/button-background",
-      "type": "Null"
-    },
-    {
-      "key": "push-button/button-border",
-      "type": "Null"
-    },
-    {
-      "key": "push-button/mouse-over/button-background",
-      "type": "Null"
-    },
-    {
-      "key": "push-button/mouse-over/button-border",
-      "type": "Null"
-    },
-
-    {
-      "key": "push-button/pressed/button-background",
-      "type": "Null"
-    },
-    {
-      "key": "push-button/pressed/button-border",
-      "type": "Null"
+      "color3": "Black",
+      "gamma": 2.2
     },
 
 
@@ -257,6 +225,12 @@
       "key": "groupbox/background",
       "type": "Color",
       "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+    },
+    {
+      "key": "groupbox/border",
+      "type": "Color",
+      "color": "White"
     }
+
   ]
 }
