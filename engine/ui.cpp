@@ -639,6 +639,13 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(knob, *material, shape);
     }
+    if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob-border"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "slider-knob-border-width", 1.0f);
+        OutlineShape(knob, *material, shape, width);
+    }
+
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
