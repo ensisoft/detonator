@@ -20,6 +20,7 @@
 
 #include <string>
 #include <algorithm>
+#include <optional>
 
 #include "base/assert.h"
 #include "base/bitflag.h"
@@ -51,7 +52,9 @@ namespace uik
             // Spinbox has 2 buttons for incrementing and decrementing an integer value.
             SpinBox,
             // A slider with a knob that moves left/right or up/down
-            Slider
+            Slider,
+            // Progress indicator
+            ProgressBar
         };
 
         enum class Flags {
@@ -284,6 +287,28 @@ namespace uik
         private:
         };
 
+        class ProgressBarModel
+        {
+        public:
+            void SetText(const std::string& text)
+            { mText = text; }
+            void SetValue(float value)
+            { mValue = value; }
+            void ClearValue()
+            { mValue.reset(); }
+            std::optional<float> GetValue() const
+            { return mValue; }
+            std::string GetText() const
+            { return mText; }
+            std::size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+        private:
+            std::optional<float> mValue;
+            std::string mText;
+        };
+
         class SliderModel
         {
         public:
@@ -511,6 +536,13 @@ namespace uik
             static constexpr auto Type = Widget::Type::Slider;
             static constexpr auto InitialWidth     = 200;
             static constexpr auto WantsMouseEvents = true;
+        };
+
+        template<>
+        struct WidgetModelTraits<ProgressBarModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::ProgressBar;
+            static constexpr auto InitialWidth = 200;
         };
 
         class WidgetBase
@@ -816,5 +848,6 @@ namespace uik
     using Form       = detail::BasicWidget<detail::FormModel, detail::WidgetContainer>;
     using SpinBox    = detail::BasicWidget<detail::SpinBoxModel>;
     using Slider     = detail::BasicWidget<detail::SliderModel>;
+    using ProgressBar = detail::BasicWidget<detail::ProgressBarModel>;
 
 } // namespace

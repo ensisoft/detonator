@@ -492,7 +492,7 @@ namespace engine
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
-        virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const override;
+        virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
         virtual bool ParseStyle(const WidgetId& id, const std::string& style) override;
 
         // About deleting material instances.

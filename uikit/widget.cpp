@@ -18,6 +18,7 @@
 
 #include "base/assert.h"
 #include "base/hash.h"
+#include "base/format.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "uikit/widget.h"
@@ -73,6 +74,57 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "form";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+
+std::size_t ProgressBarModel::GetHash(size_t hash) const
+{
+    if (mValue)
+        hash = base::hash_combine(hash, mValue.value());
+    hash  =base::hash_combine(hash, mValue.has_value());
+    hash = base::hash_combine(hash, mText);
+    return hash;
+}
+void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.enabled = paint.enabled;
+    p.focused = paint.focused;
+    p.moused  = paint.moused;
+    p.time    = paint.time;
+    p.clip    = paint.clip;
+    p.rect    = paint.rect;
+    p.pressed = false;
+    p.klass   = "progress-bar";
+    ps.painter->DrawWidgetBackground(ps.widgetId, p);
+    p.moused = false;
+    p.pressed = false;
+    ps.painter->DrawProgressBar(ps.widgetId, p, mValue);
+
+    auto text = mText;
+    if (mValue.has_value())
+    {
+        const float val = mValue.value();
+        const int percent = 100 * val;
+        text = base::FormatString(mText, percent);
+    }
+    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f);
+
+    p.moused = paint.moused;
+    ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+
+void ProgressBarModel::IntoJson(data::Writer& data) const
+{
+    if (mValue.has_value())
+        data.Write("value", mValue.value());
+    data.Write("text", mText);
+}
+bool ProgressBarModel::FromJson(const data::Reader& data)
+{
+    float value;
+    if (data.Read("value", &value))
+        mValue = value;
+    return data.Read("text", &mText);
 }
 
 std::size_t SliderModel::GetHash(size_t hash) const
@@ -170,16 +222,12 @@ void SliderModel::ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) c
     const auto slide_distance = width - knob_size;
     const auto slide_pos = math::clamp(0.0f, 1.0f, mValue);
 
-    FRect k;
-    k.SetWidth(min_side);
-    k.SetHeight(min_side);
-    k.Move(rect.GetPosition());
-    k.Translate(slide_distance * slide_pos, 0.0f);
-
+    knob->SetWidth(min_side);
+    knob->SetHeight(min_side);
+    knob->Move(rect.GetPosition());
+    knob->Translate(slide_distance * slide_pos, 0.0f);
     *slider = rect;
-    *knob   = k;
 }
-
 
 SpinBoxModel::SpinBoxModel()
 {

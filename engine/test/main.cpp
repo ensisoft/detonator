@@ -621,7 +621,10 @@ public:
         mPainter.Update(mTime, dt);
         auto action = mWindow.PollAction(mState, mTime, dt);
         if (action.type != uik::WidgetActionType::None)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+
+        }
 
         mTime += dt;
     }
@@ -655,6 +658,8 @@ public:
         mStyle.SetMaterial("slider/slider-background", engine::detail::UIColor(gfx::Color::White));
         mStyle.SetMaterial("slider/slider-knob", engine::detail::UIColor(gfx::Color::Black));
         mStyle.SetMaterial("slider/pressed/slider-knob", engine::detail::UIColor(gfx::Color::Gray));
+        // progress bar properties
+        mStyle.SetMaterial("progress-bar/progress-bar-fill", engine::detail::UIColor(gfx::Color::DarkGray));
 
         // some assorted properties
         mStyle.SetProperty("label/mouse-over/text-color", gfx::Color::DarkGreen);
@@ -664,6 +669,7 @@ public:
         mStyle.SetMaterial("checkbox/check-mark", engine::detail::UIColor(gfx::Color::Silver));
         mStyle.SetMaterial("label/background", engine::detail::UINullMaterial());
         mStyle.SetMaterial("label/border", engine::detail::UINullMaterial());
+        mStyle.SetMaterial("form/background", engine::detail::UIColor(gfx::Color::DarkGray));
 
 
         // add some widgets
@@ -671,6 +677,7 @@ public:
             uik::CheckBox chk;
             chk.SetName("Check");
             chk.SetText("Check");
+            chk.SetCheckLocation(uik::CheckBox::Check::Right);
             chk.SetPosition(30.0f, 30.0f);
             mWindow.AddWidget(chk);
         }
@@ -712,6 +719,32 @@ public:
             mWindow.AddWidget(slider);
         }
 
+        {
+            uik::CheckBox chk;
+            chk.SetName("Check");
+            chk.SetText("Check");
+            chk.SetCheckLocation(uik::CheckBox::Check::Left);
+            chk.SetPosition(300.0f, 150.0f);
+            mWindow.AddWidget(chk);
+        }
+
+        {
+            uik::ProgressBar prg;
+            prg.SetName("progress");
+            prg.SetValue(0.5f);
+            prg.SetPosition(30.0f, 200.0f);
+            prg.SetText("Done %1%");
+            mWindow.AddWidget(prg);
+        }
+
+        {
+            uik::ProgressBar prg;
+            prg.SetName("progress2");
+            prg.SetPosition(30.0f, 250.0f);
+            prg.SetText("Wait...");
+            mWindow.AddWidget(prg);
+        }
+
         mState.Clear();
         mTime = 0.0;
     }
@@ -751,7 +784,16 @@ public:
         event.time   = mTime;
         auto action = mWindow.MouseMove(event, mState);
         if (action.type != uik::WidgetActionType::None)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+            if (action.name == "slider")
+            {
+                const float value = std::get<float>(action.value);
+                auto* widget = mWindow.FindWidgetByName("progress");
+                auto* prog = dynamic_cast<uik::ProgressBar*>(widget);
+                prog->SetValue(value);
+            }
+        }
     }
 private:
     uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const
