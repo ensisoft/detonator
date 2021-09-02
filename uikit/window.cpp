@@ -410,6 +410,8 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
                 return std::make_unique<uik::SpinBox>();
             else if (type == Widget::Type::Slider)
                 return std::make_unique<uik::Slider>();
+            else if (type == Widget::Type::ProgressBar)
+                return std::make_unique<uik::ProgressBar>();
             else return nullptr;
         }
     };

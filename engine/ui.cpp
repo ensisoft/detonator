@@ -654,9 +654,53 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
     }
 }
 
-void UIPainter::DrawProgressBar(const WidgetId&, const PaintStruct& ps, float percentage) const
+void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::optional<float> percentage) const
 {
-    // todo:
+    if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "progress-bar-background-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+
+    if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-fill"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "progress-bar-fill-shape", UIStyle::WidgetShape::RoundRect);
+        if (percentage.has_value())
+        {
+            const auto value = percentage.value();
+            auto fill = ps.rect;
+            fill.SetWidth(ps.rect.GetWidth() * value);
+            FillShape(fill, *material, shape);
+        }
+        else
+        {
+            const auto width  = ps.rect.GetWidth();
+            const auto height = ps.rect.GetHeight();
+            const auto progress_width   = ps.rect.GetWidth();
+            const auto indicator_width  = progress_width * 0.2;
+            const auto indicator_height = height;
+
+            const auto duration = 2.0;
+            const auto reminder = fmodf(ps.time, duration);
+            const auto value = std::sin(reminder/duration * math::Pi*2.0);
+
+            gfx::FRect indicator;
+            indicator.SetWidth(indicator_width);
+            indicator.SetHeight(indicator_height);
+            indicator.Move(ps.rect.GetPosition());
+            indicator.Translate(progress_width*0.5, 0.0f);
+            indicator.Translate(-indicator_width*0.5, 0.0f);
+            indicator.Translate(value * 0.8 * 0.5 * progress_width, 0.0f);
+            FillShape(indicator, *material, shape);
+        }
+    }
+
+    if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-border"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "progress-bar-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "progress-bar-border-width", 1.0f);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
 }
 
 bool UIPainter::ParseStyle(const WidgetId& id , const std::string& style)
