@@ -62,6 +62,8 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& loader) const
     material->SetColor(mColorMap[1], ColorIndex::TopRight);
     material->SetColor(mColorMap[2], ColorIndex::BottomLeft);
     material->SetColor(mColorMap[3], ColorIndex::BottomRight);
+    if (mGamma)
+        material->SetGamma(mGamma.value());
     return material;
 }
 bool UIGradient::FromJson(const nlohmann::json& json)
@@ -71,6 +73,9 @@ bool UIGradient::FromJson(const nlohmann::json& json)
         !ReadColor(json, "color2", &mColorMap[2]) ||
         !ReadColor(json, "color3", &mColorMap[3]))
         return false;
+    float gamma = 1.0f;
+    if (base::JsonReadSafe(json, "gamma", &gamma))
+        mGamma = gamma;
     return true;
 }
 void UIGradient::IntoJson(nlohmann::json& json) const
@@ -79,6 +84,8 @@ void UIGradient::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color1", mColorMap[1]);
     base::JsonWrite(json, "color2", mColorMap[2]);
     base::JsonWrite(json, "color3", mColorMap[3]);
+    if (mGamma)
+        base::JsonWrite(json, "gamma", mGamma.value());
 }
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& loader) const
