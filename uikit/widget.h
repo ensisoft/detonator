@@ -343,6 +343,10 @@ namespace uik
             { mValue = value; }
             int GetValue() const
             { return mValue; }
+            int GetMin() const
+            { return mMinVal; }
+            int GetMax() const
+            { return mMaxVal; }
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;

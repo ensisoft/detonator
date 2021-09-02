@@ -313,6 +313,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widgetMoused->SetPropertySelector("/mouse-over");
     mUI.widgetPressed->SetPropertySelector("/pressed");
 
+    PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
@@ -382,6 +383,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewGroupBox);
     bar.addAction(mUI.actionNewSpinBox);
     bar.addAction(mUI.actionNewSlider);
+    bar.addAction(mUI.actionNewProgressBar);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -398,6 +400,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewGroupBox);
     menu.addAction(mUI.actionNewSpinBox);
     menu.addAction(mUI.actionNewSlider);
+    menu.addAction(mUI.actionNewProgressBar);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -758,6 +761,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewCheckBox,   false);
     SetEnabled(mUI.actionNewSpinBox,    false);
     SetEnabled(mUI.actionNewSlider,     false);
+    SetEnabled(mUI.actionNewProgressBar, false);
     SetEnabled(mUI.actionNewGroupBox,   false);
     SetEnabled(mUI.actionNewLabel,      false);
     SetEnabled(mUI.actionNewPushButton, false);
@@ -796,6 +800,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewGroupBox,   true);
     SetEnabled(mUI.actionNewSpinBox,    true);
     SetEnabled(mUI.actionNewSlider,     true);
+    SetEnabled(mUI.actionNewProgressBar, true);
     SetEnabled(mUI.cmbGrid,       true);
     SetEnabled(mUI.zoom,          true);
     SetEnabled(mUI.chkSnap,       true);
@@ -856,7 +861,11 @@ void UIWidget::on_actionNewSpinBox_triggered()
 {
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::SpinBox>(), snap, (unsigned)grid));
+    auto spin = std::make_unique<uik::SpinBox>();
+    spin->SetMin(0);
+    spin->SetMax(100);
+    spin->SetValue(GetValue(mUI.spinVal));
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(spin), snap, (unsigned)grid));
 }
 
 void UIWidget::on_actionNewSlider_triggered()
@@ -864,6 +873,16 @@ void UIWidget::on_actionNewSlider_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Slider>(), snap, (unsigned)grid));
+}
+
+void UIWidget::on_actionNewProgressBar_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    auto widget = std::make_unique<uik::ProgressBar>();
+    widget->SetText("%1%");
+    widget->SetValue(0.5f);
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
@@ -953,16 +972,61 @@ void UIWidget::on_widgetYPos_valueChanged(double value)
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_widgetLineHeight_valueChanged(double value)
+void UIWidget::on_btnText_textChanged()
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_widgetText_textChanged()
+void UIWidget::on_lblText_textChanged()
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_widgetCheckBox_stateChanged(int)
+void UIWidget::on_lblLineHeight_valueChanged(double)
 {
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_chkText_textChanged()
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_chkPlacement_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_chkCheck_stateChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_spinMin_valueChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_spinMax_valueChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_spinVal_valueChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_sliderVal_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_progVal_valueChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_progText_textChanged()
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_btnResetProgVal_clicked()
+{
+    SetValue(mUI.progVal, -1);
     UpdateCurrentWidgetProperties();
 }
 
@@ -979,11 +1043,6 @@ void UIWidget::on_btnSelectStyle_clicked()
     if (file.isEmpty())
         return;
     LoadStyle(mState.workspace->MapFileToWorkspace(file));
-}
-
-void UIWidget::on_btnEditStyle_clicked()
-{
-
 }
 
 void UIWidget::on_btnViewPlus90_clicked()
@@ -1417,17 +1476,36 @@ void UIWidget::UpdateCurrentWidgetProperties()
         // set widget data.
         if (auto* label = dynamic_cast<uik::Label*>(widget))
         {
-            label->SetText(GetValue(mUI.widgetText));
-            label->SetLineHeight(GetValue(mUI.widgetLineHeight));
+            label->SetText(GetValue(mUI.lblText));
+            label->SetLineHeight(GetValue(mUI.lblLineHeight));
         }
         else if (auto* pushbtn = dynamic_cast<uik::PushButton*>(widget))
         {
-            pushbtn->SetText(GetValue(mUI.widgetText));
+            pushbtn->SetText(GetValue(mUI.btnText));
         }
         else if (auto* chkbox = dynamic_cast<uik::CheckBox*>(widget))
         {
-            chkbox->SetText(GetValue(mUI.widgetText));
-            chkbox->SetChecked(GetValue(mUI.widgetCheckBox));
+            chkbox->SetText(GetValue(mUI.chkText));
+            chkbox->SetChecked(GetValue(mUI.chkCheck));
+            chkbox->SetCheckLocation(GetValue(mUI.chkPlacement));
+        }
+        else if (auto* slider = dynamic_cast<uik::Slider*>(widget))
+        {
+            slider->SetValue(GetValue(mUI.sliderVal));
+        }
+        else if (auto* spin = dynamic_cast<uik::SpinBox*>(widget))
+        {
+            spin->SetMin(GetValue(mUI.spinMin));
+            spin->SetMax(GetValue(mUI.spinMax));
+            spin->SetValue(GetValue(mUI.spinVal));
+        }
+        else if (auto* prog = dynamic_cast<uik::ProgressBar*>(widget))
+        {
+            const int val = GetValue(mUI.progVal);
+            if (val == -1)
+                prog->ClearValue();
+            else prog->SetValue(val / 100.0f);
+            prog->SetText(GetValue(mUI.progText));
         }
     }
 }
@@ -1458,17 +1536,12 @@ void UIWidget::DisplayCurrentWidgetProperties()
     SetValue(mUI.widgetHeight, 0.0f);
     SetValue(mUI.widgetXPos, 0.0f);
     SetValue(mUI.widgetYPos, 0.0f);
-    SetValue(mUI.widgetText, QString(""));
-    SetValue(mUI.widgetCheckBox, false);
-    SetValue(mUI.widgetLineHeight, 1.0f);
     SetValue(mUI.chkWidgetEnabled, true);
     SetValue(mUI.chkWidgetVisible, true);
     SetEnabled(mUI.widgetProperties, false);
     SetEnabled(mUI.widgetStyleTab,   false);
     SetEnabled(mUI.widgetData,       false);
-    SetEnabled(mUI.widgetLineHeight, false);
-    SetEnabled(mUI.widgetText,       false);
-    SetEnabled(mUI.widgetCheckBox,   false);
+    mUI.stackedWidget->setCurrentWidget(mUI.blankPage);
 
     if (const auto* widget = GetCurrentWidget())
     {
@@ -1490,22 +1563,46 @@ void UIWidget::DisplayCurrentWidgetProperties()
 
         if (const auto* label = dynamic_cast<const uik::Label*>(widget))
         {
-            SetValue(mUI.widgetText, label->GetText());
-            SetValue(mUI.widgetLineHeight, label->GetLineHeight());
-            SetEnabled(mUI.widgetText, true);
-            SetEnabled(mUI.widgetLineHeight, true);
+            mUI.stackedWidget->setCurrentWidget(mUI.lblPage);
+            SetValue(mUI.lblText,       label->GetText());
+            SetValue(mUI.lblLineHeight, label->GetLineHeight());
         }
         else if (const auto* pushbtn = dynamic_cast<const uik::PushButton*>(widget))
         {
-            SetValue(mUI.widgetText, pushbtn->GetText());
-            SetEnabled(mUI.widgetText, true);
+            mUI.stackedWidget->setCurrentWidget(mUI.btnPage);
+            SetValue(mUI.btnText, pushbtn->GetText());
         }
         else if (const auto* chkbox = dynamic_cast<const uik::CheckBox*>(widget))
         {
-            SetValue(mUI.widgetText, chkbox->GetText());
-            SetValue(mUI.widgetCheckBox, chkbox->IsChecked());
-            SetEnabled(mUI.widgetText, true);
-            SetEnabled(mUI.widgetCheckBox, true);
+            mUI.stackedWidget->setCurrentWidget(mUI.chkPage);
+            SetValue(mUI.chkText,      chkbox->GetText());
+            SetValue(mUI.chkPlacement, chkbox->GetCheckLocation());
+            SetValue(mUI.chkCheck,     chkbox->IsChecked());
+        }
+        else if (const auto* spin = dynamic_cast<const uik::SpinBox*>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.spinPage);
+            SetValue(mUI.spinMin, spin->GetMin());
+            SetValue(mUI.spinMax, spin->GetMax());
+            SetValue(mUI.spinVal, spin->GetValue());
+        }
+        else if (const auto* slider = dynamic_cast<const uik::Slider*>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.sliderPage);
+            SetValue(mUI.sliderVal, slider->GetValue());
+        }
+        else if (const auto* prog = dynamic_cast<const uik::ProgressBar*>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.progPage);
+            const auto val = prog->GetValue();
+            if (val.has_value())
+                SetValue(mUI.progVal, 100 * val.value());
+            else SetValue(mUI.progVal, -1);
+            SetValue(mUI.progText, prog->GetText());
+        }
+        else
+        {
+            SetEnabled(mUI.widgetData, false);
         }
     }
 
