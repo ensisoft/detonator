@@ -957,6 +957,46 @@ void unit_test_material_textures()
     }
 }
 
+void unit_test_material_textures_bind_fail()
+{
+    TestDevice device;
+    TestProgram program;
+
+    // test setting basic texture properties.
+    {
+        gfx::TextureMap2DClass test;
+        test.SetTexture(gfx::LoadTextureFromFile("no-such-file.png"));
+
+        gfx::MaterialClass::State env;
+        env.material_time = 1.0;
+        // no crash
+        test.ApplyDynamicState(env, device, program);
+    }
+
+    {
+        gfx::SpriteClass test;
+        test.AddTexture( gfx::LoadTextureFromFile("no-such-file.png"));
+
+        gfx::MaterialClass::State env;
+        env.material_time = 1.0;
+        // no crash
+        test.ApplyDynamicState(env, device, program);
+    }
+
+    {
+        gfx::CustomMaterialClass test;
+        gfx::SpriteMap sprite;
+        sprite.AddTexture(gfx::LoadTextureFromFile("no-such-file.png"));
+
+        test.SetTextureMap("huhu", sprite);
+
+        gfx::MaterialClass::State env;
+        env.material_time = 1.0;
+        // no crash
+        test.ApplyDynamicState(env, device, program);
+    }
+}
+
 void unit_test_material_uniform_folding()
 {
 
@@ -1161,6 +1201,7 @@ int test_main(int argc, char* argv[])
 {
     unit_test_material_uniforms();
     unit_test_material_textures();
+    unit_test_material_textures_bind_fail();
     unit_test_material_uniform_folding();
     unit_test_custom_uniforms();
     unit_test_custom_textures();

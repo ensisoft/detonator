@@ -120,6 +120,7 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
             return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
         else if (file.GetDepthBits() == 32)
             return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
+        else WARN("Unexpected texture bit depth.", mFile);
 
         ERROR("Failed to load texture. '%1'", mFile);
         return nullptr;
@@ -379,10 +380,10 @@ std::size_t SpriteMap::GetHash() const
     return hash;
 }
 
-void SpriteMap::BindTextures(const BindingState& state, Device& device, BoundState& result) const
+bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundState& result) const
 {
     if (mSprites.empty())
-        return;
+        return false;
     const auto frame_interval = 1.0f / std::max(mFps, 0.001f);
     const auto frame_fraction = std::fmod(state.time, frame_interval);
     const auto blend_coeff = frame_fraction/frame_interval;
@@ -404,7 +405,7 @@ void SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
             texture = device.MakeTexture(name);
             auto bitmap = source->GetData();
             if (!bitmap)
-                continue;
+                return false;
             const auto width = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
             const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
@@ -416,6 +417,7 @@ void SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
         result.rect_names[i]    = mRectUniformName[i];
     }
     result.blend_coefficient = blend_coeff;
+    return true;
 }
 
 void SpriteMap::IntoJson(data::Writer& data) const
@@ -506,10 +508,10 @@ std::size_t TextureMap2D::GetHash() const
     hash = base::hash_combine(hash, mSource ? mSource->GetHash() : 0);
     return hash;
 }
-void TextureMap2D::BindTextures(const BindingState& state, Device& device, BoundState& result) const
+bool TextureMap2D::BindTextures(const BindingState& state, Device& device, BoundState& result) const
 {
     if (!mSource)
-        return;
+        return false;
 
     const auto& source  = mSource;
     const auto& name    = std::to_string(source->GetContentHash());
@@ -519,7 +521,7 @@ void TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
         texture = device.MakeTexture(name);
         auto bitmap = source->GetData();
         if (!bitmap)
-            return;
+            return false;
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
         const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
@@ -530,6 +532,7 @@ void TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
     result.blend_coefficient = 0;
     result.sampler_names[0]  = mSamplerName;
     result.rect_names[0]     = mRectUniformName;
+    return true;
 }
 void TextureMap2D::IntoJson(data::Writer& data) const
 {
@@ -1079,7 +1082,8 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
     ts.time = state.material_time;
 
     TextureMap::BoundState binds;
-    mSprite.BindTextures(ts, device,  binds);
+    if (!mSprite.BindTextures(ts, device,  binds))
+        return;
 
     glm::vec2 alpha_mask;
 
@@ -1477,7 +1481,9 @@ void TextureMap2DClass::ApplyDynamicState(State& state, Device& device, Program&
     ts.time = 0.0;
 
     TextureMap::BoundState binds;
-    mTexture.BindTextures(ts, device, binds);
+    if (!mTexture.BindTextures(ts, device, binds))
+        return;
+
     auto* texture = binds.textures[0];
     texture->SetFilter(mMinFilter);
     texture->SetFilter(mMagFilter);
@@ -1874,7 +1880,8 @@ void CustomMaterialClass::ApplyDynamicState(State& state, Device& device, Progra
         TextureMap::BindingState ts;
         ts.time = state.material_time;
         TextureMap::BoundState binds;
-        map.second->BindTextures(ts, device, binds);
+        if (!map.second->BindTextures(ts, device, binds))
+            return;
         for (unsigned i=0; i<2; ++i)
         {
             auto* texture = binds.textures[i];

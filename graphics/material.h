@@ -501,7 +501,8 @@ namespace gfx
         // The resulting BoundState expresses which textures should currently be
         // used and which are the sampler/uniform names that should be used when
         // binding the textures to the program's state before drawing.
-        virtual void BindTextures(const BindingState& state, Device& device, BoundState& result) const = 0;
+        // Returns true if successful, otherwise false on error.
+        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const = 0;
         // Serialize into JSON object.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful.
@@ -593,7 +594,7 @@ namespace gfx
         { return std::make_unique<SpriteMap>(*this, true); }
         virtual std::unique_ptr<TextureMap> Clone() const override
         { return std::make_unique<SpriteMap>(*this, false); }
-        virtual void BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
+        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
         virtual TextureSource* FindTextureSourceById(const std::string& id) override;
@@ -661,7 +662,7 @@ namespace gfx
         virtual std::unique_ptr<TextureMap> Clone() const override
         { return std::make_unique<TextureMap2D>(*this, false); }
         virtual std::size_t GetHash() const override;
-        virtual void BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
+        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
         virtual TextureSource* FindTextureSourceById(const std::string& id) override;
