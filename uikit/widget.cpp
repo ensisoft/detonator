@@ -470,10 +470,6 @@ size_t CheckBoxModel::GetHash(size_t hash) const
 
 void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 {
-    const auto width  = paint.rect.GetWidth();
-    const auto height = paint.rect.GetHeight();
-    const auto pos = paint.rect.GetPosition();
-
     Painter::PaintStruct p;
     p.focused = paint.focused;
     p.moused  = paint.moused;
@@ -485,21 +481,15 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "checkbox";
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
-    if (width >= 30.0f && height >= 30.0f)
-    {
-        FRect box;
-        box.Resize(30.0f , 30.0f);
-        box.Move(pos);
-        box.Translate(width - 30 , (height - 30.0) * 0.5);
-        p.rect = box;
-        ps.painter->DrawCheckBox(ps.widgetId , p , mChecked);
+    FRect text, check;
+    ComputeLayout(paint.rect, &text, &check);
 
-        FRect text;
-        text.Resize(width - 30 , height);
-        text.Move(pos);
-        p.rect = text;
-        ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
-    }
+    p.rect   = check;
+    p.moused = ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
+
+    p.rect = text;
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
 
     p.rect = paint.rect;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -518,27 +508,69 @@ bool CheckBoxModel::FromJson(const data::Reader& data)
     return true;
 }
 
+WidgetAction CheckBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    ms.state->SetValue(ms.widgetId + "/mouse-over-check", check.TestPoint(mouse.window_mouse_pos));
+    return WidgetAction{};
+}
+
 WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
 {
-    const auto width  = mouse.widget_window_rect.GetWidth();
-    const auto height = mouse.widget_window_rect.GetHeight();
-    const auto& pos   = mouse.widget_window_rect.GetPosition();
-    if (width >= 30.0f && height >= 30.0f)
-    {
-        FRect box;
-        box.Resize(30.0f, 30.0f);
-        box.Move(pos);
-        box.Translate(width-30.0f, (height-30.0f)*0.5f);
-        if (!box.TestPoint(mouse.window_mouse_pos))
-            return WidgetAction{};
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    if (!check.TestPoint(mouse.window_mouse_pos))
+        return WidgetAction {};
 
-        mChecked = !mChecked;
-        WidgetAction action;
-        action.type  = WidgetActionType::ValueChanged;
-        action.value = mChecked;
-        return action;
+    mChecked = !mChecked;
+    WidgetAction action;
+    action.type  = WidgetActionType::ValueChanged;
+    action.value = mChecked;
+    return action;
+}
+
+WidgetAction CheckBoxModel::MouseLeave(const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    return WidgetAction {};
+}
+
+void CheckBoxModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) const
+{
+    const auto width = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    if (width > height && mCheck == Check::Right)
+    {
+        const auto check_size = height;
+        const auto check_x = width - check_size;
+        check->SetWidth(check_size);
+        check->SetHeight(check_size);
+        check->Move(rect.GetPosition());
+        check->Translate(check_x, 0.0f);
+
+        text->SetWidth(width-check_size);
+        text->SetHeight(height);
+        text->Move(rect.GetPosition());
     }
-    return WidgetAction{};
+    else if (width > height && mCheck == Check::Left)
+    {
+        const auto check_size = height;
+        const auto check_x = 0.0f;
+        const auto text_x  = check_size;
+        check->SetWidth(check_size);
+        check->SetHeight(check_size);
+        check->Move(rect.GetPosition());
+
+        text->SetWidth(width-check_size);
+        text->SetHeight(height);
+        text->Move(rect.GetPosition());
+        text->Translate(text_x, 0.0f);
+    }
+    else
+    {
+        *check = rect;
+    }
 }
 
 std::size_t GroupBoxModel::GetHash(size_t hash) const

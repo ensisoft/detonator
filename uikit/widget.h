@@ -394,6 +394,15 @@ namespace uik
         class CheckBoxModel
         {
         public:
+            // where is the check mark with respect to the
+            // text.
+            enum class Check {
+                // Check mark is on the left, text on the right
+                Left,
+                // Check mark is on the right, text on the left
+                Right
+            };
+
             CheckBoxModel()
             { mText = "Check"; }
             CheckBoxModel(const std::string& text)
@@ -406,6 +415,10 @@ namespace uik
             { return mChecked; }
             std::string GetText() const
             { return mText; }
+            void SetCheckLocation(Check location)
+            { mCheck = location; }
+            Check GetCheckLocation() const
+            { return mCheck; }
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
@@ -414,14 +427,15 @@ namespace uik
             { return WidgetAction{}; }
             inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
             { return WidgetAction{}; }
-            inline WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&)
-            { return WidgetAction{}; }
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
-            inline WidgetAction MouseLeave(const MouseStruct&)
-            { return WidgetAction{}; }
+            WidgetAction MouseLeave(const MouseStruct&);
+        private:
+            void ComputeLayout(const FRect& rect, FRect* text, FRect* check) const;
         private:
             std::string mText;
             bool mChecked = false;
+            Check mCheck  = Check::Left;
         };
 
         class GroupBoxModel
