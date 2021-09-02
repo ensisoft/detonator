@@ -96,9 +96,11 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     FRect knob;
     ComputeLayout(paint.rect, &slider, &knob);
     p.pressed = ps.state->GetValue(ps.widgetId + "/slider-down", false);
+    p.moused  = ps.state->GetValue(ps.widgetId + "/slider-under-mouse", false);
     ps.painter->DrawSlider(ps.widgetId, p, knob);
 
     p.pressed = false;
+    p.moused  = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 void SliderModel::IntoJson(data::Writer& data) const
@@ -123,12 +125,13 @@ WidgetAction SliderModel::MousePress(const MouseEvent& mouse, const MouseStruct&
 }
 WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
 {
+    FRect slider, knob;
+    ComputeLayout(mouse.widget_window_rect, &slider, &knob);
+    ms.state->SetValue(ms.widgetId + "/slider-under-mouse", knob.TestPoint(mouse.window_mouse_pos));
+
     const auto slider_down = ms.state->GetValue(ms.widgetId + "/slider-down", false);
     if (!slider_down)
         return WidgetAction {};
-
-    FRect slider, knob;
-    ComputeLayout(mouse.widget_window_rect, &slider, &knob);
 
     const auto slider_distance = slider.GetWidth() - knob.GetWidth();
     const auto& mouse_before = ms.state->GetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
@@ -153,6 +156,7 @@ WidgetAction SliderModel::MouseRelease(const MouseEvent& mouse, const MouseStruc
 WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
 {
     ms.state->SetValue(ms.widgetId + "/slider-down", false);
+    ms.state->SetValue(ms.widgetId + "/slider-under-mouse", false);
     return WidgetAction {};
 }
 
