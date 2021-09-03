@@ -22,152 +22,120 @@
 
 #include <stack>
 #include <utility>
+#include <vector>
 #include <cstddef>
 
+#include "base/tree.h"
+#include "base/treeop.h"
+#include "data/writer.h"
+#include "data/reader.h"
 #include "uikit/types.h"
+#include "uikit/widget.h"
 
 // functions that operate on a widget hierarchy.
 
 namespace uik
 {
-    namespace detail {
-        // Callback interface for visiting the widget hierarchy.
-        template<typename T>
-        class TVisitor
-        {
-        public:
-            // Called when entering a widget during the widget
-            // tree traversal. In pre-order traversal the parent
-            // widget will be entered first before its children.
-            // Return true to stop further tree traversal and
-            // return early.
-            virtual bool EnterWidget(T widget)
-            { return false; }
-            // Called when leaving a widget during the widget
-            // tree traversal. In pre-order traversal this is
-            // called for any widget after its children have been
-            // visited/traversed.
-            // Return true to stop further tree traversal and
-            // return early.
-            virtual bool LeaveWidget(T widget)
-            { return false; }
-        private:
-        };
 
-        template<typename T>
-        bool VisitRecursive(TVisitor<T>& visitor , T current_widget)
-        {
-            if (visitor.EnterWidget(current_widget))
-                return true;
-            for (size_t i = 0; i < current_widget->GetNumChildren(); ++i)
-            {
-                if (VisitRecursive(visitor , &current_widget->GetChild(i)))
-                    return true;
-            }
-            return visitor.LeaveWidget(current_widget);
-        }
-    } // detail
+using RenderTree = base::RenderTree<Widget>;
 
-    template<typename T, typename Function>
-    void ForEachWidget(Function callback, T start_widget)
+static
+void RenderTreeIntoJson(const RenderTree& tree, data::Writer& data, const Widget* widget = nullptr)
+{
+    auto chunk = data.NewWriteChunk();
+    if (widget) {
+        chunk->Write("type", widget->GetType());
+        widget->IntoJson(*chunk);
+    }
+    tree.ForEachChild([&tree, &chunk](const Widget* child) {
+        RenderTreeIntoJson(tree, *chunk, child);
+    }, widget);
+    data.AppendChunk("widgets", std::move(chunk));
+}
+
+static
+bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
+    std::vector<std::unique_ptr<Widget>>& container,
+    uik::Widget* parent = nullptr)
+{
+    std::unique_ptr<Widget> widget;
+    Widget::Type type;
+    if (data.Read("type", &type))
+        widget = Widget::CreateWidget(type);
+    if (widget && !widget->FromJson(data))
+        return false;
+
+    if (widget)
     {
-        class PrivateVisitor : public detail::TVisitor<T> {
-        public:
-            PrivateVisitor(Function func) : mFunc(std::move(func))
-            {}
-            virtual bool EnterWidget(T widget) override
-            {
-                mFunc(widget);
-                return false;
-            }
-        private:
-            Function mFunc;
-        };
-        PrivateVisitor pv(std::move(callback));
-        detail::VisitRecursive<T>(pv, start_widget);
+        tree.LinkChild(parent, widget.get());
+        parent = widget.get();
+        container.push_back(std::move(widget));
     }
 
-    template<typename T, typename Predicate>
-    T FindWidget(Predicate predicate, T start_widget)
+    for (unsigned i=0; i<data.GetNumChunks("widgets"); ++i)
     {
-        class PrivateVisitor : public detail::TVisitor<T> {
-        public:
-            PrivateVisitor(Predicate predicate) : mPredicate(std::move(predicate))
-            {}
-            virtual bool EnterWidget(T widget) override
-            {
-                if (mPredicate(widget))
-                    mResult = widget;
-                return mResult != nullptr;
-            }
-            T GetResult() const
-            { return mResult; }
-        private:
-            Predicate mPredicate;
-            T mResult = nullptr;
-        };
-        PrivateVisitor pv(std::move(predicate));
-        detail::VisitRecursive<T>(pv, start_widget);
-        return pv.GetResult();
+        const auto& chunk = data.GetReadChunk("widgets", i);
+        if (!RenderTreeFromJson(*chunk, tree, container, parent))
+            return false;
     }
+    return true;
+}
 
-    namespace detail {
-        template<typename T>
-        T FindParentRecursive(T child, T current, T parent)
-        {
-            if (child == current)
-                return parent;
-            for (size_t i=0; i<current->GetNumChildren(); ++i)
-            {
-                auto& ascendant = current->GetChild(i);
-                auto ret = FindParentRecursive(child, &ascendant, current);
-                if (ret) return ret;
-            }
-            return nullptr;
-        }
-    } // detail
-
-    template<typename T>
-    T FindParent(T child, T start_widget)
+static
+Widget* DuplicateWidget(RenderTree& tree, const Widget* widget, std::vector<std::unique_ptr<Widget>>* clones)
+{
+    // mark the index of the item that will be the first dupe we create
+    // we'll return this later since it's the root of the new hierarchy.
+    const size_t first = clones->size();
+    // do a deep copy of a hierarchy of nodes starting from
+    // the selected node and add the new hierarchy as a new
+    // child of the selected node's parent
+    if (tree.HasNode(widget))
     {
-        return detail::FindParentRecursive<T>(child, start_widget, nullptr);
-    }
-
-    template<typename T>
-    FRect FindWidgetRect(T which, T start_widget)
-    {
-        class PrivateVisitor : public detail::TVisitor<T> {
+        const auto* parent = tree.GetParent(widget);
+        class ConstVisitor : public RenderTree::ConstVisitor {
         public:
-            PrivateVisitor(T widget) : mWidget(widget)
-            {}
-            virtual bool EnterWidget(T widget) override
+            ConstVisitor(const Widget* parent, std::vector<std::unique_ptr<Widget>>& clones)
+                : mClones(clones)
             {
-                if (mWidget == widget)
+                mParents.push(parent);
+            }
+            virtual void EnterNode(const Widget* node) override
+            {
+                const auto* parent = mParents.top();
+
+                auto clone = node->Clone();
+                mParents.push(clone.get());
+                mLinks[clone.get()] = parent;
+                mClones.push_back(std::move(clone));
+            }
+            virtual void LeaveNode(const Widget* node) override
+            {
+                mParents.pop();
+            }
+            void LinkChildren(RenderTree& tree)
+            {
+                for (const auto& p : mLinks)
                 {
-                    FRect rect = widget->GetRect();
-                    rect.Translate(widget->GetPosition());
-                    rect.Translate(mWidgetOrigin);
-                    mRect = rect;
-                    return true;
+                    const Widget* child  = p.first;
+                    const Widget* parent = p.second;
+                    tree.LinkChild(parent, child);
                 }
-                mWidgetOrigin += widget->GetPosition();
-                return false;
             }
-            virtual bool LeaveWidget(T widget) override
-            {
-                mWidgetOrigin -= widget->GetPosition();
-                return false;
-            }
-            FRect GetRect() const
-            { return mRect; }
         private:
-            T mWidget = nullptr;
-            FRect mRect;
-            FPoint mWidgetOrigin;
+            std::stack<const Widget*> mParents;
+            std::unordered_map<const Widget*, const Widget*> mLinks;
+            std::vector<std::unique_ptr<Widget>>& mClones;
         };
-        PrivateVisitor visitor(which);
-        detail::VisitRecursive<T>(visitor, start_widget);
-        return visitor.GetRect();
+        ConstVisitor visitor(parent, *clones);
+        tree.PreOrderTraverse(visitor, widget);
+        visitor.LinkChildren(tree);
     }
+    else
+    {
+        clones->emplace_back(widget->Clone());
+    }
+    return (*clones)[first].get();
+}
 
 } // namespace

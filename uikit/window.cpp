@@ -31,70 +31,85 @@
 namespace {
 using namespace uik;
 template<typename T>
-T hit_test(T start_widget, const FPoint& point, FPoint* where, FRect* rect, bool flags)
-{
-    class PrivateVisitor : public detail::TVisitor<T> {
-    public:
-        PrivateVisitor(const FPoint& point, bool check_flags)
-                : mPoint(point)
-                , mCheckFlags(check_flags)
+class HitTestVisitor : public base::RenderTree<Widget>::TVisitor<T> {
+public:
+    HitTestVisitor(const FPoint& point, bool check_flags)
+        : mPoint(point)
+        , mCheckFlags(check_flags)
+    {
+        WidgetState state;
+        state.enabled = true;
+        state.visible = true;
+        mState.push(state);
+    }
+    virtual void EnterNode(T* widget) override
+    {
+        if (!widget)
+            return;
+        const auto state = mState.top();
+        const bool visible = state.visible & widget->TestFlag(Widget::Flags::VisibleInGame);
+        const bool enabled = state.enabled & widget->TestFlag(Widget::Flags::Enabled);
+        if ((mCheckFlags && visible && enabled) || !mCheckFlags)
         {
-            WidgetState state;
-            state.enabled = true;
-            state.visible = true;
-            mState.push(state);
-        }
-        virtual bool EnterWidget(T widget) override
-        {
-            const auto state = mState.top();
-            const bool visible = state.visible & widget->TestFlag(Widget::Flags::VisibleInGame);
-            const bool enabled = state.enabled & widget->TestFlag(Widget::Flags::Enabled);
-            if ((mCheckFlags && visible && enabled) || !mCheckFlags)
+            FRect rect = widget->GetRect();
+            rect.Translate(widget->GetPosition());
+            rect.Translate(mWidgetOrigin);
+            if (rect.TestPoint(mPoint))
             {
-                FRect rect = widget->GetRect();
-                rect.Translate(widget->GetPosition());
-                rect.Translate(mWidgetOrigin);
-                if (rect.TestPoint(mPoint))
-                {
-                    mHitWidget  = widget;
-                    mHitPoint   = rect.MapToLocal(mPoint);
-                    mWidgetRect = rect;
-                }
+                mHitWidget  = widget;
+                mHitPoint   = rect.MapToLocal(mPoint);
+                mWidgetRect = rect;
             }
-            WidgetState next;
-            next.enabled = enabled;
-            next.visible = visible;
-            mState.push(next);
-            mWidgetOrigin += widget->GetPosition();
-            return false;
         }
-        virtual bool LeaveWidget(T widget) override
-        {
-            mWidgetOrigin -= widget->GetPosition();
-            mState.pop();
-            return false;
-        }
-        FPoint GetHitPoint() const
-        { return mHitPoint; }
-        FRect GetWidgetRect() const
-        { return mWidgetRect; }
-        T GetHitWidget() const
-        { return mHitWidget; }
-    private:
-        const FPoint& mPoint;
-        const bool mCheckFlags = false;
-        struct WidgetState {
-            bool visible = true;
-            bool enabled = true;
-        };
-        std::stack<WidgetState> mState;
-        T mHitWidget = nullptr;
-        FPoint mHitPoint;
-        FPoint mWidgetOrigin;
-        FRect  mWidgetRect;
+        WidgetState next;
+        next.enabled = enabled;
+        next.visible = visible;
+        mState.push(next);
+        mWidgetOrigin += widget->GetPosition();
+    }
+    virtual void LeaveNode(T* widget) override
+    {
+        if (!widget)
+            return;
+        mWidgetOrigin -= widget->GetPosition();
+        mState.pop();
+    }
+    FPoint GetHitPoint() const
+    { return mHitPoint; }
+    FRect GetWidgetRect() const
+    { return mWidgetRect; }
+    T* GetHitWidget() const
+    { return mHitWidget; }
+private:
+    const FPoint& mPoint;
+    const bool mCheckFlags = false;
+    struct WidgetState {
+        bool visible = true;
+        bool enabled = true;
     };
-    PrivateVisitor visitor(point, flags);
-    detail::VisitRecursive(visitor, start_widget);
+    std::stack<WidgetState> mState;
+    T* mHitWidget = nullptr;
+    FPoint mHitPoint;
+    FPoint mWidgetOrigin;
+    FRect  mWidgetRect;
+};
+
+
+const Widget* hit_test(const RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags)
+{
+    HitTestVisitor<const Widget>visitor(point, flags);
+    tree.PreOrderTraverse(visitor);
+    if (where)
+        *where = visitor.GetHitPoint();
+    if (rect)
+        *rect = visitor.GetWidgetRect();
+    return visitor.GetHitWidget();
+}
+
+Widget* hit_test(RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags)
+{
+    HitTestVisitor<Widget>visitor(point, flags);
+    tree.PreOrderTraverse(visitor);
     if (where)
         *where = visitor.GetHitPoint();
     if (rect)
@@ -110,8 +125,6 @@ namespace uik
 Window::Window()
 {
     mId = base::RandomString(10);
-    mRoot = std::make_unique<Form>();
-    mRoot->SetName("Form");
 }
 
 Window::Window(const Window& other)
@@ -119,33 +132,67 @@ Window::Window(const Window& other)
     mId    = other.mId;
     mName  = other.mName;
     mStyle = other.mStyle;
-    mRoot  = std::make_unique<Form>(*other.mRoot);
+
+    std::unordered_map<const Widget*, const Widget*> map;
+
+    for (auto& w : other.mWidgets)
+    {
+        auto copy = w->Copy();
+        map[w.get()] = copy.get();
+        mWidgets.push_back(std::move(copy));
+    }
+    mRenderTree.FromTree(other.mRenderTree, [&map](const Widget* widget) {
+        return map[widget];
+    });
+}
+
+Widget* Window::AddWidget(std::unique_ptr<Widget> widget)
+{
+    auto ret = widget.get();
+    mWidgets.push_back(std::move(widget));
+    return ret;
+}
+
+Widget* Window::DuplicateWidget(const Widget* widget)
+{
+    std::vector<std::unique_ptr<Widget>> clones;
+
+    auto* ret = uik::DuplicateWidget(mRenderTree, widget, &clones);
+    for (auto& clone : clones)
+        mWidgets.push_back(std::move(clone));
+    return ret;
+}
+
+void Window::LinkChild(Widget* parent, Widget* child)
+{
+    mRenderTree.LinkChild(parent, child);
 }
 
 void Window::DeleteWidget(const Widget* carcass)
 {
-    if (carcass == mRoot.get())
-        return;
+    std::unordered_set<const Widget*> graveyard;
 
-    // not the most efficient impl but should be fine for now
-    // since there'll unlikely be that many widgets. the important
-    // thing is to safely perform the deletion without messing the
-    // iteration. 
-    FindWidget([=](Widget* parent) {
-        if (!parent->IsContainer())
-            return false;
-        return parent->DeleteChild(carcass);
-    });
+    mRenderTree.PreOrderTraverseForEach([&graveyard](const Widget* widget) {
+        graveyard.insert(widget);
+    }, carcass);
+
+    // delete from the tree.
+    mRenderTree.DeleteNode(carcass);
+
+    // delete from the container.
+    mWidgets.erase(std::remove_if(mWidgets.begin(), mWidgets.end(), [&graveyard](const auto& node) {
+        return graveyard.find(node.get()) != graveyard.end();
+    }), mWidgets.end());
 }
 
 Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)
 {
-    return hit_test<Widget*>(mRoot.get(), window, widget, nullptr, flags);
+    return hit_test(mRenderTree, window, widget, nullptr, flags);
 }
 
 const Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)const
 {
-    return hit_test<const Widget*>(mRoot.get(), window, widget, nullptr, flags);
+    return hit_test(mRenderTree, window, widget, nullptr, flags);
 }
 
 void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook) const
@@ -182,15 +229,17 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
           , mPaintHook(h)
         {
             PaintState ps;
-            ps.clip = FRect(0.0f, 0.0f, w.GetSize());
             ps.enabled = true;
             ps.visible = true;
             mState.push(ps);
             mWidgetState.GetValue(w.mId + "/focused-widget", &mFocusedWidget);
             mWidgetState.GetValue(w.mId + "/widget-under-mouse", &mWidgetUnderMouse);
         }
-        virtual bool EnterWidget(const Widget* widget) override
+        virtual void EnterNode(const Widget* widget) override
         {
+            if (!widget)
+                return;
+
             const auto state = mState.top();
             const bool visible = state.visible & widget->TestFlag(Widget::Flags::VisibleInGame);
             const bool enabled = state.enabled & widget->TestFlag(Widget::Flags::Enabled);
@@ -229,13 +278,14 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
 
             mState.push(ps);
             mWidgetOrigin += widget->GetPosition();
-            return false;
         }
-        virtual bool LeaveWidget(const Widget* widget) override
+        virtual void LeaveNode(const Widget* widget) override
         {
+            if (!widget)
+                return;
+
             mWidgetOrigin -= widget->GetPosition();
             mState.pop();
-            return false;
         }
     private:
         const Widget* mFocusedWidget = nullptr;
@@ -255,45 +305,111 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     };
 
     PaintVisitor visitor(*this, time, painter, state, hook);
-    Visit(visitor);
+    mRenderTree.PreOrderTraverse(visitor);
 }
 
 void Window::Update(State& state, double time, float dt)
 {
-    uik::ForEachWidget<Widget*>([&](Widget* widget) {
+    for (auto& widget : mWidgets)
         widget->Update(state, time, dt);
-    }, mRoot.get());
 }
 
 void Window::Style(Painter& painter) const
 {
-    uik::ForEachWidget<Widget*>([&painter](const Widget* widget) {
+    for (const auto& widget : mWidgets)
+    {
         const auto& style = widget->GetStyleString();
         if (style.empty())
             return;
         painter.ParseStyle(widget->GetId(), style);
-    }, mRoot.get());
+    }
 }
+
+FRect Window::FindWidgetRect(const Widget* widget) const
+{
+    class PrivateVisitor : public ConstVisitor {
+    public:
+        PrivateVisitor(const Widget* widget) : mWidget(widget)
+        {}
+        virtual void EnterNode(const Widget* widget) override
+        {
+            if (widget == nullptr)
+                return;
+
+            if (mWidget == widget)
+            {
+                FRect rect = widget->GetRect();
+                rect.Translate(widget->GetPosition());
+                rect.Translate(mWidgetOrigin);
+                mRect = rect;
+                mDone = true;
+                return;
+            }
+            mWidgetOrigin += widget->GetPosition();
+        }
+        virtual void LeaveNode(const Widget* widget) override
+        {
+            if (widget == nullptr)
+                return;
+            mWidgetOrigin -= widget->GetPosition();
+        }
+        virtual bool IsDone() const override
+        { return mDone; }
+        FRect GetRect() const
+        { return mRect; }
+    private:
+        const Widget* mWidget = nullptr;
+        FRect mRect;
+        FPoint mWidgetOrigin;
+        bool mDone = false;
+    };
+    PrivateVisitor visitor(widget);
+    mRenderTree.PreOrderTraverse(visitor);
+    return visitor.GetRect();
+}
+
+FRect Window::GetBoundingRect() const
+{
+    class PrivateVisitor : public ConstVisitor {
+    public:
+        virtual void EnterNode(const Widget* widget) override
+        {
+            if (widget == nullptr)
+                return;
+
+            FRect rect = widget->GetRect();
+            rect.Translate(widget->GetPosition());
+            rect.Translate(mWidgetOrigin);
+            if (mRect.IsEmpty())
+                mRect = rect;
+            else mRect = Union(mRect, rect);
+
+            mWidgetOrigin += widget->GetPosition();
+        }
+        virtual void LeaveNode(const Widget* widget) override
+        {
+            if (widget == nullptr)
+                return;
+            mWidgetOrigin -= widget->GetPosition();
+        }
+        FRect GetRect() const
+        { return mRect; }
+    private:
+        const Widget* mWidget = nullptr;
+        FRect mRect;
+        FPoint mWidgetOrigin;
+    };
+    PrivateVisitor visitor;
+    mRenderTree.PreOrderTraverse(visitor);
+    return visitor.GetRect();
+}
+
 void Window::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
     data.Write("name", mName);
     data.Write("style", mStyle);
-    struct Serializer {
-        static void IntoJson(data::Writer& data, const Widget& widget)
-        {
-            auto chunk = data.NewWriteChunk();
-            chunk->Write("type", widget.GetType());
-            widget.IntoJson(*chunk);
-            for (size_t i=0; i<widget.GetNumChildren(); ++i)
-            {
-                const auto& child = widget.GetChild(i);
-                IntoJson(*chunk, child);
-            }
-            data.AppendChunk("widgets", std::move(chunk));
-        }
-    };
-    Serializer::IntoJson(data, *mRoot);
+    RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
 
 Window::WidgetAction Window::PollAction(State& state, double time, float dt)
@@ -335,13 +451,21 @@ Window Window::Clone() const
     return copy;
 }
 
+void Window::ClearWidgets()
+{
+    mRenderTree.Clear();
+    mWidgets.clear();
+}
+
 size_t Window::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStyle);
-    ForEachWidget([&hash](const Widget* widget) {
+    mRenderTree.PreOrderTraverseForEach([&hash](const Widget* widget) {
+        if (widget == nullptr)
+            return;
         hash = base::hash_combine(hash, widget->GetHash());
     });
     return hash;
@@ -356,7 +480,8 @@ Window& Window::operator=(const Window& other)
     std::swap(mId,    copy.mId);
     std::swap(mName,  copy.mName);
     std::swap(mStyle, copy.mStyle);
-    std::swap(mRoot,  copy.mRoot);
+    std::swap(mWidgets, copy.mWidgets);
+    std::swap(mRenderTree, copy.mRenderTree);
     return *this;
 }
 
@@ -368,64 +493,15 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
         !data.Read("name", &ret.mName) ||
         !data.Read("style", &ret.mStyle))
         return std::nullopt;
+
     if (!data.GetNumChunks("widgets"))
-        return std::nullopt;
+        return ret;
 
-    struct Serializer {
-        static std::unique_ptr<Widget> FromJson(const data::Reader& data)
-        {
-            Widget::Type type;
-            if (!data.Read("type", &type))
-                return nullptr;
-            auto widget = CreateWidget(type);
-            if (!widget->FromJson(data))
-                return nullptr;
-
-            if (!widget->IsContainer())
-                return widget;
-
-            for (unsigned i=0; i<data.GetNumChunks("widgets"); ++i)
-            {
-                const auto& chunk = data.GetReadChunk("widgets", i);
-                auto ret = FromJson(*chunk);
-                if (ret == nullptr)
-                    return nullptr;
-                widget->AddChild(std::move(ret));
-            }
-            return widget;
-        }
-        static std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
-        {
-            if (type == Widget::Type::Form)
-                return std::make_unique<uik::Form>();
-            if (type == Widget::Type::Label)
-                return std::make_unique<uik::Label>();
-            else if (type == Widget::Type::PushButton)
-                return std::make_unique<uik::PushButton>();
-            else if (type == Widget::Type::CheckBox)
-                return std::make_unique<uik::CheckBox>();
-            else if (type == Widget::Type::GroupBox)
-                return std::make_unique<uik::GroupBox>();
-            else if (type == Widget::Type::SpinBox)
-                return std::make_unique<uik::SpinBox>();
-            else if (type == Widget::Type::Slider)
-                return std::make_unique<uik::Slider>();
-            else if (type == Widget::Type::ProgressBar)
-                return std::make_unique<uik::ProgressBar>();
-            else return nullptr;
-        }
-    };
     const auto& chunk = data.GetReadChunk("widgets", 0);
     if (!chunk)
+        return ret;
+    if (!RenderTreeFromJson(*chunk, ret.mRenderTree, ret.mWidgets))
         return std::nullopt;
-
-    auto root = Serializer::FromJson(*chunk);
-    if (root == nullptr)
-        return std::nullopt;
-    else if (root->GetType() != Widget::Type::Form)
-        return std::nullopt;
-
-    ret.mRoot.reset(static_cast<uik::Form*>(root.release()));
     return ret;
 }
 
@@ -439,7 +515,7 @@ Window::WidgetAction Window::send_mouse_event(const MouseEvent& mouse, MouseHand
 
     FPoint widget_pos;
     FRect widget_rect;
-    Widget* new_widget_under_mouse = hit_test<Widget*>(mRoot.get(), mouse.window_mouse_pos , &widget_pos, &widget_rect, consider_flags);
+    Widget* new_widget_under_mouse = hit_test(mRenderTree, mouse.window_mouse_pos , &widget_pos, &widget_rect, consider_flags);
     if (new_widget_under_mouse != old_widget_under_mouse)
     {
         if (old_widget_under_mouse)

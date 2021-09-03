@@ -38,7 +38,6 @@
         "material": "Fj66N4PDUG"
     },
     "id5BsoCSrO": {
-        "checked_for_packing": true
     },
     "iiKBwhkDbI": {
         "checked_for_packing": true
@@ -76,10 +75,15 @@
         "mapping_count": 4
     },
     "project": {
+        "application_identifier": "DLdjym3PLCqb",
         "application_library_lin": "app://libGameEngine.so",
         "application_library_win": "app://GameEngine.dll",
         "application_name": "Derpo Bird",
         "application_version": "",
+        "audio_buffer_size": 20,
+        "audio_channels": "Stereo",
+        "audio_sample_rate": 44100,
+        "audio_sample_type": "Float32",
         "clear_color": "4281486692",
         "command_line_arguments": "",
         "config_srgb": true,
@@ -88,6 +92,7 @@
         "game_script": "game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
+        "grab_mouse": false,
         "mouse_pointer_drawable": "_arrow_cursor",
         "mouse_pointer_hotspot": {
             "x": 0,

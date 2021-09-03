@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1509</width>
-    <height>1049</height>
+    <height>1065</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1420,6 +1420,18 @@
    </property>
    <property name="toolTip">
     <string>Place new progress bar</string>
+   </property>
+  </action>
+  <action name="actionNewForm">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Form</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new background form</string>
    </property>
   </action>
  </widget>

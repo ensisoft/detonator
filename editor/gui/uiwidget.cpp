@@ -67,29 +67,30 @@ public:
         public:
             Visitor(std::vector<TreeWidget::TreeItem>& list) : mList(list)
             {}
-            virtual bool EnterWidget(uik::Widget* widget) override
+            virtual void EnterNode(uik::Widget* widget) override
             {
-                const bool visible = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
                 TreeWidget::TreeItem item;
-                item.SetId(app::FromUtf8(widget->GetId()));
-                item.SetText(app::FromUtf8(widget->GetName()));
-                item.SetUserData(widget);
+                item.SetId(widget ? app::FromUtf8(widget->GetId()) : "root");
+                item.SetText(widget ? app::FromUtf8(widget->GetName()) : "Root");
                 item.SetLevel(mLevel);
-                item.SetIcon(QIcon("icons:eye.png"));
-                item.SetIconMode(visible ? QIcon::Normal : QIcon::Disabled);
+                if (widget)
+                {
+                    const bool visible = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
+                    item.SetUserData(widget);
+                    item.SetIcon(QIcon("icons:eye.png"));
+                    item.SetIconMode(visible ? QIcon::Normal : QIcon::Disabled);
+                }
                 mList.push_back(std::move(item));
                 mLevel++;
-                return false;
             }
-            virtual bool LeaveWidget(uik::Widget* widget) override
-            {
-                mLevel--;
-                return false;
-            }
+            virtual void LeaveNode(uik::Widget* widget) override
+            { mLevel--; }
         private:
             unsigned mLevel = 0;
             std::vector<TreeWidget::TreeItem>& mList;
         };
+        if (!mState.window.GetNumWidgets())
+            return;
         Visitor visitor(list);
         mState.window.Visit(visitor);
     }
@@ -150,13 +151,15 @@ public:
         {
             mWidget->SetName(CreateName());
             mWidget->SetPosition(hit_point);
-            child = parent->AddChild(std::move(mWidget));
+            child = mState.window.AddWidget(std::move(mWidget));
+            mState.window.LinkChild(parent, child);
         }
         else
         {
             mWidget->SetName(CreateName());
             mWidget->SetPosition(mWidgetPos.x , mWidgetPos.y);
             child = mState.window.AddWidget(std::move(mWidget));
+            mState.window.LinkChild(nullptr, child);
         }
         mState.tree->Rebuild();
         mState.tree->SelectItemById(app::FromUtf8(child->GetId()));
@@ -300,11 +303,17 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &UIWidget::ResourceToBeDeleted);
     connect(workspace, &app::Workspace::ResourceUpdated,      this, &UIWidget::ResourceUpdated);
 
+    uik::Form form;
+    form.SetSize(1024, 768);
+    form.SetName("Form");
+
     mState.tree = mUI.tree;
     mState.workspace = workspace;
-    mState.window.Resize(1024, 768);
     mState.window.SetName("My UI");
     mState.window.SetStyleName("app://ui/default.json");
+    mState.window.AddWidget(form);
+    mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
+
     mState.painter.reset(new engine::UIPainter);
 
     mUI.widgetNormal->SetPropertySelector("");
@@ -377,6 +386,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionNewForm);
     bar.addAction(mUI.actionNewLabel);
     bar.addAction(mUI.actionNewPushButton);
     bar.addAction(mUI.actionNewCheckBox);
@@ -394,6 +404,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
+    menu.addAction(mUI.actionNewForm);
     menu.addAction(mUI.actionNewLabel);
     menu.addAction(mUI.actionNewPushButton);
     menu.addAction(mUI.actionNewCheckBox);
@@ -467,7 +478,7 @@ bool UIWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
                 return false;
             else if (clipboard->IsEmpty())
                 return false;
-            else if (clipboard->GetType() != "application/binary/ui")
+            else if (clipboard->GetType() != "application/json/ui")
                 return false;
             return true;
         case Actions::CanCut:
@@ -475,8 +486,6 @@ bool UIWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
             if (!mUI.widget->hasInputFocus())
                 return false;
             else if (!GetCurrentWidget())
-                return false;
-            else if (IsRootWidget(GetCurrentWidget()))
                 return false;
             return true;
         case Actions::CanUndo:
@@ -504,31 +513,30 @@ void UIWidget::Cut(Clipboard& clipboard)
 {
     if (const auto* widget = GetCurrentWidget())
     {
-        if (IsRootWidget(widget))
-            return;
-        // we can make a copy here. the widget acts only as
-        // a source for creating duplicates (clones) when
-        // actual paste operation is done.
-        clipboard.SetObject(widget->Copy());
-        clipboard.SetType("application/binary/ui");
+        data::JsonObject json;
+        const auto& tree = mState.window.GetRenderTree();
+        uik::RenderTreeIntoJson(tree, json, widget);
+
+        clipboard.SetText(json.ToString());
+        clipboard.SetType("application/json/ui");
 
         mState.window.DeleteWidget(widget);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
+        NOTE("Copied JSON to application clipboard.");
     }
 }
 void UIWidget::Copy(Clipboard& clipboard)  const
 {
     if (const auto* widget = GetCurrentWidget())
     {
-        if (IsRootWidget(widget))
-            return;
+        data::JsonObject json;
+        const auto& tree = mState.window.GetRenderTree();
+        uik::RenderTreeIntoJson(tree, json, widget);
 
-        // we can make a copy here. the widget acts only as
-        // a source for creating duplicates (clones) when
-        // actual paste operation is done.
-        clipboard.SetObject(widget->Copy());
-        clipboard.SetType("application/binary/ui");
+        clipboard.SetText(json.ToString());
+        clipboard.SetType("application/json/ui");
+        NOTE("Copied JSON to application clipboard.");
     }
 }
 void UIWidget::Paste(const Clipboard& clipboard)
@@ -541,9 +549,9 @@ void UIWidget::Paste(const Clipboard& clipboard)
         NOTE("Clipboard is empty.");
         return;
     }
-    else if (clipboard.GetType() != "application/binary/ui")
+    else if (clipboard.GetType() != "application/json/ui")
     {
-        NOTE("No UI data object found in clipboard.");
+        NOTE("No UI JSON found in clipboard.");
         return;
     }
 
@@ -557,30 +565,65 @@ void UIWidget::Paste(const Clipboard& clipboard)
     const auto& view_to_scene  = glm::inverse(view.GetAsMatrix());
     const auto& mouse_in_scene = view_to_scene * ToVec4(mickey);
 
-    const auto& src = clipboard.GetObject<uik::Widget>();
+    data::JsonObject json;
+    auto [success, _] = json.ParseString(clipboard.GetText());
+    if (!success)
+    {
+        NOTE("Clipboard JSON parse failed.");
+        return;
+    }
 
-    auto dupe = src->Clone();
-    uik::ForEachWidget([](uik::Widget* dupe) {
-        const auto name = dupe->GetName();
-        dupe->SetName(base::FormatString("Copy of %1", name));
-    }, dupe.get());
+    // use a temporary vector in case there's a problem
+    std::vector<std::unique_ptr<uik::Widget>> nodes;
+    uik::RenderTree tree;
+    uik::RenderTreeFromJson(json, tree, nodes);
+    if (nodes.empty())
+    {
+        NOTE("No widgets were parsed from JSON.");
+        return;
+    }
 
-    uik::Widget* child = nullptr;
+    for (auto& w : nodes)
+        w->SetId(base::RandomString(10));
+
+    auto* paste_root = nodes[0].get();
+
     uik::FPoint hit_point;
     auto* widget = mState.window.HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &hit_point);
     if (widget && widget->IsContainer())
     {
-        dupe->SetPosition(hit_point);
-        child = widget->AddChild(std::move(dupe));
+        paste_root->SetPosition(hit_point);
+        mState.window.LinkChild(widget, paste_root);
     }
     else
     {
-        dupe->SetPosition(mouse_in_scene.x, mouse_in_scene.y);
-        child = mState.window.AddWidget(std::move(dupe));
+        paste_root->SetPosition(mouse_in_scene.x, mouse_in_scene.y);
+        mState.window.LinkChild(nullptr, paste_root);
     }
+    // if we got this far, nodes should contain the nodes to be added
+    // into the scene and tree should contain their hierarchy.
+    for (auto& node : nodes)
+    {
+        // moving the unique ptr means that node address stays the same
+        // thus the tree is still valid!
+        mState.window.AddWidget(std::move(node));
+    }
+    nodes.clear();
+
+    // walk the tree and link the nodes into the scene.
+    tree.PreOrderTraverseForEach([&nodes, this, &tree](uik::Widget* node) {
+        if (node == nullptr)
+            return;
+        auto* parent = tree.GetParent(node);
+        if (parent == nullptr)
+            return;
+        mState.window.LinkChild(parent, node);
+    });
+
     mUI.tree->Rebuild();
-    mUI.tree->SelectItemById(app::FromUtf8(child->GetId()));
+    mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
     mState.window.Style(*mState.painter);
+
 }
 
 void UIWidget::ZoomIn()
@@ -771,6 +814,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewSlider,     false);
     SetEnabled(mUI.actionNewProgressBar, false);
     SetEnabled(mUI.actionNewGroupBox,   false);
+    SetEnabled(mUI.actionNewForm,       false);
     SetEnabled(mUI.actionNewLabel,      false);
     SetEnabled(mUI.actionNewPushButton, false);
     SetEnabled(mUI.cmbGrid,       false);
@@ -802,6 +846,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.widgetProperties,    true);
     SetEnabled(mUI.widgetStyle,         true);
     SetEnabled(mUI.widgetData,          true);
+    SetEnabled(mUI.actionNewForm,       true);
     SetEnabled(mUI.actionNewCheckBox,   true);
     SetEnabled(mUI.actionNewLabel,      true);
     SetEnabled(mUI.actionNewPushButton, true);
@@ -842,6 +887,13 @@ void UIWidget::on_actionSave_triggered()
     INFO("Saved UI '%1'", name);
     NOTE("Saved UI '%1'", name);
     setWindowTitle(name);
+}
+
+void UIWidget::on_actionNewForm_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Form>(), snap, (unsigned)grid));
 }
 
 void UIWidget::on_actionNewLabel_triggered()
@@ -904,9 +956,6 @@ void UIWidget::on_actionWidgetDelete_triggered()
 {
     if (auto* widget = GetCurrentWidget())
     {
-        if (IsRootWidget(widget))
-            return;
-
         mState.window.DeleteWidget(widget);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
@@ -916,26 +965,18 @@ void UIWidget::on_actionWidgetDuplicate_triggered()
 {
     if (auto* widget = GetCurrentWidget())
     {
-        if (IsRootWidget(widget))
-            return;
-        // create a dupe recursively.
-        auto dupe = widget->Clone();
-        // the parent must be a container widget. a widget cannot
-        // be parented under a widget that isn't a container and
-        // at the the top-most level the window has a root widget
-        // which is the top level container.
-        auto* parent = mState.window.FindParent(widget);
-        // Adjust the properties of each widget in the new duplicate
-        // widget hierarchy starting at the top-most dupe.
-        uik::ForEachWidget([](uik::Widget* dupe) {
-            const auto name = dupe->GetName();
-            dupe->SetName(base::FormatString("Copy of %1", name));
-        }, dupe.get());
+        auto* dupe = mState.window.DuplicateWidget(widget);
+        // update the the translation for the parent of the new hierarchy
+        // so that it's possible to tell it apart from the source of the copy.
+        dupe->Translate(10.0f, 10.0f);
 
-        auto* child = parent->AddChild(std::move(dupe));
-        child->Translate(10.0f, 10.0f);
+        mState.window.VisitEach([](uik::Widget* widget) {
+            const auto& name = widget->GetName();
+            widget->SetName(base::FormatString("Copy of %1", name));
+        }, dupe);
+
         mUI.tree->Rebuild();
-        mUI.tree->SelectItemById(app::FromUtf8(child->GetId()));
+        mUI.tree->SelectItemById(app::FromUtf8(dupe->GetId()));
         mState.window.Style(*mState.painter);
     }
 }
@@ -1070,11 +1111,12 @@ void UIWidget::on_btnViewMinus90_clicked()
 
 void UIWidget::on_btnResetTransform_clicked()
 {
+    const auto& form_size = GetFormSize();
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto rotation = mUI.rotation->value();
-    mState.camera_offset_x = width * 0.5f - mState.window.GetWidth() * 0.5;
-    mState.camera_offset_y = height * 0.5f - mState.window.GetHeight() * 0.5;
+    mState.camera_offset_x = width * 0.5f - form_size.GetWidth() * 0.5;
+    mState.camera_offset_y = height * 0.5f - form_size.GetHeight() * 0.5;
     mViewTransformRotation = rotation;
     mViewTransformStartTime = mCurrentTime;
     // set new camera offset to the center of the widget.
@@ -1099,7 +1141,7 @@ void UIWidget::on_tree_customContextMenuRequested(QPoint)
     const auto* widget = GetCurrentWidget();
     SetEnabled(mUI.actionWidgetDelete, false);
     SetEnabled(mUI.actionWidgetDuplicate, false);
-    if (widget && !IsRootWidget(widget))
+    if (widget)
     {
         SetEnabled(mUI.actionWidgetDelete , true);
         SetEnabled(mUI.actionWidgetDuplicate , true);
@@ -1133,26 +1175,17 @@ void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* t
 {
     auto* src_widget = static_cast<uik::Widget*>(item->GetUserData());
     auto* dst_widget = static_cast<uik::Widget*>(target->GetUserData());
-    if (!dst_widget->IsContainer())
+    if (dst_widget && !dst_widget->IsContainer())
         return;
+    auto& tree = mState.window.GetRenderTree();
 
     // check if we're trying to drag a parent onto its own child.
-    // we can perform this check by seeing if the src widget is in fact
-    // a parent of the destination by seeing if we can find the destination
-    // starting from source.
-    if (uik::FindWidget([dst_widget](uik::Widget* widget) {
-        return widget == dst_widget;
-    }, src_widget))
+    if (base::SearchChild(tree, dst_widget, src_widget))
         return;
-
     // todo: probably want to retain the position of the widget
     // relative to window. this means that the widget's position
     // needs to be transformed relative to the new parent
-
-    dst_widget->AddChild(src_widget->Copy());
-
-    mState.window.DeleteWidget(src_widget);
-    mUI.tree->Rebuild();
+    tree.ReparentChild(dst_widget, src_widget);
 }
 void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
@@ -1189,14 +1222,15 @@ void UIWidget::ResourceUpdated(const app::Resource* resource)
 
 void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 {
+    const auto& form_size = GetFormSize();
     const auto surface_width  = mUI.widget->width();
     const auto surface_height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto window_width  = mState.window.GetWidth();
-    const auto window_height = mState.window.GetHeight();
+    const auto window_width  = form_size.GetWidth();
+    const auto window_height = form_size.GetHeight();
 
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
@@ -1249,7 +1283,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
-        gfx::DrawRectOutline(painter, gfx::FRect(0.0f, 0.0f,mState.window.GetSize()), gfx::Color::HotPink);
+        gfx::DrawRectOutline(painter, gfx::FRect(0.0f, 0.0f, GetFormSize()), gfx::Color::HotPink);
     }
     else
     {
@@ -1630,10 +1664,11 @@ void UIWidget::DisplayCurrentWidgetProperties()
 
 void UIWidget::DisplayCurrentCameraLocation()
 {
+    const auto& form = GetFormSize();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
-    const auto camera_center_x = width * 0.5f - mState.window.GetWidth() * 0.5;
-    const auto camera_center_y = height * 0.5f - mState.window.GetHeight() * 0.5;
+    const auto camera_center_x = width * 0.5f - form.GetWidth() * 0.5;
+    const auto camera_center_y = height * 0.5f - form.GetHeight() * 0.5;
 
     const auto dist_x = mState.camera_offset_x - camera_center_x;
     const auto dist_y = mState.camera_offset_y - camera_center_y;
@@ -1733,12 +1768,6 @@ bool UIWidget::LoadStyle(const QString& name)
     return true;
 }
 
-
-bool UIWidget::IsRootWidget(const uik::Widget* widget) const
-{
-    return mState.window.IsRootWidget(widget);
-}
-
 void UIWidget::UpdateDeletedResourceReferences()
 {
     // the only resource references are materials.
@@ -1755,6 +1784,12 @@ void UIWidget::UpdateDeletedResourceReferences()
         // todo: improve the message/information about which widgets were affected.
         WARN("Some UI material references are no longer available and have been defaulted.");
     }
+}
+
+uik::FSize UIWidget::GetFormSize() const
+{
+    //return mState.window.FindWidgetByType(uik::Widget::Type::Form)->GetSize();
+    return mState.window.GetBoundingRect().GetSize();
 }
 
 } // namespace

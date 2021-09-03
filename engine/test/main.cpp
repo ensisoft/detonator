@@ -630,7 +630,7 @@ public:
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
-        mWindow.Resize(500.0f, 500.0f);
+        mWindow.ClearWidgets();
         mStyle.SetClassLibrary(loader);
         mPainter.SetStyle(&mStyle);
 
@@ -671,6 +671,15 @@ public:
         mStyle.SetMaterial("label/border", engine::detail::UINullMaterial());
         mStyle.SetMaterial("form/background", engine::detail::UIColor(gfx::Color::DarkGray));
 
+        uik::Widget* form =  nullptr;
+        {
+            uik::Form form;
+            form.SetName("form");
+            form.SetSize(500.0f, 500.0f);
+            mWindow.AddWidget(form);
+            mWindow.LinkChild(nullptr, mWindow.FindWidgetByName("form"));
+        }
+        form = mWindow.FindWidgetByName("form");
 
         // add some widgets
         {
@@ -679,21 +688,24 @@ public:
             chk.SetText("Check");
             chk.SetCheckLocation(uik::CheckBox::Check::Right);
             chk.SetPosition(30.0f, 30.0f);
-            mWindow.AddWidget(chk);
+            auto* child = mWindow.AddWidget(chk);
+            mWindow.LinkChild(form, child);
         }
         {
             uik::PushButton ok;
             ok.SetName("ok");
             ok.SetText("OK");
             ok.SetPosition(150.0f, 30.0f);
-            mWindow.AddWidget(ok);
+            auto* child = mWindow.AddWidget(ok);
+            mWindow.LinkChild(form, child);
         }
         {
             uik::PushButton play;
             play.SetName("play");
             play.SetText("Play!");
             play.SetPosition(300.0f, 30.0f);
-            mWindow.AddWidget(play);
+            auto* child = mWindow.AddWidget(play);
+            mWindow.LinkChild(form, child);
         }
 
         {
@@ -701,14 +713,16 @@ public:
             lbl.SetName("label");
             lbl.SetText("Hello world");
             lbl.SetPosition(30.0f, 80.0f);
-            mWindow.AddWidget(lbl);
+            auto* child = mWindow.AddWidget(lbl);
+            mWindow.LinkChild(form, child);
         }
 
         {
             uik::SpinBox spin;
             spin.SetName("spin");
             spin.SetPosition(200.0f, 80.0f);
-            mWindow.AddWidget(spin);
+            auto* child = mWindow.AddWidget(spin);
+            mWindow.LinkChild(form, child);
         }
 
         {
@@ -716,7 +730,8 @@ public:
             slider.SetName("slider");
             slider.SetPosition(30.0f, 150.0f);
             slider.SetSize(250.f, 30.0f);
-            mWindow.AddWidget(slider);
+            auto* child = mWindow.AddWidget(slider);
+            mWindow.LinkChild(form, child);
         }
 
         {
@@ -725,7 +740,8 @@ public:
             chk.SetText("Check");
             chk.SetCheckLocation(uik::CheckBox::Check::Left);
             chk.SetPosition(300.0f, 150.0f);
-            mWindow.AddWidget(chk);
+            auto* child = mWindow.AddWidget(chk);
+            mWindow.LinkChild(form, child);
         }
 
         {
@@ -734,7 +750,8 @@ public:
             prg.SetValue(0.5f);
             prg.SetPosition(30.0f, 200.0f);
             prg.SetText("Done %1%");
-            mWindow.AddWidget(prg);
+            auto* child = mWindow.AddWidget(prg);
+            mWindow.LinkChild(form, child);
         }
 
         {
@@ -742,7 +759,8 @@ public:
             prg.SetName("progress2");
             prg.SetPosition(30.0f, 250.0f);
             prg.SetText("Wait...");
-            mWindow.AddWidget(prg);
+            auto* child = mWindow.AddWidget(prg);
+            mWindow.LinkChild(form, child);
         }
 
         mState.Clear();

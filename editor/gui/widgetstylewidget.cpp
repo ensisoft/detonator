@@ -179,12 +179,26 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
         const auto& id = widget->GetId();
         const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
         if (font.empty())
+        {
             mStyle->DeleteProperty(id + mSelector + "/text-font");
-        else mStyle->SetProperty(id + mSelector + "/text-font", font);
+            mStyle->DeleteProperty(id + mSelector + "/edit-text-font");
+        }
+        else
+        {
+            mStyle->SetProperty(id + mSelector + "/text-font", font);
+            mStyle->SetProperty(id + mSelector + "/edit-text-font", font);
+        }
 
         if (mUI.widgetFontSize->currentIndex() == -1)
+        {
             mStyle->DeleteProperty(id + mSelector + "/text-size");
-        else mStyle->SetProperty(id + mSelector + "/text-size", (int)GetValue(mUI.widgetFontSize));
+            mStyle->DeleteProperties(id + mSelector + "/edit-text-size");
+        }
+        else
+        {
+            mStyle->SetProperty(id + mSelector + "/edit-text-size", (int)GetValue(mUI.widgetFontSize));
+            mStyle->SetProperty(id + mSelector + "/text-size", (int)GetValue(mUI.widgetFontSize));
+        }
 
         if (mUI.widgetTextVAlign->currentIndex() == -1)
             mStyle->DeleteProperty(id + mSelector + "/text-vertical-align");
@@ -195,8 +209,15 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
         else mStyle->SetProperty(id + mSelector + "/text-horizontal-align", (engine::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
 
         if (!mUI.widgetTextColor->hasColor())
+        {
             mStyle->DeleteProperty(id + mSelector + "/text-color");
-        else mStyle->SetProperty(id + mSelector + "/text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
+            mStyle->DeleteProperty(id + mSelector + "/edit-text-color");
+        }
+        else
+        {
+            mStyle->SetProperty(id + mSelector + "/text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
+            mStyle->SetProperty(id + mSelector + "/edit-text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
+        }
 
         const auto blink_state = mUI.widgetTextBlink->checkState();
         if (blink_state == Qt::PartiallyChecked)

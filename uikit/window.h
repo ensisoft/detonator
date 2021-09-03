@@ -24,6 +24,7 @@
 #include <functional>
 
 #include "data/fwd.h"
+#include "base/tree.h"
 #include "uikit/widget.h"
 #include "uikit/types.h"
 #include "uikit/op.h"
@@ -69,22 +70,28 @@ namespace uik
     class Window
     {
     public:
-        using Visitor       = detail::TVisitor<Widget*>;
-        using ConstVisitor  = detail::TVisitor<const Widget*>;
+        using RenderTree    = base::RenderTree<Widget>;
+        using Visitor       = RenderTree::Visitor;
+        using ConstVisitor  = RenderTree::ConstVisitor;
 
         Window();
         Window(const Window& other);
 
-        // Add a new widget instance to the window's root widget.
-        // Returns pointer to the widget that was added.
-        Widget* AddWidget(std::unique_ptr<Widget> widget)
-        { return mRoot->AddChild(std::move(widget)); }
+        // Add a new widget instance to the window.
+        Widget* AddWidget(std::unique_ptr<Widget> widget);
 
-        // Add a new widget instance to the window's root widget.
-        // Returns a pointer to the widget that was added.
+        // Add a new widget instance to the window.
         template<typename WidgetType>
         Widget* AddWidget(WidgetType&& widget)
-        { return mRoot->AddWidget(std::forward<WidgetType>(widget)); }
+        {
+            auto w = std::make_unique<std::decay_t<WidgetType>>(std::forward<WidgetType>(widget));
+            mWidgets.push_back(std::move(w));
+            return mWidgets.back().get();
+        }
+
+        Widget* DuplicateWidget(const Widget* widget);
+
+        void LinkChild(Widget* parent, Widget* child);
 
         // Delete the given widget from the window's widget hierarchy.
         // Note that the root widget cannot be deleted and such calls
@@ -98,43 +105,57 @@ namespace uik
         // matches the predicate then nullptr is returned.
         template<typename Predicate>
         Widget* FindWidget(Predicate predicate)
-        { return uik::FindWidget<Widget*>(std::move(predicate), mRoot.get()); }
+        {
+            for (auto& widget : mWidgets)
+            {
+                if (predicate(widget.get()))
+                    return widget.get();
+            }
+            return nullptr;
+        }
 
         // Find the parent widget of the given child. Returns nullptr if the
         // widget has no parent. I.e. the widget is the root widget or a widget
         // pointer that is not part of this widget hierarchy.
         Widget* FindParent(Widget* child)
-        { return uik::FindParent<Widget*>(child, mRoot.get()); }
+        { return mRenderTree.GetParent(child); }
 
         // Get the widget at the specified index. The index must be valid.
         Widget& GetWidget(size_t index)
-        { return mRoot->GetChild(index); }
+        { return *base::SafeIndex(mWidgets, index); }
 
         // Perform hit testing based on the given window coordinates. Returns
         // the first widget whose rectangle contains the test point.
-        Widget* HitTest(const FPoint& window, FPoint* widget = nullptr, bool flags = false);
+        Widget* HitTest(const FPoint& window, FPoint* widget_coord = nullptr, bool consider_flags = false);
 
         // Find the first widget (if any) that satisfies the given predicate.
         // The predicate should return true to indicate a match. If no widget
         // matches the predicate then nullptr is returned.
         template<typename Predicate>
         const Widget* FindWidget(Predicate predicate) const
-        { return uik::FindWidget<const Widget*>(std::move(predicate), mRoot.get());  }
+        {
+            for (const auto& widget : mWidgets)
+            {
+                if (predicate(widget.get()))
+                    return widget.get();
+            }
+            return nullptr;
+        }
 
         // Find the parent widget of the given child. Returns nullptr if the
         // widget has no parent. I.e. the widget is the root widget or a widget
         // pointer that is not part of this widget hierarchy.
-        const Widget* FindParent(Widget* child) const
-        { return uik::FindParent<const Widget*>(child, mRoot.get()); }
+        const Widget* FindParent(const Widget* child) const
+        { return mRenderTree.GetParent(child); }
 
         // Get the widget at the specified index. The index must be valid.
         const Widget& GetWidget(size_t index) const
-        { return mRoot->GetChild(index); }
+        { return *base::SafeIndex(mWidgets, index); }
 
         // Find the first widget (if any) that satisfies the given predicate.
         // The predicate should return true to indicate a match. If no widget
         // matches the predicate then nullptr is returned.
-        const Widget* HitTest(const FPoint& window, FPoint* widget = nullptr, bool flags = false) const;
+        const Widget* HitTest(const FPoint& window, FPoint* widget_coord = nullptr, bool consider_flags = false) const;
 
         // Paint the window and its widgets.
         void Paint(State& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
@@ -147,36 +168,45 @@ namespace uik
         // strings this will prime the painter for subsequent paint operations.
         void Style(Painter& painter) const;
 
-        // Visit the window's whole widget hierarchy.
-        void Visit(Visitor& visitor)
-        { detail::VisitRecursive<Widget*>(visitor, mRoot.get()); }
+        // Visit the window's widget hierarchy starting from the given
+        // root widget.
+        void Visit(Visitor& visitor, Widget* root = nullptr)
+        { mRenderTree.PreOrderTraverse(visitor, root); }
 
-        // Visit the window's whole widget hierarchy.
-        void Visit(ConstVisitor& visitor) const
-        { detail::VisitRecursive<const Widget*>(visitor, mRoot.get()); }
+        // Visit the window's widget hierarchy starting from the given
+        // root widget.
+        void Visit(ConstVisitor& visitor, const Widget* root = nullptr) const
+        { mRenderTree.PreOrderTraverse(visitor, root); }
+
+        template<typename Function>
+        void VisitEach(Function callback, Widget* root = nullptr)
+        { mRenderTree.PreOrderTraverseForEach(std::move(callback), root); }
+
+        template<typename Function>
+        void VisitEach(Function callback, const Widget* root = nullptr) const
+        { mRenderTree.PreOrderTraverseForEach(std::move(callback), root); }
 
         // Invoke the given callback function for each widget in the window.
         template<typename Function>
         void ForEachWidget(Function callback)
-        { uik::ForEachWidget<Widget*>(std::move(callback), mRoot.get()); }
+        {
+            for (const auto& widget : mWidgets)
+                callback(widget.get());
+        }
 
         // Invoke the given callback function for each widget in the window.
         template<typename Function>
         void ForEachWidget(Function callback) const
-        { uik::ForEachWidget<const Widget*>(std::move(callback), mRoot.get()); }
+        {
+            for (const auto& widget : mWidgets)
+                callback(widget.get());
+        }
 
         // Find the window coordinate rectangle for the given widget.
         // If the widget is not found the result is undefined.
-        FRect FindWidgetRect(const Widget* widget) const
-        { return uik::FindWidgetRect<const Widget*>(widget, mRoot.get()); }
+        FRect FindWidgetRect(const Widget* widget) const;
 
-        // Resize the window to a new size. The size of the window is used
-        // painting and in any possible scaling operations when painting the
-        // window in some viewport.
-        void Resize(float width, float height)
-        { Resize(FSize(width, height)); }
-        void Resize(const FSize& size)
-        { mRoot->SetSize(size); }
+        FRect GetBoundingRect() const;
 
         // Aggregate of mouse event data when responding to
         // mouse events.
@@ -258,6 +288,8 @@ namespace uik
         // different.
         Window Clone() const;
 
+        void ClearWidgets();
+
         // Setters.
         void SetName(const std::string& name)
         { mName = name; }
@@ -271,38 +303,34 @@ namespace uik
         std::string GetStyleName() const
         { return mStyle; }
         std::size_t GetNumWidgets() const
-        { return mRoot->GetNumChildren(); }
+        { return mWidgets.size(); }
         std::string GetId() const
         { return mId; }
         std::string GetName() const
         { return mName; }
-        FSize GetSize() const
-        { return mRoot->GetSize(); }
-        float GetWidth() const
-        { return mRoot->GetSize().GetWidth(); }
-        float GetHeight() const
-        { return mRoot->GetSize().GetHeight(); }
-        Widget& GetRootWidget()
-        { return *mRoot; }
-        const Widget& GetRootWidget() const
-        { return *mRoot; }
-        bool IsRootWidget(const Widget* other) const
-        { return other == mRoot.get(); }
+        RenderTree& GetRenderTree()
+        { return mRenderTree; }
+        const RenderTree& GetRenderTree() const
+        { return mRenderTree; }
 
         // Helpers
         Widget* FindWidgetByName(const std::string& name)
         { return FindWidget([&name](Widget* widget) { return widget->GetName() == name; }); }
         Widget* FindWidgetById(const std::string& id)
         { return FindWidget([&id](Widget* widget) { return widget->GetId() == id; }); }
-        Widget* HitTest(float x, float y)
-        { return HitTest(FPoint(x, y)); }
+        Widget* FindWidgetByType(Widget::Type type)
+        { return FindWidget([type](Widget* widget) { return widget->GetType() == type; }); }
+        Widget* HitTest(float x, float y, FPoint* widget_coord = nullptr, bool consider_flags = false)
+        { return HitTest(FPoint(x, y), widget_coord, consider_flags); }
 
         const Widget* FindWidgetByName(const std::string& name) const
         { return FindWidget([&name](const Widget* widget) {  return widget->GetName() == name; }); }
         const Widget* FindWidgetById(const std::string& id) const
         { return FindWidget([&id](const Widget* widget) { return widget->GetId() == id; }); }
-        const Widget* HitTest(float x, float y) const
-        { return HitTest(FPoint(x, y)); }
+        const Widget* FindWidgetByType(Widget::Type type) const
+        { return FindWidget([type](Widget* widget) { return widget->GetType() == type; }); }
+        const Widget* HitTest(float x, float y, FPoint* widget_coord = nullptr, bool consider_flags = false) const
+        { return HitTest(FPoint(x, y), widget_coord, consider_flags); }
 
         Window& operator=(const Window& other);
 
@@ -317,6 +345,7 @@ namespace uik
         std::string mId;
         std::string mName;
         std::string mStyle;
-        std::unique_ptr<Form> mRoot;
+        std::vector<std::unique_ptr<Widget>> mWidgets;
+        RenderTree mRenderTree;
     };
 } // namespace

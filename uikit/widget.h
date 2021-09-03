@@ -25,6 +25,7 @@
 #include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
+#include "base/hash.h"
 #include "data/fwd.h"
 #include "uikit/types.h"
 
@@ -87,6 +88,8 @@ namespace uik
         virtual Type GetType() const = 0;
         // Test a widget flag. Returns true if the flag is set, otherwise false.
         virtual bool TestFlag(Flags flag) const = 0;
+        // Set the unique Widget ID.
+        virtual void SetId(const std::string& id) = 0;
         // Set the widget name.
         virtual void SetName(const std::string& name) = 0;
         // Set the widget size.
@@ -195,26 +198,8 @@ namespace uik
 
         // Create a functionally equivalent clone of this widget, i.e. a
         // widget that has the same type and properties but a different
-        // instance id.
+        // widget id.
         virtual std::unique_ptr<Widget> Clone() const = 0;
-
-        // Return the number of child widgets this widget has. By default
-        // widget's cannot contain other widgets unless the widget is a
-        // container widget.
-        virtual size_t GetNumChildren() const
-        { return 0; }
-        // Get a child widget at the given index. The index must be a valid index.
-        virtual Widget& GetChild(size_t index)
-        { BUG("Widget has no children."); }
-        // Get a child widget at the given index. The index must be a valid index.
-        virtual const Widget& GetChild(size_t index) const
-        { BUG("Widget has no children."); }
-        virtual bool DeleteChild(const Widget* child)
-        { BUG("Widget has no children."); }
-        virtual bool IsContainer() const
-        { return false; }
-        virtual Widget* AddChild(std::unique_ptr<Widget> child)
-        { BUG("Widget is not a container.");}
 
         // Get the rectangle within the widget in which painting/click
         // testing and child clipping  should take place.
@@ -224,12 +209,17 @@ namespace uik
         { return FRect(0.0f, 0.0f, GetSize()); }
 
         // helpers
+        inline bool IsContainer() const
+        {
+            const auto type = GetType();
+            if (type == Type::GroupBox || type == Type::Form)
+                return true;
+            return false;
+        }
         inline bool IsEnabled() const
         { return TestFlag(Flags::Enabled);  }
         inline bool IsVisible() const
         { return TestFlag(Flags::VisibleInGame); }
-        inline bool HasChildren() const
-        { return GetNumChildren() != 0; }
         inline void SetSize(float width, float height)
         { SetSize(FSize(width , height)); }
         inline void SetPosition(float x, float y)
@@ -239,6 +229,10 @@ namespace uik
         { SetSize(GetSize() + FSize(dw, dh)); }
         inline void Translate(float dx, float dy)
         { SetPosition(GetPosition() + FPoint(dx, dy)); }
+
+        static
+        std::unique_ptr<Widget> CreateWidget(Type type);
+
     private:
     };
 
@@ -549,112 +543,49 @@ namespace uik
             static constexpr auto InitialWidth = 200;
         };
 
-        class WidgetBase
+        class BaseWidget : public Widget
         {
         public:
             using Flags = Widget::Flags;
-            WidgetBase()
-            { mId   = base::RandomString(10); }
-            size_t GetHash(size_t hash) const;
-            void IntoJson(data::Writer& data) const;
-            bool FromJson(const data::Reader& data);
+            virtual std::string GetStyleString() const override
+            { return mStyle; }
+            virtual std::string GetId() const override
+            { return mId; }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual uik::FSize GetSize() const override
+            { return mSize; }
+            virtual uik::FPoint GetPosition() const override
+            { return mPosition; }
+            virtual bool TestFlag(Flags flag) const override
+            { return mFlags.test(flag); }
+            virtual void SetId(const std::string& id) override
+            { mId = id; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
+            virtual void SetSize(const FSize& size) override
+            { mSize = size; }
+            virtual void SetPosition(const FPoint& pos) override
+            { mPosition = pos; }
+            virtual void SetStyleString(const std::string& style) override
+            { mStyle = style; }
+            virtual void SetFlag(Flags flag, bool on_off) override
+            { mFlags.set(flag, on_off); }
+            virtual size_t GetHash() const override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
         protected:
             std::string mId;
             std::string mName;
             std::string mStyle;
             uik::FPoint mPosition;
-            uik::FSize mSize;
+            uik::FSize  mSize;
             base::bitflag<Flags> mFlags;
         };
 
-        class WidgetContainer
-        {
-        public:
-            template<typename WidgetType>
-            Widget* AddWidget(WidgetType&& widget)
-            {
-                auto w = std::make_unique<std::remove_reference_t<WidgetType>>(std::forward<WidgetType>(widget));
-                mWidgets.push_back(std::move(w));
-                return mWidgets.back().get();
-            }
-        protected:
-            static constexpr auto IsContainer = true;
-            WidgetContainer() = default;
-            WidgetContainer(const WidgetContainer& other)
-            {
-                for (const auto& w : other.mWidgets)
-                    mWidgets.push_back(w->Copy());
-            }
-
-            inline void CopyWidgets(const WidgetContainer& other)
-            {
-                for (const auto& w : other.mWidgets)
-                    mWidgets.push_back(w->Copy());
-            }
-            inline void CloneWidgets(const WidgetContainer& other)
-            {
-                for (const auto& w : other.mWidgets)
-                    mWidgets.push_back(w->Clone());
-            }
-
-            inline std::size_t GetNumWidgets() const
-            { return mWidgets.size(); }
-
-            inline Widget* AddWidget(std::unique_ptr<Widget> widget)
-            {
-                mWidgets.push_back(std::move(widget));
-                return mWidgets.back().get();
-            }
-            inline bool DeleteWidget(const Widget* widget)
-            {
-                auto it = std::find_if(mWidgets.begin(), mWidgets.end(),[widget](auto& w) {
-                    return w.get() == widget;
-                });
-                if (it == mWidgets.end())
-                    return false;
-                mWidgets.erase(it);
-                return true;
-            }
-            inline Widget& GetWidget(size_t index)
-            { return *base::SafeIndex(mWidgets, index).get(); }
-            inline const Widget& GetWidget(size_t index) const
-            { return *base::SafeIndex(mWidgets, index).get(); }
-
-            WidgetContainer& operator=(const WidgetContainer& other)
-            {
-                if (this == &other)
-                    return *this;
-                WidgetContainer tmp(other);
-                std::swap(mWidgets, tmp.mWidgets);
-                return *this;
-            }
-        private:
-            std::vector<std::unique_ptr<Widget>> mWidgets;
-        };
-
-        class NullContainer
-        {
-        protected:
-            static constexpr auto IsContainer = false;
-            inline std::size_t GetNumWidgets() const
-            { return 0; }
-            inline Widget* AddWidget(std::unique_ptr<Widget> widget)
-            { BUG("Widget is not a container."); }
-            inline bool DeleteWidget(const Widget* widget)
-            { BUG("Widget is not a container."); }
-            inline Widget& GetWidget(size_t index)
-            { BUG("Widget is not a container."); }
-            inline const Widget& GetWidget(size_t index) const
-            { BUG("Widget is not a container."); }
-        private:
-        };
-
-        template<typename WidgetModel,
-                typename WidgetContainer = NullContainer>
-        class BasicWidget : public Widget,
-                            public WidgetModel,
-                            public WidgetContainer,
-                            private WidgetBase
+        template<typename WidgetModel>
+        class BasicWidget : public BaseWidget,
+                            public WidgetModel
         {
         public:
             using Traits = WidgetModelTraits<WidgetModel>;
@@ -666,42 +597,23 @@ namespace uik
 
             BasicWidget()
             {
+                mId   = base::RandomString(10);
                 mSize = FSize(Traits::InitialWidth, Traits::InitialHeight);
                 mFlags.set(Flags::Enabled, true);
                 mFlags.set(Flags::VisibleInGame, true);
                 mFlags.set(Flags::VisibleInEditor, true);
             }
+
+            virtual Type GetType() const override
+            { return Traits::Type; }
+
             virtual std::size_t GetHash() const override
             {
                 size_t hash = 0;
-                hash = WidgetBase::GetHash(hash);
-                hash = WidgetModel::GetHash(hash);
+                hash = base::hash_combine(hash, BaseWidget::GetHash());
+                hash = base::hash_combine(hash, WidgetModel::GetHash(0));
                 return hash;
             }
-            virtual std::string GetStyleString() const override
-            { return mStyle; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual uik::FSize GetSize() const override
-            { return mSize; }
-            virtual uik::FPoint GetPosition() const override
-            { return mPosition; }
-            virtual Type GetType() const override
-            { return Traits::Type; }
-            virtual bool TestFlag(Flags flag) const override
-            { return mFlags.test(flag); }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual void SetSize(const FSize& size) override
-            { mSize = size; }
-            virtual void SetPosition(const FPoint& pos) override
-            { mPosition = pos; }
-            virtual void SetStyleString(const std::string& style) override
-            { mStyle = style; }
-            virtual void SetFlag(Flags flag, bool on_off) override
-            { mFlags.set(flag, on_off); }
 
             virtual void Paint(const PaintEvent& paint, State& state, Painter& painter) const override
             {
@@ -717,36 +629,36 @@ namespace uik
                 if constexpr (Traits::WantsUpdate)
                 {
                     UpdateStruct update;
-                    update.state = &state;
-                    update.widgetId = mId;
+                    update.state      = &state;
+                    update.widgetId   = mId;
                     update.widgetName = mName;
-                    update.time = time;
-                    update.dt   = dt;
+                    update.time       = time;
+                    update.dt         = dt;
                     WidgetModel::Update(update);
                 }
             }
 
             virtual void IntoJson(data::Writer& data) const override
             {
-                WidgetBase::IntoJson(data);
+                BaseWidget::IntoJson(data);
                 WidgetModel::IntoJson(data);
             }
             virtual bool FromJson(const data::Reader& data) override
             {
-                if (!WidgetBase::FromJson(data) || !WidgetModel::FromJson(data))
+                if (!BaseWidget::FromJson(data))
                     return false;
-                return true;
+                return WidgetModel::FromJson(data);
             }
             virtual WidgetAction PollAction(State& state, double time, float dt) override
             {
                 if constexpr (Traits::WantsPoll)
                 {
                     PollStruct ps;
-                    ps.state = &state;
-                    ps.widgetId = mId;
+                    ps.state      = &state;
+                    ps.widgetId   = mId;
                     ps.widgetName = mName;
-                    ps.time = time;
-                    ps.dt   = dt;
+                    ps.time       = time;
+                    ps.dt         = dt;
                     return WidgetModel::PollAction(ps);
                 }
                 else return WidgetAction {};
@@ -813,45 +725,27 @@ namespace uik
                 else return WidgetAction {};
             }
             virtual std::unique_ptr<Widget> Copy() const override
-            { return std::make_unique<BasicWidget>(*this); }
-            virtual std::unique_ptr<Widget> Clone() const override
             {
-                auto ret = std::make_unique<BasicWidget>();
-                ret->mId       = base::RandomString(10);
-                ret->mName     = mName;
-                ret->mStyle    = mStyle;
-                ret->mPosition = mPosition;
-                ret->mSize     = mSize;
-                ret->mFlags    = mFlags;
-                if constexpr (WidgetContainer::IsContainer)
-                    ret->CloneWidgets(*this);
+                auto ret = std::make_unique<BasicWidget>(*this);
                 return ret;
             }
-
-            // child widget management
-            virtual size_t GetNumChildren() const override
-            { return WidgetContainer::GetNumWidgets(); }
-            virtual Widget& GetChild(size_t index) override
-            { return WidgetContainer::GetWidget(index); }
-            virtual const Widget& GetChild(size_t index) const override
-            { return WidgetContainer::GetWidget(index); }
-            virtual bool DeleteChild(const Widget* child) override
-            { return WidgetContainer::DeleteWidget(child); }
-            virtual bool IsContainer() const override
-            { return WidgetContainer::IsContainer; }
-            virtual Widget* AddChild(std::unique_ptr<Widget> child) override
-            { return WidgetContainer::AddWidget(std::move(child)); }
-        private:
+            virtual std::unique_ptr<Widget> Clone() const override
+            {
+                auto ret = std::make_unique<BasicWidget>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+        protected:
         };
     } // detail
 
-    using Label      = detail::BasicWidget<detail::LabelModel>;
-    using PushButton = detail::BasicWidget<detail::PushButtonModel>;
-    using CheckBox   = detail::BasicWidget<detail::CheckBoxModel>;
-    using GroupBox   = detail::BasicWidget<detail::GroupBoxModel, detail::WidgetContainer>;
-    using Form       = detail::BasicWidget<detail::FormModel, detail::WidgetContainer>;
-    using SpinBox    = detail::BasicWidget<detail::SpinBoxModel>;
-    using Slider     = detail::BasicWidget<detail::SliderModel>;
+    using Label       = detail::BasicWidget<detail::LabelModel>;
+    using PushButton  = detail::BasicWidget<detail::PushButtonModel>;
+    using CheckBox    = detail::BasicWidget<detail::CheckBoxModel>;
+    using SpinBox     = detail::BasicWidget<detail::SpinBoxModel>;
+    using Slider      = detail::BasicWidget<detail::SliderModel>;
     using ProgressBar = detail::BasicWidget<detail::ProgressBarModel>;
+    using GroupBox    = detail::BasicWidget<detail::GroupBoxModel>;
+    using Form        = detail::BasicWidget<detail::FormModel>;
 
 } // namespace
