@@ -67,6 +67,7 @@ namespace gui
         virtual void Undo() override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool ConfirmClose() override;
+        virtual bool OnEscape() override;
         virtual bool GetStats(Stats* stats) const override;
         virtual void Refresh() override;
     private slots:

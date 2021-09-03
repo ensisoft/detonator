@@ -691,6 +691,14 @@ bool UIWidget::ConfirmClose()
     on_actionSave_triggered();
     return true;
 }
+bool UIWidget::OnEscape()
+{
+    if (mCurrentTool)
+        mCurrentTool.reset();
+    else mUI.tree->ClearSelection();
+    return true;
+}
+
 bool UIWidget::GetStats(Stats* stats) const
 {
     stats->time  = mPlayTime;
