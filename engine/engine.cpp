@@ -231,8 +231,9 @@ public:
 
         if (auto* ui = GetUI())
         {
-            const float width  = ui->GetWidth();
-            const float height = ui->GetHeight();
+            const auto& rect   = ui->GetBoundingRect();
+            const float width  = rect.GetWidth();
+            const float height = rect.GetHeight();
             const float scale  = std::min(surf_width / width, surf_height / height);
             const float device_viewport_width = width * scale;
             const float device_viewport_height = height * scale;
@@ -614,8 +615,9 @@ private:
     uik::Window::MouseEvent MapUIMouseEvent(const WdkMouseEvent& mickey) const
     {
         const auto* ui     = GetUI();
-        const float width  = ui->GetWidth();
-        const float height = ui->GetHeight();
+        const auto& rect   = ui->GetBoundingRect();
+        const float width  = rect.GetWidth();
+        const float height = rect.GetHeight();
         const float scale = std::min((float)mSurfaceWidth/width, (float)mSurfaceHeight/height);
         const glm::vec2 window_size(width, height);
         const glm::vec2 surface_size(mSurfaceWidth, mSurfaceHeight);

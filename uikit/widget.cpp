@@ -29,8 +29,9 @@ namespace uik
 {
 namespace detail {
 
-size_t WidgetBase::GetHash(size_t hash ) const
+size_t BaseWidget::GetHash() const
 {
+    size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStyle);
@@ -39,7 +40,7 @@ size_t WidgetBase::GetHash(size_t hash ) const
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
-void WidgetBase::IntoJson(data::Writer& data) const
+void BaseWidget::IntoJson(data::Writer& data) const
 {
     data.Write("id",       mId);
     data.Write("name",     mName);
@@ -49,7 +50,7 @@ void WidgetBase::IntoJson(data::Writer& data) const
     data.Write("flags",    mFlags);
 }
 
-bool WidgetBase::FromJson(const data::Reader& data)
+bool BaseWidget::FromJson(const data::Reader& data)
 {
     if (!data.Read("id",       &mId) ||
         !data.Read("name",     &mName) ||
@@ -654,4 +655,28 @@ bool GroupBoxModel::FromJson(const data::Reader& data)
 }
 
 } // namespace detail
+
+// static
+std::unique_ptr<Widget> Widget::CreateWidget(Type type)
+{
+    if (type == Widget::Type::Form)
+        return std::make_unique<uik::Form>();
+    if (type == Widget::Type::Label)
+        return std::make_unique<uik::Label>();
+    else if (type == Widget::Type::PushButton)
+        return std::make_unique<uik::PushButton>();
+    else if (type == Widget::Type::CheckBox)
+        return std::make_unique<uik::CheckBox>();
+    else if (type == Widget::Type::GroupBox)
+        return std::make_unique<uik::GroupBox>();
+    else if (type == Widget::Type::SpinBox)
+        return std::make_unique<uik::SpinBox>();
+    else if (type == Widget::Type::Slider)
+        return std::make_unique<uik::Slider>();
+    else if (type == Widget::Type::ProgressBar)
+        return std::make_unique<uik::ProgressBar>();
+    else BUG("Unhandled widget type.");
+    return nullptr;
+}
+
 } // namespace

@@ -223,7 +223,7 @@ namespace base
                 const auto& children = it->second;
                 for (auto *child : children)
                 {
-                    PreOrderTraverse(visitor, const_cast<Element*>(child));
+                    PreOrderTraverse<T>(visitor, const_cast<Element*>(child));
                     if (visitor.IsDone())
                         break;
                 }

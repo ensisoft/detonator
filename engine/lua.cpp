@@ -1269,21 +1269,13 @@ void BindUIK(sol::state& L)
     widget["SetFlag"]        = &SetFlag<uik::Widget>;
     widget["IsEnabled"]      = &uik::Widget::IsEnabled;
     widget["IsVisible"]      = &uik::Widget::IsVisible;
-    widget["IsContainer"]    = &uik::Widget::IsContainer;
-    widget["GetNumChildren"] = &uik::Widget::GetNumChildren;
     widget["Grow"]           = &uik::Widget::Grow;
     widget["Translate"]      = &uik::Widget::Translate;
     widget["AsLabel"]        = &WidgetCast<uik::Label,      uik::Widget::Type::Label>;
     widget["AsPushButton"]   = &WidgetCast<uik::PushButton, uik::Widget::Type::PushButton>;
     widget["AsCheckBox"]     = &WidgetCast<uik::CheckBox,   uik::Widget::Type::CheckBox>;
     widget["AsGroupBox"]     = &WidgetCast<uik::GroupBox,   uik::Widget::Type::GroupBox>;
-    widget["GetChild"]       = [](uik::Widget* widget, unsigned index) {
-        if (!widget->IsContainer())
-            throw std::runtime_error(base::FormatString("Widget '%1' is not a container.", widget->GetName()));
-        if (index >= widget->GetNumChildren())
-            throw std::runtime_error(base::FormatString("Widget '%1' index (%2) is out of bounds.", widget->GetName(), index));
-        return &widget->GetChild(index);
-    };
+
     auto label          = table.new_usertype<uik::Label>("Label");
     auto check          = table.new_usertype<uik::CheckBox>("CheckBox");
     auto group          = table.new_usertype<uik::GroupBox>("GroupBox");
@@ -1301,16 +1293,11 @@ void BindUIK(sol::state& L)
 
     auto window = table.new_usertype<uik::Window>("Window");
     window["GetId"]            = &uik::Window::GetId;
-    window["GetSize"]          = &uik::Window::GetSize;
     window["GetName"]          = &uik::Window::GetName;
-    window["GetWidth"]         = &uik::Window::GetWidth;
-    window["GetHeight"]        = &uik::Window::GetHeight;
     window["GetNumWidgets"]    = &uik::Window::GetNumWidgets;
-    window["GetRootWidget"]    = [](uik::Window* window) { return &window->GetRootWidget(); };
     window["FindWidgetById"]   = [](uik::Window* window, const std::string& id) { return window->FindWidgetById(id); };
     window["FindWidgetByName"] = [](uik::Window* window, const std::string& name) { return window->FindWidgetByName(name); };
     window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
-    window["Resize"]           = (void(uik::Window::*)(const uik::FSize&))&uik::Window::Resize;
     window["GetWidget"]        = [](uik::Window* window, unsigned index) {
         if (index >= window->GetNumWidgets())
             throw std::runtime_error(base::FormatString("Widget index %1 is out of bounds", index));

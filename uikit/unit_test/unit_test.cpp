@@ -121,6 +121,8 @@ public:
     { return TestWidget::Type::Label; }
     virtual bool TestFlag(Flags flag) const override
     { return this->flags.test(flag); }
+    virtual void SetId(const std::string& id) override
+    {}
     virtual void SetName(const std::string& name) override
     { this->name = name; }
     virtual void SetSize(const uik::FSize& size) override
@@ -219,8 +221,33 @@ void unit_test_widget()
         TEST_REQUIRE(other.IsEnabled() == widget.IsEnabled());
         TEST_REQUIRE(other.IsVisible() == widget.IsVisible());
     }
-}
 
+    // copy
+    {
+        auto copy = widget.Copy();
+        TEST_REQUIRE(copy->GetId() == widget.GetId());
+        TEST_REQUIRE(copy->GetName() == widget.GetName());
+        TEST_REQUIRE(copy->GetHash() == widget.GetHash());
+        TEST_REQUIRE(copy->GetStyleString() == widget.GetStyleString());
+        TEST_REQUIRE(copy->GetSize() == widget.GetSize());
+        TEST_REQUIRE(copy->GetPosition() == widget.GetPosition());
+        TEST_REQUIRE(copy->IsEnabled() == widget.IsEnabled());
+        TEST_REQUIRE(copy->IsVisible() == widget.IsVisible());
+    }
+
+    // clone
+    {
+        auto clone = widget.Clone();
+        TEST_REQUIRE(clone->GetId() != widget.GetId());
+        TEST_REQUIRE(clone->GetHash() != widget.GetHash());
+        TEST_REQUIRE(clone->GetName() == widget.GetName());
+        TEST_REQUIRE(clone->GetStyleString() == widget.GetStyleString());
+        TEST_REQUIRE(clone->GetSize() == widget.GetSize());
+        TEST_REQUIRE(clone->GetPosition() == widget.GetPosition());
+        TEST_REQUIRE(clone->IsEnabled() == widget.IsEnabled());
+        TEST_REQUIRE(clone->IsVisible() == widget.IsVisible());
+    }
+}
 
 void unit_test_label()
 {
@@ -321,28 +348,39 @@ void unit_test_checkbox()
     // todo:
 }
 
+void unit_test_groupbox()
+{
+    unit_test_widget<uik::GroupBox>();
+
+    // todo:
+}
+
 void unit_test_window()
 {
     uik::Window win;
     TEST_REQUIRE(win.GetId() != "");
     TEST_REQUIRE(win.GetName() == "");
-    TEST_REQUIRE(win.GetSize() != uik::FSize());
-    TEST_REQUIRE(win.GetHeight() != real::float32(0.0f));
-    TEST_REQUIRE(win.GetWidth() != real::float32(0.0f));
     TEST_REQUIRE(win.GetNumWidgets() == 0);
     TEST_REQUIRE(win.FindWidgetByName("foo") == nullptr);
     TEST_REQUIRE(win.FindWidgetById("foo") == nullptr);
 
     win.SetName("window");
     win.SetStyleName("window_style.json");
-    win.Resize(400.0f, 500.0f);
+
+    {
+        uik::Form form;
+        form.SetName("form");
+        form.SetSize(400.0f, 500.0f);
+        win.AddWidget(form);
+        win.LinkChild(nullptr, win.FindWidgetByName("form"));
+    }
 
     {
         uik::Label widget;
         widget.SetName("label");
         widget.SetText("label");
         win.AddWidget(widget);
-
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("label"));
     }
 
     {
@@ -350,6 +388,7 @@ void unit_test_window()
         widget.SetName("pushbutton");
         widget.SetText("pushbutton");
         win.AddWidget(widget);
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("pushbutton"));
     }
 
     // container widget with some contained widgets in order
@@ -358,79 +397,98 @@ void unit_test_window()
         uik::GroupBox group;
         group.SetName("groupbox");
         group.SetText("groupbox");
+        win.AddWidget(group);
 
         uik::Label label;
         label.SetName("child_label0");
         label.SetText("child label0");
-        group.AddWidget(label);
-        win.AddWidget(group);
+        win.AddWidget(label);
+
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("groupbox"));
+        win.LinkChild(win.FindWidgetByName("groupbox"), win.FindWidgetByName("child_label0"));
     }
 
-    TEST_REQUIRE(win.GetNumWidgets() == 3);
-    TEST_REQUIRE(win.GetWidget(0).GetName() == "label");
-    TEST_REQUIRE(win.GetWidget(1).GetName() == "pushbutton");
-    TEST_REQUIRE(win.GetWidget(2).GetName() == "groupbox");
-    TEST_REQUIRE(win.GetWidget(2).IsContainer());
-    TEST_REQUIRE(win.GetWidget(2).GetChild(0).GetName() == "child_label0");
-    TEST_REQUIRE(win.FindWidgetByName(win.GetWidget(0).GetName()) == &win.GetWidget(0));
-    TEST_REQUIRE(win.FindWidgetById(win.GetWidget(0).GetId()) == &win.GetWidget(0));
+    TEST_REQUIRE(win.GetNumWidgets() == 5);
+    TEST_REQUIRE(win.GetWidget(0).GetName() == "form");
+    TEST_REQUIRE(win.GetWidget(1).GetName() == "label");
+    TEST_REQUIRE(win.GetWidget(2).GetName() == "pushbutton");
+    TEST_REQUIRE(win.GetWidget(3).GetName() == "groupbox");
+    TEST_REQUIRE(win.GetWidget(4).GetName() == "child_label0");
+    TEST_REQUIRE(win.FindWidgetByName("form") == &win.GetWidget(0));
+    TEST_REQUIRE(win.FindWidgetByName("foobaser") == nullptr);
+    TEST_REQUIRE(win.FindParent(win.FindWidgetByName("form")) == nullptr);
+    TEST_REQUIRE(win.FindParent(win.FindWidgetByName("child_label0")) == win.FindWidgetByName("groupbox"));
+
+    // hierarchy
+    {
+        class Visitor : public uik::Window::ConstVisitor
+        {
+        public:
+            virtual void EnterNode(const uik::Widget* widget) override
+            {
+                mResult += widget->GetName();
+                mResult += " ";
+            }
+        public:
+            std::string mResult;
+        } visitor;
+        win.Visit(visitor, win.FindWidgetByName("form"));
+        TEST_REQUIRE(visitor.mResult == "form label pushbutton groupbox child_label0 ");
+    }
+
+    // copy/assignment
+    {
+        uik::Window copy(win);
+        TEST_REQUIRE(copy.GetHash() == win.GetHash());
+        TEST_REQUIRE(copy.GetName() == "window");
+        TEST_REQUIRE(copy.GetStyleName() == "window_style.json");
+        TEST_REQUIRE(copy.GetNumWidgets() == 5);
+
+        uik::Window w;
+        w = win;
+        TEST_REQUIRE(w.GetHash() == win.GetHash());
+    }
 
     // serialize.
     {
         data::JsonObject json;
         win.IntoJson(json);
         // for debugging
-        //std::cout << json.dump(2);
+        //std::cout << json.ToString();
 
         auto ret = uik::Window::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetName() == "window");
         TEST_REQUIRE(ret->GetStyleName() == "window_style.json");
-        TEST_REQUIRE(ret->GetNumWidgets() == 3);
-        TEST_REQUIRE(ret->GetWidget(0).GetName() == "label");
-        TEST_REQUIRE(ret->GetWidget(1).GetName() == "pushbutton");
-        TEST_REQUIRE(ret->GetWidget(2).GetName() == "groupbox");
-        TEST_REQUIRE(ret->GetWidget(2).IsContainer());
-        TEST_REQUIRE(ret->GetWidget(2).GetChild(0).GetName() == "child_label0");
-        TEST_REQUIRE(ret->FindWidgetByName(ret->GetWidget(0).GetName()) == &ret->GetWidget(0));
-        TEST_REQUIRE(ret->FindWidgetById(ret->GetWidget(0).GetId()) == &ret->GetWidget(0));
+        TEST_REQUIRE(ret->GetNumWidgets() == 5);
         TEST_REQUIRE(ret->GetHash() == win.GetHash());
     }
 
-    // copy
+    // serialize without any widgets
     {
-        uik::Window copy(win);
-        TEST_REQUIRE(copy.GetName() == "window");
-        TEST_REQUIRE(copy.GetStyleName() == "window_style.json");
-        TEST_REQUIRE(copy.GetNumWidgets() == 3);
-        TEST_REQUIRE(copy.GetWidget(0).GetName() == "label");
-        TEST_REQUIRE(copy.GetWidget(1).GetName() == "pushbutton");
-        TEST_REQUIRE(copy.GetWidget(2).GetName() == "groupbox");
-        TEST_REQUIRE(copy.GetWidget(2).IsContainer());
-        TEST_REQUIRE(copy.GetWidget(2).GetChild(0).GetName() == "child_label0");
-        TEST_REQUIRE(copy.GetHash() == win.GetHash());
-    }
+        uik::Window win;
+        data::JsonObject json;
+        win.IntoJson(json);
+        // for debugging
+        std::cout << json.ToString();
 
-    // assignment
-    {
-        uik::Window copy;
-        copy = win;
-        TEST_REQUIRE(copy.GetName() == "window");
-        TEST_REQUIRE(copy.GetStyleName() == "window_style.json");
-        TEST_REQUIRE(copy.GetNumWidgets() == 3);
-        TEST_REQUIRE(copy.GetWidget(0).GetName() == "label");
-        TEST_REQUIRE(copy.GetWidget(1).GetName() == "pushbutton");
-        TEST_REQUIRE(copy.GetWidget(2).GetName() == "groupbox");
-        TEST_REQUIRE(copy.GetWidget(2).IsContainer());
-        TEST_REQUIRE(copy.GetWidget(2).GetChild(0).GetName() == "child_label0");
-        TEST_REQUIRE(copy.GetHash() == win.GetHash());
+        auto ret = uik::Window::FromJson(json);
+        TEST_REQUIRE(ret.has_value());
+        TEST_REQUIRE(ret->GetHash() == win.GetHash());
     }
 }
 
 void unit_test_window_paint()
 {
     uik::Window win;
-    win.Resize(500.0f, 500.0f);
+    {
+        uik::Form  form;
+        form.SetSize(500.0f, 500.0f);
+        form.SetName("form");
+        win.AddWidget(form);
+        win.LinkChild(nullptr, win.FindWidgetByName("form"));
+    }
+
     {
         uik::PushButton widget;
         widget.SetSize(50.0f, 20.0f);
@@ -438,6 +496,7 @@ void unit_test_window_paint()
         widget.SetName("pushbutton");
         widget.SetText("pushbutton");
         win.AddWidget(widget);
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("pushbutton"));
     }
     // container widget with some contained widgets in order
     // to have some widget recursion
@@ -447,19 +506,20 @@ void unit_test_window_paint()
         group.SetText("groupbox");
         group.SetSize(100.0f, 150.0f);
         group.SetPosition(300.0f, 400.0f);
+        win.AddWidget(group);
 
         uik::Label label;
         label.SetName("child_label0");
         label.SetText("child label0");
         label.SetSize(100.0f, 10.0f);
         label.SetPosition(5.0f, 5.0f);
-        group.AddWidget(label);
+        win.AddWidget(label);
 
-        win.AddWidget(group);
-
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("groupbox"));
+        win.LinkChild(win.FindWidgetByName("groupbox"), win.FindWidgetByName("child_label0"));
     }
     uik::State state;
-    const uik::Widget* form   = win.FindWidgetByName("Form");
+    const uik::Widget* form   = win.FindWidgetByName("form");
     const uik::Widget* button = win.FindWidgetByName("pushbutton");
     const uik::Widget* group  = win.FindWidgetByName("groupbox");
     const uik::Widget* label  = win.FindWidgetByName("child_label0");
@@ -471,11 +531,11 @@ void unit_test_window_paint()
     {
         TEST_REQUIRE(p.cmds[0].name == "draw-widget-background");
         TEST_REQUIRE(p.cmds[0].widget == form->GetId());
-        TEST_REQUIRE(p.cmds[0].ps.clip == uik::FRect(0.0f, 0.0f, 500.0f, 500.0f));
+        TEST_REQUIRE(p.cmds[0].ps.clip.IsEmpty());
         TEST_REQUIRE(p.cmds[0].ps.rect == uik::FRect(0.0f, 0.0f, 500.0f, 500.0f));
         TEST_REQUIRE(p.cmds[1].name == "draw-widget-border");
         TEST_REQUIRE(p.cmds[1].widget == form->GetId());
-        TEST_REQUIRE(p.cmds[1].ps.clip == uik::FRect(0.0f, 0.0f, 500.0f, 500.0f));
+        TEST_REQUIRE(p.cmds[1].ps.clip.IsEmpty());
         TEST_REQUIRE(p.cmds[1].ps.rect == uik::FRect(0.0f, 0.0f, 500.0f, 500.0f));
     }
 
@@ -516,11 +576,17 @@ void unit_test_window_paint()
     }
 }
 
-
 void unit_test_window_mouse()
 {
     uik::Window win;
-    win.Resize(500.0f, 500.0f);
+
+    {
+        uik::Form form;
+        form.SetName("form");
+        form.SetSize(500.0f, 500.0f);
+        win.AddWidget(form);
+        win.LinkChild(nullptr, win.FindWidgetByName("form"));
+    }
 
     {
         TestWidget t;
@@ -528,6 +594,7 @@ void unit_test_window_mouse()
         t.SetSize(uik::FSize(40.0f, 40.0f));
         t.SetPosition(uik::FPoint(20.0f, 20.0f));
         win.AddWidget(t);
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("widget0"));
     }
 
     {
@@ -536,6 +603,7 @@ void unit_test_window_mouse()
         t.SetSize(uik::FSize(20.0f, 20.0f));
         t.SetPosition(uik::FPoint(100.0f, 100.0f));
         win.AddWidget(t);
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("widget1"));
     }
 
     auto* widget0 = static_cast<TestWidget*>(win.FindWidgetByName("widget0"));
@@ -558,12 +626,81 @@ void unit_test_window_mouse()
         win.MouseMove(mouse , state);
         TEST_REQUIRE(widget0->mouse[2].name == "leave");
     }
-
 }
+
+
 
 void unit_test_window_transforms()
 {
-    // todo: hit test, widget rect
+    uik::Window win;
+    {
+        uik::Form  form;
+        form.SetSize(500.0f, 500.0f);
+        form.SetName("form");
+        win.AddWidget(form);
+        win.LinkChild(nullptr, win.FindWidgetByName("form"));
+    }
+
+    {
+        uik::PushButton widget;
+        widget.SetSize(50.0f, 20.0f);
+        widget.SetPosition(25.0f, 35.0f);
+        widget.SetName("pushbutton");
+        widget.SetText("pushbutton");
+        win.AddWidget(widget);
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("pushbutton"));
+    }
+    // container widget with some contained widgets in order
+    // to have some widget recursion
+    {
+        uik::GroupBox group;
+        group.SetName("groupbox");
+        group.SetText("groupbox");
+        group.SetSize(100.0f, 150.0f);
+        group.SetPosition(300.0f, 400.0f);
+        win.AddWidget(group);
+
+        uik::Label label;
+        label.SetName("child_label0");
+        label.SetText("child label0");
+        label.SetSize(30.0f, 10.0f);
+        label.SetPosition(5.0f, 5.0f);
+        win.AddWidget(label);
+
+        win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("groupbox"));
+        win.LinkChild(win.FindWidgetByName("groupbox"), win.FindWidgetByName("child_label0"));
+    }
+    uik::State state;
+    const uik::Widget* form   = win.FindWidgetByName("form");
+    const uik::Widget* button = win.FindWidgetByName("pushbutton");
+    const uik::Widget* group  = win.FindWidgetByName("groupbox");
+    const uik::Widget* label  = win.FindWidgetByName("child_label0");
+
+    // hit test
+    {
+        TEST_REQUIRE(!win.HitTest(-1.0f, 0.0f));
+        TEST_REQUIRE(!win.HitTest(501.0f, 0.0f));
+        TEST_REQUIRE(!win.HitTest(250.0f, -1.0f));
+        TEST_REQUIRE(!win.HitTest(250.0f, 501.0f));
+
+        uik::FPoint pos;
+        TEST_REQUIRE(win.HitTest(26.0f, 36.0f, &pos) == button);
+        TEST_REQUIRE(pos == uik::FPoint(1.0f, 1.0f));
+
+        TEST_REQUIRE(win.HitTest(300.5f, 400.5f, &pos) == group);
+        TEST_REQUIRE(pos == uik::FPoint(0.5f,  0.5f));
+        TEST_REQUIRE(win.HitTest(399.0f, 549.0f, &pos) == group);
+        TEST_REQUIRE(pos == uik::FPoint(99.0f, 149.0f));
+
+        TEST_REQUIRE(win.HitTest(300.0f+5.0f+0.5f, 400.0f+5.0f+0.5f) == label);
+        TEST_REQUIRE(win.HitTest(405.0f, 450.0f) == form);
+    }
+
+
+    // widget rect
+    {
+
+    }
 }
 
 int test_main(int argc, char* argv[])
@@ -571,9 +708,11 @@ int test_main(int argc, char* argv[])
     unit_test_label();
     unit_test_pushbutton();
     unit_test_checkbox();
+    unit_test_groupbox();
     unit_test_window();
     unit_test_window_paint();
     unit_test_window_mouse();
+    unit_test_window_transforms();
 
     return 0;
 }

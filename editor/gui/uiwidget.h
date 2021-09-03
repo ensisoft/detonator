@@ -75,6 +75,7 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionNewForm_triggered();
         void on_actionNewLabel_triggered();
         void on_actionNewPushButton_triggered();
         void on_actionNewGroupBox_triggered();
@@ -135,8 +136,8 @@ namespace gui
         uik::Widget* GetCurrentWidget();
         const uik::Widget* GetCurrentWidget() const;
         bool LoadStyle(const QString& name);
-        bool IsRootWidget(const uik::Widget* widget) const;
         void UpdateDeletedResourceReferences();
+        uik::FSize GetFormSize() const;
     private:
         Ui::UIWidget mUI;
     private:
