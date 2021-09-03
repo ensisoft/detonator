@@ -237,12 +237,11 @@ void unit_test_tree()
         tree.LinkChild(&bar, &child3);
 
         data::JsonObject json;
-
-        tree.IntoJson(&MyNode::TreeNodeToJson, json);
+        game::RenderTreeIntoJson(tree, &MyNode::TreeNodeToJson, json);
         std::cout << json.ToString() << std::endl;
 
         tree.Clear();
-        tree.FromJson(json, &MyNode::TreeNodeFromJson);
+        game::RenderTreeFromJson(tree, &MyNode::TreeNodeFromJson, json);
         std::cout << std::endl;
         std::cout << WalkTree(tree);
         TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");

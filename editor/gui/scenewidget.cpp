@@ -534,7 +534,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
     {
         data::JsonObject json;
         const auto& tree = mState.scene.GetRenderTree();
-        tree.IntoJson([](data::Writer& writer, const auto* node) {
+        game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
         }, json, node);
         clipboard.SetType("application/json/scene_node");
@@ -554,7 +554,7 @@ void SceneWidget::Copy(Clipboard& clipboard) const
     {
         data::JsonObject json;
         const auto& tree = mState.scene.GetRenderTree();
-        tree.IntoJson([](data::Writer& writer, const auto* node) {
+        game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
          }, json, node);
         clipboard.SetType("application/json/scene_node");
@@ -587,7 +587,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     std::vector<std::unique_ptr<game::SceneNodeClass>> nodes;
     bool error = false;
     game::SceneClass::RenderTree tree;
-    tree.FromJson(json, [&nodes, &error](const data::Reader& data) {
+    game::RenderTreeFromJson(tree, [&nodes, &error](const data::Reader& data) {
         auto ret = game::SceneNodeClass::FromJson(data);
         if (ret.has_value()) {
             auto node = std::make_unique<game::SceneNodeClass>(ret->Clone());
@@ -597,7 +597,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         }
         error = true;
         return (game::SceneNodeClass*)nullptr;
-    });
+    }, json);
     if (error || nodes.empty())
     {
         NOTE("No render tree JSON found.");

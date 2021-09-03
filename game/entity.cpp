@@ -859,7 +859,7 @@ void EntityClass::IntoJson(data::Writer& data) const
     }
 
     auto chunk = data.NewWriteChunk();
-    mRenderTree.IntoJson(game::TreeNodeToJson<EntityNodeClass>, *chunk);
+    RenderTreeIntoJson(mRenderTree, game::TreeNodeToJson<EntityNodeClass>, *chunk);
     data.Write("render_tree", std::move(chunk));
 }
 
@@ -903,7 +903,7 @@ std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
         return std::nullopt;
-    ret.mRenderTree.FromJson(*chunk, game::TreeNodeFromJson(ret.mNodes));
+    RenderTreeFromJson(ret.mRenderTree, game::TreeNodeFromJson(ret.mNodes), *chunk);
     return ret;
 }
 
