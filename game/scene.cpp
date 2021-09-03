@@ -519,7 +519,7 @@ void SceneClass::IntoJson(data::Writer& data) const
         data.AppendChunk("vars", std::move(chunk));
     }
     auto chunk = data.NewWriteChunk();
-    mRenderTree.IntoJson(&game::TreeNodeToJson<SceneNodeClass>, *chunk);
+    RenderTreeIntoJson(mRenderTree, &game::TreeNodeToJson<SceneNodeClass>, *chunk);
     data.Write("render_tree", std::move(chunk));
 }
 
@@ -551,7 +551,7 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
         return std::nullopt;
-    ret.mRenderTree.FromJson(*chunk, game::TreeNodeFromJson(ret.mNodes));
+    RenderTreeFromJson(ret.mRenderTree, game::TreeNodeFromJson(ret.mNodes), *chunk);
     return ret;
 }
 SceneClass SceneClass::Clone() const

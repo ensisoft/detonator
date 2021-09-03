@@ -88,6 +88,35 @@ void TreeNodeToJson(data::Writer& writer, const Node* node)
         writer.Write("id", node->GetId());
 }
 
+
+template<typename Serializer, typename Node>
+void RenderTreeIntoJson(const RenderTree<Node>& tree, const Serializer& to_json, data::Writer& data, const Node* node = nullptr)
+{
+    auto chunk = data.NewWriteChunk();
+    to_json(*chunk, node);
+    data.Write("node", *chunk);
+    tree.ForEachChild([&tree, &to_json, &data](const Node* child) {
+        auto child_chunk = data.NewWriteChunk();
+        RenderTreeIntoJson(tree, to_json, *child_chunk, child);
+        data.AppendChunk("children", std::move(child_chunk));
+    }, node);
+}
+
+template<typename Serializer, typename Node>
+const Node* RenderTreeFromJson(RenderTree<Node>& tree, const Serializer& from_json, const data::Reader& data)
+{
+    const auto& chunk = data.GetReadChunk("node");
+    const auto* node  = chunk ? from_json(*chunk) : nullptr;
+    for (unsigned i=0; i<data.GetNumChunks("children"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("children", i);
+        const auto* child = RenderTreeFromJson(tree, from_json, *chunk);
+        tree.LinkChild(node, child);
+    }
+    return node;
+}
+
+
 // Search the tree for a route from parent to assumed child node.
 // When node is a descendant of parent returns true. Otherwise
 // false is returned and there's no path from parent to node.

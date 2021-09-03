@@ -83,6 +83,14 @@ namespace game
         void PreOrderTraverseForEach(Function callback, const Element* parent = nullptr) const
         { PreOrderTraverseForEach<const Element>(std::move(callback), parent); }
 
+        template<typename Function>
+        void ForEachChild(Function callback, const Element* parent = nullptr) const
+        { ForEachChild<const Element>(std::move(callback), parent); }
+
+        template<typename Function>
+        void ForEachChild(Function function, Element* parent = nullptr) const
+        { ForEachChild<Element>(std::move(function), parent); }
+
         // Convenience operation for moving a child node to a new parent.
         void ReparentChild(const Element* parent, const Element* child)
         {
@@ -192,38 +200,6 @@ namespace game
             return mParents.find(node) != mParents.end();
         }
 
-        template<typename Serializer>
-        void IntoJson(const Serializer& to_json, data::Writer& data, const Element* parent = nullptr) const
-        {
-            auto node  = data.NewWriteChunk();
-            to_json(*node, parent);
-            data.Write("node", *node);
-            auto it = mChildren.find(parent);
-            if (it != mChildren.end())
-            {
-                const auto& children = it->second;
-                for (auto *child : children)
-                {
-                    auto child_chunk = data.NewWriteChunk();
-                    IntoJson(to_json, *child_chunk, child);
-                    data.AppendChunk("children", std::move(child_chunk));
-                }
-            }
-        }
-        // Build render tree from a JSON object. The serializer object
-        // should create a new Element instance and return the pointer to it.
-        template<typename Serializer>
-        void FromJson(const data::Reader& data, const Serializer& from_json)
-        {
-            const auto& chunk = data.GetReadChunk("node");
-            const auto* root  = chunk ? from_json(*chunk) : nullptr;
-            for (unsigned i=0; i<data.GetNumChunks("children"); ++i)
-            {
-                const auto& chunk = data.GetReadChunk("children", i);
-                FromJson(*chunk, from_json, root);
-            }
-        }
-
         // Build an equivalent tree (in terms of topology) based on the
         // source tree while remapping nodes from one instance to another
         // through the map function.
@@ -239,19 +215,6 @@ namespace game
             }
         }
     private:
-        template<typename Serializer>
-        void FromJson(const data::Reader& data, const Serializer& from_json, const Element* parent)
-        {
-            const auto& chunk = data.GetReadChunk("node");
-            const Element* node = from_json(*chunk);
-            mChildren[parent].push_back(node);
-            mParents[node] = parent;
-            for (unsigned i=0; i<data.GetNumChunks("children"); ++i)
-            {
-                const auto& chunk = data.GetReadChunk("children", i);
-                FromJson(*chunk, from_json, node);
-            }
-        }
         template<typename T>
         void PreOrderTraverse(TVisitor<T>& visitor, T* parent = nullptr) const
         {
@@ -283,6 +246,16 @@ namespace game
             };
             PrivateVisitor visitor(std::move(callback));
             PreOrderTraverse(visitor, parent);
+        }
+        template<typename T, typename Function>
+        void ForEachChild(Function callback, T* parent = nullptr) const
+        {
+            auto it = mChildren.find(parent);
+            if (it == mChildren.end())
+                return;
+            const auto& children = it->second;
+            for (auto* child : children)
+                callback(child);
         }
     private:
         using ChildList = std::vector<const Element*>;

@@ -607,7 +607,7 @@ void EntityWidget::Cut(Clipboard& clipboard)
     {
         data::JsonObject json;
         const auto& tree = mState.entity->GetRenderTree();
-        tree.IntoJson([](data::Writer& data, const auto* node) {
+        game::RenderTreeIntoJson(tree, [](data::Writer& data, const auto* node) {
             node->IntoJson(data);
         }, json, node);
         clipboard.SetType("application/json/entity");
@@ -628,7 +628,7 @@ void EntityWidget::Copy(Clipboard& clipboard) const
     {
         data::JsonObject json;
         const auto& tree = mState.entity->GetRenderTree();
-        tree.IntoJson([](data::Writer& data, const auto* node) {
+        game::RenderTreeIntoJson(tree, [](data::Writer& data, const auto* node) {
             node->IntoJson(data);
         }, json, node);
         clipboard.SetType("application/json/entity");
@@ -661,7 +661,7 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     std::vector<std::unique_ptr<game::EntityNodeClass>> nodes;
     bool error = false;
     game::EntityClass::RenderTree tree;
-    tree.FromJson(json, [&nodes, &error](const data::Reader& data) {
+    game::RenderTreeFromJson(tree, [&nodes, &error](const data::Reader& data) {
         auto ret = game::EntityNodeClass::FromJson(data);
         if (ret.has_value()) {
             auto node = std::make_unique<game::EntityNodeClass>(ret->Clone());
@@ -671,7 +671,7 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         }
         error = true;
         return (game::EntityNodeClass*)nullptr;
-    });
+    }, json);
     if (error || nodes.empty())
     {
         NOTE("No render tree JSON found.");
