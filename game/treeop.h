@@ -28,6 +28,7 @@
 
 #include "base/assert.h"
 #include "base/format.h"
+#include "base/treeop.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "game/types.h"
@@ -40,6 +41,9 @@
 
 namespace game
 {
+
+using base::SearchChild;
+using base::SearchParent;
 
 template<typename Node>
 class TreeNodeFromJson
@@ -114,70 +118,6 @@ const Node* RenderTreeFromJson(RenderTree<Node>& tree, const Serializer& from_js
         tree.LinkChild(node, child);
     }
     return node;
-}
-
-
-// Search the tree for a route from parent to assumed child node.
-// When node is a descendant of parent returns true. Otherwise
-// false is returned and there's no path from parent to node.
-// Optionally provide the path from root to the child.
-template<typename Node>
-bool SearchChild(const RenderTree<Node>& tree, const Node* node, const Node* parent = nullptr,
-                 std::vector<const Node*>* path = nullptr)
-{
-    class ConstVisitor : public RenderTree<Node>::ConstVisitor {
-    public:
-        ConstVisitor(const Node* node,std::vector<const Node*>* path)
-            : mNode(node)
-            , mPath(path)
-        {}
-        virtual void EnterNode(const Node* node) override
-        {
-            if (!mFound && mPath)
-                mPath->push_back(node);
-
-            if (mNode == node)
-                mFound = true;
-        }
-        virtual void LeaveNode(const Node* node) override
-        {
-            if (!mFound && mPath)
-                mPath->pop_back();
-        }
-        virtual bool IsDone() const override
-        { return mFound; }
-        bool GetResult() const
-        { return mFound; }
-    private:
-        const Node* mNode = nullptr;
-        std::vector<const Node*>* mPath = nullptr;
-        bool mFound = false;
-    };
-    ConstVisitor visitor(node, path);
-    tree.PreOrderTraverse(visitor, parent);
-    return visitor.GetResult();
-}
-
-template<typename Node>
-bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* parent = nullptr,
-                  std::vector<const Node*>* path = nullptr)
-{
-    if (path)
-        path->push_back(node);
-    if (node == parent)
-        return true;
-    while (tree.HasParent(node))
-    {
-        const Node* p = tree.GetParent(node);
-        if (path)
-            path->push_back(p);
-        if (p == parent)
-            return true;
-        node = p;
-    }
-    if (path)
-        path->clear();
-    return false;
 }
 
 template<typename Node>
