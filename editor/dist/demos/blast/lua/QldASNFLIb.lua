@@ -11,11 +11,12 @@ local velocity = -100
 function Explode(redmine, mine_pos)
     Game:DebugPrint('KAPOW')
     Scene:KillEntity(redmine)
-    local blast_radius = ClassLib:FindEntityClassByName('BlastRadius')
+    local blast_radius = ClassLib:FindEntityClassByName('Shockwave')
     local args = game.EntityArgs:new()
     args.class = blast_radius
     args.name = 'blast radius'
     args.position = mine_pos
+    args.rotation = util.Random(0.0, 3.1456*2.0)
     Scene:SpawnEntity(args, true)
 
     -- which enemy ships are close enough to be affected

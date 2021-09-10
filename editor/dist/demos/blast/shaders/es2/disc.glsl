@@ -17,8 +17,17 @@ uniform vec4  kBaseColor;
 uniform vec4  kColor0;
 uniform sampler2D kTexture0;
 
+uniform vec4 kTextureRect;
+
 // data from vertex stage.
 varying vec2 vTexCoord;
+
+vec2 TransformTextureCoords(vec2 coord)
+{
+    vec2 trans = kTextureRect.xy;
+    vec2 scale = kTextureRect.zw;
+    return coord * scale + trans;
+}
 
 float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_origin)
 {
@@ -48,13 +57,13 @@ void main()
 
     float alpha = clamp(disc_alpha - fadeout, 0.0, 1.0);
 
-    vec4 texture = texture2D(kTexture0, vTexCoord);
+    vec4 texture = texture2D(kTexture0, TransformTextureCoords(vTexCoord));
     vec4 base_color = pow(kBaseColor, vec4(kGamma));
 
     float ring_alpha = ring_alpha(disc_radius, dist) * 0.3 * (1.0-s);
     vec4 ring_color = kColor0 * ring_alpha;
 
-    base_color.a = alpha * 0.8 * (1.0-s) * texture.a;
+    base_color.a = alpha * 0.8 * (1.0-s) * texture.r;
 
     gl_FragColor =  base_color  + ring_color;
 }

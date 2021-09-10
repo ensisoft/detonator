@@ -22,6 +22,7 @@
             "desc": "Texture",
             "name": "kTexture0",
             "type": "Texture2D",
+            "rect": "kTextureRect",
             "sampler": "kTexture0"
         }
     ]

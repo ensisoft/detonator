@@ -37,23 +37,6 @@
     {
       "elements": [
         {
-          "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Laser/Laser_04.mp3",
-          "arg_type": "Float32",
-          "id": "i26WRDKliM",
-          "name": "FileSource",
-          "type": "FileSource"
-        }
-      ],
-      "id": "IKBGkUO4C8",
-      "name": "Enemy Weapon",
-      "resource_id": "IKBGkUO4C8",
-      "resource_name": "Enemy Weapon",
-      "src_elem_id": "i26WRDKliM",
-      "src_elem_port": "out"
-    },
-    {
-      "elements": [
-        {
           "arg_channel": "Both",
           "id": "sRv9omsQNF",
           "name": "StereoMaker",
@@ -1528,9 +1511,9 @@
         "WantsMouseEvents": false
       },
       "id": "sX3kBAhLxU",
-      "idle_track": "",
-      "lifetime": 0.5,
-      "name": "BlastRadius",
+      "idle_track": "I02pgQSswr",
+      "lifetime": 1.0,
+      "name": "Shockwave",
       "nodes": [
         {
           "class": "EQKGzykOAt",
@@ -1545,7 +1528,7 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "2a488SIQsU",
+            "material": "r9CF1o27zZ",
             "renderpass": "Draw",
             "renderstyle": "Solid",
             "timescale": 2.0
@@ -1567,6 +1550,42 @@
             "x": 1000.0,
             "y": 1000.0
           }
+        },
+        {
+          "class": "E3LnGwMgPe",
+          "drawable_item": {
+            "drawable": "8exJylNDfi",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": false,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HyJsrevpdz",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 500.0,
+            "y": 500.0
+          }
         }
       ],
       "render_tree": {
@@ -1575,13 +1594,52 @@
             "node": {
               "id": "EQKGzykOAt"
             }
+          },
+          {
+            "node": {
+              "id": "E3LnGwMgPe"
+            }
           }
         ],
         "node": null
       },
       "resource_id": "sX3kBAhLxU",
-      "resource_name": "BlastRadius",
-      "script_file": ""
+      "resource_name": "Shockwave",
+      "script_file": "",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "action": "Off",
+                "duration": 0.5018398761749268,
+                "flag": "VisibleInGame",
+                "id": "21YaGXkIQp",
+                "node": "EQKGzykOAt",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            },
+            {
+              "actuator": {
+                "duration": 0.0,
+                "id": "boFQxygnMI",
+                "method": "Cosine",
+                "name": "DrawableTimeScale",
+                "node": "E3LnGwMgPe",
+                "starttime": 0.8049678206443787,
+                "value": 1.0
+              },
+              "type": "SetValue"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 1.0,
+          "id": "I02pgQSswr",
+          "looping": false,
+          "name": "My Track"
+        }
+      ]
     },
     {
       "flags": {
@@ -2730,11 +2788,67 @@
       "type": "Sprite"
     },
     {
+      "id": "r9CF1o27zZ",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "r9CF1o27zZ",
+      "resource_name": "Shockwave2",
+      "shader": "ws://shaders/es2/disc.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture0",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kTextureRect",
+          "sampler_name": "kTexture0",
+          "texture": {
+            "file": "ws://textures/ParticlePack/spark_06.png",
+            "id": "39bNNiokoM",
+            "name": "spark_06",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.009170671924948692,
+            "g": 0.0,
+            "r": 1.0
+          }
+        },
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 1.0
+          }
+        },
+        {
+          "name": "kGamma",
+          "value": 1.0
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
       "id": "2a488SIQsU",
       "mag_filter": "Default",
       "min_filter": "Default",
       "resource_id": "2a488SIQsU",
-      "resource_name": "BlastRadius",
+      "resource_name": "Shockwave",
       "shader": "ws://shaders/es2/disc.glsl",
       "surface": "Transparent",
       "texture_maps": [
@@ -3148,9 +3262,9 @@
     {
       "color": {
         "a": 1.0,
-        "b": 0.09390401840209961,
-        "g": 0.09390401840209961,
-        "r": 0.9433584809303284
+        "b": 0.0941176488995552,
+        "g": 0.0941176488995552,
+        "r": 0.9450980424880981
       },
       "gamma": 1.0,
       "gc": false,
@@ -3289,6 +3403,39 @@
       "num_particles": 2.0,
       "resource_id": "XKQ1uRt5ij",
       "resource_name": "Player Exhaust"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": -40.0,
+      "growth_over_time": -20.0,
+      "id": "8exJylNDfi",
+      "init_rect_height": 0.0,
+      "init_rect_width": 0.0,
+      "init_rect_xpos": 0.5,
+      "init_rect_ypos": 0.5,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 40.0,
+      "max_velocity": 1.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 20.0,
+      "min_velocity": 1.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 500.0,
+      "resource_id": "8exJylNDfi",
+      "resource_name": "Shockwave"
     }
   ],
   "scenes": [
