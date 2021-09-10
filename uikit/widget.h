@@ -26,6 +26,7 @@
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/math.h"
 #include "data/fwd.h"
 #include "uikit/types.h"
 
@@ -226,9 +227,21 @@ namespace uik
         { SetPosition(FPoint(x , y)); }
 
         inline void Grow(float dw, float dh)
-        { SetSize(GetSize() + FSize(dw, dh)); }
+        { SetSize(ClampSize(GetSize() + FSize(dw, dh))); }
         inline void Translate(float dx, float dy)
         { SetPosition(GetPosition() + FPoint(dx, dy)); }
+
+        inline float GetWidth() const
+        { return GetSize().GetWidth(); }
+        inline float GetHeight() const
+        { return GetSize().GetHeight(); }
+
+        static FSize ClampSize(const FSize& size)
+        {
+            const auto width  = math::clamp(0.0f, size.GetWidth(), size.GetWidth());
+            const auto height = math::clamp(0.0f, size.GetHeight(), size.GetHeight());
+            return FSize(width, height);
+        }
 
         static
         std::unique_ptr<Widget> CreateWidget(Type type);
