@@ -1228,7 +1228,7 @@
       "name": "MainMenu",
       "resource_id": "id5BsoCSrO",
       "resource_name": "MainMenu",
-      "style": "app://ui/default.json",
+      "style": "ws://ui/style.json",
       "widgets": [
         {
           "widgets": [
@@ -1289,7 +1289,7 @@
                     "h": 200.0,
                     "w": 900.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
                   "text": "Press ' Space' to fly the derpo bird\nbut watch out for the spike!",
                   "type": "Label"
                 },
@@ -1309,7 +1309,7 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-size\",\"value\":36}]}",
                   "text": "Play",
                   "type": "PushButton"
                 },
@@ -1329,7 +1329,7 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"pressed/border\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}}]}",
                   "text": "Quit",
                   "type": "PushButton"
                 }
