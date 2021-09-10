@@ -1,4 +1,121 @@
 {
+  "audio_graphs": [
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Laser/Laser_09.mp3",
+          "arg_type": "Float32",
+          "id": "XUF0N9uLfD",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "SJmzdnESeH",
+      "name": "Player Weapon",
+      "resource_id": "SJmzdnESeH",
+      "resource_name": "Player Weapon",
+      "src_elem_id": "XUF0N9uLfD",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Menu_Select_00.mp3",
+          "arg_type": "Float32",
+          "id": "AruPmKN2WY",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "O2WDv7PduL",
+      "name": "Menu Click",
+      "resource_id": "O2WDv7PduL",
+      "resource_name": "Menu Click",
+      "src_elem_id": "AruPmKN2WY",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Laser/Laser_04.mp3",
+          "arg_type": "Float32",
+          "id": "i26WRDKliM",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "IKBGkUO4C8",
+      "name": "Enemy Weapon",
+      "resource_id": "IKBGkUO4C8",
+      "resource_name": "Enemy Weapon",
+      "src_elem_id": "i26WRDKliM",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_channel": "Both",
+          "id": "sRv9omsQNF",
+          "name": "StereoMaker",
+          "type": "StereoMaker"
+        },
+        {
+          "arg_file": "ws://sounds/retro-action-sounds/missile_launch_2.ogg",
+          "arg_type": "Float32",
+          "id": "pmax6QpW2W",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "asMmhdCBBw",
+      "links": [
+        {
+          "dst_elem": "sRv9omsQNF",
+          "dst_port": "in",
+          "id": "T3bgbj77jG",
+          "src_elem": "pmax6QpW2W",
+          "src_port": "out"
+        }
+      ],
+      "name": "Mine Launch",
+      "resource_id": "asMmhdCBBw",
+      "resource_name": "Mine Launch",
+      "src_elem_id": "sRv9omsQNF",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/retro-action-sounds/bombexplosion.ogg",
+          "arg_type": "Float32",
+          "id": "AjbLvZAh2J",
+          "name": "bombexplosion",
+          "type": "FileSource"
+        },
+        {
+          "arg_channel": "Both",
+          "id": "0bDiXIAGRF",
+          "name": "StereoMaker",
+          "type": "StereoMaker"
+        }
+      ],
+      "id": "qHa3OPkRrg",
+      "links": [
+        {
+          "dst_elem": "0bDiXIAGRF",
+          "dst_port": "in",
+          "id": "rW9C3lt2wB",
+          "src_elem": "AjbLvZAh2J",
+          "src_port": "out"
+        }
+      ],
+      "name": "Mine Explosion",
+      "resource_id": "qHa3OPkRrg",
+      "resource_name": "Mine Explosion",
+      "src_elem_id": "0bDiXIAGRF",
+      "src_elem_port": "out"
+    }
+  ],
   "entities": [
     {
       "flags": {
@@ -1981,9 +2098,9 @@
     {
       "color": {
         "a": 1.0,
-        "b": 0.885664165019989,
-        "g": 0.885664165019989,
-        "r": 0.885664165019989
+        "b": 0.35803768038749695,
+        "g": 0.35803768038749695,
+        "r": 0.3687953054904938
       },
       "gamma": 1.0,
       "gc": false,
@@ -3382,7 +3499,7 @@
     {
       "id": "rvZg0UT77h",
       "resource_id": "rvZg0UT77h",
-      "resource_name": "Ship",
+      "resource_name": "Player",
       "uri": "ws://lua/rvZg0UT77h.lua"
     },
     {

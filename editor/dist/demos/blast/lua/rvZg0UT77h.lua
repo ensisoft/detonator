@@ -117,6 +117,7 @@ function Update(player, game_time, dt)
     if time_to_fire_weapon == 0 then
         if wdk.TestKeyDown(wdk.Keys.Space) then
             FireWeapon(player, 'RedBullet')
+            Audio:PlaySoundEffect('Player Weapon')
         end
        -- limit the firing rate
        time_to_fire_weapon = 6

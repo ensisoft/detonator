@@ -224,6 +224,7 @@ function OnUIAction(action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
+        Audio:PlaySoundEffect('Menu Click', 0)
         EnterGame()
     end
 end
