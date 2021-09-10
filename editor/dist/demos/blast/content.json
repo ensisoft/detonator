@@ -1339,7 +1339,7 @@
               "UnderlineText": false,
               "VisibleInGame": true
             },
-            "font_name": "app://fonts/orbitron-light.otf",
+            "font_name": "ws://fonts/MAXI_L_S.TTF",
             "font_size": 48,
             "horizontal_align": "Center",
             "layer": 0,
@@ -1508,8 +1508,8 @@
             "y": 0.800000011920929
           },
           "size": {
-            "x": 204.625,
-            "y": 45.2900390625
+            "x": 204.6300048828125,
+            "y": 45.290000915527344
           },
           "text_item": {
             "flags": {
@@ -1517,8 +1517,8 @@
               "UnderlineText": false,
               "VisibleInGame": true
             },
-            "font_name": "app://fonts/orbitron-bold.otf",
-            "font_size": 48,
+            "font_name": "ws://fonts/MAXI_L_S.TTF",
+            "font_size": 36,
             "horizontal_align": "Left",
             "layer": 0,
             "line_height": 1.0,
@@ -1529,7 +1529,7 @@
               "g": 1.0,
               "r": 1.0
             },
-            "vertical_align": "Top"
+            "vertical_align": "Center"
           }
         }
       ],
@@ -2616,7 +2616,7 @@
       },
       "rect_name": "",
       "resource_id": "RKmQZx8H1s",
-      "resource_name": "Play",
+      "resource_name": "Play Button Moused",
       "sampler_name": "",
       "static": false,
       "surface": "Transparent",
@@ -2660,7 +2660,7 @@
       },
       "rect_name": "",
       "resource_id": "M0ePA9uzA5",
-      "resource_name": "Exit",
+      "resource_name": "Exit Button Moused",
       "sampler_name": "",
       "static": false,
       "surface": "Transparent",
@@ -2728,6 +2728,70 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "id": "2HWYlifK1N",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "2HWYlifK1N",
+      "resource_name": "Exit button Normal",
+      "shader": "ws://shaders/es2/button.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kTextureRect",
+          "sampler_name": "kTexture",
+          "texture": {
+            "file": "ws://textures/Menu Screen/exit_buttons.png",
+            "id": "2MFvJwTS9Y",
+            "name": "exit_buttons",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "id": "tetreytAkz",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "tetreytAkz",
+      "resource_name": "Play Button Normal",
+      "shader": "ws://shaders/es2/button.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kTextureRect",
+          "sampler_name": "kTexture",
+          "texture": {
+            "file": "ws://textures/Menu Screen/play_buttons.png",
+            "id": "8qTZM3yPRi",
+            "name": "play_buttons",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     }
   ],
   "particles": [
@@ -3104,7 +3168,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
               "type": "Form",
               "widgets": [
                 {
@@ -3181,13 +3245,13 @@
                   "name": "Label_4",
                   "position": {
                     "x": 400.0,
-                    "y": 400.0
+                    "y": 300.0
                   },
                   "size": {
                     "h": 105.0,
                     "w": 399.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-blink\",\"value\":true},{\"key\":\"font-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "text": "GAME OVER",
                   "type": "Label"
                 }
@@ -3202,7 +3266,7 @@
       "name": "MainMenu",
       "resource_id": "T38qa8wN2K",
       "resource_name": "MainMenu",
-      "style": "app://ui/default.json",
+      "style": "ws://ui/style.json",
       "widgets": [
         {
           "widgets": [
@@ -3222,7 +3286,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"dkzxQN4CYv/border\",\"type\":\"Null\"},{\"key\":\"dkzxQN4CYv/background\",\"type\":\"Null\"}]}",
               "type": "Form",
               "widgets": [
                 {
@@ -3242,7 +3306,7 @@
                     "h": 180.0,
                     "w": 600.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Kb5sHrP5bL\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"yxS9Nl10Ob/background\",\"material\":\"Kb5sHrP5bL\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "Label"
                 },
@@ -3262,7 +3326,7 @@
                     "h": 150.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "PushButton"
                 },
@@ -3283,7 +3347,7 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"uwLts6eeud/background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "Label"
                 },
@@ -3304,7 +3368,7 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"9uBdXHd3R3/background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "Label"
                 },
@@ -3324,7 +3388,7 @@
                     "h": 150.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"mouse-over/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"2HWYlifK1N\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "PushButton"
                 },
@@ -3338,14 +3402,14 @@
                   "line_height": 1.0,
                   "name": "Label_4",
                   "position": {
-                    "x": 400.0,
+                    "x": 300.0,
                     "y": 300.0
                   },
                   "size": {
                     "h": 105.0,
-                    "w": 399.0
+                    "w": 603.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "text": "Press space to shoot.\n\nPress 1 to launch a mine.",
                   "type": "Label"
                 },
@@ -3360,13 +3424,13 @@
                   "name": "Copy of Label_4",
                   "position": {
                     "x": 400.0,
-                    "y": 700.0
+                    "y": 400.0
                   },
                   "size": {
                     "h": 105.0,
                     "w": 399.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-blink\",\"value\":true},{\"key\":\"font-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"tTKrlLqGrS/text-blink\",\"value\":true},{\"key\":\"tTKrlLqGrS/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"tTKrlLqGrS/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"tTKrlLqGrS/font-size\",\"value\":24}]}",
                   "text": "Press space to play!",
                   "type": "Label"
                 }

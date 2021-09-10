@@ -1,0 +1,14 @@
+{
+    "uniforms": [
+     ],
+
+    "maps": [
+        {
+            "desc": "Texture",
+            "type": "Texture2D",
+            "name": "kTexture",
+            "rect": "kTextureRect",
+            "sampler": "kTexture"
+        }
+     ]
+}
