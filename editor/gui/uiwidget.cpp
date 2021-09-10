@@ -442,11 +442,10 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.loadWidget("UI", mUI.cmbGrid);
     settings.loadWidget("UI", mUI.zoom);
     settings.loadWidget("UI", mUI.widget);
-    settings.getValue("UI", "camera_offset_x", &mState.camera_offset_x);
-    settings.getValue("UI", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
 
     std::string base64;
+    settings.getValue("UI", "camera_offset_x", &mState.camera_offset_x);
+    settings.getValue("UI", "camera_offset_y", &mState.camera_offset_y);
     settings.getValue("UI", "content", &base64);
 
     data::JsonObject json;
@@ -463,8 +462,15 @@ bool UIWidget::LoadState(const Settings& settings)
         return false;
     }
     mState.window = std::move(window.value());
-    mUI.tree->Rebuild();
+    SetValue(mUI.windowID, mState.window.GetId());
+    SetValue(mUI.windowName, mState.window.GetName());
+    setWindowTitle(GetValue(mUI.windowName));
     LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
+    DisplayCurrentCameraLocation();
+    DisplayCurrentWidgetProperties();
+
+    mUI.tree->Rebuild();
+    mCameraWasLoaded = true;
     DEBUG("Loaded UI widget state successfully.");
     return true;
 }
