@@ -1434,6 +1434,7 @@ void BindGameLib(sol::state& L)
     entity_args["scale"]    = sol::property(&EntityArgs::scale);
     entity_args["position"] = sol::property(&EntityArgs::position);
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
+    entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
 
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,

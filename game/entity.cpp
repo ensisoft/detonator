@@ -1022,6 +1022,7 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
         node->SetTranslation(translation + args.position);
         node->SetScale(scale * args.scale);
     }
+    mControlFlags.set(ControlFlags::EnableLogging, args.enable_logging);
 }
 
 Entity::Entity(const EntityClass& klass)

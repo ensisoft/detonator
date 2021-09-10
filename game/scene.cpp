@@ -716,7 +716,9 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
     ASSERT(mIdMap.find(args.id) == mIdMap.end());
 
     mSpawnList.push_back(CreateEntityInstance(args));
-    DEBUG("New entity '%1/%2'", args.klass->GetName(), args.name);
+    if (args.enable_logging)
+        DEBUG("New entity '%1/%2'", args.klass->GetName(), args.name);
+
     return mSpawnList.back().get();
 }
 
@@ -734,12 +736,14 @@ void Scene::BeginLoop()
         // should have unlinked the children first.
         mRenderTree.PreOrderTraverseForEach([](Entity* entity) {
             entity->SetFlag(Entity::ControlFlags::Killed, true);
-            DEBUG("Entity '%1/%2' was killed", entity->GetClassName(), entity->GetName());
+            if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
+                DEBUG("Entity '%1/%2' was killed", entity->GetClassName(), entity->GetName());
         }, entity);
     }
     for (auto& entity : mSpawnList)
     {
-        DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
+        if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
+            DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
         entity->SetFlag(Entity::ControlFlags::Spawned, true);
         mIdMap[entity->GetId()]     = entity.get();
         mNameMap[entity->GetName()] = entity.get();
@@ -759,7 +763,8 @@ void Scene::EndLoop()
 
         if (!entity->TestFlag(Entity::ControlFlags::Killed))
             continue;
-        DEBUG("Entity '%1/%2' was deleted.", entity->GetClassName(), entity->GetName());
+        if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
+            DEBUG("Entity '%1/%2' was deleted.", entity->GetClassName(), entity->GetName());
         mRenderTree.DeleteNode(entity.get());
         mIdMap.erase(entity->GetId());
         mNameMap.erase(entity->GetName());

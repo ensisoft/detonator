@@ -1235,7 +1235,10 @@ namespace game
         // the entity position relative to parent.
         glm::vec2  position = {0.0f, 0.0f};
         // the entity rotation relative to parent
-        float      rotation = 0.0f;
+        float rotation = 0.0f;
+        // flag to indicate whether to log events
+        // pertaining to this entity or not.
+        bool enable_logging = true;
         EntityArgs() {
             id = base::RandomString(10);
         }
@@ -1254,7 +1257,12 @@ namespace game
             // cleared at the end of the main loop iteration
             // and is thus on only from spawn until the end of
             // loop iteration.
-            Spawned
+            Spawned,
+            // Flag to enable logging related to the entity.
+            // Turning off logging is useful when spawning a large
+            // number of entities continuously and doing that would
+            // create excessive logging.
+            EnableLogging
         };
         using Flags = EntityClass::Flags;
 
