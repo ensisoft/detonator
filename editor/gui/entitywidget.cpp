@@ -882,6 +882,8 @@ void EntityWidget::on_actionPlay_triggered()
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
+    mState.renderer.ClearPaintState();
+    mEntityTime = 0.0f;
 }
 void EntityWidget::on_actionPause_triggered()
 {
@@ -892,7 +894,6 @@ void EntityWidget::on_actionPause_triggered()
 }
 void EntityWidget::on_actionStop_triggered()
 {
-    mEntityTime = 0.0f;
     mPlayState = PlayState::Stopped;
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
