@@ -67,9 +67,11 @@ function Update(ship2, game_time, dt)
     if ship_pos.x >= 550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = 550
+        ship2:PlayAnimationByName('Turn Exhaust Right')
     elseif ship_pos.x <= -550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = -550
+        ship2:PlayAnimationByName('Turn Exhaust Left')
     end
     ship2.velocity = velocity
 

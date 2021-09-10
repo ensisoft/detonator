@@ -199,6 +199,46 @@
             "x": 100.0,
             "y": 100.0
           }
+        },
+        {
+          "class": "xphEakE0UJ",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Left exhaust",
+          "position": {
+            "x": -12.9375,
+            "y": 30.1875
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 6.832275390625,
+            "y": 7.5390625
+          }
+        },
+        {
+          "class": "MFH7NpW3GP",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Right exhaust",
+          "position": {
+            "x": 10.279388427734375,
+            "y": 30.011245727539063
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 6.832275390625,
+            "y": 7.5390625
+          }
         }
       ],
       "render_tree": {
@@ -225,6 +265,16 @@
                   {
                     "node": {
                       "id": "PBF6jATZjy"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "xphEakE0UJ"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "MFH7NpW3GP"
                     }
                   }
                 ],
@@ -676,6 +726,53 @@
             "x": 148.0,
             "y": 148.0
           }
+        },
+        {
+          "class": "sWMIUMAUPt",
+          "drawable_item": {
+            "drawable": "hzaCI0I5sF",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HyJsrevpdz",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.7215686440467834,
+                  "g": 0.4745098054409027,
+                  "r": 0.062745101749897
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Exhaust",
+          "position": {
+            "x": 0.7083249092102051,
+            "y": 38.20832824707031
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 207.04705810546875,
+            "y": 176.97109985351563
+          }
         }
       ],
       "render_tree": {
@@ -711,6 +808,11 @@
                 "node": {
                   "id": "XEEkJGHbxM"
                 }
+              },
+              {
+                "node": {
+                  "id": "sWMIUMAUPt"
+                }
               }
             ],
             "node": {
@@ -723,6 +825,72 @@
       "resource_id": "pNT0bA0bpw",
       "resource_name": "Ship2",
       "script_file": "FXdfIUPul3",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 1.0,
+                "id": "fI9qj7Xw9l",
+                "method": "Cosine",
+                "node": "sWMIUMAUPt",
+                "position": {
+                  "x": 0.7099999785423279,
+                  "y": 38.209999084472656
+                },
+                "rotation": -0.6981316804885864,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 207.61000061035156,
+                  "y": 118.02999877929688
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.10000000149011612,
+          "id": "Un0uM1aEwa",
+          "looping": false,
+          "name": "Turn Exhaust Left"
+        },
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 1.0,
+                "id": "gaggOy4IX2",
+                "method": "Cosine",
+                "node": "sWMIUMAUPt",
+                "position": {
+                  "x": 0.7099999785423279,
+                  "y": 38.209999084472656
+                },
+                "rotation": 0.6981316804885864,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 207.61000061035156,
+                  "y": 118.02999877929688
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.10000000149011612,
+          "id": "k5CJyEGSf0",
+          "looping": false,
+          "name": "Turn Exhaust Right"
+        }
+      ],
       "vars": [
         {
           "name": "velocity",
@@ -1554,6 +1722,73 @@
           "value": 0
         }
       ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "5697MGBZ5q",
+      "idle_track": "",
+      "lifetime": 0.20000000298023224,
+      "name": "Player Exhaust",
+      "nodes": [
+        {
+          "class": "hXn3pS1JN3",
+          "drawable_item": {
+            "drawable": "XKQ1uRt5ij",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HyJsrevpdz",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 416.0,
+            "y": 494.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "hXn3pS1JN3"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "5697MGBZ5q",
+      "resource_name": "Player Exhaust",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -2541,7 +2776,7 @@
       "mag_filter": "Default",
       "min_filter": "Default",
       "resource_id": "Kb5sHrP5bL",
-      "resource_name": "Blast",
+      "resource_name": "Blast Title",
       "shader": "ws://shaders/es2/text.glsl",
       "surface": "Emissive",
       "texture_maps": [
@@ -2792,6 +3027,50 @@
       "type": "Custom",
       "wrap_x": "Clamp",
       "wrap_y": "Clamp"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.09390401840209961,
+        "g": 0.09390401840209961,
+        "r": 0.9433584809303284
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "HyJsrevpdz",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "HyJsrevpdz",
+      "resource_name": "Smoke Particle",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Emissive",
+      "texture": {
+        "file": "ws://textures/SmokeParticle.png",
+        "id": "mn29S3i6zn",
+        "name": "SmokeParticle",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "particles": [
@@ -2827,6 +3106,72 @@
       "num_particles": 100.0,
       "resource_id": "qklhbbEm10",
       "resource_name": "BulletTrail"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Kill",
+      "direction_sector_size": 0.3490658402442932,
+      "direction_sector_start_angle": 1.3962633609771729,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "hzaCI0I5sF",
+      "init_rect_height": 0.0,
+      "init_rect_width": 0.0,
+      "init_rect_xpos": 0.5,
+      "init_rect_ypos": 0.5,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 20.0,
+      "max_velocity": 0.5,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 10.0,
+      "min_velocity": 0.0,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 40.0,
+      "resource_id": "hzaCI0I5sF",
+      "resource_name": "Ship Exhaust"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Kill",
+      "direction_sector_size": 0.3490658402442932,
+      "direction_sector_start_angle": 1.3962633609771729,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "XKQ1uRt5ij",
+      "init_rect_height": 0.0,
+      "init_rect_width": 0.0,
+      "init_rect_xpos": 0.5,
+      "init_rect_ypos": 0.5,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 20.0,
+      "max_velocity": 0.5,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 10.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 2.0,
+      "resource_id": "XKQ1uRt5ij",
+      "resource_name": "Player Exhaust"
     }
   ],
   "scenes": [

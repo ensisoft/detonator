@@ -4,6 +4,7 @@
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 
+
 local time_to_fire_weapon = 0
 
 function FireWeapon(player, ammo_name)
@@ -15,6 +16,18 @@ function FireWeapon(player, ammo_name)
     args.class    = ClassLib:FindEntityClassByName(ammo_name)
     args.position = util.GetTranslationFromMatrix(matrix)
     args.name     = ammo_name
+    args.logging  = false
+    Scene:SpawnEntity(args, true)
+end
+
+function SpawnExhaust(player, exhaust_name)
+    local node   = player:FindNodeByClassName(exhaust_name)
+    local matrix = Scene:FindEntityNodeTransform(player, node)
+    local args = game.EntityArgs:new()
+    args.class = ClassLib:FindEntityClassByName('Player Exhaust')
+    args.position = util.GetTranslationFromMatrix(matrix)
+    args.name = 'exhaust'
+    args.logging = false
     Scene:SpawnEntity(args, true)
 end
 
@@ -96,6 +109,9 @@ function Update(player, game_time, dt)
         pos.y = y
     end
     body:SetTranslation(pos)
+
+    SpawnExhaust(player, 'Left exhaust')
+    SpawnExhaust(player, 'Right exhaust')
 
     -- fire the weapon if some key presses were detected!
     if time_to_fire_weapon == 0 then

@@ -15,6 +15,7 @@ function SpawnScore(pos, score)
     args.class  = class
     args.name   = 'score'
     args.position = pos
+    args.logging  = false
     local entity = Scene:SpawnEntity(args, true)
     local node   = entity:FindNodeByClassName('text')
     local text   = node:GetTextItem()
