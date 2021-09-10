@@ -135,7 +135,8 @@ namespace gui
         void RebuildCombos();
         uik::Widget* GetCurrentWidget();
         const uik::Widget* GetCurrentWidget() const;
-        bool LoadStyle(const QString& name);
+        bool LoadStyleVerbose(const QString& name);
+        bool LoadStyleQuiet(const std::string& uri);
         void UpdateDeletedResourceReferences();
         uik::FSize GetFormSize() const;
     private:

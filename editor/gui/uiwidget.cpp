@@ -281,6 +281,11 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.setupUi(this);
     mUI.tree->SetModel(mWidgetTree.get());
     mUI.tree->Rebuild();
+    mUI.widgetNormal->SetPropertySelector("");
+    mUI.widgetDisabled->SetPropertySelector("/disabled");
+    mUI.widgetFocused->SetPropertySelector("/focused");
+    mUI.widgetMoused->SetPropertySelector("/mouse-over");
+    mUI.widgetPressed->SetPropertySelector("/pressed");
 
     mUI.widget->onMouseMove    = std::bind(&UIWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&UIWidget::MousePress, this, std::placeholders::_1);
@@ -307,35 +312,32 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     form.SetSize(1024, 768);
     form.SetName("Form");
 
-    mState.tree = mUI.tree;
+    mState.tree  = mUI.tree;
+    mState.style = std::make_unique<engine::UIStyle>();
+    mState.style->SetClassLibrary(workspace);
     mState.workspace = workspace;
+    mState.painter.reset(new engine::UIPainter);
+    mState.painter->SetStyle(mState.style.get());
     mState.window.SetName("My UI");
-    mState.window.SetStyleName("app://ui/default.json");
     mState.window.AddWidget(form);
     mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
 
-    mState.painter.reset(new engine::UIPainter);
+    LoadStyleQuiet("app://ui/default.json");
 
-    mUI.widgetNormal->SetPropertySelector("");
-    mUI.widgetDisabled->SetPropertySelector("/disabled");
-    mUI.widgetFocused->SetPropertySelector("/focused");
-    mUI.widgetMoused->SetPropertySelector("/mouse-over");
-    mUI.widgetPressed->SetPropertySelector("/pressed");
-
+    PopulateUIStyles(mUI.baseStyle);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.baseStyle, mState.window.GetStyleName());
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    setWindowTitle(GetValue(mUI.windowName));
 
-    PopulateUIStyles(mUI.baseStyle);
-
-    LoadStyle("app://ui/default.json");
     RebuildCombos();
-    setWindowTitle("My UI");
     DisplayCurrentWidgetProperties();
+    mOriginalHash = mState.window.GetHash();
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -348,9 +350,6 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     mState.window = *window;
     mOriginalHash = mState.window.GetHash();
 
-    SetValue(mUI.windowName, window->GetName());
-    SetValue(mUI.windowID, window->GetId());
-    SetValue(mUI.baseStyle, window->GetStyleName());
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
@@ -363,8 +362,14 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
-    setWindowTitle(resource.GetName());
-    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
+    if (!LoadStyleQuiet(mState.window.GetStyleName()))
+        mState.window.SetStyleName("");
+
+    SetValue(mUI.windowName, window->GetName());
+    SetValue(mUI.windowID, window->GetId());
+    SetValue(mUI.baseStyle, mState.window.GetStyleName());
+    setWindowTitle(GetValue(mUI.windowName));
+
     UpdateDeletedResourceReferences();
     DisplayCurrentCameraLocation();
     DisplayCurrentWidgetProperties();
@@ -462,15 +467,21 @@ bool UIWidget::LoadState(const Settings& settings)
         return false;
     }
     mState.window = std::move(window.value());
+    mOriginalHash = mState.window.GetHash();
+    mCameraWasLoaded = true;
+
+    if (!LoadStyleQuiet(mState.window.GetStyleName()))
+        mState.window.SetStyleName("");
+
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.baseStyle, mState.window.GetStyleName());
     setWindowTitle(GetValue(mUI.windowName));
-    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
+
     DisplayCurrentCameraLocation();
     DisplayCurrentWidgetProperties();
 
     mUI.tree->Rebuild();
-    mCameraWasLoaded = true;
     DEBUG("Loaded UI widget state successfully.");
     return true;
 }
@@ -996,7 +1007,7 @@ void UIWidget::on_baseStyle_currentIndexChanged(int)
 {
     const auto& name = mState.window.GetStyleName();
 
-    if (!LoadStyle(GetValue(mUI.baseStyle)))
+    if (!LoadStyleVerbose(GetValue(mUI.baseStyle)))
         SetValue(mUI.baseStyle, name);
 }
 
@@ -1087,7 +1098,10 @@ void UIWidget::on_btnResetProgVal_clicked()
 
 void UIWidget::on_btnReloadStyle_clicked()
 {
-    LoadStyle(app::FromUtf8(mState.window.GetStyleName()));
+    const auto& style = mState.window.GetStyleName();
+    if (style.empty())
+        return;
+    LoadStyleVerbose(app::FromUtf8(style));
 }
 
 void UIWidget::on_btnSelectStyle_clicked()
@@ -1097,7 +1111,9 @@ void UIWidget::on_btnSelectStyle_clicked()
         tr("Style (*.json)"));
     if (file.isEmpty())
         return;
-    LoadStyle(mState.workspace->MapFileToWorkspace(file));
+    const auto& name = mState.workspace->MapFileToWorkspace(file);
+    if (LoadStyleVerbose(name))
+        SetValue(mUI.baseStyle, name);
 }
 
 void UIWidget::on_btnViewPlus90_clicked()
@@ -1734,12 +1750,12 @@ const uik::Widget* UIWidget::GetCurrentWidget() const
     return static_cast<const uik::Widget*>(item->GetUserData());
 }
 
-bool UIWidget::LoadStyle(const QString& name)
+bool UIWidget::LoadStyleVerbose(const QString& name)
 {
     const auto& data = mState.workspace->LoadGameData(app::ToUtf8(name));
     if (!data)
     {
-        ERROR("Failed to load style file: '%1'", name);
+        ERROR("Failed to load style file: '%1'.", name);
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
@@ -1763,14 +1779,36 @@ bool UIWidget::LoadStyle(const QString& name)
             return false;
     }
     mState.style = std::move(style);
-    INFO("Loaded UI style '%1'", name);
-
     mState.painter->SetStyle(mState.style.get());
     mState.painter->DeleteMaterialInstances();
-    // reapply the styling for each widget.
     mState.window.Style(*mState.painter);
     mState.window.SetStyleName(app::ToUtf8(name));
-    SetValue(mUI.baseStyle, name);
+    INFO("Loaded UI style '%1'.", name);
+    NOTE("Loaded UI style '%1'.", name);
+    return true;
+}
+
+bool UIWidget::LoadStyleQuiet(const std::string& uri)
+{
+    const auto& data = mState.workspace->LoadGameData(uri);
+    if (!data)
+    {
+        ERROR("Failed to load style file: '%1'.", uri);
+        return false;
+    }
+    auto style = std::make_unique<engine::UIStyle>();
+    style->SetClassLibrary(mState.workspace);
+    if (!style->LoadStyle(*data))
+    {
+        ERROR("Errors were found while parsing the style '%1'.", uri);
+        return false;
+    }
+    mState.style = std::move(style);
+    mState.painter->SetStyle(mState.style.get());
+    mState.painter->DeleteMaterialInstances();
+    mState.window.Style(*mState.painter);
+    mState.window.SetStyleName(uri);
+    INFO("Loaded UI style '%1'.", uri);
     return true;
 }
 
