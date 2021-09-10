@@ -874,15 +874,25 @@ void MaterialWidget::ApplyShaderDescription()
     mSamplers.clear();
 
     auto* material = mMaterial->AsCustom();
-    if (!material) return;
+    if (!material)
+        return;
 
     // try to load the .json file that should contain the meta information
     // about the shader input parameters.
     auto uri = material->GetShaderUri();
-    if (uri.empty()) return;
+    if (uri.empty())
+    {
+        ERROR("Empty material shader uri.");
+        return;
+    }
+
     boost::replace_all(uri, ".glsl", ".json");
-    const auto [ok, json, error] = base::JsonParseFile(app::ToUtf8(mWorkspace->MapFileToFilesystem(uri)));
-    if (!ok) ERROR_RETURN("Failed to load the shader description file '%1' %2", uri, error);
+    const auto [parse_success, json, error] = base::JsonParseFile(app::ToUtf8(mWorkspace->MapFileToFilesystem(uri)));
+    if (!parse_success)
+    {
+        ERROR("Failed to parse the shader description file '%1' %2", uri, error);
+        return;
+    }
 
     if (json.contains("uniforms"))
     {
@@ -895,16 +905,16 @@ void MaterialWidget::ApplyShaderDescription()
         auto widget_col = 0;
         for (const auto& json : json["uniforms"].items())
         {
-            Uniform::Type type;
-            std::string name;
-            std::string desc;
-            if (!base::JsonReadSafe(json.value(), "desc", &desc) ||
-                !base::JsonReadSafe(json.value(), "name", &name) ||
-                !base::JsonReadSafe(json.value(), "type", &type))
-            {
-                WARN("Failed to understand shader uniform description.");
-                continue;
-            }
+            Uniform::Type type = Uniform::Type::Float;
+            std::string name = "Uniform";
+            std::string desc = "kUniform";
+            if (!base::JsonReadSafe(json.value(), "desc", &desc))
+                WARN("Uniform is missing 'desc' parameter.");
+            if (!base::JsonReadSafe(json.value(), "name", &name))
+                WARN("Uniform is missing 'name' parameter.");
+            if (!base::JsonReadSafe(json.value(), "type", &type))
+                WARN("Uniform is missing 'type' parameter.");
+
             auto* label = new QLabel(this);
             SetValue(label, desc);
             layout->addWidget(label, widget_row, 0);
@@ -965,16 +975,16 @@ void MaterialWidget::ApplyShaderDescription()
         auto widget_col = 0;
         for (const auto& json : json["maps"].items())
         {
-            std::string desc;
-            std::string name;
-            gfx::TextureMap::Type type;
-            if (!base::JsonReadSafe(json.value(), "desc", &desc) ||
-                !base::JsonReadSafe(json.value(), "name", &name) ||
-                !base::JsonReadSafe(json.value(), "type", &type))
-            {
-                WARN("Failed to understand shader texture map description.");
-                continue;
-            }
+            std::string desc = "Texture";
+            std::string name = "kTexture";
+            gfx::TextureMap::Type type = gfx::TextureMap::Type::Texture2D;
+            if (!base::JsonReadSafe(json.value(), "desc", &desc))
+                WARN("Texture map is missing 'desc' parameter.");
+            if (!base::JsonReadSafe(json.value(), "name", &name))
+                WARN("Texture map is missing 'name' parameter.");
+            if (!base::JsonReadSafe(json.value(), "type", &type))
+                WARN("Texture map is missing 'type' parameter.");
+
             auto* label = new QLabel(this);
             SetValue(label, desc);
             layout->addWidget(label, widget_row, 0);
@@ -1007,8 +1017,8 @@ void MaterialWidget::ApplyShaderDescription()
             // create new texture map and add to the material
             if (type == gfx::TextureMap::Type::Texture2D)
             {
-                std::string sampler_name;
-                std::string texture_rect_uniform_name;
+                std::string sampler_name = "kTexture";
+                std::string texture_rect_uniform_name = "kTextureRect";
                 if (!base::JsonReadSafe(json.value(), "sampler", &sampler_name))
                     WARN("Texture map '%1' has no name for texture sampler.", name);
                 if (!base::JsonReadSafe(json.value(), "rect", &texture_rect_uniform_name))
@@ -1021,10 +1031,10 @@ void MaterialWidget::ApplyShaderDescription()
             }
             else if (type == gfx::TextureMap::Type::Sprite)
             {
-                std::string sampler_name0;
-                std::string sampler_name1;
-                std::string texture_rect_uniform_name0;
-                std::string texture_rect_uniform_name1;
+                std::string sampler_name0 = "kTexture0";
+                std::string sampler_name1 = "kTexture1";
+                std::string texture_rect_uniform_name0 = "kTextureRect0";
+                std::string texture_rect_uniform_name1 = "kTextureRect1";
                 if (!base::JsonReadSafe(json.value(), "sampler0", &sampler_name0))
                     WARN("Texture map '%1' has no name for texture sampler 0.", name);
                 if (!base::JsonReadSafe(json.value(), "sampler1", &sampler_name1))
@@ -1032,7 +1042,7 @@ void MaterialWidget::ApplyShaderDescription()
                 if (!base::JsonReadSafe(json.value(), "rect0", &texture_rect_uniform_name0))
                     WARN("Texture map '%1' has no name for texture 0 rectangle uniform.", name);
                 if (!base::JsonReadSafe(json.value(), "rect1", &texture_rect_uniform_name1))
-                    WARN("Texture map '%1' has no name for texture 0 rectangle uniform.", name);
+                    WARN("Texture map '%1' has no name for texture 1 rectangle uniform.", name);
 
                 auto map = std::make_unique<gfx::SpriteMap>();
                 map->SetSamplerName(sampler_name0, 0);
