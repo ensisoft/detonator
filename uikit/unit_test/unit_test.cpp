@@ -703,6 +703,16 @@ void unit_test_window_transforms()
     }
 }
 
+void unit_test_util()
+{
+    auto widget = uik::CreateWidget(uik::Widget::Type::Label);
+
+    auto* label = uik::WidgetCast<uik::Label>(widget);
+    auto* spin  = uik::WidgetCast<uik::SpinBox>(widget);
+    TEST_REQUIRE(label != nullptr);
+    TEST_REQUIRE(spin == nullptr);
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_label();
@@ -713,6 +723,6 @@ int test_main(int argc, char* argv[])
     unit_test_window_paint();
     unit_test_window_mouse();
     unit_test_window_transforms();
-
+    unit_test_util();
     return 0;
 }

@@ -61,7 +61,7 @@ bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
     std::unique_ptr<Widget> widget;
     Widget::Type type;
     if (data.Read("type", &type))
-        widget = Widget::CreateWidget(type);
+        widget = uik::CreateWidget(type);
     if (widget && !widget->FromJson(data))
         return false;
 

@@ -656,8 +656,7 @@ bool GroupBoxModel::FromJson(const data::Reader& data)
 
 } // namespace detail
 
-// static
-std::unique_ptr<Widget> Widget::CreateWidget(Type type)
+std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
 {
     if (type == Widget::Type::Form)
         return std::make_unique<uik::Form>();

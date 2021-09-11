@@ -242,10 +242,6 @@ namespace uik
             const auto height = math::clamp(0.0f, size.GetHeight(), size.GetHeight());
             return FSize(width, height);
         }
-
-        static
-        std::unique_ptr<Widget> CreateWidget(Type type);
-
     private:
     };
 
@@ -303,8 +299,12 @@ namespace uik
             { mValue = value; }
             void ClearValue()
             { mValue.reset(); }
+            bool HasValue() const
+            { return mValue.has_value(); }
             std::optional<float> GetValue() const
             { return mValue; }
+            float GetValue(float backup) const
+            { return mValue.value_or(backup); }
             std::string GetText() const
             { return mText; }
             std::size_t GetHash(size_t hash) const;
@@ -608,6 +608,8 @@ namespace uik
             using Widget::SetSize;
             using Widget::SetPosition;
 
+            static constexpr auto RuntimeWidgetType = Traits::Type;
+
             BasicWidget()
             {
                 mId   = base::RandomString(10);
@@ -760,5 +762,29 @@ namespace uik
     using ProgressBar = detail::BasicWidget<detail::ProgressBarModel>;
     using GroupBox    = detail::BasicWidget<detail::GroupBoxModel>;
     using Form        = detail::BasicWidget<detail::FormModel>;
+
+    template<typename T>
+    T* WidgetCast(Widget* widget)
+    {
+        if (widget->GetType() == T::RuntimeWidgetType)
+            return static_cast<T*>(widget);
+        return nullptr;
+    }
+    template<typename T>
+    const T* WidgetCast(const Widget* widget)
+    {
+        if (widget->GetType() == T::RuntimeWidgetType)
+            return static_cast<T*>(widget);
+        return nullptr;
+    }
+
+    template<typename T>
+    Widget* WidgetCast(std::unique_ptr<Widget>& widget)
+    { return WidgetCast<T>(widget.get()); }
+    template<typename T>
+    const Widget* WidgetCast(const std::unique_ptr<Widget>& widget)
+    { return WidgetCast<T>(widget.get()); }
+
+    std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type);
 
 } // namespace
