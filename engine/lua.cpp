@@ -294,12 +294,57 @@ template sol::object GetScriptVar<game::Entity>(const game::Entity&, const char*
 template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object);
 template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object);
 
-template<typename Widget, uik::Widget::Type CastType>
+// shim to help with uik::WidgetCast overload resolution.
+template<typename Widget> inline
 Widget* WidgetCast(uik::Widget* widget)
+{ return uik::WidgetCast<Widget>(widget); }
+
+sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget, const std::string& type_string)
 {
-    if (widget->GetType() != CastType)
-        throw std::runtime_error(base::FormatString("Widget '%1' is not a %2", widget->GetName(), CastType));
-    return static_cast<Widget*>(widget);
+    sol::state_view lua(state);
+    const auto type_value = magic_enum::enum_cast<uik::Widget::Type>(type_string);
+    if (!type_value.has_value())
+        throw std::runtime_error("No such widget type: " + type_string);
+
+    const auto type = type_value.value();
+    if (type == uik::Widget::Type::Form)
+        return sol::make_object(lua, uik::WidgetCast<uik::Form>(widget));
+    else if (type == uik::Widget::Type::Label)
+        return sol::make_object(lua, uik::WidgetCast<uik::Label>(widget));
+    else if (type == uik::Widget::Type::SpinBox)
+        return sol::make_object(lua, uik::WidgetCast<uik::SpinBox>(widget));
+    else if (type == uik::Widget::Type::ProgressBar)
+        return sol::make_object(lua, uik::WidgetCast<uik::ProgressBar>(widget));
+    else if (type == uik::Widget::Type::Slider)
+        return sol::make_object(lua, uik::WidgetCast<uik::Slider>(widget));
+    else if (type == uik::Widget::Type::GroupBox)
+        return sol::make_object(lua, uik::WidgetCast<uik::GroupBox>(widget));
+    else if (type == uik::Widget::Type::PushButton)
+        return sol::make_object(lua, uik::WidgetCast<uik::PushButton>(widget));
+    else if (type == uik::Widget::Type::CheckBox)
+        return sol::make_object(lua, uik::WidgetCast<uik::CheckBox>(widget));
+    else BUG("Unhandled widget type cast.");
+    return sol::make_object(lua, sol::nil);
+}
+
+template<typename Widget>
+void BindWidgetInterface(sol::usertype<Widget>& widget)
+{
+    widget["GetId"]          = &Widget::GetId;
+    widget["GetName"]        = &Widget::GetName;
+    widget["GetHash"]        = &Widget::GetHash;
+    widget["GetSize"]        = &Widget::GetSize;
+    widget["GetPosition"]    = &Widget::GetPosition;
+    widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
+    widget["SetName"]        = &uik::Widget::SetName;
+    widget["SetSize"]        = (void(Widget::*)(const uik::FSize&))&Widget::SetSize;
+    widget["SetPosition"]    = (void(Widget::*)(const uik::FPoint&))&Widget::SetPosition;
+    widget["TestFlag"]       = &TestFlag<uik::Widget>;
+    widget["SetFlag"]        = &SetFlag<uik::Widget>;
+    widget["IsEnabled"]      = &Widget::IsEnabled;
+    widget["IsVisible"]      = &Widget::IsVisible;
+    widget["Grow"]           = &Widget::Grow;
+    widget["Translate"]      = &Widget::Translate;
 }
 
 // the problem with using a std random number generation is that
@@ -1254,49 +1299,98 @@ void BindWDK(sol::state& L)
 void BindUIK(sol::state& L)
 {
     auto table = L["uik"].get_or_create<sol::table>();
+    table["WidgetCast"] = &WidgetObjectCast;
 
     auto widget = table.new_usertype<uik::Widget>("Widget");
-    widget["GetId"]          = &uik::Widget::GetId;
-    widget["GetName"]        = &uik::Widget::GetName;
-    widget["GetHash"]        = &uik::Widget::GetHash;
-    widget["GetSize"]        = &uik::Widget::GetSize;
-    widget["GetPosition"]    = &uik::Widget::GetPosition;
-    widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
-    widget["SetName"]        = &uik::Widget::SetName;
-    widget["SetSize"]        = (void(uik::Widget::*)(const uik::FSize&))&uik::Widget::SetSize;
-    widget["SetPosition"]    = (void(uik::Widget::*)(const uik::FPoint&))&uik::Widget::SetPosition;
-    widget["TestFlag"]       = &TestFlag<uik::Widget>;
-    widget["SetFlag"]        = &SetFlag<uik::Widget>;
-    widget["IsEnabled"]      = &uik::Widget::IsEnabled;
-    widget["IsVisible"]      = &uik::Widget::IsVisible;
-    widget["Grow"]           = &uik::Widget::Grow;
-    widget["Translate"]      = &uik::Widget::Translate;
-    widget["AsLabel"]        = &WidgetCast<uik::Label,      uik::Widget::Type::Label>;
-    widget["AsPushButton"]   = &WidgetCast<uik::PushButton, uik::Widget::Type::PushButton>;
-    widget["AsCheckBox"]     = &WidgetCast<uik::CheckBox,   uik::Widget::Type::CheckBox>;
-    widget["AsGroupBox"]     = &WidgetCast<uik::GroupBox,   uik::Widget::Type::GroupBox>;
+    BindWidgetInterface(widget);
+    widget["AsLabel"]        = &WidgetCast<uik::Label>;
+    widget["AsPushButton"]   = &WidgetCast<uik::PushButton>;
+    widget["AsCheckBox"]     = &WidgetCast<uik::CheckBox>;
+    widget["AsGroupBox"]     = &WidgetCast<uik::GroupBox>;
+    widget["AsSpinBox"]      = &WidgetCast<uik::SpinBox>;
+    widget["AsProgressBar"]  = &WidgetCast<uik::ProgressBar>;
+    widget["AsForm"]         = &WidgetCast<uik::Form>;
+    widget["AsSlider"]       = &WidgetCast<uik::Slider>;
 
-    auto label          = table.new_usertype<uik::Label>("Label");
-    auto check          = table.new_usertype<uik::CheckBox>("CheckBox");
-    auto group          = table.new_usertype<uik::GroupBox>("GroupBox");
-    auto pushbtn        = table.new_usertype<uik::PushButton>("PushButton");
-    label["GetText"]    = &uik::Label::GetText;
-    label["SetText"]    = (void(uik::Label::*)(const std::string&))&uik::Label::SetText;
-    check["GetText"]    = &uik::CheckBox::GetText;
-    check["SetText"]    = (void(uik::CheckBox::*)(const std::string&))&uik::CheckBox::SetText;
-    check["IsChecked"]  = &uik::CheckBox::IsChecked;
-    check["SetChecked"] = &uik::CheckBox::SetChecked;
-    group["GetText"]    = &uik::GroupBox::GetText;
-    group["SetText"]    = (void(uik::GroupBox::*)(const std::string&))&uik::GroupBox::SetText;
+    auto form = table.new_usertype<uik::Form>("Form");
+    BindWidgetInterface(form);
+
+    auto label = table.new_usertype<uik::Label>("Label");
+    BindWidgetInterface(label);
+    label["GetText"] = &uik::Label::GetText;
+    label["SetText"] = (void(uik::Label::*)(const std::string&))&uik::Label::SetText;
+
+    auto checkbox = table.new_usertype<uik::CheckBox>("CheckBox");
+    BindWidgetInterface(checkbox);
+    checkbox["GetText"]    = &uik::CheckBox::GetText;
+    checkbox["SetText"]    = (void(uik::CheckBox::*)(const std::string&))&uik::CheckBox::SetText;
+    checkbox["IsChecked"]  = &uik::CheckBox::IsChecked;
+    checkbox["SetChecked"] = &uik::CheckBox::SetChecked;
+
+    auto groupbox = table.new_usertype<uik::GroupBox>("GroupBox");
+    BindWidgetInterface(groupbox);
+    groupbox["GetText"] = &uik::GroupBox::GetText;
+    groupbox["SetText"] = (void(uik::GroupBox::*)(const std::string&))&uik::GroupBox::SetText;
+
+    auto pushbtn = table.new_usertype<uik::PushButton>("PushButton");
+    BindWidgetInterface(pushbtn);
     pushbtn["GetText"]  = &uik::PushButton::GetText;
     pushbtn["SetText"]  = (void(uik::PushButton::*)(const std::string&))&uik::PushButton::SetText;
+
+    auto progressbar = table.new_usertype<uik::ProgressBar>("ProgressBar");
+    BindWidgetInterface(progressbar);
+    progressbar["SetText"]    = &uik::ProgressBar::SetText;
+    progressbar["GetText"]    = &uik::ProgressBar::GetText;
+    progressbar["ClearValue"] = &uik::ProgressBar::ClearValue;
+    progressbar["SetValue"]   = &uik::ProgressBar::SetValue;
+    progressbar["HasValue"]   = &uik::ProgressBar::HasValue;
+    progressbar["GetValue"]   = [](uik::ProgressBar* progress, sol::this_state state) {
+        sol::state_view view(state);
+        if (progress->HasValue())
+            return sol::make_object(view, progress->GetValue(0.0f));
+        return sol::make_object(view, sol::nil);
+    };
+
+    auto spinbox = table.new_usertype<uik::SpinBox>("SpinBox");
+    BindWidgetInterface(spinbox);
+    spinbox["SetMin"]   = &uik::SpinBox::SetMin;
+    spinbox["SetMax"]   = &uik::SpinBox::SetMax;
+    spinbox["SetValue"] = &uik::SpinBox::SetValue;
+    spinbox["GetMin"]   = &uik::SpinBox::GetMin;
+    spinbox["GetMax"]   = &uik::SpinBox::GetMax;
+    spinbox["GetValue"] = &uik::SpinBox::GetValue;
+
+    auto slider = table.new_usertype<uik::Slider>("Slider");
+    BindWidgetInterface(slider);
+    slider["SetValue"] = &uik::Slider::SetValue;
+    slider["GetValue"] = &uik::Slider::GetValue;
 
     auto window = table.new_usertype<uik::Window>("Window");
     window["GetId"]            = &uik::Window::GetId;
     window["GetName"]          = &uik::Window::GetName;
     window["GetNumWidgets"]    = &uik::Window::GetNumWidgets;
-    window["FindWidgetById"]   = [](uik::Window* window, const std::string& id) { return window->FindWidgetById(id); };
-    window["FindWidgetByName"] = [](uik::Window* window, const std::string& name) { return window->FindWidgetByName(name); };
+    window["FindWidgetById"]   = sol::overload(
+        [](uik::Window* window, const std::string& id) {
+            return window->FindWidgetById(id);
+        },
+        [](sol::this_state state, uik::Window* window, const std::string& id,  const std::string& type_string) {
+            sol::state_view lua(state);
+            auto* widget = window->FindWidgetById(id);
+            if (!widget)
+                return sol::make_object(lua, sol::nil);
+            return WidgetObjectCast(state, widget, type_string);
+        });
+    window["FindWidgetByName"] = sol::overload(
+        [](uik::Window* window, const std::string& name) {
+            return window->FindWidgetByName(name);
+        },
+        [](sol::this_state state, uik::Window* window, const std::string& name, const std::string& type_string) {
+            sol::state_view lua(state);
+            auto* widget = window->FindWidgetByName(name);
+            if (!widget)
+                return sol::make_object(lua, sol::nil);
+            return WidgetObjectCast(state, widget, type_string);
+        });
     window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
     window["GetWidget"]        = [](uik::Window* window, unsigned index) {
         if (index >= window->GetNumWidgets())
