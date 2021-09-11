@@ -599,13 +599,13 @@ void LuaGame::OnAudioEvent(const AudioEvent& event)
     CallLua((*mLuaState)["OnAudioEvent"], event);
 }
 
-void LuaGame::OnKeyDown(const wdk::WindowEventKeydown& key)
+void LuaGame::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     CallLua((*mLuaState)["OnKeyDown"],
             static_cast<int>(key.symbol),
             static_cast<int>(key.modifiers.value()));
 }
-void LuaGame::OnKeyUp(const wdk::WindowEventKeyup& key)
+void LuaGame::OnKeyUp(const wdk::WindowEventKeyUp& key)
 {
     CallLua((*mLuaState)["OnKeyUp"],
             static_cast<int>(key.symbol),
@@ -876,11 +876,11 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
         CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
     }
 }
-void ScriptEngine::OnKeyDown(const wdk::WindowEventKeydown& key)
+void ScriptEngine::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     DispatchKeyboardEvent("OnKeyDown", key);
 }
-void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyup& key)
+void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyUp& key)
 {
     DispatchKeyboardEvent("OnKeyUp", key);
 }

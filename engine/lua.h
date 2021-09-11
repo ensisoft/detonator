@@ -57,8 +57,8 @@ namespace engine
         virtual void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action) override;
         virtual void OnContactEvent(const ContactEvent& contact) override;
         virtual void OnAudioEvent(const AudioEvent& event) override;
-        virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;
-        virtual void OnKeyUp(const wdk::WindowEventKeyup& key) override;
+        virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override;
+        virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override;
         virtual void OnChar(const wdk::WindowEventChar& text) override;
         virtual void OnMouseMove(const MouseEvent& mouse) override;
         virtual void OnMousePress(const MouseEvent& mouse) override;
@@ -98,8 +98,8 @@ namespace engine
         void EndLoop();
         bool GetNextAction(Action* out);
         void OnContactEvent(const ContactEvent& contact);
-        void OnKeyDown(const wdk::WindowEventKeydown& key);
-        void OnKeyUp(const wdk::WindowEventKeyup& key);
+        void OnKeyDown(const wdk::WindowEventKeyDown& key);
+        void OnKeyUp(const wdk::WindowEventKeyUp& key);
         void OnChar(const wdk::WindowEventChar& text);
         void OnMouseMove(const MouseEvent& mouse);
         void OnMousePress(const MouseEvent& mouse);

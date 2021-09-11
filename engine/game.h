@@ -122,8 +122,8 @@ namespace engine
         virtual void OnAudioEvent(const AudioEvent& event) = 0;
 
         // action/input handlers for some interesting windowing events.
-        virtual void OnKeyDown(const wdk::WindowEventKeydown& key) {}
-        virtual void OnKeyUp(const wdk::WindowEventKeyup& key) {}
+        virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) {}
+        virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) {}
         virtual void OnChar(const wdk::WindowEventChar& text) {}
         virtual void OnMouseMove(const MouseEvent& mouse) {}
         virtual void OnMousePress(const MouseEvent& mouse) {}

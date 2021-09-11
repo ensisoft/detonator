@@ -479,7 +479,7 @@ public:
         // todo: handle ending play, saving game etc.
         mRunning = false;
     }
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override
     {
         if (mBlockKeyboard)
             return;
@@ -489,7 +489,7 @@ public:
             mScripting->OnKeyDown(key);
         }
     }
-    virtual void OnKeyup(const wdk::WindowEventKeyup& key) override
+    virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
         if (mBlockKeyboard)
             return;

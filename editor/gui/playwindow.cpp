@@ -995,10 +995,10 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             else if (key_event->key() == Qt::Key_F9 && InFullScreen())
                 mUI.actionScreenshot->trigger();
 
-            wdk::WindowEventKeydown key;
+            wdk::WindowEventKeyDown key;
             key.symbol    = MapVirtualKey(key_event->key());
             key.modifiers = MapKeyModifiers(key_event->modifiers());
-            listener->OnKeydown(key);
+            listener->OnKeyDown(key);
             //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
             return true;
         }
@@ -1006,10 +1006,10 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         {
             const auto* key_event = static_cast<const QKeyEvent *>(event);
 
-            wdk::WindowEventKeyup key;
+            wdk::WindowEventKeyUp key;
             key.symbol    = MapVirtualKey(key_event->key());
             key.modifiers = MapKeyModifiers(key_event->modifiers());
-            listener->OnKeyup(key);
+            listener->OnKeyUp(key);
             //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
             return true;
         }

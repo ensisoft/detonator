@@ -1623,11 +1623,11 @@ int main(int argc, char* argv[])
     unsigned surface_height = 768;
     window.Create("Demo", 1024, 768, context->GetVisualID());
     window.SetFullscreen(fullscreen);
-    window.on_resize = [&](const wdk::WindowEventResize& resize) {
+    window.OnResize = [&](const wdk::WindowEventResize& resize) {
         surface_width = resize.width;
         surface_height = resize.height;
     };
-    window.on_keydown = [&](const wdk::WindowEventKeydown& key) {
+    window.OnKeyDown = [&](const wdk::WindowEventKeyDown& key) {
         const auto current_test_index = test_index;
         if (key.symbol == wdk::Keysym::Escape)
             window.Destroy();

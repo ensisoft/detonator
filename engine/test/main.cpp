@@ -67,7 +67,7 @@ public:
     virtual void Start(engine::ClassLibrary* loader) {}
     virtual void End() {}
     virtual void Tick() {}
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) {}
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) {}
     virtual void OnMousePress(const wdk::WindowEventMousePress& mickey) {}
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) {}
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) {}
@@ -110,7 +110,7 @@ public:
     virtual void End() override
     { mEngine.reset(); }
 
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         std::string track;
         if (key.symbol == wdk::Keysym::Key1)
@@ -216,7 +216,7 @@ public:
     virtual void End() override
     { mEngine.reset(); }
 
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         const auto millisec = unsigned(mDelay * 1000u);
         if (key.symbol == wdk::Keysym::Key1)
@@ -377,7 +377,7 @@ public:
         mSurfaceWidth  = width;
         mSurfaceHeight = height;
     }
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Key1)
             mViewport.Grow(0.0f, -10.0f);
@@ -498,7 +498,7 @@ public:
         mEntity->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
     }
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Key1)
             mDrawBoundingBoxes = !mDrawBoundingBoxes;
@@ -930,7 +930,7 @@ public:
     {
         mRunning = false;
     }
-    virtual void OnKeydown(const wdk::WindowEventKeydown& key) override
+    virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override
     {
         const auto current_test_index = mTestIndex;
         if (key.symbol == wdk::Keysym::Escape)
