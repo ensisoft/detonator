@@ -54,7 +54,7 @@ namespace engine
         virtual FRect GetViewport() const override;
         virtual void OnUIOpen(uik::Window* ui) override;
         virtual void OnUIClose(uik::Window* ui, int result) override;
-        virtual void OnUIAction(const uik::Window::WidgetAction& action) override;
+        virtual void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action) override;
         virtual void OnContactEvent(const ContactEvent& contact) override;
         virtual void OnAudioEvent(const AudioEvent& event) override;
         virtual void OnKeyDown(const wdk::WindowEventKeydown& key) override;

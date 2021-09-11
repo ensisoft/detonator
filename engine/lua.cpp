@@ -519,9 +519,9 @@ void LuaGame::OnUIClose(uik::Window* ui, int result)
     CallLua((*mLuaState)["OnUIClose"], ui, result);
 }
 
-void LuaGame::OnUIAction(const uik::Window::WidgetAction& action)
+void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
 {
-    CallLua((*mLuaState)["OnUIAction"], action);
+    CallLua((*mLuaState)["OnUIAction"], ui, action);
 }
 
 void LuaGame::OnContactEvent(const ContactEvent& contact)

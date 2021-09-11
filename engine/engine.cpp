@@ -344,7 +344,7 @@ public:
             mUIPainter.Update(mGameTimeTotal, dt);
             const auto& action = ui->PollAction(mUIState, mGameTickStep, dt);
             if (action.type != uik::WidgetActionType::None)
-                mGame->OnUIAction(action);
+                mGame->OnUIAction(ui, action);
         }
 
         mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - (float)dt);
@@ -608,7 +608,7 @@ private:
         auto action = (ui->*which)(mickey, mUIState);
         if (action.type == uik::WidgetActionType::None)
             return;
-        mGame->OnUIAction(action);
+        mGame->OnUIAction(ui, action);
         //DEBUG("Widget action: '%1'", action.type);
     }
     template<typename WdkMouseEvent>

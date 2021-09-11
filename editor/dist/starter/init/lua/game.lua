@@ -98,7 +98,7 @@ end
 -- 'id'    - the id of the UI widget that generated the action
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
-function OnUIAction(action)
+function OnUIAction(ui, action)
 
 end
 

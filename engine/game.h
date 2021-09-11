@@ -111,7 +111,7 @@ namespace engine
         {}
         virtual void OnUIClose(uik::Window* ui, int result)
         {}
-        virtual void OnUIAction(const uik::Window::WidgetAction& action)
+        virtual void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
         {}
 
         // Act on a contact event when 2 physics bodies have come into

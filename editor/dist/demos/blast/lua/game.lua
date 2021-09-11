@@ -220,7 +220,7 @@ function OnUIClose(ui, result)
     Game:DebugPrint(ui:GetName() .. ' is closed')
 end
 
-function OnUIAction(action)
+function OnUIAction(ui, action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
