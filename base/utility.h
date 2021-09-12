@@ -159,6 +159,29 @@ std::unique_ptr<T, Deleter> MakeUniqueHandle(T* ptr, Deleter del)
 // system time etc.
 double GetTime();
 
+class ElapsedTimer
+{
+public:
+    // Start measuring the passing of time.
+    inline void Start()
+    { mStartTime = base::GetTime(); }
+    // Return the time in seconds since Start.
+    inline double SinceStart()
+    { return base::GetTime() - mStartTime; }
+    // Return the time in seconds since last Delta.
+    inline double Delta()
+    {
+        const auto now = base::GetTime();
+        const auto dt  = now - mDeltaTime;
+        mDeltaTime = now;
+        return dt;
+    }
+private:
+    bool mStarted = false;
+    double mStartTime = 0.0;
+    double mDeltaTime = 0.0;
+};
+
 // when using these functions with narrow byte strings think about
 // the string encoding and whether that can be a problem!
 inline bool Contains(const std::string& str, const std::string& what)
