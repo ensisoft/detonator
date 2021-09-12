@@ -385,12 +385,12 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
     DEBUG("Create PlayWindow");
     mLogger = std::make_unique<SessionLogger>();
 
-    mEventLog.SetModel(mLogger->GetModel());
-    mEventLog.setSourceModel(mLogger->GetModel());
+    mAppEventLog.SetModel(mLogger->GetModel());
+    mAppEventLog.setSourceModel(mLogger->GetModel());
 
     mUI.setupUi(this);
     mUI.actionClose->setShortcut(QKeySequence::Close);
-    mUI.log->setModel(&mEventLog);
+    mUI.log->setModel(&mAppEventLog);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
     mUI.problem->setVisible(false);
 
@@ -499,6 +499,12 @@ void PlayWindow::RunOnce()
     mContext.makeCurrent(mSurface);
     try
     {
+        if (mWinEventLog)
+        {
+            if (auto* listener = mEngine->GetWindowListener())
+                mWinEventLog->Replay(*listener, mTimer.SinceStart());
+        }
+
         bool quit = false;
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
@@ -544,6 +550,9 @@ void PlayWindow::RunOnce()
         // ask the application to draw the current frame.
         mEngine->Draw();
 
+        if (mWinEventLog)
+            mWinEventLog->SetTime(wall_time);
+
         engine::Engine::Stats stats;
         if (mEngine->GetStats(&stats))
         {
@@ -580,6 +589,13 @@ void PlayWindow::RunOnce()
 
 void PlayWindow::NonGameTick()
 {
+    if (mWinEventLog && mWinEventLog->IsClosed())
+    {
+        mWorkspace.SetUserProperty("play_window_event_dlg_geom", mWinEventLog->saveGeometry());
+        mWinEventLog->close();
+        mWinEventLog.reset();
+    }
+
     // flush the buffer logger to the main log.
     mLogger->Dispatch();
 }
@@ -662,16 +678,16 @@ void PlayWindow::LoadState()
     const auto& project = mWorkspace.GetProjectSettings();
     const auto& window_geometry = mWorkspace.GetUserProperty("play_window_geometry", QByteArray());
     const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty("play_window_toolbar_and_dock_state", QByteArray());
-    const unsigned log_bits = mWorkspace.GetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
+    const unsigned log_bits = mWorkspace.GetUserProperty("play_window_log_bits", mAppEventLog.GetShowBits());
     const QString log_filter = mWorkspace.GetUserProperty("play_window_log_filter", QString());
     const bool log_filter_case_sens = mWorkspace.GetUserProperty("play_window_log_filter_case_sensitive", true);
-    mEventLog.SetFilterStr(log_filter, log_filter_case_sens);
-    mEventLog.SetShowBits(log_bits);
-    mEventLog.invalidate();
-    mUI.actionLogShowDebug->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Debug));
-    mUI.actionLogShowInfo->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Info));
-    mUI.actionLogShowWarning->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Warning));
-    mUI.actionLogShowError->setChecked(mEventLog.IsShown(app::EventLogProxy::Show::Error));
+    mAppEventLog.SetFilterStr(log_filter, log_filter_case_sens);
+    mAppEventLog.SetShowBits(log_bits);
+    mAppEventLog.invalidate();
+    mUI.actionLogShowDebug->setChecked(mAppEventLog.IsShown(app::EventLogProxy::Show::Debug));
+    mUI.actionLogShowInfo->setChecked(mAppEventLog.IsShown(app::EventLogProxy::Show::Info));
+    mUI.actionLogShowWarning->setChecked(mAppEventLog.IsShown(app::EventLogProxy::Show::Warning));
+    mUI.actionLogShowError->setChecked(mAppEventLog.IsShown(app::EventLogProxy::Show::Error));
 
     if (!window_geometry.isEmpty())
         restoreGeometry(window_geometry);
@@ -700,10 +716,8 @@ void PlayWindow::LoadState()
     SetValue(mUI.actionToggleDebugDraw, debug_draw);
     SetValue(mUI.logFilter, log_filter);
     SetValue(mUI.logFilterCaseSensitive, log_filter_case_sens);
-    QSignalBlocker foo(mUI.actionViewEventlog);
-    QSignalBlocker bar(mUI.actionViewStatusbar);
-    mUI.actionViewEventlog->setChecked(show_eventlog);
-    mUI.actionViewStatusbar->setChecked(show_status_bar);
+    SetValue(mUI.actionViewStatusbar, show_status_bar);
+    SetValue(mUI.actionViewEventlog, show_eventlog);
     mUI.statusbar->setVisible(show_status_bar);
     mUI.dockWidget->setVisible(show_eventlog);
 }
@@ -714,7 +728,7 @@ void PlayWindow::SaveState()
     mWorkspace.SetUserProperty("play_window_show_eventlog", mUI.dockWidget->isVisible());
     mWorkspace.SetUserProperty("play_window_geometry", saveGeometry());
     mWorkspace.SetUserProperty("play_window_toolbar_and_dock_state", saveState());
-    mWorkspace.SetUserProperty("play_window_log_bits", mEventLog.GetShowBits());
+    mWorkspace.SetUserProperty("play_window_log_bits", mAppEventLog.GetShowBits());
     mWorkspace.SetUserProperty("play_window_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
     mWorkspace.SetUserProperty("play_window_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
     mWorkspace.SetUserProperty("play_window_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
@@ -843,23 +857,23 @@ void PlayWindow::on_actionClearLog_triggered()
 }
 void PlayWindow::on_actionLogShowDebug_toggled(bool val)
 {
-    mEventLog.SetVisible(app::EventLogProxy::Show::Debug, val);
-    mEventLog.invalidate();
+    mAppEventLog.SetVisible(app::EventLogProxy::Show::Debug, val);
+    mAppEventLog.invalidate();
 }
 void PlayWindow::on_actionLogShowInfo_toggled(bool val)
 {
-    mEventLog.SetVisible(app::EventLogProxy::Show::Info, val);
-    mEventLog.invalidate();
+    mAppEventLog.SetVisible(app::EventLogProxy::Show::Info, val);
+    mAppEventLog.invalidate();
 }
 void PlayWindow::on_actionLogShowWarning_toggled(bool val)
 {
-    mEventLog.SetVisible(app::EventLogProxy::Show::Warning, val);
-    mEventLog.invalidate();
+    mAppEventLog.SetVisible(app::EventLogProxy::Show::Warning, val);
+    mAppEventLog.invalidate();
 }
 void PlayWindow::on_actionLogShowError_toggled(bool val)
 {
-    mEventLog.SetVisible(app::EventLogProxy::Show::Error, val);
-    mEventLog.invalidate();
+    mAppEventLog.SetVisible(app::EventLogProxy::Show::Error, val);
+    mAppEventLog.invalidate();
 }
 
 void PlayWindow::on_actionToggleDebugDraw_toggled()
@@ -905,10 +919,23 @@ void PlayWindow::on_actionScreenshot_triggered()
     }
 }
 
+void PlayWindow::on_actionEventLog_triggered()
+{
+    if (!mWinEventLog)
+    {
+        mWinEventLog.reset(new DlgEventLog(this));
+        QByteArray geom;
+        if (mWorkspace.GetUserProperty("play_window_event_dlg_geom", &geom))
+            mWinEventLog->restoreGeometry(geom);
+    }
+    if (!mWinEventLog->isVisible())
+        mWinEventLog->show();
+}
+
 void PlayWindow::on_btnApplyFilter_clicked()
 {
-    mEventLog.SetFilterStr(GetValue(mUI.logFilter),GetValue(mUI.logFilterCaseSensitive));
-    mEventLog.invalidate();
+    mAppEventLog.SetFilterStr(GetValue(mUI.logFilter), GetValue(mUI.logFilterCaseSensitive));
+    mAppEventLog.invalidate();
 }
 
 void PlayWindow::on_log_customContextMenuRequested(QPoint point)
@@ -955,6 +982,13 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     if (!listener)
         return QMainWindow::event(event);
 
+    // if we're replaying a trace then don't mess with the event
+    // dispatching.
+    if (mWinEventLog && mWinEventLog->IsPlaying())
+        return QMainWindow::event(event);
+
+    const auto event_time = mTimer.SinceStart();
+
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
     try
     {
@@ -974,7 +1008,9 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             key.symbol    = MapVirtualKey(key_event->key());
             key.modifiers = MapKeyModifiers(key_event->modifiers());
             listener->OnKeyDown(key);
-            //DEBUG("Qt key down: %1 -> %2", key_event->key(), key.symbol);
+            if (mWinEventLog)
+                mWinEventLog->RecordEvent(key, event_time);
+
             return true;
         }
         else if (event->type() == QEvent::KeyRelease)
@@ -985,21 +1021,25 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             key.symbol    = MapVirtualKey(key_event->key());
             key.modifiers = MapKeyModifiers(key_event->modifiers());
             listener->OnKeyUp(key);
-            //DEBUG("Qt key up: %1 -> %2", key_event->key(), key.symbol);
+            if (mWinEventLog)
+                mWinEventLog->RecordEvent(key, event_time);
+
             return true;
         }
         else if (event->type() == QEvent::MouseMove)
         {
             const auto* mouse = static_cast<const QMouseEvent*>(event);
 
-            wdk::WindowEventMouseMove m;
-            m.window_x = mouse->x();
-            m.window_y = mouse->y();
-            m.global_x = mouse->globalX();
-            m.global_y = mouse->globalY();
-            m.modifiers = MapKeyModifiers(mouse->modifiers());
-            m.btn       = MapMouseButton(mouse->button());
-            listener->OnMouseMove(m);
+            wdk::WindowEventMouseMove move;
+            move.window_x = mouse->x();
+            move.window_y = mouse->y();
+            move.global_x = mouse->globalX();
+            move.global_y = mouse->globalY();
+            move.modifiers = MapKeyModifiers(mouse->modifiers());
+            move.btn       = MapMouseButton(mouse->button());
+            listener->OnMouseMove(move);
+            if (mWinEventLog)
+                mWinEventLog->RecordEvent(move, event_time);
         }
         else if (event->type() == QEvent::MouseButtonPress)
         {
@@ -1013,6 +1053,8 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             press.modifiers = MapKeyModifiers(mouse->modifiers());
             press.btn       = MapMouseButton(mouse->button());
             listener->OnMousePress(press);
+            if (mWinEventLog)
+                mWinEventLog->RecordEvent(press, event_time);
         }
         else if (event->type() == QEvent::MouseButtonRelease)
         {
@@ -1026,6 +1068,8 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
             release.modifiers = MapKeyModifiers(mouse->modifiers());
             release.btn       = MapMouseButton(mouse->button());
             listener->OnMouseRelease(release);
+            if (mWinEventLog)
+                mWinEventLog->RecordEvent(release, event_time);
         }
         if (event->type() == QEvent::Resize)
         {

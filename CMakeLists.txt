@@ -244,6 +244,8 @@ add_executable(GSEditor
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
+    editor/app/window-eventlog.h
+    editor/app/window-eventlog.cpp
     editor/app/format.h
     editor/app/format.cpp
     editor/app/packing.h
@@ -273,6 +275,9 @@ add_executable(GSEditor
     editor/gui/playwindow.h
     editor/gui/playwindow.cpp
     editor/gui/playwindow.ui
+    editor/gui/dlgeventlog.h
+    editor/gui/dlgeventlog.ui
+    editor/gui/dlgeventlog.cpp
     editor/gui/dlgabout.h
     editor/gui/dlgabout.ui
     editor/gui/dlgabout.cpp
@@ -426,6 +431,7 @@ add_executable(EditorGameHost
     editor/app/workspace.h
     editor/app/workspace.cpp
     editor/app/buffer.cpp
+    editor/app/window-eventlog.cpp
     editor/app/ipc.h
     editor/app/ipc.cpp
     editor/gui/host.cpp
@@ -433,6 +439,9 @@ add_executable(EditorGameHost
     editor/gui/playwindow.h
     editor/gui/playwindow.ui
     editor/gui/playwindow.cpp
+    editor/gui/dlgeventlog.h
+    editor/gui/dlgeventlog.ui
+    editor/gui/dlgeventlog.cpp
     editor/resource/resource.qrc
 )
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
@@ -575,19 +584,25 @@ add_executable(unit_test_workspace
         editor/app/workspace.cpp
         editor/app/buffer.cpp
         editor/app/packing.cpp)
+add_executable(unit_test_event_log
+        editor/app/unit_test/unit_test_window-eventlog.cpp
+        editor/app/window-eventlog.cpp)
 add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
 add_test(NAME unit_test_resource  COMMAND unit_test_resource)
 add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
+add_test(NAME unit_test_event_log COMMAND unit_test_event_log)
 target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
+target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 
 # engine tests
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)

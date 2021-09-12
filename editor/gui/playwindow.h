@@ -33,6 +33,7 @@
 #include "base/utility.h"
 #include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
+#include "editor/gui/dlgeventlog.h"
 
 namespace app {
     class Workspace;
@@ -101,6 +102,7 @@ namespace gui
         void on_actionToggleDebugMsg_toggled();
         void on_actionFullscreen_triggered();
         void on_actionScreenshot_triggered();
+        void on_actionEventLog_triggered();
         void on_btnApplyFilter_clicked();
         void on_log_customContextMenuRequested(QPoint point);
 
@@ -154,7 +156,7 @@ namespace gui
         // Note the thread safety because of for example audio threading.
         std::unique_ptr<SessionLogger> mLogger;
         // proxy model for filtering application event log
-        app::EventLogProxy mEventLog;
+        app::EventLogProxy mAppEventLog;
         // The game engine loaded from the game library.
         std::unique_ptr<engine::Engine> mEngine;
         // rendering context implementation for the QWindow surface.
@@ -171,6 +173,9 @@ namespace gui
         unsigned mNumFramesTotal = 0;
         // Timer to keep track of rendering times.
         QElapsedTimer mFrameTimer;
+        // Interface dialog for recording and playing back
+        // window event captures i.e. mouse/keyboard inputs.
+        std::unique_ptr<DlgEventLog> mWinEventLog;
     };
 
 } // namespace
