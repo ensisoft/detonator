@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "base/utility.h"
 #include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
 
@@ -162,9 +163,8 @@ namespace gui
         // URIs to files based on the workspace configuration for 
         // the game playing (i.e. the working folder)
         std::unique_ptr<ResourceLoader> mResourceLoader;
-        // Current game/app time. Updated in time steps whenever
-        // the update timer runs.
-        double mTimeTotal = 0.0;
+        // timer to measure the passing of time.
+        base::ElapsedTimer mTimer;
         // Current number of frames within the last second.
         unsigned mNumFrames = 0;
         // total number of frames rendered.

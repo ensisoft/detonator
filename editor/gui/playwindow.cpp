@@ -46,31 +46,6 @@
 
 namespace {
 
-// returns number of seconds elapsed since the last call
-// of this function.
-double ElapsedSeconds()
-{
-    using clock = std::chrono::steady_clock;
-    static auto start = clock::now();
-    auto now  = clock::now();
-    auto gone = now - start;
-    start = now;
-    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
-        (1000.0 * 1000.0);
-}
-
-// returns number of seconds since the application started
-// running.
-double CurrentRuntime()
-{
-    using clock = std::chrono::steady_clock;
-    static const auto start = clock::now();
-    const auto now  = clock::now();
-    const auto gone = now - start;
-    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
-        (1000.0 * 1000.0);
-}
-
 class TemporaryCurrentDirChange
 {
 public:
@@ -556,14 +531,13 @@ void PlayWindow::RunOnce()
             return;
         }
 
-        // this is the real wall time elapsed rendering the previous
-        // for each iteration of the loop we measure the time
-        // spent producing a frame. the time is then used to take
+        // This is the real wall time elapsed rendering the previous frame.
+        // For each iteration of the loop we measure the time
+        // spent producing a frame and that time is then used to take
         // some number of simulation steps in order for the simulations
         // to catch up for the *next* frame.
-        const auto time_step = ElapsedSeconds();
-        mTimeTotal += time_step;
-
+        const auto time_step = mTimer.Delta();
+        const auto wall_time = mTimer.SinceStart();
         // ask the application to take its simulation steps.
         mEngine->Update(time_step);
 
@@ -579,7 +553,7 @@ void PlayWindow::RunOnce()
         mNumFrames++;
         mNumFramesTotal++;
         SetValue(mUI.frames, mNumFramesTotal);
-        SetValue(mUI.wallTime, mTimeTotal);
+        SetValue(mUI.wallTime, wall_time);
 
         const auto elapsed = mFrameTimer.elapsed();
         if (elapsed >= 1000)
@@ -588,7 +562,7 @@ void PlayWindow::RunOnce()
             const auto fps = mNumFrames / seconds;
             engine::Engine::HostStats stats;
             stats.num_frames_rendered = mNumFramesTotal;
-            stats.total_wall_time     = mTimeTotal;
+            stats.total_wall_time     = wall_time;
             stats.current_fps         = fps;
             mEngine->SetHostStats(stats);
 
@@ -824,6 +798,7 @@ void PlayWindow::DoAppInit()
 
         mEngine->Load();
         mEngine->Start();
+        mTimer.Start();
 
         // try to give the keyboard focus to the window
         // looks like this has to be done through a timer again.
