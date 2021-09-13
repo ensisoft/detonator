@@ -1074,6 +1074,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     SetValue(mUI.graphID, base::RandomString(10));
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    mUI.afDuration->SetEditable(false);
     GetSelectedElementProperties();
     mGraphHash = GetHash();
 }
@@ -1755,6 +1756,11 @@ void AudioWidget::on_effect_currentIndexChanged(int)
     SetSelectedElementProperties();
 }
 
+void AudioWidget::on_loopCount_valueChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
 void AudioWidget::SceneSelectionChanged()
 {
     GetSelectedElementProperties();
@@ -1853,7 +1859,8 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.afChannels,   QString(""));
     SetValue(mUI.afSampleRate, QString(""));
     SetValue(mUI.afFrames,     QString(""));
-    SetValue(mUI.afDuration,   QString(""));
+    SetValue(mUI.afDuration,   0);
+    SetValue(mUI.loopCount, 1);
 
     SetEnabled(mUI.sampleType, false);
     SetEnabled(mUI.sampleRate, false);
@@ -1868,6 +1875,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetEnabled(mUI.effect, false);
     SetEnabled(mUI.audioFile, false);
     SetEnabled(mUI.actionDelete, false);
+    SetEnabled(mUI.loopCount, false);
 
     /*
     SetVisible(mUI.sampleType, false);
@@ -1932,7 +1940,15 @@ void AudioWidget::GetSelectedElementProperties()
         SetVisible(mUI.fileSource, true);
         SetVisible(mUI.btnSelectFile, true);
         SetVisible(mUI.lblFileSource, true);
+        SetVisible(mUI.loopCount, true);
+        SetEnabled(mUI.loopCount, true);
         SetValue(mUI.fileSource, *val);
+    }
+    if (const auto* val = item->GetArgValue<unsigned>("loops"))
+    {
+        SetEnabled(mUI.loopCount, true);
+        SetVisible(mUI.loopCount, true);
+        SetValue(mUI.loopCount, *val);
     }
 
     if (const auto* val = item->GetArgValue<float>("gain"))
@@ -1978,7 +1994,7 @@ void AudioWidget::GetSelectedElementProperties()
         SetValue(mUI.afChannels,   QString(""));
         SetValue(mUI.afSampleRate, QString(""));
         SetValue(mUI.afFrames,     QString(""));
-        SetValue(mUI.afDuration,   QString(""));
+        SetValue(mUI.afDuration,   0);
         const std::string& URI = *item->GetArgValue<std::string>("file");
         if (URI.empty())
             return;
@@ -2028,6 +2044,8 @@ void AudioWidget::SetSelectedElementProperties()
         *val = GetValue(mUI.startTime);
     if (auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
         *val = GetValue(mUI.effect);
+    if (auto* val = item->GetArgValue<unsigned>("loops"))
+        *val = GetValue(mUI.loopCount);
 
     mScene->invalidate();
 }

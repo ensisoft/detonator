@@ -362,6 +362,9 @@ add_executable(GSEditor
     editor/gui/widgetstylewidget.h
     editor/gui/widgetstylewidget.ui
     editor/gui/widgetstylewidget.cpp
+    editor/gui/timewidget.h
+    editor/gui/timewidget.ui
+    editor/gui/timewidget.cpp
     editor/gui/utility.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc

@@ -137,6 +137,7 @@ namespace gui
         void on_delay_valueChanged(int);
         void on_startTime_valueChanged(int);
         void on_effect_currentIndexChanged(int);
+        void on_loopCount_valueChanged(int);
 
         void SceneSelectionChanged();
         void AddElementAction();

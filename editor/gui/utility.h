@@ -41,6 +41,7 @@
 #include "editor/app/format.h"
 #include "editor/app/resource.h"
 #include "editor/gui/gfxwidget.h"
+#include "editor/gui/timewidget.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -374,6 +375,12 @@ inline void SetValue(QLabel* label, const std::string& str)
     label->setText(app::FromUtf8(str));
 }
 
+inline void SetValue(gui::TimeWidget* time, unsigned value)
+{
+    QSignalBlocker s(time);
+    time->SetTime(value);
+}
+
 struct NormalizedFloat {
     float value = 0.0f;
     NormalizedFloat(float val) : value(val) {}
@@ -596,6 +603,8 @@ inline GroupboxValueGetter GetValue(const QGroupBox* box)
 { return GroupboxValueGetter { box }; }
 inline RadiobuttonGetter GetValue(const QRadioButton* button)
 { return RadiobuttonGetter { button }; }
+inline unsigned GetValue(const gui::TimeWidget* time)
+{ return time->GetTime(); }
 
 template<typename Widget, typename Value>
 void GetUIValue(Widget* widget, Value* out)
