@@ -58,6 +58,7 @@ namespace audio
         virtual size_t ReadFrames(float* ptr, size_t frames) override;
         virtual size_t ReadFrames(short* ptr, size_t frames) override;
         virtual size_t ReadFrames(int* ptr, size_t frames) override;
+        virtual void Reset() override;
 
         // Try to open the decoder based on the given IO device.
         // Returns true if successful. Errors are logged.

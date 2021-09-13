@@ -190,6 +190,12 @@ size_t Mpg123Decoder::ReadFrames(int* ptr, size_t frames)
     return ReadFrames<int>(ptr, frames);
 }
 
+void Mpg123Decoder::Reset()
+{
+    if (mpg123_seek_frame(mHandle, 0, SEEK_SET) != MPG123_OK)
+        throw std::runtime_error("mpg123_seek_frame failed");
+}
+
 bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
 {
     ASSERT(!mIsOpen);

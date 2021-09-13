@@ -325,7 +325,7 @@ private:
             }
             catch (const std::exception & e)
             {
-                ERROR("Audio stream '%1' play error (%2).", source_->GetName(), e.what());
+                ERROR("Audio stream '%1' error (%2).", source_->GetName(), e.what());
                 state_ = Stream::State::Error;
             }
         }
@@ -415,7 +415,7 @@ private:
             }
             catch (const std::exception & e)
             {
-                ERROR("Audio stream '%1' play error (%2).", source_->GetName(), e.what());
+                ERROR("Audio stream '%1' error (%2).", source_->GetName(), e.what());
                 state_ = Stream::State::Error;
             }
         }

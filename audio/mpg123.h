@@ -92,6 +92,7 @@ namespace audio
         virtual size_t ReadFrames(float* ptr, size_t frames) override;
         virtual size_t ReadFrames(short* ptr, size_t frames) override;
         virtual size_t ReadFrames(int* ptr, size_t frames) override;
+        virtual void Reset() override;
 
         bool Open(std::unique_ptr<Mpg123IODevice> io, SampleType format = SampleType::Int16);
     private:

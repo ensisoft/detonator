@@ -80,7 +80,17 @@ bool AudioFile::HasMore(std::uint64_t num_bytes_read) const noexcept
 
 bool AudioFile::Reset() noexcept
 {
-    return Open();
+    try
+    {
+        mDecoder->Reset();
+        mFrames = 0;
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Failed to reset audio decoder for looped playback.");
+        return false;
+    }
+    return true;
 }
 void AudioFile::Shutdown() noexcept
 {

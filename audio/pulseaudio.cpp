@@ -317,7 +317,7 @@ private:
             }
             catch (const std::exception& exception)
             {
-                ERROR("Audio source '%1' write error (%2).", source->GetName(), exception.what());
+                ERROR("Audio source '%1' error (%2).", source->GetName(), exception.what());
                 this_->state_ = State::Error;
             }
         }

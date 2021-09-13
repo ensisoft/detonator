@@ -35,10 +35,9 @@
 
 int main(int argc, char* argv[])
 {
-    std::string path(".");
-
     audio::Source::Format format = audio::Source::Format::Float32;
 
+    std::string file;
     unsigned loops = 1;
     bool mp3_files = false;
     bool ogg_files = false;
@@ -63,17 +62,17 @@ int main(int argc, char* argv[])
             sine = true;
         else if (!std::strcmp(argv[i], "--graph"))
             graph = true;
-        else if (!std::strcmp(argv[i], "--path"))
-            path = argv[++i];
         else if (!std::strcmp(argv[i], "--loops"))
             loops = std::stoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--int16"))
             format = audio::Source::Format::Int16;
         else if (!std::strcmp(argv[i], "--int32"))
             format = audio::Source::Format::Int32;
+        else if (!std::strcmp(argv[i], "--file"))
+            file = argv[++i];
     }
 
-    if (!(ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph))
+    if (!(ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph) && file.empty())
     {
         std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
@@ -83,7 +82,9 @@ int main(int argc, char* argv[])
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
             "\t--sine\t\tTest procedural audio (sine wave).\n"
-            "\t--graph\t\tTest audio graph.\n");
+            "\t--graph\t\tTest audio graph.\n"
+            "\t--loops\t\tNumber of loops to use to play each file.\n"
+            "\t--file\t\tA specific test file to add\n");
         std::printf("Have a good day.\n");
         return 0;
     }
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
         sine_format.channel_count = 1;
         sine_format.sample_rate   = 44100;
         auto* sine     = (*graph)->AddElement(audio::SineSource("sine", sine_format, 500, 5000));
-        auto* file     = (*graph)->AddElement(audio::FileSource("file", path + "/OGG/testshort.ogg",audio::SampleType::Float32));
+        auto* file     = (*graph)->AddElement(audio::FileSource("file", "OGG/testshort.ogg",audio::SampleType::Float32));
         auto* gain     = (*graph)->AddElement(audio::Gain("gain", 1.0f));
         auto* mixer    = (*graph)->AddElement(audio::Mixer("mixer", 2));
         auto* splitter = (*graph)->AddElement(audio::StereoSplitter("split"));
@@ -145,85 +146,86 @@ int main(int argc, char* argv[])
     }
 
     std::vector<std::string> test_files;
+    if (!file.empty())
+        test_files.push_back(file);
+
     if (ogg_files)
     {
         // https://github.com/UniversityRadioYork/ury-playd/issues/111
-        test_files.push_back("/OGG/testshort.ogg");
-        test_files.push_back("/OGG/a2002011001-e02-128k.ogg");
-        test_files.push_back("/OGG/a2002011001-e02-32k.ogg");
-        test_files.push_back("/OGG/a2002011001-e02-64k.ogg");
-        test_files.push_back("/OGG/a2002011001-e02-96k.ogg");
+        test_files.push_back("OGG/testshort.ogg");
+        test_files.push_back("OGG/a2002011001-e02-128k.ogg");
+        test_files.push_back("OGG/a2002011001-e02-32k.ogg");
+        test_files.push_back("OGG/a2002011001-e02-64k.ogg");
+        test_files.push_back("OGG/a2002011001-e02-96k.ogg");
     }
     if (mp3_files)
     {
-        test_files.push_back("/MP3/Kalimba_short.mp3");
+        test_files.push_back("MP3/Kalimba_short.mp3");
     }
     if (pcm_8bit_files)
     {
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm mono 8 bit 8kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 8 bit/pcm stereo 8 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 8kHz.wav");
     }
 
     if (pcm_16bit_files)
     {
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm mono 16 bit 8kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 16 bit/pcm stereo 16 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 8kHz.wav");
     }
 
     if (pcm_24bit_files)
     {
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 88.2kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 8kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm mono 24 bit 96kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 11025Hz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 16kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 22050Hz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 32kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 44.1kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 48kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 88.2kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 8kHz.wav");
-        test_files.push_back("/WAV/PCM 24 bit/pcm stereo 24 bit 96kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 88.2kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 96kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 11025Hz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 16kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 22050Hz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 32kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 44.1kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 48kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 88.2kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 8kHz.wav");
+        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 96kHz.wav");
     }
-    
 
     for (const auto& file : test_files)
     {
-        const auto& filename = path + file;
-        INFO("Testing: '%1'", filename);
+        INFO("Testing: '%1'", file);
         base::FlushGlobalLog();
 
-        auto source = std::make_unique<audio::AudioFile>(filename, "test", format);
+        auto source = std::make_unique<audio::AudioFile>(file, "test", format);
         source->Open();
 
         const auto looping = loops > 1;

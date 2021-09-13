@@ -63,6 +63,9 @@ size_t SndFileDecoder::ReadFrames(short* ptr, size_t frames)
 size_t SndFileDecoder::ReadFrames(int* ptr, size_t frames)
 { return sf_readf_int(mFile, ptr, frames); }
 
+void SndFileDecoder::Reset()
+{ sf_seek(mFile, 0, SEEK_SET); }
+
 bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
 {
     ASSERT(mDevice == nullptr);
