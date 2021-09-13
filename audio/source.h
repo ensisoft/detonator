@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <optional>
 
 #if defined(AUDIO_ENABLE_TEST_SOUND)
 #  include "base/math.h"
@@ -71,9 +72,6 @@ namespace audio
         // num bytes is the current number of PCM data (in bytes)
         // extracted and played back from the source.
         virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept = 0;
-        // Reset the sample for looped playback, i.e. possibly rewind
-        // to the start of the data. Should return true on success.
-        virtual bool Reset() noexcept = 0;
         // Shutdown the source when playback is finished and the source
         // will no longer be used for playback. (I.e. there will be no
         // more calls to FillBuffer or HasMore)
@@ -124,20 +122,24 @@ namespace audio
         // Returns true if there's more audio data available
         // or false if the source has been depleted.
         virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
-        // Reset the sample for looped playback, i.e. possibly rewind
-        // to the start of the data.
-        virtual bool Reset() noexcept override;
         // Shutdown.
         virtual void Shutdown() noexcept override;
         // Try to open the audio file for reading. Returns true if
         // successful otherwise false and error is logged.
         bool Open();
+
+        // Set the number of loops (the number of times) the file is
+        // to be played. pass 0 for "infinite" looping.
+        void SetLoopCount(unsigned count)
+        { mLoopCount = count; }
     private:
         const std::string mFilename;
         const std::string mName;
         const Format mFormat = Format::Float32;
         std::unique_ptr<Decoder> mDecoder;
         std::size_t mFrames = 0;
+        unsigned mLoopCount = 1;
+        unsigned mPlayCount = 0;
     };
 
 #ifdef AUDIO_ENABLE_TEST_SOUND
@@ -190,8 +192,6 @@ namespace audio
             const auto millis  = seconds * 1000.0f;
             return millis < mDuration;
         }
-        virtual bool Reset() noexcept override
-        { return true; /* intentionally empty */ }
         virtual void Shutdown() noexcept override
         { /* intentionally empty */ }
     private:

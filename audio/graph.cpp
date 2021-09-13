@@ -872,12 +872,7 @@ bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
     return mPendingBuffer || !mGraph.IsSourceDone();
 }
-bool AudioGraph::Reset() noexcept
-{
-    // todo:
-    BUG("Unimplemented function.");
-    return false;
-}
+
 void AudioGraph::Shutdown() noexcept
 {
     mGraph.Shutdown();

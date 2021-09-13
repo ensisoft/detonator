@@ -61,9 +61,6 @@ public:
         DEBUG("HasNextBuffer: %1", ret);
         return ret;
     }
-
-    virtual bool Reset() noexcept override
-    { return true; }
     virtual void Shutdown() noexcept override
     {}
     virtual void RecvCommand(std::unique_ptr<audio::Command>) noexcept override

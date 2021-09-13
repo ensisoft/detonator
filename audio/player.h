@@ -58,8 +58,6 @@ namespace audio
             std::size_t id = 0;
             // what was the result
             TrackStatus status = TrackStatus::Success;
-            // whether set to looping or not
-            bool looping = false;
         };
 
         // Audio source progress event. This is only generated
@@ -94,7 +92,7 @@ namespace audio
         // Play the audio samples sourced from the source object.
         // Returns an identifier for the audio stream that can then be used
         // to control the playback in call to pause/resume/send command.
-        std::size_t Play(std::unique_ptr<Source> source, bool looping = false);
+        std::size_t Play(std::unique_ptr<Source> source);
 
         // Pause the audio stream identified by id. 
         void Pause(std::size_t id);

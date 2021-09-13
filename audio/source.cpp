@@ -72,26 +72,30 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     if (ret != frames_to_read)
         WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames_to_read);
     mFrames += ret;
+
+    if (mFrames == mDecoder->GetNumFrames())
+    {
+        if (++mPlayCount != mLoopCount)
+        {
+            mDecoder->Reset();
+            mFrames = 0;
+            DEBUG("Audio file '%1' reset for looped playback (#%2).", mFilename, mPlayCount+1);
+        }
+    }
     return ret * frame_size;
 }
 
 bool AudioFile::HasMore(std::uint64_t num_bytes_read) const noexcept
-{ return mFrames < mDecoder->GetNumFrames(); }
-
-bool AudioFile::Reset() noexcept
 {
-    try
-    {
-        mDecoder->Reset();
-        mFrames = 0;
-    }
-    catch (const std::exception& e)
-    {
-        ERROR("Failed to reset audio decoder for looped playback.");
-        return false;
-    }
-    return true;
+    if (mFrames < mDecoder->GetNumFrames())
+        return true;
+
+    if (mPlayCount < mLoopCount)
+        return true;
+
+    return false;
 }
+
 void AudioFile::Shutdown() noexcept
 {
     mDecoder.reset();

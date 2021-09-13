@@ -62,14 +62,13 @@ Player::~Player()
     thread_->join();
 }
 
-std::size_t Player::Play(std::unique_ptr<Source> source, bool looping)
+std::size_t Player::Play(std::unique_ptr<Source> source)
 {
     const auto id = trackid_;
 
     EnqueueCmd cmd;
     cmd.source   = std::move(source);
     cmd.paused   = false; // todo: take as param
-    cmd.looping  = looping;
     auto cmd_ptr = MakeCommand(std::move(cmd));
 
     Action action;
@@ -139,7 +138,6 @@ void Player::AudioThreadLoop(Device* ptr)
     struct Track {
         std::size_t id = 0;
         std::shared_ptr<Stream> stream;
-        bool looping = false;
         bool paused  = false;
     };
     std::list<Track> playing;    // currently playing tracks
@@ -162,7 +160,6 @@ void Player::AudioThreadLoop(Device* ptr)
                 {
                     SourceCompleteEvent event;
                     event.id      = track_action.track_id;
-                    event.looping = enqueue_cmd->looping;
                     event.status  = TrackStatus::Failure;
                     std::lock_guard<std::mutex> lock(event_mutex_);
                     events_.push(std::move(event));
@@ -171,7 +168,6 @@ void Player::AudioThreadLoop(Device* ptr)
                 {
                     Track item;
                     item.id      = track_action.track_id;
-                    item.looping = enqueue_cmd->looping;
                     item.paused  = false;
                     item.stream  = stream;
                     item.stream->Play();
@@ -223,7 +219,7 @@ void Player::AudioThreadLoop(Device* ptr)
         for (auto it = std::begin(playing); it != std::end(playing);)
         {
             auto& track = *it;
-            // propagate events
+            // propagate events from the stream/source if any.
             while (auto event = track.stream->GetEvent())
             {
                 SourceEvent ev;
@@ -237,35 +233,16 @@ void Player::AudioThreadLoop(Device* ptr)
             if (state == Stream::State::Complete || state == Stream::State::Error)
             {
                 auto source = track.stream->GetFinishedSource();
-                if (state == Stream::State::Complete && track.looping)
-                {
-                    if (source->Reset())
-                    {
-                        DEBUG("Looping track %1", track.id);
-                        track.stream = dev->Prepare(std::move(source));
-                        track.stream->Play();
-                    }
-                    else
-                    {
-                        ERROR("Track %1 ('%2') failed to reset. Can't replay.", track.id, source->GetName());
-                        track.looping = false;
-                    }
-                }
                 // generate a track completion event
                 SourceCompleteEvent event;
                 event.id      = track.id;
-                event.looping = track.looping;
-                event.status  = state == Stream::State::Complete ? TrackStatus::Success
-                                                                 : TrackStatus::Failure;
-                {
-                    std::lock_guard<std::mutex> lock(event_mutex_);
-                    events_.push(std::move(event));
-                }
-                if (!track.looping)
-                {
-                    source->Shutdown();
-                    it = playing.erase(it);
-                }
+                event.status  = state == Stream::State::Complete
+                                ? TrackStatus::Success
+                                : TrackStatus::Failure;
+                std::lock_guard<std::mutex> lock(event_mutex_);
+                events_.push(std::move(event));
+                source->Shutdown();
+                it = playing.erase(it);
             }
             else it++;
         }

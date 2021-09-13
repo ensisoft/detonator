@@ -333,7 +333,6 @@ namespace audio
         virtual std::string GetName() const noexcept override;
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
         virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
-        virtual bool Reset() noexcept override;
         virtual void Shutdown() noexcept override;
         virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
         virtual std::unique_ptr<Event> GetEvent() noexcept override;

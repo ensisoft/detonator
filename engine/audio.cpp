@@ -98,8 +98,8 @@ void AudioEngine::Start()
     auto device = audio::Device::Create(mName.c_str());
     device->SetBufferSize(mBufferSize);
     mPlayer = std::make_unique<audio::Player>(std::move(device));
-    mEffectGraphId = mPlayer->Play(std::move(effect_graph), false /* looping */);
-    mMusicGraphId  = mPlayer->Play(std::move(music_graph), false /*looping*/);
+    mEffectGraphId = mPlayer->Play(std::move(effect_graph));
+    mMusicGraphId  = mPlayer->Play(std::move(music_graph));
     DEBUG("Audio effect graph playing with stream id '%1'.", mEffectGraphId);
     DEBUG("Audio music graph playing with stream id '%1'.", mMusicGraphId);
 }

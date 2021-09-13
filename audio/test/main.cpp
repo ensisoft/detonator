@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     if (sine)
     {
         auto source = std::make_unique<audio::SineGenerator>(500, format);
-        const auto id = player.Play(std::move(source), false);
+        const auto id = player.Play(std::move(source));
         DEBUG("New sine wave stream = %1", id);        
         INFO("Playing procedural sine audio for 10 seconds.");
         std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
         for (const auto& str : desc)
             DEBUG(str);
 
-        const auto id = player.Play(std::move(graph), false);
+        const auto id = player.Play(std::move(graph));
         std::this_thread::sleep_for(std::chrono::seconds(10));
         player.Cancel(id);
     }
@@ -226,29 +226,29 @@ int main(int argc, char* argv[])
         base::FlushGlobalLog();
 
         auto source = std::make_unique<audio::AudioFile>(file, "test", format);
-        source->Open();
+        if (!source->Open())
+        {
+            ERROR("Failed to open '%1'.", file);
+            continue;
+        }
+        source->SetLoopCount(loops);
+        const auto id = player.Play(std::move(source));
+        DEBUG("New audio track (ID=%1).", id);
 
-        const auto looping = loops > 1;
-        const auto id = player.Play(std::move(source), looping);
-        DEBUG("New track. id = %1", id);
-
-        unsigned completed_loop_count = 0;
-        while (completed_loop_count != loops)
+        bool track_done = false;
+        while (!track_done)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             audio::Player::Event e;
-            if (player.GetEvent(&e))
-            {
-                if (std::holds_alternative<audio::Player::SourceCompleteEvent>(e))
-                {
-                    const auto& track_event = std::get<audio::Player::SourceCompleteEvent>(e);
-                    INFO("Track id %1 status event %2", track_event.id, track_event.status);
-                    completed_loop_count++;
-                }
-            }
+            if (!player.GetEvent(&e))
+                continue;
+            else if (!std::holds_alternative<audio::Player::SourceCompleteEvent>(e))
+                continue;
+
+            const auto& track_event = std::get<audio::Player::SourceCompleteEvent>(e);
+            INFO("Audio track (ID=%1) status event %2.", track_event.id, track_event.status);
+            track_done = true;
         }
-        if (looping)
-            player.Cancel(id);
     }
     return 0;
 }   
