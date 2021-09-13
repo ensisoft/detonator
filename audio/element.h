@@ -680,11 +680,13 @@ namespace audio
     public:
         FileSource(const std::string& name,
                    const std::string& file,
-                   SampleType type = SampleType::Int16);
+                   SampleType type = SampleType::Int16,
+                   unsigned loops = 1);
         FileSource(const std::string& name,
                    const std::string& id,
                    const std::string& file,
-                   SampleType type = SampleType::Int16);
+                   SampleType type = SampleType::Int16,
+                   unsigned loops = 1);
         FileSource(FileSource&& other);
        ~FileSource();
         virtual std::string GetId() const override
@@ -706,6 +708,10 @@ namespace audio
             if (index == 0) return mPort;
             BUG("No such output port.");
         }
+        void SetFileName(const std::string& file)
+        { mFile = file; }
+        void SetLoopCount(unsigned count)
+        { mLoopCount = count; }
 
         struct FileInfo {
             unsigned channels    = 0;
@@ -717,11 +723,13 @@ namespace audio
     private:
         const std::string mName;
         const std::string mId;
-        const std::string mFile;
+        std::string mFile;
         std::unique_ptr<Decoder> mDecoder;
         SingleSlotPort mPort;
         Format mFormat;
         unsigned mFramesRead = 0;
+        unsigned mPlayCount  = 0;
+        unsigned mLoopCount  = 1;
     };
 
     class BufferSource : public Element

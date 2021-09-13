@@ -858,20 +858,22 @@ void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milli
     mOut.PushBuffer(out_buffer);
 }
 
-FileSource::FileSource(const std::string& name, const std::string& file, SampleType type)
+FileSource::FileSource(const std::string& name, const std::string& file, SampleType type, unsigned loops)
   : mName(name)
   , mId(base::RandomString(10))
   , mFile(file)
   , mPort("out")
+  , mLoopCount(loops)
 {
     mFormat.sample_type = type;
 }
 
-FileSource::FileSource(const std::string& name, const std::string& id, const std::string& file, SampleType type)
+FileSource::FileSource(const std::string& name, const std::string& id, const std::string& file, SampleType type, unsigned loops)
   : mName(name)
   , mId(id)
   , mFile(file)
   , mPort("out")
+  , mLoopCount(loops)
 {
     mFormat.sample_type = type;
 }
@@ -958,7 +960,14 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
 
     mFramesRead += ret;
     if (mFramesRead == frames_available)
-        DEBUG("File source is done. %1 frames read.", mFramesRead);
+    {
+        if (++mPlayCount != mLoopCount)
+        {
+            mDecoder->Reset();
+            mFramesRead = 0;
+            DEBUG("File source reset for looped playback (#%1).", mPlayCount+1);
+        }
+    }
 
     mPort.PushBuffer(buffer);
 }
@@ -1632,8 +1641,9 @@ const ElementDesc* FindElementDesc(const std::string& type)
         }
         {
             ElementDesc file;
-            file.args["file"] = std::string();
-            file.args["type"] = audio::SampleType::Float32;
+            file.args["file"]  = std::string();
+            file.args["type"]  = audio::SampleType::Float32;
+            file.args["loops"] = 1u;
             file.output_ports.push_back({"out"});
             map["FileSource"] = file;
         }
@@ -1739,7 +1749,8 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     else if (desc.type == "FileSource")
         return Construct<FileSource>(desc.name, desc.id,
             GetArg<std::string>(args, "file", name),
-            GetArg<SampleType>(args, "type", name));
+            GetArg<SampleType>(args, "type", name),
+            GetArg<unsigned>(args, "loops", name));
     else if (desc.type == "ZeroSource")
         return Construct<ZeroSource>(desc.name, desc.id,
             GetArg<Format>(args, "format", name));
