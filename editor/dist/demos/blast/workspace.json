@@ -67,6 +67,8 @@
     "5LKG2wBRGq": {
         "checked_for_packing": true
     },
+    "5YQ8ZqObX7": {
+    },
     "7AdsZqt5pg": {
         "checked_for_packing": true
     },
@@ -83,6 +85,17 @@
         "use_init_rect": true,
         "use_lifetime": true,
         "use_size_derivatives": true
+    },
+    "9o7zbhlIlp": {
+        "material": "5YQ8ZqObX7",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "use_alpha_derivatives": false,
+        "use_direction_sector": true,
+        "use_init_rect": true,
+        "use_lifetime": false,
+        "use_size_derivatives": false
     },
     "A7Z5jfJF38": {
         "checked_for_packing": true,
@@ -153,6 +166,8 @@
     },
     "UWF4u1fYHa": {
     },
+    "XExwRNFj8H": {
+    },
     "XKQ1uRt5ij": {
         "checked_for_packing": true,
         "material": "HyJsrevpdz",
@@ -166,7 +181,6 @@
         "use_size_derivatives": false
     },
     "Z2zrRug3HP": {
-        "checked_for_packing": true
     },
     "asMmhdCBBw": {
         "elem_pmax6QpW2W_pos_x": -587,

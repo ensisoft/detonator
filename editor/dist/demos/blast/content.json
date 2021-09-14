@@ -2228,6 +2228,73 @@
       "resource_id": "NtNnX1kgNp",
       "resource_name": "Mine Status",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "XExwRNFj8H",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Stars",
+      "nodes": [
+        {
+          "class": "QxJjKiAP7G",
+          "drawable_item": {
+            "drawable": "9o7zbhlIlp",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "5YQ8ZqObX7",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 1.5707963705062866,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 876.949951171875,
+            "y": 1352.576416015625
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "QxJjKiAP7G"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "XExwRNFj8H",
+      "resource_name": "Stars",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -3566,6 +3633,50 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
+      "id": "5YQ8ZqObX7",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "5YQ8ZqObX7",
+      "resource_name": "Round Particle",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/RoundParticle.png",
+        "id": "Y6tN5Yy5IM",
+        "name": "RoundParticle",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "particles": [
@@ -3700,6 +3811,39 @@
       "num_particles": 500.0,
       "resource_id": "8exJylNDfi",
       "resource_name": "Shockwave"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Wrap",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "9o7zbhlIlp",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 3.4028234663852886e+38,
+      "max_point_size": 10.0,
+      "max_velocity": 1.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 3.4028234663852886e+38,
+      "min_point_size": 1.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "resource_id": "9o7zbhlIlp",
+      "resource_name": "Stars"
     }
   ],
   "scenes": [
@@ -3854,6 +3998,43 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "XExwRNFj8H",
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "RHO6B0Pdke",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Stars_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -3876,6 +4057,11 @@
           {
             "node": {
               "id": "NwiDBuIzNw"
+            }
+          },
+          {
+            "node": {
+              "id": "RHO6B0Pdke"
             }
           }
         ],
@@ -3925,6 +4111,43 @@
             "x": 2.0,
             "y": 2.0
           }
+        },
+        {
+          "entity": "XExwRNFj8H",
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "LSdE6iJi1w",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Stars_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -3932,6 +4155,11 @@
           {
             "node": {
               "id": "WYKWrRK5Fj"
+            }
+          },
+          {
+            "node": {
+              "id": "LSdE6iJi1w"
             }
           }
         ],
