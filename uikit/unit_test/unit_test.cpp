@@ -345,7 +345,22 @@ void unit_test_checkbox()
 {
     unit_test_widget<uik::CheckBox>();
 
-    // todo:
+    // bug.
+    {
+        uik::CheckBox chk;
+        chk.SetChecked(true);
+        chk.SetName("check");
+        chk.SetCheckLocation(uik::CheckBox::Check::Right);
+        data::JsonObject json;
+        chk.IntoJson(json);
+
+        uik::CheckBox other;
+        other.FromJson(json);
+        TEST_REQUIRE(other.GetHash() == chk.GetHash());
+        TEST_REQUIRE(other.IsChecked());
+        TEST_REQUIRE(other.GetCheckLocation() == uik::CheckBox::Check::Right);
+    }
+
 }
 
 void unit_test_groupbox()

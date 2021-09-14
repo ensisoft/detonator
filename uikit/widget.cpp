@@ -514,6 +514,7 @@ size_t CheckBoxModel::GetHash(size_t hash) const
 {
     hash = base::hash_combine(hash, mText);
     hash = base::hash_combine(hash, mChecked);
+    hash = base::hash_combine(hash, mCheck);
     return hash;
 }
 
@@ -548,11 +549,13 @@ void CheckBoxModel::IntoJson(data::Writer& data) const
 {
     data.Write("text", mText);
     data.Write("checked", mChecked);
+    data.Write("check", mCheck);
 }
 bool CheckBoxModel::FromJson(const data::Reader& data)
 {
     if (!data.Read("text", &mText) ||
-        !data.Read("checked", &mChecked))
+        !data.Read("checked", &mChecked) ||
+        !data.Read("check", &mCheck))
         return false;
     return true;
 }
