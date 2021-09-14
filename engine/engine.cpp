@@ -734,6 +734,8 @@ private:
     }
     void StopGame()
     {
+        if (!mScene)
+            return;
         mGame->EndPlay(mScene.get());
         mScripting->EndPlay(mScene.get());
         mScene.reset();
