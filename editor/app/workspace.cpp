@@ -1085,11 +1085,12 @@ QString Workspace::MapFileToFilesystem(const std::string& uri) const
 }
 
 template<typename ClassType>
-void LoadResources(const char* type,
+bool LoadResources(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<Resource>>& vector)
 {
     DEBUG("Loading %1", type);
+    bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
         const auto& chunk = data.GetReadChunk(type, i);
@@ -1099,25 +1100,29 @@ void LoadResources(const char* type,
             !chunk->Read("resource_id", &id))
         {
             ERROR("Unexpected JSON. Maybe old workspace version?");
+            success = false;
             continue;
         }
         std::optional<ClassType> ret = ClassType::FromJson(*chunk);
         if (!ret.has_value())
         {
             ERROR("Failed to load resource '%1'", name);
+            success = false;
             continue;
         }
         vector.push_back(std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name)));
         DEBUG("Loaded resource '%1'", name);
     }
+    return success;
 }
 
 template<typename ClassType>
-void LoadMaterials(const char* type,
+bool LoadMaterials(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<Resource>>& vector)
 {
     DEBUG("Loading %1", type);
+    bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
         const auto& chunk = data.GetReadChunk(type, i);
@@ -1127,18 +1132,20 @@ void LoadMaterials(const char* type,
             !chunk->Read("resource_id", &id))
         {
             ERROR("Unexpected JSON. Maybe old workspace version?");
+            success = false;
             continue;
         }
         auto ret = ClassType::FromJson(*chunk);
         if (!ret)
         {
             ERROR("Failed to load resource '%1'", name);
+            success = false;
             continue;
         }
-        //vector.push_back(std::make_unique<GameResource<ClassType>>(std::move(ret), FromUtf8(name)));
         vector.push_back(std::make_unique<MaterialResource>(std::move(ret), FromUtf8(name)));
         DEBUG("Loaded resource '%1'", name);
     }
+    return success;
 }
 
 bool Workspace::LoadContent(const QString& filename)
@@ -1823,6 +1830,49 @@ void Workspace::DuplicateResources(std::vector<size_t> indices)
 void Workspace::DuplicateResource(size_t index)
 {
     DuplicateResources(std::vector<size_t>{index});
+}
+
+bool Workspace::ExportResources(const QModelIndexList& list, const QString& filename) const
+{
+    data::JsonObject json;
+    for (int i=0; i<list.size(); ++i)
+    {
+        const auto& resource = GetResource(list[i].row());
+        resource.Serialize(json);
+    }
+    data::JsonFile file;
+    file.SetRootObject(json);
+    const auto [success, error] = file.Save(app::ToUtf8(filename));
+    if (!success)
+        ERROR("Export resource as JSON error '%1'.", error);
+    else INFO("Exported %1 resource(s) into '%2'", list.size(), filename);
+    return success;
+}
+
+// static
+bool Workspace::ImportResources(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources)
+{
+    data::JsonFile file;
+    auto [success, error] = file.Load(ToUtf8(filename));
+    if (!success)
+    {
+        ERROR("Import resource as JSON error '%1'.", error);
+        return false;
+    }
+    data::JsonObject root = file.GetRootObject();
+
+    success = true;
+    success = success && LoadMaterials<gfx::MaterialClass>("materials", root, resources);
+    success = success && LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, resources);
+    success = success && LoadResources<gfx::PolygonClass>("shapes", root, resources);
+    success = success && LoadResources<game::EntityClass>("entities", root, resources);
+    success = success && LoadResources<game::SceneClass>("scenes", root, resources);
+    success = success && LoadResources<Script>("scripts", root, resources);
+    success = success && LoadResources<DataFile>("data_files", root, resources);
+    success = success && LoadResources<audio::GraphClass>("audio_graphs", root, resources);
+    success = success && LoadResources<uik::Window>("uis", root, resources);
+    DEBUG("Loaded %1 resources from '%2'.", resources.size(), filename);
+    return success;
 }
 
 void Workspace::ImportFilesAsResource(const QStringList& files)

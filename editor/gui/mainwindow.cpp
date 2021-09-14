@@ -1128,16 +1128,7 @@ void MainWindow::on_actionExportJSON_triggered()
     if (filename.isEmpty())
         return;
 
-    data::JsonObject json;
-    for (int i=0; i<indices.size(); ++i)
-    {
-        const auto& resource = mWorkspace->GetResource(indices[i].row());
-        resource.Serialize(json);
-    }
-    data::JsonFile file;
-    file.SetRootObject(json);
-    const auto [ok, error] = file.Save(app::ToUtf8(filename));
-    if (!ok)
+    if (!mWorkspace->ExportResources(indices, filename))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1145,9 +1136,52 @@ void MainWindow::on_actionExportJSON_triggered()
         msg.setText(tr("Failed to export the JSON into file.\n"
                        "Please see the log for details."));
         msg.exec();
+        return;
     }
-    INFO("Exported %1 resource(s) into '%2'", indices.size(), filename);
     NOTE("Exported %1 resource(s) into '%2'", indices.size(), filename);
+}
+
+void MainWindow::on_actionImportJSON_triggered()
+{
+    if (!mWorkspace)
+        return;
+    const auto& filename = QFileDialog::getOpenFileName(this,
+        tr("Import Resources from Json"),
+        QString(), tr("JSON (*.json)"));
+    if (filename.isEmpty())
+        return;
+
+    std::vector<std::unique_ptr<app::Resource>> resources;
+    if (!app::Workspace::ImportResources(filename, resources))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to import the resources from JSON.\n"
+                       "Please see the log for details."));
+        msg.exec();
+        return;
+    }
+
+    std::size_t import_count = 0;
+
+    for (const auto& resource : resources)
+    {
+        if (const auto* previous = mWorkspace->FindResourceById(resource->GetId()))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msg.setText(tr("A resource with this ID (%1, '%2') already exists in the workspace.\n"
+                           "Overwrite resource?").arg(previous->GetId()).arg(previous->GetName()));
+            if (msg.exec() == QMessageBox::No)
+                continue;
+        }
+        mWorkspace->SaveResource(*resource);
+        ++import_count;
+    }
+    if (import_count)
+        NOTE("Imported %1 resources into workspace.", import_count);
 }
 
 void MainWindow::on_actionEditResource_triggered()
@@ -1471,6 +1505,9 @@ void MainWindow::on_eventlist_customContextMenuRequested(QPoint point)
 
 void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 {
+    if (!mWorkspace)
+        return;
+
     const auto& indices = mUI.workspace->selectionModel()->selectedRows();
     mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
     mUI.actionDuplicateResource->setEnabled(!indices.isEmpty());
@@ -1478,6 +1515,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
     mUI.actionExportJSON->setEnabled(!indices.isEmpty());
+    mUI.actionImportJSON->setEnabled(mWorkspace != nullptr);
     mUI.actionRenameResource->setEnabled(!indices.empty());
 
     // disable edit actions if a non-native resources have been
@@ -1530,6 +1568,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionDuplicateResource);
     menu.addAction(mUI.actionDeleteResource);
     menu.addAction(mUI.actionExportJSON);
+    menu.addAction(mUI.actionImportJSON);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());

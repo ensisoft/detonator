@@ -274,6 +274,11 @@ namespace app
         void DuplicateResources(std::vector<size_t> indices);
         void DuplicateResource(size_t index);
 
+        bool ExportResources(const QModelIndexList& list, const QString& filename) const;
+
+        static
+        bool ImportResources(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources);
+
         // Import and create new resource based on a file.
         // Currently supports creating material resources out of
         // images (.jpeg and .png) files

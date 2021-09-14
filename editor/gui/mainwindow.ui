@@ -1682,6 +1682,18 @@
     <string>Rename selected resources</string>
    </property>
   </action>
+  <action name="actionImportJSON">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import Json</string>
+   </property>
+   <property name="toolTip">
+    <string>Import resources from JSON</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>statTime</tabstop>

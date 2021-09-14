@@ -116,6 +116,7 @@ namespace gui
         void on_actionNewAudioGraph_triggered();
         void on_actionImportFiles_triggered();
         void on_actionExportJSON_triggered();
+        void on_actionImportJSON_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();
