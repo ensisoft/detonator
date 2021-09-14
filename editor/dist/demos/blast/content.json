@@ -4345,8 +4345,8 @@
                   "line_height": 1.0,
                   "name": "Label_2",
                   "position": {
-                    "x": 152.0,
-                    "y": 151.0
+                    "x": 150.0,
+                    "y": 100.0
                   },
                   "size": {
                     "h": 100.0,
@@ -4367,7 +4367,7 @@
                   "name": "Label_3",
                   "position": {
                     "x": 950.0,
-                    "y": 150.0
+                    "y": 100.0
                   },
                   "size": {
                     "h": 100.0,
@@ -4396,6 +4396,27 @@
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "text": "GAME OVER",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "H3p8Q7ShDR",
+                  "line_height": 1.2000000476837158,
+                  "name": "Label_4",
+                  "position": {
+                    "x": 300.0,
+                    "y": 400.0
+                  },
+                  "size": {
+                    "h": 299.0,
+                    "w": 602.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
+                  "text": "GAMESTUDIO by Sami Väisänen\n\nGraphics by UnLuckY Studio\n\nMusic by Juhani Junkala",
                   "type": "Label"
                 }
               ]
@@ -4483,8 +4504,8 @@
                   "line_height": 1.0,
                   "name": "Label_2",
                   "position": {
-                    "x": 152.0,
-                    "y": 151.0
+                    "x": 150.0,
+                    "y": 100.0
                   },
                   "size": {
                     "h": 100.0,
@@ -4505,7 +4526,7 @@
                   "name": "Label_3",
                   "position": {
                     "x": 950.0,
-                    "y": 150.0
+                    "y": 100.0
                   },
                   "size": {
                     "h": 100.0,
