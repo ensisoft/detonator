@@ -320,7 +320,7 @@ void Window::Style(Painter& painter) const
     {
         const auto& style = widget->GetStyleString();
         if (style.empty())
-            return;
+            continue;
         painter.ParseStyle(widget->GetId(), style);
     }
 }

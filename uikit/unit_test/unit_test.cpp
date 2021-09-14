@@ -41,6 +41,11 @@ public:
         PaintStruct ps;
     };
     mutable std::vector<Command> cmds;
+    struct StyleInfo {
+        std::string widget;
+        std::string style;
+    };
+    mutable std::vector<StyleInfo> styles;
 
     void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override
     {
@@ -83,7 +88,13 @@ public:
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override
     {}
     bool ParseStyle(const WidgetId& id, const std::string& style) override
-    { return true; }
+    {
+        StyleInfo s;
+        s.widget = id;
+        s.style  = style;
+        styles.push_back(std::move(s));
+        return true;
+    }
 private:
 };
 
@@ -728,6 +739,35 @@ void unit_test_util()
     TEST_REQUIRE(spin == nullptr);
 }
 
+void unit_test_apply_style()
+{
+    uik::Window win;
+
+    {
+        uik::Label lbl;
+        lbl.SetStyleString("label style");
+        win.AddWidget(lbl);
+    }
+    {
+        uik::CheckBox chk;
+        chk.SetStyleString("check style");
+        win.AddWidget(chk);
+    }
+    {
+        uik::PushButton btn;
+        btn.SetStyleString("button style");
+        win.AddWidget(btn);
+    }
+
+    Painter p;
+    win.Style(p);
+
+    TEST_REQUIRE(p.styles.size() == 3);
+    TEST_REQUIRE(p.styles[0].style == "label style");
+    TEST_REQUIRE(p.styles[1].style == "check style");
+    TEST_REQUIRE(p.styles[2].style == "button style");
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_label();
@@ -739,5 +779,6 @@ int test_main(int argc, char* argv[])
     unit_test_window_mouse();
     unit_test_window_transforms();
     unit_test_util();
+    unit_test_apply_style();
     return 0;
 }
