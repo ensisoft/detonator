@@ -125,9 +125,9 @@ public:
 
         if (track.empty()) return;
         const auto& name = base::ToString(key.symbol);
-        mEngine->AddMusicGraph(BuildMusicGraph(name, track));
+        mEngine->AddMusic(BuildMusicGraph(name, track));
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
-        mEngine->PlayMusic(name);
+        mEngine->ResumeMusic(name);
     }
     virtual std::ifstream OpenStream(const std::string& file) const override
     { return base::OpenBinaryInputStream(file); }

@@ -8,7 +8,7 @@ State = States.Menu
 function LoadGame()
     Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-500.0, -800.0, 1000, 800))
-    Audio:PlayMusicGraph('MenuMusic')
+    Audio:PlayMusic('MenuMusic')
     Audio:SetMusicEffect('MenuMusic', 'FadeIn', 2000)
 end
 
@@ -25,8 +25,8 @@ end
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
     Game:OpenUI('MainMenu')
-    Audio:CancelMusicCmds('MenuMusic')
-    Audio:PlayMusicGraph('MenuMusic')
+    Audio:KillMusic('MenuMusic')
+    Audio:PlayMusic('MenuMusic')
     Audio:SetMusicEffect('MenuMusic', 'FadeIn', 2000)
 end
 

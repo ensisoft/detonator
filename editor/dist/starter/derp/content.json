@@ -4,6 +4,7 @@
       "elements": [
         {
           "arg_file": "ws://music/jump and run - tropics.ogg",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "NwwdP8ZHwL",
           "name": "FileSource",
@@ -27,6 +28,7 @@
         },
         {
           "arg_file": "ws://sounds/click.wav",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "qZy6ISYxl7",
           "name": "FileSource",
@@ -65,6 +67,7 @@
         },
         {
           "arg_file": "ws://sounds/qubodup-cfork-ccby3-jump.ogg",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "WK3PiWWhSR",
           "name": "FileSource",

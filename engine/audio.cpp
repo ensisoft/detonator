@@ -118,33 +118,33 @@ void AudioEngine::SetDebugPause(bool on_off)
     }
 }
 
-bool AudioEngine::AddMusicGraph(const GraphHandle& handle)
+bool AudioEngine::AddMusic(const GraphHandle& graph)
 {
-    ASSERT(handle);
+    ASSERT(graph);
 
-    auto graph = std::make_unique<audio::Graph>(handle);
-    if (!graph->Prepare(*mLoader))
+    auto instance = std::make_unique<audio::Graph>(graph);
+    if (!instance->Prepare(*mLoader))
         ERROR_RETURN(false, "Failed to prepare music audio graph.");
-    const auto& port = graph->GetOutputPort(0);
+    const auto& port = instance->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-        ERROR_RETURN(false, "Music audio graph '%1' has incompatible output PCM format '%2'.", handle->GetName(), port.GetFormat());
+        ERROR_RETURN(false, "Music audio graph '%1' has incompatible output PCM format '%2'.", graph->GetName(), port.GetFormat());
 
     audio::MixerSource::AddSourceCmd cmd;
-    cmd.src    = std::move(graph);
+    cmd.src    = std::move(instance);
     cmd.paused = true;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
     return true;
 }
 
-bool AudioEngine::PlayMusicGraph(const GraphHandle& handle)
+bool AudioEngine::PlayMusic(const GraphHandle& graph)
 {
-    if (!AddMusicGraph(handle))
+    if (!AddMusic(graph))
         return false;
-    PlayMusic(handle->GetName(), 0);
+    ResumeMusic(graph->GetName(), 0);
     return true;
 }
 
-void AudioEngine::PlayMusic(const std::string& track, unsigned when)
+void AudioEngine::ResumeMusic(const std::string& track, unsigned when)
 {
     audio::MixerSource::PauseSourceCmd cmd;
     cmd.name      = track;
@@ -262,10 +262,11 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, Au
     {
         AudioEvent ev;
         ev.track = done->src->GetName();
+        ev.type  = AudioEvent::Type::TrackDone;
         if (event.id == mMusicGraphId)
-            ev.type = AudioEvent::Type::MusicTrackDone;
+            ev.source = "music";
         else if (event.id == mEffectGraphId)
-            ev.type = AudioEvent::Type::SoundEffectDone;
+            ev.source = "effect";
         else BUG("Unexpected audio event id.");
 
         events->push_back(std::move(ev));

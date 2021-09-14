@@ -35,11 +35,11 @@ namespace engine
     // a separate file since scripting interface requires this.
     struct AudioEvent {
         enum class Type {
-            MusicTrackDone,
-            SoundEffectDone
+            TrackDone
         };
+        std::string source;
         std::string track;
-        Type type = Type::MusicTrackDone;
+        Type type = Type::TrackDone;
     };
 
     // AudioEngine is the audio part of the game engine. Currently it
@@ -81,16 +81,16 @@ namespace engine
         // Add a new audio graph for music playback.
         // The audio graph is initially only prepared and sent to the audio
         // player but set to paused state. In order to begin playing the track
-        // PlayMusic must be called separately.
+        // ResumeMusic must be called separately.
         // Returns false if the music graph could not be loaded.
-        bool AddMusicGraph(const GraphHandle& graph);
-        // Similar to AddMusicGraph except that also begins the audio graph
+        bool AddMusic(const GraphHandle& graph);
+        // Similar to AddMusic except that also begins the audio graph
         // playback immediately.
         // Returns false if the music graph could not be loaded.
-        bool PlayMusicGraph(const GraphHandle& graph);
-        // Schedule a command to start playing the named music track after
-        // 'when' milliseconds elapses.
-        void PlayMusic(const std::string& track, unsigned when = 0);
+        bool PlayMusic(const GraphHandle& graph);
+        // Schedule a command to start playing the named music track that
+        // has previously been paused after 'when' milliseconds elapses.
+        void ResumeMusic(const std::string& track, unsigned when = 0);
         // Schedule a command to pause the named music track after 'when' milliseconds elapses.
         // Note that this will not remove the music track from the mixer.
         void PauseMusic(const std::string& track, unsigned when = 0);
