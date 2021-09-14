@@ -4,6 +4,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Laser/Laser_09.mp3",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "XUF0N9uLfD",
           "name": "FileSource",
@@ -21,6 +22,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Menu_Select_00.mp3",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "AruPmKN2WY",
           "name": "FileSource",
@@ -44,6 +46,7 @@
         },
         {
           "arg_file": "ws://sounds/retro-action-sounds/missile_launch_2.ogg",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "pmax6QpW2W",
           "name": "FileSource",
@@ -70,6 +73,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/retro-action-sounds/bombexplosion.ogg",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "AjbLvZAh2J",
           "name": "bombexplosion",
@@ -1964,6 +1968,118 @@
       "resource_id": "5697MGBZ5q",
       "resource_name": "Player Exhaust",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "NtNnX1kgNp",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Mine Status",
+      "nodes": [
+        {
+          "class": "6FUm4sZ0NR",
+          "drawable_item": {
+            "drawable": "_circle",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "vg5yQskPIv",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -50.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.875,
+            "y": 39.25
+          }
+        },
+        {
+          "class": "oroPtAUiYl",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Text",
+          "position": {
+            "x": 50.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 26.0
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": true,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "ws://fonts/MAXI_L_S.TTF",
+            "font_size": 16,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "text": "Ready!",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.054901961237192154,
+              "g": 0.054901961237192154,
+              "r": 0.7019608020782471
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "6FUm4sZ0NR"
+            }
+          },
+          {
+            "node": {
+              "id": "oroPtAUiYl"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "NtNnX1kgNp",
+      "resource_name": "Mine Status",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -3546,7 +3662,44 @@
           "parent_render_tree_node": "",
           "position": {
             "x": -468.5714111328125,
-            "y": -362.85711669921875
+            "y": -360.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "NtNnX1kgNp",
+          "flag_set_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "NwiDBuIzNw",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Mine Status",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 420.0,
+            "y": -360.0
           },
           "rotation": 0.0,
           "scale": {
@@ -3570,6 +3723,11 @@
           {
             "node": {
               "id": "khKJrggLXs"
+            }
+          },
+          {
+            "node": {
+              "id": "NwiDBuIzNw"
             }
           }
         ],

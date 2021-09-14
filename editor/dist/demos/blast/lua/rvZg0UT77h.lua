@@ -6,6 +6,8 @@
 
 
 local time_to_fire_weapon = 0
+local mine_ready = true
+local mine_load_time = 0.0
 
 function FireWeapon(player, ammo_name)
     -- what's the current ship's weapon world position ?
@@ -61,6 +63,21 @@ end
 
 -- Called on every iteration of game loop.
 function Update(player, game_time, dt)
+    if mine_ready == false then 
+        local status = Scene:FindEntityByInstanceName('Mine Status')
+        local node   = status:FindNodeByClassName('Text')
+        local text   = node:GetTextItem()
+        text:SetText(string.format('%.2f', mine_load_time))
+        text:SetFlag('BlinkText', false)
+
+        mine_load_time = mine_load_time - dt
+        if mine_load_time <= 0.0 then 
+            mine_ready = true
+            text:SetText('Ready!')
+            text:SetFlag('BlinkText', true)
+        end
+    end
+
 
     if wdk.TestKeyDown(wdk.Keys.ArrowLeft) then
         if hori_velocity >= 0 then
@@ -126,14 +143,18 @@ function Update(player, game_time, dt)
     time_to_fire_weapon = time_to_fire_weapon - 1
 end
 
--- low frequency keyboard event callback hander.
+-- low frequency keyboard event callback handler.
 -- keeping the key pressed down will call repeatedly
 -- OnKeyDown followed by OnKeyUp until another key is
--- pressed at which point the keyevents for the original
+-- pressed at which point the key events for the original
 -- key combo stop arriving.
 function OnKeyDown(player, symbol, modifier_bits)
     if symbol == wdk.Keys.Key1 then
-        FireWeapon(player, 'RedMine')
+        if mine_ready then 
+            FireWeapon(player, 'RedMine')
+            mine_ready = false
+            mine_load_time = 5.0
+        end
     end
 end
 
