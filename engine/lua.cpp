@@ -1579,9 +1579,28 @@ void BindGameLib(sol::state& L)
                     throw std::runtime_error("No such audio graph: " + name);
                 return engine.PlayMusicGraph(klass);
             });
-    audio["PlayMusic"]      = &AudioEngine::PlayMusic;
-    audio["PauseMusic"]     = &AudioEngine::PauseMusic;
-    audio["KillMusic"]      = &AudioEngine::KillMusic;
+    audio["PlayMusic"] = sol::overload(
+            [](AudioEngine& engine, const std::string& track, unsigned when) {
+                engine.PlayMusic(track, when);
+            },
+            [](AudioEngine& engine, const std::string& track) {
+                engine.PlayMusic(track, 0);
+            });
+    audio["PauseMusic"] = sol::overload(
+            [](AudioEngine& engine, const std::string& track, unsigned when) {
+                engine.PauseMusic(track, when);
+            },
+            [](AudioEngine& engine, const std::string& track) {
+                engine.PauseMusic(track, 0);
+            });
+    audio["KillMusic"] = sol::overload(
+            [](AudioEngine& engine, const std::string& track, unsigned when) {
+                engine.KillMusic(track, when);
+            },
+            [](AudioEngine& engine, const std::string& track) {
+                engine.KillMusic(track, 0);
+            });
+
     audio["CancelMusicCmds"] = &AudioEngine::CancelMusicCmds;
     audio["SetMusicGain"]   = &AudioEngine::SetMusicGain;
     audio["SetMusicEffect"] = [](AudioEngine& engine,
