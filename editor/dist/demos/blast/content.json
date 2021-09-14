@@ -101,6 +101,154 @@
       "resource_name": "Mine Explosion",
       "src_elem_id": "0bDiXIAGRF",
       "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Title Screen.ogg",
+          "arg_loops": 0,
+          "arg_type": "Float32",
+          "id": "D79A5NORKR",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "0tJOf84hBU",
+      "name": "Menu Music",
+      "resource_id": "0tJOf84hBU",
+      "resource_name": "Menu Music",
+      "src_elem_id": "D79A5NORKR",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 3.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "KUf8FAknrd",
+          "name": "FileSource_2",
+          "type": "FileSource"
+        },
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 2.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "EEfBsJfH7U",
+          "name": "FileSource_1",
+          "type": "FileSource"
+        },
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 1.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "LoG45mUAF4",
+          "name": "FileSource",
+          "type": "FileSource"
+        },
+        {
+          "id": "R4vRj4xxUb",
+          "input_ports": [
+            {
+              "name": "in0"
+            },
+            {
+              "name": "in1"
+            },
+            {
+              "name": "in2"
+            }
+          ],
+          "name": "Playlist",
+          "type": "Playlist"
+        }
+      ],
+      "id": "2Tg09vx9Yf",
+      "links": [
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in2",
+          "id": "sWL6k9FtFH",
+          "src_elem": "LoG45mUAF4",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in1",
+          "id": "qjI5N9KnZ6",
+          "src_elem": "EEfBsJfH7U",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in0",
+          "id": "10b18zjUz6",
+          "src_elem": "KUf8FAknrd",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in2",
+          "id": "jpx5FhJ4F3",
+          "src_elem": "KUf8FAknrd",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in1",
+          "id": "vyM6kwP8Rq",
+          "src_elem": "EEfBsJfH7U",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in0",
+          "id": "EHbWuZoFtK",
+          "src_elem": "LoG45mUAF4",
+          "src_port": "out"
+        }
+      ],
+      "name": "Game Music",
+      "resource_id": "2Tg09vx9Yf",
+      "resource_name": "Game Music",
+      "src_elem_id": "R4vRj4xxUb",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Ending.ogg",
+          "arg_loops": 0,
+          "arg_type": "Float32",
+          "id": "BpdAYwxrEY",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "gD6Z1YvKbI",
+      "name": "Ending",
+      "resource_id": "gD6Z1YvKbI",
+      "resource_name": "Ending",
+      "src_elem_id": "BpdAYwxrEY",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/UI Sound Library/Click_Electronic_14.mp3",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "7ET20Y11sb",
+          "name": "FileSource",
+          "type": "FileSource"
+        }
+      ],
+      "id": "JnQz1XnpaF",
+      "name": "Mine Fail",
+      "resource_id": "JnQz1XnpaF",
+      "resource_name": "Mine Fail",
+      "src_elem_id": "7ET20Y11sb",
+      "src_elem_port": "out"
     }
   ],
   "entities": [

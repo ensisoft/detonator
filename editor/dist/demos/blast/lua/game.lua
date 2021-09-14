@@ -108,14 +108,22 @@ function EnterGame()
     Game:Delay(0.5)
     Game:CloseUI(0)
     Game:Play('Game')
+    Audio:SetMusicEffect('Menu Music', 'FadeOut', 2000)
+    Audio:KillMusic('Menu Music', 2000)
+    Audio:PlayMusic('Game Music')
+    Audio:SetMusicEffect('Game Music', 'FadeIn', 2000)
 end
 
--- quit the game asap and go back to the menu
-function QuitGame()
+function EnterMenu()
+    Game:DebugPrint('Enter Menu')
     Game:Stop(0)
+    Game:CloseUI(0)
     Game:Play('Menu')
     Game:OpenUI('MainMenu')
     Game:ShowMouse(true)
+    Audio:KillMusic('Game Music')
+    Audio:KillMusic('Ending')
+    Audio:PlayMusic('Menu Music')
 end
 
 function InitGameState()
@@ -133,9 +141,8 @@ end
 -- the initial state machine. I.e. for example find a menu
 -- object and ask for the game to show the menu.
 function LoadGame()
-    Game:Play('Menu')
-    Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
+    EnterMenu()
 end
 
 function BeginPlay(scene)
@@ -190,7 +197,7 @@ end
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         if State == States.Play then
-            QuitGame()
+            EnterMenu()
         elseif State == States.Menu then
             Game:Quit(0)
         end
@@ -199,12 +206,21 @@ function OnKeyDown(symbol, modifier_bits)
             if Menu == Menus.MainMenu then
                 EnterGame()
             elseif Menu == Menus.GameOver then
-                Game:CloseUI(0)
-                Game:OpenUI('MainMenu')
-                Game:ShowMouse(true)
+                EnterMenu()
             end
         end
     end
+end
+
+function OnKeyUp(symbol, modifier_bits)
+end
+
+function OnAudioEvent(event)
+    if event.track == 'Game Music' then 
+        if event.type == 'TrackDone'  and State == States.Play then
+            Audio:PlayMusic('Game Music')
+        end
+    end 
 end
 
 function OnUIOpen(ui)
@@ -229,5 +245,4 @@ function OnUIAction(ui, action)
     end
 end
 
-function OnKeyUp(symbol, modifier_bits)
-end
+

@@ -44,6 +44,8 @@ function EndPlay(player, scene)
     Game:Stop(0)
     Game:Play('Menu')
     Game:OpenUI('GameOver')
+    Audio:KillMusic('Game Music')
+    Audio:PlayMusic('Ending')
 end
 
 -- Called on every low frequency game tick.
@@ -154,6 +156,8 @@ function OnKeyDown(player, symbol, modifier_bits)
             FireWeapon(player, 'RedMine')
             mine_ready = false
             mine_load_time = 5.0
+        else 
+            Audio:PlaySoundEffect('Mine Fail')
         end
     end
 end
