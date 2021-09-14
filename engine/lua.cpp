@@ -1476,6 +1476,7 @@ void BindGameLib(sol::state& L)
     text["SetText"]       = (void(TextItem::*)(const std::string&))&TextItem::SetText;
     text["SetColor"]      = &TextItem::SetTextColor;
     text["TestFlag"]      = &TestFlag<TextItem>;
+    text["SetFlag"]       = &SetFlag<TextItem>;
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
