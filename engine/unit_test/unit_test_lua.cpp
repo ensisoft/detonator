@@ -25,6 +25,7 @@
 #include "base/test_float.h"
 #include "base/test_help.h"
 #include "base/color4f.h"
+#include "base/logging.h"
 #include "data/json.h"
 #include "game/scene.h"
 #include "engine/lua.h"
@@ -389,7 +390,7 @@ end
     }
 }
 
-void unit_test_scene()
+void unit_test_scene_interface()
 {
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("test_entity");
@@ -599,13 +600,294 @@ end
     TEST_REQUIRE(ret.valid());
 }
 
+void unit_test_entity_begin_end_play()
+{
+    base::OverwriteTextFile("entity_begin_end_play_test.lua", R"(
+function BeginPlay(entity, scene)
+   local event = game.GameEvent:new()
+   event.from  = entity:GetName()
+   event.name  = 'begin'
+   Game:PostEvent(event)
+end
+function EndPlay(entity, scene)
+   local event = game.GameEvent:new()
+   event.from = entity:GetName()
+   event.name = 'end'
+   Game:PostEvent(event)
+end
+)");
+
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("entity");
+    entity->SetSriptFileId("entity_begin_end_play_test");
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("entity");
+        node.SetEntity(entity);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    game::Scene scene(scene_class);
+
+    engine::ScriptEngine script(".");
+    script.BeginPlay(&scene);
+
+    // begin play should invoke BeginPlay on the entities that are
+    // statically in the scene class.
+    engine::Action action;
+    TEST_REQUIRE(script.GetNextAction(&action));
+    const auto* event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event);
+    TEST_REQUIRE(event->event.from == "entity");
+    TEST_REQUIRE(event->event.name == "begin");
+    TEST_REQUIRE(script.HasAction() == false);
+
+    scene.BeginLoop();
+        script.BeginLoop();
+        scene.KillEntity(scene.FindEntityByInstanceName("entity"));
+        script.EndLoop();
+    scene.EndLoop();
+
+    scene.BeginLoop();
+        script.BeginLoop();
+        script.EndLoop();
+    scene.EndLoop();
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event);
+    TEST_REQUIRE(event->event.from == "entity");
+    TEST_REQUIRE(event->event.name == "end");
+    TEST_REQUIRE(script.HasAction() == false);
+
+    scene.BeginLoop();
+        script.BeginLoop();
+        game::EntityArgs args;
+        args.name = "spawned";
+        args.klass = entity;
+        scene.SpawnEntity(args);
+        script.EndLoop();
+    scene.EndLoop();
+
+    scene.BeginLoop();
+        script.BeginLoop();
+
+        script.EndLoop();
+    scene.EndLoop();
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event);
+    TEST_REQUIRE(event->event.from == "spawned");
+    TEST_REQUIRE(event->event.name == "begin");
+    TEST_REQUIRE(script.HasAction() == false);
+}
+
+void unit_test_entity_tick_update()
+{
+    base::OverwriteTextFile("entity_tick_update_test.lua", R"(
+function Tick(entity, game_time, dt)
+   local event = game.GameEvent:new()
+   event.name  = 'tick'
+   event.from  = entity:GetName()
+   Game:PostEvent(event)
+end
+function Update(entity, game_time, dt)
+   local event = game.GameEvent:new()
+   event.name  = 'update'
+   event.from  = entity:GetName()
+   Game:PostEvent(event)
+end
+)");
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+    foo->SetSriptFileId("entity_tick_update_test");
+    foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
+    foo->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
+
+    auto bar = std::make_shared<game::EntityClass>();
+    bar->SetName("bar");
+    bar->SetSriptFileId("entity_tick_update_test");
+    bar->SetFlag(game::EntityClass::Flags::TickEntity, false);
+    bar->SetFlag(game::EntityClass::Flags::UpdateEntity, true);
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("bar");
+        node.SetEntity(bar);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    game::Scene scene(scene_class);
+    engine::ScriptEngine script(".");
+    script.BeginPlay(&scene);
+
+    script.BeginLoop();
+    script.Tick(0.0, 0.0);
+
+    engine::Action action;
+    TEST_REQUIRE(script.GetNextAction(&action));
+    const auto* event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event);
+    TEST_REQUIRE(event->event.from == "foo");
+    TEST_REQUIRE(event->event.name == "tick");
+    TEST_REQUIRE(script.HasAction() == false);
+
+    script.Update(0.0, 0.0);
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event);
+    TEST_REQUIRE(event->event.from == "bar");
+    TEST_REQUIRE(event->event.name == "update");
+    TEST_REQUIRE(script.HasAction() == false);
+
+
+    script.EndLoop();
+}
+
+void unit_test_entity_private_environment()
+{
+    // test that each entity type has their own private
+    // lua environment without stomping on each others data!
+
+    base::OverwriteTextFile("entity_env_foo_test.lua", R"(
+local foobar = 123
+function Tick(entity, game_time, dt)
+   local event = game.GameEvent:new()
+   event.name  = 'foo'
+   event.value = foobar
+   Game:PostEvent(event)
+end
+)");
+    base::OverwriteTextFile("entity_env_bar_test.lua", R"(
+local foobar = 321
+function Tick(entity, game_time, dt)
+   local event = game.GameEvent:new()
+   event.name  = 'bar'
+   event.value = foobar
+   Game:PostEvent(event)
+end
+)");
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    auto bar = std::make_shared<game::EntityClass>();
+    bar->SetName("bar");
+    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("bar");
+        node.SetEntity(bar);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    game::Scene instance(scene_class);
+
+    engine::ScriptEngine script(".");
+    script.BeginPlay(&instance);
+    script.Tick(0.0, 0.0);
+
+    engine::Action action1;
+    engine::Action action2;
+    TEST_REQUIRE(script.GetNextAction(&action1));
+    TEST_REQUIRE(script.GetNextAction(&action2));
+
+    const auto* e1 = std::get_if<engine::PostEventAction>(&action1);
+    const auto* e2 = std::get_if<engine::PostEventAction>(&action2);
+    TEST_REQUIRE(e1 && e2);
+    TEST_REQUIRE(std::get<int>(e1->event.value) == 123);
+    TEST_REQUIRE(std::get<int>(e2->event.value) == 321);
+
+}
+
+void unit_test_entity_shared_globals()
+{
+    base::OverwriteTextFile("entity_shared_global_test_foo.lua", R"(
+function Tick(entity, game_time, dt)
+    _G['foobar'] = 123
+end
+)");
+    base::OverwriteTextFile("entity_shared_global_test_bar.lua", R"(
+function Tick(entity, game_time, dt)
+   local event = game.GameEvent:new()
+   event.name  = 'bar'
+   event.value = _G['foobar']
+   Game:PostEvent(event)
+end
+)");
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+    foo->SetSriptFileId("entity_shared_global_test_foo");
+    foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    auto bar = std::make_shared<game::EntityClass>();
+    bar->SetName("bar");
+    bar->SetSriptFileId("entity_shared_global_test_bar");
+    bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("bar");
+        node.SetEntity(bar);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    game::Scene instance(scene_class);
+
+    engine::ScriptEngine script(".");
+    script.BeginPlay(&instance);
+    script.Tick(0.0, 0.0);
+
+    engine::Action action;
+    TEST_REQUIRE(script.GetNextAction(&action));
+    const auto* event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.name == "bar");
+    TEST_REQUIRE(std::get<int>(event->event.value) == 123);
+
+}
 
 int test_main(int argc, char* argv[])
 {
+    base::OStreamLogger log(std::cout);
+    base::SetGlobalLog(&log);
+    base::EnableDebugLog(true);
+
     unit_test_util();
     unit_test_glm();
     unit_test_base();
     unit_test_data();
-    unit_test_scene();
+    unit_test_scene_interface();
+    unit_test_entity_begin_end_play();
+    unit_test_entity_tick_update();
+    unit_test_entity_private_environment();
+    unit_test_entity_shared_globals();
+
     return 0;
 }

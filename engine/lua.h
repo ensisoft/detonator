@@ -110,6 +110,10 @@ namespace engine
         { mActionQueue.push(std::move(action)); }
         const ClassLibrary* GetClassLib() const
         { return mClassLib; }
+        bool HasAction() const
+        { return !mActionQueue.empty(); }
+        size_t GetNumActions() const
+        { return mActionQueue.size(); }
     private:
         sol::environment* GetTypeEnv(const game::EntityClass& klass);
         template<typename KeyEvent>
