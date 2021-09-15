@@ -769,6 +769,15 @@ private:
         mRequests.SetFullScreen(action.full_screen);
         DEBUG("Requesting %1 mode", action.full_screen ? "FullScreen" : "Window");
     }
+    void OnAction(const engine::PostEventAction& action)
+    {
+        mGame->OnGameEvent(action.event);
+
+        if (mScene)
+        {
+            mScripting->OnGameEvent(action.event);
+        }
+    }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
     {

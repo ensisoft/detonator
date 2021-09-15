@@ -38,6 +38,7 @@ namespace engine
     struct ContactEvent;
     struct AudioEvent;
     struct MouseEvent;
+    struct GameEvent;
 
     // This is the main interface for the game engine to interface
     // with the actual game logic. I.e. implementations of this
@@ -120,6 +121,9 @@ namespace engine
 
         // Act on audio playback event.
         virtual void OnAudioEvent(const AudioEvent& event) = 0;
+
+        // Act on a game event posted through PostEvent
+        virtual void OnGameEvent(const GameEvent& event) = 0;
 
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) {}

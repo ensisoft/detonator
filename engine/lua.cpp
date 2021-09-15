@@ -225,6 +225,11 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         action.result = result;
         self.PushAction(std::move(action));
     };
+    engine["PostEvent"] = [](LuaGame& self, const GameEvent& event) {
+        PostEventAction action;
+        action.event = event;
+        self.PushAction(std::move(action));
+    };
 }
 template<typename Type>
 bool TestFlag(const Type& object, const std::string& name)
@@ -599,6 +604,11 @@ void LuaGame::OnAudioEvent(const AudioEvent& event)
     CallLua((*mLuaState)["OnAudioEvent"], event);
 }
 
+void LuaGame::OnGameEvent(const GameEvent& event)
+{
+    CallLua((*mLuaState)["OnGameEvent"], event);
+}
+
 void LuaGame::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     CallLua((*mLuaState)["OnKeyDown"],
@@ -876,6 +886,18 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
         CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
     }
 }
+void ScriptEngine::OnGameEvent(const GameEvent& event)
+{
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["OnGameEvent"], entity, event);
+        }
+    }
+}
+
 void ScriptEngine::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     DispatchKeyboardEvent("OnKeyDown", key);
@@ -1668,6 +1690,53 @@ void BindGameLib(sol::state& L)
                 throw std::runtime_error(base::FormatString("No such mouse event index: %1", key));
             }
     );
+
+    auto game_event = table.new_usertype<GameEvent>("GameEvent", sol::constructors<GameEvent()>(),
+        sol::meta_function::index, [&L](const GameEvent& event, const char* key) {
+            sol::state_view lua(L);
+            if (!std::strcmp(key, "from"))
+                return sol::make_object(lua, event.from);
+            else if (!std::strcmp(key, "to"))
+                return sol::make_object(lua, event.to);
+            else if (!std::strcmp(key ,"name"))
+                return sol::make_object(lua, event.name);
+            else if (!std::strcmp(key, "value"))
+                return sol::make_object(lua, event.value);
+            throw std::runtime_error(base::FormatString("No such game event index: %1", key));
+        },
+        sol::meta_function::new_index, [&L](GameEvent& event, const char* key, sol::object value) {
+            if (!std::strcmp(key, "from"))
+                event.from = value.as<std::string>();
+            else if (!std::strcmp(key, "to"))
+                event.to = value.as<std::string>();
+            else if (!std::strcmp(key, "name"))
+                event.name = value.as<std::string>();
+            else if (!std::strcmp(key, "value")) {
+                if (value.is<bool>())
+                    event.value = value.as<bool>();
+                else if (value.is<int>())
+                    event.value = value.as<int>();
+                else if (value.is<float>())
+                    event.value = value.as<float>();
+                else if (value.is<std::string>())
+                    event.value = value.as<std::string>();
+                else if(value.is<glm::vec2>())
+                    event.value = value.as<glm::vec2>();
+                else if (value.is<glm::vec3>())
+                    event.value = value.as<glm::vec3>();
+                else if (value.is<glm::vec4>())
+                    event.value = value.as<glm::vec4>();
+                else if (value.is<base::Color4f>())
+                    event.value = value.as<base::Color4f>();
+                else if (value.is<base::FSize>())
+                    event.value = value.as<base::FSize>();
+                else if (value.is<base::FRect>())
+                    event.value = key, value.as<base::FRect>();
+                else if (value.is<base::FPoint>())
+                    event.value = value.as<base::FPoint>();
+                else throw std::runtime_error("Unsupported game event value type.");
+            }
+        });
 }
 
 } // namespace

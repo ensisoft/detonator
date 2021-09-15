@@ -22,6 +22,7 @@
 #include <string>
 
 #include "engine/classlib.h"
+#include "engine/event.h"
 
 namespace engine
 {
@@ -87,6 +88,9 @@ namespace engine
     struct RequestFullScreenAction {
         bool full_screen = true;
     };
+    struct PostEventAction {
+        GameEvent event;
+    };
 
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
@@ -105,6 +109,7 @@ namespace engine
             BlockKeyboardAction,
             BlockMouseAction,
             GrabMouseAction,
-            RequestFullScreenAction>;
+            RequestFullScreenAction,
+            PostEventAction>;
 
 } // namespace
