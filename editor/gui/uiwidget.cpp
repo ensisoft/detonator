@@ -1238,7 +1238,8 @@ void UIWidget::ResourceUpdated(const app::Resource* resource)
 {
     if (!resource->IsMaterial())
         return;
-    // purge material instance (if any)
+    RebuildCombos();
+    DisplayCurrentWidgetProperties();
     mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
 }
 
