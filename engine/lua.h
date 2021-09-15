@@ -44,12 +44,14 @@ namespace engine
        ~LuaGame();
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void SetAudioEngine(const AudioEngine* engine) override;
-        virtual void LoadGame(const ClassLibrary* loader) override;
+        virtual bool LoadGame(const ClassLibrary* loader) override;
+        virtual void StartGame() override;
         virtual void Tick(double game_time, double dt) override;
         virtual void Update(double game_time,  double dt) override;
         virtual void BeginPlay(game::Scene* scene) override;
         virtual void EndPlay(game::Scene* scene) override;
         virtual void SaveGame() override;
+        virtual void StopGame() override;
         virtual bool GetNextAction(Action* out) override;
         virtual FRect GetViewport() const override;
         virtual void OnUIOpen(uik::Window* ui) override;

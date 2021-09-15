@@ -266,15 +266,17 @@ namespace engine
             unsigned surface_height = 0;
         };
 
-        // Initialize the application and its resources and subsystems
+        // Initialize the engine and its resources and subsystems
         // such as the graphics and audio.
         virtual void Init(const InitParams& init) {}
 
         // Load the game and its data and/or previous state.
         // Called once before entering the main game update/render loop.
-        virtual void Load() {}
+        // Should return true if successful,otherwise false on error.
+        virtual bool Load()
+        { return true; }
 
-        // Start the application. This is called once before entering the
+        // Start the game. This is called once before entering the
         // main game update/render loop.
         virtual void Start() {}
 
@@ -294,12 +296,16 @@ namespace engine
         // main game loop took.
         virtual void Update(double dt) {}
 
+        // Stop the game. Called once after exiting the main loop and
+        // before calling save and shutdown.
+        virtual void Stop() {}
+
         // Save the game and its current state.
         // Called once after leaving the main game update/render loop.
         virtual void Save() {}
 
-        // Shutdown the application. Called once after leaving the
-        // main game update/render loop.
+        // Shutdown the engine. Called once after leaving the
+        // main game update/render loop. Release any resources here.
         virtual void Shutdown() {}
 
         // Returns true if the application is still running. When

@@ -4,6 +4,7 @@
       "elements": [
         {
           "arg_file": "ws://music/ctr_title.mp3",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "HWXOWk3B4g",
           "name": "ctr_title",
@@ -21,6 +22,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/coin/Picked Coin Echo 2.wav",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "lI3HDnTgut",
           "name": "Picked Coin Echo",
@@ -38,6 +40,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/win/winfretless.ogg",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "2Qlif27snN",
           "name": "winfretless",
@@ -55,6 +58,7 @@
       "elements": [
         {
           "arg_file": "ws://sounds/falling/Falling.mp3",
+          "arg_loops": 1,
           "arg_type": "Float32",
           "id": "hsNS566ktU",
           "name": "Falling",

@@ -140,7 +140,7 @@ end
 -- The intention of this function is for the game to start
 -- the initial state machine. I.e. for example find a menu
 -- object and ask for the game to show the menu.
-function LoadGame()
+function StartGame()
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
     EnterMenu()
 end

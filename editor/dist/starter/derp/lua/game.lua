@@ -4,8 +4,8 @@ States = {
 }
 State = States.Menu
 
--- Called when the game is first loaded.
-function LoadGame()
+-- Called when the game is first started
+function StartGame()
     Game:OpenUI('MainMenu')
     Game:SetViewport(base.FRect:new(-500.0, -800.0, 1000, 800))
     Audio:PlayMusic('MenuMusic')

@@ -1,8 +1,8 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
 
--- Called when the game is first loaded.
-function LoadGame()
+-- Called when the game is started.
+function StartGame()
     Game:SetViewport(base.FRect:new(-500.0, -400.0, 1000.0, 800.0))
     Game:Play('Level 0')
 --    Audio:PlayMusicGraph('ctr_title')

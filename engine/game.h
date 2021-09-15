@@ -55,11 +55,18 @@ namespace engine
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) = 0;
         // Set audio engine instance.
         virtual void SetAudioEngine(const AudioEngine* engine) = 0;
-        // Load the game. This is called once by the engine after the
-        // application has started. In the implementation you should
-        // start with some initial game state and possibly request some
-        // action to take place such as loading/displaying the game main UI.
-        virtual void LoadGame(const ClassLibrary* loader) = 0;
+        // Load the game data. This is called once by the engine after the
+        // main application has started. In the implementation you should
+        // load whatever initial game state that is needed. It's possible to
+        // fail (indicated by returning false) and this will make the host
+        // application exit early.
+        virtual bool LoadGame(const ClassLibrary* loader) = 0;
+        // Start the actual game after all required initial content has been
+        // loaded. At this point all the engine subsystems are available
+        // including rendering, physics and audio.
+        // The game should enter whatever initial state such as opening
+        // main screen/menu.
+        virtual void StartGame() = 0;
         // BeginPlay is called as a response to PlayAction. When the
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
@@ -88,9 +95,10 @@ namespace engine
         {}
         // Called after StopAction has taken place.
         virtual void EndPlay(game::Scene* scene) = 0;
-
+        // todo:
         virtual void SaveGame() = 0;
-
+        // todo:
+        virtual void StopGame() = 0;
         // Get the next action from the game's action queue. The game engine
         // will process all the game actions once per game update loop iteration.
         // If there was no next action returns false, otherwise true is returned

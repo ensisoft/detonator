@@ -648,6 +648,7 @@ void PlayWindow::Shutdown()
         {
             DEBUG("Shutting down game...");
             TemporaryCurrentDirChange cwd(mGameWorkingDir);
+            mEngine->Stop();
             mEngine->Save();
             mEngine->Shutdown();
         }

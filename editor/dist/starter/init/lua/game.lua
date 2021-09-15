@@ -2,8 +2,31 @@
 -- You're free to delete functions that you don't need.
 
 -- Called when the game is first loaded.
+-- This is the place where you might want to load some 
+-- previous/initial game state. 
 function LoadGame()
     Game:DebugPrint('LoadGame called.')
+    return true
+end
+
+-- Called after the game has been loaded and the game can 
+-- be started. This is likely the place where the first
+-- game content is shown, such as a main menu.
+function StartGame()
+    Game:DebugPrint('StartGame called')
+end
+
+-- Called before the application exist.
+-- This is the last chance to persist any state that should
+-- be restored on next game run. 
+function SaveGame() 
+    Game:DebugPrint('SaveGame called')
+end
+
+-- Called when the game play should stop, i.e. the application
+-- is about to exit. 
+function StopGame()
+    Game:DebugPrint('StopGame called')
 end
 
 -- Called as a response to Game:Play when an instance
@@ -107,5 +130,15 @@ end
 -- 'type'  - the type of the event. 'MusicTrackDone' or 'SoundEffectDone'
 -- 'track' - the name of the audio track that generated the event.
 function OnAudioEvent(event)
+
+end
+
+-- Called when a game event has been posted.
+-- A game event has the following fields:
+-- 'from' a text string identifying the sender.
+-- 'to' a text string identifier the receiver
+-- 'name' a name to attach semantical meaning to the message
+-- 'value' a value of bool, float, int, string, vec2/3/4, FRect, FSize, FPoint or Color4f
+function OnGameEvent(event)
 
 end

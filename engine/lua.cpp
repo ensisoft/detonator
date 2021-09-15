@@ -512,7 +512,7 @@ void LuaGame::SetAudioEngine(const AudioEngine* engine)
 {
     mAudioEngine = engine;
 }
-void LuaGame::LoadGame(const ClassLibrary* loader)
+bool LuaGame::LoadGame(const ClassLibrary* loader)
 {
     mClasslib = loader;
     (*mLuaState)["Audio"]    = mAudioEngine;
@@ -520,7 +520,15 @@ void LuaGame::LoadGame(const ClassLibrary* loader)
     (*mLuaState)["ClassLib"] = mClasslib;
     (*mLuaState)["Game"]     = this;
     CallLua((*mLuaState)["LoadGame"]);
+    // tood: return value.
+    return true;
 }
+
+void LuaGame::StartGame()
+{
+    CallLua((*mLuaState)["StartGame"]);
+}
+
 void LuaGame::Tick(double game_time, double dt)
 {
     CallLua((*mLuaState)["Tick"], game_time, dt);
@@ -543,9 +551,14 @@ void LuaGame::EndPlay(Scene* scene)
     mScene = nullptr;
 }
 
+void LuaGame::StopGame()
+{
+    CallLua((*mLuaState)["StopGame"]);
+}
+
 void LuaGame::SaveGame()
 {
-
+    CallLua((*mLuaState)["SaveGame"]);
 }
 
 bool LuaGame::GetNextAction(Action* out)

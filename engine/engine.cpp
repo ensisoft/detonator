@@ -70,20 +70,14 @@ public:
     virtual bool GetNextRequest(Request* out) override
     { return mRequests.GetNext(out); }
 
-    // Application implementation
-    virtual void Start()
-    {
-        DEBUG("Engine starting.");
-        mAudio->Start();
 
-        mGame->LoadGame(mClasslib);
-    }
     virtual void Init(const InitParams& init) override
     {
         DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
         mAudio = std::make_unique<engine::AudioEngine>(init.application_name);
         mAudio->SetClassLibrary(mClasslib);
         mAudio->SetLoader(mAudioLoader);
+        mAudio->Start();
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
@@ -101,6 +95,17 @@ public:
         mUIPainter.SetStyle(&mUIStyle);
         mRenderer.SetClassLibrary(mClasslib);
         mPhysics.SetClassLibrary(mClasslib);
+    }
+    virtual bool Load() override
+    {
+        DEBUG("Loading game state.");
+        return mGame->LoadGame(mClasslib);
+    }
+
+    virtual void Start() override
+    {
+        DEBUG("Starting game play.");
+        mGame->StartGame();
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -369,6 +374,16 @@ public:
             if (mActionDelay > 0.0f)
                 break;
         }
+    }
+
+    virtual void Stop() override
+    {
+        mGame->StopGame();
+    }
+
+    virtual void Save() override
+    {
+        mGame->SaveGame();
     }
 
     virtual void Shutdown() override

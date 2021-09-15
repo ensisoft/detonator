@@ -614,6 +614,7 @@ int main(int argc, char* argv[])
             engine->EndMainLoop();
         } // main loop
 
+        engine->Stop();
         engine->Save();
         engine->Shutdown();
         engine.reset();

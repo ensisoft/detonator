@@ -21,14 +21,8 @@ end
 
 -- main game callbacks
 
--- This is called when the game is first loaded when
--- the application is started. Before the call the loader
--- setups the global objects (as documented at the start of
--- of the file) and then proceeds to call LoadGame.
--- The intention of this function is for the game to start
--- the initial state machine. I.e. for example find a menu
--- object and ask for the game to show the menu.
-function LoadGame()
+-- start the game and show some initial content.
+function StartGame()
     local scene = ClassLib:FindSceneClassByName('My Scene')
     Game:Play(scene)
     Game:SetViewport(Viewport)
