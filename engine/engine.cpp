@@ -363,38 +363,11 @@ public:
         engine::Action action;
         while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
         {
-            if (auto* ptr = std::get_if<engine::ShowMouseAction>(&action))
-                ShowMouseCursor(ptr->show);
-            else if (auto* ptr = std::get_if<engine::BlockMouseAction>(&action))
-                BlockKeyboard(ptr->block);
-            else if (auto* ptr = std::get_if<engine::BlockMouseAction>(&action))
-                BlockMouse(ptr->block);
-            else if (auto* ptr = std::get_if<engine::GrabMouseAction>(&action))
-                GrabMouse(ptr->grab);
-            else if (auto* ptr = std::get_if<engine::OpenUIAction>(&action))
-                OpenUI(ptr->ui);
-            else if (auto* ptr = std::get_if<engine::CloseUIAction>(&action))
-                CloseUI(ptr->result);
-            else if (auto* ptr = std::get_if<engine::PlayAction>(&action))
-                PlayGame(ptr->klass);
-            else if (auto* ptr = std::get_if<engine::SuspendAction>(&action))
-                SuspendGame();
-            else if (auto* ptr = std::get_if<engine::ResumeAction>(&action))
-                ResumeGame();
-            else if (auto* ptr = std::get_if<engine::QuitAction>(&action))
-                QuitGame(ptr->exit_code);
-            else if (auto* ptr = std::get_if<engine::StopAction>(&action))
-                StopGame();
-            else if (auto* ptr = std::get_if<engine::RequestFullScreenAction>(&action))
-                RequestFullScreen(ptr->full_screen);
-            else if (auto* ptr = std::get_if<engine::DebugClearAction>(&action))
-                DebugClear();
-            else if (auto* ptr = std::get_if<engine::DebugPrintAction>(&action))  {
-                DebugPrintString(ptr->message, ptr->clear);
-            } else if (auto* ptr = std::get_if<engine::DelayAction>(&action)) {
-                DelayGame(ptr->seconds);
+            std::visit([this](const auto& variant_value) {
+                this->OnAction(variant_value);
+            }, action);
+            if (mActionDelay > 0.0f)
                 break;
-            }
         }
     }
 
@@ -667,8 +640,10 @@ private:
     { return !mUI.empty(); }
 
 
-    void OpenUI(engine::ClassHandle<uik::Window> window)
+    void OnAction(const engine::OpenUIAction& action)
     {
+        auto window = action.ui;
+
         // todo: if the style loading somehow fails, then what?
         mUIStyle.ClearProperties();
         mUIStyle.ClearMaterials();
@@ -693,12 +668,12 @@ private:
 
         mGame->OnUIOpen(mUI.top().get());
     }
-    void CloseUI(int result)
+    void OnAction(const engine::CloseUIAction& action)
     {
         if (mUI.empty())
             return;
 
-        mGame->OnUIClose(mUI.top().get(), result);
+        mGame->OnUIClose(mUI.top().get(), action.result);
         mUI.pop();
 
         if (auto* ui = GetUI())
@@ -716,23 +691,23 @@ private:
             ui->Style(mUIPainter);
         }
     }
-    void PlayGame(engine::ClassHandle<game::SceneClass> klass)
+    void OnAction(const engine::PlayAction& action)
     {
-        mScene = game::CreateSceneInstance(klass);
+        mScene = game::CreateSceneInstance(action.klass);
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
         mScripting->BeginPlay(mScene.get());
         mGame->BeginPlay(mScene.get());
     }
-    void SuspendGame()
+    void OnAction(const engine::SuspendAction& action)
     {
 
     }
-    void ResumeGame()
+    void OnAction(const engine::ResumeAction& action)
     {
 
     }
-    void StopGame()
+    void OnAction(const engine::StopAction& action)
     {
         if (!mScene)
             return;
@@ -740,11 +715,81 @@ private:
         mScripting->EndPlay(mScene.get());
         mScene.reset();
     }
-    void QuitGame(int exit_code)
+    void OnAction(const engine::QuitAction& action)
     {
         // todo: cleanup?
+        mRequests.Quit(action.exit_code);
+    }
 
-        mRequests.Quit(exit_code);
+    void OnAction(const engine::DebugClearAction& action)
+    {
+        mDebugPrints.clear();
+    }
+    void OnAction(const engine::DebugPrintAction& action)
+    {
+        if (action.clear)
+            mDebugPrints.clear();
+        DebugPrint print;
+        print.message = action.message;
+        mDebugPrints.push_back(std::move(print));
+    }
+
+    void OnAction(const engine::DelayAction& action)
+    {
+        mActionDelay = math::clamp(0.0f, action.seconds, action.seconds);
+        DEBUG("Action delay: %1 s", mActionDelay);
+    }
+    void OnAction(const engine::ShowDebugAction& action)
+    {
+        mShowDebugs = action.show;
+        DEBUG("Show debugs is %1", action.show ? "ON" : "OFF");
+    }
+    void OnAction(const engine::ShowMouseAction& action)
+    {
+        mShowMouseCursor = action.show;
+        DEBUG("Mouse cursor is %1", action.show ? "ON" : "OFF");
+    }
+    void OnAction(const engine::BlockKeyboardAction& action)
+    {
+        mBlockKeyboard = action.block;
+        DEBUG("Keyboard block is %1", action.block ? "ON" : "OFF");
+    }
+    void OnAction(const engine::BlockMouseAction& action)
+    {
+        mBlockMouse = action.block;
+        DEBUG("Mouse block is %1", action.block ? "ON" : "OFF");
+    }
+    void OnAction(const engine::GrabMouseAction& action)
+    {
+        mRequests.GrabMouse(action.grab);
+        DEBUG("Requesting to %1 mouse grabbing.", action.grab ? "enable" : "disable");
+    }
+    void OnAction(const engine::RequestFullScreenAction& action)
+    {
+        mRequests.SetFullScreen(action.full_screen);
+        DEBUG("Requesting %1 mode", action.full_screen ? "FullScreen" : "Window");
+    }
+
+    static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
+    {
+        std::string ret;
+        if (mods.test(wdk::Keymod::Control))
+            ret += "Ctrl+";
+        if (mods.test(wdk::Keymod::Shift))
+            ret += "Shift+";
+        if (mods.test(wdk::Keymod::Alt))
+            ret += "Alt+";
+        if (!ret.empty())
+            ret.pop_back();
+        return ret;
+    }
+    void TickGame(double game_time, double dt)
+    {
+        mGame->Tick(game_time, dt);
+        if (mScene)
+        {
+            mScripting->Tick(game_time, dt);
+        }
     }
     void UpdateGame(double game_time,  double dt)
     {
@@ -777,70 +822,6 @@ private:
 
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(dt);
-    }
-
-    void TickGame(double game_time, double dt)
-    {
-        mGame->Tick(game_time, dt);
-        if (mScene)
-        {
-            mScripting->Tick(game_time, dt);
-        }
-    }
-    void DebugClear()
-    { mDebugPrints.clear(); }
-    void DebugPrintString(std::string msg, bool clear)
-    {
-        if (clear)
-            mDebugPrints.clear();
-        DebugPrint print;
-        print.message = std::move(msg);
-        mDebugPrints.push_back(std::move(print));
-    }
-
-    void DelayGame(float seconds)
-    {
-        mActionDelay = math::clamp(0.0f, seconds, seconds);
-        DEBUG("Action delay: %1 s", mActionDelay);
-    }
-    void ShowMouseCursor(bool show)
-    {
-        mShowMouseCursor = show;
-        DEBUG("Mouse cursor is %1", show ? "ON" : "OFF");
-    }
-    void BlockKeyboard(bool block)
-    {
-        mBlockKeyboard = block;
-        DEBUG("Keyboard block is %1", block ? "ON" : "OFF");
-    }
-    void BlockMouse(bool block)
-    {
-        mBlockMouse = block;
-        DEBUG("Mouse block is %1", block ? "ON" : "OFF");
-    }
-    void GrabMouse(bool grab)
-    {
-        mRequests.GrabMouse(grab);
-        DEBUG("Requesting to %1 mouse grabbing.", grab ? "enable" : "disable");
-    }
-    void RequestFullScreen(bool full_screen)
-    {
-        mRequests.SetFullScreen(full_screen);
-        DEBUG("Requesting %1 mode", full_screen ? "FullScreen" : "Window");
-    }
-
-    static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
-    {
-        std::string ret;
-        if (mods.test(wdk::Keymod::Control))
-            ret += "Ctrl+";
-        if (mods.test(wdk::Keymod::Shift))
-            ret += "Shift+";
-        if (mods.test(wdk::Keymod::Alt))
-            ret += "Alt+";
-        if (!ret.empty())
-            ret.pop_back();
-        return ret;
     }
 
 private:
