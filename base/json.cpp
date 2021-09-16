@@ -419,4 +419,19 @@ std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& f
     return JsonParse(contents);
 }
 
+std::tuple<bool, std::string> JsonWriteFile(const nlohmann::json& json, const std::string& filename)
+{
+    auto out = base::OpenBinaryOutputStream(filename);
+    if (!out.is_open())
+        return std::make_tuple(false, "failed to open: " + filename);
+    const auto& str = json.dump(2);
+    if (str.size())
+    {
+        out.write(str.c_str(), str.size());
+        if (out.fail())
+            return std::make_tuple(false, "JSON write failed.");
+    }
+    return std::make_tuple(true, "");
+}
+
 } // namespace

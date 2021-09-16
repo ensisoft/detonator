@@ -260,6 +260,51 @@ double CurrentRuntime()
         (1000.0 * 1000.0);
 }
 
+void SaveState(const std::string& file, const wdk::Window& window)
+{
+    nlohmann::json json;
+    base::JsonWrite(json["window"], "width",  window.GetSurfaceWidth());
+    base::JsonWrite(json["window"], "height", window.GetSurfaceHeight());
+    base::JsonWrite(json["window"], "xpos", window.GetPosX());
+    base::JsonWrite(json["window"], "ypos", window.GetPosY());
+    base::JsonWrite(json["window"], "fullscreen", window.IsFullscreen());
+    const auto [success, error] = base::JsonWriteFile(json, file);
+    if (success) return;
+
+    ERROR("Failed to save main app state.", error);
+}
+
+void LoadState(const std::string& file, wdk::Window& window)
+{
+    if (!base::FileExists(file))
+        return;
+
+    const auto [json_ok, json, json_error] = base::JsonParseFile(file);
+    if (!json_ok)
+    {
+        ERROR("Failed to read _app_state.json ('%1')", json_error);
+        return;
+    }
+
+    int window_width = 0;
+    int window_height = 0;
+    int window_xpos = 0;
+    int window_ypos = 0;
+    bool window_set_fullscreen = false;
+    base::JsonReadSafe(json["window"], "width", &window_width);
+    base::JsonReadSafe(json["window"], "height", &window_height);
+    base::JsonReadSafe(json["window"], "xpos", &window_xpos);
+    base::JsonReadSafe(json["window"], "ypos", &window_ypos);
+    base::JsonReadSafe(json["window"], "fullscreen", &window_set_fullscreen);
+    window.Move(window_xpos, window_ypos);
+    window.SetSize(window_width, window_height);
+    window.SetFullscreen(window_set_fullscreen);
+    DEBUG("Previous window state %1x%2 @ %3%,%4 full screen = %5.",
+          window_width, window_height,
+          window_xpos, window_ypos,
+          window_set_fullscreen ? "True" : "False");
+}
+
 int main(int argc, char* argv[])
 {
 #if defined(LINUX_OS)
@@ -520,6 +565,15 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(audio, "sample_type", &config.audio.sample_type);
             base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
         }
+
+        // check whether there's a state file with previous window geometry
+        const auto& state_file = base::JoinPath(env.game_home, "_app_state.json");
+
+        bool save_window_geometry = false;
+        base::JsonReadSafe(json["application"], "save_window_geometry", &save_window_geometry);
+        if (save_window_geometry)
+            LoadState(state_file, window);
+
         engine->SetEngineConfig(config);
         engine->Load();
         engine->Start();
@@ -620,6 +674,11 @@ int main(int argc, char* argv[])
         engine.reset();
 
         context->Dispose();
+
+        if (save_window_geometry)
+            SaveState(state_file, window);
+
+        window.Destroy();
 
         GameLibSetGlobalLogger(nullptr, false);
         DEBUG("Exiting...");

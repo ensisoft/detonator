@@ -200,6 +200,6 @@ void JsonWrite(nlohmann::json& json, const char* name, base::bitflag<Enum, Bits>
 std::tuple<bool, nlohmann::json, std::string> JsonParse(const char* beg, const char* end);
 std::tuple<bool, nlohmann::json, std::string> JsonParse(const std::string& json);
 std::tuple<bool, nlohmann::json, std::string> JsonParseFile(const std::string& filename);
-
+std::tuple<bool, std::string> JsonWriteFile(const nlohmann::json& json,  const std::string& filename);
 } // base
 

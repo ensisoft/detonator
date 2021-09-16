@@ -34,30 +34,6 @@
           <string>Application settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="18" column="1">
-           <widget class="QCheckBox" name="chkWndHasBorder">
-            <property name="text">
-             <string>Window has border</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>Engine library</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="label_26">
-            <property name="text">
-             <string>Main game script</string>
-            </property>
-           </widget>
-          </item>
           <item row="16" column="1">
            <widget class="QCheckBox" name="chkWndCanResize">
             <property name="text">
@@ -65,68 +41,23 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Window mode</string>
+          <item row="10" column="1">
+           <widget class="QSpinBox" name="ticksPerSecond">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Window size (w,h)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Updates per second</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbWindowMode"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbMSAA">
-            <property name="editable">
-             <bool>false</bool>
-            </property>
-            <item>
-             <property name="text">
-              <string>0</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>4</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>16</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Application version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Application name</string>
+             <string>Identifier</string>
             </property>
            </widget>
           </item>
@@ -137,31 +68,25 @@
             </property>
            </widget>
           </item>
-          <item row="17" column="1">
-           <widget class="QCheckBox" name="chkCursor">
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbWindowMode"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Window has cursor</string>
+             <string>Window size (w,h)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="22" column="1">
+           <widget class="QCheckBox" name="chkSrgb">
+            <property name="text">
+             <string>Use sRGB color buffer</string>
             </property>
             <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
-          </item>
-          <item row="10" column="2">
-           <spacer name="horizontalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="1" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -188,51 +113,31 @@
             </item>
            </layout>
           </item>
-          <item row="14" column="1">
-           <widget class="QLineEdit" name="edtAppVersion">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cmbMSAA">
+            <property name="editable">
+             <bool>false</bool>
             </property>
-           </widget>
-          </item>
-          <item row="22" column="1">
-           <widget class="QCheckBox" name="chkSrgb">
-            <property name="text">
-             <string>Use sRGB color buffer</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QSpinBox" name="ticksPerSecond">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="23" column="1">
-           <widget class="QCheckBox" name="chkGrabMouse">
-            <property name="text">
-             <string>Grab mouse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="24" column="1">
-           <widget class="QCheckBox" name="chkVsync">
-            <property name="text">
-             <string>VSYNC</string>
-            </property>
+            <item>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="4" column="1">
@@ -277,16 +182,6 @@
             </item>
            </layout>
           </item>
-          <item row="12" column="1">
-           <widget class="QLineEdit" name="edtAppName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
           <item row="11" column="1">
            <widget class="QSpinBox" name="updatesPerSecond">
             <property name="sizePolicy">
@@ -306,10 +201,17 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_6">
+          <item row="12" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>Default MSAA</string>
+             <string>Application name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="24" column="1">
+           <widget class="QCheckBox" name="chkGrabMouse">
+            <property name="text">
+             <string>Grab mouse</string>
             </property>
            </widget>
           </item>
@@ -326,10 +228,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_4">
+          <item row="17" column="1">
+           <widget class="QCheckBox" name="chkCursor">
             <property name="text">
-             <string>Identifier</string>
+             <string>Window has cursor</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -343,6 +248,108 @@
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QLineEdit" name="edtAppName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Default MSAA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="25" column="1">
+           <widget class="QCheckBox" name="chkVsync">
+            <property name="text">
+             <string>VSYNC</string>
+            </property>
+           </widget>
+          </item>
+          <item row="15" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Main game script</string>
+            </property>
+           </widget>
+          </item>
+          <item row="18" column="1">
+           <widget class="QCheckBox" name="chkWndHasBorder">
+            <property name="text">
+             <string>Window has border</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="2">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Engine library</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Updates per second</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Application version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Window mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="1">
+           <widget class="QLineEdit" name="edtAppVersion">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="23" column="1">
+           <widget class="QCheckBox" name="chkSaveGeom">
+            <property name="text">
+             <string>Save window geometry</string>
             </property>
            </widget>
           </item>
@@ -1209,6 +1216,7 @@
   <tabstop>chkCursor</tabstop>
   <tabstop>chkWndHasBorder</tabstop>
   <tabstop>chkSrgb</tabstop>
+  <tabstop>chkSaveGeom</tabstop>
   <tabstop>chkGrabMouse</tabstop>
   <tabstop>chkVsync</tabstop>
   <tabstop>numVeloIterations</tabstop>

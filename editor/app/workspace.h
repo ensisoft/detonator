@@ -465,6 +465,9 @@ namespace app
             // flag to indicate whether the mouse should be
             // grabbed and confined within the window.
             bool grab_mouse = false;
+            // Flag to indicate whether to save and restore the window
+            // geometry between application runs.
+            bool save_window_geometry = false;
             // how many times the app ticks per second.
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.

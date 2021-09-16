@@ -1241,6 +1241,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "window_cursor"           , mSettings.window_cursor);
     JsonWrite(project, "config_srgb"             , mSettings.config_srgb);
     JsonWrite(project, "grab_mouse"              , mSettings.grab_mouse);
+    JsonWrite(project, "save_window_geometry"    , mSettings.save_window_geometry);
     JsonWrite(project, "ticks_per_second"        , mSettings.ticks_per_second);
     JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
@@ -1341,6 +1342,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "window_cursor",            &mSettings.window_cursor);
     JsonReadSafe(project, "config_srgb",              &mSettings.config_srgb);
     JsonReadSafe(project, "grab_mouse",               &mSettings.grab_mouse);
+    JsonReadSafe(project, "save_window_geometry",     &mSettings.save_window_geometry);
     JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
     JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
@@ -2253,6 +2255,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_mag_filter);
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
+        base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
         base::JsonWrite(json["physics"], "num_velocity_iterations", mSettings.num_velocity_iterations);
         base::JsonWrite(json["physics"], "num_position_iterations", mSettings.num_position_iterations);
         base::JsonWrite(json["physics"], "gravity", mSettings.gravity);
