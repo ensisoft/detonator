@@ -49,6 +49,7 @@
 #include "engine/physics.h"
 #include "engine/lua.h"
 #include "engine/event.h"
+#include "engine/state.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "wdk/keys.h"
@@ -292,6 +293,33 @@ void SetScriptVar(Type& object, const char* key, sol::object value)
     else throw std::runtime_error(base::FormatString("Variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
 }
 
+void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
+{
+    if (value.is<bool>())
+        kv.SetValue(key, value.as<bool>());
+    else if (value.is<int>())
+        kv.SetValue(key, value.as<int>());
+    else if (value.is<float>())
+        kv.SetValue(key, value.as<float>());
+    else if (value.is<std::string>())
+        kv.SetValue(key, value.as<std::string>());
+    else if (value.is<glm::vec2>())
+        kv.SetValue(key, value.as<glm::vec2>());
+    else if (value.is<glm::vec3>())
+        kv.SetValue(key, value.as<glm::vec3>());
+    else if (value.is<glm::vec4>())
+        kv.SetValue(key, value.as<glm::vec4>());
+    else if (value.is<base::Color4f>())
+        kv.SetValue(key, value.as<base::Color4f>());
+    else if (value.is<base::FSize>())
+        kv.SetValue(key, value.as<base::FSize>());
+    else if (value.is<base::FRect>())
+        kv.SetValue(key, value.as<base::FRect>());
+    else if (value.is<base::FPoint>())
+        kv.SetValue(key, value.as<base::FPoint>());
+    else throw std::runtime_error("Unsupported key value store type.");
+}
+
 // WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
 // directly in the call to create new usertype. adding these specializations as a workaround.
 template sol::object GetScriptVar<game::Scene>(const game::Scene&, const char*, sol::this_state);
@@ -471,7 +499,7 @@ LuaGame::LuaGame(const std::string& lua_path,
                  const std::string& game_home,
                  const std::string& game_name)
 {
-    mLuaState = std::make_shared<sol::state>();
+    mLuaState = std::make_unique<sol::state>();
     // todo: should this specify which libraries to load?
     mLuaState->open_libraries();
     // ? is a wildcard (usually denoted by kleene star *)
@@ -504,6 +532,11 @@ LuaGame::LuaGame(const std::string& lua_path,
 
 LuaGame::~LuaGame() = default;
 
+void LuaGame::SetStateStore(KeyValueStore* store)
+{
+    mStateStore = store;
+}
+
 void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
 {
     mPhysicsEngine = engine;
@@ -518,6 +551,7 @@ bool LuaGame::LoadGame(const ClassLibrary* loader)
     (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClasslib;
+    (*mLuaState)["State"]    = mStateStore;
     (*mLuaState)["Game"]     = this;
     CallLua((*mLuaState)["LoadGame"]);
     // tood: return value.
@@ -747,6 +781,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClassLib;
     (*mLuaState)["Scene"]    = mScene;
+    (*mLuaState)["State"]    = mStateStore;
     (*mLuaState)["Game"]     = this;
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
     auto engine = table.new_usertype<ScriptEngine>("Engine");
@@ -1035,7 +1070,7 @@ void BindUtil(sol::state& L)
     box["Transform"]   = &FBox::Transform;
     box["Reset"]       = &FBox::Reset;
 
-    util["JoinPath"] = &base::JoinPath;
+    util["JoinPath"]   = &base::JoinPath;
     util["FileExists"] = &base::FileExists;
     util["RandomString"] = &base::RandomString;
 }
@@ -1750,6 +1785,58 @@ void BindGameLib(sol::state& L)
                 else throw std::runtime_error("Unsupported game event value type.");
             }
         });
+
+    auto kvstore = table.new_usertype<KeyValueStore>("KeyValueStore", sol::constructors<KeyValueStore()>(),
+        sol::meta_function::index, [](const KeyValueStore& kv, const char* key, sol::this_state state) {
+            sol::state_view lua(state);
+            KeyValueStore::Value value;
+            if (!kv.GetValue(key, &value))
+                throw std::runtime_error("No such key value store index: " + std::string(key));
+            return sol::make_object(lua, value);
+        },
+        sol::meta_function::new_index, [&L](KeyValueStore& kv, const char* key, sol::object value) {
+            SetKvValue(kv, key, value);
+        }
+    );
+    kvstore["SetValue"] = SetKvValue;
+    kvstore["HasValue"] = &KeyValueStore::HasValue;
+    kvstore["Clear"]    = &KeyValueStore::Clear;
+    kvstore["Persist"]  = sol::overload(
+        [](const KeyValueStore& kv, data::JsonObject& json) {
+            kv.Persist(json);
+        },
+        [](const KeyValueStore& kv, data::Writer& writer) {
+            kv.Persist(writer);
+        });
+
+    kvstore["Restore"]  = sol::overload(
+            [](KeyValueStore& kv, const data::JsonObject& json) {
+                return kv.Restore(json);
+            },
+            [](KeyValueStore& kv, const data::Reader& reader) {
+                return kv.Restore(reader);
+            });
+    kvstore["GetValue"] = sol::overload(
+        [](const KeyValueStore& kv, const char* key, sol::this_state state) {
+            sol::state_view lua(state);
+            KeyValueStore::Value value;
+            if (!kv.GetValue(key, &value))
+                throw std::runtime_error("No such key value key: " + std::string(key));
+            return sol::make_object(lua, value);
+        },
+        [](KeyValueStore& kv, const char* key, sol::this_state state, sol::object value) {
+            sol::state_view lua(state);
+            KeyValueStore::Value val;
+            if (kv.GetValue(key, &val))
+                return sol::make_object(lua, val);
+            SetKvValue(kv, key, value);
+            return value;
+        });
+    kvstore["InitValue"] = [](KeyValueStore& kv, const char* key, sol::object value) {
+        if (kv.HasValue(key))
+            return;
+        SetKvValue(kv, key, value);
+    };
 }
 
 } // namespace

@@ -35,6 +35,7 @@ namespace engine
 {
     class PhysicsEngine;
     class AudioEngine;
+    class KeyValueStore;
     struct ContactEvent;
     struct AudioEvent;
     struct MouseEvent;
@@ -51,6 +52,10 @@ namespace engine
         using Action = engine::Action;
 
         virtual ~Game() = default;
+        // Set the default store/scratch pad that the game can
+        // use for sharing data between game and entity scripting
+        // states.
+        virtual void SetStateStore(KeyValueStore* store) = 0;
         // Set physics engine instance.
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) = 0;
         // Set audio engine instance.

@@ -49,6 +49,7 @@
 #include "engine/lua.h"
 #include "engine/format.h"
 #include "engine/ui.h"
+#include "engine/state.h"
 #include "uikit/window.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
@@ -85,10 +86,12 @@ public:
         mSurfaceHeight = init.surface_height;
         mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script, mGameHome, init.application_name);
         mGame->SetPhysicsEngine(&mPhysics);
+        mGame->SetStateStore(&mStateStore);
         mGame->SetAudioEngine(mAudio.get());
         mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");
         mScripting->SetClassLibrary(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
+        mScripting->SetStateStore(&mStateStore);
         mScripting->SetAudioEngine(mAudio.get());
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
@@ -919,7 +922,7 @@ private:
     // update of the game simulation state.
     float mGameTimeStep = 0.0f;
     // The size of the game tick step (in seconds) to take for each
-    // tick of the game staete.
+    // tick of the game state
     float mGameTickStep = 0.0f;
     // accumulation counters for keeping track of left over time
     // available for taking update and tick steps.
@@ -938,6 +941,8 @@ private:
     bool mShowMouseCursor = true;
     // flag to control the debug string printing.
     bool mShowDebugs = true;
+    // The bitbag for storing game state.
+    engine::KeyValueStore mStateStore;
 };
 
 } //namespace

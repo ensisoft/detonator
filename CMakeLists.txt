@@ -209,7 +209,8 @@ add_library(EngineLib
     engine/audio.cpp
     engine/renderer.cpp
     engine/physics.cpp
-    engine/ui.cpp)
+    engine/ui.cpp
+    engine/state.cpp)
 add_library(UiLib
     uikit/layout.cpp
     uikit/widget.cpp
@@ -630,7 +631,8 @@ add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
         game/scriptvar.cpp
         engine/audio.cpp
         engine/lua.cpp
-        engine/physics.cpp)
+        engine/physics.cpp
+        engine/state.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()

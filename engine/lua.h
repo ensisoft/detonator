@@ -42,6 +42,7 @@ namespace engine
                 const std::string& game_home,
                 const std::string& game_name);
        ~LuaGame();
+        virtual void SetStateStore(KeyValueStore* store) override;
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void SetAudioEngine(const AudioEngine* engine) override;
         virtual bool LoadGame(const ClassLibrary* loader) override;
@@ -74,7 +75,8 @@ namespace engine
         const ClassLibrary* mClasslib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
         const AudioEngine* mAudioEngine = nullptr;
-        std::shared_ptr<sol::state> mLuaState;
+        KeyValueStore* mStateStore = nullptr;
+        std::unique_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
         FRect mView;
         game::Scene* mScene = nullptr;
@@ -93,6 +95,8 @@ namespace engine
         { mPhysicsEngine = engine; }
         void SetAudioEngine(const AudioEngine* engine)
         { mAudioEngine = engine; }
+        void SetStateStore(KeyValueStore* store)
+        { mStateStore = store; }
         void BeginPlay(game::Scene* scene);
         void EndPlay(game::Scene* scene);
         void Tick(double game_time, double dt);
@@ -126,6 +130,7 @@ namespace engine
         const ClassLibrary* mClassLib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
         const AudioEngine* mAudioEngine = nullptr;
+        KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
         std::unordered_map<std::string, std::shared_ptr<sol::environment>> mTypeEnvs;
         std::queue<Action> mActionQueue;
