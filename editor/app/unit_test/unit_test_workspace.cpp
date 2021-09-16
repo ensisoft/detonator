@@ -1160,6 +1160,33 @@ void unit_test_packing_texture_name_collision_resample_bug()
     }
 }
 
+void unit_test_export_import()
+{
+    DeleteDir("TestWorkspace");
+    MakeDir("TestWorkspace"); // initially empty workspace folder.
+
+    {
+        app::Workspace workspace("TestWorkspace");
+        // add some user defined content.
+        gfx::ColorClass material;
+        material.SetId("foo123");
+        app::MaterialResource resource(material, "TestMaterial");
+        resource.SetProperty("int", 123);
+        resource.SetProperty("str", QString("hello"));
+        workspace.SaveResource(resource);
+        workspace.ExportResources(std::vector<size_t>{0}, "test_export_import_content.json");
+    }
+
+    {
+        std::vector<std::unique_ptr<app::Resource>> resources;
+        TEST_REQUIRE(app::Workspace::ImportResources("test_export_import_content.json",resources));
+        TEST_REQUIRE(resources.size() == 1);
+        TEST_REQUIRE(resources[0]->GetId() == "foo123");
+        TEST_REQUIRE(resources[0]->GetProperty("int", 0) == 123);
+        TEST_REQUIRE(resources[0]->GetProperty("str", QString()) == "hello");
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -1183,5 +1210,6 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_name_collision();
     unit_test_packing_ui_style_resources();
     unit_test_packing_texture_name_collision_resample_bug();
+    unit_test_export_import();
     return 0;
 }
