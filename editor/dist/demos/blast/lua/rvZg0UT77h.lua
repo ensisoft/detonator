@@ -43,9 +43,11 @@ function EndPlay(player, scene)
     Game:Delay(1.0)
     Game:Stop(0)
     Game:Play('Menu')
-    Game:OpenUI('GameOver')
+    Game:OpenUI('GameOver')  
     Audio:KillMusic('Game Music')
-    Audio:PlayMusic('Ending')
+    if State.play_music then 
+        Audio:PlayMusic('Ending')
+    end
 end
 
 -- Called on every low frequency game tick.

@@ -21,3 +21,9 @@ function SpawnScore(pos, score)
     local text   = node:GetTextItem()
     text:SetText(tostring(score))
 end
+
+function PlayMusic(music)
+    if State.play_music then 
+        Audio:PlayMusic(music)
+    end
+end

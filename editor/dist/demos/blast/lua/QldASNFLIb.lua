@@ -34,12 +34,16 @@ function Explode(redmine, mine_pos)
             end
         end
     end
-    Audio:PlaySoundEffect('Mine Explosion')
+    if State.play_effects then 
+        Audio:PlaySoundEffect('Mine Explosion')
+    end
 end
 
 -- Called when the game play begins for a scene.
 function BeginPlay(redmine, scene)
-    Audio:PlaySoundEffect('Mine Launch')
+    if State.play_effects then 
+        Audio:PlaySoundEffect('Mine Launch')
+    end
 end
 
 -- Called on every low frequency game tick.

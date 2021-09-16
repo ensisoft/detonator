@@ -3403,6 +3403,50 @@
       },
       "gamma": 1.0,
       "gc": false,
+      "id": "OFJHLiHeaP",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "OFJHLiHeaP",
+      "resource_name": "Options Button Moused",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Menu Screen/optionst_buttons.png",
+        "id": "i1mArtd5tU",
+        "name": "optionst_buttons",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
       "id": "RKmQZx8H1s",
       "particle_action": "None",
       "rect": {
@@ -3525,6 +3569,38 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "id": "IRvSQ66eD6",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "IRvSQ66eD6",
+      "resource_name": "Options Button Normal",
+      "shader": "ws://shaders/es2/button.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kTextureRect",
+          "sampler_name": "kTexture",
+          "texture": {
+            "file": "ws://textures/Menu Screen/optionst_buttons.png",
+            "id": "KyLn5d0Z7B",
+            "name": "optionst_buttons",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     },
     {
       "id": "2HWYlifK1N",
@@ -3677,6 +3753,21 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 0.45490196347236633,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.0
+      },
+      "gamma": 1.0,
+      "id": "lu4EmBCEzh",
+      "resource_id": "lu4EmBCEzh",
+      "resource_name": "Background",
+      "static": false,
+      "surface": "Transparent",
+      "type": "Color"
     }
   ],
   "particles": [
@@ -4483,8 +4574,8 @@
                   "id": "RTLiMmUoN2",
                   "name": "play",
                   "position": {
-                    "x": 417.0,
-                    "y": 526.0
+                    "x": 350.0,
+                    "y": 450.0
                   },
                   "size": {
                     "h": 150.0,
@@ -4545,8 +4636,8 @@
                   "id": "XfLEY3G2dj",
                   "name": "exit",
                   "position": {
-                    "x": 625.0,
-                    "y": 523.0
+                    "x": 700.0,
+                    "y": 450.0
                   },
                   "size": {
                     "h": 150.0,
@@ -4583,20 +4674,200 @@
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
-                  "id": "tTKrlLqGrS",
-                  "line_height": 1.0,
-                  "name": "Copy of Label_4",
+                  "id": "GMjpJeWIYM",
+                  "name": "options",
                   "position": {
-                    "x": 400.0,
-                    "y": 400.0
+                    "x": 529.0,
+                    "y": 451.0
                   },
                   "size": {
-                    "h": 105.0,
-                    "w": 399.0
+                    "h": 150.0,
+                    "w": 150.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"tTKrlLqGrS/text-blink\",\"value\":true},{\"key\":\"tTKrlLqGrS/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"tTKrlLqGrS/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"tTKrlLqGrS/font-size\",\"value\":24}]}",
-                  "text": "Press space to play!",
-                  "type": "Label"
+                  "style": "{\"materials\":[{\"key\":\"mouse-over/background\",\"material\":\"OFJHLiHeaP\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"IRvSQ66eD6\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
+                  "text": "",
+                  "type": "PushButton"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PYYxBsykKG",
+      "name": "Options",
+      "resource_id": "PYYxBsykKG",
+      "resource_name": "Options",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "kDgyUDq6fR",
+              "name": "Form_2",
+              "position": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "size": {
+                "h": 800.0,
+                "w": 600.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "ri8naa05Ws",
+                  "name": "Form",
+                  "position": {
+                    "x": 100.0,
+                    "y": 100.0
+                  },
+                  "size": {
+                    "h": 600.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"lu4EmBCEzh\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "type": "Form",
+                  "widgets": [
+                    {
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "raEf5y5Iiv",
+                      "name": "play_music",
+                      "position": {
+                        "x": 50.0,
+                        "y": 100.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 300.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "text": "Play Music",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "fPdlpSge6E",
+                      "name": "play_effects",
+                      "position": {
+                        "x": 50.0,
+                        "y": 200.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 302.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "text": "Play Effects",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "fSQBA6fkb1",
+                      "name": "music_volume",
+                      "position": {
+                        "x": 50.0,
+                        "y": 350.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 302.0
+                      },
+                      "style": "",
+                      "type": "Slider",
+                      "value": 0.5
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "BEEzrCRX9n",
+                      "line_height": 1.0,
+                      "name": "Label_1",
+                      "position": {
+                        "x": 50.0,
+                        "y": 300.0
+                      },
+                      "size": {
+                        "h": 51.0,
+                        "w": 299.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "text": "Music Volume",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "if22vD6l3k",
+                      "line_height": 1.0,
+                      "name": "Label_1",
+                      "position": {
+                        "x": 50.0,
+                        "y": 400.0
+                      },
+                      "size": {
+                        "h": 51.0,
+                        "w": 299.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "text": "Effects volume",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "h1biLTrCXG",
+                      "name": "effects_volume",
+                      "position": {
+                        "x": 50.0,
+                        "y": 450.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 302.0
+                      },
+                      "style": "",
+                      "type": "Slider",
+                      "value": 0.5
+                    }
+                  ]
                 }
               ]
             }

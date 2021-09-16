@@ -131,6 +131,9 @@
     "HyJsrevpdz": {
         "checked_for_packing": true
     },
+    "IRvSQ66eD6": {
+        "checked_for_packing": true
+    },
     "JnQz1XnpaF": {
         "checked_for_packing": true,
         "elem_7ET20Y11sb_pos_x": -38,
@@ -152,7 +155,13 @@
         "elem_AruPmKN2WY_pos_y": -219,
         "mapping_count": 0
     },
+    "OFJHLiHeaP": {
+        "checked_for_packing": true
+    },
     "OtyRiUrsTd": {
+        "checked_for_packing": true
+    },
+    "PYYxBsykKG": {
         "checked_for_packing": true
     },
     "QldASNFLIb": {
@@ -162,6 +171,7 @@
         "checked_for_packing": true
     },
     "RoGbL91JLQ": {
+        "checked_for_packing": true
     },
     "SJmzdnESeH": {
         "checked_for_packing": true,
@@ -259,6 +269,9 @@
     "lOfMr3YBtI": {
         "checked_for_packing": true
     },
+    "lu4EmBCEzh": {
+        "checked_for_packing": true
+    },
     "nQUmTOnClw": {
         "checked_for_packing": true
     },
@@ -349,6 +362,7 @@
         "phys_gravity_y": 10,
         "phys_scale_x": 100,
         "phys_scale_y": 100,
+        "save_window_geometry": true,
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
@@ -443,7 +457,7 @@
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",

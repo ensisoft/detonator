@@ -20,8 +20,15 @@ Menus = {
     MainMenu = 1,
     GameOver = 2
 }
-State = States.Menu
-Menu  = Menus.MainMenu
+
+local GameState = {
+    state = States.Menu,
+    menu  = Menus.MainMenu,
+    music_volume   = 1.0,
+    effects_volume = 1.0,
+    play_music  = true,
+    play_effects = true
+}
 
 function SpawnEnemy(x, y, velocity)
     local ship = ClassLib:FindEntityClassByName('Ship2')
@@ -110,8 +117,10 @@ function EnterGame()
     Game:Play('Game')
     Audio:SetMusicEffect('Menu Music', 'FadeOut', 2000)
     Audio:KillMusic('Menu Music', 2000)
-    Audio:PlayMusic('Game Music')
-    Audio:SetMusicEffect('Game Music', 'FadeIn', 2000)
+    if State.play_music then
+        Audio:PlayMusic('Game Music')
+        Audio:SetMusicEffect('Game Music', 'FadeIn', 2000)
+    end
 end
 
 function EnterMenu()
@@ -123,7 +132,9 @@ function EnterMenu()
     Game:ShowMouse(true)
     Audio:KillMusic('Game Music')
     Audio:KillMusic('Ending')
-    Audio:PlayMusic('Menu Music')
+    if State.play_music then
+        Audio:PlayMusic('Menu Music')
+    end
 end
 
 function InitGameState()
@@ -133,24 +144,50 @@ function InitGameState()
     util.RandomSeed(6634)
 end
 
--- This is called when the game is first loaded when
--- the application is started. Before the call the loader
--- setups the global objects (as documented at the start of
--- of the file) and then proceeds to call LoadGame.
--- The intention of this function is for the game to start
--- the initial state machine. I.e. for example find a menu
--- object and ask for the game to show the menu.
+function LoadGame()
+    Game:DebugPrint('LoadGame')
+    local file = util.JoinPath(game.home, 'state.json')
+    if util.FileExists(file) then
+        local json, error = data.ReadJsonFile(file)
+        if json == nil then
+            base.error('Failed to load game state.')
+            base.error(error)
+            return false
+        end
+        State:Restore(json)
+    end 
+    Audio:SetMusicGain(State:GetValue('music_gain', 1.0))
+    Audio:SetSoundEffectGain(State:GetValue('effects_gain', 1.0))
+    State:InitValue('play_music', true)
+    State:InitValue('play_effects', true)
+    Game:DebugPrint('State loaded')
+    return true
+end
+
 function StartGame()
+    Game:DebugPrint('StartGame')
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
     EnterMenu()
+end
+
+function StopGame()
+    Game:DebugPrint('StopGame')
+end
+
+function SaveGame()
+    Game:DebugPrint('SaveGame')
+    local state_json = util.JoinPath(game.home, 'state.json')
+    local json = data.JsonObject:new()
+    State:Persist(json)
+    data.WriteJsonFile(json, state_json)
 end
 
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay ' .. scene:GetClassName())
     if scene:GetClassName() == 'Menu' then
-        State = States.Menu
+        GameState.state = States.Menu
     elseif scene:GetClassName() == 'Game' then
-        State = States.Play
+        GameState.state = States.Play
         InitGameState()
     end
 end
@@ -160,9 +197,11 @@ function EndPlay(scene)
 end
 
 function Tick(game_time, dt)
+    if Scene == nil then return end
+
     -- spawn a space rock even in the menu.
     SpawnSpaceRock()
-    if State == States.Menu then
+    if GameState.state == States.Menu then
         return
     end
 
@@ -196,16 +235,22 @@ end
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
-        if State == States.Play then
+        if GameState.state == States.Play then
             EnterMenu()
-        elseif State == States.Menu then
-            Game:Quit(0)
+        elseif GameState.state == States.Menu then
+            if GameState.menu == Menus.MainMenu then
+                Game:Quit(0)
+            elseif GameState.menu == Menus.Options then
+                Game:CloseUI(0)
+            elseif GameState.menu == Menus.GameOver then 
+                EnterMenu()
+            end
         end
     elseif symbol == wdk.Keys.Space then
-        if State == States.Menu then
-            if Menu == Menus.MainMenu then
+        if GameState.state == States.Menu then
+            if GameState.menu == Menus.MainMenu then
                 EnterGame()
-            elseif Menu == Menus.GameOver then
+            elseif GameState.menu == Menus.GameOver then
                 EnterMenu()
             end
         end
@@ -217,7 +262,7 @@ end
 
 function OnAudioEvent(event)
     if event.track == 'Game Music' then 
-        if event.type == 'TrackDone'  and State == States.Play then
+        if event.type == 'TrackDone'  and GameState.state == States.Play then
             Audio:PlayMusic('Game Music')
         end
     end 
@@ -226,14 +271,29 @@ end
 function OnUIOpen(ui)
     Game:DebugPrint(ui:GetName() .. ' is open')
     if ui:GetName() == 'MainMenu' then
-        Menu = Menus.MainMenu
+        GameState.menu = Menus.MainMenu
     elseif ui:GetName() == 'GameOver' then
-        Menu = Menus.GameOver
-    end
+        GameState.menu = Menus.GameOver
+    elseif ui:GetName() == 'Options' then
+
+        GameState.menu = Menus.Options
+        local play_music = ui:FindWidgetByName('play_music', 'CheckBox')
+        local play_effects = ui:FindWidgetByName('play_effects', 'CheckBox')
+        local music_volume = ui:FindWidgetByName('music_volume', 'Slider')
+        local effects_volume = ui:FindWidgetByName('effects_volume', 'Slider')     
+
+        play_music:SetChecked(State:GetValue('play_music', true))
+        play_effects:SetChecked(State:GetValue('play_effects', true))
+        music_volume:SetValue(State:GetValue('music_gain', 1.0))
+        effects_volume:SetValue(State:GetValue('effects_gain', 1.0))
+    end    
 end
 
 function OnUIClose(ui, result)
     Game:DebugPrint(ui:GetName() .. ' is closed')
+    if ui:GetName() == 'Options' then 
+        GameState.menu = Menus.MainMenu
+    end
 end
 
 function OnUIAction(ui, action)
@@ -242,6 +302,23 @@ function OnUIAction(ui, action)
     elseif action.name == 'play' then
         Audio:PlaySoundEffect('Menu Click', 0)
         EnterGame()
+    elseif action.name == 'options' then
+        Game:OpenUI('Options')
+    elseif action.name == 'play_music' then 
+        if action.value == false then
+            Audio:KillMusic('Menu Music')
+        else
+            Audio:PlayMusic('Menu Music')
+        end
+        State:SetValue('play_music', action.value)
+    elseif action.name == 'play_effects' then 
+        State:SetValue('play_effects', action.value)
+    elseif action.name == 'music_volume' then
+        State:SetValue('music_gain', action.value)
+        Audio:SetMusicGain(action.value)
+    elseif action.name == 'effects_volume' then 
+        State:SetValue('effects_gain', action.value)
+        Audio:SetSoundEffectGain(action.value)
     end
 end
 

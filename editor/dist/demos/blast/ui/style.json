@@ -183,7 +183,7 @@
 
     {
       "key": "checkbox/check-background",
-      "type": "Gradient",
+      "type": "Null",
       "color0": "Black",
       "color1": "Black",
       "color2": "LightGray",
