@@ -140,8 +140,9 @@ private:
         file.id   = base::RandomString(10);
         file.name = "file";
         file.type = "FileSource";
-        file.args["file"] = audio_file;
-        file.args["type"] = audio::SampleType::Float32;
+        file.args["file"]  = audio_file;
+        file.args["type"]  = audio::SampleType::Float32;
+        file.args["loops"] = 1u;
         graph->AddElement(file);
 
         audio::GraphClass::Element stereo;
@@ -248,8 +249,9 @@ private:
         file.id   = base::RandomString(10);
         file.name = "file";
         file.type = "FileSource";
-        file.args["file"] = audio_file;
-        file.args["type"] = audio::SampleType::Float32;
+        file.args["file"]  = audio_file;
+        file.args["type"]  = audio::SampleType::Float32;
+        file.args["loops"] = 1u;
         graph->AddElement(file);
 
         audio::GraphClass::Element stereo;
