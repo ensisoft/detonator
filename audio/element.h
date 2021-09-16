@@ -840,6 +840,10 @@ namespace audio
         // Commands to modify the state of the source identified
         // by its name. If no such source is found then nothing is done.
 
+        struct DeleteAllSrcCmd {
+            unsigned millisecs = 0;
+        };
+
         // Delete the source.
         struct DeleteSourceCmd {
             std::string name;
@@ -898,6 +902,8 @@ namespace audio
         }
         // Cancel any pending commands on the named source.
         void CancelSourceCommands(const std::string& name);
+        // Delete all sources from the mixer.
+        void DeleteSources();
         // Delete the named source from the mixer.
         void DeleteSource(const std::string& name);
         // Pause/resume the named source. If already paused/playing nothing is done.
@@ -927,6 +933,7 @@ namespace audio
         virtual void ReceiveCommand(Command& cmd) override;
         virtual bool DispatchCommand(const std::string& dest, Command& cmd) override;
     private:
+        void ExecuteCommand(const DeleteAllSrcCmd& cmd);
         void ExecuteCommand(const DeleteSourceCmd& cmd);
         void ExecuteCommand(const PauseSourceCmd& cmd);
         void RemoveDoneEffects(EventQueue& events);

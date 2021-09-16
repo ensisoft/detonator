@@ -96,6 +96,8 @@ namespace engine
         void PauseMusic(const std::string& track, unsigned when = 0);
         // Kill and remove the named music track from the music mixer.
         void KillMusic(const std::string& track, unsigned when = 0);
+        // Kill all currently playing music tracks.
+        void KillAllMusic(unsigned when = 0);
         // Cancel any pending commands on a music track to play/pause/kill.
         void CancelMusicCmds(const std::string& track);
 
@@ -111,6 +113,8 @@ namespace engine
         // Adjust the gain (volume) on the effects stream. There's no strict range
         // for the gain value but you likely want to keep this around (0.0f, 1.0f)
         void SetSoundEffectGain(float gain);
+        // Kill all currently playing sound effects.
+        void KillAllSoundEffects();
 
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of
@@ -135,6 +139,8 @@ namespace engine
         std::size_t mMusicGraphId  = 0;
         // Counter to generate unique element names for effect graphs
         std::size_t mEffectCounter = 0;
+        bool mEnableMusic = true;
+        bool mEnableEffects = true;
     };
 
 } // namespace

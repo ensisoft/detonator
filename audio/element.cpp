@@ -1212,6 +1212,12 @@ void MixerSource::DeleteSource(const std::string& name)
     DEBUG("Deleted MixerSource '%1' source '%2'.", mName, name);
 }
 
+void MixerSource::DeleteSources()
+{
+    mSources.clear();
+    DEBUG("Deleted MixerSource '%1' sources.", mName);
+}
+
 void MixerSource::PauseSource(const std::string& name, bool paused)
 {
     auto it = mSources.find(name);
@@ -1378,6 +1384,8 @@ bool MixerSource::DispatchCommand(const std::string& dest, Command& cmd)
     }
     return false;
 }
+void MixerSource::ExecuteCommand(const DeleteAllSrcCmd& cmd)
+{ DeleteSources(); }
 void MixerSource::ExecuteCommand(const DeleteSourceCmd& cmd)
 { DeleteSource(cmd.name); }
 void MixerSource::ExecuteCommand(const PauseSourceCmd& cmd)

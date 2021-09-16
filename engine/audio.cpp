@@ -169,6 +169,13 @@ void AudioEngine::KillMusic(const std::string& track, unsigned when)
     cmd.millisecs = when;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
+void AudioEngine::KillAllMusic(unsigned int when)
+{
+    audio::MixerSource::DeleteAllSrcCmd cmd;
+    cmd.millisecs = when;
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+}
+
 void AudioEngine::CancelMusicCmds(const std::string& track)
 {
     audio::MixerSource::CancelSourceCmdCmd cmd;
@@ -230,6 +237,12 @@ void AudioEngine::SetSoundEffectGain(float gain)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
+}
+void AudioEngine::KillAllSoundEffects()
+{
+    audio::MixerSource::DeleteAllSrcCmd cmd;
+    cmd.millisecs = 0;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
 void AudioEngine::Tick(AudioEventQueue* events)
