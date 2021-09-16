@@ -759,3 +759,7 @@ add_test(NAME gfx_test_msaa0  COMMAND graphics_test --test          --no-user WO
 add_test(NAME gfx_test_msaa4  COMMAND graphics_test --test --msaa4  --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 add_test(NAME gfx_test_msaa8  COMMAND graphics_test --test --msaa8  --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
 add_test(NAME gfx_test_msaa16 COMMAND graphics_test --test --msaa16 --no-user WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
+
+add_test(NAME audio_test_loop_mp3  COMMAND audio_test --loops 4 --file MP3/Alarm_Loop_00.mp3 WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/audio/test")
+add_test(NAME audio_test_loop_ogg  COMMAND audio_test --loops 4 --file OGG/Alarm_Loop_00.ogg WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/audio/test")
+add_test(NAME audio_test_loop_wav  COMMAND audio_test --loops 4 --file WAV/Alarm_Loop_00.wav WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/audio/test")
