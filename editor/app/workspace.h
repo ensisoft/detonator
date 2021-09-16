@@ -275,6 +275,7 @@ namespace app
         void DuplicateResource(size_t index);
 
         bool ExportResources(const QModelIndexList& list, const QString& filename) const;
+        bool ExportResources(const std::vector<size_t>& indices, const QString& filename) const;
 
         static
         bool ImportResources(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources);

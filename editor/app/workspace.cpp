@@ -1836,18 +1836,36 @@ void Workspace::DuplicateResource(size_t index)
 
 bool Workspace::ExportResources(const QModelIndexList& list, const QString& filename) const
 {
+    std::vector<size_t> indices;
+    for (const auto& index : list)
+        indices.push_back(index.row());
+    return ExportResources(indices, filename);
+}
+
+bool Workspace::ExportResources(const std::vector<size_t>& indices, const QString& filename) const
+{
     data::JsonObject json;
-    for (int i=0; i<list.size(); ++i)
+    for (size_t index : indices)
     {
-        const auto& resource = GetResource(list[i].row());
+        const auto& resource = GetResource(index);
         resource.Serialize(json);
+
+        QJsonObject props;
+        resource.SaveProperties(props);
+        QJsonDocument docu(props);
+        QByteArray bytes = docu.toJson().toBase64();
+
+        const auto& prop_key = resource.GetIdUtf8();
+        const auto& prop_val = std::string(bytes.constData(), bytes.size());
+        json.Write(prop_key.c_str(), prop_val);
     }
+
     data::JsonFile file;
     file.SetRootObject(json);
     const auto [success, error] = file.Save(app::ToUtf8(filename));
     if (!success)
         ERROR("Export resource as JSON error '%1'.", error);
-    else INFO("Exported %1 resource(s) into '%2'", list.size(), filename);
+    else INFO("Exported %1 resource(s) into '%2'", indices.size(), filename);
     return success;
 }
 
@@ -1874,6 +1892,28 @@ bool Workspace::ImportResources(const QString& filename, std::vector<std::unique
     success = success && LoadResources<audio::GraphClass>("audio_graphs", root, resources);
     success = success && LoadResources<uik::Window>("uis", root, resources);
     DEBUG("Loaded %1 resources from '%2'.", resources.size(), filename);
+
+    // restore the properties.
+    for (auto& resource : resources)
+    {
+        const auto& prop_key = resource->GetIdUtf8();
+        std::string prop_val;
+        if (!root.Read(prop_key.c_str(), &prop_val)) {
+            WARN("No properties found for resource '%1'.", prop_key);
+            continue;
+        }
+        if (prop_val.empty())
+            continue;
+
+        const auto& bytes = QByteArray::fromBase64(QByteArray(prop_val.c_str(), prop_val.size()));
+        QJsonParseError error;
+        const auto& docu = QJsonDocument::fromJson(bytes, &error);
+        if (docu.isNull()) {
+            WARN("Json parse error when parsing resource '%1' properties.", prop_key);
+            continue;
+        }
+        resource->LoadProperties(docu.object());
+    }
     return success;
 }
 
