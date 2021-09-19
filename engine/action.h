@@ -30,7 +30,9 @@ namespace engine
     // The top of the stack UI (if any) will be given the chance
     // to process the user input coming from mouse/keyboard.
     struct OpenUIAction {
-        ClassHandle<uik::Window> ui;
+        // window instance. this is a shared_ptr because of the
+        // variant but should be a unique_ptr
+        std::shared_ptr<uik::Window> ui;
     };
     // Close the topmost UI and pop it off of the UI stack.
     struct CloseUIAction {
