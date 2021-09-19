@@ -1073,6 +1073,37 @@ void BindUtil(sol::state& L)
     util["JoinPath"]   = &base::JoinPath;
     util["FileExists"] = &base::FileExists;
     util["RandomString"] = &base::RandomString;
+
+    util["FormatString"] = [](std::string str, sol::variadic_args args) {
+        for (size_t i=0; i<args.size(); ++i) {
+            const auto& arg = args[i];
+            const auto index = i + 1;
+            if (arg.is<std::string>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<std::string>());
+            else if (arg.is<int>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<int>());
+            else if (arg.is<float>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<float>());
+            else if (arg.is<bool>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<bool>());
+            else if (arg.is<base::FSize>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<base::FSize>());
+            else if (arg.is<base::FPoint>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<base::FPoint>());
+            else if (arg.is<base::FRect>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<base::FRect>());
+            else if (arg.is<base::Color4f>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<base::Color4f>());
+            else if (arg.is<glm::vec2>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec2>());
+            else if (arg.is<glm::vec3>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec3>());
+            else if (arg.is<glm::vec4>())
+                str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec4>());
+            else throw std::runtime_error("Unsupported string format value type.");
+        }
+        return str;
+    };
 }
 
 void BindBase(sol::state& L)
@@ -1101,6 +1132,9 @@ void BindBase(sol::state& L)
     rect["Combine"]        = &base::Union<float>;
     rect["Intersect"]      = &base::Intersect<float>;
     rect["TestIntersect"]  = &base::DoesIntersect<float>;
+    rect.set_function(sol::meta_function::to_string, [](const FRect& rect) {
+        return base::ToString(rect);
+    });
 
     sol::constructors<base::FSize(), base::FSize(float, float)> size_ctors;
     auto size = table.new_usertype<base::FSize>("FSize", size_ctors);
@@ -1109,6 +1143,7 @@ void BindBase(sol::state& L)
     size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
     size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
     size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
+    size.set_function(sol::meta_function::to_string, [](const base::FSize& size) { return base::ToString(size); });
 
     sol::constructors<base::FPoint(), base::FPoint(float, float)> point_ctors;
     auto point = table.new_usertype<base::FPoint>("FPoint", point_ctors);
@@ -1116,6 +1151,7 @@ void BindBase(sol::state& L)
     point["GetY"] = &base::FPoint::GetY;
     point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
     point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
+    point.set_function(sol::meta_function::to_string, [](const base::FPoint& point) { return base::ToString(point); });
 
     // build color name table
     for (const auto& color : magic_enum::enum_values<base::Color>())
@@ -1149,7 +1185,7 @@ void BindBase(sol::state& L)
             throw std::runtime_error("No such color value:" + std::to_string(value));
         return base::Color4f(color_value.value());
     };
-
+    color.set_function(sol::meta_function::to_string, [](const base::Color4f& color) { return base::ToString(color); });
 }
 
 void BindData(sol::state& L)
