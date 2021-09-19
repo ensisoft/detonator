@@ -39,15 +39,12 @@ end
 
 -- called when the game play ends for an entity in the scene.
 function EndPlay(player, scene)
-    Game:DebugPrint('Game Over!')
-    Game:Delay(1.0)
-    Game:Stop(0)
-    Game:Play('Menu')
-    Game:OpenUI('GameOver')  
-    Audio:KillMusic('Game Music')
-    if State.play_music then 
-        Audio:PlayMusic('Ending')
-    end
+    local game_over = game.GameEvent:new()
+    game_over.from = 'player'
+    game_over.to   = 'game'
+    game_over.message = 'dead' 
+    game_over.value = Scene.score
+    Game:PostEvent(game_over)
 end
 
 -- Called on every low frequency game tick.

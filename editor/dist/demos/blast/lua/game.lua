@@ -276,6 +276,12 @@ function OnUIOpen(ui)
     Game:DebugPrint(ui:GetName() .. ' is open')
     if ui:GetName() == 'MainMenu' then
         GameState.menu = Menus.MainMenu
+        local hiscore = ui:FindWidgetByName('hiscore', 'Label')
+        if State:HasValue('high_score') then 
+            hiscore:SetText(string.format('High score %d', State.high_score))
+        else
+            hiscore:SetText('No highscore set!')
+        end
     elseif ui:GetName() == 'GameOver' then
         GameState.menu = Menus.GameOver
     elseif ui:GetName() == 'Options' then
@@ -290,7 +296,7 @@ function OnUIOpen(ui)
         music_volume:SetValue(State:GetValue('music_gain', 1.0))
         effects_volume:SetValue(State:GetValue('effects_gain', 1.0))
     elseif ui:GetName() == 'Credits' then
-        GameState.menu = Menus.Credits
+        GameState.menu = Menus.Credits        
     end
 end
 
@@ -330,3 +336,23 @@ function OnUIAction(ui, action)
 end
 
 
+function OnGameEvent(event)
+    if event.from == 'player' and event.message == 'dead' then
+        Game:DebugPrint('Game Over!')
+        Game:Delay(1.0)
+        Game:Stop(0)
+        Game:Play('Menu')
+        Audio:KillMusic('Game Music')
+        local ui = Game:OpenUI('GameOver')  
+        local highscore = ui:FindWidgetByName('highscore')
+        local old_score = State:GetValue('high_score', 0)
+        highscore:SetVisible(event.value > old_score)        
+        if event.value > old_score then 
+            State.high_score = event.value
+            Audio:PlaySoundEffect('Victory', 1000)
+            Audio:PlayMusic('Ending', 5000)
+        else 
+            Audio:PlayMusic('Ending')
+        end
+    end
+end
