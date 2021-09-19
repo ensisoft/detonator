@@ -135,6 +135,21 @@
     "HyJsrevpdz": {
         "checked_for_packing": true
     },
+    "IAJrgwvwpO": {
+        "elem_aJsrCvIyQ1_pos_x": -62,
+        "elem_aJsrCvIyQ1_pos_y": -85,
+        "elem_qERaxJoKYx_pos_x": -336,
+        "elem_qERaxJoKYx_pos_y": -123,
+        "link_qkeikevSmD_dst_x": -61,
+        "link_qkeikevSmD_dst_y": -34,
+        "link_qkeikevSmD_src_x": -136,
+        "link_qkeikevSmD_src_y": -73,
+        "mapping_0_link": "qkeikevSmD",
+        "mapping_0_port": "aJsrCvIyQ1:in",
+        "mapping_1_link": "qkeikevSmD",
+        "mapping_1_port": "qERaxJoKYx:out",
+        "mapping_count": 2
+    },
     "IRvSQ66eD6": {
         "checked_for_packing": true
     },
@@ -188,7 +203,6 @@
         "checked_for_packing": true
     },
     "UWF4u1fYHa": {
-        "checked_for_packing": true
     },
     "XExwRNFj8H": {
         "checked_for_packing": true
@@ -457,7 +471,6 @@
         "checked_for_packing": true
     },
     "wXtbrxNRpX": {
-        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,

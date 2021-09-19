@@ -45,8 +45,8 @@ function Update(bullet, game_time, dt)
                 local score = Scene:FindEntityByInstanceName('GameScore')
                 local node  = score:FindNodeByClassName('text')
                 local text  = node:GetTextItem()
-                score.score = score.score + entity.score
-                text:SetText(tostring(score.score))
+                Scene.score = Scene.score + entity.score
+                text:SetText(tostring(Scene.score))
             end
         elseif entity:GetClassName() == 'Player' and bullet.red == false then
             -- invader ship bullet hit player's ship

@@ -249,6 +249,39 @@
       "resource_name": "Mine Fail",
       "src_elem_id": "7ET20Y11sb",
       "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_gain": 2.0,
+          "id": "aJsrCvIyQ1",
+          "name": "Gain",
+          "type": "Gain"
+        },
+        {
+          "arg_file": "ws://sounds/Victory.mp3",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "qERaxJoKYx",
+          "name": "Victory",
+          "type": "FileSource"
+        }
+      ],
+      "id": "IAJrgwvwpO",
+      "links": [
+        {
+          "dst_elem": "aJsrCvIyQ1",
+          "dst_port": "in",
+          "id": "qkeikevSmD",
+          "src_elem": "qERaxJoKYx",
+          "src_port": "out"
+        }
+      ],
+      "name": "Victory",
+      "resource_id": "IAJrgwvwpO",
+      "resource_name": "Victory",
+      "src_elem_id": "aJsrCvIyQ1",
+      "src_elem_port": "out"
     }
   ],
   "entities": [
@@ -2040,15 +2073,7 @@
       },
       "resource_id": "wXtbrxNRpX",
       "resource_name": "GameScore",
-      "script_file": "",
-      "vars": [
-        {
-          "name": "score",
-          "readonly": false,
-          "type": "Integer",
-          "value": 0
-        }
-      ]
+      "script_file": ""
     },
     {
       "flags": {
@@ -4236,7 +4261,15 @@
       },
       "resource_id": "UWF4u1fYHa",
       "resource_name": "Game",
-      "script_file": ""
+      "script_file": "",
+      "vars": [
+        {
+          "name": "score",
+          "readonly": false,
+          "type": "Integer",
+          "value": 0
+        }
+      ]
     },
     {
       "id": "Z2zrRug3HP",
@@ -4561,8 +4594,29 @@
                     "h": 105.0,
                     "w": 399.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "text": "GAME OVER",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": false
+                  },
+                  "id": "g7dpEOb2pr",
+                  "line_height": 1.0,
+                  "name": "highscore",
+                  "position": {
+                    "x": 350.0,
+                    "y": 500.0
+                  },
+                  "size": {
+                    "h": 98.0,
+                    "w": 499.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "text": "NEW HIGHSCORE",
                   "type": "Label"
                 }
               ]
@@ -4762,6 +4816,27 @@
                   "style": "{\"materials\":[{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"Z2vMjFgL9w\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"AuNZPvQDrI\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "MAbRd4j1tx",
+                  "line_height": 1.0,
+                  "name": "hiscore",
+                  "position": {
+                    "x": 300.0,
+                    "y": 600.0
+                  },
+                  "size": {
+                    "h": 105.0,
+                    "w": 603.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22}]}",
+                  "text": "highscore",
+                  "type": "Label"
                 }
               ]
             }
