@@ -280,7 +280,7 @@
              </sizepolicy>
             </property>
             <property name="maximum">
-             <double>1.000000000000000</double>
+             <double>100.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
