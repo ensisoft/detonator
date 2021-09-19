@@ -83,11 +83,11 @@ namespace engine
         // player but set to paused state. In order to begin playing the track
         // ResumeMusic must be called separately.
         // Returns false if the music graph could not be loaded.
-        bool AddMusic(const GraphHandle& graph);
-        // Similar to AddMusic except that also begins the audio graph
-        // playback immediately.
+        bool PrepareMusicGraph(const GraphHandle& graph);
+        // Similar to PrepareMusicGraph except that also schedules a command
+        // to start the music playback after 'when' milliseconds elapses.
         // Returns false if the music graph could not be loaded.
-        bool PlayMusic(const GraphHandle& graph);
+        bool PlayMusic(const GraphHandle& graph, unsigned when = 0);
         // Schedule a command to start playing the named music track that
         // has previously been paused after 'when' milliseconds elapses.
         void ResumeMusic(const std::string& track, unsigned when = 0);
