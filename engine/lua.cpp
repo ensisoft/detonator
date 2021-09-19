@@ -209,17 +209,21 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         [](LuaGame& self, ClassHandle<uik::Window> model) {
             if (!model)
                 throw std::runtime_error("Nil UI window object.");
+            // there's no "class" object for the UI system so we're just
+            // going to create a mutable copy and put that on the UI stack.
             OpenUIAction action;
-            action.ui = model;
-            self.PushAction(std::move(action));
+            action.ui = std::make_shared<uik::Window>(*model);
+            self.PushAction(action);
+            return action.ui.get();
         },
         [](LuaGame& self, std::string name) {
             auto handle = self.GetClassLib()->FindUIByName(name);
             if (!handle)
                 throw std::runtime_error("No such UI: " + name);
             OpenUIAction action;
-            action.ui = handle;
+            action.ui = std::make_shared<uik::Window>(*handle);
             self.PushAction(action);
+            return action.ui.get();
         });
     engine["CloseUI"] = [](LuaGame& self, int result) {
         CloseUIAction action;

@@ -644,68 +644,72 @@ private:
     }
     inline uik::Window* GetUI()
     {
-        if (mUI.empty())
+        if (mUIStack.empty())
             return nullptr;
-        return mUI.top().get();
+        return mUIStack.top().get();
     }
     inline const uik::Window* GetUI() const
     {
-        if (mUI.empty())
+        if (mUIStack.empty())
             return nullptr;
-        return mUI.top().get();
+        return mUIStack.top().get();
     }
     bool HaveOpenUI() const
-    { return !mUI.empty(); }
+    { return !mUIStack.empty(); }
 
-
-    void OnAction(const engine::OpenUIAction& action)
+    void LoadStyle(const std::string& name)
     {
-        auto window = action.ui;
-
         // todo: if the style loading somehow fails, then what?
         mUIStyle.ClearProperties();
         mUIStyle.ClearMaterials();
         mUIState.Clear();
 
-        auto style_data = mGameDataLoader->LoadGameData(window->GetStyleName());
-        if (!style_data || !mUIStyle.LoadStyle(*style_data))
+        auto data = mGameDataLoader->LoadGameData(name);
+        if (!data)
         {
-            ERROR("The UI style ('%1') could not be loaded.", window->GetStyleName());
+            ERROR("Failed to load UI style '%1' data.", name);
             return;
         }
-        DEBUG("Loaded UI style '%1'", window->GetStyleName());
 
-        // there's no "class" object for the UI system so we're just
-        // going to create a mutable copy and put that on the UI stack.
-        auto ui = std::make_unique<uik::Window>(*window);
-        ui->Style(mUIPainter);
+        if (!mUIStyle.LoadStyle(*data))
+        {
+            ERROR("Failed to parse UI style '%1'.", name);
+            return;
+        }
+        DEBUG("Loaded UI style '%1'", name);
+    }
+
+    void OnAction(const engine::OpenUIAction& action)
+    {
+        auto window = action.ui;
+
+        LoadStyle(window->GetStyleName());
+
+        window->Style(mUIPainter);
         // push the window to the top of the UI stack. this is the new
         // currently active UI
-        mUI.push(std::move(ui));
-        mUIPainter.DeleteMaterialInstances();
+        mUIStack.push(window);
 
-        mGame->OnUIOpen(mUI.top().get());
+        mUIPainter.DeleteMaterialInstances();
+        mUIState.Clear();
+
+        mGame->OnUIOpen(mUIStack.top().get());
     }
     void OnAction(const engine::CloseUIAction& action)
     {
-        if (mUI.empty())
+        if (mUIStack.empty())
             return;
 
-        mGame->OnUIClose(mUI.top().get(), action.result);
-        mUI.pop();
+        mGame->OnUIClose(mUIStack.top().get(), action.result);
+        mUIStack.pop();
 
         if (auto* ui = GetUI())
         {
+            LoadStyle(ui->GetStyleName());
+
             mUIPainter.DeleteMaterialInstances();
-            mUIStyle.ClearProperties();
-            mUIStyle.ClearMaterials();
             mUIState.Clear();
-            auto style_data = mGameDataLoader->LoadGameData(ui->GetStyleName());
-            if (!style_data || !mUIStyle.LoadStyle(*style_data))
-            {
-                ERROR("The UI style ('%1') could not be loaded.", ui->GetStyleName());
-                return;
-            }
+
             ui->Style(mUIPainter);
         }
     }
@@ -900,7 +904,7 @@ private:
     // that gets the mouse/keyboard input events. It's
     // possible that the stack is empty if the game is
     // not displaying any UI
-    std::stack<std::unique_ptr<uik::Window>> mUI;
+    std::stack<std::shared_ptr<uik::Window>> mUIStack;
     // Transient UI state.
     uik::State mUIState;
     // flag to indicate whether the app is still running or not.
