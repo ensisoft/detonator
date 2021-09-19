@@ -32,6 +32,7 @@
 #include <type_traits>
 
 #include "base/types.h"
+#include "base/color4f.h"
 
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
@@ -72,6 +73,7 @@ namespace base
         std::string ToString(const FRect& rect);
         std::string ToString(const FSize& size);
         std::string ToString(const FPoint& point);
+        std::string ToString(const Color4f& color);
 
         template<typename Enum> inline
         std::string EnumToString(const Enum value)

@@ -51,6 +51,15 @@ end
 function make_random_int()
     return util.Random(0, 100)
 end
+function test_format_none()
+    return util.FormatString('huhu')
+end
+function test_format_one(var)
+   return util.FormatString('huhu %1', var)
+end
+function test_format_many()
+   return util.FormatString('%1%2 %3', 'foo', 'bar', 123)
+end
 )");
 
     L["test_random_begin"]();
@@ -65,6 +74,29 @@ end
         TEST_REQUIRE(ret == expected_ints[i]);
         //std::cout << ret << std::endl;
     }
+
+    {
+        auto test_format_none = L["test_format_none"];
+        std::string ret = test_format_none();
+        TEST_REQUIRE(ret == "huhu");
+    }
+
+    {
+        auto test_format_one = L["test_format_one"];
+        std::string ret = test_format_one("string");
+        TEST_REQUIRE(ret == "huhu string");
+        ret = test_format_one(123);
+        TEST_REQUIRE(ret == "huhu 123");
+        ret = test_format_one(1.0f); // output format is locale specific
+        //TEST_REQUIRE(ret == "huhu 1.0");
+    }
+
+    {
+        auto test_format_many = L["test_format_many"];
+        std::string ret = test_format_many();
+        TEST_REQUIRE(ret == "foobar 123");
+    }
+
 }
 
 void unit_test_glm()

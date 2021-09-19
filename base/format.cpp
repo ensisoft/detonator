@@ -122,6 +122,15 @@ std::string ToString(const FPoint& point)
     return buff;
 }
 
+std::string ToString(const Color4f& color)
+{
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "r:%.2f, g:%.2f, b:%.2f, a:%.2f",
+        color.Red(), color.Green(), color.Blue(), color.Alpha());
+    return buff;
+}
+
 std::string ToString(const std::wstring& s)
 {
     //setup converter
