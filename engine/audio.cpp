@@ -118,7 +118,7 @@ void AudioEngine::SetDebugPause(bool on_off)
     }
 }
 
-bool AudioEngine::AddMusic(const GraphHandle& graph)
+bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
 {
     ASSERT(graph);
 
@@ -136,11 +136,11 @@ bool AudioEngine::AddMusic(const GraphHandle& graph)
     return true;
 }
 
-bool AudioEngine::PlayMusic(const GraphHandle& graph)
+bool AudioEngine::PlayMusic(const GraphHandle& graph, unsigned when)
 {
-    if (!AddMusic(graph))
+    if (!PrepareMusicGraph(graph))
         return false;
-    ResumeMusic(graph->GetName(), 0);
+    ResumeMusic(graph->GetName(), when);
     return true;
 }
 

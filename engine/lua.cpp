@@ -1663,18 +1663,18 @@ void BindGameLib(sol::state& L)
     physics["SetLinearVelocity"]    = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::SetLinearVelocity;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
-    audio["AddMusic"] = sol::overload(
+    audio["PrepareMusicGraph"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
                     throw std::runtime_error("Nil audio graph class.");
-                return engine.AddMusic(klass);
+                return engine.PrepareMusicGraph(klass);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
                     throw std::runtime_error("No such audio graph: " + name);
-                return engine.AddMusic(klass);
+                return engine.PrepareMusicGraph(klass);
             });
     audio["PlayMusic"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
@@ -1682,6 +1682,18 @@ void BindGameLib(sol::state& L)
                     throw std::runtime_error("Nil audio graph class.");
                 return engine.PlayMusic(klass);
             },
+            [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
+                if (!klass)
+                    throw std::runtime_error("Nil audio graph class.");
+                return engine.PlayMusic(klass, when);
+            },
+            [](AudioEngine& engine, const std::string& name, unsigned when) {
+                const auto* lib = engine.GetClassLibrary();
+                auto klass = lib->FindAudioGraphClassByName(name);
+                if (!klass)
+                    throw std::runtime_error("No such audio graph: " + name);
+                return engine.PlayMusic(klass, when);
+            },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
@@ -1689,6 +1701,7 @@ void BindGameLib(sol::state& L)
                     throw std::runtime_error("No such audio graph: " + name);
                 return engine.PlayMusic(klass);
             });
+
     audio["ResumeMusic"] = sol::overload(
             [](AudioEngine& engine, const std::string& track, unsigned when) {
                 engine.ResumeMusic(track, when);

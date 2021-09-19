@@ -125,7 +125,7 @@ public:
 
         if (track.empty()) return;
         const auto& name = base::ToString(key.symbol);
-        mEngine->AddMusic(BuildMusicGraph(name, track));
+        mEngine->PrepareMusicGraph(BuildMusicGraph(name, track));
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->ResumeMusic(name);
     }
