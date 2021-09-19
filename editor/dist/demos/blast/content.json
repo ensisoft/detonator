@@ -3447,6 +3447,50 @@
       },
       "gamma": 1.0,
       "gc": false,
+      "id": "AuNZPvQDrI",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "AuNZPvQDrI",
+      "resource_name": "Credits Button Moused",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+        "id": "sxHrljrhni",
+        "name": "Creditst_buttons",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "gc": false,
       "id": "RKmQZx8H1s",
       "particle_action": "None",
       "rect": {
@@ -3569,6 +3613,38 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "id": "Z2vMjFgL9w",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "Z2vMjFgL9w",
+      "resource_name": "Credit Button Normal",
+      "shader": "ws://shaders/es2/button.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kTexture",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kTextureRect",
+          "sampler_name": "kTexture",
+          "texture": {
+            "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+            "id": "9sBNbuo9j9",
+            "name": "Creditst_buttons",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
     },
     {
       "id": "IRvSQ66eD6",
@@ -4488,27 +4564,6 @@
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "text": "GAME OVER",
                   "type": "Label"
-                },
-                {
-                  "flags": {
-                    "Enabled": true,
-                    "VisibleInEditor": true,
-                    "VisibleInGame": true
-                  },
-                  "id": "H3p8Q7ShDR",
-                  "line_height": 1.2000000476837158,
-                  "name": "Label_4",
-                  "position": {
-                    "x": 300.0,
-                    "y": 400.0
-                  },
-                  "size": {
-                    "h": 299.0,
-                    "w": 602.0
-                  },
-                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
-                  "text": "GAMESTUDIO by Sami Väisänen\n\nGraphics by UnLuckY Studio\n\nMusic by Juhani Junkala",
-                  "type": "Label"
                 }
               ]
             }
@@ -4574,7 +4629,7 @@
                   "id": "RTLiMmUoN2",
                   "name": "play",
                   "position": {
-                    "x": 350.0,
+                    "x": 358.0,
                     "y": 450.0
                   },
                   "size": {
@@ -4636,7 +4691,7 @@
                   "id": "XfLEY3G2dj",
                   "name": "exit",
                   "position": {
-                    "x": 700.0,
+                    "x": 471.0,
                     "y": 450.0
                   },
                   "size": {
@@ -4677,8 +4732,8 @@
                   "id": "GMjpJeWIYM",
                   "name": "options",
                   "position": {
-                    "x": 529.0,
-                    "y": 451.0
+                    "x": 584.0,
+                    "y": 450.0
                   },
                   "size": {
                     "h": 150.0,
@@ -4687,6 +4742,102 @@
                   "style": "{\"materials\":[{\"key\":\"mouse-over/background\",\"material\":\"OFJHLiHeaP\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"IRvSQ66eD6\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
                   "text": "",
                   "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "GmBRUeQaas",
+                  "name": "credits",
+                  "position": {
+                    "x": 700.0,
+                    "y": 450.0
+                  },
+                  "size": {
+                    "h": 150.0,
+                    "w": 150.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"Z2vMjFgL9w\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"AuNZPvQDrI\",\"type\":\"Reference\"}]}",
+                  "text": "",
+                  "type": "PushButton"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4eIBhHhK0W",
+      "name": "Credits",
+      "resource_id": "4eIBhHhK0W",
+      "resource_name": "Credits",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "kDgyUDq6fR",
+              "name": "Form_2",
+              "position": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "size": {
+                "h": 800.0,
+                "w": 600.0
+              },
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "ri8naa05Ws",
+                  "name": "Form",
+                  "position": {
+                    "x": 100.0,
+                    "y": 100.0
+                  },
+                  "size": {
+                    "h": 600.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"lu4EmBCEzh\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "type": "Form",
+                  "widgets": [
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "diepBHgxwg",
+                      "line_height": 3.0,
+                      "name": "Label_4",
+                      "position": {
+                        "x": 0.0,
+                        "y": 0.0
+                      },
+                      "size": {
+                        "h": 602.0,
+                        "w": 400.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
+                      "text": "GAMESTUDIO \nSami Vaisanen\n\nGraphics \nUnLuckY Studio\n\nMusic\nJuhani Junkala",
+                      "type": "Label"
+                    }
+                  ]
                 }
               ]
             }
