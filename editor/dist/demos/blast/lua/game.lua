@@ -18,7 +18,9 @@ States = {
 }
 Menus = {
     MainMenu = 1,
-    GameOver = 2
+    GameOver = 2,
+    Options  = 3,
+    Credits  = 4
 }
 
 local GameState = {
@@ -244,6 +246,8 @@ function OnKeyDown(symbol, modifier_bits)
                 Game:CloseUI(0)
             elseif GameState.menu == Menus.GameOver then 
                 EnterMenu()
+            elseif GameState.menu == Menus.Credits then 
+                Game:CloseUI(0)
             end
         end
     elseif symbol == wdk.Keys.Space then
@@ -275,7 +279,6 @@ function OnUIOpen(ui)
     elseif ui:GetName() == 'GameOver' then
         GameState.menu = Menus.GameOver
     elseif ui:GetName() == 'Options' then
-
         GameState.menu = Menus.Options
         local play_music = ui:FindWidgetByName('play_music', 'CheckBox')
         local play_effects = ui:FindWidgetByName('play_effects', 'CheckBox')
@@ -286,7 +289,9 @@ function OnUIOpen(ui)
         play_effects:SetChecked(State:GetValue('play_effects', true))
         music_volume:SetValue(State:GetValue('music_gain', 1.0))
         effects_volume:SetValue(State:GetValue('effects_gain', 1.0))
-    end    
+    elseif ui:GetName() == 'Credits' then
+        GameState.menu = Menus.Credits
+    end
 end
 
 function OnUIClose(ui, result)
@@ -319,6 +324,8 @@ function OnUIAction(ui, action)
     elseif action.name == 'effects_volume' then 
         State:SetValue('effects_gain', action.value)
         Audio:SetSoundEffectGain(action.value)
+    elseif action.name == 'credits' then 
+        Game:OpenUI('Credits')
     end
 end
 
