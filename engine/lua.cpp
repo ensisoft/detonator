@@ -382,6 +382,12 @@ void BindWidgetInterface(sol::usertype<Widget>& widget)
     widget["IsVisible"]      = &Widget::IsVisible;
     widget["Grow"]           = &Widget::Grow;
     widget["Translate"]      = &Widget::Translate;
+    widget["SetVisible"]     = [](uik::Widget& widget, bool on_off) {
+        widget.SetFlag(uik::Widget::Flags::VisibleInGame, on_off);
+    };
+    widget["Enable"] = [](uik::Widget& widget, bool on_off) {
+        widget.SetFlag(uik::Widget::Flags::Enabled, on_off);
+    };
 }
 
 // the problem with using a std random number generation is that
