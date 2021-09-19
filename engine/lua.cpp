@@ -1782,8 +1782,8 @@ void BindGameLib(sol::state& L)
                 return sol::make_object(lua, event.from);
             else if (!std::strcmp(key, "to"))
                 return sol::make_object(lua, event.to);
-            else if (!std::strcmp(key ,"name"))
-                return sol::make_object(lua, event.name);
+            else if (!std::strcmp(key ,"message"))
+                return sol::make_object(lua, event.message);
             else if (!std::strcmp(key, "value"))
                 return sol::make_object(lua, event.value);
             throw std::runtime_error(base::FormatString("No such game event index: %1", key));
@@ -1793,8 +1793,8 @@ void BindGameLib(sol::state& L)
                 event.from = value.as<std::string>();
             else if (!std::strcmp(key, "to"))
                 event.to = value.as<std::string>();
-            else if (!std::strcmp(key, "name"))
-                event.name = value.as<std::string>();
+            else if (!std::strcmp(key, "message"))
+                event.message = value.as<std::string>();
             else if (!std::strcmp(key, "value")) {
                 if (value.is<bool>())
                     event.value = value.as<bool>();
