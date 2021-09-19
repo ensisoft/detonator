@@ -638,13 +638,13 @@ void unit_test_entity_begin_end_play()
 function BeginPlay(entity, scene)
    local event = game.GameEvent:new()
    event.from  = entity:GetName()
-   event.name  = 'begin'
+   event.message = 'begin'
    Game:PostEvent(event)
 end
 function EndPlay(entity, scene)
    local event = game.GameEvent:new()
    event.from = entity:GetName()
-   event.name = 'end'
+   event.message = 'end'
    Game:PostEvent(event)
 end
 )");
@@ -672,7 +672,7 @@ end
     const auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
     TEST_REQUIRE(event->event.from == "entity");
-    TEST_REQUIRE(event->event.name == "begin");
+    TEST_REQUIRE(event->event.message == "begin");
     TEST_REQUIRE(script.HasAction() == false);
 
     scene.BeginLoop();
@@ -690,7 +690,7 @@ end
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
     TEST_REQUIRE(event->event.from == "entity");
-    TEST_REQUIRE(event->event.name == "end");
+    TEST_REQUIRE(event->event.message == "end");
     TEST_REQUIRE(script.HasAction() == false);
 
     scene.BeginLoop();
@@ -712,7 +712,7 @@ end
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
     TEST_REQUIRE(event->event.from == "spawned");
-    TEST_REQUIRE(event->event.name == "begin");
+    TEST_REQUIRE(event->event.message == "begin");
     TEST_REQUIRE(script.HasAction() == false);
 }
 
@@ -720,15 +720,15 @@ void unit_test_entity_tick_update()
 {
     base::OverwriteTextFile("entity_tick_update_test.lua", R"(
 function Tick(entity, game_time, dt)
-   local event = game.GameEvent:new()
-   event.name  = 'tick'
-   event.from  = entity:GetName()
+   local event   = game.GameEvent:new()
+   event.message = 'tick'
+   event.from    = entity:GetName()
    Game:PostEvent(event)
 end
 function Update(entity, game_time, dt)
-   local event = game.GameEvent:new()
-   event.name  = 'update'
-   event.from  = entity:GetName()
+   local event   = game.GameEvent:new()
+   event.message = 'update'
+   event.from    = entity:GetName()
    Game:PostEvent(event)
 end
 )");
@@ -770,7 +770,7 @@ end
     const auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
     TEST_REQUIRE(event->event.from == "foo");
-    TEST_REQUIRE(event->event.name == "tick");
+    TEST_REQUIRE(event->event.message == "tick");
     TEST_REQUIRE(script.HasAction() == false);
 
     script.Update(0.0, 0.0);
@@ -779,7 +779,7 @@ end
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
     TEST_REQUIRE(event->event.from == "bar");
-    TEST_REQUIRE(event->event.name == "update");
+    TEST_REQUIRE(event->event.message == "update");
     TEST_REQUIRE(script.HasAction() == false);
 
 
@@ -794,18 +794,18 @@ void unit_test_entity_private_environment()
     base::OverwriteTextFile("entity_env_foo_test.lua", R"(
 local foobar = 123
 function Tick(entity, game_time, dt)
-   local event = game.GameEvent:new()
-   event.name  = 'foo'
-   event.value = foobar
+   local event   = game.GameEvent:new()
+   event.message = 'foo'
+   event.value   = foobar
    Game:PostEvent(event)
 end
 )");
     base::OverwriteTextFile("entity_env_bar_test.lua", R"(
 local foobar = 321
 function Tick(entity, game_time, dt)
-   local event = game.GameEvent:new()
-   event.name  = 'bar'
-   event.value = foobar
+   local event   = game.GameEvent:new()
+   event.message = 'bar'
+   event.value   = foobar
    Game:PostEvent(event)
 end
 )");
@@ -862,7 +862,7 @@ end
     base::OverwriteTextFile("entity_shared_global_test_bar.lua", R"(
 function Tick(entity, game_time, dt)
    local event = game.GameEvent:new()
-   event.name  = 'bar'
+   event.message = 'bar'
    event.value = _G['foobar']
    Game:PostEvent(event)
 end
@@ -900,7 +900,7 @@ end
     engine::Action action;
     TEST_REQUIRE(script.GetNextAction(&action));
     const auto* event = std::get_if<engine::PostEventAction>(&action);
-    TEST_REQUIRE(event->event.name == "bar");
+    TEST_REQUIRE(event->event.message == "bar");
     TEST_REQUIRE(std::get<int>(event->event.value) == 123);
 
 }

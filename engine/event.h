@@ -61,7 +61,7 @@ namespace engine
         // identification of the receiver.
         std::string to;
         // name/action/meaning of the event.
-        std::string name;
+        std::string message;
         // the value (if any)
         GameEventValue value;
     };

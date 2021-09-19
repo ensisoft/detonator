@@ -137,7 +137,7 @@ end
 -- A game event has the following fields:
 -- 'from' a text string identifying the sender.
 -- 'to' a text string identifier the receiver
--- 'name' a name to attach semantical meaning to the message
+-- 'message' a text message identifying the event or carrying event information
 -- 'value' a value of bool, float, int, string, vec2/3/4, FRect, FSize, FPoint or Color4f
 function OnGameEvent(event)
 
