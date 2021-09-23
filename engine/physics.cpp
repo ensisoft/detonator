@@ -37,6 +37,9 @@ using namespace game;
 inline b2Vec2 GetPosition(const b2Vec2& vec2)
 { return vec2; }
 
+inline b2Vec2 ToBox2D(const glm::vec2& vector)
+{ return b2Vec2 {vector.x, vector.y}; }
+
 namespace engine
 {
 
@@ -409,16 +412,14 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
             }
             else
             {
-                if (physics_node.world_body->GetType() == b2BodyType::b2_kinematicBody)
-                {
-                    // set the instantaneous velocities from the animation system
-                    // to the physics system in order to drive objects physically.
-                    // the velocities are expressed relative to the world.
-                    const auto* body = node->GetRigidBody();
-                    const auto& velo = body->GetLinearVelocity();
-                    physics_node.world_body->SetAngularVelocity(body->GetAngularVelocity());
-                    physics_node.world_body->SetLinearVelocity(b2Vec2(velo.x, velo.y));
-                }
+                auto* rigid_body = node->GetRigidBody();
+                // apply any adjustment done by the animation/game to the physics body.
+                if (rigid_body->HasAngularVelocityAdjustment())
+                    physics_node.world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());
+                if (rigid_body->HasLinearVelocityAdjustment())
+                    physics_node.world_body->SetLinearVelocity(ToBox2D(rigid_body->GetLinearVelocityAdjustment()));
+
+                rigid_body->ClearVelocityAdjustments();
 
                 // get the object's transform properties in the physics world.
                 const auto physics_world_pos = physics_node.world_body->GetPosition();
@@ -441,11 +442,12 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
                 box.Transform(glm::inverse(node_to_world));
                 node->SetTranslation(box.GetCenter());
                 node->SetRotation(box.GetRotation());
-                auto* body = node->GetRigidBody();
+
                 const auto& linear_velocity = physics_node.world_body->GetLinearVelocity();
                 const auto angular_velocity = physics_node.world_body->GetAngularVelocity();
-                body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
-                body->SetAngularVelocity(angular_velocity);
+                // update current instantaneous velocities for other subsystems/game to read
+                rigid_body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
+                rigid_body->SetAngularVelocity(angular_velocity);
             }
         }
         virtual void LeaveNode(EntityNode* node) override

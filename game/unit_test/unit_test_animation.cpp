@@ -174,12 +174,12 @@ void unit_test_kinematic_actuator()
         instance.Start(node);
 
         instance.Apply(node, 1.0f);
-        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(1.0f, 2.0f));
-        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity() == real::float32(3.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocityAdjustment() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocityAdjustment() == real::float32(3.0f));
 
         instance.Apply(node, 0.0f);
-        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocity() == glm::vec2(0.0f, 1.0f));
-        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocity() == real::float32(5.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocityAdjustment() == glm::vec2(0.0f, 1.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocityAdjustment() == real::float32(5.0f));
 
     }
 }

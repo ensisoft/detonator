@@ -182,9 +182,9 @@ void KinematicActuator::Start(EntityNode& node)
     {
         mStartLinearVelocity  = body->GetLinearVelocity();
         mStartAngularVelocity = body->GetAngularVelocity();
-        if (body->GetSimulation() != RigidBodyItemClass::Simulation::Kinematic)
+        if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
         {
-            WARN("EntityNode '%1' is not kinematically simulated.", node.GetName());
+            WARN("EntityNode '%1' is not dynamically or kinematically simulated.", node.GetName());
             WARN("Kinematic actuator will have no effect.");
         }
     }
@@ -201,8 +201,8 @@ void KinematicActuator::Apply(EntityNode& node, float t)
         const auto method = mClass->GetInterpolation();
         const auto linear_velocity = math::interpolate(mStartLinearVelocity, mClass->GetEndLinearVelocity(), t, method);
         const auto angular_velocity = math::interpolate(mStartAngularVelocity, mClass->GetEndAngularVelocity(), t, method);
-        body->SetLinearVelocity(linear_velocity);
-        body->SetAngularVelocity(angular_velocity);
+        body->AdjustLinearVelocity(linear_velocity);
+        body->AdjustAngularVelocity(angular_velocity);
     }
 }
 
@@ -210,8 +210,8 @@ void KinematicActuator::Finish(EntityNode& node)
 {
     if (auto* body = node.GetRigidBody())
     {
-        body->SetLinearVelocity(mClass->GetEndLinearVelocity());
-        body->SetAngularVelocity(mClass->GetEndAngularVelocity());
+        body->AdjustLinearVelocity(mClass->GetEndLinearVelocity());
+        body->AdjustAngularVelocity(mClass->GetEndAngularVelocity());
     }
 }
 
@@ -314,18 +314,18 @@ void SetValueActuator::Apply(EntityNode& node, float t)
     if (param == ParamName::DrawableTimeScale && draw)
         draw->SetTimeScale(value);
     else if (param == ParamName::AngularVelocity && body)
-        body->SetAngularVelocity(value);
+        body->AdjustAngularVelocity(value);
     else if (param == ParamName::LinearVelocityX && body)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.x = value;
-        body->SetLinearVelocity(velocity);
+        body->AdjustLinearVelocity(velocity);
     }
     else if (param == ParamName::LinearVelocityY && body)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.y = value;
-        body->SetLinearVelocity(velocity);
+        body->AdjustLinearVelocity(velocity);
     }
 }
 
