@@ -608,40 +608,40 @@ target_link_libraries(unit_test_workspace EngineLib AudioLib UiLib GfxLib DataLi
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 
+add_library(GameLibTesting
+    game/entity.cpp
+    game/scriptvar.cpp
+    game/animation.cpp
+    game/scene.cpp)
+add_library(EngineLibTesting
+    engine/audio.cpp
+    engine/physics.cpp
+    engine/renderer.cpp
+    engine/lua.cpp
+    engine/state.cpp)
+target_include_directories(GameLibTesting   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
+target_include_directories(EngineLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+if (MSVC)
+    target_compile_options(EngineLibTesting PRIVATE /bigobj)
+endif()
+
+add_executable(unit_test_tree     game/unit_test/unit_test_tree.cpp)
+add_executable(unit_test_anim     game/unit_test/unit_test_animation.cpp)
+add_executable(unit_test_entity   game/unit_test/unit_test_entity.cpp)
+add_executable(unit_test_scene    game/unit_test/unit_test_scene.cpp)
+
 # engine tests
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
-add_executable(unit_test_tree game/unit_test/unit_test_tree.cpp base/assert.cpp)
-add_executable(unit_test_anim game/unit_test/unit_test_animation.cpp
-        game/entity.cpp
-        game/scriptvar.cpp
-        game/animation.cpp)
-add_executable(unit_test_entity game/unit_test/unit_test_entity.cpp
-        game/animation.cpp
-        game/scriptvar.cpp
-        game/entity.cpp)
-add_executable(unit_test_scene game/unit_test/unit_test_scene.cpp
-        game/scene.cpp
-        game/animation.cpp
-        game/scriptvar.cpp
-        game/entity.cpp)
-add_executable(unit_test_lua engine/unit_test/unit_test_lua.cpp
-        game/animation.cpp
-        game/scene.cpp
-        game/entity.cpp
-        game/scriptvar.cpp
-        engine/audio.cpp
-        engine/lua.cpp
-        engine/physics.cpp
-        engine/state.cpp)
+add_executable(unit_test_lua      engine/unit_test/unit_test_lua.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
-target_link_libraries(unit_test_entity   DataLib BaseLib)
-target_link_libraries(unit_test_scene    DataLib BaseLib)
-target_link_libraries(unit_test_lua      DataLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
-target_link_libraries(unit_test_settings DataLib BaseLib)
-target_link_libraries(unit_test_anim     DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_tree     DataLib BaseLib)
+target_link_libraries(unit_test_entity   GameLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_scene    GameLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_anim     GameLibTesting DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_tree     GameLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_lua      EngineLibTesting GameLibTesting DataLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_settings EngineLibTesting DataLib BaseLib)
 
 target_include_directories(unit_test_tree     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_anim     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
