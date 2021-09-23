@@ -1563,19 +1563,19 @@ void BindGameLib(sol::state& L)
     drawable["SetFlag"]       = &SetFlag<DrawableItem>;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
-    body["GetFriction"]        = &RigidBodyItem::GetFriction;
-    body["GetRestitution"]     = &RigidBodyItem::GetRestitution;
-    body["GetAngularDamping"]  = &RigidBodyItem::GetAngularDamping;
-    body["GetLinearDamping"]   = &RigidBodyItem::GetLinearDamping;
-    body["GetDensity"]         = &RigidBodyItem::GetDensity;
-    body["GetPolygonShapeId"]  = &RigidBodyItem::GetPolygonShapeId;
-    body["GetLinearVelocity"]  = &RigidBodyItem::GetLinearVelocity;
-    body["GetAngularVelocity"] = &RigidBodyItem::GetAngularVelocity;
-    body["SetLinearVelocity"]  = &RigidBodyItem::SetLinearVelocity;
-    body["SetAngularVelocity"] = &RigidBodyItem::SetAngularVelocity;
-    body["TestFlag"]           = &TestFlag<RigidBodyItem>;
-    body["SetFlag"]            = &SetFlag<RigidBodyItem>;
-    body["GetSimulationType"]  = [](const RigidBodyItem* item) {
+    body["GetFriction"]           = &RigidBodyItem::GetFriction;
+    body["GetRestitution"]        = &RigidBodyItem::GetRestitution;
+    body["GetAngularDamping"]     = &RigidBodyItem::GetAngularDamping;
+    body["GetLinearDamping"]      = &RigidBodyItem::GetLinearDamping;
+    body["GetDensity"]            = &RigidBodyItem::GetDensity;
+    body["GetPolygonShapeId"]     = &RigidBodyItem::GetPolygonShapeId;
+    body["GetLinearVelocity"]     = &RigidBodyItem::GetLinearVelocity;
+    body["GetAngularVelocity"]    = &RigidBodyItem::GetAngularVelocity;
+    body["AdjustLinearVelocity"]  = &RigidBodyItem::AdjustLinearVelocity;
+    body["AdjustAngularVelocity"] = &RigidBodyItem::AdjustAngularVelocity;
+    body["TestFlag"]              = &TestFlag<RigidBodyItem>;
+    body["SetFlag"]               = &SetFlag<RigidBodyItem>;
+    body["GetSimulationType"]     = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetSimulation());
     };
     body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {

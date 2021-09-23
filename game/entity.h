@@ -532,28 +532,43 @@ namespace game
         { return mInstanceFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mClass->GetPolygonShapeId(); }
-
-        // Get the instantaneous current velocities of the
-        // rigid body under the simulation.
-        // linear velocity is expressed in meters per second
-        // and angular velocity is radians per second.
-        // ! The velocities are expressed in the world coordinate space !
+        // Get the current instantaneous linear velocity of the
+        // rigid body under the physics simulation.
+        // The linear velocity expresses how fast the object is
+        // moving and to which direction. It's expressed in meters per second
+        // using the world coordinate space.
         glm::vec2 GetLinearVelocity() const
         { return mLinearVelocity; }
+        // Get the current instantaneous angular velocity of the
+        // rigid body under the physics simulation.
+        // The angular velocity expresses how fast the object is rotating
+        // around its own center in radians per second.
         float GetAngularVelocity() const
         { return mAngularVelocity; }
-
-        // Set the instantaneous current velocities of the
-        // rigid body under the simulation.
-        // linear velocity is expressed in meters per second
-        // and angular velocity is radians per second.
-        // ! The velocities are expressed in the world coordinate space !
         void SetLinearVelocity(const glm::vec2& velocity)
         { mLinearVelocity = velocity; }
         void SetAngularVelocity(float velocity)
         { mAngularVelocity = velocity; }
         void SetFlag(Flags flag, bool on_off)
         { mInstanceFlags.set(flag, on_off); }
+
+        void AdjustLinearVelocity(const glm::vec2& velocity)
+        { mLinearVelocityAdjustment = velocity; }
+        void AdjustAngularVelocity(float radians)
+        { mAngularVelocityAdjustment = radians; }
+        bool HasLinearVelocityAdjustment() const
+        { return mLinearVelocityAdjustment.has_value(); }
+        bool HasAngularVelocityAdjustment() const
+        { return mAngularVelocityAdjustment.has_value(); }
+        float GetAngularVelocityAdjustment() const
+        { return mAngularVelocityAdjustment.value(); }
+        glm::vec2 GetLinearVelocityAdjustment() const
+        { return mLinearVelocityAdjustment.value(); }
+        void ClearVelocityAdjustments()
+        {
+            mLinearVelocityAdjustment.reset();
+            mAngularVelocityAdjustment.reset();
+        }
 
         const RigidBodyItemClass& GetClass() const
         { return *mClass.get(); }
@@ -575,6 +590,12 @@ namespace game
         float mAngularVelocity = 0.0f;
         // Flags specific to this instance.
         base::bitflag<Flags> mInstanceFlags;
+        // current adjustment to be made to the body's linear
+        // velocity.
+        std::optional<glm::vec2> mLinearVelocityAdjustment;
+        // current adjustment to be made to the body's angular
+        // velocity.
+        std::optional<float> mAngularVelocityAdjustment;
     };
 
     class TextItem
