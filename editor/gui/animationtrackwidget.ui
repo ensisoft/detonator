@@ -723,7 +723,7 @@
            <enum>QFrame::Plain</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="transformActuator">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -1370,7 +1370,7 @@
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete Node Timeline</string>
+    <string>Delete Timeline</string>
    </property>
    <property name="toolTip">
     <string>Delete selected node timeline</string>
