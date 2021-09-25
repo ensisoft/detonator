@@ -262,7 +262,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10009009391069412,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "KG5fOHpMYa",
                 "node": "mqxbWFGIg9",
                 "starttime": 0.0
@@ -273,7 +273,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.10414785146713257,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "sTMBX1vz6w",
                 "node": "mqxbWFGIg9",
                 "starttime": 0.8958521485328674
@@ -284,7 +284,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.09963932633399963,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "QeuPJrbmpq",
                 "node": "2qZDXrpOrX",
                 "starttime": 0.0
@@ -295,7 +295,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10414791107177734,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "OHFoxLJrUF",
                 "node": "2qZDXrpOrX",
                 "starttime": 0.8958520889282227

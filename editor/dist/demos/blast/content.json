@@ -1798,7 +1798,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.5018398761749268,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "21YaGXkIQp",
                 "node": "EQKGzykOAt",
                 "starttime": 0.0

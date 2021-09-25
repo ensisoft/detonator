@@ -2242,7 +2242,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "06gyuPzb5f",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2253,7 +2253,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "JC3lUWX3Ql",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2264,7 +2264,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "Ai9eUuSfLT",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2275,7 +2275,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "s1avLU11xY",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2286,7 +2286,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "vE0jOzB9Al",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2297,7 +2297,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 1.0,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "E1aDIr8lKY",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
@@ -2317,7 +2317,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09909459948539734,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "op5x2NvFOx",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2328,7 +2328,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.09859158843755722,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "yqnECxRbfe",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2339,7 +2339,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09959757328033447,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "HIiYvFjrt5",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2350,7 +2350,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09657948464155197,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "tyr8CZjEKL",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2361,7 +2361,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09507054090499878,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "W7wHPdMQPU",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2372,7 +2372,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09305836260318756,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "v5XjD51HyC",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
@@ -2392,7 +2392,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10261563211679459,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "eHsXYXnOSm",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2403,7 +2403,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10311861336231232,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "4GO5ossMne",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2414,7 +2414,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.1021127998828888,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "v2lpIPoSS5",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2425,7 +2425,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.1006036028265953,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "MJH6wGdHim",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2436,7 +2436,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10060364007949829,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "rF7YiWpIw4",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2447,7 +2447,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.10261568427085876,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "7Lzy2z4gXA",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
@@ -2467,7 +2467,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.0985916405916214,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "DwhRxYGReS",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2478,7 +2478,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09909455478191376,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "7fHrPoitWh",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2489,7 +2489,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09808850288391113,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "kOMtBqgmNz",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2500,7 +2500,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.09909453988075256,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "zArZ66mIS4",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2511,7 +2511,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09708249568939209,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "YjgFLgRgGR",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2522,7 +2522,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.09758555144071579,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "HgA8F8j3t1",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
@@ -2542,7 +2542,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.20271632075309753,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "XnRGMMR7jE",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2553,7 +2553,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.20120733976364136,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "iP8hmKsLaR",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2564,7 +2564,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.20020131766796112,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "OD52kANM1i",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2575,7 +2575,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.2002009004354477,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "JByFlM7KOG",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2586,7 +2586,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.1971834897994995,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "ms9sT29MFj",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2597,7 +2597,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.1986924558877945,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "hS7rTubFpi",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
@@ -2617,7 +2617,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.19969822466373444,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "N2JkMyiHk9",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
@@ -2628,7 +2628,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.1996982842683792,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "6ZAjJr1plq",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
@@ -2639,7 +2639,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.20020121335983276,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "OYeWJs9j6z",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
@@ -2650,7 +2650,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.19969843327999115,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "SvC7JwLtel",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
@@ -2661,7 +2661,7 @@
               "actuator": {
                 "action": "Off",
                 "duration": 0.20070414245128632,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "yuYiHj1dJx",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
@@ -2672,7 +2672,7 @@
               "actuator": {
                 "action": "On",
                 "duration": 0.19919505715370178,
-                "flag": "VisibleInGame",
+                "flag": "Drawable_VisibleInGame",
                 "id": "8ozpAa96iF",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
