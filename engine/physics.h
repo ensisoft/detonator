@@ -166,6 +166,7 @@ namespace engine
             std::string polygonId;
             // RigidBodyItemClass::Collision shape
             unsigned shape = 0;
+            unsigned flags = 0;
         };
         // The nodes represented in the physics simulation.
         std::unordered_map<std::string, PhysicsNode> mNodes;

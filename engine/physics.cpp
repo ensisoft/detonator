@@ -396,8 +396,24 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
                 }
             }
 
+            auto* rigid_body   = node->GetRigidBody();
             auto& physics_node = it->second;
+            if (physics_node.flags != rigid_body->GetFlags().value())
+            {
+                auto* body = physics_node.world_body;
+                body->SetEnabled(rigid_body->TestFlag(RigidBodyItem::Flags::Enabled));
+                body->SetBullet(rigid_body->TestFlag(RigidBodyItem::Flags::Bullet));
+                body->SetFixedRotation(rigid_body->TestFlag(RigidBodyItem::Flags::DiscardRotation));
+                body->SetSleepingAllowed(rigid_body->TestFlag(RigidBodyItem::Flags::CanSleep));
+                b2Fixture* fixture_list_head = body->GetFixtureList();
+                while (fixture_list_head) {
+                    fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
+                    fixture_list_head = fixture_list_head->GetNext();
+                }
+            }
             physics_node.alive = true;
+            physics_node.flags = rigid_body->GetFlags().value();
+
             if (physics_node.world_body->GetType() == b2BodyType::b2_staticBody)
             {
                 auto* body = physics_node.world_body;
@@ -412,7 +428,6 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
             }
             else
             {
-                auto* rigid_body = node->GetRigidBody();
                 // apply any adjustment done by the animation/game to the physics body.
                 if (rigid_body->HasAngularVelocityAdjustment())
                     physics_node.world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());
@@ -700,6 +715,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     physics_node.world_extents = node_size_in_world;
     physics_node.polygonId     = polygonId;
     physics_node.shape         = (unsigned)body->GetCollisionShape();
+    physics_node.flags         = body->GetFlags().value();
 
     mNodes[node.GetId()]   = physics_node;
     mFixtures[fixture_ptr] = node.GetId();
