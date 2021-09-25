@@ -143,8 +143,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::SetValueActuatorClass::Interpolation>(mUI.setvalInterpolation);
     PopulateFromEnum<game::SetValueActuatorClass::ParamName>(mUI.setvalName);
     PopulateFromEnum<game::KinematicActuatorClass::Interpolation>(mUI.kinematicInterpolation);
-    PopulateFromEnum<game::DrawableItemClass::Flags>(mUI.itemFlags, false);
-    PopulateFromEnum<game::RigidBodyItemClass::Flags>(mUI.itemFlags, false);
+    PopulateFromEnum<game::SetFlagActuatorClass::FlagName>(mUI.itemFlags);
     PopulateFromEnum<game::SetFlagActuatorClass::FlagAction>(mUI.flagAction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);

@@ -98,6 +98,22 @@ namespace game
     class SetFlagActuatorClass : public ActuatorClass
     {
     public:
+        enum class FlagName {
+            Drawable_VisibleInGame,
+            Drawable_UpdateMaterial,
+            Drawable_UpdateDrawable,
+            Drawable_Restart,
+            Drawable_FlipVertically,
+            RigidBody_Bullet,
+            RigidBody_Sensor,
+            RigidBody_Enabled,
+            RigidBody_CanSleep,
+            RigidBody_DiscardRotation,
+            TextItem_VisibleInGame,
+            TextItem_Blink,
+            TextItem_Underline
+        };
+
         enum class FlagAction {
             On, Off, Toggle
         };
@@ -136,25 +152,23 @@ namespace game
 
         FlagAction GetFlagAction() const
         { return mFlagAction; }
-        std::string GetFlagName() const
+        FlagName GetFlagName() const
         { return mFlagName; }
-        void SetFlagName(const std::string& name)
+        void SetFlagName(const FlagName name)
         { mFlagName = name; }
         void SetFlagAction(FlagAction action)
         { mFlagAction = action; }
-
     private:
         // id of the actuator.
         std::string mId;
         // id of the node that the action will be applied onto
         std::string mNodeId;
-        // the name of the flag to set.
-        std::string mFlagName;
         // Normalized start time.
         float mStartTime = 0.0f;
         // Normalized duration.
         float mDuration = 1.0f;
         FlagAction mFlagAction = FlagAction::Off;
+        FlagName   mFlagName   = FlagName::Drawable_FlipVertically;
     };
 
     // Modify the kinematic physics body properties, i.e.
@@ -468,6 +482,7 @@ namespace game
         { return mClass->GetNodeId(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<SetFlagActuator>(*this); }
+        bool CanApply(EntityNode& node, bool verbose) const;
     private:
         std::shared_ptr<const SetFlagActuatorClass> mClass;
         bool mStartState = false;

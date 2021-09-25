@@ -217,25 +217,43 @@ void KinematicActuator::Finish(EntityNode& node)
 
 void SetFlagActuator::Start(EntityNode& node)
 {
-    if (const auto* item = node.GetDrawable())
-    {
-        const auto flag = magic_enum::enum_cast<DrawableItemClass::Flags>(mClass->GetFlagName());
-        if (flag.has_value())
-        {
-            mStartState = item->TestFlag(flag.value());
-            return;
-        }
-    }
-    if (const auto* item = node.GetRigidBody())
-    {
-        const auto flag = magic_enum::enum_cast<RigidBodyItemClass::Flags>(mClass->GetFlagName());
-        if (flag.has_value())
-        {
-            mStartState = item->TestFlag(flag.value());
-            return;
-        }
-    }
-    WARN("Unidentified node flag '%1'", mClass->GetFlagName());
+    if (!CanApply(node, true /*verbose*/))
+        return;
+
+    const auto* draw = node.GetDrawable();
+    const auto* body = node.GetRigidBody();
+    const auto* text = node.GetTextItem();
+
+    using FlagName = SetFlagActuatorClass::FlagName;
+    const auto flag = mClass->GetFlagName();
+
+    if (flag == FlagName::Drawable_VisibleInGame)
+        mStartState = draw->TestFlag(DrawableItem::Flags::VisibleInGame);
+    else if (flag == FlagName::Drawable_UpdateMaterial)
+        mStartState = draw->TestFlag(DrawableItem::Flags::UpdateMaterial);
+    else if (flag == FlagName::Drawable_UpdateDrawable)
+        mStartState = draw->TestFlag(DrawableItem::Flags::UpdateDrawable);
+    else if (flag == FlagName::Drawable_Restart)
+        mStartState = draw->TestFlag(DrawableItem::Flags::RestartDrawable);
+    else if (flag == FlagName::Drawable_FlipVertically)
+        mStartState = draw->TestFlag(DrawableItem::Flags::FlipVertically);
+    else if (flag == FlagName::RigidBody_Bullet)
+        mStartState = body->TestFlag(RigidBodyItem::Flags::Bullet);
+    else if (flag == FlagName::RigidBody_Sensor)
+        mStartState = body->TestFlag(RigidBodyItem::Flags::Sensor);
+    else if (flag == FlagName::RigidBody_Enabled)
+        mStartState = body->TestFlag(RigidBodyItem::Flags::Enabled);
+    else if (flag == FlagName::RigidBody_CanSleep)
+        mStartState = body->TestFlag(RigidBodyItem::Flags::CanSleep);
+    else if (flag == FlagName::RigidBody_DiscardRotation)
+        mStartState = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
+    else if (flag == FlagName::TextItem_VisibleInGame)
+        mStartState = text->TestFlag(TextItem::Flags::VisibleInGame);
+    else if (flag == FlagName::TextItem_Blink)
+        mStartState = text->TestFlag(TextItem::Flags::BlinkText);
+    else if (flag == FlagName::TextItem_Underline)
+        mStartState = text->TestFlag(TextItem::Flags::UnderlineText);
+    else BUG("Unhandled flag in set flag actuator.");
 }
 void SetFlagActuator::Apply(EntityNode& node, float t)
 {
@@ -243,6 +261,9 @@ void SetFlagActuator::Apply(EntityNode& node, float t)
 }
 void SetFlagActuator::Finish(EntityNode& node)
 {
+    if (!CanApply(node, false))
+        return;
+
     bool next_value = false;
     const auto action = mClass->GetFlagAction();
     if (action == FlagAction::Toggle)
@@ -252,25 +273,92 @@ void SetFlagActuator::Finish(EntityNode& node)
     else if (action == FlagAction::Off)
         next_value = false;
 
-    if (auto* item = node.GetDrawable())
+    auto* draw = node.GetDrawable();
+    auto* body = node.GetRigidBody();
+    auto* text = node.GetTextItem();
+
+    using FlagName = SetFlagActuatorClass::FlagName;
+    const auto flag = mClass->GetFlagName();
+
+    if (flag == FlagName::Drawable_VisibleInGame)
+        draw->SetFlag(DrawableItem::Flags::VisibleInGame, next_value);
+    else if (flag == FlagName::Drawable_UpdateMaterial)
+        draw->SetFlag(DrawableItem::Flags::UpdateMaterial, next_value);
+    else if (flag == FlagName::Drawable_UpdateDrawable)
+        draw->SetFlag(DrawableItem::Flags::UpdateDrawable, next_value);
+    else if (flag == FlagName::Drawable_Restart)
+        draw->SetFlag(DrawableItem::Flags::RestartDrawable, next_value);
+    else if (flag == FlagName::Drawable_FlipVertically)
+        draw->SetFlag(DrawableItem::Flags::FlipVertically, next_value);
+    else if (flag == FlagName::RigidBody_Bullet)
+        body->SetFlag(RigidBodyItem::Flags::Bullet, next_value);
+    else if (flag == FlagName::RigidBody_Sensor)
+        body->SetFlag(RigidBodyItem::Flags::Sensor, next_value);
+    else if (flag == FlagName::RigidBody_Enabled)
+        body->SetFlag(RigidBodyItem::Flags::Enabled, next_value);
+    else if (flag == FlagName::RigidBody_CanSleep)
+        body->SetFlag(RigidBodyItem::Flags::CanSleep, next_value);
+    else if (flag == FlagName::RigidBody_DiscardRotation)
+        body->SetFlag(RigidBodyItem::Flags::DiscardRotation, next_value);
+    else if (flag == FlagName::TextItem_VisibleInGame)
+        text->SetFlag(TextItem::Flags::VisibleInGame, next_value);
+    else if (flag == FlagName::TextItem_Blink)
+        text->SetFlag(TextItem::Flags::BlinkText, next_value);
+    else if (flag == FlagName::TextItem_Underline)
+        text->SetFlag(TextItem::Flags::UnderlineText, next_value);
+    else BUG("Unhandled flag in set flag actuator.");
+
+    DEBUG("Set EntityNode '%1' flag '%2' to '%3'.", node.GetName(), flag, next_value ? "On" : "Off");
+}
+
+bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
+{
+    auto* draw = node.GetDrawable();
+    auto* body = node.GetRigidBody();
+    auto* text = node.GetTextItem();
+
+    using FlagName = SetFlagActuatorClass::FlagName;
+    const auto flag = mClass->GetFlagName();
+
+    if (flag == FlagName::Drawable_VisibleInGame ||
+        flag == FlagName::Drawable_UpdateMaterial ||
+        flag == FlagName::Drawable_UpdateDrawable ||
+        flag == FlagName::Drawable_Restart ||
+        flag == FlagName::Drawable_FlipVertically)
     {
-        const auto flag = magic_enum::enum_cast<DrawableItemClass::Flags>(mClass->GetFlagName());
-        if (flag.has_value())
+        if (!draw && verbose)
         {
-            item->SetFlag(flag.value(), next_value);
-            return;
+            WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
+            WARN("Setting a drawable flag '%1' will have no effect.", flag);
         }
+        return draw != nullptr;
     }
-    if (auto* item = node.GetRigidBody())
+    else if (flag == FlagName::RigidBody_Bullet ||
+             flag == FlagName::RigidBody_Sensor ||
+             flag == FlagName::RigidBody_Enabled ||
+             flag == FlagName::RigidBody_CanSleep ||
+             flag == FlagName::RigidBody_DiscardRotation)
     {
-        const auto flag = magic_enum::enum_cast<RigidBodyItemClass::Flags>(mClass->GetFlagName());
-        if (flag.has_value())
+        if (!body && verbose)
         {
-            item->SetFlag(flag.value(), next_value);
-            return;
+            WARN("EntityNode '%1' doesn't have a rigid body.", node.GetName());
+            WARN("Setting a rigid body flag '%1' will have no effect.", flag);
         }
+        return body != nullptr;
     }
-    WARN("Unidentified node flag '%1'", mClass->GetFlagName());
+    else if (flag == FlagName::TextItem_VisibleInGame ||
+             flag == FlagName::TextItem_Underline ||
+             flag == FlagName::TextItem_Blink)
+    {
+        if (!text && verbose)
+        {
+            WARN("EntityNode '%1' doesn't have a text item.", node.GetName());
+            WARN("Setting a text item flag '%1' will have no effect.", flag);
+        }
+        return text != nullptr;
+    }
+    else BUG("Unhandled flag in set flag actuator.");
+    return true;
 }
 
 void SetValueActuator::Start(EntityNode& node)
