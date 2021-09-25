@@ -3149,7 +3149,8 @@
       "min_filter": "Default",
       "resource_id": "r9CF1o27zZ",
       "resource_name": "Shockwave2",
-      "shader": "ws://shaders/es2/disc.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/disc.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
@@ -3205,7 +3206,8 @@
       "min_filter": "Default",
       "resource_id": "2a488SIQsU",
       "resource_name": "Shockwave",
-      "shader": "ws://shaders/es2/disc.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/disc.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
@@ -3318,7 +3320,8 @@
       "min_filter": "Default",
       "resource_id": "EgsgPADEqi",
       "resource_name": "BluePulse",
-      "shader": "ws://shaders/es2/pulsing.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/pulsing.glsl",
       "surface": "Opaque",
       "type": "Custom",
       "uniforms": [
@@ -3341,7 +3344,8 @@
       "min_filter": "Default",
       "resource_id": "HnopPLXPe5",
       "resource_name": "RedPulse",
-      "shader": "ws://shaders/es2/pulsing.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/pulsing.glsl",
       "surface": "Opaque",
       "type": "Custom",
       "uniforms": [
@@ -3364,7 +3368,8 @@
       "min_filter": "Default",
       "resource_id": "Kb5sHrP5bL",
       "resource_name": "Blast Title",
-      "shader": "ws://shaders/es2/text.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/text.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -3645,7 +3650,8 @@
       "min_filter": "Default",
       "resource_id": "Z2vMjFgL9w",
       "resource_name": "Credit Button Normal",
-      "shader": "ws://shaders/es2/button.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/button.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
@@ -3677,7 +3683,8 @@
       "min_filter": "Default",
       "resource_id": "IRvSQ66eD6",
       "resource_name": "Options Button Normal",
-      "shader": "ws://shaders/es2/button.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/button.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
@@ -3709,7 +3716,8 @@
       "min_filter": "Default",
       "resource_id": "2HWYlifK1N",
       "resource_name": "Exit button Normal",
-      "shader": "ws://shaders/es2/button.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/button.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
@@ -3741,7 +3749,8 @@
       "min_filter": "Default",
       "resource_id": "tetreytAkz",
       "resource_name": "Play Button Normal",
-      "shader": "ws://shaders/es2/button.glsl",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/button.glsl",
       "surface": "Transparent",
       "texture_maps": [
         {
