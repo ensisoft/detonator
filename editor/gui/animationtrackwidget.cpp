@@ -898,7 +898,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     QMenu add_timeline(this);
     add_timeline.setEnabled(true);
     add_timeline.setIcon(QIcon("icons:add.png"));
-    add_timeline.setTitle(tr("Add Node Timeline ..."));
+    add_timeline.setTitle(tr("New Timeline ..."));
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
@@ -941,13 +941,11 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
             action->setData(seconds);
         }
     }
+    menu.addMenu(&add_timeline);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteActuator);
-    menu.addSeparator();
-    menu.addMenu(&add_timeline);
-    menu.addAction(mUI.actionDeleteTimeline);
-    menu.addSeparator();
     menu.addAction(mUI.actionDeleteActuators);
+    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());
