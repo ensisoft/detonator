@@ -1679,6 +1679,7 @@ CustomMaterialClass::CustomMaterialClass(const CustomMaterialClass& other, bool 
 {
     mClassId     = copy ? other.mClassId : base::RandomString(10);
     mShaderUri   = other.mShaderUri;
+    mShaderSrc   = other.mShaderSrc;
     mUniforms    = other.mUniforms;
     mSurfaceType = other.mSurfaceType;
     mMinFilter   = other.mMinFilter;
@@ -1777,7 +1778,9 @@ gfx::Shader* CustomMaterialClass::GetShader(Device& device) const
     if (auto* shader = device.FindShader(mClassId))
         return shader;
     auto* shader = device.MakeShader(mClassId);
-    shader->CompileFile(mShaderUri);
+    if (!mShaderSrc.empty())
+        shader->CompileSource(mShaderSrc);
+    else shader->CompileFile(mShaderUri);
     return shader;
 }
 std::size_t CustomMaterialClass::GetHash() const
@@ -1785,6 +1788,7 @@ std::size_t CustomMaterialClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mShaderUri);
+    hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mMinFilter);
     hash = base::hash_combine(hash, mMagFilter);
@@ -1915,14 +1919,15 @@ void CustomMaterialClass::ApplyStaticState(Device& device, Program& prog) const
 }
 void CustomMaterialClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type", Type::Custom);
-    data.Write("id",      mClassId);
-    data.Write("shader",  mShaderUri);
-    data.Write("surface", mSurfaceType);
-    data.Write("min_filter", mMinFilter);
-    data.Write("mag_filter", mMagFilter);
-    data.Write("wrap_x", mWrapX);
-    data.Write("wrap_y", mWrapY);
+    data.Write("type",  Type::Custom);
+    data.Write("id",          mClassId);
+    data.Write("shader_uri",  mShaderUri);
+    data.Write("shader_src",  mShaderSrc);
+    data.Write("surface",     mSurfaceType);
+    data.Write("min_filter",  mMinFilter);
+    data.Write("mag_filter",  mMagFilter);
+    data.Write("wrap_x",      mWrapX);
+    data.Write("wrap_y",      mWrapY);
 
     // use an ordered set for persisting the data to make sure
     // that the order in which the uniforms are written out is
@@ -1972,13 +1977,14 @@ bool ReadUniform(const data::Reader& data, MaterialClass::Uniform& u)
 
 bool CustomMaterialClass::FromJson2(const data::Reader& data)
 {
-    data.Read("id",      &mClassId);
-    data.Read("shader",  &mShaderUri);
-    data.Read("surface", &mSurfaceType);
-    data.Read("min_filter",    &mMinFilter);
-    data.Read("mag_filter",    &mMagFilter);
-    data.Read("wrap_x",        &mWrapX);
-    data.Read("wrap_y",        &mWrapY);
+    data.Read("id",         &mClassId);
+    data.Read("shader_uri", &mShaderUri);
+    data.Read("shader_src", &mShaderSrc);
+    data.Read("surface",    &mSurfaceType);
+    data.Read("min_filter", &mMinFilter);
+    data.Read("mag_filter", &mMagFilter);
+    data.Read("wrap_x",     &mWrapX);
+    data.Read("wrap_y",     &mWrapY);
     for (unsigned i=0; i<data.GetNumChunks("uniforms"); ++i)
     {
         Uniform u;
@@ -2085,6 +2091,7 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
     CustomMaterialClass tmp(other, true);
     std::swap(mClassId, tmp.mClassId);
     std::swap(mShaderUri, tmp.mShaderUri);
+    std::swap(mShaderSrc, tmp.mShaderSrc);
     std::swap(mUniforms, tmp.mUniforms);
     std::swap(mSurfaceType, tmp.mSurfaceType);
     std::swap(mTextureMaps, tmp.mTextureMaps);

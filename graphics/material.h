@@ -1258,6 +1258,8 @@ namespace gfx
         { mWrapY = wrap; }
         void SetShaderUri(const std::string& uri)
         { mShaderUri = uri; }
+        void SetShaderSrc(const std::string& src)
+        { mShaderSrc = src; }
         void SetUniform(const std::string& name, const Uniform& value)
         { mUniforms[name] = value; }
         void SetUniform(const std::string& name, Uniform&& value)
@@ -1297,6 +1299,8 @@ namespace gfx
         { return mUniforms; }
         std::string GetShaderUri() const
         { return mShaderUri; }
+        std::string GetShaderSrc() const
+        { return mShaderSrc; }
         MinTextureFilter GetTextureMinFilter() const
         { return mMinFilter; }
         MagTextureFilter GetTextureMagFilter() const
@@ -1351,6 +1355,7 @@ namespace gfx
     private:
         std::string mClassId;
         std::string mShaderUri;
+        std::string mShaderSrc;
         std::unordered_map<std::string, Uniform> mUniforms;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         MinTextureFilter mMinFilter = MinTextureFilter::Default;
