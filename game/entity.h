@@ -532,6 +532,8 @@ namespace game
         { return mInstanceFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mClass->GetPolygonShapeId(); }
+        base::bitflag<Flags> GetFlags() const
+        { return mInstanceFlags; }
         // Get the current instantaneous linear velocity of the
         // rigid body under the physics simulation.
         // The linear velocity expresses how fast the object is
