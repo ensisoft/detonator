@@ -46,6 +46,9 @@ namespace engine
     class ClassLibrary
     {
     public:
+        template<typename T>
+        using ClassHandle = std::shared_ptr<const T>;
+
         virtual ~ClassLibrary() = default;
         // Find an audio subsystem provided audio graph class object by its class id.
         // If not found will return nullptr.
