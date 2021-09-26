@@ -151,7 +151,21 @@
       </widget>
      </item>
      <item row="1" column="4">
-      <widget class="color_widgets::ColorSelector" name="color"/>
+      <widget class="color_widgets::ColorSelector" name="color">
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
+      <widget class="QLineEdit" name="string">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -169,6 +183,14 @@
    <header>color_selector.hpp</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>value_x</tabstop>
+  <tabstop>value_y</tabstop>
+  <tabstop>value_z</tabstop>
+  <tabstop>value_w</tabstop>
+  <tabstop>color</tabstop>
+  <tabstop>string</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -19,125 +19,49 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include "ui_uniform.h"
 #  include <QWidget>
 #  include <glm/glm.hpp>
 #include "warnpop.h"
 
-#include "editor/gui/utility.h"
+namespace Ui {
+    class Uniform;
+}
 
 namespace gui
 {
+    // todo: rename to MultiValueWidget or something
     class Uniform : public QWidget
     {
         Q_OBJECT
 
     public:
         enum class Type {
-            Float, Vec2, Vec3, Vec4, Color
+            Float, Vec2, Vec3, Vec4, Color, String
         };
-        Uniform(QWidget* parent) : QWidget(parent)
-        {
-            mUI.setupUi(this);
-            mUI.label_x->setVisible(false);
-            mUI.label_y->setVisible(false);
-            mUI.label_z->setVisible(false);
-            mUI.label_w->setVisible(false);
-            mUI.value_x->setVisible(false);
-            mUI.value_y->setVisible(false);
-            mUI.value_z->setVisible(false);
-            mUI.value_w->setVisible(false);
-            mUI.color->setVisible(false);
-        }
-        void SetType(Type type)
-        {
-            if (type == Type::Float)
-            {
-                mUI.value_x->setVisible(true);
-            }
-            else if (type == Type::Vec2)
-            {
-                mUI.value_x->setVisible(true);
-                mUI.value_y->setVisible(true);
-                mUI.label_x->setVisible(true);
-                mUI.label_y->setVisible(true);
-            }
-            else if (type == Type::Vec3)
-            {
-                mUI.value_x->setVisible(true);
-                mUI.value_y->setVisible(true);
-                mUI.value_z->setVisible(true);
-                mUI.label_x->setVisible(true);
-                mUI.label_y->setVisible(true);
-                mUI.label_z->setVisible(true);
-            }
-            else if (type == Type::Vec4)
-            {
-                mUI.value_x->setVisible(true);
-                mUI.value_y->setVisible(true);
-                mUI.value_z->setVisible(true);
-                mUI.value_w->setVisible(true);
-                mUI.label_x->setVisible(true);
-                mUI.label_y->setVisible(true);
-                mUI.label_z->setVisible(true);
-                mUI.label_w->setVisible(true);
-            }
-            else if (type== Type::Color)
-                mUI.color->setVisible(true);
-        }
-        void SetValue(float value)
-        {
-            gui::SetValue(mUI.value_x, value);
-        }
-        void SetValue(const glm::vec2& value)
-        {
-            gui::SetValue(mUI.value_x, value.x);
-            gui::SetValue(mUI.value_y, value.y);
-        }
-        void SetValue(const glm::vec3& value)
-        {
-            gui::SetValue(mUI.value_x, value.x);
-            gui::SetValue(mUI.value_y, value.y);
-            gui::SetValue(mUI.value_z, value.z);
-        }
-        void SetValue(const glm::vec4& value)
-        {
-            gui::SetValue(mUI.value_x, value.x);
-            gui::SetValue(mUI.value_y, value.y);
-            gui::SetValue(mUI.value_z, value.z);
-            gui::SetValue(mUI.value_w, value.w);
-        }
-        void SetValue(QColor color)
-        { gui::SetValue(mUI.color, color); }
-        float GetAsFloat() const
-        { return gui::GetValue(mUI.value_x); }
-        glm::vec2 GetAsVec2() const
-        {
-            return {gui::GetValue(mUI.value_x),
-                    gui::GetValue(mUI.value_y)};
-        }
-        glm::vec3 GetAsVec3() const
-        {
-            return {gui::GetValue(mUI.value_x),
-                    gui::GetValue(mUI.value_y),
-                    gui::GetValue(mUI.value_z)};
-        }
-        glm::vec4 GetAsVec4() const
-        {
-            return {gui::GetValue(mUI.value_x),
-                    gui::GetValue(mUI.value_y),
-                    gui::GetValue(mUI.value_z),
-                    gui::GetValue(mUI.value_w)};
-        }
-        QColor GetAsColor() const
-        {
-            return mUI.color->color();
-        }
+        Uniform(QWidget* parent);
+       ~Uniform();
 
+        void SetType(Type type);
+        void SetValue(float value);
+        void SetValue(const glm::vec2& value);
+        void SetValue(const glm::vec3& value);
+        void SetValue(const glm::vec4& value);
+        void SetValue(QColor color);
+        void SetValue(QString string);
+        void SetValue(const std::string& str);
+        float GetAsFloat() const;
+        glm::vec2 GetAsVec2() const;
+        glm::vec3 GetAsVec3() const;
+        glm::vec4 GetAsVec4() const;
+        QColor GetAsColor() const;
+        QString GetAsString() const;
         void SetName(QString name)
         { mName = name; }
         QString GetName() const
         { return mName; }
+    private:
+        void HideEverything();
+
     signals:
         void ValueChanged(const Uniform* uniform);
     private slots:
@@ -151,8 +75,10 @@ namespace gui
         { emit ValueChanged(this); };
         void on_color_colorChanged(QColor)
         { emit ValueChanged(this); }
+        void on_string_editingFinished()
+        { emit ValueChanged(this); }
     private:
-        Ui::Uniform mUI;
+        Ui::Uniform* mUI = nullptr;
     private:
         QString mName;
     };

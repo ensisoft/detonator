@@ -42,6 +42,7 @@
 #include "editor/app/resource.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/timewidget.h"
+#include "editor/gui/uniform.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -391,6 +392,58 @@ inline void SetValue(QSlider* slider, NormalizedFloat value)
     QSignalBlocker s(slider);
     const float max = slider->maximum();
     slider->setValue(value.value * max);
+}
+
+inline void SetValue(Uniform* uniform, float value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Float);
+    uniform->SetValue(value);
+}
+
+inline void SetValue(Uniform* uniform, const glm::vec2& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Vec2);
+    uniform->SetValue(value);
+}
+
+inline void SetValue(Uniform* uniform, const glm::vec3& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Vec3);
+    uniform->SetValue(value);
+}
+
+inline void SetValue(Uniform* uniform, const glm::vec4& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Vec4);
+    uniform->SetValue(value);
+}
+inline void SetValue(Uniform* uniform, const QString& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::String);
+    uniform->SetValue(value);
+}
+inline void SetValue(Uniform* uniform, const QColor& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Color);
+    uniform->SetValue(value);
+}
+inline void SetValue(Uniform* uniform, const gfx::Color4f& color)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::Color);
+    uniform->SetValue(FromGfx(color));
+}
+inline void SetValue(Uniform* uniform, const std::string& value)
+{
+    QSignalBlocker s(uniform);
+    uniform->SetType(Uniform::Type::String);
+    uniform->SetValue(app::FromUtf8(value));
 }
 
 inline float GetNormalizedValue(QSlider* slider)
