@@ -190,14 +190,29 @@ namespace base
         float mAlpha = 1.0f;
     };
 
-    inline
-    Color4f operator * (const Color4f& color, float scalar)
+    inline Color4f operator*(const Color4f& color, float scalar)
     {
         const auto r = color.Red();
         const auto g = color.Green();
         const auto b = color.Blue();
         const auto a = color.Alpha();
         return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+    inline Color4f operator*(float scalar, const Color4f& color)
+    {
+        const auto r = color.Red();
+        const auto g = color.Green();
+        const auto b = color.Blue();
+        const auto a = color.Alpha();
+        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+    inline Color4f operator+(const Color4f& lhs, const Color4f& rhs)
+    {
+        return Color4f(lhs.Red()    + rhs.Red(),
+                       lhs.Green() + rhs.Green(),
+                       lhs.Blue()   + rhs.Blue(),
+                       lhs.Alpha() + rhs.Alpha());
+
     }
 
 } // namespace
