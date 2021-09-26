@@ -24,6 +24,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <variant>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -57,6 +58,14 @@ namespace data
         virtual bool HasValue(const char* name) const = 0;
 
         // helpers
+        template<typename... T>
+        void Write(const char* name, const std::variant<T...>& variant)
+        {
+            std::visit([this, name](const auto& variant_value) {
+                this->Write(name, variant_value);
+            }, variant);
+        }
+
         template<typename T>
         void Write(const char* name, T value)
         {

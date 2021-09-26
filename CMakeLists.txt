@@ -559,6 +559,13 @@ target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
 # unit tests
 enable_testing()
 
+#data unit tests
+add_executable(unit_test_data data/unit_test/unit_test.cpp
+        data/json.cpp)
+add_test(NAME unit_test_data COMMAND unit_test_data)
+target_include_directories(unit_test_data PRIVATE "${CMAKE_CURRENT_LIST_DIR}/data/unit_test")
+target_link_libraries(unit_test_data PRIVATE BaseLib)
+
 #editor unit tests
 add_executable(unit_test_imgpack
         editor/app/unit_test/unit_test_image_packing.cpp

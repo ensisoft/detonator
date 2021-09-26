@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <tuple>
+#include <variant>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -56,6 +57,12 @@ namespace data
         virtual unsigned GetNumChunks(const char* name) const = 0;
 
         // helpers
+        template<typename... T>
+        bool Read(const char* name, std::variant<T...>* out) const
+        {
+            return ReadVariantAlternative<0>(name, out);
+        }
+
         template<typename T>
         bool Read(const char* name, T* out) const
         {
@@ -110,5 +117,21 @@ namespace data
             return std::make_tuple(true, value);
         }
     private:
+        template<size_t index, typename... T>
+        bool ReadVariantAlternative(const char* key, std::variant<T...>* out) const
+        {
+            using Variant = std::variant<T...>;
+            using Alternative = std::variant_alternative_t<index, Variant>;
+
+            Alternative value;
+            if (this->Read(key, &value)) {
+                *out = value;
+                return true;
+            }
+            constexpr auto variant_size = std::variant_size_v<Variant>;
+            if constexpr (index + 1 == variant_size)
+                return false;
+            else return ReadVariantAlternative<index + 1>(key, out);
+        }
     };
 } // namespace
