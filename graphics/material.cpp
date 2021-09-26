@@ -1810,19 +1810,7 @@ std::size_t CustomMaterialClass::GetHash() const
     {
         const auto* uniform = base::SafeFind(mUniforms, key);
         hash = base::hash_combine(hash, key);
-        if (const auto* ptr = std::get_if<float>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<int>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec2>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec3>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec4>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<Color4f>(uniform))
-            hash = base::hash_combine(hash, *ptr);
-        else BUG("Unhandled uniform type.");
+        hash = base::hash_combine(hash, *uniform);
     }
 
     keys.clear();
@@ -1965,16 +1953,6 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
     }
 }
 
-template<typename T>
-bool ReadUniform(const data::Reader& data, MaterialClass::Uniform& u)
-{
-    T value;
-    if (!data.Read("value", &value))
-        return false;
-    u = value;
-    return true;
-}
-
 bool CustomMaterialClass::FromJson2(const data::Reader& data)
 {
     data.Read("id",         &mClassId);
@@ -1987,24 +1965,14 @@ bool CustomMaterialClass::FromJson2(const data::Reader& data)
     data.Read("wrap_y",     &mWrapY);
     for (unsigned i=0; i<data.GetNumChunks("uniforms"); ++i)
     {
-        Uniform u;
+        Uniform uniform;
         const auto& chunk = data.GetReadChunk("uniforms", i);
         std::string name;
         if (!chunk->Read("name", &name))
             return false;
-
-        // note: the order of vec2/3/4 reading is important since
-        // vec4 parses as vec3/2 and vec3 parses as vec2.
-        // this should be fixed in data/json.cpp
-        if (ReadUniform<float>(*chunk, u) ||
-            ReadUniform<int>(*chunk, u) ||
-            ReadUniform<glm::vec4>(*chunk, u) ||
-            ReadUniform<glm::vec3>(*chunk, u) ||
-            ReadUniform<glm::vec2>(*chunk, u) ||
-            ReadUniform<Color4f>(*chunk, u))
-        {
-            mUniforms[std::move(name)] = std::move(u);
-        } else return false;
+        if (!chunk->Read("value", &uniform))
+            return false;
+        mUniforms[std::move(name)] = std::move(uniform);
     }
     for (unsigned i=0; i<data.GetNumChunks("texture_maps"); ++i)
     {
