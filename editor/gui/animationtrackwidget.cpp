@@ -1023,7 +1023,7 @@ void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
     }
 }
 
-void AnimationTrackWidget::on_setvalEndValue_valueChanged(double value)
+void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1266,9 +1266,46 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
     }
     else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(klass))
     {
+        using Name = game::SetValueActuatorClass::ParamName;
+        const auto name = (Name)GetValue(mUI.setvalName);
+        if (name == Name::DrawableTimeScale)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::LinearVelocityX)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::LinearVelocityY)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::AngularVelocity)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::LinearVelocity)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
+        }
+        else if (name == Name::TextItemText)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::String);
+            setter->SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
+        }
+        else if (name == Name::TextItemColor)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Color);
+            setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        }
+        else BUG("Unhandled value actuator value type.");
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
-        setter->SetParamName(GetValue(mUI.setvalName));
-        setter->SetEndValue(GetValue(mUI.setvalEndValue));
+        setter->SetParamName(name);
     }
     else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(klass))
     {
@@ -1465,9 +1502,26 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         }
         else if (const auto* ptr = dynamic_cast<const game::SetValueActuatorClass*>(actuator))
         {
+            const auto name = ptr->GetParamName();
+            using Name = game::SetValueActuatorClass::ParamName;
+            if (name == Name::DrawableTimeScale)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            else if (name == Name::LinearVelocity)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+            else if (name == Name::LinearVelocityX)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            else if (name == Name::LinearVelocityY)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            else if (name == Name::AngularVelocity)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            else if (name == Name::TextItemColor)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
+            else if (name == Name::TextItemText)
+                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<std::string>());
+            else BUG("Unhandled set value actuator value type.");
+
             SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
             SetValue(mUI.setvalName, ptr->GetParamName());
-            SetValue(mUI.setvalEndValue, ptr->GetEndValue());
             SetEnabled(mUI.actuatorProperties, true);
             SetEnabled(mUI.setvalActuator, true);
             mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
@@ -1878,13 +1932,30 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
     }
     else if (type == game::ActuatorClass::Type::SetValue)
     {
+        using Name = game::SetValueActuatorClass::ParamName;
+        const auto name = (Name)GetValue(mUI.setvalName);
         game::SetValueActuatorClass klass;
         klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
-        klass.SetEndValue(GetValue(mUI.setvalEndValue));
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
+        if (name == Name::DrawableTimeScale)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (name == Name::LinearVelocityX)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (name == Name::LinearVelocityY)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (name == Name::AngularVelocity)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (name == Name::LinearVelocity)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsVec2());
+        else if (name == Name::TextItemText)
+            klass.SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
+        else if (name == Name::TextItemColor)
+            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        else BUG("Unhandled value actuator value type.");
+
         mState.actuator_to_timeline[klass.GetId()] = timelineId;
         mState.track->AddActuator(klass);
     }
@@ -1917,7 +1988,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
 
     const float end = start_time + duration;
     const float animation_duration = GetValue(mUI.duration);
-    DEBUG("New %1 actuator for node '%1' from %2s to %3s", type, nodeId,
+    DEBUG("New %1 actuator for node '%2' from %3s to %4s", type, nodeId,
           start_time * animation_duration, end * animation_duration);
 }
 

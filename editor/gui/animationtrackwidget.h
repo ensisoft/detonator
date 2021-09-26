@@ -121,7 +121,7 @@ namespace gui
         void on_transformEndScaleX_valueChanged(double value);
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
-        void on_setvalEndValue_valueChanged(double value);
+        void on_setvalEndValue_ValueChanged();
         void on_kinematicEndVeloX_valueChanged(double value);
         void on_kinematicEndVeloY_valueChanged(double value);
         void on_kinematicEndVeloZ_valueChanged(double value);
