@@ -114,6 +114,9 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec2* out
         return false;
     if (!vector.contains("y") || !vector["y"].is_number_float())
         return false;
+    // if it contains more than x and y then it's not a vec2
+    if (vector.contains("z"))
+        return false;
     out->x = vector["x"];
     out->y = vector["y"];
     return true;
@@ -128,6 +131,9 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec3* out
     if (!vector.contains("y") || !vector["y"].is_number_float())
         return false;
     if (!vector.contains("z") || !vector["z"].is_number_float())
+        return false;
+    // if it contains more than x,y,z then it's not a vec3
+    if (vector.contains("w"))
         return false;
     out->x = vector["x"];
     out->y = vector["y"];
@@ -173,6 +179,8 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, FPoint* point)
     if (!json.contains(name) || !json[name].is_object())
         return false;
     const auto& object = json[name];
+    if (object.contains("z"))
+        return false;
 
     float x, y;
     if (!JsonReadSafe(object, "x", &x) ||
@@ -254,6 +262,8 @@ bool JsonReadSafe(const nlohmann::json& value, glm::vec2* out)
         return false;
     if (!value.contains("y") || !value["y"].is_number_float())
         return false;
+    if (value.contains("z"))
+        return false;
     out->x = value["x"];
     out->y = value["y"];
     return true;
@@ -267,6 +277,8 @@ bool JsonReadSafe(const nlohmann::json& value, glm::vec3* out)
     if (!value.contains("y") || !value["y"].is_number_float())
         return false;
     if (!value.contains("z") || !value["z"].is_number_float())
+        return false;
+    if (value.contains("w"))
         return false;
     out->x = value["x"];
     out->y = value["y"];
