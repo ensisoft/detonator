@@ -35,6 +35,7 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "data/fwd.h"
+#include "game/types.h"
 
 namespace game
 {
@@ -247,8 +248,14 @@ namespace game
             DrawableTimeScale,
             LinearVelocityX,
             LinearVelocityY,
-            AngularVelocity
+            LinearVelocity,
+            AngularVelocity,
+            TextItemText,
+            TextItemColor
         };
+
+        using ParamValue = std::variant<float,
+            std::string, glm::vec2, Color4f>;
 
         // The interpolation method.
         using Interpolation = math::Interpolation;
@@ -263,10 +270,25 @@ namespace game
         { mParamName = name; }
         void SetInterpolation(Interpolation method)
         { mInterpolation = method; }
-        float GetEndValue() const
+        ParamValue GetEndValue() const
         { return mEndValue; }
-        void SetEndValue(float alpha)
-        { mEndValue = alpha; }
+        template<typename T>
+        const T* GetEndValue() const
+        {
+            if (const auto* ptr = std::get_if<T>(&mEndValue))
+                return ptr;
+            return nullptr;
+        }
+        template<typename T>
+        T* GetEndValue()
+        {
+            if (auto* ptr = std::get_if<T>(&mEndValue))
+                return ptr;
+            return nullptr;
+        }
+
+        void SetEndValue(ParamValue value)
+        { mEndValue = value; }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
         virtual std::string GetId() const override
@@ -308,7 +330,7 @@ namespace game
         // Normalized duration of the action.
         float mDuration = 1.0f;
         // the end value
-        float mEndValue = 1.0f;
+        ParamValue mEndValue;
     };
 
     // TransformActuatorClass holds the transform data for some
@@ -492,7 +514,8 @@ namespace game
     class SetValueActuator : public Actuator
     {
     public:
-        using ParamName = SetValueActuatorClass::ParamName;
+        using ParamName  = SetValueActuatorClass::ParamName;
+        using ParamValue = SetValueActuatorClass::ParamValue;
         using Inteprolation = SetValueActuatorClass::Interpolation;
         SetValueActuator(const std::shared_ptr<const SetValueActuatorClass>& klass)
            : mClass(klass)
@@ -515,9 +538,21 @@ namespace game
         { return mClass->GetNodeId(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<SetValueActuator>(*this); }
+        bool CanApply(EntityNode& node, bool verbose) const;
+    private:
+        template<typename T>
+        T Interpolate(float t)
+        {
+            const auto method = mClass->GetInterpolation();
+            const auto end    = mClass->GetEndValue();
+            const auto start  = mStartValue;
+            ASSERT(std::holds_alternative<T>(end));
+            ASSERT(std::holds_alternative<T>(start));
+            return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
+        }
     private:
         std::shared_ptr<const SetValueActuatorClass> mClass;
-        float mStartValue = 1.0f;
+        ParamValue mStartValue;
     };
 
     // Apply change to the target nodes' transform.

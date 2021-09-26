@@ -723,7 +723,7 @@
            <enum>QFrame::Plain</enum>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="transformActuator">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -984,32 +984,10 @@
           </widget>
           <widget class="QWidget" name="setvalActuator">
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="1">
-             <widget class="QComboBox" name="setvalInterpolation">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="setvalEndValue">
-              <property name="wrapping">
-               <bool>false</bool>
-              </property>
-              <property name="minimum">
-               <double>-100.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>100.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>Interpolation</string>
               </property>
              </widget>
             </item>
@@ -1027,10 +1005,13 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_17">
-              <property name="text">
-               <string>Interpolation</string>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="setvalInterpolation">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
              </widget>
             </item>
@@ -1041,6 +1022,13 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="gui::Uniform" name="setvalEndValue" native="true">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
               </property>
              </widget>
             </item>
@@ -1396,6 +1384,12 @@
    <header>timelinewidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>gui::Uniform</class>
+   <extends>QWidget</extends>
+   <header>uniform.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>trackName</tabstop>
@@ -1435,7 +1429,6 @@
   <tabstop>btnTransformReset</tabstop>
   <tabstop>setvalInterpolation</tabstop>
   <tabstop>setvalName</tabstop>
-  <tabstop>setvalEndValue</tabstop>
   <tabstop>kinematicInterpolation</tabstop>
   <tabstop>kinematicEndVeloX</tabstop>
   <tabstop>kinematicEndVeloY</tabstop>

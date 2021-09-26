@@ -25,6 +25,7 @@
 #include <cmath>
 
 #include "base/types.h"
+#include "base/color4f.h"
 
 namespace game
 {
@@ -35,9 +36,10 @@ namespace game
     using FPoint = base::FPoint;
     using FSize  = base::FSize;
     using ISize  = base::ISize;
+    using Color4f = base::Color4f;
 
     // todo: refactor into base/types ?
-    // Box represents a rectangular object which (unlike gfx::FRect)
+    // Box represents a rectangular object which (unlike base::FRect)
     // also maintains orientation.
     class FBox
     {
