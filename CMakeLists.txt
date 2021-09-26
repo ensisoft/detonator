@@ -358,6 +358,7 @@ add_executable(GSEditor
     editor/gui/uiwidget.cpp
     editor/gui/uniform.h
     editor/gui/uniform.ui
+    editor/gui/uniform.cpp
     editor/gui/sampler.h
     editor/gui/sampler.ui
     editor/gui/widgetstylewidget.h
