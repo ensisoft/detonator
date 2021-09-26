@@ -267,7 +267,7 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& e
 }
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio '%1' mixer event %2.", event.id == mMusicGraphId ? "Music" : "FX");
+    DEBUG("'%1' mixer source event.", event.id == mMusicGraphId ? "Music" : "FX");
     if (events == nullptr)
         return;
 
