@@ -23,11 +23,15 @@
 #  include <QDialog>
 #include "warnpop.h"
 
+#include <vector>
+
 #include "editor/app/workspace.h"
 #include "game/fwd.h"
 
 namespace gui
 {
+    class Uniform;
+
     class DlgMaterialParams : public QDialog
     {
         Q_OBJECT
@@ -35,16 +39,22 @@ namespace gui
     public:
         DlgMaterialParams(QWidget* parent, app::Workspace* workspace, game::DrawableItemClass* item);
     private slots:
+        void on_btnResetGamma_clicked();
         void on_btnResetBaseColor_clicked();
         void on_baseColor_colorChanged(QColor);
+        void on_gamma_valueChanged(double);
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void UniformValueChanged(const gui::Uniform* uniform);
+        void ToggleUniform(bool checked);
     private:
         Ui::DlgMaterialParams mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
         game::DrawableItemClass* mItem = nullptr;
-        game::DrawableItemClass::MaterialParamMap mParams;
+        game::DrawableItemClass::MaterialParamMap mOldParams;
+        std::vector<gui::Uniform*> mUniforms;
+        bool mCustomMaterial = false;
     };
 
 } // namespace
