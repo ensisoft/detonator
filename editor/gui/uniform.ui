@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
+    <width>395</width>
     <height>78</height>
    </rect>
   </property>
@@ -16,63 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="value_x">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimum">
-        <double>-100.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>100.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="stepType">
-        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QDoubleSpinBox" name="value_z">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimum">
-        <double>-100.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>100.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="stepType">
-        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLabel" name="label_w">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>W</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="3">
       <widget class="QDoubleSpinBox" name="value_w">
        <property name="sizePolicy">
@@ -117,8 +60,18 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_y">
+     <item row="2" column="4">
+      <widget class="QLineEdit" name="string">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLabel" name="label_w">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -126,7 +79,14 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Y</string>
+        <string>W</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="color_widgets::ColorSelector" name="color">
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
        </property>
       </widget>
      </item>
@@ -143,6 +103,50 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QDoubleSpinBox" name="value_x">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimum">
+        <double>-100.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="stepType">
+        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QDoubleSpinBox" name="value_z">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimum">
+        <double>-100.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>100.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="stepType">
+        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="2">
       <widget class="QLabel" name="label_z">
        <property name="text">
@@ -150,20 +154,29 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="4">
-      <widget class="color_widgets::ColorSelector" name="color">
-       <property name="focusPolicy">
-        <enum>Qt::TabFocus</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4">
-      <widget class="QLineEdit" name="string">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_y">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Y</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QSpinBox" name="value_i">
+       <property name="minimum">
+        <number>-100</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="stepType">
+        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
        </property>
       </widget>
      </item>

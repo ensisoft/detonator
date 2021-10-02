@@ -23,6 +23,8 @@
 #  include <glm/glm.hpp>
 #include "warnpop.h"
 
+#include "base/color4f.h"
+
 namespace Ui {
     class Uniform;
 }
@@ -36,20 +38,23 @@ namespace gui
 
     public:
         enum class Type {
-            Float, Vec2, Vec3, Vec4, Color, String
+            Int, Float, Vec2, Vec3, Vec4, Color, String
         };
         Uniform(QWidget* parent);
        ~Uniform();
 
         void SetType(Type type);
+        void SetValue(int value);
         void SetValue(float value);
         void SetValue(const glm::vec2& value);
         void SetValue(const glm::vec3& value);
         void SetValue(const glm::vec4& value);
-        void SetValue(QColor color);
-        void SetValue(QString string);
+        void SetValue(const QColor& color);
+        void SetValue(const base::Color4f& color);
+        void SetValue(const QString& string);
         void SetValue(const std::string& str);
         float GetAsFloat() const;
+        int GetAsInt() const;
         glm::vec2 GetAsVec2() const;
         glm::vec3 GetAsVec3() const;
         glm::vec4 GetAsVec4() const;
@@ -59,6 +64,8 @@ namespace gui
         { mName = name; }
         QString GetName() const
         { return mName; }
+        Type GetType() const
+        { return mType;}
     private:
         void HideEverything();
 
@@ -77,9 +84,12 @@ namespace gui
         { emit ValueChanged(this); }
         void on_string_editingFinished()
         { emit ValueChanged(this); }
+        void on_value_i_valueChanged(int)
+        { emit ValueChanged(this); }
     private:
         Ui::Uniform* mUI = nullptr;
     private:
         QString mName;
+        Type mType = Type::Int;
     };
 } // namespace

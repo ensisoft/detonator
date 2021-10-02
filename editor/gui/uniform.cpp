@@ -44,6 +44,10 @@ void Uniform::SetType(Type type)
     {
         mUI->value_x->setVisible(true);
     }
+    else if (type == Type::Int)
+    {
+        mUI->value_i->setVisible(true);
+    }
     else if (type == Type::Vec2)
     {
         mUI->value_x->setVisible(true);
@@ -75,10 +79,16 @@ void Uniform::SetType(Type type)
         mUI->color->setVisible(true);
     else if (type == Type::String)
         mUI->string->setVisible(true);
+
+    mType = type;
 }
 void Uniform::SetValue(float value)
 {
     gui::SetValue(mUI->value_x, value);
+}
+void Uniform::SetValue(int value)
+{
+    gui::SetValue(mUI->value_i, value);
 }
 
 void Uniform::SetValue(const glm::vec2& value)
@@ -99,14 +109,18 @@ void Uniform::SetValue(const glm::vec4& value)
     gui::SetValue(mUI->value_z, value.z);
     gui::SetValue(mUI->value_w, value.w);
 }
-void Uniform::SetValue(QColor color)
+void Uniform::SetValue(const QColor& color)
 { gui::SetValue(mUI->color, color); }
-void Uniform::SetValue(QString string)
+void Uniform::SetValue(const base::Color4f& color)
+{ gui::SetValue(mUI->color, color); }
+void Uniform::SetValue(const QString& string)
 { gui::SetValue(mUI->string, string); }
 void Uniform::SetValue(const std::string& str)
 { gui::SetValue(mUI->string, str); }
 float Uniform::GetAsFloat() const
 { return gui::GetValue(mUI->value_x); }
+int Uniform::GetAsInt() const
+{ return gui::GetValue(mUI->value_i); }
 glm::vec2 Uniform::GetAsVec2() const
 {
     return {gui::GetValue(mUI->value_x),
@@ -143,6 +157,7 @@ void Uniform::HideEverything()
     mUI->value_w->setVisible(false);
     mUI->color->setVisible(false);
     mUI->string->setVisible(false);
+    mUI->value_i->setVisible(false);
 }
 
 } // namespace
