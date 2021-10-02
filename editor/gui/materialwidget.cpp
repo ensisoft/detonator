@@ -906,8 +906,8 @@ void MaterialWidget::ApplyShaderDescription()
         for (const auto& json : json["uniforms"].items())
         {
             Uniform::Type type = Uniform::Type::Float;
-            std::string name = "Uniform";
-            std::string desc = "kUniform";
+            std::string name = "kUniform";
+            std::string desc = "Uniform";
             if (!base::JsonReadSafe(json.value(), "desc", &desc))
                 WARN("Uniform is missing 'desc' parameter.");
             if (!base::JsonReadSafe(json.value(), "name", &name))
