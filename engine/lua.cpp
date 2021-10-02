@@ -1561,6 +1561,29 @@ void BindGameLib(sol::state& L)
     drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
     drawable["TestFlag"]      = &TestFlag<DrawableItem>;
     drawable["SetFlag"]       = &SetFlag<DrawableItem>;
+    drawable["SetUniform"]    = [](DrawableItem& item, const char* name, sol::object value) {
+        if (value.is<float>())
+            item.SetMaterialParam(name, value.as<float>());
+        else if (value.is<int>())
+            item.SetMaterialParam(name, value.as<int>());
+        else if (value.is<base::Color4f>())
+            item.SetMaterialParam(name, value.as<base::Color4f>());
+        else if (value.is<glm::vec2>())
+            item.SetMaterialParam(name, value.as<glm::vec2>());
+        else if (value.is<glm::vec3>())
+            item.SetMaterialParam(name, value.as<glm::vec3>());
+        else if (value.is<glm::vec4>())
+            item.SetMaterialParam(name, value.as<glm::vec4>());
+        else throw std::runtime_error("Unsupported material uniform type.");
+    };
+    drawable["GetUniform"] = [](const DrawableItem& item, const char* name, sol::this_state state) {
+        sol::state_view L(state);
+        if (const auto* value = item.FindMaterialParam(name))
+            return sol::make_object(L, *value);
+        throw std::runtime_error("No such material uniform: " + std::string(name));
+    };
+    drawable["HasUniform"] = &DrawableItem::HasMaterialParam;
+    drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
     body["GetFriction"]           = &RigidBodyItem::GetFriction;
