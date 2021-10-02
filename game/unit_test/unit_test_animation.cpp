@@ -61,6 +61,22 @@ void apply_value(game::SetValueActuatorClass::ParamName name,
     actuator.Finish(node);
 }
 
+void apply_material_value(const char* name,
+                          game::MaterialActuatorClass::MaterialParam  value,
+                          game::EntityNode& node)
+{
+    game::MaterialActuatorClass klass;
+    klass.SetNodeId(node.GetClassId());
+    klass.SetStartTime(0.1f);
+    klass.SetDuration(0.5f);
+    klass.SetParamName(name);
+    klass.SetParamValue(value);
+
+    game::MaterialActuator actuator(klass);
+    actuator.Start(node);
+    actuator.Finish(node);
+}
+
 void unit_test_setflag_actuator()
 {
     game::SetFlagActuatorClass klass;
@@ -517,6 +533,88 @@ void unit_test_transform_actuator()
     }
 }
 
+void unit_test_material_actuator()
+{
+    game::MaterialActuatorClass klass;
+    klass.SetNodeId("1234");
+    klass.SetStartTime(0.1f);
+    klass.SetDuration(0.5f);
+    klass.SetInterpolation(game::MaterialActuatorClass::Interpolation::Cosine);
+    klass.SetParamName("kColor");
+    klass.SetParamValue(game::Color4f(game::Color::Green));
+
+    // serialize.
+    {
+        data::JsonObject json;
+        klass.IntoJson(json);
+        game::MaterialActuatorClass copy;
+        TEST_REQUIRE(copy.FromJson(json));
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetNodeId()     == "1234");
+        TEST_REQUIRE(copy.GetStartTime()  == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()   == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetParamName() == "kColor");
+        TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+    }
+    // copy assignment and copy ctor
+    {
+        game::MaterialActuatorClass copy(klass);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetNodeId()     == "1234");
+        TEST_REQUIRE(copy.GetStartTime()  == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()   == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetParamName() == "kColor");
+        TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        copy = klass;
+        TEST_REQUIRE(copy.GetId()   == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+    }
+
+    // copy and clone
+    {
+        auto copy = klass.Copy();
+        TEST_REQUIRE(copy->GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy->GetId()   == klass.GetId());
+        auto clone = klass.Clone();
+        TEST_REQUIRE(clone->GetHash()  != klass.GetHash());
+        TEST_REQUIRE(clone->GetId()    != klass.GetId());
+    }
+
+    // instance
+    {
+        game::EntityNodeClass node_klass;
+
+        game::DrawableItemClass draw_class;
+        draw_class.SetMaterialParam("kFloat", 1.0f);
+        draw_class.SetMaterialParam("kColor", base::Color::Red);
+        draw_class.SetMaterialParam("kVec2", glm::vec2(1.0f, 2.0f));
+        draw_class.SetMaterialParam("kVec3", glm::vec3(1.0f, 2.0f, 3.0f));
+        draw_class.SetMaterialParam("kVec4", glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+        draw_class.SetMaterialParam("kInt", 123);
+        node_klass.SetDrawable(draw_class);
+        game::EntityNode node(node_klass);
+
+        apply_material_value("kFloat", -1.0f, node);
+        apply_material_value("kColor", game::Color::Green, node);
+        apply_material_value("kVec2", glm::vec2(2.0f, 1.0f), node);
+        apply_material_value("kVec3", glm::vec3(3.0f, 2.0f, 1.0f), node);
+        apply_material_value("kVec4", glm::vec4(4.0f, 3.0f, 2.0f, 1.0f), node);
+        apply_material_value("kInt", 321, node);
+
+        const auto* draw = node.GetDrawable();
+        TEST_REQUIRE(*draw->GetMaterialParamValue<float>("kFloat") == real::float32(-1.0f));
+        TEST_REQUIRE(*draw->GetMaterialParamValue<game::Color4f>("kColor") == base::Color::Green);
+        TEST_REQUIRE(*draw->GetMaterialParamValue<glm::vec2>("kVec2") == glm::vec2(2.0f, 1.0f));
+        TEST_REQUIRE(*draw->GetMaterialParamValue<glm::vec3>("kVec3") == glm::vec3(3.0f, 2.0f, 1.0f));
+        TEST_REQUIRE(*draw->GetMaterialParamValue<glm::vec4>("kVec4") == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
+        TEST_REQUIRE(*draw->GetMaterialParamValue<int>("kInt") == 321);
+    }
+}
+
 
 void unit_test_animation_track()
 {
@@ -613,6 +711,7 @@ int test_main(int argc, char* argv[])
     unit_test_setval_actuator();
     unit_test_transform_actuator();
     unit_test_kinematic_actuator();
+    unit_test_material_actuator();
     unit_test_animation_track();
     return 0;
 }
