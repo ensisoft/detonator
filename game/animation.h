@@ -61,7 +61,9 @@ namespace game
             // SetValue actuators sets some parameter to the specific value on the node.
             SetValue,
             // SetFlag actuator sets a a binary flag to the specific state on the node.
-            SetFlag
+            SetFlag,
+            // Material actuator changes material parameters
+            Material
         };
         // dtor.
         virtual ~ActuatorClass() = default;
@@ -274,19 +276,10 @@ namespace game
         { return mEndValue; }
         template<typename T>
         const T* GetEndValue() const
-        {
-            if (const auto* ptr = std::get_if<T>(&mEndValue))
-                return ptr;
-            return nullptr;
-        }
+        { return std::get_if<T>(&mEndValue); }
         template<typename T>
         T* GetEndValue()
-        {
-            if (auto* ptr = std::get_if<T>(&mEndValue))
-                return ptr;
-            return nullptr;
-        }
-
+        { return std::get_if<T>(&mEndValue); }
         void SetEndValue(ParamValue value)
         { mEndValue = value; }
         virtual void SetNodeId(const std::string& id) override
@@ -422,6 +415,77 @@ namespace game
         glm::vec2 mEndScale = {1.0f, 1.0f};
         // the ending rotation.
         float mEndRotation = 0.0f;
+    };
+
+    class MaterialActuatorClass : public ActuatorClass
+    {
+    public:
+        using Interpolation = math::Interpolation;
+        using MaterialParam = std::variant<float, int,
+            Color4f,
+            glm::vec2, glm::vec3, glm::vec4>;
+        MaterialActuatorClass()
+        { mId = base::RandomString(10); }
+        Interpolation GetInterpolation() const
+        { return mInterpolation; }
+        std::string GetParamName() const
+        { return mParamName; }
+        MaterialParam GetParamValue() const
+        { return mParamValue; }
+        template<typename T>
+        const T* GetParamValue() const
+        { return std::get_if<T>(&mParamValue); }
+        template<typename T>
+        T* GetParamValue()
+        { return std::get_if<T>(&mParamValue); }
+        void SetParamName(const std::string& name)
+        { mParamName = name; }
+        void SetParamValue(const MaterialParam& value)
+        { mParamValue = value; }
+        void SetInterpolation(Interpolation method)
+        { mInterpolation = method; }
+        virtual void SetNodeId(const std::string& id) override
+        { mNodeId = id; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetNodeId() const override
+        { return mNodeId; }
+        virtual std::unique_ptr<ActuatorClass> Copy() const override
+        { return std::make_unique<MaterialActuatorClass>(*this); }
+        virtual std::unique_ptr<ActuatorClass> Clone() const override
+        {
+            auto ret = std::make_unique<MaterialActuatorClass>(*this);
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+        virtual Type GetType() const override
+        { return Type::Material; }
+        virtual float GetStartTime() const override
+        { return mStartTime; }
+        virtual float GetDuration() const override
+        { return mDuration; }
+        virtual void SetStartTime(float start) override
+        { mStartTime = start; }
+        virtual void SetDuration(float duration) override
+        { mDuration = duration; }
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool FromJson(const data::Reader& data) override;
+        virtual std::size_t GetHash() const override;
+    private:
+        // Id of the actuator class.
+        std::string mId;
+        // Id of the node class that the actuator applies on
+        std::string mNodeId;
+        // Interpolation method used to change the value.
+        Interpolation mInterpolation = Interpolation::Linear;
+        // Actuator start time on the timeline.
+        float mStartTime = 0.0f;
+        // Actuator duration on the timeline.
+        float mDuration  = 1.0f;
+        // The name of the material parameter that is going to be changed (uniform name)
+        std::string mParamName;
+        // The value of the material parameter.
+        MaterialParam mParamValue;
     };
 
     // An instance of ActuatorClass object.
@@ -586,6 +650,45 @@ namespace game
         glm::vec2 mStartSize  = {1.0f, 1.0f};
         glm::vec2 mStartScale = {1.0f, 1.0f};
         float mStartRotation  = 0.0f;
+    };
+
+    class MaterialActuator : public Actuator
+    {
+    public:
+        using Interpolation = MaterialActuatorClass::Interpolation;
+        using MaterialParam = MaterialActuatorClass::MaterialParam;
+        MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
+          : mClass(klass)
+        {}
+        MaterialActuator(const MaterialActuatorClass& klass)
+          : mClass(std::make_shared<MaterialActuatorClass>(klass))
+        {}
+        virtual void Start(EntityNode& node) override;
+        virtual void Apply(EntityNode& node, float t) override;
+        virtual void Finish(EntityNode& node) override;
+
+        virtual float GetStartTime() const override
+        { return mClass->GetStartTime(); }
+        virtual float GetDuration() const override
+        { return mClass->GetDuration(); }
+        virtual std::string GetNodeId() const override
+        { return mClass->GetNodeId(); }
+        virtual std::unique_ptr<Actuator> Copy() const override
+        { return std::make_unique<MaterialActuator>(*this); }
+    private:
+        template<typename T>
+        T Interpolate(float t)
+        {
+            const auto method = mClass->GetInterpolation();
+            const auto end    = mClass->GetParamValue();
+            const auto start  = mStartValue;
+            ASSERT(std::holds_alternative<T>(end));
+            ASSERT(std::holds_alternative<T>(start));
+            return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
+        }
+    private:
+        std::shared_ptr<const MaterialActuatorClass> mClass;
+        MaterialParam mStartValue;
     };
 
     // AnimationTrackClass defines a new type of animation track that includes

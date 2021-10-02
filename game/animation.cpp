@@ -176,6 +176,40 @@ std::size_t TransformActuatorClass::GetHash() const
     return hash;
 }
 
+void MaterialActuatorClass::IntoJson(data::Writer& data) const
+{
+    data.Write("id",       mId);
+    data.Write("node",     mNodeId);
+    data.Write("method",   mInterpolation);
+    data.Write("start",    mStartTime);
+    data.Write("duration", mDuration);
+    data.Write("name",     mParamName);
+    data.Write("value",    mParamValue);
+}
+bool MaterialActuatorClass::FromJson(const data::Reader& data)
+{
+    return (data.Read("id",       &mId) &&
+            data.Read("node",     &mNodeId) &&
+            data.Read("method",   &mInterpolation) &&
+            data.Read("start",    &mStartTime) &&
+            data.Read("duration", &mDuration) &&
+            data.Read("name",     &mParamName) &&
+            data.Read("value",    &mParamValue));
+}
+std::size_t MaterialActuatorClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mInterpolation);
+    hash = base::hash_combine(hash, mStartTime);
+    hash = base::hash_combine(hash, mDuration);
+    hash = base::hash_combine(hash, mParamName);
+    hash = base::hash_combine(hash, mParamValue);
+    return hash;
+}
+
+
 void KinematicActuator::Start(EntityNode& node)
 {
     if (const auto* body = node.GetRigidBody())
@@ -533,6 +567,51 @@ void TransformActuator::Finish(EntityNode& node)
     node.SetScale(mClass->GetEndScale());
 }
 
+void MaterialActuator::Start(EntityNode& node)
+{
+    const auto& name = mClass->GetParamName();
+    const auto* draw = node.GetDrawable();
+    if (draw == nullptr)
+    {
+        WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
+        WARN("Setting a material parameter '%1' will have no effect.", name);
+        return;
+    }
+    if (const auto* p = draw->FindMaterialParam(name))
+        mStartValue = *p;
+    else WARN("EntityNode '%1' drawable doesn't have such material param '%2'.", node.GetName(), name);
+}
+void MaterialActuator::Apply(EntityNode& node, float t)
+{
+    if (auto* draw = node.GetDrawable())
+    {
+        const auto& name = mClass->GetParamName();
+        const auto& end  = mClass->GetParamValue();
+        if (std::holds_alternative<int>(end))
+            draw->SetMaterialParam(name, Interpolate<int>(t));
+        else if (std::holds_alternative<float>(end))
+            draw->SetMaterialParam(name, Interpolate<float>(t));
+        else if (std::holds_alternative<glm::vec2>(end))
+            draw->SetMaterialParam(name, Interpolate<glm::vec2>(t));
+        else if (std::holds_alternative<glm::vec3>(end))
+            draw->SetMaterialParam(name, Interpolate<glm::vec3>(t));
+        else if (std::holds_alternative<glm::vec4>(end))
+            draw->SetMaterialParam(name, Interpolate<glm::vec4>(t));
+        else if (std::holds_alternative<Color4f>(end))
+            draw->SetMaterialParam(name, Interpolate<Color4f>(t));
+        else BUG("Unhandled material parameter type.");
+    }
+}
+void MaterialActuator::Finish(EntityNode& node)
+{
+    if (auto* draw = node.GetDrawable())
+    {
+        const auto& name = mClass->GetParamName();
+        const auto& end  = mClass->GetParamValue();
+        draw->SetMaterialParam(name, end);
+    }
+}
+
 AnimationTrackClass::AnimationTrackClass(const AnimationTrackClass& other)
 {
     for (const auto& a : other.mActuators)
@@ -602,6 +681,8 @@ std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) 
         return std::make_unique<KinematicActuator>(std::static_pointer_cast<KinematicActuatorClass>(klass));
     else if (klass->GetType() == ActuatorClass::Type::SetFlag)
         return std::make_unique<SetFlagActuator>(std::static_pointer_cast<SetFlagActuatorClass>(klass));
+    else if (klass->GetType() == ActuatorClass::Type::Material)
+        return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
     else BUG("Unknown actuator type");
     return {};
 }
@@ -663,6 +744,8 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const data::Rea
             actuator = std::make_shared<KinematicActuatorClass>();
         else if (type == ActuatorClass::Type::SetFlag)
             actuator = std::make_shared<SetFlagActuatorClass>();
+        else if (type == ActuatorClass::Type::Material)
+            actuator = std::make_shared<MaterialActuatorClass>();
         else BUG("Unknown actuator type.");
 
         const auto& act = meta->GetReadChunk("actuator");
