@@ -390,6 +390,7 @@ void unit_test_scene_instance_spawn()
             game::EntityArgs args;
             args.klass = entity;
             args.name  = "foo";
+            args.id    = "12341sss";
             auto* ret = scene.SpawnEntity(args);
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetName() == "foo");
@@ -469,6 +470,7 @@ void unit_test_scene_instance_kill()
            game::EntityArgs args;
            args.klass = entity;
            args.name  = "foo";
+           args.id    = "109101ss";
            auto* ret = scene.SpawnEntity(args);
         scene.EndLoop();
 

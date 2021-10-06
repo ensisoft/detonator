@@ -708,14 +708,15 @@ void Scene::KillEntity(Entity* entity)
 
 Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 {
+    ASSERT(args.klass);
     // we must have the klass of the entity and an id.
     // the invariant that must hold is that entity IDs are
     // always going to be unique.
-    ASSERT(args.klass);
-    ASSERT(args.id.empty() == false);
-    ASSERT(mIdMap.find(args.id) == mIdMap.end());
+    auto instance = CreateEntityInstance(args);
 
-    mSpawnList.push_back(CreateEntityInstance(args));
+    ASSERT(mIdMap.find(instance->GetId()) == mIdMap.end());
+
+    mSpawnList.push_back(std::move(instance));
     if (args.enable_logging)
         DEBUG("New entity '%1/%2'", args.klass->GetName(), args.name);
 

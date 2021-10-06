@@ -677,11 +677,7 @@ namespace game
             VisibleInEditor
         };
 
-        EntityNodeClass()
-        {
-            mClassId = base::RandomString(10);
-            mBitFlags.set(Flags::VisibleInEditor, true);
-        }
+        EntityNodeClass();
         EntityNodeClass(const EntityNodeClass& other);
         EntityNodeClass(EntityNodeClass&& other);
 
@@ -985,18 +981,7 @@ namespace game
             WantsMouseEvents,
         };
 
-        EntityClass()
-        {
-            mClassId = base::RandomString(10);
-            mFlags.set(Flags::VisibleInEditor, true);
-            mFlags.set(Flags::VisibleInGame, true);
-            mFlags.set(Flags::LimitLifetime, false);
-            mFlags.set(Flags::KillAtLifetime, true);
-            mFlags.set(Flags::TickEntity, true);
-            mFlags.set(Flags::UpdateEntity, true);
-            mFlags.set(Flags::WantsKeyEvents, false);
-            mFlags.set(Flags::WantsMouseEvents, false);
-        }
+        EntityClass();
         EntityClass(const EntityClass& other);
 
         // Add a new node to the entity.
@@ -1262,9 +1247,6 @@ namespace game
         // flag to indicate whether to log events
         // pertaining to this entity or not.
         bool enable_logging = true;
-        EntityArgs() {
-            id = base::RandomString(10);
-        }
     };
 
     class Entity
