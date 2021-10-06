@@ -33,6 +33,14 @@
 #include "game/entity.h"
 #include "game/transform.h"
 
+namespace {
+    std::string FastId(std::size_t len)
+    {
+        static std::uint64_t counter = 1;
+        return std::to_string(counter++);
+    }
+} // namespace
+
 namespace game
 {
 
@@ -248,6 +256,12 @@ std::optional<TextItemClass> TextItemClass::FromJson(const data::Reader& data)
     return ret;
 }
 
+EntityNodeClass::EntityNodeClass()
+{
+    mClassId = base::RandomString(10);
+    mBitFlags.set(Flags::VisibleInEditor, true);
+}
+
 EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
 {
     mClassId  = other.mClassId;
@@ -431,7 +445,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
 EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
     : mClass(klass)
 {
-    mInstId = base::RandomString(10);
+    mInstId = FastId(10);
     mName   = klass->GetName();
     Reset();
 }
@@ -519,6 +533,19 @@ glm::mat4 EntityNode::GetModelTransform() const
     // with the position parameter.
     transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
     return transform.GetAsMatrix();
+}
+
+EntityClass::EntityClass()
+{
+    mClassId = base::RandomString(10);
+    mFlags.set(Flags::VisibleInEditor, true);
+    mFlags.set(Flags::VisibleInGame, true);
+    mFlags.set(Flags::LimitLifetime, false);
+    mFlags.set(Flags::KillAtLifetime, true);
+    mFlags.set(Flags::TickEntity, true);
+    mFlags.set(Flags::UpdateEntity, true);
+    mFlags.set(Flags::WantsKeyEvents, false);
+    mFlags.set(Flags::WantsMouseEvents, false);
 }
 
 EntityClass::EntityClass(const EntityClass& other)
@@ -999,7 +1026,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
             mScriptVars.push_back(*var);
     }
 
-    mInstanceId  = base::RandomString(10);
+    mInstanceId  = FastId(10);
     mIdleTrackId = mClass->GetIdleTrackId();
     mFlags       = mClass->GetFlags();
     mLifetime    = mClass->GetLifetime();
@@ -1008,7 +1035,8 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
-    mInstanceId   = args.id;
+    mInstanceId   = args.id.empty() ? FastId(10) : args.id;
+
     for (auto& node : mNodes)
     {
         if (mRenderTree.GetParent(node.get()))
