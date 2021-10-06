@@ -38,6 +38,7 @@
         "phys_gravity_y": 10,
         "phys_scale_x": 100,
         "phys_scale_y": 100,
+        "save_window_geometry": false,
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
