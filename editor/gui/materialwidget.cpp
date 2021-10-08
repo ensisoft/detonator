@@ -936,7 +936,8 @@ void MaterialWidget::ApplyShaderDescription()
                 type == Uniform::Type::Vec2  && material->HasUniform<glm::vec2>(name) ||
                 type == Uniform::Type::Vec3  && material->HasUniform<glm::vec3>(name) ||
                 type == Uniform::Type::Vec4  && material->HasUniform<glm::vec4>(name) ||
-                type == Uniform::Type::Color && material->HasUniform<gfx::Color4f>(name))
+                type == Uniform::Type::Color && material->HasUniform<gfx::Color4f>(name) ||
+                type == Uniform::Type::Int   && material->HasUniform<int>(name))
                 continue;
 
             // set default uniform value if it doesn't exist already.
@@ -950,6 +951,8 @@ void MaterialWidget::ApplyShaderDescription()
                 material->SetUniform(name, glm::vec4());
             else if (type == Uniform::Type::Color)
                 material->SetUniform(name, gfx::Color::White);
+            else if (type == Uniform::Type::Int)
+                material->SetUniform(name, 0);
             else BUG("Unhandled uniform type.");
         }
         // delete the material uniforms that were no longer in the description
@@ -1117,6 +1120,8 @@ void MaterialWidget::SetMaterialProperties()
                 *val = widget->GetAsVec4();
             else if (auto* val = ptr->GetUniformValue<gfx::Color4f>(name))
                 *val = ToGfx(widget->GetAsColor());
+            else if (auto* val = ptr->GetUniformValue<int>(name))
+                *val = widget->GetAsInt();
             else BUG("No such uniform in material. UI and material are out of sync.");
         }
         for (auto* widget : mSamplers)
@@ -1295,6 +1300,8 @@ void MaterialWidget::GetMaterialProperties()
                 widget->SetValue(*val);
             else if (const auto* val = ptr->GetUniformValue<gfx::Color4f>(name))
                 widget->SetValue(FromGfx(*val));
+            else if (const auto* val = ptr->GetUniformValue<int>(name))
+                widget->SetValue(*val);
             else BUG("No such uniform in material. UI and material are out of sync.");
         }
 
