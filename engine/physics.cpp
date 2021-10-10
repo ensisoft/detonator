@@ -108,7 +108,7 @@ void PhysicsEngine::UpdateEntity(Entity& entity)
     UpdateEntity(transform.GetAsMatrix(), entity);
 }
 
-void PhysicsEngine::Tick(std::vector<ContactEvent>* contacts)
+void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
 {
     class ContactListener : public b2ContactListener
     {

@@ -94,7 +94,7 @@ public:
     virtual void Update(float dt) override
     {
         std::vector<engine::AudioEvent> events;
-        mEngine->Tick(&events);
+        mEngine->Update(&events);
         for (auto& event : events)
         {
             DEBUG("AudioEvent (%1) on track '%2'", event.type, event.track);
@@ -205,7 +205,7 @@ public:
     }
     virtual void Update(float dt) override
     {
-        mEngine->Tick(nullptr);
+        mEngine->Update(nullptr);
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
@@ -528,7 +528,7 @@ public:
     {
         if (mPhysics.HaveWorld())
         {
-            mPhysics.Tick();
+            mPhysics.Step();
             mPhysics.UpdateScene(*mScene);
         }
     }

@@ -245,7 +245,7 @@ void AudioEngine::KillAllSoundEffects()
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
 }
 
-void AudioEngine::Tick(AudioEventQueue* events)
+void AudioEngine::Update(AudioEventQueue* events)
 {
     // pump audio events from the audio player thread
     audio::Player::Event event;

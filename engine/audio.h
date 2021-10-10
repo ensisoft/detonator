@@ -119,7 +119,7 @@ namespace engine
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of
         // audio events that have happened.
-        void Tick(AudioEventQueue* events = nullptr);
+        void Update(AudioEventQueue* events = nullptr);
     private:
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events);
         void OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events);
