@@ -739,25 +739,7 @@ void MainWindow::iterateGameLoop()
 
     if (mPlayWindow)
     {
-        // there's small semantic change here between the other
-        // main loop implementations and calling App::BeginMainLoop
-        // in the sense that other implementations call BeginMainLoop
-        // first and then dispatch window system events, call, tick
-        // update, render and EndMainLoop.
-        // however this is the only place where this can be called
-        // since modal dialogs will cause Qt to enter a temporary
-        // event loop that dispatches the window events which means
-        // that we have no other chance to call BeginMainLoop other than this.
-        // Hopefully this will not become an issue but might be something
-        // to keep in mind!
-        mPlayWindow->BeginMainLoop();
-        // run the playwindow main loop once.
-        mPlayWindow->RunOnce();
-        // See the comments up top about BeginMainLoop, the
-        // same comment applies to EndMainLoop as well,
-        // i.e. window events may be dispatched outside these
-        // two functions being called.
-        mPlayWindow->EndMainLoop();
+        mPlayWindow->RunGameLoopOnce();
     }
 
     // show stats for the current tab if any

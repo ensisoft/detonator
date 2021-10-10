@@ -25,15 +25,18 @@
 #  include <QLibrary>
 #  include <QElapsedTimer>
 #  include <QTimer>
+#  include <boost/circular_buffer.hpp>
 #  include "ui_playwindow.h"
 #include "warnpop.h"
 
 #include <memory>
+#include <variant>
 
 #include "base/utility.h"
 #include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgeventlog.h"
+#include "wdk/events.h"
 
 namespace app {
     class Workspace;
@@ -59,17 +62,11 @@ namespace gui
         bool IsClosed() const
         { return mClosed; }
 
-        // Begin an iteration of the mainloop.
-        void BeginMainLoop();
-
         // Iterate the app once.
-        void RunOnce();
+        void RunGameLoopOnce();
 
         // Do periodic low frequency tick.
         void NonGameTick();
-
-        // End an iteration of the mainloop.
-        void EndMainLoop();
 
         // Load the game library and launch the game.
         // Returns true if successful or false if some problem happened.
@@ -176,6 +173,15 @@ namespace gui
         // Interface dialog for recording and playing back
         // window event captures i.e. mouse/keyboard inputs.
         std::unique_ptr<DlgEventLog> mWinEventLog;
+        // event queue of wdk events that are waiting to be dispatched
+        // to the game.
+        using WindowEvent = std::variant<wdk::WindowEventResize,
+                     wdk::WindowEventMouseRelease,
+                     wdk::WindowEventMousePress,
+                     wdk::WindowEventMouseMove,
+                     wdk::WindowEventKeyUp,
+                     wdk::WindowEventKeyDown>;
+        boost::circular_buffer<WindowEvent> mEventQueue;
     };
 
 } // namespace
