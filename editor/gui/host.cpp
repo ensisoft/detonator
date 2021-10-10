@@ -263,13 +263,11 @@ void Main(int argc, char* argv[])
     unsigned frame = 0;
     while (!window.IsClosed())
     {
-        window.BeginMainLoop();
-
         app.processEvents();
         if (window.IsClosed())
             break;
 
-        window.RunOnce();
+        window.RunGameLoopOnce();
 
         if ((frame % 100) == 0)
         {
@@ -278,8 +276,6 @@ void Main(int argc, char* argv[])
         }
 
         ++frame;
-
-        window.EndMainLoop();
     }
     window.NonGameTick();
     base::FlushGlobalLog();

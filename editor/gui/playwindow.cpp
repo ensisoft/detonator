@@ -380,7 +380,7 @@ private:
     QString mLogTag;
 };
 
-PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace)
+PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEventQueue(200)
 {
     DEBUG("Create PlayWindow");
     mLogger = std::make_unique<SessionLogger>();
@@ -453,59 +453,54 @@ PlayWindow::~PlayWindow()
     DEBUG("Destroy PlayWindow");
 }
 
-void PlayWindow::BeginMainLoop()
+void PlayWindow::RunGameLoopOnce()
 {
     if (!mEngine || !mInitDone)
         return;
+
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
     try
     {
+        auto* listener = mEngine->GetWindowListener();
+        bool quit = false;
+
+        // indicate beginning of the main loop iteration.
         mEngine->BeginMainLoop();
-    }
-    catch (const std::exception& e)
-    {
-        DEBUG("Exception in App::BeginMainLoop.");
-        Barf(e.what());
-    }
-}
 
-void PlayWindow::EndMainLoop()
-{
-    if (!mEngine || !mInitDone)
-        return;
-    TemporaryCurrentDirChange cwd(mGameWorkingDir);
-
-    mContext.makeCurrent(mSurface);
-    try
-    {
-        mEngine->EndMainLoop();
-    }
-    catch (const std::exception& e)
-    {
-        DEBUG("Exception in App::EndMainLoop.");
-        Barf(e.what());
-    }
-}
-
-void PlayWindow::RunOnce()
-{
-    if (!mEngine || !mInitDone)
-        return;
-
-    TemporaryCurrentDirChange cwd(mGameWorkingDir);
-
-    mContext.makeCurrent(mSurface);
-    try
-    {
-        if (mWinEventLog)
+        // if we have an event log that is being replayed then source
+        // the window input events from the log.
+        if (mWinEventLog && mWinEventLog->IsPlaying())
         {
-            if (auto* listener = mEngine->GetWindowListener())
-                mWinEventLog->Replay(*listener, mTimer.SinceStart());
+            ASSERT(mEventQueue.empty());
+            mWinEventLog->Replay(*listener, mTimer.SinceStart());
+        }
+        else
+        {
+            for (auto it = mEventQueue.begin(); it != mEventQueue.end(); ++it)
+            {
+                const auto& event = *it;
+                if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event)) {
+                    mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+                    ActivateWindow();
+                }
+                else if (const auto* ptr = std::get_if<wdk::WindowEventMouseRelease>(&event))
+                    listener->OnMouseRelease(*ptr);
+                else if (const auto* ptr = std::get_if<wdk::WindowEventMousePress>(&event))
+                    listener->OnMousePress(*ptr);
+                else if (const auto* ptr = std::get_if<wdk::WindowEventMouseMove>(&event))
+                    listener->OnMouseMove(*ptr);
+                else if (const auto* ptr = std::get_if<wdk::WindowEventKeyUp>(&event))
+                    listener->OnKeyUp(*ptr);
+                else if (const auto* ptr = std::get_if<wdk::WindowEventKeyDown>(&event))
+                    listener->OnKeyDown(*ptr);
+                else BUG("Unhandled window event type.");
+            }
+            mEventQueue.clear();
         }
 
-        bool quit = false;
+        // Process pending application requests if any.
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
         {
@@ -529,12 +524,6 @@ void PlayWindow::RunOnce()
                 INFO("Quit with exit code %1", ptr->exit_code);
                 quit = true;
             }
-        }
-        if (!mEngine->IsRunning() || quit)
-        {
-            // trigger close event.
-            this->close();
-            return;
         }
 
         // This is the real wall time elapsed rendering the previous frame.
@@ -578,6 +567,15 @@ void PlayWindow::RunOnce()
             SetValue(mUI.fps, fps);
             mNumFrames = 0;
             mFrameTimer.restart();
+        }
+
+        // indicate end of iteration.
+        mEngine->EndMainLoop();
+
+        if (!mEngine->IsRunning() || quit)
+        {
+            // trigger close event.
+            this->close();
         }
     }
     catch (const std::exception& e)
@@ -971,125 +969,105 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     // we're only interesting intercepting our window events
     // that will be translated into wdk events and passed to the
     // application object.
-    if (destination != mSurface)
+    if ((destination != mSurface) || !mEngine || !mInitDone)
         return QMainWindow::event(event);
 
-    // no app? return
-    if (!mEngine || !mInitDone)
-        return QMainWindow::event(event);
-
-    // app not providing a listener? return
-    auto* listener = mEngine->GetWindowListener();
-    if (!listener)
-        return QMainWindow::event(event);
-
-    // if we're replaying a trace then don't mess with the event
-    // dispatching.
     if (mWinEventLog && mWinEventLog->IsPlaying())
         return QMainWindow::event(event);
 
-    const auto event_time = mTimer.SinceStart();
+    ASSERT(!mEventQueue.full());
 
-    TemporaryCurrentDirChange cwd(mGameWorkingDir);
-    try
+    if (event->type() == QEvent::KeyPress)
     {
-        if (event->type() == QEvent::KeyPress)
-        {
-            // this will collide with the application if the app wants to also use
-            // the F11 key for something. But there aren't a lot of possibilities here..
-            const auto* key_event = static_cast<const QKeyEvent *>(event);
-            if (key_event->key() == Qt::Key_F11 && InFullScreen())
-                SetFullScreen(false);
-            else if (key_event->key() == Qt::Key_F7 && InFullScreen())
-                mUI.actionPause->trigger();
-            else if (key_event->key() == Qt::Key_F9 && InFullScreen())
-                mUI.actionScreenshot->trigger();
+        const auto* key_event = static_cast<const QKeyEvent *>(event);
 
-            wdk::WindowEventKeyDown key;
-            key.symbol    = MapVirtualKey(key_event->key());
-            key.modifiers = MapKeyModifiers(key_event->modifiers());
-            listener->OnKeyDown(key);
-            if (mWinEventLog)
-                mWinEventLog->RecordEvent(key, event_time);
+        // this will collide with the application if the app wants to also use
+        // the F11/F7/F9 key for something. But there aren't a lot of possibilities here..
+        if (key_event->key() == Qt::Key_F11 && InFullScreen())
+            SetFullScreen(false);
+        else if (key_event->key() == Qt::Key_F7 && InFullScreen())
+            mUI.actionPause->trigger();
+        else if (key_event->key() == Qt::Key_F9 && InFullScreen())
+            mUI.actionScreenshot->trigger();
 
-            return true;
-        }
-        else if (event->type() == QEvent::KeyRelease)
-        {
-            const auto* key_event = static_cast<const QKeyEvent *>(event);
+        wdk::WindowEventKeyDown key;
+        key.symbol    = MapVirtualKey(key_event->key());
+        key.modifiers = MapKeyModifiers(key_event->modifiers());
+        mEventQueue.push_back(key);
 
-            wdk::WindowEventKeyUp key;
-            key.symbol    = MapVirtualKey(key_event->key());
-            key.modifiers = MapKeyModifiers(key_event->modifiers());
-            listener->OnKeyUp(key);
-            if (mWinEventLog)
-                mWinEventLog->RecordEvent(key, event_time);
-
-            return true;
-        }
-        else if (event->type() == QEvent::MouseMove)
-        {
-            const auto* mouse = static_cast<const QMouseEvent*>(event);
-
-            wdk::WindowEventMouseMove move;
-            move.window_x = mouse->x();
-            move.window_y = mouse->y();
-            move.global_x = mouse->globalX();
-            move.global_y = mouse->globalY();
-            move.modifiers = MapKeyModifiers(mouse->modifiers());
-            move.btn       = MapMouseButton(mouse->button());
-            listener->OnMouseMove(move);
-            if (mWinEventLog)
-                mWinEventLog->RecordEvent(move, event_time);
-        }
-        else if (event->type() == QEvent::MouseButtonPress)
-        {
-            const auto* mouse = static_cast<const QMouseEvent*>(event);
-
-            wdk::WindowEventMousePress press;
-            press.window_x = mouse->x();
-            press.window_y = mouse->y();
-            press.global_x = mouse->globalX();
-            press.global_y = mouse->globalY();
-            press.modifiers = MapKeyModifiers(mouse->modifiers());
-            press.btn       = MapMouseButton(mouse->button());
-            listener->OnMousePress(press);
-            if (mWinEventLog)
-                mWinEventLog->RecordEvent(press, event_time);
-        }
-        else if (event->type() == QEvent::MouseButtonRelease)
-        {
-            const auto* mouse = static_cast<const QMouseEvent*>(event);
-
-            wdk::WindowEventMouseRelease release;
-            release.window_x = mouse->x();
-            release.window_y = mouse->y();
-            release.global_x = mouse->globalX();
-            release.global_y = mouse->globalY();
-            release.modifiers = MapKeyModifiers(mouse->modifiers());
-            release.btn       = MapMouseButton(mouse->button());
-            listener->OnMouseRelease(release);
-            if (mWinEventLog)
-                mWinEventLog->RecordEvent(release, event_time);
-        }
-        if (event->type() == QEvent::Resize)
-        {
-            const auto width = mSurface->width();
-            const auto height = mSurface->height();
-            mEngine->OnRenderingSurfaceResized(width, height);
-
-            // try to give the keyboard focus to the window
-            QTimer::singleShot(100, this, &PlayWindow::ActivateWindow);
-            return true;
-        }
+        if (mWinEventLog)
+            mWinEventLog->RecordEvent(key, mTimer.SinceStart());
     }
-    catch (const std::exception& e)
+    else if (event->type() == QEvent::KeyRelease)
     {
-        DEBUG("Exception in app event handler.");
-        Barf(e.what());
-    }
+        const auto* key_event = static_cast<const QKeyEvent *>(event);
 
-    return QMainWindow::event(event);
+        wdk::WindowEventKeyUp key;
+        key.symbol    = MapVirtualKey(key_event->key());
+        key.modifiers = MapKeyModifiers(key_event->modifiers());
+        mEventQueue.push_back(key);
+
+        if (mWinEventLog)
+            mWinEventLog->RecordEvent(key, mTimer.SinceStart());
+    }
+    else if (event->type() == QEvent::MouseMove)
+    {
+        const auto* mouse = static_cast<const QMouseEvent*>(event);
+
+        wdk::WindowEventMouseMove move;
+        move.window_x = mouse->x();
+        move.window_y = mouse->y();
+        move.global_x = mouse->globalX();
+        move.global_y = mouse->globalY();
+        move.modifiers = MapKeyModifiers(mouse->modifiers());
+        move.btn       = MapMouseButton(mouse->button());
+        mEventQueue.push_back(move);
+
+        if (mWinEventLog)
+            mWinEventLog->RecordEvent(move, mTimer.SinceStart());
+    }
+    else if (event->type() == QEvent::MouseButtonPress)
+    {
+        const auto* mouse = static_cast<const QMouseEvent*>(event);
+
+        wdk::WindowEventMousePress press;
+        press.window_x = mouse->x();
+        press.window_y = mouse->y();
+        press.global_x = mouse->globalX();
+        press.global_y = mouse->globalY();
+        press.modifiers = MapKeyModifiers(mouse->modifiers());
+        press.btn       = MapMouseButton(mouse->button());
+        mEventQueue.push_back(press);
+
+        if (mWinEventLog)
+            mWinEventLog->RecordEvent(press, mTimer.SinceStart());
+    }
+    else if (event->type() == QEvent::MouseButtonRelease)
+    {
+        const auto* mouse = static_cast<const QMouseEvent*>(event);
+
+        wdk::WindowEventMouseRelease release;
+        release.window_x = mouse->x();
+        release.window_y = mouse->y();
+        release.global_x = mouse->globalX();
+        release.global_y = mouse->globalY();
+        release.modifiers = MapKeyModifiers(mouse->modifiers());
+        release.btn       = MapMouseButton(mouse->button());
+        mEventQueue.push_back(release);
+
+        if (mWinEventLog)
+            mWinEventLog->RecordEvent(release, mTimer.SinceStart());
+    }
+    if (event->type() == QEvent::Resize)
+    {
+        wdk::WindowEventResize resize;
+        resize.width  = mSurface->width();
+        resize.height = mSurface->height();
+        mEventQueue.push_back(resize);
+    }
+    else return QMainWindow::event(event);
+
+    return true;
 }
 
 void PlayWindow::ResizeSurface(unsigned width, unsigned height)
