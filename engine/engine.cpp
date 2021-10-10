@@ -830,7 +830,7 @@ private:
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
-                mPhysics.Tick(&contacts);
+                mPhysics.Step(&contacts);
                 mPhysics.UpdateScene(*mScene);
                 for (const auto& contact : contacts)
                 {
@@ -843,7 +843,7 @@ private:
         }
 
         std::vector<engine::AudioEvent> audio_events;
-        mAudio->Tick(&audio_events);
+        mAudio->Update(&audio_events);
         for (const auto& event : audio_events)
         {
             mGame->OnAudioEvent(event);

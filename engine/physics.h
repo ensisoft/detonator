@@ -98,8 +98,8 @@ namespace engine
         // single entity instance.
         void UpdateEntity(game::Entity& entity);
 
-        // Tick the physics simulation forward by one time step.
-        void Tick(std::vector<ContactEvent>* contacts = nullptr);
+        // Step the physics simulation forward by one time step.
+        void Step(std::vector<ContactEvent>* contacts = nullptr);
 
         // Delete all physics bodies currently in the system.
         void DeleteAll();

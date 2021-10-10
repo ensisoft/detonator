@@ -480,7 +480,7 @@ void AnimationTrackWidget::Update(double secs)
     mPlaybackAnimation->Update(secs);
     if (GetValue(mUI.actionUsePhysics))
     {
-        mPhysics.Tick();
+        mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
     }
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
