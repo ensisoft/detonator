@@ -29,6 +29,7 @@
 
 #include "base/platform.h"
 #include "base/logging.h"
+#include "base/trace.h"
 #include "audio/loader.h"
 #include "audio/format.h"
 #include "engine/classlib.h"
@@ -154,6 +155,9 @@ namespace engine
         {}
 
         virtual void DebugPrintString(const std::string& str)
+        {}
+
+        virtual void SetTracer(base::Trace* tracer)
         {}
 
         // Parameters pertaining to the environment of the application.

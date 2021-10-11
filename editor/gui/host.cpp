@@ -269,7 +269,7 @@ void Main(int argc, char* argv[])
 
         window.RunGameLoopOnce();
 
-        if ((frame % 100) == 0)
+        if ((frame % 10) == 0)
         {
             window.NonGameTick();
             base::FlushGlobalLog();
