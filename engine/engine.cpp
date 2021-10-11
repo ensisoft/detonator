@@ -29,6 +29,7 @@
 #include <stack>
 
 #include "base/logging.h"
+#include "base/trace.h"
 #include "game/entity.h"
 #include "game/treeop.h"
 #include "graphics/image.h"
@@ -124,6 +125,8 @@ public:
         print.message = message;
         mDebugPrints.push_back(std::move(print));
     }
+    virtual void SetTracer(base::Trace* tracer) override
+    { base::SetThreadTrace(tracer); }
 
     virtual void SetEnvironment(const Environment& env) override
     {
@@ -183,6 +186,8 @@ public:
 
     virtual void Draw() override
     {
+        TRACE_SCOPE("Engine::Draw");
+
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
 
@@ -228,13 +233,13 @@ public:
             mPainter->SetPixelRatio(glm::vec2(scale, scale));
 
             gfx::Transform transform;
-            mRenderer.BeginFrame();
-            mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull);
+            TRACE_CALL(mRenderer.BeginFrame(), "Renderer::BeginFrame");
+            TRACE_CALL(mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull), "Renderer::Draw");
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
                 mPhysics.DebugDrawObjects(*mPainter , transform);
             }
-            mRenderer.EndFrame();
+            TRACE_CALL(mRenderer.EndFrame(), "Renderer::EndFrame");
         }
 
         if (auto* ui = GetUI())
@@ -254,7 +259,7 @@ public:
             mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
-            ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr);
+            TRACE_CALL(ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr), "UI::Paint");
         }
 
         if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mShowMouseCursor)
@@ -304,21 +309,25 @@ public:
             gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
-        mDevice->EndFrame(true);
-        mDevice->CleanGarbage(120);
+        TRACE_CALL(mDevice->EndFrame(true), "Device::Swap");
+        TRACE_CALL(mDevice->CleanGarbage(120), "Device::CleanGarbage");
     }
 
     virtual void BeginMainLoop() override
     {
+        TRACE_SCOPE("Engine::BeginMainLoop");
+
         if (mScene)
         {
-            mScene->BeginLoop();
-            mScripting->BeginLoop();
+            TRACE_CALL(mScene->BeginLoop(), "Scene::BeginLoop");
+            TRACE_CALL(mScripting->BeginLoop(), "Scripting::BeginLoop");
         }
     }
 
     virtual void Update(double dt) override
     {
+        TRACE_SCOPE("Engine::Update");
+
         if (mDebug.debug_pause)
             dt = 0.0;
 
@@ -349,7 +358,7 @@ public:
 
         if (auto* ui = GetUI())
         {
-            mUIPainter.Update(mGameTimeTotal, dt);
+            TRACE_CALL(mUIPainter.Update(mGameTimeTotal, dt), "UI::Update");
             const auto& action = ui->PollAction(mUIState, mGameTickStep, dt);
             if (action.type != uik::WidgetActionType::None)
                 mGame->OnUIAction(ui, action);
@@ -359,6 +368,8 @@ public:
     }
     virtual void EndMainLoop() override
     {
+        TRACE_SCOPE("Engine::EndMainLoop");
+
         if (mScene)
         {
             mScripting->EndLoop();
@@ -816,40 +827,42 @@ private:
     }
     void TickGame(double game_time, double dt)
     {
-        mGame->Tick(game_time, dt);
+        TRACE_SCOPE("Engine::TickGame");
+        TRACE_CALL(mGame->Tick(game_time, dt), "Game::Tick");
         if (mScene)
         {
-            mScripting->Tick(game_time, dt);
+            TRACE_CALL(mScripting->Tick(game_time, dt), "Scripting::Tick");
         }
     }
     void UpdateGame(double game_time,  double dt)
     {
+        TRACE_SCOPE("Engine::UpdateGame");
         if (mScene)
         {
-            mScene->Update(dt);
+            TRACE_CALL(mScene->Update(dt), "Scene::Update");
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
-                mPhysics.Step(&contacts);
-                mPhysics.UpdateScene(*mScene);
+                TRACE_CALL(mPhysics.Step(&contacts), "Physics::Step");
+                TRACE_CALL(mPhysics.UpdateScene(*mScene), "Physics::UpdateScene");
                 for (const auto& contact : contacts)
                 {
                     mGame->OnContactEvent(contact);
                     mScripting->OnContactEvent(contact);
                 }
             }
-            mRenderer.Update(*mScene, game_time, dt);
-            mScripting->Update(game_time, dt);
+            TRACE_CALL(mRenderer.Update(*mScene, game_time, dt), "Renderer::Update");
+            TRACE_CALL(mScripting->Update(game_time, dt), "Scripting::Update");
         }
 
         std::vector<engine::AudioEvent> audio_events;
-        mAudio->Update(&audio_events);
+        TRACE_CALL(mAudio->Update(&audio_events), "Audio::Update");
         for (const auto& event : audio_events)
         {
             mGame->OnAudioEvent(event);
         }
 
-        mGame->Update(game_time, dt);
+        TRACE_CALL(mGame->Update(game_time, dt), "Game::Update");
 
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(dt);
@@ -947,6 +960,8 @@ private:
     bool mShowDebugs = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
+    // Trace writer if any.
+    std::unique_ptr<base::TraceWriter> mTraceWriter;
 };
 
 } //namespace

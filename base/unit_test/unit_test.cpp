@@ -16,10 +16,15 @@
 
 #include "config.h"
 
+#include <chrono>
+#include <thread>
+#include <iostream>
+
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/color4f.h"
 #include "base/types.h"
+#include "base/trace.h"
 
 bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
 {
@@ -224,6 +229,44 @@ void unit_test_rect_test_point()
     TEST_REQUIRE(rect.TestPoint(11, 11));
 }
 
+void bar()
+{
+    TRACE_SCOPE("bar");
+    std::this_thread::sleep_for(std::chrono::milliseconds(3));
+}
+
+void foo()
+{
+    TRACE_SCOPE("foo");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    bar();
+}
+void meh()
+{
+    TRACE_SCOPE("meh");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void unit_test_trace()
+{
+    base::TraceLog trace(10);
+
+    base::SetThreadTrace(&trace);
+    base::TraceStart();
+    {
+        TRACE_SCOPE("unit_Test");
+        foo();
+        meh();
+    }
+    for (size_t i=0; i<trace.GetNumEntries(); ++i)
+    {
+        const auto& entry = trace.GetEntry(i);
+        for (unsigned i=0; i<entry.level; ++i)
+            std::cout << "  ";
+        std::cout << entry.name <<  " " << entry.finish_time - entry.start_time << std::endl;
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_rect<int>();
@@ -233,5 +276,6 @@ int test_main(int argc, char* argv[])
     unit_test_rect_union<int>();
     unit_test_rect_test_point<int>();
     unit_test_rect_test_point<float>();
+    unit_test_trace();
     return 0;
 }

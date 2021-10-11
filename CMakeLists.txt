@@ -170,6 +170,13 @@ set(CMAKE_DEBUG_POSTFIX "")
 # combine as many translation units as possible into static libraries
 # in order to reduce the build times by not repeatedly building a translation
 # unit when it's possible to use a library
+add_library(BaseLib
+    base/assert.cpp
+    base/format.cpp
+    base/logging.cpp
+    base/json.cpp
+    base/utility.cpp
+    base/trace.cpp)
 add_library(AudioLib
     audio/format.cpp
     audio/sndfile.cpp
@@ -180,12 +187,6 @@ add_library(AudioLib
     audio/player.cpp
     audio/element.cpp
     audio/graph.cpp)
-add_library(BaseLib
-    base/assert.cpp
-    base/format.cpp
-    base/logging.cpp
-    base/json.cpp
-    base/utility.cpp)
 add_library(DataLib
     data/json.cpp)
 add_library(GfxLib
@@ -706,7 +707,7 @@ add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)
 add_executable(unit_test_math    base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
 add_executable(unit_test_logging base/unit_test/unit_test_log.cpp base/logging.cpp)
-add_executable(unit_test_base    base/unit_test/unit_test.cpp base/json.cpp base/utility.cpp)
+add_executable(unit_test_base    base/unit_test/unit_test.cpp base/json.cpp base/utility.cpp base/trace.cpp base/assert.cpp)
 target_include_directories(unit_test_base    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 target_include_directories(unit_test_logging PRIVATE "${CMAKE_CURRENT_LIST_DIR}/base/unit_test/")
 if (UNIX)

@@ -46,6 +46,7 @@
 #include "base/cmdline.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "base/trace.h"
 #include "engine/main/interface.h"
 #include "engine/classlib.h"
 #include "wdk/opengl/config.h"
@@ -326,6 +327,7 @@ int main(int argc, char* argv[])
     {
         engine::Engine::DebugOptions debug;
 
+        std::string trace_file;
         std::string config_file;
         std::string cmdline_error;
         // skip arg 0 since that's the executable name
@@ -340,6 +342,7 @@ int main(int argc, char* argv[])
         opt.Add("--debug-show-fps", "Show FPS counter and stats. You'll need to use --debug-font.");
         opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
         opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
+        opt.Add("--trace", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
         if (!opt.Parse(args, &cmdline_error, true))
         {
             std::cerr << "Error parsing args: " << cmdline_error;
@@ -350,6 +353,10 @@ int main(int argc, char* argv[])
         {
             opt.Print(std::cout);
             return 0;
+        }
+        if (opt.WasGiven("--trace"))
+        {
+            trace_file = opt.GetValue<std::string>("--trace");
         }
 
         if (opt.WasGiven("--debug"))
@@ -396,6 +403,15 @@ int main(int argc, char* argv[])
         INFO("Copyright (c) 2010-2020 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
         INFO("http://github.com/ensisoft/gamestudio");
+
+        std::unique_ptr<base::FileTraceWriter> trace_writer;
+        std::unique_ptr<base::TraceLog> trace_logger;
+        if (opt.WasGiven("--trace"))
+        {
+            trace_writer.reset(new base::FileTraceWriter(trace_file));
+            trace_logger.reset(new base::TraceLog(1000));
+            base::SetThreadTrace(trace_logger.get());
+        }
 
         // read config JSON
         const auto [json_ok, json, json_error] = base::JsonParseFile(config_file);
@@ -472,7 +488,6 @@ int main(int argc, char* argv[])
             attrs.red_size, attrs.green_size, attrs.blue_size, attrs.alpha_size,
             attrs.stencil_size, attrs.depth_size);
         DEBUG("Sampling: %1", attrs.sampling);
-
 
         auto context = std::make_shared<WindowContext>(attrs);
 
@@ -574,6 +589,7 @@ int main(int argc, char* argv[])
         if (save_window_geometry)
             LoadState(state_file, window);
 
+        engine->SetTracer(trace_logger.get());
         engine->SetEngineConfig(config);
         engine->Load();
         engine->Start();
@@ -586,6 +602,9 @@ int main(int argc, char* argv[])
 
         while (engine->IsRunning() && !quit)
         {
+            TRACE_START();
+            TRACE_ENTER(MainLoop);
+
             // indicate beginning of the main loop iteration.
             engine->BeginMainLoop();
 
@@ -666,7 +685,17 @@ int main(int argc, char* argv[])
             }
             // indicate end of iteration.
             engine->EndMainLoop();
+
+            TRACE_LEAVE(MainLoop);
+
+            if (trace_logger)
+            {
+                trace_logger->Write(*trace_writer);
+                trace_writer->Flush();
+            }
         } // main loop
+
+        engine->SetTracer(nullptr);
 
         engine->Stop();
         engine->Save();
