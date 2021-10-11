@@ -31,12 +31,16 @@
 namespace {
 gfx::Material MakeMaterial(const gfx::Color4f& color)
 {
+    static std::shared_ptr<gfx::ColorClass> klass;
+    if (!klass)
+        klass = std::make_shared<gfx::ColorClass>();
+
     const auto alpha = color.Alpha();
-    auto mat = gfx::CreateMaterialFromColor(color);
-    mat.SetSurfaceType(alpha == 1.0f
+    klass->SetBaseColor(color);
+    klass->SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
-    return mat;
+    return gfx::Material(klass);
 }
 } // namespace
 
@@ -81,11 +85,23 @@ void DrawTextRect(Painter& painter,
     buff.AddText(text_and_style);
 
     // Setup material to shade the text.
-    static auto klass = std::make_shared<gfx::TextureMap2DClass>();
-    klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
-    klass->SetBaseColor(color);
-    klass->SetTexture(CreateTextureFromText(buff));
-    klass->EnableGC(true);
+    // the classes are expensive to construct so keep the class
+    // object around for re-using later.
+    static std::shared_ptr<gfx::TextureMap2DClass> klass;
+    if (!klass)
+    {
+        klass = std::make_shared<gfx::TextureMap2DClass>();
+        klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+        klass->SetTexture(CreateTextureFromText(buff));
+        klass->EnableGC(true);
+    }
+    else
+    {
+        // update the text buffer in the material classes
+        // texture source
+        auto* texture_src = static_cast<detail::TextureTextBufferSource*>(klass->GetTextureSource());
+        texture_src->SetTextBuffer(std::move(buff));
+    }
 
     // if the text is set to be blinking do a sharp cut off
     // and when we have the "off" interval then simply don't
@@ -100,10 +116,13 @@ void DrawTextRect(Painter& painter,
             return;
     }
 
+    Material material(klass);
+    material.SetUniform("kBaseColor", color);
+
     Transform t;
     t.Resize(rect);
     t.MoveTo(rect);
-    painter.Draw(Rectangle(), t, Material(klass));
+    painter.Draw(Rectangle(), t, material);
 }
 
 void FillRect(Painter& painter, const FRect& rect, const Color4f& color)
