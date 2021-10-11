@@ -52,7 +52,12 @@ std::string RandomString(size_t len)
             "abdefghijlkmnopqrstuvwxyz"
             "1234567890";
     static unsigned max_len = std::strlen(alphabet) - 1;
-    static std::random_device rd;
+    // seed mersenne twister with random value from random_device
+    // the random device itself is very slow since it uses the
+    // entropy in the system for random number generation.
+    // that level of randomness is not needed.
+    static std::mt19937 rd((std::random_device()()));
+
     std::uniform_int_distribution<unsigned> dist(0, max_len);
 
     std::string ret;
