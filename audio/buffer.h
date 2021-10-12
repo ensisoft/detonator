@@ -29,6 +29,19 @@
 
 namespace audio
 {
+    // Compressed source data buffer containing for example
+    // OGG, MP3 or flac encoded PCM data.
+    class SourceBuffer
+    {
+    public:
+        virtual ~SourceBuffer() = default;
+        // Get the read pointer for the contents of the buffer.
+        virtual const void* GetData() const = 0;
+        // Get the size of the buffer's contents in bytes.
+        virtual size_t GetSize() const = 0;
+    private:
+    };
+
     // Interface for accessing and dealing with buffers of PCM audio data.
     // Each buffer contains the actual PCM data and also carries some
     // meta information related to the contents of the buffer, i.e it's

@@ -892,16 +892,15 @@ FileSource::~FileSource() = default;
 
 bool FileSource::Prepare(const Loader& loader)
 {
-    auto stream = loader.OpenStream(mFile);
-    if (!stream.is_open())
+    auto buffer = loader.LoadAudioBuffer(mFile);
+    if (!buffer)
         return false;
 
     std::unique_ptr<Decoder> decoder;
     const auto& upper = base::ToUpperUtf8(mFile);
     if (base::EndsWith(upper, ".MP3"))
     {
-        auto io = std::make_unique<Mpg123FileInputStream>();
-        io->UseStream(mFile, std::move(stream));
+        auto io = std::make_unique<Mpg123Buffer>(mFile, buffer);
         auto dec = std::make_unique<Mpg123Decoder>();
         if (!dec->Open(std::move(io), mFormat.sample_type))
             return false;
@@ -911,8 +910,7 @@ bool FileSource::Prepare(const Loader& loader)
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto io = std::make_unique<SndFileInputStream>();
-        io->UseStream(mFile, std::move(stream));
+        auto io = std::make_unique<SndFileBuffer>(mFile, buffer);
         auto dec = std::make_unique<SndFileDecoder>();
         if (!dec->Open(std::move(io)))
             return false;
@@ -1019,7 +1017,7 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
     return true;
 }
 
-BufferSource::BufferSource(const std::string& name, std::unique_ptr<Buffer> buffer,
+BufferSource::BufferSource(const std::string& name, std::unique_ptr<SourceBuffer> buffer,
                  Format format, SampleType type)
   : mName(name)
   , mId(base::RandomString(10))
