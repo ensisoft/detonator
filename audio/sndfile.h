@@ -98,9 +98,13 @@ namespace audio
     class SndFileBuffer : public SndFileIODevice
     {
     public:
-        SndFileBuffer(const std::string& name, std::unique_ptr<const Buffer> buffer)
+        SndFileBuffer(const std::string& name, std::unique_ptr<SourceBuffer> buffer)
             : mName(name)
             , mBuffer(std::move(buffer))
+        {}
+        SndFileBuffer(const std::string& name, std::shared_ptr<const SourceBuffer> buffer)
+            : mName(name)
+            , mBuffer(buffer)
         {}
         virtual std::int64_t GetLength() const override;
         virtual std::int64_t Seek(std::int64_t offset, int whence) override;
@@ -110,7 +114,7 @@ namespace audio
         { return mName; }
     private:
         const std::string mName;
-        std::unique_ptr<const Buffer> mBuffer;
+        std::shared_ptr<const SourceBuffer> mBuffer;
         std::int64_t mOffset = 0;
     };
 

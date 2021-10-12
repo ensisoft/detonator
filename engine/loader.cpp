@@ -77,7 +77,7 @@ public:
     }
     virtual std::size_t GetSize() const override
     { return mFileData.size(); }
-    virtual std::string GetName() const override
+    virtual std::string GetName() const /*override*/
     { return mFileName; }
 private:
     const std::string mFileName;
@@ -86,6 +86,7 @@ private:
 
 using GameDataFileBuffer = FileBuffer<GameData>;
 using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
+using AudioFileBuffer    = FileBuffer<audio::SourceBuffer>;
 
 class FileResourceLoaderImpl : public FileResourceLoader
 {
@@ -137,13 +138,28 @@ public:
         return buff;
     }
     // audio::Loader impl
-    virtual std::ifstream OpenStream(const std::string& uri) const override
+    virtual std::ifstream OpenAudioStream(const std::string& uri) const override
     {
         const auto& filename = ResolveURI(uri);
         auto stream = base::OpenBinaryInputStream(filename);
         if (!stream.is_open())
             ERROR("Failed to open '%1'.", filename);
         return stream;
+    }
+    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
+    {
+        const auto& filename = ResolveURI(uri);
+        auto it = mAudioFileBufferCache.find(filename);
+        if (it != mAudioFileBufferCache.end())
+            return it->second;
+
+        std::vector<char> buffer;
+        if (!LoadFileBuffer(filename, &buffer))
+            return nullptr;
+
+        auto buff = std::make_shared<AudioFileBuffer>(uri, std::move(buffer));
+        mAudioFileBufferCache[filename] = buff;
+        return buff;
     }
 
     // FileResourceLoader impl
@@ -180,6 +196,8 @@ private:
         std::shared_ptr<const GraphicsFileBuffer>> mGraphicsFileBufferCache;
     mutable std::unordered_map<std::string,
         std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
+    mutable std::unordered_map<std::string,
+        std::shared_ptr<const AudioFileBuffer>> mAudioFileBufferCache;
     // the root of the resource dir against which to resolve the resource URIs.
     std::string mResourcePath;
     std::string mApplicationPath;

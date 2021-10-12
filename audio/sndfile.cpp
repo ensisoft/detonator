@@ -155,7 +155,7 @@ std::int64_t SndFileInputStream::Tell() const
 { return (sf_count_t)mStream.tellg(); }
 
 std::int64_t SndFileBuffer::GetLength() const
-{ return mBuffer->GetByteSize(); }
+{ return mBuffer->GetSize(); }
 
 std::int64_t SndFileBuffer::Seek(std::int64_t offset, int whence)
 {
@@ -164,18 +164,18 @@ std::int64_t SndFileBuffer::Seek(std::int64_t offset, int whence)
     else if (whence == SEEK_SET)
         mOffset = offset;
     else if (whence == SEEK_END)
-        mOffset = mBuffer->GetByteSize() - offset;
+        mOffset = mBuffer->GetSize() - offset;
     else BUG("Unknown seek position");
     return mOffset;
 }
 std::int64_t SndFileBuffer::Read(void* ptr, std::int64_t count)
 {
-    const auto num_bytes = mBuffer->GetByteSize();
+    const auto num_bytes = mBuffer->GetSize();
     const auto num_avail = num_bytes - mOffset;
     const auto num_bytes_to_read = std::min((std::int64_t)num_avail, count);
     if (num_bytes_to_read == 0)
         return 0;
-    const auto* src = static_cast<const std::uint8_t*>(mBuffer->GetPtr());
+    const auto* src = static_cast<const std::uint8_t*>(mBuffer->GetData());
     std::memcpy(ptr, &src[mOffset], num_bytes_to_read);
     mOffset += num_bytes_to_read;
     return num_bytes_to_read;

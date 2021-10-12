@@ -66,9 +66,13 @@ namespace audio
     class Mpg123Buffer : public Mpg123IODevice
     {
     public:
-        Mpg123Buffer(const std::string& name, std::unique_ptr<const Buffer> buffer)
+        Mpg123Buffer(const std::string& name, std::unique_ptr<SourceBuffer> buffer)
           : mName(name)
           , mBuffer(std::move(buffer))
+        {}
+        Mpg123Buffer(const std::string& name, std::shared_ptr<const SourceBuffer> buffer)
+          : mName(name)
+          , mBuffer(buffer)
         {}
         virtual long Read(void* buffer,  size_t bytes) override;
         virtual off_t Seek(off_t offset, int whence) override;
@@ -76,7 +80,7 @@ namespace audio
         { return mName; }
     private:
         const std::string mName;
-        std::unique_ptr<const Buffer> mBuffer;
+        std::shared_ptr<const SourceBuffer> mBuffer;
         off_t mOffset = 0;
     };
 

@@ -170,6 +170,25 @@ bool OverwriteTextFile(const std::string& file, const std::string& text)
     return true;
 }
 
+std::vector<char> LoadBinaryFile(const std::string& filename)
+{
+    auto in = base::OpenBinaryInputStream(filename);
+    if (!in.is_open())
+        throw std::runtime_error("Failed to open: " + filename);
+
+    std::vector<char> buff;
+
+    in.seekg(0, std::ios::end);
+    const auto size = (std::size_t)in.tellg();
+    in.seekg(0, std::ios::beg);
+    buff.resize(size);
+    in.read(&buff[0], size);
+    if ((std::size_t)in.gcount() != size)
+        throw std::runtime_error("Failed to read all of: " + filename);
+
+    return buff;
+}
+
 } // namespace
 
 #if defined(__MSVC__)

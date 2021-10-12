@@ -27,6 +27,7 @@
 
 #include "editor/app/utility.h"
 #include "graphics/resource.h"
+#include "audio/buffer.h"
 #include "engine/data.h"
 
 namespace app
@@ -56,7 +57,7 @@ namespace app
             }
             virtual std::size_t GetSize() const override
             { return mFileData.size(); }
-            virtual std::string GetName() const override
+            virtual std::string GetName() const /* override */
             { return app::ToUtf8(mFileName); }
 
             static std::shared_ptr<const FileBuffer> LoadFromFile(const QString& file)
@@ -76,5 +77,6 @@ namespace app
     // the same interface so the impl can be shared.
     using GraphicsFileBuffer = detail::FileBuffer<gfx::Resource>;
     using GameDataFileBuffer = detail::FileBuffer<engine::GameData>;
+    using AudioFileBuffer    = detail::FileBuffer<audio::SourceBuffer>;
 
 } // namespace

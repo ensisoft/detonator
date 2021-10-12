@@ -738,7 +738,7 @@ namespace audio
         enum class Format {
             Mp3, Ogg, Flac, Wav
         };
-        BufferSource(const std::string& name, std::unique_ptr<Buffer> buffer,
+        BufferSource(const std::string& name, std::unique_ptr<SourceBuffer> buffer,
                      Format format, SampleType type = SampleType::Int16);
         BufferSource(BufferSource&& other);
        ~BufferSource();
@@ -765,7 +765,7 @@ namespace audio
         const std::string mName;
         const std::string mId;
         const Format mInputFormat;
-        std::unique_ptr<Buffer> mBuffer;
+        std::unique_ptr<SourceBuffer> mBuffer;
         std::unique_ptr<Decoder> mDecoder;
         SingleSlotPort mPort;
         audio::Format mOutputFormat;

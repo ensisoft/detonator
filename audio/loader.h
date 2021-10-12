@@ -19,9 +19,13 @@
 #include "config.h"
 
 #include <fstream>
+#include <memory>
 
 namespace audio
 {
+    class SourceBuffer;
+    using SourceBufferHandle = std::shared_ptr<const SourceBuffer>;
+
     // Interface for accessing the audio data.
     class Loader
     {
@@ -31,7 +35,9 @@ namespace audio
         // some other abstraction.
         // Open a stream to the given audio file. Should return a valid
         // open stream object when successful.
-        virtual std::ifstream OpenStream(const std::string& file) const = 0;
+        virtual std::ifstream OpenAudioStream(const std::string& file) const = 0;
+
+        virtual SourceBufferHandle LoadAudioBuffer(const std::string& file) const = 0;
     private:
     };
 

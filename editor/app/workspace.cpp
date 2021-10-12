@@ -950,7 +950,7 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
     return GraphicsFileBuffer::LoadFromFile(file);
 }
 
-std::ifstream Workspace::OpenStream(const std::string& URI) const
+std::ifstream Workspace::OpenAudioStream(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
@@ -958,6 +958,13 @@ std::ifstream Workspace::OpenStream(const std::string& URI) const
     if (!stream.is_open())
         ERROR("Failed to open '%1'.", file);
     return stream;
+}
+
+audio::SourceBufferHandle Workspace::LoadAudioBuffer(const std::string& URI) const
+{
+    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    DEBUG("URI '%1' => '%2'", URI, file);
+    return AudioFileBuffer::LoadFromFile(file);
 }
 
 bool Workspace::LoadWorkspace()

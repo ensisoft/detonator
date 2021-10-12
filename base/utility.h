@@ -222,6 +222,8 @@ std::ofstream OpenBinaryOutputStream(const std::string& filename);
 bool OverwriteTextFile(const std::string& file, const std::string& text);
 bool FileExists(const std::string& filename);
 
+std::vector<char> LoadBinaryFile(const std::string& filename);
+
 } // base
 
 

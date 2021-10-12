@@ -248,7 +248,7 @@ public:
     {
         return app::GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
     }
-    virtual std::ifstream OpenStream(const std::string& URI) const override
+    virtual std::ifstream OpenAudioStream(const std::string& URI) const override
     {
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
@@ -256,6 +256,12 @@ public:
         if (!stream.is_open())
             ERROR("Failed to open '%1'.", file);
         return stream;
+    }
+    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& URI) const override
+    {
+        const auto& file = ResolveURI(URI);
+        DEBUG("URI '%1' => '%2'", URI, file);
+        return app::AudioFileBuffer::LoadFromFile(file);
     }
 private:
     QString ResolveURI(const std::string& URI) const
