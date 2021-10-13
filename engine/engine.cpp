@@ -186,8 +186,6 @@ public:
 
     virtual void Draw() override
     {
-        TRACE_SCOPE("Engine::Draw");
-
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
 
@@ -196,7 +194,7 @@ public:
 
         if (mScene)
         {
-
+            TRACE_SCOPE("Scene");
             // get the game's logical viewport into the game world.
             const auto& view = mGame->GetViewport();
             // map the logical viewport to some area in the rendering surface
@@ -233,17 +231,19 @@ public:
             mPainter->SetPixelRatio(glm::vec2(scale, scale));
 
             gfx::Transform transform;
-            TRACE_CALL(mRenderer.BeginFrame(), "Renderer::BeginFrame");
-            TRACE_CALL(mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull), "Renderer::Draw");
+            TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull));
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
-                mPhysics.DebugDrawObjects(*mPainter , transform);
+                TRACE_CALL("Physics::DebugDraw", mPhysics.DebugDrawObjects(*mPainter , transform));
             }
-            TRACE_CALL(mRenderer.EndFrame(), "Renderer::EndFrame");
+            TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
         }
 
         if (auto* ui = GetUI())
         {
+            TRACE_SCOPE("UI");
+
             const auto& rect   = ui->GetBoundingRect();
             const float width  = rect.GetWidth();
             const float height = rect.GetHeight();
@@ -259,9 +259,10 @@ public:
             mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
-            TRACE_CALL(ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr), "UI::Paint");
+            TRACE_CALL("UI::Paint",ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
         }
 
+        TRACE_ENTER(DebugDrawing);
         if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mShowMouseCursor)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
@@ -298,6 +299,7 @@ public:
             // visualize the game's logical viewport in the window.
             gfx::DrawRectOutline(*mPainter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
         }
+        TRACE_LEAVE(DebugDrawing);
 
         if (mShowMouseCursor)
         {
@@ -309,25 +311,21 @@ public:
             gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
-        TRACE_CALL(mDevice->EndFrame(true), "Device::Swap");
-        TRACE_CALL(mDevice->CleanGarbage(120), "Device::CleanGarbage");
+        TRACE_CALL("Device::Swap",mDevice->EndFrame(true));
+        TRACE_CALL("Device::CleanGarbage",mDevice->CleanGarbage(120));
     }
 
     virtual void BeginMainLoop() override
     {
-        TRACE_SCOPE("Engine::BeginMainLoop");
-
         if (mScene)
         {
-            TRACE_CALL(mScene->BeginLoop(), "Scene::BeginLoop");
-            TRACE_CALL(mScripting->BeginLoop(), "Scripting::BeginLoop");
+            TRACE_CALL("Scene::BeginLoop",mScene->BeginLoop());
+            TRACE_CALL("Scripting:BeginLoop",mScripting->BeginLoop());
         }
     }
 
     virtual void Update(double dt) override
     {
-        TRACE_SCOPE("Engine::Update");
-
         if (mDebug.debug_pause)
             dt = 0.0;
 
@@ -343,14 +341,14 @@ public:
             mGameTimeTotal += mGameTimeStep;
             mTimeAccum -= mGameTimeStep;
             mTickAccum += mGameTimeStep;
-            UpdateGame(mGameTimeTotal, mGameTimeStep);
+            TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
 
             // put some accumulated time towards ticking game.
             auto tick_time = mGameTimeTotal;
 
             while (mTickAccum >= mGameTickStep)
             {
-                TickGame(tick_time, mGameTickStep);
+                TRACE_CALL("TickGame", TickGame(tick_time, mGameTickStep));
                 mTickAccum -= mGameTickStep;
                 tick_time += mGameTickStep;
             }
@@ -358,7 +356,7 @@ public:
 
         if (auto* ui = GetUI())
         {
-            TRACE_CALL(mUIPainter.Update(mGameTimeTotal, dt), "UI::Update");
+            TRACE_CALL("UI::Update",mUIPainter.Update(mGameTimeTotal, dt));
             const auto& action = ui->PollAction(mUIState, mGameTickStep, dt);
             if (action.type != uik::WidgetActionType::None)
                 mGame->OnUIAction(ui, action);
@@ -368,26 +366,26 @@ public:
     }
     virtual void EndMainLoop() override
     {
-        TRACE_SCOPE("Engine::EndMainLoop");
-
         if (mScene)
         {
-            mScripting->EndLoop();
-            mScene->EndLoop();
+            TRACE_CALL("Scripting::EndLoop",mScripting->EndLoop());
+            TRACE_CALL("Scene::EndLoop",mScene->EndLoop());
         }
 
         if (mActionDelay > 0.0f)
             return;
 
-        engine::Action action;
-        while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
-        {
-            std::visit([this](const auto& variant_value) {
-                this->OnAction(variant_value);
-            }, action);
-            if (mActionDelay > 0.0f)
-                break;
-        }
+        TRACE_BLOCK("Actions",
+            engine::Action action;
+            while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
+            {
+                std::visit([this](const auto& variant_value) {
+                    this->OnAction(variant_value);
+                }, action);
+                if (mActionDelay > 0.0f)
+                    break;
+            }
+        );
     }
 
     virtual void Stop() override
@@ -827,42 +825,42 @@ private:
     }
     void TickGame(double game_time, double dt)
     {
-        TRACE_SCOPE("Engine::TickGame");
-        TRACE_CALL(mGame->Tick(game_time, dt), "Game::Tick");
+        TRACE_CALL("Game::Tick",mGame->Tick(game_time, dt));
         if (mScene)
         {
-            TRACE_CALL(mScripting->Tick(game_time, dt), "Scripting::Tick");
+            TRACE_CALL("Scripting::Tick", mScripting->Tick(game_time, dt));
         }
     }
     void UpdateGame(double game_time,  double dt)
     {
-        TRACE_SCOPE("Engine::UpdateGame");
         if (mScene)
         {
-            TRACE_CALL(mScene->Update(dt), "Scene::Update");
+            TRACE_CALL("Scene::Update",mScene->Update(dt));
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
-                TRACE_CALL(mPhysics.Step(&contacts), "Physics::Step");
-                TRACE_CALL(mPhysics.UpdateScene(*mScene), "Physics::UpdateScene");
-                for (const auto& contact : contacts)
-                {
-                    mGame->OnContactEvent(contact);
-                    mScripting->OnContactEvent(contact);
-                }
+                TRACE_CALL("Physics::Step", mPhysics.Step(&contacts));
+                TRACE_CALL("Physics::Update", mPhysics.UpdateScene(*mScene));
+                TRACE_BLOCK("Physics::ContactEvents",
+                    for (const auto& contact : contacts)
+                    {
+                        mGame->OnContactEvent(contact);
+                        mScripting->OnContactEvent(contact);
+                    }
+                );
             }
-            TRACE_CALL(mRenderer.Update(*mScene, game_time, dt), "Renderer::Update");
-            TRACE_CALL(mScripting->Update(game_time, dt), "Scripting::Update");
+            TRACE_CALL("Renderer::Update",mRenderer.Update(*mScene, game_time, dt));
+            TRACE_CALL("Scripting::Update",mScripting->Update(game_time, dt));
         }
 
         std::vector<engine::AudioEvent> audio_events;
-        TRACE_CALL(mAudio->Update(&audio_events), "Audio::Update");
+        TRACE_CALL("Audio::Update",mAudio->Update(&audio_events));
         for (const auto& event : audio_events)
         {
             mGame->OnAudioEvent(event);
         }
 
-        TRACE_CALL(mGame->Update(game_time, dt), "Game::Update");
+        TRACE_CALL("Game::Update",mGame->Update(game_time, dt));
 
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(dt);
@@ -960,8 +958,6 @@ private:
     bool mShowDebugs = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
-    // Trace writer if any.
-    std::unique_ptr<base::TraceWriter> mTraceWriter;
 };
 
 } //namespace

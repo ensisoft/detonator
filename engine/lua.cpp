@@ -35,6 +35,7 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/format.h"
+#include "base/trace.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "data/json.h"
@@ -830,8 +831,12 @@ void ScriptEngine::EndPlay(Scene* scene)
 void ScriptEngine::Tick(double game_time, double dt)
 {
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt);
+    {
+        TRACE_CALL("Lua::Scene::Tick",
+                   CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt));
+    }
 
+    TRACE_SCOPE("Lua::Entity::Tick");
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
@@ -846,8 +851,12 @@ void ScriptEngine::Tick(double game_time, double dt)
 void ScriptEngine::Update(double game_time, double dt)
 {
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["Update"], mScene, game_time, dt);
+    {
+        TRACE_CALL("Lua::Scene::Update",
+                   CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
+    }
 
+    TRACE_SCOPE("Lua::Entity::Update");
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
@@ -1123,6 +1132,14 @@ void BindBase(sol::state& L)
     table["warn"]  = [](const std::string& str) { WARN(str); };
     table["error"] = [](const std::string& str) { ERROR(str); };
     table["info"]  = [](const std::string& str) { INFO(str); };
+
+    auto trace = L.create_named_table("trace");
+    trace["marker"] = sol::overload(
+            [](const std::string& str) { base::TraceMarker(str); },
+            [](const std::string& str, unsigned index) { base::TraceMarker(str, index); }
+    );
+    trace["enter"]  = &base::TraceBeginScope;
+    trace["leave"]  = &base::TraceEndScope;
 
     sol::constructors<base::FRect(), base::FRect(float, float, float, float)> rect_ctors;
     auto rect = table.new_usertype<base::FRect>("FRect", rect_ctors);

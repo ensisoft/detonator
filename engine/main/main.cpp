@@ -404,11 +404,13 @@ int main(int argc, char* argv[])
         INFO("http://www.ensisoft.com");
         INFO("http://github.com/ensisoft/gamestudio");
 
-        std::unique_ptr<base::FileTraceWriter> trace_writer;
+        std::unique_ptr<base::TraceWriter> trace_writer;
         std::unique_ptr<base::TraceLog> trace_logger;
         if (opt.WasGiven("--trace"))
         {
-            trace_writer.reset(new base::FileTraceWriter(trace_file));
+            if (base::EndsWith(trace_file, ".json"))
+                trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
+            else trace_writer.reset(new base::TextFileTraceWriter(trace_file));
             trace_logger.reset(new base::TraceLog(1000));
             base::SetThreadTrace(trace_logger.get());
         }
@@ -606,8 +608,9 @@ int main(int argc, char* argv[])
             TRACE_ENTER(MainLoop);
 
             // indicate beginning of the main loop iteration.
-            engine->BeginMainLoop();
+            TRACE_CALL("Engine::BeginMainLoop", engine->BeginMainLoop());
 
+            TRACE_ENTER(EventDispatch);
             // process pending window events if any.
             wdk::native_event_t event;
             while(wdk::PeekEvent(event))
@@ -626,7 +629,9 @@ int main(int argc, char* argv[])
                     fullscreen = window.IsFullscreen();
                 }
             }
+            TRACE_LEAVE(EventDispatch);
 
+            TRACE_ENTER(EngineRequest);
             // Process pending application requests if any.
             engine::Engine::Request request;
             while (engine->GetNextRequest(&request))
@@ -649,6 +654,7 @@ int main(int argc, char* argv[])
                     INFO("Quit with exit code %1", exit_code);
                 }
             }
+            TRACE_LEAVE(EngineRequest);
             // this is the real wall time elapsed rendering the previous
             // for each iteration of the loop we measure the time
             // spent producing a frame. the time is then used to take
@@ -658,10 +664,10 @@ int main(int argc, char* argv[])
             const auto wall_time = CurrentRuntime();
 
             // ask the application to take its simulation steps.
-            engine->Update(time_step);
+            TRACE_CALL("Engine::Update", engine->Update(time_step));
 
             // ask the application to draw the current frame.
-            engine->Draw();
+            TRACE_CALL("Engine::Draw", engine->Draw());
 
             // do some simple statistics bookkeeping.
             static auto frames_total = 0;
@@ -684,14 +690,12 @@ int main(int argc, char* argv[])
                 seconds = 0.0;
             }
             // indicate end of iteration.
-            engine->EndMainLoop();
-
+            TRACE_CALL("Engine::EndMainLoop", engine->EndMainLoop());
             TRACE_LEAVE(MainLoop);
 
             if (trace_logger)
             {
                 trace_logger->Write(*trace_writer);
-                trace_writer->Flush();
             }
         } // main loop
 

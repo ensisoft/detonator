@@ -29,10 +29,12 @@
 namespace base
 {
     struct TraceEntry {
-        const char* name = nullptr;
+        const char* name     = nullptr;
         unsigned start_time  = 0;
         unsigned finish_time = 0;
-        unsigned level = 0;
+        unsigned level       = 0;
+        std::vector<std::string> markers;
+        std::string comment;
     };
 
     class TraceWriter
@@ -48,11 +50,12 @@ namespace base
     {
     public:
         virtual ~Trace() = default;
-        virtual void Clear() = 0;
         virtual void Start() = 0;
         virtual void Write(TraceWriter& writer) const = 0;
-        virtual unsigned BeginScope(const char* name) = 0;
+        virtual unsigned BeginScope(const char* name, std::string comment) = 0;
         virtual void EndScope(unsigned index) = 0;
+        virtual void Marker(const std::string& marker) = 0;
+        virtual void Marker(const std::string& marker, unsigned index) = 0;
     private:
     };
 
@@ -62,30 +65,28 @@ namespace base
         TraceLog(size_t capacity)
         {
             mCallTrace.resize(capacity);
-        }
-        virtual void Clear() override
-        {
-            mTraceIndex = 0;
+            mStartTime  = std::chrono::high_resolution_clock::now();
         }
         virtual void Start() override
         {
             mTraceIndex = 0;
             mStackDepth = 0;
-            mStartTime  = std::chrono::high_resolution_clock::now();
         }
         virtual void Write(TraceWriter& writer) const override
         {
             for (size_t i=0; i<mTraceIndex; ++i)
                 writer.Write(mCallTrace[i]);
         }
-        virtual unsigned BeginScope(const char* name) override
+        virtual unsigned BeginScope(const char* name, std::string comment) override
         {
             ASSERT(mTraceIndex < mCallTrace.size());
             TraceEntry entry;
-            entry.name  = name;
-            entry.level = mStackDepth++;
-            entry.start_time = GetTime();
-            mCallTrace[mTraceIndex] =  entry;
+            entry.name        = name;
+            entry.level       = mStackDepth++;
+            entry.start_time  = GetTime();
+            entry.finish_time = 0;
+            entry.comment     = std::move(comment);
+            mCallTrace[mTraceIndex] = std::move(entry);
             return mTraceIndex++;
         }
         virtual void EndScope(unsigned index) override
@@ -94,6 +95,16 @@ namespace base
             ASSERT(mStackDepth);
             mCallTrace[index].finish_time = GetTime();
             mStackDepth--;
+        }
+        virtual void Marker(const std::string& str) override
+        {
+            ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
+            mCallTrace[mTraceIndex-1].markers.push_back(str);
+        }
+        virtual void Marker(const std::string& str, unsigned index) override
+        {
+            ASSERT(index < mTraceIndex);
+            mCallTrace[index].markers.push_back(str);
         }
         std::size_t GetNumEntries() const
         { return mTraceIndex; }
@@ -114,31 +125,46 @@ namespace base
         std::chrono::high_resolution_clock::time_point mStartTime;
     };
 
-    class FileTraceWriter : public TraceWriter
+    class TextFileTraceWriter : public TraceWriter
     {
     public:
-        FileTraceWriter(const std::string& file);
-       ~FileTraceWriter() noexcept;
-        FileTraceWriter() = default;
+        TextFileTraceWriter(const std::string& file);
+       ~TextFileTraceWriter() noexcept;
+        TextFileTraceWriter() = default;
         virtual void Write(const TraceEntry& entry) override;
         virtual void Flush() override;
-        FileTraceWriter& operator=(const FileTraceWriter&) = delete;
+        TextFileTraceWriter& operator=(const TextFileTraceWriter&) = delete;
     private:
         FILE* mFile = nullptr;
     };
 
+    class ChromiumTraceJsonWriter : public TraceWriter
+    {
+    public:
+        ChromiumTraceJsonWriter(const std::string& file);
+       ~ChromiumTraceJsonWriter() noexcept;
+        ChromiumTraceJsonWriter();
+        virtual void Write(const TraceEntry& entry) override;
+        virtual void Flush() override;
+        ChromiumTraceJsonWriter& operator=(const ChromiumTraceJsonWriter&) = delete;
+    private:
+        FILE* mFile = nullptr;
+        bool mCommaNeeded = false;
+    };
+
     void SetThreadTrace(Trace* trace);
-    void TraceClear();
     void TraceStart();
     void TraceWrite(TraceWriter& writer);
+    void TraceMarker(const std::string& str, unsigned index);
+    void TraceMarker(const std::string& str);
     bool IsTracingEnabled();
 
-    unsigned TraceBeginScope(const char* name);
+    unsigned TraceBeginScope(const char* name, std::string comment);
     void TraceEndScope(unsigned index);
 
     struct AutoTracingScope {
-        AutoTracingScope(const char* name)
-        { index = TraceBeginScope(name); }
+        AutoTracingScope(const char* name, std::string comment)
+        { index = TraceBeginScope(name, std::move(comment)); }
        ~AutoTracingScope()
         { TraceEndScope(index); }
     private:
@@ -146,8 +172,8 @@ namespace base
     };
 
     struct ManualTracingScope {
-        ManualTracingScope(const char* name)
-        { index = TraceBeginScope(name); }
+        ManualTracingScope(const char* name, std::string comment)
+        { index = TraceBeginScope(name, std::move(comment)); }
        ~ManualTracingScope()
         {
             ASSERT(index == -1 && "No matching call to TraceEndScope found.");
@@ -161,14 +187,37 @@ namespace base
         unsigned index = 0;
     };
 
+    namespace detail {
+        template<typename... Args>
+        std::string FormatTraceComment(const char* fmt, Args... args)
+        {
+            static char pray[256] = {0};
+            std::snprintf(pray, sizeof(pray),fmt, args...);
+            return pray;
+        }
+        inline std::string FormatTraceComment(const char* fmt)
+        { return fmt; }
+        inline std::string FormatTraceComment()
+        { return ""; }
+    } // namespace
+
 } // namespace
 
 #define TRACE_START() base::TraceStart()
-#define TRACE_SCOPE(name) base::AutoTracingScope _trace(name)
-#define TRACE_ENTER(name) base::ManualTracingScope foo_##name(#name)
+#define TRACE_SCOPE(name, ...) base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__))
+#define TRACE_ENTER(name, ...) base::ManualTracingScope foo_##name(#name, base::detail::FormatTraceComment(__VA_ARGS__))
 #define TRACE_LEAVE(name) foo_##name.EndScope()
-#define TRACE_CALL(call, name)             \
-do {                                       \
-   base::AutoTracingScope _trace(name);    \
-   call;                                   \
+#define TRACE_CALL(name, call, ...)                                                          \
+do {                                                                                         \
+   base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
+   call;                                                                                     \
 } while (0)
+#define TRACE_BLOCK(name, block, ...)                                                        \
+do {                                                                                         \
+   base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
+   block                                                                                     \
+} while (0)
+
+
+
+

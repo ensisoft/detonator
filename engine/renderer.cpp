@@ -200,6 +200,7 @@ void Renderer::DrawScene(const SceneType& scene,
         return a.entity_object->GetLayer() < b.entity_object->GetLayer();
     });
 
+    TRACE_SCOPE("Renderer::DrawEntities", "entities=%u", nodes.size());
     for (const auto& p : nodes)
     {
         if (scene_hook && !scene_hook->FilterEntity(*p.entity_object))
@@ -454,7 +455,9 @@ void Renderer::DrawEntity(const EntityType& entity,
     };
 
     Visitor visitor(entity, packets, *this, transform, hook);
-    tree.PreOrderTraverse(visitor);
+    TRACE_CALL("Tree::Traverse", tree.PreOrderTraverse(visitor));
+
+    TRACE_SCOPE("Renderer::DrawPackets");
 
     // the layer value is negative but for the indexing below
     // we must have positive values only.
