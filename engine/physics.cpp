@@ -76,7 +76,7 @@ void PhysicsEngine::UpdateScene(game::Scene& scene)
     for (const auto& node : nodes)
     {
         transform.Push(node.node_to_scene);
-          UpdateEntity(transform.GetAsMatrix(), *node.entity);
+          UpdateEntity(transform.GetAsMatrix(), *node.entity_object);
         transform.Pop();
     }
     // cull physics nodes that were not touched.
@@ -273,7 +273,7 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
     for (const auto& node : nodes)
     {
         transform.Push(node.node_to_scene);
-          AddEntity(transform.GetAsMatrix(), *node.entity);
+          AddEntity(transform.GetAsMatrix(), *node.entity_object);
         transform.Pop();
     }
 }

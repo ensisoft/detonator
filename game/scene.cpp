@@ -33,6 +33,52 @@
 #include "game/treeop.h"
 #include "game/transform.h"
 
+namespace {
+template<typename Result, typename Entity, typename Node>
+class SceneEntityCollector : public game::RenderTree<Entity>::template TVisitor<Node> {
+public:
+    virtual void EnterNode(Node* node) override
+    {
+        if (!node)
+            return;
+
+        glm::mat4 parent_node_transform(1.0f);
+        if (const auto* parent = GetParent())
+        {
+            const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
+            parent_node_transform   = parent->FindNodeTransform(parent_node);
+        }
+        mParents.push(node);
+        mTransform.Push(std::move(parent_node_transform));
+        Result ret;
+        ret.node_to_scene = mTransform.GetAsMatrix();
+        ret.visual_entity = node;
+        ret.entity_object = node;
+        mResult.push_back(std::move(ret));
+    }
+    virtual void LeaveNode(Node* node) override
+    {
+        if (!node)
+            return;
+        mTransform.Pop();
+        mParents.pop();
+    }
+    std::vector<Result> GetResult() &&
+    { return std::move(mResult); }
+private:
+    Node* GetParent() const
+    {
+        if (mParents.empty())
+            return nullptr;
+        return mParents.top();
+    }
+private:
+    std::stack<Node*> mParents;
+    std::vector<Result> mResult;
+    game::Transform mTransform;
+};
+} // namespace
+
 namespace game
 {
 
@@ -248,8 +294,8 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
             mTransform.Push(node->GetNodeTransform());
             ConstSceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.entity        = node->GetEntityClass();
-            entity.node          = node;
+            entity.visual_entity = node->GetEntityClass();
+            entity.entity_object = node;
             mResult.push_back(std::move(entity));
         }
         virtual void LeaveNode(const SceneNodeClass* node) override
@@ -314,8 +360,8 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
             mTransform.Push(node->GetNodeTransform());
             SceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.entity        = node->GetEntityClass();
-            entity.node          = node;
+            entity.visual_entity = node->GetEntityClass();
+            entity.entity_object = node;
             mResult.push_back(std::move(entity));
         }
         virtual void LeaveNode(SceneNodeClass* node) override
@@ -349,9 +395,9 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (!entity_node.entity)
+        if (!entity_node.visual_entity)
         {
-            WARN("Node '%1' has no entity class object!", entity_node.node->GetName());
+            WARN("Node '%1' has no entity class object!", entity_node.entity_object->GetName());
             continue;
         }
         // transform the coordinate in the scene into the entity
@@ -361,12 +407,12 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
         auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.visual_entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
         if (nodes.empty())
             continue;
 
         // hit some nodes so the entity as a whole is hit.
-        hits->push_back(entity_node.node);
+        hits->push_back(entity_node.entity_object);
         if (hitbox_positions)
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
@@ -377,9 +423,9 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (!entity_node.entity)
+        if (!entity_node.visual_entity)
         {
-            WARN("Node '%1' has no entity class object!", entity_node.node->GetName());
+            WARN("Node '%1' has no entity class object!", entity_node.visual_entity->GetName());
             continue;
         }
         // transform the coordinate in the scene into the entity
@@ -389,12 +435,12 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
         auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.visual_entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
         if (nodes.empty())
             continue;
 
         // hit some nodes so the entity as a whole is hit.
-        hits->push_back(entity_node.node);
+        hits->push_back(entity_node.entity_object);
         if (hitbox_positions)
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
@@ -405,7 +451,7 @@ glm::vec2 SceneClass::MapCoordsFromNodeModel(float x, float y, const SceneNodeCl
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (entity_node.node == node)
+        if (entity_node.entity_object == node)
         {
             const auto ret = entity_node.node_to_scene * glm::vec4(x, y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
@@ -419,7 +465,7 @@ glm::vec2 SceneClass::MapCoordsToNodeModel(float x, float y, const SceneNodeClas
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (entity_node.node == node)
+        if (entity_node.entity_object == node)
         {
             const auto ret = glm::inverse(entity_node.node_to_scene) * glm::vec4(x, y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
@@ -778,104 +824,16 @@ void Scene::EndLoop()
 
 std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
 {
-    std::vector<Scene::ConstSceneNode> ret;
-
-    class Visitor : public RenderTree::ConstVisitor {
-    public:
-        Visitor(std::vector<Scene::ConstSceneNode>& result) : mResult(result)
-        {}
-        virtual void EnterNode(const Entity* node) override
-        {
-            if (!node)
-                return;
-
-            glm::mat4 parent_node_transform(1.0f);
-            if (const auto* parent = GetParent())
-            {
-                const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
-                parent_node_transform   = parent->FindNodeTransform(parent_node);
-            }
-            mParents.push(node);
-            mTransform.Push(parent_node_transform);
-            ConstSceneNode entity;
-            entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.entity        = node;
-            entity.node          = node;
-            mResult.push_back(std::move(entity));
-        }
-        virtual void LeaveNode(const Entity* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-            mParents.pop();
-        }
-    private:
-        const Entity* GetParent() const
-        {
-            if (mParents.empty())
-                return nullptr;
-            return mParents.top();
-        }
-    private:
-        std::stack<const Entity*> mParents;
-        std::vector<Scene::ConstSceneNode>& mResult;
-        Transform mTransform;
-    };
-    Visitor visitor(ret);
+    SceneEntityCollector<Scene::ConstSceneNode, Entity, const Entity> visitor;
     mRenderTree.PreOrderTraverse(visitor);
-    return ret;
+    return std::move(visitor).GetResult();
 }
 
 std::vector<Scene::SceneNode> Scene::CollectNodes()
 {
-    std::vector<Scene::SceneNode> ret;
-
-    class Visitor : public RenderTree::Visitor {
-    public:
-        Visitor(std::vector<Scene::SceneNode>& result) : mResult(result)
-        {}
-        virtual void EnterNode(Entity* node) override
-        {
-            if (!node)
-                return;
-
-            glm::mat4 parent_node_transform(1.0f);
-            if (const auto* parent = GetParent())
-            {
-                const auto* parent_node = parent->FindNodeByClassId(node->GetParentNodeClassId());
-                parent_node_transform   = parent->FindNodeTransform(parent_node);
-            }
-            mParents.push(node);
-            mTransform.Push(parent_node_transform);
-            SceneNode entity;
-            entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.entity        = node;
-            entity.node          = node;
-            mResult.push_back(std::move(entity));
-        }
-        virtual void LeaveNode(Entity* node) override
-        {
-            if (!node)
-                return;
-            mTransform.Pop();
-            mParents.pop();
-        }
-    private:
-        Entity* GetParent() const
-        {
-            if (mParents.empty())
-                return nullptr;
-            return mParents.top();
-        }
-    private:
-        std::stack<Entity*> mParents;
-        std::vector<Scene::SceneNode>& mResult;
-        Transform mTransform;
-    };
-    Visitor visitor(ret);
+    SceneEntityCollector<Scene::SceneNode, Entity, Entity> visitor;
     mRenderTree.PreOrderTraverse(visitor);
-    return ret;
+    return std::move(visitor).GetResult();
 }
 
 glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
