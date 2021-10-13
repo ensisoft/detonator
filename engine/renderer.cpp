@@ -25,6 +25,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/trace.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
@@ -196,24 +197,24 @@ void Renderer::DrawScene(const SceneType& scene,
 
     // todo: use a faster sorting. (see the entity draw)
     std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) {
-        return a.node->GetLayer() < b.node->GetLayer();
+        return a.entity_object->GetLayer() < b.entity_object->GetLayer();
     });
 
     for (const auto& p : nodes)
     {
-        if (scene_hook && !scene_hook->FilterEntity(*p.node))
+        if (scene_hook && !scene_hook->FilterEntity(*p.entity_object))
             continue;
 
         transform.Push(p.node_to_scene);
 
         if (scene_hook)
-            scene_hook->BeginDrawEntity(*p.node, painter, transform);
+            scene_hook->BeginDrawEntity(*p.entity_object, painter, transform);
 
-        if (p.entity && p.node->TestFlag(EntityType::Flags::VisibleInGame))
-            Draw(*p.entity, painter, transform, entity_hook);
+        if (p.visual_entity && p.entity_object->TestFlag(EntityType::Flags::VisibleInGame))
+            Draw(*p.visual_entity, painter, transform, entity_hook);
 
         if (scene_hook)
-            scene_hook->EndDrawEntity(*p.node, painter, transform);
+            scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
 
         transform.Pop();
     }

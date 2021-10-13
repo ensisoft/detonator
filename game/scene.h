@@ -272,11 +272,10 @@ namespace game
             // The transform matrix that applies to this entity (node)
             // in order to transform it to the scene.
             glm::mat4 node_to_scene;
-            // the entity representation in the scene.
-            std::shared_ptr<const EntityClass> entity;
-            // the data node that holds the placement data
-            // for placing the entity in the scene.
-            const SceneNodeClass* node = nullptr;
+            // The entity representation in the scene.
+            std::shared_ptr<const EntityClass> visual_entity;
+            // The entity object in the scene.
+            const SceneNodeClass* entity_object = nullptr;
         };
         // Collect nodes from the scene into a flat list.
         std::vector<ConstSceneNode> CollectNodes() const;
@@ -287,11 +286,10 @@ namespace game
             // The transform matrix that applies to this entity (node)
             // in order to transform it to the scene.
             glm::mat4 node_to_scene;
-            // the entity representation in the scene.
-            std::shared_ptr<const EntityClass> entity;
-            // the data node that holds the placement data
-            // for placing the entity in the scene.
-            SceneNodeClass* node = nullptr;
+            // The entity representation in the scene.
+            std::shared_ptr<const EntityClass> visual_entity;
+            // The entity object in the scene.
+            SceneNodeClass* entity_object = nullptr;
         };
         // Collect nodes from the scene into a flat list.
         std::vector<SceneNode> CollectNodes();
@@ -468,14 +466,10 @@ namespace game
             // The transformation matrix for transforming the
             // entity into the scene.
             glm::mat4 node_to_scene;
-            // The actual entity.
-            const Entity* entity = nullptr;
-            // The data object for the placement of the
-            // entity. Opposed to the SceneClass the placement
-            // information for the entity is squashed into each
-            // and every entity. Theres no reason to have a separate
-            // object for this.
-            const Entity* node   = nullptr;
+            // Visual representation object of the entity in the scene.
+            const Entity* visual_entity = nullptr;
+            // The entity object in the scene.x
+            const Entity* entity_object = nullptr;
         };
         // Collect the entities in the scene into a flat list.
         std::vector<ConstSceneNode> CollectNodes() const;
@@ -488,14 +482,10 @@ namespace game
             // The transformation matrix for transforming the
             // entity into the scene.
             glm::mat4 node_to_scene;
-            // The actual entity.
-            Entity* entity = nullptr;
-            // The data object for the placement of the
-            // entity. Opposed to the SceneClass the placement
-            // information for the entity is squashed into each
-            // and every entity. Theres no reason to have a separate
-            // object for this.
-            Entity* node   = nullptr;
+            // Visual representation object of the entity in the scene.
+            Entity* visual_entity = nullptr;
+            // The entity object in the scene.
+            Entity* entity_object = nullptr;
         };
         // Collect the entities in the scene into a flat list.
         std::vector<SceneNode> CollectNodes();
