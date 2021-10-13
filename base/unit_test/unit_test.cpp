@@ -243,7 +243,7 @@ void foo()
 }
 void meh()
 {
-    TRACE_SCOPE("meh");
+    TRACE_SCOPE("meh", "foo=%u", 123);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
@@ -254,16 +254,27 @@ void unit_test_trace()
     base::SetThreadTrace(&trace);
     base::TraceStart();
     {
-        TRACE_SCOPE("unit_Test");
+        TRACE_SCOPE("unit_test");
         foo();
         meh();
     }
+    TEST_REQUIRE(trace.GetNumEntries() == 4);
+    TEST_REQUIRE(trace.GetEntry(0).level == 0);
+    TEST_REQUIRE(trace.GetEntry(0).name == "unit_test");
+    TEST_REQUIRE(trace.GetEntry(1).level == 1);
+    TEST_REQUIRE(trace.GetEntry(1).name == "foo");
+    TEST_REQUIRE(trace.GetEntry(2).level == 2);
+    TEST_REQUIRE(trace.GetEntry(2).name == "bar");
+    TEST_REQUIRE(trace.GetEntry(3).level == 1);
+    TEST_REQUIRE(trace.GetEntry(3).name == "meh");
+    TEST_REQUIRE(trace.GetEntry(3).comment == "foo=123");
+
     for (size_t i=0; i<trace.GetNumEntries(); ++i)
     {
         const auto& entry = trace.GetEntry(i);
         for (unsigned i=0; i<entry.level; ++i)
             std::cout << "  ";
-        std::cout << entry.name <<  " " << entry.finish_time - entry.start_time << std::endl;
+        std::cout << entry.name <<  " " << entry.finish_time - entry.start_time << entry.comment << std::endl;
     }
 }
 

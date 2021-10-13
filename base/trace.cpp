@@ -30,11 +30,6 @@ void SetThreadTrace(Trace* trace)
 {
     thread_tracer = trace;
 }
-void TraceClear()
-{
-    if (thread_tracer)
-        thread_tracer->Clear();
-}
 void TraceStart()
 {
     if (thread_tracer)
@@ -47,10 +42,10 @@ void TraceWrite(TraceWriter& writer)
         thread_tracer->Write(writer);
 }
 
-unsigned TraceBeginScope(const char* name)
+unsigned TraceBeginScope(const char* name, std::string comment)
 {
     if (thread_tracer)
-        return thread_tracer->BeginScope(name);
+        return thread_tracer->BeginScope(name, comment);
     return 0;
 }
 void TraceEndScope(unsigned index)
@@ -58,32 +53,84 @@ void TraceEndScope(unsigned index)
     if (thread_tracer)
         thread_tracer->EndScope(index);
 }
+void TraceMarker(const std::string& str)
+{
+    if (thread_tracer)
+        thread_tracer->Marker(str);
+}
+void TraceMarker(const std::string& str, unsigned index)
+{
+    if (thread_tracer)
+        thread_tracer->Marker(str, index);
+}
 
 bool IsTracingEnabled()
 { return thread_tracer != nullptr; }
 
-FileTraceWriter::FileTraceWriter(const std::string& file)
+TextFileTraceWriter::TextFileTraceWriter(const std::string& file)
 {
     mFile = std::fopen(file.c_str(), "w");
     if (mFile == nullptr)
         throw std::runtime_error("failed to open trace file: " + file);
 }
-FileTraceWriter::~FileTraceWriter() noexcept
+TextFileTraceWriter::~TextFileTraceWriter() noexcept
 {
     std::fclose(mFile);
 }
 
-void FileTraceWriter::Write(const TraceEntry& entry)
+void TextFileTraceWriter::Write(const TraceEntry& entry)
 {
     // https://stackoverflow.com/questions/293438/left-pad-printf-with-spaces
     // %*s < print spaces
-    std::fprintf(mFile, "%*s%s %fms\n", entry.level, " ", entry.name,
-                 (entry.finish_time - entry.start_time) / 1000.0f);
+    std::fprintf(mFile, "%*s%s %fms, '%s'", entry.level+1, " ", entry.name,
+                 (entry.finish_time - entry.start_time) / 1000.0f, entry.comment.c_str());
+    for (const auto& m : entry.markers)
+        std::fprintf(mFile, " %s ", m.c_str());
+    std::fprintf(mFile, "\n\n");
 }
 
-void FileTraceWriter::Flush()
+void TextFileTraceWriter::Flush()
 {
-    std::fprintf(mFile, "\n");
+    std::fflush(mFile);
+}
+
+ChromiumTraceJsonWriter::ChromiumTraceJsonWriter(const std::string& file)
+{
+    mFile = std::fopen(file.c_str(), "w");
+    if (mFile == nullptr)
+        throw std::runtime_error("failed to open trace file: " + file);
+    std::fprintf(mFile, "{\"traceEvents\":[\n");
+}
+
+ChromiumTraceJsonWriter::~ChromiumTraceJsonWriter()
+{
+    std::fprintf(mFile, "] }\n");
+}
+
+void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
+{
+    const auto duration = entry.finish_time - entry.start_time;
+    const auto start    = entry.start_time;
+
+    std::string markers;
+    for (const auto& m : entry.markers)
+    {
+        markers += m;
+        markers.push_back(' ');
+    }
+    markers.pop_back();
+
+constexpr static auto* JsonString =
+  R"(%c { "pid":0, "tid":0, "ph":"X", "ts":%u, "dur":%u, "name":"%s", "args": { "markers": "%s", "comment": "%s" } }
+)";
+
+    std::fprintf(mFile, JsonString, mCommaNeeded ? ',' : ' ', start, duration,
+                 entry.name, markers.c_str(), entry.comment.c_str());
+
+    mCommaNeeded = true;
+}
+void ChromiumTraceJsonWriter::Flush()
+{
     std::fflush(mFile);
 }
 
