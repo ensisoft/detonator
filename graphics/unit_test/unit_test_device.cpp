@@ -783,6 +783,8 @@ void main() {
     auto* prog = dev->MakeProgram("prog");
     TEST_REQUIRE(prog->Build(shaders));
 
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
@@ -794,9 +796,6 @@ void main() {
         {0.25f, 0.25f}
     };
     prog->SetUniform("kMatrix", matrix);
-
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
     dev->Draw(*prog, *geom, state);
     dev->EndFrame();
 
@@ -849,6 +848,8 @@ void main() {
     auto* prog = dev->MakeProgram("prog");
     TEST_REQUIRE(prog->Build(shaders));
 
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
@@ -861,9 +862,6 @@ void main() {
             {0.50f, 0.25f, 0.25f}
     };
     prog->SetUniform("kMatrix", matrix);
-
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
     dev->Draw(*prog, *geom, state);
     dev->EndFrame();
 
@@ -917,6 +915,8 @@ void main() {
     auto* prog = dev->MakeProgram("prog");
     TEST_REQUIRE(prog->Build(shaders));
 
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
@@ -930,9 +930,6 @@ void main() {
             {0.25f, 0.25, 0.25f, 0.25f}
     };
     prog->SetUniform("kMatrix", matrix);
-
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
     dev->Draw(*prog, *geom, state);
     dev->EndFrame();
 

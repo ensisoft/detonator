@@ -421,7 +421,74 @@ public:
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
-        SetState(state);
+        auto* myprog = (ProgImpl*)(&program);
+        auto* mygeom = (GeomImpl*)(&geometry);
+        myprog->SetLastUseFrameNumber(mFrameNumber);
+        mygeom->SetLastUseFrameNumber(mFrameNumber);
+
+        const auto& buffer = mygeom->GetVertexBuffer();
+        const auto& layout = mygeom->GetVertexLayout();
+        if (!buffer.GetCount())
+            return;
+
+        GL_CALL(glLineWidth(state.line_width));
+        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+                           state.viewport.GetWidth(), state.viewport.GetHeight()));
+        switch (state.culling)
+        {
+            case State::Culling::None:
+                GL_CALL(glDisable(GL_CULL_FACE));
+                break;
+            case State::Culling::Back:
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_BACK));
+                break;
+            case State::Culling::Front:
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT));
+                break;
+            case State::Culling::FrontAndBack:
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
+                break;
+        }
+        switch (state.blending)
+        {
+            case State::BlendOp::None:
+                GL_CALL(glDisable(GL_BLEND));
+                break;
+            case State::BlendOp::Transparent:
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                break;
+            case State::BlendOp::Additive:
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
+                break;
+        }
+
+        // enable scissor if needed.
+        if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
+        {
+            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
+                              state.scissor.GetWidth(), state.scissor.GetHeight()));
+        }
+
+        if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))
+        {
+            const auto stencil_func  = ToGLEnum(state.stencil_func);
+            const auto stencil_fail  = ToGLEnum(state.stencil_fail);
+            const auto stencil_dpass = ToGLEnum(state.stencil_dpass);
+            const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
+            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        }
+
+        if (state.bWriteColor) {
+            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+        } else {
+            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+        }
 
         GLenum default_texture_min_filter = GL_NONE;
         GLenum default_texture_mag_filter = GL_NONE;
@@ -439,12 +506,209 @@ public:
             case Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
         }
 
-        auto* myprog = (ProgImpl*)(&program);
-        auto* mygeom = (GeomImpl*)(&geometry);
-        myprog->SetLastUseFrameNumber(mFrameNumber);
-        myprog->SetState(mTextureUnits, default_texture_min_filter, default_texture_mag_filter);
-        mygeom->SetLastUseFrameNumber(mFrameNumber);
-        mygeom->Draw(myprog->GetName());
+        // start using this program
+        GL_CALL(glUseProgram(myprog->GetName()));
+
+        // set program uniforms
+        size_t num_uniforms = myprog->GetNumUniformsSet();
+        for (size_t i=0; i<num_uniforms; ++i)
+        {
+            const auto& uniform = myprog->GetSetUniform(i);
+            const auto& value   = uniform.value;
+            const auto location = uniform.location;
+            if (const auto* ptr = std::get_if<int>(&value))
+                GL_CALL(glUniform1i(location, *ptr));
+            else if (const auto* ptr = std::get_if<float>(&value))
+                GL_CALL(glUniform1f(location, *ptr));
+            else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
+                GL_CALL(glUniform2i(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec2>(&value))
+                GL_CALL(glUniform2f(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec3>(&value))
+                GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
+            else if (const auto* ptr = std::get_if<glm::vec4>(&value))
+                GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
+            else if (const auto* ptr = std::get_if<Color4f>(&value))
+                GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix2>(&value))
+                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix3>(&value))
+                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix4>(&value))
+                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, (const float*)&ptr->s));
+            else BUG("Unhandled shader program uniform type.");
+        }
+
+        // set program texture bindings
+        size_t num_textures = myprog->GetNumSamplersSet();
+        if (num_textures > mTextureUnits.size())
+        {
+            WARN("Program uses more textures than there are units available.");
+            num_textures = mTextureUnits.size();
+        }
+        // for all textures used by this draw, look if the texture
+        // is already bound to some unit. if it is already bound
+        // and texture parameters haven't changed then nothing needs to be
+        // done. Otherwise see if there's a free texture slot and bind
+        // if there or lastly "evict" some texture from some unit and overwrite
+        // with new texture.
+        size_t unit = 0;
+
+        for (size_t i=0; i<num_textures; ++i)
+        {
+            const auto& sampler = myprog->GetSetSampler(i);
+            // it's possible that this is nullptr when the shader compiler
+            // has removed the un-used texture sampler reference. In other
+            // words the glGetUniformLocation returns -1.
+            const TextureImpl* texture = sampler.texture;
+            if (texture == nullptr)
+                continue;
+
+            // see if there's already a unit that has this texture bound.
+            // if so, we use the same unit.
+            for (unit=0; unit < mTextureUnits.size(); ++unit)
+            {
+                if (mTextureUnits[unit].texture == texture)
+                    break;
+            }
+            if (unit == mTextureUnits.size())
+            {
+                // look for a first free unit if any.
+                for (unit=0; unit<mTextureUnits.size(); ++unit)
+                {
+                    if (mTextureUnits[unit].texture == nullptr)
+                        break;
+                }
+            }
+            if (unit == mTextureUnits.size())
+            {
+                size_t last_used_frame_number = mTextureUnits[0].texture->GetLastUsedFrameNumber();
+                unit = 0;
+                // look for a unit we can reuse
+                for (size_t i=0; i<mTextureUnits.size(); ++i)
+                {
+                    const auto* bound_texture = mTextureUnits[i].texture;
+                    if (bound_texture->GetLastUsedFrameNumber() < last_used_frame_number)
+                    {
+                        unit = i;
+                    }
+                }
+            }
+            ASSERT(unit < mTextureUnits.size());
+
+            // map the texture filter to a GL setting.
+            GLenum texture_min_filter = GL_NONE;
+            GLenum texture_mag_filter = GL_NONE;
+            switch (texture->GetMinFilter())
+            {
+                case Texture::MinFilter::Default:
+                    texture_min_filter = default_texture_min_filter;
+                    break;
+                case Texture::MinFilter::Nearest:
+                    texture_min_filter = GL_NEAREST;
+                    break;
+                case Texture::MinFilter::Linear:
+                    texture_min_filter = GL_LINEAR;
+                    break;
+                case Texture::MinFilter::Mipmap:
+                    texture_min_filter = GL_NEAREST_MIPMAP_NEAREST;
+                    break;
+                case Texture::MinFilter::Bilinear:
+                    texture_min_filter = GL_NEAREST_MIPMAP_LINEAR;
+                    break;
+                case Texture::MinFilter::Trilinear:
+                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
+                    break;
+            }
+            switch (texture->GetMagFilter())
+            {
+                case Texture::MagFilter::Default:
+                    texture_mag_filter = default_texture_mag_filter;
+                    break;
+                case Texture::MagFilter::Nearest:
+                    texture_mag_filter = GL_NEAREST;
+                    break;
+                case Texture::MagFilter::Linear:
+                    texture_mag_filter = GL_LINEAR;
+                    break;
+            }
+            ASSERT(texture_min_filter != GL_NONE);
+            ASSERT(texture_mag_filter != GL_NONE);
+
+            const GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            const GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            // if nothing has changed then skip all of the work
+            if (mTextureUnits[unit].texture    == texture &&
+                mTextureUnits[unit].min_filter == texture_min_filter &&
+                mTextureUnits[unit].mag_filter == texture_mag_filter &&
+                mTextureUnits[unit].wrap_x     == texture_wrap_x &&
+                mTextureUnits[unit].wrap_y     == texture_wrap_y)
+            {
+                // set the texture unit to the sampler
+                GL_CALL(glUniform1i(sampler.location, unit));
+                continue;
+            }
+
+            // set all this dang state here, so we can easily track/understand
+            // which unit the texture is bound to.
+            const GLuint texture_name = texture->GetName();
+
+            // // first select the desired texture unit.
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
+            // bind the 2D texture.
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+            // set texture parameters, wrapping and min/mag filters.
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+            // set the texture unit to the sampler
+            GL_CALL(glUniform1i(sampler.location, unit));
+
+            // store current binding and the sampler state.
+            mTextureUnits[unit].texture    = texture;
+            mTextureUnits[unit].min_filter = texture_min_filter;
+            mTextureUnits[unit].mag_filter = texture_mag_filter;
+            mTextureUnits[unit].wrap_x     = texture_wrap_x;
+            mTextureUnits[unit].wrap_y     = texture_wrap_y;
+        }
+
+        // start drawing geometry.
+        //
+        // first enable the vertex attributes.
+        for (const auto& attr : layout.attributes)
+        {
+            const uint8_t* base = reinterpret_cast<const uint8_t*>(buffer.GetRawPtr());
+            const GLint location = mGL.glGetAttribLocation(myprog->GetName(), attr.name.c_str());
+            if (location == -1)
+                continue;
+            const auto size   = attr.num_vector_components;
+            const auto stride = layout.vertex_struct_size;
+            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, base + attr.offset));
+            GL_CALL(glEnableVertexAttribArray(location));
+        }
+
+        // go through the draw commands and submit the calls
+        const auto& cmds = mygeom->GetNumDrawCmds();
+        for (size_t i=0; i<cmds; ++i)
+        {
+            const auto& draw  = mygeom->GetDrawCommand(i);
+            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer.GetCount() : draw.count;
+            const auto type   = draw.type;
+            const auto offset = (GLsizei) draw.offset;
+
+            if (type == Geometry::DrawType::Triangles)
+                GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
+            else if (type == Geometry::DrawType::Points)
+                GL_CALL(glDrawArrays(GL_POINTS, offset, count));
+            else if (type == Geometry::DrawType::TriangleFan)
+                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
+            else if (type == Geometry::DrawType::Lines)
+                GL_CALL(glDrawArrays(GL_LINES, offset, count));
+            else if (type == Geometry::DrawType::LineLoop)
+                GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
+            else BUG("Unknown draw primitive type.");
+        }
     }
 
     virtual Type GetDeviceType() const override
@@ -568,74 +832,6 @@ private:
         ASSERT(!"???");
         return GL_NONE;
     }
-
-    void SetState(const State& state)
-    {
-        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
-                           state.viewport.GetWidth(), state.viewport.GetHeight()));
-
-        GL_CALL(glLineWidth(state.line_width));
-
-        switch (state.culling)
-        {
-            case State::Culling::None: {
-                GL_CALL(glDisable(GL_CULL_FACE));
-            } break;
-            case State::Culling::Back: {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_BACK));
-            } break;
-            case State::Culling::Front: {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT));
-            } break;
-            case State::Culling::FrontAndBack: {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
-            } break;
-        }
-
-        // enable scissor if needed.
-        if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
-        {
-            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
-                              state.scissor.GetWidth(), state.scissor.GetHeight()));
-        }
-
-        switch (state.blending)
-        {
-            case State::BlendOp::None: {
-                    GL_CALL(glDisable(GL_BLEND));
-                } break;
-            case State::BlendOp::Transparent: {
-                    GL_CALL(glEnable(GL_BLEND));
-                    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                } break;
-            case State::BlendOp::Additive: {
-                    GL_CALL(glEnable(GL_BLEND));
-                    GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
-                } break;
-        }
-
-        if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))
-        {
-            const auto stencil_func  = ToGLEnum(state.stencil_func);
-            const auto stencil_fail  = ToGLEnum(state.stencil_fail);
-            const auto stencil_dpass = ToGLEnum(state.stencil_dpass);
-            const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
-            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
-            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
-        }
-        if (state.bWriteColor)
-        {
-            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        }
-        else
-        {
-            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        }
-    }
-
 private:
     class TextureImpl;
     // cached texture unit state. used to omit texture unit
@@ -798,7 +994,7 @@ private:
         virtual void AddDrawCmd(DrawType type) override
         {
             DrawCommand cmd;
-            cmd.type = type;
+            cmd.type   = type;
             cmd.offset = 0;
             cmd.count  = std::numeric_limits<size_t>::max();
             mDrawCommands.push_back(cmd);
@@ -817,49 +1013,22 @@ private:
         virtual void SetVertexLayout(const VertexLayout& layout) override
         { mLayout = layout; }
 
-        void Draw(GLuint program)
-        {
-            ASSERT(mBuffer);
-            if (!mBuffer->GetCount())
-                return;
-            for (const auto& attr : mLayout.attributes)
-            {
-                const uint8_t* base = reinterpret_cast<const uint8_t*>(mBuffer->GetRawPtr());
-                const GLint location = mGL.glGetAttribLocation(program, attr.name.c_str());
-                if (location == -1)
-                    continue;
-                GL_CALL(glVertexAttribPointer(location, attr.num_vector_components, GL_FLOAT, GL_FALSE,
-                    mLayout.vertex_struct_size, base + attr.offset));
-                GL_CALL(glEnableVertexAttribArray(location));
-            }
-
-            for (const auto& draw : mDrawCommands)
-            {
-                const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? mBuffer->GetCount() : draw.count;
-                const auto type   = draw.type;
-                const auto offset = (GLsizei)draw.offset;
-
-                if (type == DrawType::Triangles)
-                    GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
-                else if (type == DrawType::Points)
-                    GL_CALL(glDrawArrays(GL_POINTS, offset, count));
-                else if (type == DrawType::TriangleFan)
-                    GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
-                else if (type == DrawType::Lines)
-                    GL_CALL(glDrawArrays(GL_LINES, offset, count));
-                else if (type == DrawType::LineLoop)
-                    GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
-            }
-        }
         void SetLastUseFrameNumber(size_t frame_number)
         { mFrameNumber = frame_number; }
 
-    private:
         struct DrawCommand {
             DrawType type = DrawType::Triangles;
             size_t count  = 0;
             size_t offset = 0;
         };
+        size_t GetNumDrawCmds() const
+        { return mDrawCommands.size(); }
+        const DrawCommand& GetDrawCommand(size_t index) const
+        { return mDrawCommands[index]; }
+        const VertexBuffer& GetVertexBuffer() const
+        { return *mBuffer; }
+        const VertexLayout& GetVertexLayout() const
+        { return mLayout; }
     private:
         const OpenGLFunctions& mGL;
         std::size_t mFrameNumber = 0;
@@ -938,8 +1107,7 @@ private:
             hash = base::hash_combine(hash, x);
             if (hash != ret.hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform1i(ret.location, x));
+                mUniforms.push_back({ret.location, x});
                 ret.hash = hash;
             }
         }
@@ -954,8 +1122,7 @@ private:
             hash = base::hash_combine(hash, y);
             if (hash != ret.hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform2i(ret.location, x, y));
+                mUniforms.push_back({ret.location, glm::ivec2(x, y)});
                 ret.hash = hash;
             }
         }
@@ -969,8 +1136,7 @@ private:
             hash = base::hash_combine(hash, x);
             if (ret.hash != hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform1f(ret.location, x));
+                mUniforms.push_back({ret.location, x});
                 ret.hash = hash;
             }
         }
@@ -985,8 +1151,7 @@ private:
             hash = base::hash_combine(hash, y);
             if (hash != ret.hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform2f(ret.location, x, y));
+                mUniforms.push_back({ret.location, glm::vec2(x, y)});
                 ret.hash = hash;
             }
         }
@@ -1002,8 +1167,7 @@ private:
             hash = base::hash_combine(hash, z);
             if (hash != ret.hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform3f(ret.location, x, y, z));
+                mUniforms.push_back({ret.location, glm::vec3(x, y, z)});
                 ret.hash = hash;
             }
         }
@@ -1020,8 +1184,7 @@ private:
             hash = base::hash_combine(hash, w);
             if (hash != ret.hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform4f(ret.location, x, y, z, w));
+                mUniforms.push_back({ret.location, glm::vec4(x, y, z, w)});
                 ret.hash = hash;
             }
         }
@@ -1033,8 +1196,7 @@ private:
             const auto hash = base::hash_combine(0u, color);
             if (ret.hash != hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniform4f(ret.location, color.Red(), color.Green(), color.Blue(), color.Alpha()));
+                mUniforms.push_back({ret.location, color});
                 ret.hash = hash;
             }
         }
@@ -1051,8 +1213,7 @@ private:
                 hash = base::hash_combine(hash, ptr[i]);
             if (ret.hash != hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniformMatrix2fv(ret.location, 1, GL_FALSE /* transpose */, (const float*)&matrix));
+                mUniforms.push_back({ret.location, Uniform::Matrix2(matrix)});
                 ret.hash = hash;
             }
         }
@@ -1070,8 +1231,7 @@ private:
 
             if (ret.hash != hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniformMatrix3fv(ret.location, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+                mUniforms.push_back({ret.location, Uniform::Matrix3(matrix) });
                 ret.hash = hash;
             }
         }
@@ -1089,8 +1249,7 @@ private:
 
             if (ret.hash != hash)
             {
-                GL_CALL(glUseProgram(mProgram));
-                GL_CALL(glUniformMatrix4fv(ret.location, 1, GL_FALSE /*transpose*/, (const float*)&matrix));
+                mUniforms.push_back({ret.location, Uniform::Matrix4(matrix) });
                 ret.hash = hash;
             }
         }
@@ -1140,165 +1299,28 @@ private:
             SetUniform("kDeviceTextureMatrix", kDeviceTextureMatrix);
             */
 
-            if (unit >= mTextures.size())
-                mTextures.resize(unit + 1);
+            if (unit >= mSamplers.size())
+                mSamplers.resize(unit + 1);
 
             // keep track of textures being used so that if/when this
             // program is actually used to draw stuff we can realize
             // which textures will actually be used to draw and do the
             // texture binds.
-            mTextures[unit].texture  = const_cast<TextureImpl*>(impl);
-            mTextures[unit].location = ret.location;
+            mSamplers[unit].texture  = const_cast<TextureImpl*>(impl);
+            mSamplers[unit].location = ret.location;
         }
         virtual void SetTextureCount(unsigned count) override
         {
-            mTextures.resize(count);
+            mSamplers.resize(count);
         }
 
-        void SetState(TextureUnits& units,
-            GLenum default_texture_min_filter, GLenum default_texture_mag_filter) //const
-        {
-            GL_CALL(glUseProgram(mProgram));
-
-            size_t num_textures = mTextures.size();
-            if (num_textures > units.size())
-            {
-                WARN("Program uses more textures than there are units available.");
-                num_textures = units.size();
-            }
-            // for all textures used by this draw, look if the texture
-            // is already bound to some unit. if it is already bound
-            // and texture parameters haven't changed then nothing needs to be
-            // done. Otherwise see if there's a free texture slot and bind
-            // if there or lastly "evict" some texture from some unit and overwrite
-            // with new texture.
-            size_t unit = 0;
-
-            for (size_t i=0; i<num_textures; ++i)
-            {
-                // it's possible that this is nullptr when the shader compiler
-                // has removed the un-used texture sampler reference. In other
-                // words the glGetUniformLocation returns -1.
-                const TextureImpl* texture = mTextures[i].texture;
-                if (texture == nullptr)
-                    continue;
-
-                // see if there's already a unit that has this texture bound.
-                // if so, we use the same unit.
-                for (unit=0; unit < units.size(); ++unit)
-                {
-                    if (units[unit].texture == texture)
-                        break;
-                }
-                if (unit == units.size())
-                {
-                    // look for a first free unit if any.
-                    for (unit=0; unit<units.size(); ++unit)
-                    {
-                        if (units[unit].texture == nullptr)
-                            break;
-                    }
-                }
-                if (unit == units.size())
-                {
-                    size_t last_used_frame_number = units[0].texture->GetLastUsedFrameNumber();
-                    unit = 0;
-                    // look for a unit we can reuse
-                    for (size_t i=0; i<units.size(); ++i)
-                    {
-                        const auto* bound_texture = units[i].texture;
-                        if (bound_texture->GetLastUsedFrameNumber() < last_used_frame_number)
-                        {
-                            unit = i;
-                        }
-                    }
-                }
-                ASSERT(unit < units.size());
-
-                // map the texture filter to a GL setting.
-                GLenum texture_min_filter = GL_NONE;
-                GLenum texture_mag_filter = GL_NONE;
-                switch (texture->GetMinFilter())
-                {
-                    case Texture::MinFilter::Default:
-                        texture_min_filter = default_texture_min_filter;
-                        break;
-                    case Texture::MinFilter::Nearest:
-                        texture_min_filter = GL_NEAREST;
-                        break;
-                    case Texture::MinFilter::Linear:
-                        texture_min_filter = GL_LINEAR;
-                        break;
-                    case Texture::MinFilter::Mipmap:
-                        texture_min_filter = GL_NEAREST_MIPMAP_NEAREST;
-                        break;
-                    case Texture::MinFilter::Bilinear:
-                        texture_min_filter = GL_NEAREST_MIPMAP_LINEAR;
-                        break;
-                    case Texture::MinFilter::Trilinear:
-                        texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
-                        break;
-                }
-                switch (texture->GetMagFilter())
-                {
-                    case Texture::MagFilter::Default:
-                        texture_mag_filter = default_texture_mag_filter;
-                        break;
-                    case Texture::MagFilter::Nearest:
-                        texture_mag_filter = GL_NEAREST;
-                        break;
-                    case Texture::MagFilter::Linear:
-                        texture_mag_filter = GL_LINEAR;
-                        break;
-                }
-                ASSERT(texture_min_filter != GL_NONE);
-                ASSERT(texture_mag_filter != GL_NONE);
-
-                const GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-                const GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-                // if nothing has changed then skip all of the work
-                if (units[unit].texture    == texture &&
-                    units[unit].min_filter == texture_min_filter &&
-                    units[unit].mag_filter == texture_mag_filter &&
-                    units[unit].wrap_x     == texture_wrap_x &&
-                    units[unit].wrap_y     == texture_wrap_y)
-                {
-                    // set the texture unit to the sampler
-                    GL_CALL(glUniform1i(mTextures[i].location, unit));
-                    continue;
-                }
-
-                // set all this dang state here, so we can easily track/understand
-                // which unit the texture is bound to.
-                const GLuint texture_name = texture->GetName();
-
-                // // first select the desired texture unit.
-                GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
-                // bind the 2D texture.
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
-                // set texture parameters, wrapping and min/mag filters.
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
-                // set the texture unit to the sampler
-                GL_CALL(glUniform1i(mTextures[i].location, unit));
-
-                // store current binding and the sampler state.
-                units[unit].texture    = texture;
-                units[unit].min_filter = texture_min_filter;
-                units[unit].mag_filter = texture_mag_filter;
-                units[unit].wrap_x     = texture_wrap_x;
-                units[unit].wrap_y     = texture_wrap_y;
-            }
-        }
         GLuint GetName() const
         { return mProgram; }
 
         void SetLastUseFrameNumber(size_t frame_number)
         {
             mFrameNumber = frame_number;
-            for (auto& it : mTextures)
+            for (auto& it : mSamplers)
             {
                 // shader compiler optimized texture that isn't used.
                 // our logical "how many textures this shader expects"
@@ -1317,40 +1339,75 @@ private:
             // b) it is garbage collected and we have a dandling pointer.
             // However doing this clear means that the program cannot be
             // used across frame's without having it's state reset.
-            mTextures.clear();
+            mSamplers.clear();
+            mUniforms.clear();
         }
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
 
-    private:
-        struct Uniform {
-            int location = 0;
-            uint32_t hash = 0;
-        };
-        std::unordered_map<std::string, Uniform> mUniforms;
-
-        Uniform& GetUniform(const char* name)
-        {
-            auto it = mUniforms.find(name);
-            if (it != std::end(mUniforms))
-                return it->second;
-
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
-            Uniform u;
-            u.location = ret;
-            mUniforms[name] = u;
-            return mUniforms[name];
-        }
-
-    private:
-        const OpenGLFunctions& mGL;
-        GLuint mProgram = 0;
-        GLuint mVersion = 0;
         struct Sampler {
             GLuint location = 0;
             TextureImpl* texture = nullptr;
         };
-        std::vector<Sampler> mTextures;
+        struct Uniform {
+            GLuint location = 0;
+            struct Matrix2 {
+                float s[2*2];
+                Matrix2(const Program::Matrix2x2& matrix)
+                { std::memcpy(&s, matrix, sizeof(matrix)); }
+            };
+            struct Matrix3 {
+                float s[3*3];
+                Matrix3(const Program::Matrix3x3& matrix)
+                { std::memcpy(&s, matrix, sizeof(matrix)); }
+            };
+            struct Matrix4 {
+                float s[4*4];
+                Matrix4(const Program::Matrix4x4& matrix)
+                { std::memcpy(&s, matrix, sizeof(matrix)); }
+            };
+            std::variant<int, float,
+                glm::ivec2,
+                glm::vec2,
+                glm::vec3,
+                glm::vec4,
+                gfx::Color4f,
+                Matrix2, Matrix3, Matrix4> value;
+        };
+        size_t GetNumSamplersSet() const
+        { return mSamplers.size(); }
+        size_t GetNumUniformsSet() const
+        { return mUniforms.size(); }
+        const Sampler& GetSetSampler(size_t index) const
+        { return mSamplers[index]; }
+        const Uniform& GetSetUniform(size_t index) const
+        { return mUniforms[index]; }
+
+    private:
+        struct CachedUniform {
+            GLuint location = 0;
+            uint32_t hash   = 0;
+        };
+        CachedUniform& GetUniform(const char* name)
+        {
+            auto it = mUniformCache.find(name);
+            if (it != std::end(mUniformCache))
+                return it->second;
+
+            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            CachedUniform uniform;
+            uniform.location = ret;
+            uniform.hash     = 0;
+            mUniformCache[name] = uniform;
+            return mUniformCache[name];
+        }
+        std::unordered_map<std::string, CachedUniform> mUniformCache;
+    private:
+        const OpenGLFunctions& mGL;
+        GLuint mProgram = 0;
+        GLuint mVersion = 0;
+        std::vector<Sampler> mSamplers;
+        std::vector<Uniform> mUniforms;
         std::size_t mFrameNumber = 0;
     };
 
