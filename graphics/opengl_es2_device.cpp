@@ -179,11 +179,15 @@ struct OpenGLFunctions
     PFNGLSCISSORPROC                 glScissor;
     PFNGLCULLFACEPROC                glCullFace;
     PFNGLFRONTFACEPROC               glFrontFace;
+    PFNGLGENBUFFERSPROC              glGenBuffers;
+    PFNGLDELETEBUFFERSPROC           glDeleteBuffers;
+    PFNGLBINDBUFFERPROC              glBindBuffer;
+    PFNGLBUFFERDATAPROC              glBufferData;
 };
 
 //
 // OpenGL ES 2.0 based custom graphics device implementation
-// try to keep this implementantation free of Qt in
+// try to keep this implementation free of Qt in
 // order to promote portability to possibly emscripten
 // or Qt free implementation.
 class OpenGLES2GraphicsDevice : public Device
@@ -251,6 +255,10 @@ public:
         RESOLVE(glScissor);
         RESOLVE(glCullFace);
         RESOLVE(glFrontFace);
+        RESOLVE(glGenBuffers);
+        RESOLVE(glDeleteBuffers);
+        RESOLVE(glBindBuffer);
+        RESOLVE(glBufferData);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -421,14 +429,15 @@ public:
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
-        auto* myprog = (ProgImpl*)(&program);
-        auto* mygeom = (GeomImpl*)(&geometry);
+        const auto* myprog = static_cast<const ProgImpl*>(&program);
+        const auto* mygeom = static_cast<const GeomImpl*>(&geometry);
         myprog->SetLastUseFrameNumber(mFrameNumber);
         mygeom->SetLastUseFrameNumber(mFrameNumber);
 
-        const auto& buffer = mygeom->GetVertexBuffer();
-        const auto& layout = mygeom->GetVertexLayout();
-        if (!buffer.GetCount())
+        const auto& vertex_layout = mygeom->GetVertexLayout();
+        const auto buffer_byte_size = mygeom->GetByteSize();
+        const auto buffer_vertex_count = buffer_byte_size / vertex_layout.vertex_struct_size;
+        if (buffer_byte_size == 0)
             return;
 
         GL_CALL(glLineWidth(state.line_width));
@@ -564,6 +573,8 @@ public:
             if (texture == nullptr)
                 continue;
 
+            texture->SetLastUseFrameNumber(mFrameNumber);
+
             // see if there's already a unit that has this texture bound.
             // if so, we use the same unit.
             for (unit=0; unit < mTextureUnits.size(); ++unit)
@@ -674,17 +685,24 @@ public:
         }
 
         // start drawing geometry.
-        //
+
+        // the brain damaged API goes like this.. when using DrawArrays with a client side
+        // data pointer the argument is actually a pointer to the data.
+        // When using a VBO the pointer is not a pointer but an offset to the VBO.
+        const uint8_t* base_ptr =  (const uint8_t*)mygeom->GetByteOffset();
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, mygeom->GetName()));
+
         // first enable the vertex attributes.
-        for (const auto& attr : layout.attributes)
+        for (const auto& attr : vertex_layout.attributes)
         {
-            const uint8_t* base = reinterpret_cast<const uint8_t*>(buffer.GetRawPtr());
             const GLint location = mGL.glGetAttribLocation(myprog->GetName(), attr.name.c_str());
             if (location == -1)
                 continue;
             const auto size   = attr.num_vector_components;
-            const auto stride = layout.vertex_struct_size;
-            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, base + attr.offset));
+            const auto stride = vertex_layout.vertex_struct_size;
+            const auto attr_ptr = base_ptr + attr.offset;
+            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
             GL_CALL(glEnableVertexAttribArray(location));
         }
 
@@ -693,7 +711,7 @@ public:
         for (size_t i=0; i<cmds; ++i)
         {
             const auto& draw  = mygeom->GetDrawCommand(i);
-            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer.GetCount() : draw.count;
+            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_vertex_count : draw.count;
             const auto type   = draw.type;
             const auto offset = (GLsizei) draw.offset;
 
@@ -956,7 +974,7 @@ private:
         GLuint GetName() const
         { return mName; }
 
-        void SetLastUseFrameNumber(size_t frame_number)
+        void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
 
         size_t GetLastUsedFrameNumber() const
@@ -978,7 +996,7 @@ private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
         Format mFormat = Texture::Format::Grayscale;
-        std::size_t mFrameNumber = 0;
+        mutable std::size_t mFrameNumber = 0;
         bool mEnableGC = false;
     };
 
@@ -986,7 +1004,15 @@ private:
     {
     public:
         GeomImpl(const OpenGLFunctions& funcs) : mGL(funcs)
-        {}
+        {
+            GL_CALL(glGenBuffers(1, &mName));
+            DEBUG("New vertex buffer %1.", mName);
+        }
+       ~GeomImpl()
+        {
+            GL_CALL(glDeleteBuffers(1, &mName));
+            DEBUG("Deleted vertex buffer %1.", mName);
+        }
         virtual void ClearDraws() override
         {
             mDrawCommands.clear();
@@ -1008,12 +1034,29 @@ private:
             cmd.count  = count;
             mDrawCommands.push_back(cmd);
         }
-        virtual void SetVertexBuffer(std::unique_ptr<VertexBuffer> buffer) override
-        { mBuffer = std::move(buffer); }
         virtual void SetVertexLayout(const VertexLayout& layout) override
         { mLayout = layout; }
 
-        void SetLastUseFrameNumber(size_t frame_number)
+        virtual void Upload(const void* data, size_t bytes, Usage usage) override
+        {
+            GLenum flag = GL_NONE;
+            if (usage == Usage::Static)
+                flag = GL_STATIC_DRAW;
+            else if (usage == Usage::Stream)
+                flag = GL_STREAM_DRAW;
+            else if (usage == Usage::Dynamic)
+                flag = GL_DYNAMIC_DRAW;
+            else BUG("No such vertex buffer usage.");
+
+            GLint current_buffer = 0;
+            GL_CALL(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_buffer));
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, mName));
+            GL_CALL(glBufferData(GL_ARRAY_BUFFER, bytes, data, flag));
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, current_buffer));
+            mByteSize = bytes;
+        }
+
+        void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
 
         struct DrawCommand {
@@ -1021,20 +1064,26 @@ private:
             size_t count  = 0;
             size_t offset = 0;
         };
+        size_t GetByteOffset() const
+        { return mOffset; }
+        size_t GetByteSize() const
+        { return mByteSize; }
         size_t GetNumDrawCmds() const
         { return mDrawCommands.size(); }
         const DrawCommand& GetDrawCommand(size_t index) const
         { return mDrawCommands[index]; }
-        const VertexBuffer& GetVertexBuffer() const
-        { return *mBuffer; }
         const VertexLayout& GetVertexLayout() const
         { return mLayout; }
+        GLuint GetName() const
+        { return mName; }
     private:
         const OpenGLFunctions& mGL;
-        std::size_t mFrameNumber = 0;
+        mutable std::size_t mFrameNumber = 0;
         std::vector<DrawCommand> mDrawCommands;
-        std::unique_ptr<VertexBuffer> mBuffer;
+        std::size_t mByteSize = 0;
+        std::size_t mOffset = 0;
         VertexLayout mLayout;
+        GLuint mName = 0;
     };
 
     class ProgImpl : public Program
@@ -1084,7 +1133,7 @@ private:
                 return false;
             }
 
-            DEBUG("Program was built succesfully!");
+            DEBUG("Program was built successfully!");
             DEBUG("Program info: %1", build_info);
             if (mProgram)
             {
@@ -1314,23 +1363,6 @@ private:
             mSamplers.resize(count);
         }
 
-        GLuint GetName() const
-        { return mProgram; }
-
-        void SetLastUseFrameNumber(size_t frame_number)
-        {
-            mFrameNumber = frame_number;
-            for (auto& it : mSamplers)
-            {
-                // shader compiler optimized texture that isn't used.
-                // our logical "how many textures this shader expects"
-                // vector might then have holes in it for textures for
-                // which the glUniformLocation returns -1
-                if (!it.texture)
-                    continue;
-                it.texture->SetLastUseFrameNumber(frame_number);
-            }
-        }
         void BeginFrame()
         {
             // this clear has some unfortunate consequences.
@@ -1342,8 +1374,6 @@ private:
             mSamplers.clear();
             mUniforms.clear();
         }
-        size_t GetLastUsedFrameNumber() const
-        { return mFrameNumber; }
 
         struct Sampler {
             GLuint location = 0;
@@ -1382,7 +1412,12 @@ private:
         { return mSamplers[index]; }
         const Uniform& GetSetUniform(size_t index) const
         { return mUniforms[index]; }
-
+        GLuint GetName() const
+        { return mProgram; }
+        void SetLastUseFrameNumber(size_t frame_number) const
+        { mFrameNumber = frame_number; }
+        size_t GetLastUsedFrameNumber() const
+        { return mFrameNumber; }
     private:
         struct CachedUniform {
             GLuint location = 0;
@@ -1408,7 +1443,7 @@ private:
         GLuint mVersion = 0;
         std::vector<Sampler> mSamplers;
         std::vector<Uniform> mUniforms;
-        std::size_t mFrameNumber = 0;
+        mutable std::size_t mFrameNumber = 0;
     };
 
     class ShaderImpl : public Shader
@@ -1542,7 +1577,7 @@ private:
             }
             else
             {
-                DEBUG("Shader was built succesfully!");
+                DEBUG("Shader was built successfully!");
                 if (!compile_info.empty())
                     INFO("Shader info: %1", compile_info);
             }

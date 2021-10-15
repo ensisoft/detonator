@@ -230,8 +230,6 @@ public:
     {}
     virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
     {}
-    virtual void SetVertexBuffer(std::unique_ptr<gfx::VertexBuffer> buffer) override
-    {}
     virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
     {}
 private:

@@ -1404,7 +1404,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
         Vec2 aPosition;
         Vec4 aData;
     };
-    static VertexLayout layout(sizeof(ParticleVertex), {
+    static const VertexLayout layout(sizeof(ParticleVertex), {
         {"aPosition", 0, 2, 0, offsetof(ParticleVertex, aPosition)},
         {"aData",     0, 4, 0, offsetof(ParticleVertex, aData)}
     });
@@ -1428,7 +1428,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
         verts.push_back(v);
     }
 
-    geom->SetVertexBuffer(std::move(verts));
+    geom->SetVertexBuffer(std::move(verts), Geometry::Usage::Stream);
     geom->SetVertexLayout(layout);
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Points);
