@@ -183,6 +183,7 @@ struct OpenGLFunctions
     PFNGLDELETEBUFFERSPROC           glDeleteBuffers;
     PFNGLBINDBUFFERPROC              glBindBuffer;
     PFNGLBUFFERDATAPROC              glBufferData;
+    PFNGLBUFFERSUBDATAPROC           glBufferSubData;
 };
 
 //
@@ -259,6 +260,7 @@ public:
         RESOLVE(glDeleteBuffers);
         RESOLVE(glBindBuffer);
         RESOLVE(glBufferData);
+        RESOLVE(glBufferSubData);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -324,6 +326,11 @@ public:
        mShaders.clear();
        mPrograms.clear();
        mGeoms.clear();
+
+       for (auto& buffer : mBuffers)
+       {
+           GL_CALL(glDeleteBuffers(1, &buffer.name));
+       }
     }
 
     virtual void ClearColor(const Color4f& color) override
@@ -388,7 +395,7 @@ public:
 
     virtual Geometry* MakeGeometry(const std::string& name) override
     {
-        auto geometry = std::make_unique<GeomImpl>(mGL);
+        auto geometry = std::make_unique<GeomImpl>(this);
         auto* ret = geometry.get();
         mGeoms[name] = std::move(geometry);
         return ret;
@@ -691,7 +698,9 @@ public:
         // When using a VBO the pointer is not a pointer but an offset to the VBO.
         const uint8_t* base_ptr =  (const uint8_t*)mygeom->GetByteOffset();
 
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, mygeom->GetName()));
+        const auto& buffer = mBuffers[mygeom->GetBufferIndex()];
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
 
         // first enable the vertex attributes.
         for (const auto& attr : vertex_layout.attributes)
@@ -713,7 +722,7 @@ public:
             const auto& draw  = mygeom->GetDrawCommand(i);
             const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_vertex_count : draw.count;
             const auto type   = draw.type;
-            const auto offset = (GLsizei) draw.offset;
+            const auto offset = draw.offset;
 
             if (type == Geometry::DrawType::Triangles)
                 GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
@@ -774,6 +783,20 @@ public:
             auto* impl = static_cast<ProgImpl*>(pair.second.get());
             impl->BeginFrame();
         }
+
+        // trying to do so called "buffer streaming" by "orphaning" the streaming
+        // vertex buffers. this is achieved by re-specifying the contents of the
+        // buffer by using nullptr data upload.
+        // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
+        for (auto& buff : mBuffers)
+        {
+            if (buff.usage == GL_STREAM_DRAW)
+            {
+                GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, buff.usage));
+                buff.offset = 0;
+            }
+        }
     }
     virtual void EndFrame(bool display) override
     {
@@ -805,6 +828,64 @@ public:
         return bmp;
     }
 
+    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
+    {
+        GLenum flag = GL_NONE;
+        if (usage == Geometry::Usage::Static)
+            flag = GL_STATIC_DRAW;
+        else if (usage == Geometry::Usage::Stream)
+            flag = GL_STREAM_DRAW;
+        else if (usage == Geometry::Usage::Dynamic)
+            flag = GL_DYNAMIC_DRAW;
+        else BUG("Unsupported vertex buffer type.");
+
+        for (size_t i=0; i<mBuffers.size(); ++i)
+        {
+            auto& buffer = mBuffers[i];
+            const auto available = buffer.capacity - buffer.offset;
+            if ((available >= bytes) && (buffer.usage == flag))
+            {
+                const auto offset = buffer.offset;
+                buffer.offset += bytes;
+                buffer.refcount++;
+                return {i, offset};
+            }
+        }
+        VertexBuffer buffer;
+        buffer.usage    = flag;
+        buffer.offset   = bytes;
+        buffer.capacity = std::max(size_t(1024 * 1024), bytes);
+        buffer.refcount = 1;
+        GL_CALL(glGenBuffers(1, &buffer.name));
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
+        GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, buffer.usage));
+        mBuffers.push_back(buffer);
+        DEBUG("Allocated new vertex buffer. [name=%1, size=%2]", buffer.name, buffer.capacity);
+        return {mBuffers.size()-1, 0};
+    }
+    void FreeBuffer(size_t index, size_t offset, size_t bytes, Geometry::Usage usage)
+    {
+        ASSERT(index < mBuffers.size());
+        auto& buffer = mBuffers[index];
+        ASSERT(buffer.refcount > 0);
+        buffer.refcount--;
+
+        if (buffer.usage == GL_STATIC_DRAW || buffer.usage == GL_DYNAMIC_DRAW)
+        {
+            if (buffer.refcount == 0)
+                buffer.offset = 0;
+        }
+    }
+
+    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, Geometry::Usage usage)
+    {
+        ASSERT(index < mBuffers.size());
+        auto& buffer = mBuffers[index];
+        ASSERT(offset + bytes <= buffer.capacity);
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
+        GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
+        //DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2]", buffer.name, bytes);
+    }
 private:
     bool EnableIf(GLenum flag, bool on_off)
     {
@@ -1003,15 +1084,14 @@ private:
     class GeomImpl : public Geometry
     {
     public:
-        GeomImpl(const OpenGLFunctions& funcs) : mGL(funcs)
-        {
-            GL_CALL(glGenBuffers(1, &mName));
-            DEBUG("New vertex buffer %1.", mName);
-        }
+        GeomImpl(OpenGLES2GraphicsDevice* device) : mDevice(device)
+        {}
        ~GeomImpl()
         {
-            GL_CALL(glDeleteBuffers(1, &mName));
-            DEBUG("Deleted vertex buffer %1.", mName);
+            if (mBufferSize)
+            {
+                mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
+            }
         }
         virtual void ClearDraws() override
         {
@@ -1039,21 +1119,16 @@ private:
 
         virtual void Upload(const void* data, size_t bytes, Usage usage) override
         {
-            GLenum flag = GL_NONE;
-            if (usage == Usage::Static)
-                flag = GL_STATIC_DRAW;
-            else if (usage == Usage::Stream)
-                flag = GL_STREAM_DRAW;
-            else if (usage == Usage::Dynamic)
-                flag = GL_DYNAMIC_DRAW;
-            else BUG("No such vertex buffer usage.");
+            if ((usage != mBufferUsage) || (bytes > mBufferSize))
+            {
+                if (mBufferSize)
+                    mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
 
-            GLint current_buffer = 0;
-            GL_CALL(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_buffer));
-            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, mName));
-            GL_CALL(glBufferData(GL_ARRAY_BUFFER, bytes, data, flag));
-            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, current_buffer));
-            mByteSize = bytes;
+                std::tie(mBufferIndex, mBufferOffset) = mDevice->AllocateBuffer(bytes, usage);
+            }
+            mDevice->UploadBuffer(mBufferIndex, mBufferOffset, data, bytes, usage);
+            mBufferSize  = bytes;
+            mBufferUsage = usage;
         }
 
         void SetLastUseFrameNumber(size_t frame_number) const
@@ -1064,26 +1139,28 @@ private:
             size_t count  = 0;
             size_t offset = 0;
         };
+        size_t GetBufferIndex() const
+        { return mBufferIndex; }
         size_t GetByteOffset() const
-        { return mOffset; }
+        { return mBufferOffset; }
         size_t GetByteSize() const
-        { return mByteSize; }
+        { return mBufferSize; }
         size_t GetNumDrawCmds() const
         { return mDrawCommands.size(); }
         const DrawCommand& GetDrawCommand(size_t index) const
         { return mDrawCommands[index]; }
         const VertexLayout& GetVertexLayout() const
         { return mLayout; }
-        GLuint GetName() const
-        { return mName; }
     private:
-        const OpenGLFunctions& mGL;
+        OpenGLES2GraphicsDevice* mDevice = nullptr;
+
         mutable std::size_t mFrameNumber = 0;
         std::vector<DrawCommand> mDrawCommands;
-        std::size_t mByteSize = 0;
-        std::size_t mOffset = 0;
+        std::size_t mBufferSize   = 0;
+        std::size_t mBufferOffset = 0;
+        std::size_t mBufferIndex  = 0;
+        Usage mBufferUsage = Usage::Static;
         VertexLayout mLayout;
-        GLuint mName = 0;
     };
 
     class ProgImpl : public Program
@@ -1616,6 +1693,15 @@ private:
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
     // texture units and their current settings.
     TextureUnits mTextureUnits;
+
+    struct VertexBuffer {
+        GLenum usage = GL_NONE;
+        GLuint name  = 0;
+        size_t capacity = 0;
+        size_t offset   = 0;
+        size_t refcount = 0;
+    };
+    std::vector<VertexBuffer> mBuffers;
 };
 
 // static

@@ -1097,7 +1097,7 @@ Geometry* PolygonClass::Upload(Device& device) const
         {
             geom = device.MakeGeometry("DynamicPolygon");
         }
-        geom->SetVertexBuffer(mVertices);
+        geom->SetVertexBuffer(mVertices, Geometry::Usage::Dynamic);
         geom->ClearDraws();
         for (const auto& cmd : mDrawCommands)
         {
