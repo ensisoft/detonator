@@ -1007,6 +1007,36 @@ void main() {
     dev->CleanGarbage(120);
 }
 
+void unit_test_clean_garbage()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+
+    {
+        const gfx::RGB pixels[2 * 3] = {
+                gfx::Color::White, gfx::Color::White,
+                gfx::Color::Red, gfx::Color::Red,
+                gfx::Color::Blue, gfx::Color::Blue
+        };
+        auto* texture = dev->MakeTexture("foo");
+        texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
+        texture->EnableGarbageCollection(true);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+    }
+
+    dev->BeginFrame();
+    dev->EndFrame();
+    dev->CleanGarbage(2);
+
+    TEST_REQUIRE(dev->FindTexture("foo"));
+
+    dev->BeginFrame();
+    dev->EndFrame();
+    dev->CleanGarbage(2);
+    TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1023,5 +1053,7 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix3x3_uniform();
     unit_test_render_set_matrix4x4_uniform();
     unit_test_uniform_sampler_optimize_bug();
+
+    unit_test_clean_garbage();
     return 0;
 }
