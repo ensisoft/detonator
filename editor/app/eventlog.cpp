@@ -51,7 +51,7 @@ void EventLog::write(Event::Type type, const QString& msg, const QString& tag)
     if (mEvents.full())
     {
         const auto first = index(0, 0);
-        const auto last  = index((int)mEvents.size(), 1);
+        const auto last  = index((int)mEvents.size()-1, 0);
         mEvents.push_front(event);
         emit dataChanged(first, last);
     }
