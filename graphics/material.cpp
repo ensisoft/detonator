@@ -1485,6 +1485,7 @@ void TextureMap2DClass::ApplyDynamicState(State& state, Device& device, Program&
         return;
 
     auto* texture = binds.textures[0];
+    texture->EnableGarbageCollection(mGarbageCollect);
     texture->SetFilter(mMinFilter);
     texture->SetFilter(mMagFilter);
     texture->SetWrapX(mWrapX);
