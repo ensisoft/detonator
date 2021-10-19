@@ -744,6 +744,10 @@ namespace gfx
         // instances of a single material type called they might still
         // have a different state.
         struct State {
+            // true if running in an "editing mode", which means that even
+            // content marked static might have changed and should be checked
+            // in case it has been modified and should be re-uploaded.
+            bool editing_mode = false;
             // True when rendering points, i.e. the material is being applied
             // on anything that rasterizes as GL_POINTS. When this is true
             // the shader must use the built-in gl_PointCoord variable instead
@@ -1386,6 +1390,10 @@ namespace gfx
         }
 
         struct Environment {
+            // true if running in an "editing mode", which means that even
+            // content marked static might have changed and should be checked
+            // in case it has been modified and should be re-uploaded.
+            bool editing_mode  = false;
             bool render_points = false;
         };
         struct RasterState {
@@ -1397,9 +1405,10 @@ namespace gfx
         void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
         {
             MaterialClass::State state;
+            state.editing_mode  = env.editing_mode;
+            state.render_points = env.render_points;
             state.material_time = mRuntime;
             state.uniforms      = mUniforms;
-            state.render_points = env.render_points;
             mClass->ApplyDynamicState(state, device, program);
             raster.blending = state.blending;
         }

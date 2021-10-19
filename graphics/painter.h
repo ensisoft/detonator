@@ -43,6 +43,11 @@ namespace gfx
     {
     public:
         virtual ~Painter() = default;
+        // Set flag that enables "editing" mode which indicates
+        // that even content marked "static" should be checked against
+        // modifications and possibly regenerated/reuploaded to the device.
+        // The default is false.
+        virtual void SetEditingMode(bool on_off) = 0;
         // Set the ratio of rendering surface pixels to game units.
         virtual void SetPixelRatio(const glm::vec2& ratio) = 0;
         // Set the size of the target rendering surface. (The surface that

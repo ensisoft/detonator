@@ -532,11 +532,12 @@ int main(int argc, char* argv[])
 
         // setup application
         engine::Engine::InitParams params;
-        base::JsonReadSafe(json["application"], "game_script", &params.game_script);
+        params.editing_mode     = false; // no editing, static means optimal static, no checking for changes.
         params.application_name = title;
         params.context          = context.get();
         params.surface_width    = window.GetSurfaceWidth();
         params.surface_height   = window.GetSurfaceHeight();
+        base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         engine->Init(params);
 
         // the times here are in the application timeline which

@@ -48,6 +48,10 @@ public:
     StandardPainter(Device* device)
       : mDevice(device)
     {}
+    virtual void SetEditingMode(bool on_off) override
+    {
+        mEditingMode = on_off;
+    }
     virtual void SetPixelRatio(const glm::vec2& ratio) override
     {
         mPixelRatio = ratio;
@@ -90,9 +94,10 @@ public:
         const auto style = shape.GetStyle();
 
         Drawable::Environment draw_env;
-        draw_env.pixel_ratio = mPixelRatio;
-        draw_env.proj_matrix = &kProjMatrix;
-        draw_env.view_matrix = &kViewMatrix;
+        draw_env.editing_mode = mEditingMode;
+        draw_env.pixel_ratio  = mPixelRatio;
+        draw_env.proj_matrix  = &kProjMatrix;
+        draw_env.view_matrix  = &kViewMatrix;
 
         Geometry* geom = shape.Upload(draw_env, *mDevice);
         Program* prog = GetProgram(shape, mat);
@@ -101,6 +106,7 @@ public:
 
         Material::RasterState material_raster_state;
         Material::Environment material_env;
+        material_env.editing_mode  = mEditingMode;
         material_env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix",
@@ -166,9 +172,10 @@ public:
         {
             const auto& kViewMatrix = mViewMatrix * (*mask.transform);
             Drawable::Environment draw_env;
-            draw_env.pixel_ratio = mPixelRatio;
-            draw_env.view_matrix = &kViewMatrix;
-            draw_env.proj_matrix = &kProjMatrix;
+            draw_env.editing_mode = mEditingMode;
+            draw_env.pixel_ratio  = mPixelRatio;
+            draw_env.view_matrix  = &kViewMatrix;
+            draw_env.proj_matrix  = &kProjMatrix;
             Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -183,6 +190,7 @@ public:
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
             material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
             mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
@@ -204,9 +212,10 @@ public:
         {
             const auto& kViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
-            draw_env.pixel_ratio = mPixelRatio;
-            draw_env.view_matrix = &kViewMatrix;
-            draw_env.proj_matrix = &kProjMatrix;
+            draw_env.editing_mode = mEditingMode;
+            draw_env.pixel_ratio  = mPixelRatio;
+            draw_env.view_matrix  = &kViewMatrix;
+            draw_env.proj_matrix  = &kProjMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -221,6 +230,7 @@ public:
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
             draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
@@ -243,9 +253,10 @@ public:
         {
             const auto& kViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
-            draw_env.pixel_ratio = mPixelRatio;
-            draw_env.proj_matrix = &kProjMatrix;
-            draw_env.view_matrix = &kViewMatrix;
+            draw_env.editing_mode = mEditingMode;
+            draw_env.pixel_ratio  = mPixelRatio;
+            draw_env.proj_matrix  = &kProjMatrix;
+            draw_env.view_matrix  = &kViewMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -260,6 +271,7 @@ public:
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
             draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
 
@@ -322,6 +334,7 @@ private:
     std::shared_ptr<Device> mDeviceInst;
     Device* mDevice = nullptr;
 private:
+    bool mEditingMode = false;
     // Expected Size of the rendering surface.
     ISize mSurfacesize;
     // the viewport setting for mapping the NDC coordinates
