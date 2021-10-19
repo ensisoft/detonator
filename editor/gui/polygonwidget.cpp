@@ -93,7 +93,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     SetEnabled(mUI.actionStop, false);
     SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mPolygon.GetId());
-    setWindowTitle("My Shape");
+    SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
 
     connect(workspace, &app::Workspace::NewResourceAvailable,
@@ -116,13 +117,14 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
+    SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
     GetUserProperty(resource, "alpha", mUI.alpha);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "widget", mUI.widget);
-    setWindowTitle(mUI.name->text());
+    setWindowTitle(GetValue(mUI.name));
 
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
@@ -188,12 +190,13 @@ bool ShapeWidget::LoadState(const Settings& settings)
     QString material;
     settings.getValue("Polygon", "material", &material);
     settings.loadWidget("Polygon", mUI.name);
+    settings.loadWidget("Polygon", mUI.alpha);
     settings.loadWidget("Polygon", mUI.chkShowGrid);
     settings.loadWidget("Polygon", mUI.chkSnap);
     settings.loadWidget("Polygon", mUI.cmbGrid);
     settings.loadWidget("Polygon", mUI.widget);
     SetValue(mUI.blueprints, ListItemId(material));
-    setWindowTitle(mUI.name->text());
+    setWindowTitle(GetValue(mUI.name));
 
     std::string base64;
     settings.getValue("Polygon", "content", &base64);
@@ -216,6 +219,9 @@ bool ShapeWidget::LoadState(const Settings& settings)
     mOriginalHash = mPolygon.GetHash();
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
+
+    SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    SetValue(mUI.ID, mPolygon.GetId());
 
     on_blueprints_currentIndexChanged(0);
     return true;
@@ -404,6 +410,11 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
 {
     SetValue(mUI.blueprints, -1);
     mBlueprint.reset();
+}
+
+void ShapeWidget::on_staticInstance_stateChanged(int)
+{
+    mPolygon.SetStatic(GetValue(mUI.staticInstance));
 }
 
 void ShapeWidget::NewResourceAvailable(const app::Resource* resource)

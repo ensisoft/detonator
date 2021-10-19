@@ -65,6 +65,7 @@ namespace gui
         void on_actionClear_triggered();
         void on_blueprints_currentIndexChanged(int);
         void on_btnResetBlueprint_clicked();
+        void on_staticInstance_stateChanged(int);
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
 
