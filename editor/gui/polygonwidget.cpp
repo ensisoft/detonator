@@ -508,7 +508,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
     cmd.offset = 0;
     cmd.count  = points.size();
-    poly.AddDrawCommand(MakeVerts(points, width, height), cmd);
+    poly.AddVertices(MakeVerts(points, width, height));
+    poly.AddDrawCommand(cmd);
     painter.Draw(gfx::Polygon(poly), view, color);
 }
 
@@ -726,7 +727,8 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
         cmd.offset = mPolygon.GetNumVertices();
-        mPolygon.AddDrawCommand(MakeVerts(mPoints, width, height), cmd);
+        mPolygon.AddVertices(MakeVerts(mPoints, width, height));
+        mPolygon.AddDrawCommand(cmd);
         mPoints.clear();
 
         mUI.actionNewTriangleFan->setChecked(false);

@@ -44,7 +44,8 @@ void unit_test_polygon_data()
     cmd.type = gfx::PolygonClass::DrawType::TriangleFan;
     cmd.offset = 1243;
     cmd.count = 555;
-    klass.AddDrawCommand(std::move(verts), cmd);
+    klass.AddVertices(std::move(verts));
+    klass.AddDrawCommand(cmd);
 
     // to/from json
     {
