@@ -1077,74 +1077,72 @@ void PolygonClass::Clear()
 {
     mVertices.clear();
     mDrawCommands.clear();
-    mName.clear();
 }
 void PolygonClass::ClearDrawCommands()
 {
     mDrawCommands.clear();
-    mName.clear();
 }
 void PolygonClass::ClearVertices()
 {
     mVertices.clear();
-    mName.clear();
 }
 void PolygonClass::AddVertices(const std::vector<Vertex>& vertices)
 {
     std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
-    mName.clear();
 }
 void PolygonClass::AddVertices(std::vector<Vertex>&& vertices)
 {
     std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
-    mName.clear();
 }
 void PolygonClass::AddVertices(const Vertex* vertices, size_t num_vertices)
 {
     for (size_t i=0; i<num_vertices; ++i)
         mVertices.push_back(vertices[i]);
-    mName.clear();
 }
 void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
 {
     mDrawCommands.push_back(cmd);
-    mName.clear();
 }
 
 Shader* PolygonClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 
-Geometry* PolygonClass::Upload(Device& device) const
+Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
 {
-    Geometry* geom = nullptr;
+    auto* geom = device.FindGeometry(mId);
 
-    if (mStatic)
+    auto needs_upload = false;
+    size_t content_hash = 0;
+
+    // see if the content needs to be inspected for re-uploading.
+    // this takes place only if the polygon is marked dynamic
+    // or we're running in the editing mode.
+    if (geom && (!mStatic || editing_mode))
     {
-        geom = device.FindGeometry(GetName());
-        if (!geom)
-        {
-            geom = device.MakeGeometry(GetName());
-            geom->SetVertexBuffer(mVertices);
-            for (const auto& cmd : mDrawCommands)
-            {
-                geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
-            }
-        }
+        content_hash = GetContentHash();
+        if (geom->GetDataHash() != content_hash)
+            needs_upload = true;
     }
-    else
-    {
-        geom = device.FindGeometry("DynamicPolygon");
-        if (!geom)
-        {
-            geom = device.MakeGeometry("DynamicPolygon");
-        }
-        geom->SetVertexBuffer(mVertices, Geometry::Usage::Dynamic);
-        geom->ClearDraws();
-        for (const auto& cmd : mDrawCommands)
-        {
-            geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
-        }
-    }
+    if (geom && !needs_upload)
+        return geom;
+
+    if (geom == nullptr)
+        geom = device.MakeGeometry(mId);
+
+    // set the vertex buffer.
+    geom->SetVertexBuffer(mVertices,
+        mStatic ? Geometry::Usage::Static : Geometry::Usage::Dynamic);
+
+    geom->ClearDraws();
+
+    // set the draw commands
+    for (const auto& cmd : mDrawCommands)
+        geom->AddDrawCmd(cmd.type, cmd.offset, cmd.count);
+
+    //store the current content hash.
+    if (!content_hash)
+        content_hash = GetContentHash();
+    geom->SetDataHash(content_hash);
     return geom;
 }
 
@@ -1152,11 +1150,29 @@ void PolygonClass::Pack(Packer* packer) const
 {
 }
 
+std::size_t PolygonClass::GetContentHash() const
+{
+    size_t hash = 0;
+    for (const auto& vertex : mVertices)
+    {
+        hash = base::hash_combine(hash, vertex.aTexCoord.x);
+        hash = base::hash_combine(hash, vertex.aTexCoord.y);
+        hash = base::hash_combine(hash, vertex.aPosition.x);
+        hash = base::hash_combine(hash, vertex.aPosition.y);
+    }
+    for (const auto& draw : mDrawCommands)
+    {
+        hash = base::hash_combine(hash, draw.type);
+        hash = base::hash_combine(hash, draw.count);
+        hash = base::hash_combine(hash, draw.offset);
+    }
+    return hash;
+}
+
 std::size_t PolygonClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
-    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStatic);
     for (const auto& vertex : mVertices)
     {
@@ -1255,7 +1271,6 @@ void PolygonClass::UpdateVertex(const Vertex& vert, size_t index)
 {
     ASSERT(index < mVertices.size());
     mVertices[index] = vert;
-    mName.clear();
 }
 
 void PolygonClass::EraseVertex(size_t index)
@@ -1281,7 +1296,6 @@ void PolygonClass::EraseVertex(size_t index)
             cmd.offset--;
         ++i;
     }
-    mName.clear();
 }
 
 void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
@@ -1305,14 +1319,12 @@ void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t i
         if (vertex_index <= cmd.offset)
             cmd.offset++;
     }
-    mName.clear();
 }
 
 void PolygonClass::UpdateDrawCommand(const DrawCommand& cmd, size_t index)
 {
     ASSERT(index < mDrawCommands.size());
     mDrawCommands[index] = cmd;
-    mName.clear();
 }
 
 const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
@@ -1328,14 +1340,6 @@ const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
             return i;
     }
     BUG("no draw command found.");
-}
-
-std::string PolygonClass::GetName() const
-{
-    if (!mName.empty())
-        return mName;
-    mName = std::to_string(GetHash());
-    return mName;
 }
 
 void CursorClass::Pack(Packer* packer) const

@@ -589,9 +589,7 @@ namespace gfx
         bool IsStatic() const
         { return mStatic; }
 
-        // Get a (non human) readable name of the polygon based
-        // on the content.
-        std::string GetName() const;
+        size_t GetContentHash() const;
         size_t GetNumVertices() const
         { return mVertices.size(); }
         size_t GetNumDrawCommands() const
@@ -606,7 +604,7 @@ namespace gfx
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
         Shader* GetShader(Device& device) const;
-        Geometry* Upload(Device& device) const;
+        Geometry* Upload(bool editing_mode, Device& device) const;
 
         virtual void Pack(Packer* packer) const override;
         virtual Type GetType() const override
@@ -633,8 +631,6 @@ namespace gfx
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
-    private:
-        mutable std::string mName; // cached name
     };
 
     class Polygon : public Drawable
@@ -655,7 +651,7 @@ namespace gfx
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(device); }
+        { return mClass->Upload(env.editing_mode, device); }
         virtual Style GetStyle() const override
         { return Style::Solid; }
         virtual void SetCulling(Culling culling) override
