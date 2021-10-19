@@ -540,88 +540,19 @@ namespace gfx
 
         using Vertex = gfx::Vertex;
 
-        PolygonClass()
-        { mId = base::RandomString(10); }
+        PolygonClass();
 
-        Shader* GetShader(Device& device) const;
-        Geometry* Upload(Device& device) const;
+        void Clear();
+        void ClearDrawCommands();
+        void ClearVertices();
 
-        void Clear()
-        {
-            mVertices.clear();
-            mDrawCommands.clear();
-            mName.clear();
-        }
-        void ClearDrawCommands()
-        {
-            mDrawCommands.clear();
-            mName.clear();
-        }
-        void ClearVertices()
-        {
-            mVertices.clear();
-            mName.clear();
-        }
-
-        void AddVertices(const std::vector<Vertex>& verts)
-        {
-            std::copy(std::begin(verts), std::end(verts), std::back_inserter(mVertices));
-            mName.clear();
-        }
-        void AddVertices(std::vector<Vertex>&& verts)
-        {
-            std::move(std::begin(verts), std::end(verts), std::back_inserter(mVertices));
-            mName.clear();
-        }
-        void AddVertices(const Vertex* vertices, size_t num_verts)
-        {
-            for (size_t i=0; i<num_verts; ++i)
-                mVertices.push_back(vertices[i]);
-            mName.clear();
-        }
-        void AddDrawCommand(const DrawCommand& cmd)
-        {
-            mDrawCommands.push_back(cmd);
-            mName.clear();
-        }
-
-        void AddDrawCommand(const std::vector<Vertex>& verts, const DrawCommand& cmd)
-        {
-            std::copy(std::begin(verts), std::end(verts),
-                std::back_inserter(mVertices));
-            mDrawCommands.push_back(cmd);
-            mName.clear();
-        }
-        void AddDrawCommand(std::vector<Vertex>&& verts, const DrawCommand& cmd)
-        {
-            std::move(std::begin(verts), std::end(verts),
-                std::back_inserter(mVertices));
-            mDrawCommands.push_back(cmd);
-            mName.clear();
-        }
-        void AddDrawCommand(const Vertex* vertices, size_t num_vertices,
-            const DrawCommand& cmd)
-        {
-            for (size_t i=0; i<num_vertices; ++i)
-                mVertices.push_back(vertices[i]);
-            mDrawCommands.push_back(cmd);
-            mName.clear();
-        }
-        size_t GetNumVertices() const
-        { return mVertices.size(); }
-        size_t GetNumDrawCommands() const
-        { return mDrawCommands.size(); }
-        const DrawCommand& GetDrawCommand(size_t index) const
-        { return mDrawCommands[index]; }
-        const Vertex& GetVertex(size_t index) const
-        { return mVertices[index]; }
-
-        void UpdateVertex(const Vertex& vert, size_t index)
-        {
-            ASSERT(index < mVertices.size());
-            mVertices[index] = vert;
-            mName.clear();
-        }
+        // Add the array of vertices to the existing vertex buffer.
+        void AddVertices(const std::vector<Vertex>& vertices);
+        void AddVertices(std::vector<Vertex>&& vertices);
+        void AddVertices(const Vertex* vertices, size_t num_vertices);
+        // Update the vertex at the given index.
+        void UpdateVertex(const Vertex& vert, size_t index);
+        // Erase the vertex at the given index.
         void EraseVertex(size_t index);
         // Insert a vertex into the vertex array where the index is
         // an index within the given draw command. Index can be in
@@ -632,15 +563,11 @@ namespace gfx
         // new vertex will grow its count by 1 and all draw commands
         // that come after the will have their starting offsets
         // incremented by 1.
-        void InsertVertex(const Vertex& vert, size_t cmd_index, size_t index);
+        void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
 
-        void UpdateDrawCommand(const DrawCommand& cmd, size_t index)
-        {
-            ASSERT(index < mDrawCommands.size());
-            mDrawCommands[index] = cmd;
-            mName.clear();
-        }
+        void AddDrawCommand(const DrawCommand& cmd);
 
+        void UpdateDrawCommand(const DrawCommand& cmd, size_t index);
         // Find the draw command that contains the vertex at the given index.
         // Returns index to the draw command.
         const size_t FindDrawCommand(size_t vertex_index) const;
@@ -658,15 +585,25 @@ namespace gfx
         bool IsStatic() const
         { return mStatic; }
 
+        // Get a (non human) readable name of the polygon based
+        // on the content.
+        std::string GetName() const;
+        size_t GetNumVertices() const
+        { return mVertices.size(); }
+        size_t GetNumDrawCommands() const
+        { return mDrawCommands.size(); }
+        const DrawCommand& GetDrawCommand(size_t index) const
+        { return mDrawCommands[index]; }
+        const Vertex& GetVertex(size_t index) const
+        { return mVertices[index]; }
         // Set the polygon static or not. See comments in IsStatic.
         void SetStatic(bool on_off)
         { mStatic = on_off; }
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
 
-        // Get a (non human) readable name of the polygon based
-        // on the content.
-        std::string GetName() const;
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(Device& device) const;
 
         virtual void Pack(Packer* packer) const override;
         virtual Type GetType() const override

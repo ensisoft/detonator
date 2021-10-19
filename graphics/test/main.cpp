@@ -328,7 +328,8 @@ private:
         cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
-        poly.AddDrawCommand(std::move(verts), cmd);
+        poly.AddVertices(std::move(verts));
+        poly.AddDrawCommand(cmd);
     }
 
     void AddCircleShape(gfx::PolygonClass& poly,  float x, float y, float r)
@@ -355,7 +356,8 @@ private:
         cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
-        poly.AddDrawCommand(std::move(verts), cmd);
+        poly.AddVertices(std::move(verts));
+        poly.AddDrawCommand(cmd);
     }
 private:
     float mTime = 0.0f;

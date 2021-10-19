@@ -1070,6 +1070,47 @@ bool GridClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
+PolygonClass::PolygonClass()
+{ mId = base::RandomString(10); }
+
+void PolygonClass::Clear()
+{
+    mVertices.clear();
+    mDrawCommands.clear();
+    mName.clear();
+}
+void PolygonClass::ClearDrawCommands()
+{
+    mDrawCommands.clear();
+    mName.clear();
+}
+void PolygonClass::ClearVertices()
+{
+    mVertices.clear();
+    mName.clear();
+}
+void PolygonClass::AddVertices(const std::vector<Vertex>& vertices)
+{
+    std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    mName.clear();
+}
+void PolygonClass::AddVertices(std::vector<Vertex>&& vertices)
+{
+    std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    mName.clear();
+}
+void PolygonClass::AddVertices(const Vertex* vertices, size_t num_vertices)
+{
+    for (size_t i=0; i<num_vertices; ++i)
+        mVertices.push_back(vertices[i]);
+    mName.clear();
+}
+void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
+{
+    mDrawCommands.push_back(cmd);
+    mName.clear();
+}
+
 Shader* PolygonClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 
@@ -1210,6 +1251,13 @@ std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
     return ret;
 }
 
+void PolygonClass::UpdateVertex(const Vertex& vert, size_t index)
+{
+    ASSERT(index < mVertices.size());
+    mVertices[index] = vert;
+    mName.clear();
+}
+
 void PolygonClass::EraseVertex(size_t index)
 {
     ASSERT(index < mVertices.size());
@@ -1257,6 +1305,13 @@ void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t i
         if (vertex_index <= cmd.offset)
             cmd.offset++;
     }
+    mName.clear();
+}
+
+void PolygonClass::UpdateDrawCommand(const DrawCommand& cmd, size_t index)
+{
+    ASSERT(index < mDrawCommands.size());
+    mDrawCommands[index] = cmd;
     mName.clear();
 }
 
