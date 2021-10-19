@@ -196,6 +196,7 @@ void unit_test_drawable_item()
     auto device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
         std::make_shared<TestContext>(256, 256));
     auto painter = gfx::Painter::Create(device);
+    painter->SetEditingMode(false);
     painter->SetOrthographicView(256, 256);
     painter->SetViewport(0, 0, 256, 256);
     painter->SetSurfaceSize(256, 256);
@@ -396,6 +397,7 @@ void unit_test_entity_layering()
     auto device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
         std::make_shared<TestContext>(256, 256));
     auto painter = gfx::Painter::Create(device);
+    painter->SetEditingMode(false);
     painter->SetOrthographicView(256, 256);
     painter->SetViewport(0, 0, 256, 256);
     painter->SetSurfaceSize(256, 256);

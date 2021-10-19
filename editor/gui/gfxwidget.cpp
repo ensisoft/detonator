@@ -313,6 +313,11 @@ void GfxWindow::doInit()
     }
     mCustomGraphicsDevice  = device;
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
+    // this magic flag here turns all statics into "non-statics"
+    // and let's resources that we create with static flags to
+    // re-inspect their content for modification and then possibly
+    // re-upload/regenerate the required GPU objects.
+    mCustomGraphicsPainter->SetEditingMode(true);
 
     const auto w = width();
     const auto h = height();

@@ -255,6 +255,10 @@ namespace engine
         { return true; }
 
         struct InitParams {
+            // true if running in an "editor mode", which means that even
+            // content marked static might have changed and should be checked
+            // in case it has been modified and should be re-uploaded.
+            bool editing_mode = false;
             // name of the "main" game script for loading the game.
             std::string game_script;
             // application name/title.

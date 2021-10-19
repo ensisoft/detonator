@@ -119,6 +119,10 @@ namespace gfx
         using Culling = DrawableClass::Culling;
 
         struct Environment {
+            // true if running in an "editor mode", which means that even
+            // content marked static might have changed and should be checked
+            // in case it has been modified and should be re-uploaded.
+            bool editing_mode = false;
             // how many render surface units (pixels, texels if rendering to a texture)
             // to a game unit.
             glm::vec2 pixel_ratio = {1.0f, 1.0f};
@@ -601,7 +605,6 @@ namespace gfx
         { mStatic = on_off; }
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
-
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Device& device) const;
 
@@ -629,8 +632,9 @@ namespace gfx
         std::string mId;
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
-        mutable std::string mName; // cached name
         bool mStatic = true;
+    private:
+        mutable std::string mName; // cached name
     };
 
     class Polygon : public Drawable

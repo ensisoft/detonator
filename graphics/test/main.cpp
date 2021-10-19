@@ -1587,6 +1587,7 @@ int main(int argc, char* argv[])
     auto context = std::make_shared<WindowContext>(sampling, srgb);
     auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
     auto painter = gfx::Painter::Create(device);
+    painter->SetEditingMode(false);
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;

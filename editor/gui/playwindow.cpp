@@ -787,6 +787,7 @@ void PlayWindow::DoAppInit()
         mEngine->SetEnvironment(env);
 
         engine::Engine::InitParams params;
+        params.editing_mode     = true; // allow changes to "static" content take place.
         params.game_script      = app::ToUtf8(settings.game_script);
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();

@@ -83,6 +83,7 @@ public:
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
+        mPainter->SetEditingMode(init.editing_mode);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
         mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script, mGameHome, init.application_name);

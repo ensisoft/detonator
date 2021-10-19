@@ -914,6 +914,7 @@ public:
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
+        mPainter->SetEditingMode(false);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
     }
