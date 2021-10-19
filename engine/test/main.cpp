@@ -928,7 +928,7 @@ public:
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);
 
-        mDevice->CleanGarbage(120);
+        mDevice->CleanGarbage(120, gfx::Device::GCFlags::Textures);
     }
 
     virtual void Update(double dt) override

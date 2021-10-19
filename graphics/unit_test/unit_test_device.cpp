@@ -1004,7 +1004,6 @@ void main() {
 
     dev->Draw(*prog, *geom, state);
     dev->EndFrame();
-    dev->CleanGarbage(120);
 }
 
 void unit_test_clean_garbage()
@@ -1026,13 +1025,13 @@ void unit_test_clean_garbage()
 
     dev->BeginFrame();
     dev->EndFrame();
-    dev->CleanGarbage(2);
+    dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
 
     TEST_REQUIRE(dev->FindTexture("foo"));
 
     dev->BeginFrame();
     dev->EndFrame();
-    dev->CleanGarbage(2);
+    dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
     TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
 
 }

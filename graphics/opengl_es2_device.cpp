@@ -741,38 +741,56 @@ public:
     virtual Type GetDeviceType() const override
     { return Type::OpenGL_ES2; }
 
-    virtual void CleanGarbage(size_t max_num_idle_frames) override
+    virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
     {
-        for (auto it = mPrograms.begin(); it != mPrograms.end();)
+        if (flags & GCFlags::Programs)
         {
-            auto* impl = static_cast<ProgImpl*>(it->second.get());
-            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
-            if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
-                it = mPrograms.erase(it);
-            else ++it;
+            for (auto it = mPrograms.begin(); it != mPrograms.end();)
+            {
+                auto* impl = static_cast<ProgImpl*>(it->second.get());
+                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+                if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
+                    it = mPrograms.erase(it);
+                else ++it;
+            }
         }
 
-        for (auto it = mTextures.begin(); it != mTextures.end();)
+        if (flags & GCFlags::Textures)
         {
-            auto* impl = static_cast<TextureImpl*>(it->second.get());
-            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
-            const auto is_eligible = impl->IsEligibleForGarbageCollection();
-            const auto is_expired  = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
-            if (is_eligible && is_expired)
+            for (auto it = mTextures.begin(); it != mTextures.end();)
             {
-                size_t unit = 0;
-                for (unit=0; unit<mTextureUnits.size(); ++unit)
+                auto* impl = static_cast<TextureImpl*>(it->second.get());
+                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+                const auto is_eligible = impl->IsEligibleForGarbageCollection();
+                const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
+                const auto is_forced  = flags & GCFlags::Force;
+                if ((is_forced || is_eligible) && is_expired)
                 {
-                    if (mTextureUnits[unit].texture == impl)
+                    size_t unit = 0;
+                    for (unit = 0; unit < mTextureUnits.size(); ++unit)
                     {
-                        mTextureUnits[unit].texture = nullptr;
-                        break;
+                        if (mTextureUnits[unit].texture == impl)
+                        {
+                            mTextureUnits[unit].texture = nullptr;
+                            break;
+                        }
                     }
-                }
-                // delete the texture
-                it = mTextures.erase(it);
+                    // delete the texture
+                    it = mTextures.erase(it);
+                } else ++it;
             }
-            else ++it;
+        }
+
+        if (flags & GCFlags::Geometries)
+        {
+            for (auto it = mGeoms.begin(); it != mGeoms.end();)
+            {
+                auto* impl = static_cast<GeomImpl*>(it->second.get());
+                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+                if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
+                    it = mGeoms.erase(it);
+                else ++it;
+            }
         }
     }
 
@@ -958,17 +976,17 @@ private:
         TextureImpl(const OpenGLFunctions& funcs) : mGL(funcs)
         {
             GL_CALL(glGenTextures(1, &mName));
-            DEBUG("New texture object %1 name = %2", (void*)this, mName);
+            DEBUG("New texture object. [name=%1]", mName);
         }
         ~TextureImpl()
         {
             GL_CALL(glDeleteTextures(1, &mName));
-            DEBUG("Deleted texture %1", mName);
+            DEBUG("Deleted texture object. [name=%1]", mName);
         }
 
         virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) override
         {
-            DEBUG("Loading texture %1 %2x%3 px", mName, xres, yres);
+            DEBUG("Loading texture. [name=%1, size=%2x%3 px]", mName, xres, yres);
 
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
@@ -1054,13 +1072,10 @@ private:
         // internal
         GLuint GetName() const
         { return mName; }
-
         void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
-
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
-
         bool IsEligibleForGarbageCollection() const
         { return mEnableGC; }
 
@@ -1139,6 +1154,8 @@ private:
             size_t count  = 0;
             size_t offset = 0;
         };
+        size_t GetLastUsedFrameNumber() const
+        { return mFrameNumber; }
         size_t GetBufferIndex() const
         { return mBufferIndex; }
         size_t GetByteOffset() const

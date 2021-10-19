@@ -1702,7 +1702,7 @@ int main(int argc, char* argv[])
                 if (!base::FileExists(goldfile) || issue_gold)
                 {
                     device->EndFrame(true /*display*/);
-                    device->CleanGarbage(120);
+                    device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
                     // the result is the new gold image. should be eye balled and verified.
                     gfx::WritePNG(result, goldfile);
                     INFO("Wrote new gold file. '%1'", goldfile);
@@ -1756,7 +1756,7 @@ int main(int argc, char* argv[])
                 }
 
                 device->EndFrame(true /* display */);
-                device->CleanGarbage(120);
+                device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
 
                 if (stop_for_input && user_interaction)
                 {
@@ -1819,7 +1819,7 @@ int main(int argc, char* argv[])
             tests[test_index]->Render(*painter);
 
             device->EndFrame(true /*display*/);
-            device->CleanGarbage(120);
+            device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
 
             // process incoming (window) events
             wdk::native_event_t event;
