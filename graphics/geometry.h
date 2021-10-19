@@ -165,8 +165,10 @@ namespace gfx
         virtual void SetVertexLayout(const VertexLayout& layout) = 0;
         // Upload the vertex data that defines the geometry.
         virtual void Upload(const void* data, size_t bytes, Usage usage = Usage::Static) = 0;
-
-        // helpers
+        // Set the hash value that identifies the data.
+        virtual void SetDataHash(size_t hash) = 0;
+        // Get the hash value that was used in the latest data upload.
+        virtual size_t GetDataHash() const  = 0;
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>

@@ -257,14 +257,19 @@ private:
 class PolygonTest : public GraphicsTest
 {
 public:
+    PolygonTest()
+    {
+        // allow editing
+        mPoly.SetDynamic(true);
+    }
+
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::PolygonClass poly;
-        poly.SetDynamic(true);
-        AddPacman(poly, 0.4f, -0.5f, 0.3f);
-        AddCircleShape(poly, 0.60f, -0.5f, 0.05f);
-        AddCircleShape(poly, 0.75f, -0.5f, 0.05f);
-        AddCircleShape(poly, 0.90f, -0.5f, 0.05f);
+        mPoly.Clear();
+        AddPacman(mPoly, 0.4f, -0.5f, 0.3f);
+        AddCircleShape(mPoly, 0.60f, -0.5f, 0.05f);
+        AddCircleShape(mPoly, 0.75f, -0.5f, 0.05f);
+        AddCircleShape(mPoly, 0.90f, -0.5f, 0.05f);
 
         // pacman body + food dots
         gfx::Transform transform;
@@ -277,7 +282,7 @@ public:
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
         material.SetGamma(2.2f);
-        painter.Draw(gfx::Polygon(poly), transform, material);
+        painter.Draw(gfx::Polygon(mPoly), transform, material);
 
         // eye
         transform.Resize(40, 40);
@@ -361,6 +366,7 @@ private:
     }
 private:
     float mTime = 0.0f;
+    gfx::PolygonClass mPoly;
 };
 
 class StencilTest : public GraphicsTest

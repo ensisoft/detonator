@@ -224,14 +224,57 @@ private:
 class TestGeometry : public gfx::Geometry
 {
 public:
+    struct Draw {
+        gfx::Geometry::DrawType type;
+        std::size_t offset = 0;
+        std::size_t count  = 0;
+    };
+    std::vector<Draw> mDrawCmds;
+
+    gfx::VertexLayout mLayout;
+
     virtual void ClearDraws() override
-    {}
+    {
+        mDrawCmds.clear();
+    }
     virtual void AddDrawCmd(DrawType type) override
-    {}
+    {
+        Draw d;
+        d.type = type;
+        mDrawCmds.push_back(d);
+    }
     virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
-    {}
+    {
+        Draw d;
+        d.type = type;
+        d.count = count;
+        d.offset = offset;
+        mDrawCmds.push_back(d);
+    }
     virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
-    {}
+    {
+        mLayout = layout;
+    }
+    virtual void Upload(const void* data, size_t bytes, Usage usage) override
+    {
+        mUsage = usage;
+        mData.resize(bytes);
+        mBytes =bytes;
+        mUploaded = true;
+        std::memcpy(&mData[0], data, bytes);
+    }
+    // Set the hash value that identifies the data.
+    virtual void SetDataHash(size_t hash) override
+    { mHash = hash; }
+    // Get the hash value that was used in the latest data upload.
+    virtual size_t GetDataHash() const  override
+    { return mHash; }
+
+    bool mUploaded = false;
+    gfx::Geometry::Usage mUsage;
+    std::vector<char> mData;
+    std::size_t mBytes = 0;
+    std::size_t mHash = 0;
 private:
 };
 
@@ -273,11 +316,17 @@ public:
     }
     virtual gfx::Geometry* FindGeometry(const std::string& name) override
     {
-        return nullptr;
+        auto it = mGeomIndexMap.find(name);
+        if (it == mGeomIndexMap.end())
+            return nullptr;
+        return mGeoms[it->second].get();
     }
     virtual gfx::Geometry* MakeGeometry(const std::string& name) override
     {
-        return nullptr;
+        const size_t index = mGeoms.size();
+        mGeoms.emplace_back(new TestGeometry);
+        mGeomIndexMap[name] = index;
+        return mGeoms.back().get();
     }
     virtual gfx::Texture* FindTexture(const std::string& name) override
     {
@@ -354,6 +403,9 @@ public:
 private:
     std::unordered_map<std::string, std::size_t> mTextureIndexMap;
     std::vector<std::unique_ptr<TestTexture>> mTextures;
+
+    std::unordered_map<std::string, std::size_t> mGeomIndexMap;
+    std::vector<std::unique_ptr<TestGeometry>> mGeoms;
 
     std::unordered_map<std::string, std::size_t> mShaderIndexMap;
     std::vector<std::unique_ptr<TestShader>> mShaders;
@@ -1192,7 +1244,73 @@ void unit_test_custom_textures()
     TEST_REQUIRE(program.GetUniform("kTextureRect1", &kTextureRect1));
     TEST_REQUIRE(kTextureRect0 == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
     TEST_REQUIRE(kTextureRect1 == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
+}
 
+void unit_test_static_poly()
+{
+    gfx::PolygonClass poly;
+
+    // polygon marked static but we're in edit mode so the
+    // contents should get reuploaded as needed.
+    poly.SetStatic(true);
+
+    const gfx::Vertex verts[3] = {
+       {{10.0f, 10.0f}, {0.5f, 1.0f}},
+       {{-10.0f, -10.0f}, {0.0f, 0.0f}},
+       {{10.0f, 10.0f}, {1.0f, 0.0f}}
+    };
+    gfx::PolygonClass::DrawCommand cmd;
+    cmd.offset = 0;
+    cmd.count  = 3;
+    cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+    poly.AddVertices(verts, 3);
+    poly.AddDrawCommand(cmd);
+
+    TestDevice device;
+    auto* geom = (TestGeometry*)poly.Upload(true, device);
+
+    TEST_REQUIRE(geom);
+    TEST_REQUIRE(geom->mUploaded == true);
+    TEST_REQUIRE(geom->mBytes == sizeof(verts));
+    TEST_REQUIRE(geom->mDrawCmds.size() == 1);
+    TEST_REQUIRE(geom->mDrawCmds[0].offset == 0);
+    TEST_REQUIRE(geom->mDrawCmds[0].count == 3);
+    TEST_REQUIRE(geom->mDrawCmds[0].type == gfx::Geometry::DrawType::TriangleFan);
+
+    geom->mUploaded = false;
+
+    {
+        auto* g = (TestGeometry*)poly.Upload(true, device);
+        TEST_REQUIRE(g == geom);
+    }
+    TEST_REQUIRE(geom->mUploaded == false);
+    TEST_REQUIRE(geom->mBytes == sizeof(verts));
+
+    // change the content (simulate editing)
+    poly.AddVertices(verts, 3);
+    poly.AddDrawCommand(cmd);
+
+    {
+        auto* g = (TestGeometry*)poly.Upload(true, device);
+        TEST_REQUIRE(g == geom);
+    }
+    TEST_REQUIRE(geom->mUploaded == true);
+    TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
+
+    geom->mUploaded = false;
+
+
+    // change the content (simulate editing)
+    poly.AddVertices(verts, 3);
+    poly.AddDrawCommand(cmd);
+
+    // upload when edit mode is false should not re-upload anything.
+    {
+        auto g = (TestGeometry*)poly.Upload(false, device);
+        TEST_REQUIRE(g == geom);
+    }
+    TEST_REQUIRE(geom->mUploaded == false);
+    TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
 }
 
 int test_main(int argc, char* argv[])
@@ -1203,5 +1321,7 @@ int test_main(int argc, char* argv[])
     unit_test_material_uniform_folding();
     unit_test_custom_uniforms();
     unit_test_custom_textures();
+
+    unit_test_static_poly();
     return 0;
 }

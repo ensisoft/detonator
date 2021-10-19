@@ -1194,6 +1194,11 @@ private:
             mBufferUsage = usage;
         }
 
+        virtual void SetDataHash(size_t hash) override
+        { mHash = hash; }
+        virtual size_t GetDataHash() const  override
+        { return mHash; }
+
         void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
 
@@ -1224,6 +1229,7 @@ private:
         std::size_t mBufferSize   = 0;
         std::size_t mBufferOffset = 0;
         std::size_t mBufferIndex  = 0;
+        std::size_t mHash = 0;
         Usage mBufferUsage = Usage::Static;
         VertexLayout mLayout;
     };
