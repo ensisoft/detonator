@@ -848,13 +848,56 @@ public:
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
     {
+        // there are 3 different types of buffers and each have their
+        // own allocation strategy:
+
+        // 1. Static buffers
+        // Static buffers are allocated by static geometry objects
+        // that are typically created once and never updated.
+        // For static buffers we're using so called bump allocation.
+        // That means that for each geometry allocation we take the
+        // first chunk that can be found and has enough space. These
+        // individual chunks can then never be "freed" but only when
+        // the whole VBO is no longer referred to can the data be re-used.
+        // This should be the optimal allocation strategy for static
+        // game data that is created when the application begins
+        // running and then never gets modified.
+        //
+        // 2. Dynamic buffers
+        // Dynamic buffers can be allocated and used by geometry objects
+        // that have had their geometry data updated. The usage can thus
+        // grow or shrink during application run. This type of buffering
+        // needs an allocation strategy that can handle fragmentation.
+        // Since that doesn't currently exist (but is a TODO) we're just
+        // going to use a VBO *per* geometry and let the driver handle
+        // the fragmentation.
+        //
+        // 3. Streaming buffers.
+        // Streaming buffers are used for streaming geometry that gets
+        // updated on every frame, for example particle engines. The
+        // allocation strategy is also to use a bump allocation but
+        // reset the contents of each buffer on every new frame. This
+        // allows the total buffer allocation to grow to a "high water
+        // mark" and then keep re-using those buffers frame after frame.
+
         GLenum flag = GL_NONE;
+        size_t capacity = 0;
+
         if (usage == Geometry::Usage::Static)
+        {
             flag = GL_STATIC_DRAW;
+            capacity = std::max(size_t(1024 * 1024), bytes);
+        }
         else if (usage == Geometry::Usage::Stream)
+        {
             flag = GL_STREAM_DRAW;
+            capacity = std::max(size_t(1024 * 1024), bytes);
+        }
         else if (usage == Geometry::Usage::Dynamic)
+        {
             flag = GL_DYNAMIC_DRAW;
+            capacity = bytes;
+        }
         else BUG("Unsupported vertex buffer type.");
 
         for (size_t i=0; i<mBuffers.size(); ++i)
@@ -869,16 +912,17 @@ public:
                 return {i, offset};
             }
         }
+
         VertexBuffer buffer;
         buffer.usage    = flag;
         buffer.offset   = bytes;
-        buffer.capacity = std::max(size_t(1024 * 1024), bytes);
+        buffer.capacity = capacity;
         buffer.refcount = 1;
         GL_CALL(glGenBuffers(1, &buffer.name));
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, buffer.usage));
         mBuffers.push_back(buffer);
-        DEBUG("Allocated new vertex buffer. [name=%1, size=%2]", buffer.name, buffer.capacity);
+        DEBUG("Allocated new vertex buffer. [name=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
         return {mBuffers.size()-1, 0};
     }
     void FreeBuffer(size_t index, size_t offset, size_t bytes, Geometry::Usage usage)
@@ -893,6 +937,8 @@ public:
             if (buffer.refcount == 0)
                 buffer.offset = 0;
         }
+        if (usage == Geometry::Usage::Static)
+            DEBUG("Free vertex data. [vbo=%1, bytes=%2, type=%3, refs=%4]", buffer.name, bytes, usage, buffer.refcount);
     }
 
     void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, Geometry::Usage usage)
@@ -902,7 +948,9 @@ public:
         ASSERT(offset + bytes <= buffer.capacity);
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
-        //DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2]", buffer.name, bytes);
+        if (usage == Geometry::Usage::Static)
+            DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, full=%3%. type=%4]", buffer.name, bytes,
+                  (double)buffer.offset / (double)buffer.capacity, usage);
     }
 private:
     bool EnableIf(GLenum flag, bool on_off)

@@ -1036,6 +1036,106 @@ void unit_test_clean_garbage()
 
 }
 
+void unit_test_render_dynamic()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts1[] = {
+        { {-1,  1}, {0, 1} },
+        { {-1,  0}, {0, 0} },
+        { { 0,  0}, {1, 0} },
+
+        { {-1,  1}, {0, 1} },
+        { { 0,  0}, {1, 0} },
+        { { 0,  1}, {1, 1} }
+    };
+    const gfx::Vertex verts2[] = {
+        { {0,  1}, {0, 1} },
+        { {0,  0}, {0, 0} },
+        { {1,  0}, {1, 0} },
+
+        { {0,  1}, {0, 1} },
+        { {1,  0}, {1, 0} },
+        { {1,  1}, {1, 1} }
+    };
+
+    geom->SetVertexBuffer(verts1, 6, gfx::Geometry::Usage::Dynamic);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const std::string& fssrc =
+            R"(#version 100
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1.0);
+})";
+
+    const std::string& vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* vs = dev->MakeShader("vert");
+    auto* fs = dev->MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+
+    auto* prog = dev->MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    {
+        gfx::RgbaBitmap expected;
+        expected.Resize(10, 10);
+        expected.Fill(gfx::Color::Red);
+        expected.Fill(gfx::URect(0, 0, 5, 5), gfx::Color::White);
+
+        // this has alpha in it.
+        const auto& bmp = dev->ReadColorBuffer(10, 10);
+        //gfx::WritePNG(bmp, "render-test-dynamic.png");
+        TEST_REQUIRE(bmp == expected);
+    }
+
+    // change the geometry buffer.
+    geom->ClearDraws();
+    geom->SetVertexBuffer(verts2, 6, gfx::Geometry::Usage::Dynamic);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    // draw frame
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    {
+        gfx::RgbaBitmap expected;
+        expected.Resize(10, 10);
+        expected.Fill(gfx::Color::Red);
+        expected.Fill(gfx::URect(5, 0, 5, 5), gfx::Color::White);
+
+        // this has alpha in it.
+        const auto& bmp = dev->ReadColorBuffer(10, 10);
+        //gfx::WritePNG(bmp, "render-test-dynamic.png");
+        TEST_REQUIRE(bmp == expected);
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1054,5 +1154,7 @@ int test_main(int argc, char* argv[])
     unit_test_uniform_sampler_optimize_bug();
 
     unit_test_clean_garbage();
+
+    unit_test_render_dynamic();
     return 0;
 }
