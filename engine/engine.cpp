@@ -312,7 +312,7 @@ public:
         }
 
         TRACE_CALL("Device::Swap",mDevice->EndFrame(true));
-        TRACE_CALL("Device::CleanGarbage",mDevice->CleanGarbage(120));
+        TRACE_CALL("Device::CleanGarbage",mDevice->CleanGarbage(120, gfx::Device::GCFlags::Textures));
     }
 
     virtual void BeginMainLoop() override

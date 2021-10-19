@@ -308,7 +308,7 @@ public:
 
     virtual Type GetDeviceType() const override
     { return Type::OpenGL_ES2; }
-    virtual void CleanGarbage(size_t) override
+    virtual void CleanGarbage(size_t, unsigned) override
     {}
 
     virtual void BeginFrame() override

@@ -206,12 +206,19 @@ namespace gfx
 
         virtual Type GetDeviceType() const = 0;
 
+        enum GCFlags {
+            Force      = 0x1,
+            Textures   = 0x2,
+            Programs   = 0x4,
+            Geometries = 0x8
+        };
+
         // Delete GPU resources that are no longer being used and that are
         // eligible for garbage collection (i.e. are marked as okay to delete).
         // Resources that have not been used in the last N frames can be deleted.
         // For example if a texture was last used to render frame N and we're
         // currently at frame N+max_num_idle_frames then the texture is deleted.
-        virtual void CleanGarbage(size_t max_num_idle_frames) = 0;
+        virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) = 0;
 
         // Prepare the device for the next frame.
         virtual void BeginFrame() = 0;
