@@ -70,10 +70,6 @@ namespace gui
             mSelection = app::Resource::Type::Script;
             accept();
         }
-        void on_btnUIStyle_clicked()
-        {
-
-        }
         void on_btnUI_clicked()
         {
             mSelection = app::Resource::Type::UI;
