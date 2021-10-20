@@ -441,11 +441,14 @@ public:
         myprog->SetLastUseFrameNumber(mFrameNumber);
         mygeom->SetLastUseFrameNumber(mFrameNumber);
 
-        const auto& vertex_layout = mygeom->GetVertexLayout();
         const auto buffer_byte_size = mygeom->GetByteSize();
-        const auto buffer_vertex_count = buffer_byte_size / vertex_layout.vertex_struct_size;
         if (buffer_byte_size == 0)
             return;
+
+        const auto& vertex_layout = mygeom->GetVertexLayout();
+        ASSERT(vertex_layout.vertex_struct_size && "Vertex layout has not been set.");
+
+        const auto buffer_vertex_count = buffer_byte_size / vertex_layout.vertex_struct_size;
 
         GL_CALL(glLineWidth(state.line_width));
         GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
@@ -922,7 +925,7 @@ public:
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, buffer.usage));
         mBuffers.push_back(buffer);
-        DEBUG("Allocated new vertex buffer. [name=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
+        DEBUG("Allocated new vertex buffer. [vbo=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
         return {mBuffers.size()-1, 0};
     }
     void FreeBuffer(size_t index, size_t offset, size_t bytes, Geometry::Usage usage)
@@ -938,7 +941,8 @@ public:
                 buffer.offset = 0;
         }
         if (usage == Geometry::Usage::Static)
-            DEBUG("Free vertex data. [vbo=%1, bytes=%2, type=%3, refs=%4]", buffer.name, bytes, usage, buffer.refcount);
+            DEBUG("Free vertex data. [vbo=%1, bytes=%2, offset=%3, type=%4, refs=%5]", buffer.name,
+                  bytes, offset, usage, buffer.refcount);
     }
 
     void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, Geometry::Usage usage)
@@ -948,9 +952,13 @@ public:
         ASSERT(offset + bytes <= buffer.capacity);
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
+
         if (usage == Geometry::Usage::Static)
-            DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, full=%3%. type=%4]", buffer.name, bytes,
-                  (double)buffer.offset / (double)buffer.capacity, usage);
+        {
+            const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
+            DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, offset=%3, full=%4%, type=%5]", buffer.name,
+                  bytes, offset, percent_full, usage);
+        }
     }
 private:
     bool EnableIf(GLenum flag, bool on_off)
@@ -1182,6 +1190,9 @@ private:
 
         virtual void Upload(const void* data, size_t bytes, Usage usage) override
         {
+            if (data == nullptr || bytes == 0)
+                return;
+
             if ((usage != mBufferUsage) || (bytes > mBufferSize))
             {
                 if (mBufferSize)
