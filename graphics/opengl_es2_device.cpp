@@ -811,10 +811,10 @@ public:
         // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
         for (auto& buff : mBuffers)
         {
-            if (buff.usage == GL_STREAM_DRAW)
+            if (buff.usage == Geometry::Usage::Stream)
             {
                 GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
-                GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, buff.usage));
+                GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
                 buff.offset = 0;
             }
         }
@@ -847,6 +847,28 @@ public:
                 (void*)bmp.GetDataPtr()));
         bmp.FlipHorizontally();
         return bmp;
+    }
+    virtual void GetResourceStats(ResourceStats* stats) const override
+    {
+        std::memset(stats, 0, sizeof(*stats));
+        for (const auto& buffer : mBuffers)
+        {
+            if (buffer.usage == Geometry::Usage::Static)
+            {
+                stats->static_vbo_mem_alloc += buffer.capacity;
+                stats->static_vbo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == Geometry::Usage::Dynamic)
+            {
+                stats->dynamic_vbo_mem_alloc += buffer.capacity;
+                stats->dynamic_vbo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == Geometry::Usage::Stream)
+            {
+                stats->streaming_vbo_mem_alloc += buffer.capacity;
+                stats->streaming_vbo_mem_use   += buffer.offset;
+            }
+        }
     }
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
@@ -907,7 +929,7 @@ public:
         {
             auto& buffer = mBuffers[i];
             const auto available = buffer.capacity - buffer.offset;
-            if ((available >= bytes) && (buffer.usage == flag))
+            if ((available >= bytes) && (buffer.usage == usage))
             {
                 const auto offset = buffer.offset;
                 buffer.offset += bytes;
@@ -917,13 +939,13 @@ public:
         }
 
         VertexBuffer buffer;
-        buffer.usage    = flag;
+        buffer.usage    = usage;
         buffer.offset   = bytes;
         buffer.capacity = capacity;
         buffer.refcount = 1;
         GL_CALL(glGenBuffers(1, &buffer.name));
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
-        GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, buffer.usage));
+        GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, flag));
         mBuffers.push_back(buffer);
         DEBUG("Allocated new vertex buffer. [vbo=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
         return {mBuffers.size()-1, 0};
@@ -935,14 +957,14 @@ public:
         ASSERT(buffer.refcount > 0);
         buffer.refcount--;
 
-        if (buffer.usage == GL_STATIC_DRAW || buffer.usage == GL_DYNAMIC_DRAW)
+        if (buffer.usage == Geometry::Usage::Static || buffer.usage == Geometry::Usage::Dynamic)
         {
             if (buffer.refcount == 0)
                 buffer.offset = 0;
         }
         if (usage == Geometry::Usage::Static)
             DEBUG("Free vertex data. [vbo=%1, bytes=%2, offset=%3, type=%4, refs=%5]", buffer.name,
-                  bytes, offset, usage, buffer.refcount);
+                  bytes, offset, buffer.usage, buffer.refcount);
     }
 
     void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, Geometry::Usage usage)
@@ -953,11 +975,11 @@ public:
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
 
-        if (usage == Geometry::Usage::Static)
+        if (buffer.usage == Geometry::Usage::Static)
         {
             const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
             DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, offset=%3, full=%4%, type=%5]", buffer.name,
-                  bytes, offset, percent_full, usage);
+                  bytes, offset, percent_full, buffer.usage);
         }
     }
 private:
@@ -1777,8 +1799,8 @@ private:
     TextureUnits mTextureUnits;
 
     struct VertexBuffer {
-        GLenum usage = GL_NONE;
-        GLuint name  = 0;
+        Geometry::Usage usage = Geometry::Usage::Static;
+        GLuint name     = 0;
         size_t capacity = 0;
         size_t offset   = 0;
         size_t refcount = 0;

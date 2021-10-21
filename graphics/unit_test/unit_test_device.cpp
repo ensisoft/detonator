@@ -1133,7 +1133,162 @@ void main() {
         //gfx::WritePNG(bmp, "render-test-dynamic.png");
         TEST_REQUIRE(bmp == expected);
     }
+}
 
+void unit_test_buffer_allocation()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+        std::make_shared<TestContext>(10, 10));
+
+    char junk_data[512] = {0};
+
+    // static
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
+
+        // should reuse the same buffer since the data is the same.
+        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
+
+        // should reuse the same buffer since the data is less
+        foo->Upload(junk_data, sizeof(junk_data)/2, gfx::Geometry::Usage::Static);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data)); // no decrease here.
+
+        auto* bar = dev->MakeGeometry("bar");
+        bar->Upload(junk_data, sizeof(junk_data)/2, gfx::Geometry::Usage::Static);
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data) + sizeof(junk_data)/2);
+
+    }
+    dev->DeleteGeometries();
+
+    // streaming. cleared after every frame, allocations remain.
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Stream);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0); // from static geometry testing above
+
+        dev->BeginFrame();
+        dev->EndFrame();
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
+    }
+
+    dev->DeleteGeometries();
+
+    // dynamic
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0 );
+
+        // should reuse the same buffer since the amount of data is the same.
+        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
+
+        // should reuse the same buffer since the amount of data is less.
+        foo->Upload(junk_data, sizeof(junk_data)-1, gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
+
+        // grow dynamic buffer.
+        char more_junk[1024] = {0};
+        foo->Upload(more_junk, sizeof(more_junk), gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(more_junk));
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
+
+        // second geometry should be able to re-use the dynamic buffer that should
+        // be unused.
+        auto* bar = dev->MakeGeometry("bar");
+        bar->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
+
+    }
 }
 
 int test_main(int argc, char* argv[])
@@ -1152,9 +1307,10 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix3x3_uniform();
     unit_test_render_set_matrix4x4_uniform();
     unit_test_uniform_sampler_optimize_bug();
+    unit_test_render_dynamic();
 
     unit_test_clean_garbage();
 
-    unit_test_render_dynamic();
+    unit_test_buffer_allocation();
     return 0;
 }

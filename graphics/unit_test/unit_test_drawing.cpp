@@ -379,6 +379,10 @@ public:
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;
     }
+    virtual void GetResourceStats(ResourceStats* stats) const override
+    {
+
+    }
 
     const TestTexture& GetTexture(size_t index) const
     {
