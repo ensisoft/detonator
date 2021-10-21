@@ -143,7 +143,7 @@ namespace gfx
 
         // Define how the contents of the geometry object are expected
         // to be used.
-        enum Usage {
+        enum class Usage {
             // The geometry is updated once and drawn multiple times.
             Static,
             // The geometry is updated multiple times and drawn once/few times.

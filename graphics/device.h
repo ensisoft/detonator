@@ -236,6 +236,16 @@ namespace gfx
         virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const = 0;
         virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height) const = 0;
 
+        struct ResourceStats {
+            std::size_t dynamic_vbo_mem_use   = 0;
+            std::size_t dynamic_vbo_mem_alloc = 0;
+            std::size_t static_vbo_mem_use    = 0;
+            std::size_t static_vbo_mem_alloc  = 0;
+            std::size_t streaming_vbo_mem_use = 0;
+            std::size_t streaming_vbo_mem_alloc = 0;
+        };
+        virtual void GetResourceStats(ResourceStats* stats) const = 0;
+
         // Create a rendering device of the requested type.
         // Context should be a valid non null context object with the
         // right version.
