@@ -1131,7 +1131,7 @@ Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
 
     // set the vertex buffer.
     geom->SetVertexBuffer(mVertices,
-        mStatic ? Geometry::Usage::Static : Geometry::Usage::Dynamic);
+        mStatic && !editing_mode ? Geometry::Usage::Static : Geometry::Usage::Dynamic);
 
     geom->ClearDraws();
 
