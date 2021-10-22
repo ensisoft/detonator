@@ -198,6 +198,14 @@ namespace gui
             struct {
                 // nothing here yet.
             } audio;
+            struct {
+                std::size_t dynamic_vbo_mem_use   = 0;
+                std::size_t dynamic_vbo_mem_alloc = 0;
+                std::size_t static_vbo_mem_use    = 0;
+                std::size_t static_vbo_mem_alloc  = 0;
+                std::size_t streaming_vbo_mem_use = 0;
+                std::size_t streaming_vbo_mem_alloc = 0;
+            } device;
         };
         virtual bool GetStats(Stats* stats) const
         { return false; }

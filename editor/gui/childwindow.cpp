@@ -106,18 +106,7 @@ void ChildWindow::RefreshUI()
     mUI.actionZoomIn->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
     mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 
-    MainWidget::Stats stats;
-    mWidget->GetStats(&stats);
-    SetValue(mUI.statTime, QString::number(stats.time));
-    SetVisible(mUI.lblFps,    stats.graphics.valid);
-    SetVisible(mUI.lblVsync,  stats.graphics.valid);
-    SetVisible(mUI.statFps,   stats.graphics.valid);
-    SetVisible(mUI.statVsync, stats.graphics.valid);
-    if (stats.graphics.valid)
-    {
-        SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-        SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
-    }
+    UpdateStats();
 
     if (mWidget->ShouldClose())
     {
@@ -146,20 +135,7 @@ void ChildWindow::Render()
         return;
     mWidget->Render();
 
-    MainWidget::Stats stats;
-    if (mWidget->GetStats(&stats))
-    {
-        SetValue(mUI.statTime, QString::number(stats.time));
-        SetVisible(mUI.lblFps, stats.graphics.valid);
-        SetVisible(mUI.lblVsync, stats.graphics.valid);
-        SetVisible(mUI.statFps, stats.graphics.valid);
-        SetVisible(mUI.statVsync, stats.graphics.valid);
-        if (stats.graphics.valid)
-        {
-            SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-            SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
-        }
-    }
+    UpdateStats();
 }
 
 void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
@@ -337,6 +313,36 @@ void ChildWindow::closeEvent(QCloseEvent* event)
     // mainwindow will check from time to if the window object
     // should be deleted.
     mClosed = true;
+}
+
+void ChildWindow::UpdateStats()
+{
+    if (!mWidget)
+        return;
+
+    MainWidget::Stats stats;
+    mWidget->GetStats(&stats);
+    SetValue(mUI.statTime, QString::number(stats.time));
+    SetVisible(mUI.lblFps,    stats.graphics.valid);
+    SetVisible(mUI.lblVsync,  stats.graphics.valid);
+    SetVisible(mUI.statFps,   stats.graphics.valid);
+    SetVisible(mUI.statVsync, stats.graphics.valid);
+    SetVisible(mUI.statVBO,   stats.graphics.valid);
+    SetVisible(mUI.lblVBO,    stats.graphics.valid);
+    if (!stats.graphics.valid)
+        return;
+    const auto kb = 1024.0; // * 1024.0;
+    const auto vbo_use = stats.device.static_vbo_mem_use +
+                         stats.device.streaming_vbo_mem_use +
+                         stats.device.dynamic_vbo_mem_use;
+    const auto vbo_alloc = stats.device.static_vbo_mem_alloc +
+                           stats.device.streaming_vbo_mem_alloc +
+                           stats.device.dynamic_vbo_mem_alloc;
+    SetValue(mUI.statVBO, QString("%1/%2 kB")
+            .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
+
+    SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
 }
 
 } // namespace

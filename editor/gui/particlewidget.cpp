@@ -438,6 +438,13 @@ bool ParticleEditorWidget::GetStats(Stats* stats) const
     stats->graphics.valid = true;
     stats->graphics.vsync = mUI.widget->haveVSYNC();
     stats->graphics.fps   = mUI.widget->getCurrentFPS();
+    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
+    stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
+    stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;
+    stats->device.dynamic_vbo_mem_use     = dev_stats.dynamic_vbo_mem_use;
+    stats->device.streaming_vbo_mem_use   = dev_stats.streaming_vbo_mem_use;
+    stats->device.streaming_vbo_mem_alloc = dev_stats.streaming_vbo_mem_alloc;
     return true;
 }
 

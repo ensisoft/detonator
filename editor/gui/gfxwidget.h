@@ -80,6 +80,13 @@ namespace gui
         { return *mCustomGraphicsDevice; }
         gfx::Painter& getPainter() const
         { return *mCustomGraphicsPainter; }
+        gfx::Device::ResourceStats getDeviceResourceStats() const
+        {
+            gfx::Device::ResourceStats stats;
+            if (mCustomGraphicsDevice)
+                mCustomGraphicsDevice->GetResourceStats(&stats);
+            return stats;
+        }
 
         void setClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
@@ -182,6 +189,8 @@ namespace gui
         { return mWindow->getDevice(); }
         gfx::Painter& getPainter() const
         { return mWindow->getPainter(); }
+        gfx::Device::ResourceStats getDeviceResourceStats() const
+        { return mWindow->getDeviceResourceStats(); }
 
         void setClearColor(const gfx::Color4f& color)
         { mWindow->setClearColor(color); }

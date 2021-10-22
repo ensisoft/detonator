@@ -50,7 +50,33 @@
         </spacer>
        </item>
        <item>
+        <widget class="QLabel" name="lblVBO">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>VBO</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="statVBO">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Time (s)</string>
          </property>
@@ -80,6 +106,9 @@
        </item>
        <item>
         <widget class="QLabel" name="lblFps">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>FPS</string>
          </property>
@@ -109,6 +138,9 @@
        </item>
        <item>
         <widget class="QLabel" name="lblVsync">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>VSYNC (F3)</string>
          </property>
@@ -889,7 +921,7 @@
      <x>0</x>
      <y>0</y>
      <width>1459</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
