@@ -401,8 +401,11 @@ void ShapeWidget::on_actionClear_triggered()
 
 void ShapeWidget::on_blueprints_currentIndexChanged(int)
 {
-    auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
     mBlueprint.reset();
+    if (mUI.blueprints->currentIndex() == -1)
+        return;
+
+    auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
     mBlueprint = gfx::CreateMaterialInstance(klass);
 }
 
