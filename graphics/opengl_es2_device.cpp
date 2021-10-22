@@ -441,6 +441,51 @@ public:
         myprog->SetLastUseFrameNumber(mFrameNumber);
         mygeom->SetLastUseFrameNumber(mFrameNumber);
 
+        // start using this program
+        GL_CALL(glUseProgram(myprog->GetName()));
+
+        // IMPORTANT !
+        // the program doesn't set the uniforms directly but instead of compares the uniform
+        // value against a cached hash in order to elide redundant uniform sets.
+        // However this means that if a uniform value is set but the draw that uses the
+        // program doesn't actually draw anything doing an early return here would mean
+        // that the uniform state setting would be skipped. This would later lead to
+        // incorrect assumption about the state of the program. I.e. using the program
+        // later would not set the uniform value since the cached hash would incorrectly
+        // indicate that the actual value has already been set in the program!
+        // Easiest fix for this right now is to simply do the uniform setting first (and always)
+        // even if the geometry is "empty", (i.e. no vertex data/draw commands).
+
+        // set program uniforms
+        size_t num_uniforms = myprog->GetNumUniformsSet();
+        for (size_t i=0; i<num_uniforms; ++i)
+        {
+            const auto& uniform = myprog->GetSetUniform(i);
+            const auto& value   = uniform.value;
+            const auto location = uniform.location;
+            if (const auto* ptr = std::get_if<int>(&value))
+                GL_CALL(glUniform1i(location, *ptr));
+            else if (const auto* ptr = std::get_if<float>(&value))
+                GL_CALL(glUniform1f(location, *ptr));
+            else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
+                GL_CALL(glUniform2i(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec2>(&value))
+                GL_CALL(glUniform2f(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec3>(&value))
+                GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
+            else if (const auto* ptr = std::get_if<glm::vec4>(&value))
+                GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
+            else if (const auto* ptr = std::get_if<Color4f>(&value))
+                GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix2>(&value))
+                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix3>(&value))
+                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
+            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix4>(&value))
+                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, (const float*)&ptr->s));
+            else BUG("Unhandled shader program uniform type.");
+        }
+
         const auto buffer_byte_size = mygeom->GetByteSize();
         if (buffer_byte_size == 0)
             return;
@@ -525,38 +570,7 @@ public:
             case Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
         }
 
-        // start using this program
-        GL_CALL(glUseProgram(myprog->GetName()));
 
-        // set program uniforms
-        size_t num_uniforms = myprog->GetNumUniformsSet();
-        for (size_t i=0; i<num_uniforms; ++i)
-        {
-            const auto& uniform = myprog->GetSetUniform(i);
-            const auto& value   = uniform.value;
-            const auto location = uniform.location;
-            if (const auto* ptr = std::get_if<int>(&value))
-                GL_CALL(glUniform1i(location, *ptr));
-            else if (const auto* ptr = std::get_if<float>(&value))
-                GL_CALL(glUniform1f(location, *ptr));
-            else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
-                GL_CALL(glUniform2i(location, ptr->x, ptr->y));
-            else if (const auto* ptr = std::get_if<glm::vec2>(&value))
-                GL_CALL(glUniform2f(location, ptr->x, ptr->y));
-            else if (const auto* ptr = std::get_if<glm::vec3>(&value))
-                GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
-            else if (const auto* ptr = std::get_if<glm::vec4>(&value))
-                GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
-            else if (const auto* ptr = std::get_if<Color4f>(&value))
-                GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix2>(&value))
-                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix3>(&value))
-                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix4>(&value))
-                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, (const float*)&ptr->s));
-            else BUG("Unhandled shader program uniform type.");
-        }
 
         // set program texture bindings
         size_t num_textures = myprog->GetNumSamplersSet();
