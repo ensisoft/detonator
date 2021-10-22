@@ -83,6 +83,20 @@ private:
     std::unique_ptr<wdk::Config>  mConfig;
 };
 
+gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* fssrc)
+{
+    auto* vs = dev.MakeShader("vert");
+    auto* fs = dev.MakeShader("frag");
+    TEST_REQUIRE(vs->CompileSource(vssrc));
+    TEST_REQUIRE(fs->CompileSource(fssrc));
+    std::vector<const gfx::Shader*> shaders;
+    shaders.push_back(vs);
+    shaders.push_back(fs);
+
+    auto* prog = dev.MakeProgram("prog");
+    TEST_REQUIRE(prog->Build(shaders));
+    return prog;
+}
 
 
 void unit_test_device()
@@ -1291,6 +1305,84 @@ void unit_test_buffer_allocation()
     }
 }
 
+void unit_test_empty_draw_lost_uniform_bug()
+{
+    // if a uniform is set in the program and the program
+    // is used to draw but the geometry is "empty" the
+    // uniform doesn't get set to the program but the hash
+    // value is kept. On the next draw if the same program
+    // is used with the same uniform value the cached uniform
+    // hash value will cause the uniform set to be skipped.
+    // thus resulting in incorrect state!
+
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+                                   std::make_shared<TestContext>(10, 10));
+
+
+    auto* geom = dev->MakeGeometry("geom");
+    // geometry doesn't have any actual vertex data!
+
+    const char* fssrc =
+            R"(#version 100
+precision mediump float;
+uniform vec4 kColor;
+void main() {
+  gl_FragColor = kColor;
+})";
+
+    const char* vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+
+    prog->SetUniform("kColor", gfx::Color::HotPink);
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    // this doesn't actually draw anything (and it cannot draw) because
+    // there's no vertex data that has been put in the geometry.
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // now set the actual vertex geometry
+    const gfx::Vertex verts[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    // draw
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+
+    // set color uniform again.
+    prog->SetUniform("kColor", gfx::Color::HotPink);
+
+    dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // this has alpha in it.
+    const auto& bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.Compare(gfx::Color::HotPink));
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1312,5 +1404,7 @@ int test_main(int argc, char* argv[])
     unit_test_clean_garbage();
 
     unit_test_buffer_allocation();
+
+    unit_test_empty_draw_lost_uniform_bug();
     return 0;
 }
