@@ -99,6 +99,7 @@ namespace gui
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual void closeEvent(QCloseEvent* event) override;
+        void UpdateStats();
     private:
         Ui::ChildWindow mUI;
     private:

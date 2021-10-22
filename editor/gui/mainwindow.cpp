@@ -742,24 +742,7 @@ void MainWindow::iterateGameLoop()
         mPlayWindow->RunGameLoopOnce();
     }
 
-    // show stats for the current tab if any
-    if (mCurrentWidget)
-    {
-        MainWidget::Stats stats;
-        if (mCurrentWidget->GetStats(&stats))
-        {
-            SetValue(mUI.statTime, QString::number(stats.time));
-            SetVisible(mUI.lblFps,    stats.graphics.valid);
-            SetVisible(mUI.lblVsync,  stats.graphics.valid);
-            SetVisible(mUI.statFps,   stats.graphics.valid);
-            SetVisible(mUI.statVsync, stats.graphics.valid);
-            if (stats.graphics.valid)
-            {
-                SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-                SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
-            }
-         }
-    }
+    UpdateStats();
 
     GfxWindow::EndFrame();
     GfxWindow::CleanGarbage();
@@ -833,6 +816,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
     SetValue(mUI.statTime, QString(""));
     SetValue(mUI.statFps,  QString(""));
     SetValue(mUI.statVsync, QString(""));
+    SetValue(mUI.statVBO, QString(""));
 
     if (index != -1)
     {
@@ -1922,20 +1906,7 @@ void MainWindow::RefreshUI()
     {
         mUI.actionZoomIn->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomIn));
         mUI.actionZoomOut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
-        MainWidget::Stats stats;
-        if (mCurrentWidget->GetStats(&stats))
-        {
-            SetValue(mUI.statTime, QString::number(stats.time));
-            SetVisible(mUI.lblFps, stats.graphics.valid);
-            SetVisible(mUI.lblVsync, stats.graphics.valid);
-            SetVisible(mUI.statFps, stats.graphics.valid);
-            SetVisible(mUI.statVsync, stats.graphics.valid);
-            if (stats.graphics.valid)
-            {
-                SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-                SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
-            }
-        }
+        UpdateStats();
     }
 }
 
@@ -2065,18 +2036,7 @@ void MainWindow::RefreshWidget()
     if (widget != mCurrentWidget)
         return;
 
-    MainWidget::Stats stats;
-    widget->GetStats(&stats);
-    SetValue(mUI.statTime, QString::number(stats.time));
-    SetVisible(mUI.lblFps,    stats.graphics.valid);
-    SetVisible(mUI.lblVsync,  stats.graphics.valid);
-    SetVisible(mUI.statFps,   stats.graphics.valid);
-    SetVisible(mUI.statVsync, stats.graphics.valid);
-    if (!stats.graphics.valid)
-        return;
-
-    SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+    UpdateStats();
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -2442,6 +2402,36 @@ void MainWindow::ImportFiles(const QStringList& files)
         return;
 
     mWorkspace->ImportFilesAsResource(files);
+}
+
+void MainWindow::UpdateStats()
+{
+    if (!mCurrentWidget)
+        return;
+
+    MainWidget::Stats stats;
+    mCurrentWidget->GetStats(&stats);
+    SetValue(mUI.statTime, QString::number(stats.time));
+    SetVisible(mUI.lblFps,    stats.graphics.valid);
+    SetVisible(mUI.lblVsync,  stats.graphics.valid);
+    SetVisible(mUI.statFps,   stats.graphics.valid);
+    SetVisible(mUI.statVsync, stats.graphics.valid);
+    SetVisible(mUI.statVBO,   stats.graphics.valid);
+    SetVisible(mUI.lblVBO,    stats.graphics.valid);
+    if (!stats.graphics.valid)
+        return;
+    const auto kb = 1024.0; // * 1024.0;
+    const auto vbo_use = stats.device.static_vbo_mem_use +
+                         stats.device.streaming_vbo_mem_use +
+                         stats.device.dynamic_vbo_mem_use;
+    const auto vbo_alloc = stats.device.static_vbo_mem_alloc +
+                           stats.device.streaming_vbo_mem_alloc +
+                           stats.device.dynamic_vbo_mem_alloc;
+    SetValue(mUI.statVBO, QString("%1/%2 kB")
+            .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
+
+    SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
+    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
 }
 
 } // namespace

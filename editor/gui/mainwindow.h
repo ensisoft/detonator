@@ -176,6 +176,7 @@ namespace gui
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         void ShowHelpWidget();
         void ImportFiles(const QStringList& files);
+        void UpdateStats();
 
     private:
         virtual bool event(QEvent* event)  override;
