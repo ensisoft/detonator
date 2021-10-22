@@ -477,7 +477,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
-    gfx::ColorClass color;
+    static gfx::ColorClass color;
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     painter.Draw(gfx::Polygon(mPolygon), view, color);
@@ -517,14 +517,15 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Resize(width-2, height-2);
     view.MoveTo(1, 1);
 
-    gfx::PolygonClass poly;
     gfx::PolygonClass::DrawCommand cmd;
     cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
     cmd.offset = 0;
     cmd.count  = points.size();
-    poly.AddVertices(MakeVerts(points, width, height));
-    poly.AddDrawCommand(cmd);
-    painter.Draw(gfx::Polygon(poly), view, color);
+    mCurrentDraw.ClearDrawCommands();
+    mCurrentDraw.ClearVertices();
+    mCurrentDraw.AddVertices(MakeVerts(points, width, height));
+    mCurrentDraw.AddDrawCommand(cmd);
+    painter.Draw(gfx::Polygon(mCurrentDraw), view, color);
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
