@@ -1183,6 +1183,44 @@ private:
     float mTime = 0.0f;
 };
 
+class TextRectScaleTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto width  = 600.0f + 600 * std::sin(mAngle);
+        const auto height = 600.0f + 600 * std::sin(mAngle);
+
+        gfx::FRect rect;
+        rect.Resize(width, height);
+        rect.Move(1024.0f/2, 768.0f/2);
+        rect.Translate(-width/2, -height/2);
+
+        gfx::FillRect(painter, rect, gfx::Color::DarkGray);
+        gfx::DrawTextRect(painter,
+            "Lorem ipsum dolor sit amet, consectetur adipiscing\n"
+            "elit, sed do eiusmod tempor incididunt ut labore et\n"
+            "dolore magna aliqua. Ut enim ad minim veniam, quis\n"
+            "nostrud exercitation ullamco laboris nisi ut aliquip\n"
+            "ex ea commodo consequat.",
+            "fonts/Cousine-Regular.ttf", 20,
+            rect,
+            gfx::Color::Black);
+    }
+    virtual std::string GetName() const override
+    { return "TextRectScaleTest"; }
+
+    virtual void Update(float dt) override
+    {
+        // full circle in 2s
+        const auto angular_velo = math::Pi;
+        mAngle += (angular_velo * dt);
+    }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+    float mAngle = 0.0f;
+};
 
 class TextAlignTest : public GraphicsTest
 {
@@ -1602,6 +1640,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new TextAlignTest);
+    tests.emplace_back(new TextRectScaleTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapeTest<gfx::Arrow>("ArrowShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::Capsule>("CapsuleShapeTest"));
