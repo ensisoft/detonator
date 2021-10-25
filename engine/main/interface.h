@@ -343,6 +343,12 @@ namespace engine
         // Statistics collected/provided by the app/game.
         struct Stats {
             double total_game_time = 0.0;
+            std::size_t dynamic_vbo_mem_use   = 0;
+            std::size_t dynamic_vbo_mem_alloc = 0;
+            std::size_t static_vbo_mem_use    = 0;
+            std::size_t static_vbo_mem_alloc  = 0;
+            std::size_t streaming_vbo_mem_use = 0;
+            std::size_t streaming_vbo_mem_alloc = 0;
         };
         // Get the current statistics collected by the app implementation.
         // Returns false if not available.

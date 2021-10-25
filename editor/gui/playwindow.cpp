@@ -552,6 +552,15 @@ void PlayWindow::RunGameLoopOnce()
         if (mEngine->GetStats(&stats))
         {
             SetValue(mUI.gameTime, stats.total_game_time);
+            const auto kb = 1024.0; // * 1024.0;
+            const auto vbo_use = stats.static_vbo_mem_use +
+                                 stats.streaming_vbo_mem_use +
+                                 stats.dynamic_vbo_mem_use;
+            const auto vbo_alloc = stats.static_vbo_mem_alloc +
+                                   stats.streaming_vbo_mem_alloc +
+                                   stats.dynamic_vbo_mem_alloc;
+            SetValue(mUI.statVBO, QString("%1/%2 kB")
+                    .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
         }
 
         mNumFrames++;
