@@ -434,7 +434,16 @@ public:
     }
     virtual bool GetStats(Stats* stats) const override
     {
-        stats->total_game_time = mGameTimeTotal;
+        gfx::Device::ResourceStats rs;
+        mDevice->GetResourceStats(&rs);
+
+        stats->total_game_time         = mGameTimeTotal;
+        stats->static_vbo_mem_use      = rs.static_vbo_mem_use;
+        stats->static_vbo_mem_alloc    = rs.static_vbo_mem_alloc;
+        stats->dynamic_vbo_mem_alloc   = rs.dynamic_vbo_mem_alloc;
+        stats->dynamic_vbo_mem_use     = rs.dynamic_vbo_mem_use;
+        stats->streaming_vbo_mem_alloc = rs.streaming_vbo_mem_alloc;
+        stats->streaming_vbo_mem_use   = rs.streaming_vbo_mem_use;
         return true;
     }
     virtual void TakeScreenshot(const std::string& filename) const override
