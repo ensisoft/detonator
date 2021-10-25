@@ -1401,7 +1401,7 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
                 { {1.0f, -1.0f}, {1.0f, 1.0f} },
                 { {1.0f,  0.0f}, {1.0f, 0.0f} }
             };
-            geom = device.MakeGeometry("Rectangle");
+            geom = device.MakeGeometry("BlockCursor");
             geom->SetVertexBuffer(verts, 6);
             geom->AddDrawCmd(Geometry::DrawType::Triangles);
         }
