@@ -603,7 +603,7 @@ Workspace::Workspace(const QString& dir)
     // It is used as the initial material when user hasn't selected
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
-    auto checkerboard = gfx::CreateMaterialFromTexture("app://textures/Checkerboard.png");
+    auto checkerboard = gfx::CreateMaterialClassFromTexture("app://textures/Checkerboard.png");
     checkerboard.SetId("_checkerboard");
     mResources.emplace_back(new MaterialResource(std::move(checkerboard), "Checkerboard"));
 
@@ -612,7 +612,7 @@ Workspace::Workspace(const QString& dir)
     for (const auto& val : values)
     {
         const std::string color_name(magic_enum::enum_name(val));
-        auto color = gfx::CreateMaterialFromColor(gfx::Color4f(val));
+        auto color = gfx::CreateMaterialClassFromColor(gfx::Color4f(val));
         color.SetId("_" + color_name);
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }

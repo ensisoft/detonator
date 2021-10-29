@@ -1637,15 +1637,14 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         if (dummy)
         {
-            gfx::TextureMap2DClass dummy;
-            dummy.SetTexture(gfx::LoadTextureFromFile("app://textures/Checkerboard.png"));
-            painter.Draw(*drawable, transform, dummy);
+            static auto dummy = gfx::CreateMaterialClassFromTexture("app://textures/Checkerboard.png");
+            painter.Draw(*drawable, transform, gfx::MaterialClassInst(dummy));
         }
         ShowMessage(message, painter, width, height);
         return;
     }
 
-    gfx::Material material(mMaterial);
+    gfx::MaterialClassInst material(mMaterial);
     material.SetRuntime(mTime);
     painter.Draw(*drawable, transform, material);
 }

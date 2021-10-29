@@ -441,7 +441,7 @@ void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
         return;
 
     SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
-    if (mBlueprint && (*mBlueprint)->GetId() == resource->GetIdUtf8())
+    if (mBlueprint && mBlueprint->GetClassId() == resource->GetIdUtf8())
         mBlueprint.reset();
 }
 
@@ -487,7 +487,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     static gfx::ColorClass color;
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    painter.Draw(gfx::Polygon(mPolygon), view, color);
+    painter.Draw(gfx::Polygon(mPolygon), view, gfx::MaterialClassInst(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -532,7 +532,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     mCurrentDraw.ClearVertices();
     mCurrentDraw.AddVertices(MakeVerts(points, width, height));
     mCurrentDraw.AddDrawCommand(cmd);
-    painter.Draw(gfx::Polygon(mCurrentDraw), view, color);
+    painter.Draw(gfx::Polygon(mCurrentDraw), view, gfx::MaterialClassInst(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)

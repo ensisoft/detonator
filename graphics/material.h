@@ -1377,17 +1377,7 @@ namespace gfx
     public:
         using Uniform    = MaterialClass::Uniform;
         using UniformMap = MaterialClass::UniformMap;
-
-        // Create new material instance based on the given material class.
-        Material(const std::shared_ptr<const MaterialClass>& klass, double time = 0.0)
-            : mClass(klass)
-            , mRuntime(time)
-        {}
-        Material(const MaterialClass& klass, double time = 0.0)
-        {
-            mClass   = klass.Copy();
-            mRuntime = time;
-        }
+        virtual ~Material() = default;
 
         struct Environment {
             // true if running in an "editing mode", which means that even
@@ -1400,9 +1390,55 @@ namespace gfx
             using Blending = Device::State::BlendOp;
             Blending blending = Blending::None;
         };
+        // Apply the dynamic material properties to the given program object
+        // and set the rasterizer state.
+        // Dynamic properties are the properties that can change between
+        // one material instance to another even when the underlying
+        // type/material class is the same.
+        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const = 0;
+        // Apply the static state, i.e. the material state that doesn't change
+        // during the material's lifetime and need to be only set once.
+        virtual void ApplyStaticState(Device& device, Program& program) const = 0;
+        // Create the shader for this material on the given device.
+        // Returns the new shader object or nullptr if the shader failed to compile.
+        virtual Shader* GetShader(Device& device) const = 0;
+        // Get the program ID for the material that is used to map the
+        // material to a device specific program object.
+        virtual std::string GetProgramId() const = 0;
+        // Get the material class id (if any).
+        virtual std::string GetClassId() const = 0;
+        // Update material time by a delta value (in seconds).
+        virtual void Update(float dt) = 0;
+        // Set the material instance time to a specific time value.
+        virtual void SetRuntime(float runtime) = 0;
+        // Set material instance uniform.
+        virtual void SetUniform(const std::string& name, const Uniform& value) = 0;
+        // Set material instance uniform.
+        virtual void SetUniform(const std::string& name, Uniform&& value) = 0;
+        // Set all material uniforms at once.
+        virtual void SetUniforms(const UniformMap& uniforms) = 0;
+        // Clear away all material instance uniforms.
+        virtual void ResetUniforms() = 0;
+    private:
+    };
+
+    // Material instance that represents an instance of some material class.
+    class MaterialClassInst : public Material
+    {
+    public:
+        // Create new material instance based on the given material class.
+        MaterialClassInst(const std::shared_ptr<const MaterialClass>& klass, double time = 0.0)
+            : mClass(klass)
+            , mRuntime(time)
+        {}
+        MaterialClassInst(const MaterialClass& klass, double time = 0.0)
+        {
+            mClass   = klass.Copy();
+            mRuntime = time;
+        }
 
         // Apply the material properties to the given program object and set the rasterizer state.
-        void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override
         {
             MaterialClass::State state;
             state.editing_mode  = env.editing_mode;
@@ -1412,23 +1448,25 @@ namespace gfx
             mClass->ApplyDynamicState(state, device, program);
             raster.blending = state.blending;
         }
-        // Update material time by a delta value (in seconds).
-        void Update(float dt)
+        virtual void ApplyStaticState(Device& device, Program& program) const override
+        { mClass->ApplyStaticState(device, program); }
+        virtual Shader* GetShader(Device& device) const override
+        { return mClass->GetShader(device); }
+        virtual std::string GetProgramId() const override
+        { return mClass->GetProgramId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual void Update(float dt) override
         { mRuntime += dt; }
-
-        // Set the material instance time to a specific time value.
-        void SetRuntime(float runtime)
+        virtual void SetRuntime(float runtime) override
         { mRuntime = runtime; }
-        // Set material instance uniform.
-        void SetUniform(const std::string& name, const Uniform& value)
+        virtual void SetUniform(const std::string& name, const Uniform& value) override
         { mUniforms[name] = value; }
-        // Set material instance uniform.
-        void SetUniform(const std::string& name, Uniform&& value)
+        virtual void SetUniform(const std::string& name, Uniform&& value) override
         { mUniforms[name] = std::move(value); }
-        // Clear away all material instance uniforms.
-        void ResetUniforms()
+        virtual void ResetUniforms()  override
         { mUniforms.clear(); }
-        void SetUniforms(const UniformMap& uniforms)
+        virtual void SetUniforms(const UniformMap& uniforms) override
         { mUniforms = uniforms; }
 
         double GetRuntime() const
@@ -1450,18 +1488,31 @@ namespace gfx
     };
 
     // Create material based on a simple color only.
-    ColorClass CreateMaterialFromColor(const Color4f& color);
+    ColorClass CreateMaterialClassFromColor(const Color4f& color);
     // Create a material based on a 2D texture map.
-    TextureMap2DClass CreateMaterialFromTexture(const std::string& uri);
+    TextureMap2DClass CreateMaterialClassFromTexture(const std::string& uri);
     // Create a sprite from multiple textures.
-    SpriteClass CreateMaterialFromSprite(const std::initializer_list<std::string>& textures);
+    SpriteClass CreateMaterialClassFromSprite(const std::initializer_list<std::string>& textures);
     // Create a sprite from multiple textures.
-    SpriteClass CreateMaterialFromSprite(const std::vector<std::string>& textures);
+    SpriteClass CreateMaterialClassFromSprite(const std::vector<std::string>& textures);
     // Create a sprite from a texture atlas where all the sprite frames
     // are packed inside the single texture.
-    SpriteClass CreateMaterialFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
+    SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
     // Create a material class from a text buffer.
-    TextureMap2DClass CreateMaterialFromText(const TextBuffer& text);
+    TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text);
+
+    inline MaterialClassInst CreateMaterialFromColor(const Color4f& color)
+    { return MaterialClassInst(CreateMaterialClassFromColor(color)); }
+    inline MaterialClassInst CreateMaterialFromTexture(const std::string& uri)
+    { return MaterialClassInst(CreateMaterialClassFromTexture(uri)); }
+    inline MaterialClassInst CreateMaterialFromSprite(const std::initializer_list<std::string>& textures)
+    { return MaterialClassInst(CreateMaterialClassFromSprite(textures)); }
+    inline MaterialClassInst CreateMaterialFromSprite(const std::vector<std::string>& textures)
+    { return MaterialClassInst(CreateMaterialClassFromSprite(textures)); }
+    inline MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
+    { return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(texture, frames)); }
+    inline MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
+    { return MaterialClassInst(CreateMaterialClassFromText(text)); }
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);

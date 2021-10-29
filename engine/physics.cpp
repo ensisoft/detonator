@@ -294,9 +294,10 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view)
 {
-    auto mat = gfx::CreateMaterialFromColor(gfx::Color::HotPink);
-    mat.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    mat.SetBaseAlpha(0.6);
+    static auto klass = gfx::CreateMaterialClassFromColor(gfx::Color::HotPink);
+    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    klass.SetBaseAlpha(0.6);
+    static gfx::MaterialClassInst mat(klass);
 
     view.Push();
     view.Scale(mScale);

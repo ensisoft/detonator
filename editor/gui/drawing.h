@@ -154,8 +154,8 @@ private:
         // the mask object is not selected or when there's no drawable item.
         if ((is_mask || !drawable) && !is_selected && !is_playing)
         {
-            static const auto yellow = std::make_shared<gfx::Material>(
-                    gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+            static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
+                    gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
             static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
             // visualize it.
             trans.Push(node->GetModelTransform());
@@ -172,7 +172,8 @@ private:
         if (!is_selected)
             return;
 
-        static const auto green  = std::make_shared<gfx::Material>(gfx::CreateMaterialFromColor(gfx::Color::Green));
+        static const auto green  = std::make_shared<gfx::MaterialClassInst>(
+                gfx::CreateMaterialClassFromColor(gfx::Color::Green));
         static const auto rect   = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
         static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
         const auto& size = node->GetSize();

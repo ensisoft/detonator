@@ -108,11 +108,11 @@ public:
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
     {
         if (id == "pink")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
         else if (id == "red")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialFromColor(gfx::Color::Red));
+            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
         else if (id == "green")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialFromColor(gfx::Color::Green));
+            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
         else if (id == "red-green")
         {
             gfx::RgbBitmap bmp;
