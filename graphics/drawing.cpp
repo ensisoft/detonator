@@ -29,7 +29,7 @@
 #include "graphics/text.h"
 
 namespace {
-gfx::Material MakeMaterial(const gfx::Color4f& color)
+gfx::MaterialClassInst MakeMaterial(const gfx::Color4f& color)
 {
     static std::shared_ptr<gfx::ColorClass> klass;
     if (!klass)
@@ -40,7 +40,7 @@ gfx::Material MakeMaterial(const gfx::Color4f& color)
     klass->SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
-    return gfx::Material(klass);
+    return gfx::MaterialClassInst(klass);
 }
 } // namespace
 
@@ -116,7 +116,7 @@ void DrawTextRect(Painter& painter,
             return;
     }
 
-    Material material(klass);
+    MaterialClassInst material(klass);
     material.SetUniform("kBaseColor", color);
 
     Transform t;

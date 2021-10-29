@@ -240,7 +240,7 @@ void GfxWindow::paintGL()
         gfx::Rectangle rect(gfx::Drawable::Style::Outline, 2.0f);
         gfx::Transform transform;
         transform.Resize(width(), height());
-        mCustomGraphicsPainter->Draw(rect, transform, *material);
+        mCustomGraphicsPainter->Draw(rect, transform, gfx::MaterialClassInst(material));
     }
 
     mContext->swapBuffers(this);

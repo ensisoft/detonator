@@ -2072,14 +2072,14 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
 }
 
 
-ColorClass CreateMaterialFromColor(const Color4f& color)
+ColorClass CreateMaterialClassFromColor(const Color4f& color)
 {
     ColorClass material;
     material.SetBaseColor(color);
     return material;
 }
 
-TextureMap2DClass CreateMaterialFromTexture(const std::string& uri)
+TextureMap2DClass CreateMaterialClassFromTexture(const std::string& uri)
 {
     TextureMap2DClass material;
     material.SetTexture(LoadTextureFromFile(uri));
@@ -2087,7 +2087,7 @@ TextureMap2DClass CreateMaterialFromTexture(const std::string& uri)
     return material;
 }
 
-SpriteClass CreateMaterialFromSprite(const std::initializer_list<std::string>& textures)
+SpriteClass CreateMaterialClassFromSprite(const std::initializer_list<std::string>& textures)
 {
     SpriteClass material;
     for (const auto& texture : textures)
@@ -2097,7 +2097,7 @@ SpriteClass CreateMaterialFromSprite(const std::initializer_list<std::string>& t
     return material;
 }
 
-SpriteClass CreateMaterialFromSprite(const std::vector<std::string>& textures)
+SpriteClass CreateMaterialClassFromSprite(const std::vector<std::string>& textures)
 {
     SpriteClass material;
     for (const auto& texture : textures)
@@ -2107,7 +2107,7 @@ SpriteClass CreateMaterialFromSprite(const std::vector<std::string>& textures)
     return material;
 }
 
-SpriteClass CreateMaterialFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
+SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
 {
     SpriteClass material;
     for (size_t i=0; i<frames.size(); ++i)
@@ -2119,7 +2119,7 @@ SpriteClass CreateMaterialFromSpriteAtlas(const std::string& texture, const std:
     return material;
 }
 
-TextureMap2DClass CreateMaterialFromText(const TextBuffer& text)
+TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text)
 {
     TextureMap2DClass material;
     material.SetTexture(CreateTextureFromText(text));
@@ -2129,11 +2129,11 @@ TextureMap2DClass CreateMaterialFromText(const TextBuffer& text)
 
 std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)
 {
-    return std::make_unique<Material>(klass);
+    return std::make_unique<MaterialClassInst>(klass);
 }
 
 std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass)
 {
-    return std::make_unique<Material>(klass);
+    return std::make_unique<MaterialClassInst>(klass);
 }
 } // namespace

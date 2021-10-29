@@ -166,7 +166,7 @@ public:
         state.bWriteColor   = false;
         state.blending      = Device::State::BlendOp::None;
 
-        Material mask_material = CreateMaterialFromColor(gfx::Color::White);
+        MaterialClassInst mask_material(CreateMaterialFromColor(gfx::Color::White));
         // do the masking pass
         for (const auto& mask : mask_list)
         {
@@ -293,14 +293,14 @@ public:
 private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
-        const std::string& name = drawable.GetId() + "/" + material->GetProgramId();
+        const std::string& name = drawable.GetId() + "/" + material.GetProgramId();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {
             Shader* drawable_shader = drawable.GetShader(*mDevice);
             if (!drawable_shader || !drawable_shader->IsValid())
                 return nullptr;
-            Shader* material_shader = material->GetShader(*mDevice);
+            Shader* material_shader = material.GetShader(*mDevice);
             if (!material_shader || !material_shader->IsValid())
                 return nullptr;
 
@@ -311,7 +311,7 @@ private:
             prog->Build(shaders);
             if (prog->IsValid())
             {
-                material->ApplyStaticState(*mDevice, *prog);
+                material.ApplyStaticState(*mDevice, *prog);
             }
         }
         if (prog->IsValid())

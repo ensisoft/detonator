@@ -724,7 +724,7 @@ void UIPainter::DeleteMaterialInstanceByClassId(const std::string& id)
     for (auto it = mMaterials.begin(); it != mMaterials.end();)
     {
         gfx::Material* material = it->second.get();
-        if (!material || (*material)->GetId() != id)
+        if (!material || material->GetClassId() != id)
         {
             ++it;
             continue;

@@ -652,7 +652,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // get the material based on the selection in the materials combobox
     const std::string& id = GetItemId(mUI.materials);
-    if (!mMaterial || (*mMaterial)->GetId() != id)
+    if (!mMaterial || mMaterial->GetClassId() != id)
     {
         auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.materials));
         mMaterial  = gfx::CreateMaterialInstance(klass);
@@ -700,7 +700,7 @@ void ParticleEditorWidget::ResourceUpdated(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {
-        if (mMaterial && (*mMaterial)->GetId() == resource->GetIdUtf8())
+        if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
             mMaterial.reset();
     }
 }
@@ -710,7 +710,7 @@ void ParticleEditorWidget::ResourceToBeDeleted(const app::Resource* resource)
     if (resource->GetType() == app::Resource::Type::Material)
     {
         SetList(mUI.materials, mWorkspace->ListAllMaterials());
-        if (mMaterial && (*mMaterial)->GetId() == resource->GetIdUtf8())
+        if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
         {
             mMaterial.reset();
             SetValue(mUI.materials, QString("White"));

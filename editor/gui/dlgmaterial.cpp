@@ -115,7 +115,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
         rect.Resize(BoxSize, BoxSize);
         rect.Move(xpos, ypos);
         rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
-        gfx::Material material(klass);
+        gfx::MaterialClassInst material(klass);
         material.SetRuntime(time_milliseconds / 1000.0);
         gfx::FillRect(painter, rect, material);
 
