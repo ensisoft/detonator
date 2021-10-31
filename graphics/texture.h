@@ -121,11 +121,15 @@ namespace gfx
         virtual unsigned GetHeight() const = 0;
         // Get the texture format.
         virtual Format GetFormat() const = 0;
-        // Enable or disable this texture from being garbage collected.
-        // When this is enabled the texture may be deleted if it goes
-        // unused long enough.
-        // The default state is false. I.e. no garbage collection.
-        virtual void EnableGarbageCollection(bool gc) = 0;
+        // Set the hash value that identifies the data.
+        virtual void SetContentHash(size_t hash) = 0;
+        // Get the hash value that was used in the latest data upload.
+        virtual size_t GetContentHash() const = 0;
+        // Set a flag indicating whether the texture is transient
+        // or not. Transient textures are removed after some
+        // time and only exist temporarily. Currently used just
+        // to render text.
+        virtual void SetTransient(bool on_off) = 0;
     protected:
     private:
     };

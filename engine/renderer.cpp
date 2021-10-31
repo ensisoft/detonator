@@ -312,12 +312,9 @@ void Renderer::DrawEntity(const EntityType& entity,
                     buffer.AddText(std::move(text_and_style));
 
                     // setup material to shade text.
-                    auto klass = std::make_shared<gfx::TextureMap2DClass>();
-                    klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-                    klass->SetBaseColor(text->GetTextColor());
-                    klass->SetTexture(CreateTextureFromText(std::move(buffer)));
-                    klass->EnableGC(true); // enable gc
-                    paint_node.material = gfx::CreateMaterialInstance(klass);
+                    auto mat = gfx::CreateMaterialInstance(std::move(buffer));
+                    mat->SetColor(text->GetTextColor());
+                    paint_node.material = std::move(mat);
                     paint_node.material_class_id = material;
                 }
                 bool visible_now = true;

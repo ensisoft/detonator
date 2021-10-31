@@ -2333,7 +2333,6 @@
       },
       "fps": 5.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "rrmZfWe97e",
       "particle_action": "None",
       "rect_name0": "",
@@ -2429,7 +2428,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "4IluygNgeR",
       "particle_action": "None",
       "rect": {
@@ -2473,7 +2471,6 @@
         "r": 1.0
       },
       "gamma": 0.800000011920929,
-      "gc": false,
       "id": "nQUmTOnClw",
       "particle_action": "None",
       "rect": {
@@ -2517,7 +2514,6 @@
         "r": 0.3687953054904938
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "lOfMr3YBtI",
       "particle_action": "None",
       "rect": {
@@ -2563,7 +2559,6 @@
       },
       "fps": 30.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "TNyQSW6bB6",
       "particle_action": "None",
       "rect_name0": "",
@@ -2805,7 +2800,6 @@
       },
       "fps": 30.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "1lANs9A0yJ",
       "particle_action": "None",
       "rect_name0": "",
@@ -3045,7 +3039,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "s4zt0bFnAL",
       "particle_action": "None",
       "rect": {
@@ -3091,7 +3084,6 @@
       },
       "fps": 1.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "vg5yQskPIv",
       "particle_action": "None",
       "rect_name0": "",
@@ -3278,7 +3270,6 @@
         "r": 0.18355077505111694
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "CopZZzjQd4",
       "particle_action": "None",
       "rect": {
@@ -3432,7 +3423,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "OFJHLiHeaP",
       "particle_action": "None",
       "rect": {
@@ -3476,7 +3466,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "AuNZPvQDrI",
       "particle_action": "None",
       "rect": {
@@ -3520,7 +3509,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "RKmQZx8H1s",
       "particle_action": "None",
       "rect": {
@@ -3564,7 +3552,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "M0ePA9uzA5",
       "particle_action": "None",
       "rect": {
@@ -3608,7 +3595,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "pGHzP0FH33",
       "particle_action": "None",
       "rect": {
@@ -3784,7 +3770,6 @@
         "r": 0.9450980424880981
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "HyJsrevpdz",
       "particle_action": "None",
       "rect": {
@@ -3828,7 +3813,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "5YQ8ZqObX7",
       "particle_action": "None",
       "rect": {

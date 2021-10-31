@@ -238,7 +238,6 @@ void unit_test_texture()
     texture.SetFileName("file.png");
     texture.SetName("file");
     klass.SetTexture(texture.Copy());
-    klass.EnableGC(true);
     klass.SetTextureRect(gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
     klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);

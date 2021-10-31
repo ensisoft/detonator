@@ -579,7 +579,6 @@
       },
       "fps": 10.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "Fj66N4PDUG",
       "particle_action": "None",
       "rect_name0": "",
@@ -711,7 +710,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "LPH6tgo9eN",
       "particle_action": "None",
       "rect": {
@@ -757,7 +755,6 @@
       },
       "fps": 2.0,
       "gamma": 1.0,
-      "gc": false,
       "id": "sUAHqYkAPp",
       "particle_action": "None",
       "rect_name0": "",
@@ -817,7 +814,6 @@
         "r": 1.0
       },
       "gamma": 1.0,
-      "gc": false,
       "id": "8UZOHE5ijx",
       "particle_action": "None",
       "rect": {

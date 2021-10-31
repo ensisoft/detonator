@@ -94,8 +94,12 @@ public:
     { return mHeight; }
     virtual Format GetFormat() const override
     { return mFormat; }
-    virtual void EnableGarbageCollection(bool gc) override
-    {}
+    virtual void SetContentHash(size_t hash) override
+    { mHash = hash; }
+    virtual size_t GetContentHash() const override
+    { return mHash; }
+    virtual void SetTransient(bool on_off) override
+    { mTransient = on_off; }
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
@@ -104,6 +108,8 @@ private:
     Wrapping mWrapY = Wrapping::Repeat;
     MinFilter mMinFilter = MinFilter::Default;
     MagFilter mMagFilter = MagFilter::Default;
+    std::size_t mHash = 0;
+    bool mTransient = false;
 };
 
 class TestProgram : public gfx::Program
