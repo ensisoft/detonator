@@ -234,15 +234,27 @@ public:
     // Resource loader implementation
     virtual gfx::ResourceHandle LoadResource(const std::string& URI) override
     {
+        auto it = mGraphicsBuffers.find(URI);
+        if (it != mGraphicsBuffers.end())
+            return it->second;
+
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        return app::GraphicsFileBuffer::LoadFromFile(file);
+        auto buffer = app::GraphicsFileBuffer::LoadFromFile(file);
+        mGraphicsBuffers[URI] = buffer;
+        return buffer;
     }
     virtual engine::GameDataHandle LoadGameData(const std::string& URI) const override
     {
+        auto it = mGameDataBuffers.find(URI);
+        if (it != mGameDataBuffers.end())
+            return it->second;
+
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        return app::GameDataFileBuffer::LoadFromFile(file);
+        auto buffer = app::GameDataFileBuffer::LoadFromFile(file);
+        mGameDataBuffers[URI] = buffer;
+        return buffer;
     }
     virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
     {
@@ -259,9 +271,26 @@ public:
     }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& URI) const override
     {
+        auto it = mAudioBuffers.find(URI);
+        if (it != mAudioBuffers.end())
+            return it->second;
+
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        return app::AudioFileBuffer::LoadFromFile(file);
+        auto buffer = app::AudioFileBuffer::LoadFromFile(file);
+        mAudioBuffers[URI] = buffer;
+        return buffer;
+    }
+    std::size_t GetBufferCacheSize() const
+    {
+        size_t ret = 0;
+        for (const auto& pair : mAudioBuffers)
+            ret += pair.second->GetSize();
+        for (const auto& pair : mGameDataBuffers)
+            ret += pair.second->GetSize();
+        for (const auto& pair : mGraphicsBuffers)
+            ret += pair.second->GetSize();
+        return ret;
     }
 private:
     QString ResolveURI(const std::string& URI) const
@@ -297,6 +326,9 @@ private:
     const QString mGameDir;
     const QString mHostDir;
     mutable std::unordered_map<std::string, QString> mFileMaps;
+    mutable std::unordered_map<std::string, audio::SourceBufferHandle> mAudioBuffers;
+    mutable std::unordered_map<std::string, engine::GameDataHandle> mGameDataBuffers;
+    mutable std::unordered_map<std::string, gfx::ResourceHandle> mGraphicsBuffers;
 };
 
 // implement base::logger and forward the log events
@@ -579,6 +611,9 @@ void PlayWindow::RunGameLoopOnce()
             stats.current_fps         = fps;
             mEngine->SetHostStats(stats);
 
+            const auto cache = mResourceLoader->GetBufferCacheSize();
+            const auto megs  = cache / (1024.0 * 1024.0);
+            SetValue(mUI.statFileCache, QString("%1 MB").arg(megs, 0, 'f', 1, ' '));
             SetValue(mUI.fps, fps);
             mNumFrames = 0;
             mFrameTimer.restart();
