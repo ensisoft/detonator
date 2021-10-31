@@ -1601,6 +1601,14 @@ void EntityWidget::on_tiLayer_valueChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
+void EntityWidget::on_tiRasterWidth_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiRasterHeight_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
 void EntityWidget::on_tiText_textChanged()
 {
     UpdateCurrentNodeProperties();
@@ -1633,6 +1641,17 @@ void EntityWidget::on_btnSelectFont_clicked()
             text->SetFontName(app::ToUtf8(file));
         }
     }
+}
+
+void EntityWidget::on_btnResetTextRasterWidth_clicked()
+{
+    SetValue(mUI.tiRasterWidth, 0);
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_btnResetTextRasterHeight_clicked()
+{
+    SetValue(mUI.tiRasterHeight, 0);
+    UpdateCurrentNodeProperties();
 }
 
 void EntityWidget::on_drawableItem_toggled(bool on)
@@ -2188,6 +2207,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiTextColor, Qt::white);
     SetValue(mUI.tiLineHeight, 1.0f);
     SetValue(mUI.tiLayer, 0);
+    SetValue(mUI.tiRasterWidth, 0);
+    SetValue(mUI.tiRasterHeight, 0);
     SetValue(mUI.tiText, QString(""));
     SetValue(mUI.tiVisible, true);
     SetValue(mUI.tiUnderline, false);
@@ -2269,6 +2290,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiTextColor, text->GetTextColor());
             SetValue(mUI.tiLineHeight, text->GetLineHeight());
             SetValue(mUI.tiLayer, text->GetLayer());
+            SetValue(mUI.tiRasterWidth, text->GetRasterWidth());
+            SetValue(mUI.tiRasterHeight, text->GetRasterHeight());
             SetValue(mUI.tiText, text->GetText());
             SetValue(mUI.tiVisible, text->TestFlag(game::TextItemClass::Flags::VisibleInGame));
             SetValue(mUI.tiUnderline, text->TestFlag(game::TextItemClass::Flags::UnderlineText));
@@ -2389,6 +2412,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetLineHeight(GetValue(mUI.tiLineHeight));
         text->SetText(GetValue(mUI.tiText));
         text->SetLayer(GetValue(mUI.tiLayer));
+        text->SetRasterWidth(GetValue(mUI.tiRasterWidth));
+        text->SetRasterHeight(GetValue(mUI.tiRasterHeight));
         // flags
         text->SetFlag(game::TextItemClass::Flags::VisibleInGame, GetValue(mUI.tiVisible));
         text->SetFlag(game::TextItemClass::Flags::UnderlineText, GetValue(mUI.tiUnderline));

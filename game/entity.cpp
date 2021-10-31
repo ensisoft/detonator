@@ -221,6 +221,8 @@ size_t TextItemClass::GetHash() const
     hash = base::hash_combine(hash, mText);
     hash = base::hash_combine(hash, mFontName);
     hash = base::hash_combine(hash, mFontSize);
+    hash = base::hash_combine(hash, mRasterWidth);
+    hash = base::hash_combine(hash, mRasterHeight);
     hash = base::hash_combine(hash, mLineHeight);
     hash = base::hash_combine(hash, mTextColor);
     return hash;
@@ -235,6 +237,8 @@ void TextItemClass::IntoJson(data::Writer& data) const
     data.Write("text",             mText);
     data.Write("font_name",        mFontName);
     data.Write("font_size",        mFontSize);
+    data.Write("raster_width",     mRasterWidth);
+    data.Write("raster_height",    mRasterHeight);
     data.Write("line_height",      mLineHeight);
     data.Write("text_color",       mTextColor);
 }
@@ -250,6 +254,8 @@ std::optional<TextItemClass> TextItemClass::FromJson(const data::Reader& data)
         !data.Read("text",             &ret.mText) ||
         !data.Read("font_name",        &ret.mFontName) ||
         !data.Read("font_size",        &ret.mFontSize) ||
+        !data.Read("raster_width",     &ret.mRasterWidth) ||
+        !data.Read("raster_height",    &ret.mRasterHeight) ||
         !data.Read("line_height",      &ret.mLineHeight) ||
         !data.Read("text_color",       &ret.mTextColor))
         return std::nullopt;

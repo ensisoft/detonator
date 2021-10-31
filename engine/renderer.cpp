@@ -277,7 +277,11 @@ void Renderer::DrawEntity(const EntityType& entity,
 
             if (text)
             {
-                const auto& size = node->GetSize();
+                const auto& node_size = node->GetSize();
+                const auto text_raster_width  = text->GetRasterWidth();
+                const auto text_raster_height = text->GetRasterHeight();
+                const auto raster_width  = text_raster_width ? text_raster_width : node_size.x;
+                const auto raster_height = text_raster_height ? text_raster_height : node_size.y;
                 auto& paint_node = mRenderer.mPaintNodes["text/" + node->GetId()];
                 paint_node.visited = true;
                 // use the instance hash as a material id to realize whether
@@ -285,8 +289,8 @@ void Renderer::DrawEntity(const EntityType& entity,
                 // or the rasterization parameters have changed (node size -> raster buffer size)
                 size_t hash = 0;
                 hash = base::hash_combine(hash, text->GetHash());
-                hash = base::hash_combine(hash, size.x);
-                hash = base::hash_combine(hash, size.y);
+                hash = base::hash_combine(hash, raster_width);
+                hash = base::hash_combine(hash, raster_height);
                 const auto& material = std::to_string(hash);
                 if (paint_node.material_class_id != material)
                 {
@@ -296,7 +300,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                     text_and_style.fontsize = text->GetFontSize();
                     text_and_style.lineheight = text->GetLineHeight();
                     text_and_style.underline  = text->TestFlag(TextItem::Flags::UnderlineText);
-                    gfx::TextBuffer buffer(size.x, size.y);
+                    gfx::TextBuffer buffer(raster_width, raster_height);
                     if (text->GetVAlign() == TextItem::VerticalTextAlign::Top)
                         buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignTop);
                     else if (text->GetVAlign() == TextItem::VerticalTextAlign::Center)

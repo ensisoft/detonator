@@ -1872,6 +1872,8 @@
             "horizontal_align": "Center",
             "layer": 0,
             "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
             "text": "123",
             "text_color": {
               "a": 1.0,
@@ -2050,6 +2052,8 @@
             "horizontal_align": "Left",
             "layer": 0,
             "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
             "text": "0",
             "text_color": {
               "a": 1.0,
@@ -2224,6 +2228,8 @@
             "horizontal_align": "Center",
             "layer": 0,
             "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
             "text": "Ready!",
             "text_color": {
               "a": 1.0,

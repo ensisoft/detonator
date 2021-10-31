@@ -94,6 +94,8 @@ void unit_test_entity_node()
     text.SetLineHeight(2.0f);
     text.SetFontSize(18);
     text.SetLayer(3);
+    text.SetRasterWidth(100);
+    text.SetRasterHeight(200);
     text.SetFontName("fontname.otf");
     text.SetFlag(game::TextItemClass::Flags::UnderlineText, true);
     text.SetAlign(game::TextItemClass::VerticalTextAlign::Top);
@@ -143,6 +145,8 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTextItem()->GetText() == "jeesus ajaa mopolla");
     TEST_REQUIRE(node.GetTextItem()->GetFontSize() == 18);
     TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
+    TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
+    TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
 
     // to/from json
     {
@@ -176,6 +180,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(node.GetTextItem()->GetText() == "jeesus ajaa mopolla");
         TEST_REQUIRE(node.GetTextItem()->GetFontSize() == 18);
         TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
+        TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
+        TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
         TEST_REQUIRE(ret->GetHash() == node.GetHash());
     }
 
@@ -209,6 +215,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetTextItem()->GetText() == "jeesus ajaa mopolla");
         TEST_REQUIRE(clone.GetTextItem()->GetFontSize() == 18);
         TEST_REQUIRE(clone.GetTextItem()->GetFontName() == "fontname.otf");
+        TEST_REQUIRE(clone.GetTextItem()->GetRasterWidth() == 100);
+        TEST_REQUIRE(clone.GetTextItem()->GetRasterHeight() == 200);
     }
 
     // test instance state.
@@ -231,6 +239,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance->GetTextItem()->GetText() == "jeesus ajaa mopolla");
         TEST_REQUIRE(instance->GetTextItem()->GetFontSize() == 18);
         TEST_REQUIRE(instance->GetTextItem()->GetFontName() == "fontname.otf");
+        TEST_REQUIRE(instance->GetTextItem()->GetRasterWidth() == 100);
+        TEST_REQUIRE(instance->GetTextItem()->GetRasterHeight() == 200);
 
         instance.SetName("foobar");
         instance.SetSize(glm::vec2(200.0f, 200.0f));

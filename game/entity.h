@@ -383,6 +383,10 @@ namespace game
         { mHAlign = align; }
         void SetTextColor(const Color4f& color)
         { mTextColor = color; }
+        void SetRasterWidth(unsigned width)
+        { mRasterWidth = width;}
+        void SetRasterHeight(unsigned height)
+        { mRasterHeight = height; }
 
         // class getters
         bool TestFlag(Flags flag) const
@@ -399,6 +403,10 @@ namespace game
         { return mLineHeight; }
         unsigned GetFontSize() const
         { return mFontSize; }
+        unsigned GetRasterWidth() const
+        { return mRasterWidth; }
+        unsigned GetRasterHeight() const
+        { return mRasterHeight; }
         base::bitflag<Flags> GetFlags() const
         { return mBitFlags; }
         HorizontalTextAlign GetHAlign() const
@@ -418,6 +426,8 @@ namespace game
         std::string mText;
         std::string mFontName;
         unsigned mFontSize = 0;
+        unsigned mRasterWidth = 0;
+        unsigned mRasterHeight = 0;
         float mLineHeight = 1.0f;
         Color4f mTextColor = Color::White;
     };
@@ -627,6 +637,10 @@ namespace game
         { return mClass->GetLineHeight(); }
         int GetLayer() const
         { return mClass->GetLayer(); }
+        unsigned GetRasterWidth() const
+        { return mClass->GetRasterWidth(); }
+        unsigned GetRasterHeight() const
+        { return mClass->GetRasterHeight(); }
         HorizontalTextAlign GetHAlign() const
         { return mClass->GetHAlign(); }
         VerticalTextAlign GetVAlign() const
