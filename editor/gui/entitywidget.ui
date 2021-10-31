@@ -1837,24 +1837,7 @@
                <layout class="QVBoxLayout" name="verticalLayout_11">
                 <item>
                  <layout class="QGridLayout" name="gridLayout_7">
-                  <item row="5" column="1">
-                   <widget class="QDoubleSpinBox" name="tiLineHeight">
-                    <property name="minimum">
-                     <double>1.000000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.100000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="tiFontSize">
-                    <property name="placeholderText">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
+                  <item row="11" column="1">
                    <widget class="QCheckBox" name="tiBlink">
                     <property name="text">
                      <string>Blinking text</string>
@@ -1867,12 +1850,128 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_47">
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_44">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
-                     <string>Layer</string>
+                     <string>Text align</string>
                     </property>
                    </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                    <item>
+                     <widget class="QComboBox" name="tiFontName">
+                      <property name="editable">
+                       <bool>true</bool>
+                      </property>
+                      <property name="currentText">
+                       <string/>
+                      </property>
+                      <property name="placeholderText">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="btnSelectFont">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="arrowType">
+                       <enum>Qt::NoArrow</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_46">
+                    <property name="text">
+                     <string>Line height</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QDoubleSpinBox" name="tiLineHeight">
+                    <property name="minimum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QCheckBox" name="tiVisible">
+                    <property name="text">
+                     <string>Visible in game</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1">
+                   <widget class="QSpinBox" name="tiLayer">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimum">
+                     <number>-100</number>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <layout class="QHBoxLayout" name="horizontalLayout_9">
+                    <item>
+                     <widget class="QSpinBox" name="tiRasterWidth">
+                      <property name="specialValueText">
+                       <string>Use Node Size</string>
+                      </property>
+                      <property name="minimum">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <number>10240</number>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="btnResetTextRasterWidth">
+                      <property name="toolTip">
+                       <string>Reset idle track to nothing</string>
+                      </property>
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                      </property>
+                      <property name="autoRaise">
+                       <bool>false</bool>
+                      </property>
+                      <property name="arrowType">
+                       <enum>Qt::NoArrow</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                   <item row="2" column="1">
                    <widget class="QComboBox" name="tiVAlign">
@@ -1884,10 +1983,33 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="7" column="1">
-                   <widget class="QCheckBox" name="tiVisible">
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_45">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
-                     <string>Visible in game</string>
+                     <string>Text align</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="tiFontSize">
+                    <property name="placeholderText">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="1">
+                   <widget class="QCheckBox" name="tiUnderline">
+                    <property name="text">
+                     <string>Underline text</string>
+                    </property>
+                    <property name="tristate">
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -1895,6 +2017,46 @@
                    <widget class="QLabel" name="label_42">
                     <property name="text">
                      <string>Font size</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QComboBox" name="tiHAlign">
+                    <property name="placeholderText">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_41">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Font name</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_43">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Text color</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_47">
+                    <property name="text">
+                     <string>Layer</string>
                     </property>
                    </widget>
                   </item>
@@ -1930,117 +2092,41 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="label_45">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Text align</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="1">
-                   <widget class="QSpinBox" name="tiLayer">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimum">
-                     <number>-100</number>
-                    </property>
-                    <property name="maximum">
-                     <number>100</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QComboBox" name="tiHAlign">
-                    <property name="placeholderText">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_44">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Text align</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="label_43">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Text color</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_41">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Font name</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="8" column="1">
-                   <widget class="QCheckBox" name="tiUnderline">
-                    <property name="text">
-                     <string>Underline text</string>
-                    </property>
-                    <property name="tristate">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="label_46">
-                    <property name="text">
-                     <string>Line height</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <layout class="QHBoxLayout" name="horizontalLayout_10">
                     <item>
-                     <widget class="QComboBox" name="tiFontName">
-                      <property name="editable">
-                       <bool>true</bool>
+                     <widget class="QSpinBox" name="tiRasterHeight">
+                      <property name="specialValueText">
+                       <string>Use Node Size</string>
                       </property>
-                      <property name="currentText">
-                       <string/>
+                      <property name="minimum">
+                       <number>0</number>
                       </property>
-                      <property name="placeholderText">
-                       <string/>
+                      <property name="maximum">
+                       <number>10240</number>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="btnSelectFont">
+                     <widget class="QToolButton" name="btnResetTextRasterHeight">
+                      <property name="toolTip">
+                       <string>Reset idle track to nothing</string>
+                      </property>
                       <property name="text">
                        <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                      </property>
+                      <property name="autoRaise">
+                       <bool>false</bool>
                       </property>
                       <property name="arrowType">
                        <enum>Qt::NoArrow</enum>
@@ -2048,6 +2134,20 @@
                      </widget>
                     </item>
                    </layout>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="label_12">
+                    <property name="text">
+                     <string>Raster width</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="0">
+                   <widget class="QLabel" name="label_48">
+                    <property name="text">
+                     <string>Raster height</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>
@@ -2438,6 +2538,10 @@
   <tabstop>tiTextColor</tabstop>
   <tabstop>tiLineHeight</tabstop>
   <tabstop>tiLayer</tabstop>
+  <tabstop>tiRasterWidth</tabstop>
+  <tabstop>btnResetTextRasterWidth</tabstop>
+  <tabstop>tiRasterHeight</tabstop>
+  <tabstop>btnResetTextRasterHeight</tabstop>
   <tabstop>tiVisible</tabstop>
   <tabstop>tiUnderline</tabstop>
   <tabstop>tiBlink</tabstop>

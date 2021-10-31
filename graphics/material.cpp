@@ -2108,7 +2108,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         // create the texture object first. The if check above
         // will then act as a throttle and prevent superfluous
         // attempts to rasterize when the contents of the text
-        // buffer have not changed. 
+        // buffer have not changed.
         texture = device.MakeTexture(name);
 
         auto bitmap = mText.TryRasterize();
