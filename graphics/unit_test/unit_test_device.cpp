@@ -1033,7 +1033,6 @@ void unit_test_clean_garbage()
         };
         auto* texture = dev->MakeTexture("foo");
         texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
-        texture->EnableGarbageCollection(true);
         TEST_REQUIRE(dev->FindTexture("foo"));
     }
 

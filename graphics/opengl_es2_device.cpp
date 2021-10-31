@@ -778,10 +778,8 @@ public:
             {
                 auto* impl = static_cast<TextureImpl*>(it->second.get());
                 const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
-                const auto is_eligible = impl->IsEligibleForGarbageCollection();
                 const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
-                const auto is_forced  = flags & GCFlags::Force;
-                if ((is_forced || is_eligible) && is_expired)
+                if (is_expired)
                 {
                     size_t unit = 0;
                     for (unit = 0; unit < mTextureUnits.size(); ++unit)
@@ -838,6 +836,30 @@ public:
         mFrameNumber++;
         if (display)
             mContext->Display();
+
+        const auto max_num_idle_frames = 120;
+
+        // clean up expired transient textures.
+        for (auto it = mTextures.begin(); it != mTextures.end();)
+        {
+            auto* impl = static_cast<TextureImpl*>(it->second.get());
+            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+            const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
+            if (is_expired && impl->IsTransient())
+            {
+                size_t unit = 0;
+                for (unit = 0; unit < mTextureUnits.size(); ++unit)
+                {
+                    if (mTextureUnits[unit].texture == impl)
+                    {
+                        mTextureUnits[unit].texture = nullptr;
+                        break;
+                    }
+                }
+                // delete the texture
+                it = mTextures.erase(it);
+            } else ++it;
+        }
     }
 
     virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
@@ -1158,19 +1180,22 @@ private:
         { return mHeight; }
         virtual Texture::Format GetFormat() const override
         { return mFormat; }
-        virtual void EnableGarbageCollection(bool gc) override
-        { mEnableGC = gc; }
+        virtual void SetContentHash(size_t hash) override
+        { mHash = hash; }
+        virtual size_t GetContentHash() const override
+        { return mHash; }
+        virtual void SetTransient(bool on_off) override
+        { mTransient = on_off; }
 
         // internal
+        bool IsTransient() const
+        { return mTransient; }
         GLuint GetName() const
         { return mName; }
         void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
         size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
-        bool IsEligibleForGarbageCollection() const
-        { return mEnableGC; }
-
     private:
         const OpenGLFunctions& mGL;
 
@@ -1185,7 +1210,8 @@ private:
         unsigned mHeight = 0;
         Format mFormat = Texture::Format::Grayscale;
         mutable std::size_t mFrameNumber = 0;
-        bool mEnableGC = false;
+        std::size_t mHash = 0;
+        bool mTransient = false;
     };
 
     class GeomImpl : public Geometry

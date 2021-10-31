@@ -385,8 +385,7 @@ void GfxWindow::CleanGarbage()
     auto device = shared_device.lock();
     if (!device)
         return;
-    device->CleanGarbage(120, gfx::Device::GCFlags::Force |
-                              gfx::Device::GCFlags::Textures |
+    device->CleanGarbage(120, gfx::Device::GCFlags::Textures |
                               gfx::Device::GCFlags::Programs |
                               gfx::Device::GCFlags::Geometries);
 }

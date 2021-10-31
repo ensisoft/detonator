@@ -75,34 +75,6 @@ void DrawTextRect(Painter& painter,
     const bool underline = properties & TextProp::Underline;
     const bool blinking  = properties & TextProp::Blinking;
 
-    // Add blob of text in the buffer.
-    TextBuffer::Text text_and_style;
-    text_and_style.text = text;
-    text_and_style.font = font;
-    text_and_style.fontsize = font_size_px;
-    text_and_style.underline = underline;
-    text_and_style.lineheight = line_height;
-    buff.AddText(text_and_style);
-
-    // Setup material to shade the text.
-    // the classes are expensive to construct so keep the class
-    // object around for re-using later.
-    static std::shared_ptr<gfx::TextureMap2DClass> klass;
-    if (!klass)
-    {
-        klass = std::make_shared<gfx::TextureMap2DClass>();
-        klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
-        klass->SetTexture(CreateTextureFromText(buff));
-        klass->EnableGC(true);
-    }
-    else
-    {
-        // update the text buffer in the material classes
-        // texture source
-        auto* texture_src = static_cast<detail::TextureTextBufferSource*>(klass->GetTextureSource());
-        texture_src->SetTextBuffer(std::move(buff));
-    }
-
     // if the text is set to be blinking do a sharp cut off
     // and when we have the "off" interval then simply don't
     // render the text.
@@ -116,8 +88,16 @@ void DrawTextRect(Painter& painter,
             return;
     }
 
-    MaterialClassInst material(klass);
-    material.SetUniform("kBaseColor", color);
+    // Add blob of text in the buffer.
+    TextBuffer::Text text_and_style;
+    text_and_style.text = text;
+    text_and_style.font = font;
+    text_and_style.fontsize = font_size_px;
+    text_and_style.underline = underline;
+    text_and_style.lineheight = line_height;
+    buff.AddText(text_and_style);
+    TextMaterial material(std::move(buff));
+    material.SetColor(color);
 
     Transform t;
     t.Resize(rect);

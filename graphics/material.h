@@ -465,7 +465,8 @@ namespace gfx
         };
         // The current state to be used when binding textures to samplers.
         struct BindingState {
-            double time = 0.0f;
+            bool dynamic_content = false;
+            double current_time  = 0.0f;
         };
         // The result of binding textures.
         struct BoundState {
@@ -1049,8 +1050,6 @@ namespace gfx
         { mSprite.SetTextureRect(index, rect); }
         void SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
         {  mSprite.SetTextureSource(index, std::move(source)); }
-        void SetTextureGc(std::size_t index, bool on_off)
-        { mGarbageCollect = on_off; }
         void SetTextureMinFilter(MinTextureFilter filter)
         { mMinFilter = filter; }
         void SetTextureMagFilter(MagTextureFilter filter)
@@ -1125,7 +1124,6 @@ namespace gfx
         SpriteClass& operator=(const SpriteClass&);
     private:
         bool mBlendFrames = true;
-        bool mGarbageCollect = false;
         gfx::Color4f mBaseColor = gfx::Color::White;
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -1156,8 +1154,6 @@ namespace gfx
         { mTexture.SetTexture(std::move(source), rect); }
         void SetTextureRect(const FRect& rect)
         { mTexture.SetTextureRect(rect); }
-        void EnableGC(bool on_off)
-        { mGarbageCollect = on_off; }
         void SetTextureMinFilter(MinTextureFilter filter)
         { mMinFilter = filter; }
         void SetTextureMagFilter(MagTextureFilter filter)
@@ -1231,7 +1227,6 @@ namespace gfx
         gfx::Color4f mBaseColor;
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-        bool mGarbageCollect = false;
         MinTextureFilter mMinFilter = MinTextureFilter::Default;
         MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
@@ -1487,6 +1482,32 @@ namespace gfx
         UniformMap mUniforms;
     };
 
+    // material specialized for rendering text using
+    // a pre-rasterized bitmap of text. Creates transient
+    // texture objects for the text.
+    class TextMaterial : public gfx::Material
+    {
+    public:
+        TextMaterial(const TextBuffer& text);
+        TextMaterial(TextBuffer&& text);
+        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
+        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual std::string GetProgramId() const override;
+        virtual std::string GetClassId() const override;
+        virtual void Update(float dt) override;
+        virtual void SetRuntime(float runtime) override;
+        virtual void SetUniform(const std::string& name, const Uniform& value) override;
+        virtual void SetUniform(const std::string& name, Uniform&& value) override;
+        virtual void ResetUniforms()  override;
+        virtual void SetUniforms(const UniformMap& uniforms) override;
+        void SetColor(const Color4f& color)
+        { mColor = color; }
+    private:
+        TextBuffer mText;
+        Color4f mColor = Color::White;
+    };
+
     // Create material based on a simple color only.
     ColorClass CreateMaterialClassFromColor(const Color4f& color);
     // Create a material based on a 2D texture map.
@@ -1516,5 +1537,7 @@ namespace gfx
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
+    std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text);
+    std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text);
 
 } // namespace

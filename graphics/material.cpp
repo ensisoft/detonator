@@ -385,9 +385,9 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
     if (mSprites.empty())
         return false;
     const auto frame_interval = 1.0f / std::max(mFps, 0.001f);
-    const auto frame_fraction = std::fmod(state.time, frame_interval);
+    const auto frame_fraction = std::fmod(state.current_time, frame_interval);
     const auto blend_coeff = frame_fraction/frame_interval;
-    const auto first_index = (unsigned)(state.time/frame_interval);
+    const auto first_index = (unsigned)(state.current_time/frame_interval);
     const auto frame_count = (unsigned)mSprites.size();
     const auto texture_count = std::min(frame_count, 2u);
     const unsigned frame_index[2] = {
@@ -398,18 +398,32 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
     {
         const auto& sprite  = mSprites[frame_index[i]];
         const auto& source  = sprite.source;
-        const auto& name    = std::to_string(source->GetContentHash());
+        const auto& name    = source->GetId();
         auto* texture = device.FindTexture(name);
-        if (!texture)
+
+        bool needs_upload = false;
+        size_t content_hash = 0;
+
+        // check for changes.
+        if (texture && state.dynamic_content) {
+            content_hash = source->GetContentHash();
+            needs_upload = content_hash != texture->GetContentHash();
+        }
+        if (!texture || needs_upload)
         {
-            texture = device.MakeTexture(name);
+            if (!texture)
+                texture = device.MakeTexture(name);
+
             auto bitmap = source->GetData();
             if (!bitmap)
                 return false;
-            const auto width = bitmap->GetWidth();
+            const auto width  = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
             const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
             texture->Upload(bitmap->GetDataPtr(), width, height, format);
+            if (!content_hash)
+                content_hash = source->GetContentHash();
+            texture->SetContentHash(content_hash);
         }
         result.textures[i]      = texture;
         result.rects[i]         = sprite.rect;
@@ -514,11 +528,23 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
         return false;
 
     const auto& source  = mSource;
-    const auto& name    = std::to_string(source->GetContentHash());
+    const auto& name    = mSource->GetId();
     auto* texture = device.FindTexture(name);
-    if (!texture)
+
+    bool needs_upload = false;
+    size_t content_hash = 0;
+
+    // check for changes.
+    if (texture && state.dynamic_content) {
+        content_hash = source->GetContentHash();
+        needs_upload = content_hash != texture->GetContentHash();
+    }
+    // upload if doesn't exist already or the content has changed.
+    if (!texture || needs_upload)
     {
-        texture = device.MakeTexture(name);
+        if (!texture)
+            texture = device.MakeTexture(name);
+
         auto bitmap = source->GetData();
         if (!bitmap)
             return false;
@@ -526,6 +552,9 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
         const auto height = bitmap->GetHeight();
         const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
         texture->Upload(bitmap->GetDataPtr(), width, height, format);
+        if (!content_hash)
+            content_hash = source->GetContentHash();
+        texture->SetContentHash(content_hash);
     }
     result.textures[0] = texture;
     result.rects[0]    = mRect;
@@ -899,7 +928,6 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
     mGamma           = other.mGamma;
     mStatic          = other.mStatic;
     mBlendFrames     = other.mBlendFrames;
-    mGarbageCollect  = other.mGarbageCollect;
     mBaseColor       = other.mBaseColor;
     mTextureScale    = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
@@ -1036,7 +1064,6 @@ std::size_t SpriteClass::GetHash() const
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mBlendFrames);
-    hash = base::hash_combine(hash, mGarbageCollect);
     hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mTextureScale);
     hash = base::hash_combine(hash, mTextureVelocity);
@@ -1079,7 +1106,8 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
         state.blending = State::Blending::Additive;
 
     TextureMap::BindingState ts;
-    ts.time = state.material_time;
+    ts.dynamic_content = state.editing_mode || !mStatic;
+    ts.current_time    = state.material_time;
 
     TextureMap::BoundState binds;
     if (!mSprite.BindTextures(ts, device,  binds))
@@ -1092,7 +1120,6 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
     {
         auto* texture = binds.textures[i];
         // set texture properties *before* setting it to the program.
-        texture->EnableGarbageCollection(mGarbageCollect);
         texture->SetFilter(mMinFilter);
         texture->SetFilter(mMagFilter);
         texture->SetWrapX(mWrapX);
@@ -1168,7 +1195,6 @@ void SpriteClass::IntoJson(data::Writer& data) const
     data.Write("gamma", mGamma);
     data.Write("static", mStatic);
     data.Write("blending", mBlendFrames);
-    data.Write("gc", mGarbageCollect);
     data.Write("color", mBaseColor);
     data.Write("texture_min_filter", mMinFilter);
     data.Write("texture_mag_filter", mMagFilter);
@@ -1187,7 +1213,6 @@ bool SpriteClass::FromJson2(const data::Reader& data)
     data.Read("gamma", &mGamma);
     data.Read("static", &mStatic);
     data.Read("blending", &mBlendFrames);
-    data.Read("gc", &mGarbageCollect);
     data.Read("color", &mBaseColor);
     data.Read("texture_min_filter", &mMinFilter);
     data.Read("texture_mag_filter", &mMagFilter);
@@ -1286,7 +1311,6 @@ SpriteClass& SpriteClass::operator=(const SpriteClass& other)
     std::swap(mGamma          , tmp.mGamma);
     std::swap(mStatic         , tmp.mStatic);
     std::swap(mBlendFrames    , tmp.mBlendFrames);
-    std::swap(mGarbageCollect , tmp.mGarbageCollect);
     std::swap(mBaseColor      , tmp.mBaseColor);
     std::swap(mTextureScale   , tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
@@ -1310,7 +1334,6 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
     mBaseColor       = other.mBaseColor;
     mTextureScale    = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
-    mGarbageCollect  = other.mGarbageCollect;
     mMinFilter       = other.mMinFilter;
     mMagFilter       = other.mMagFilter;
     mWrapX           = other.mWrapX;
@@ -1439,7 +1462,6 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mTextureScale);
     hash = base::hash_combine(hash, mTextureVelocity);
-    hash = base::hash_combine(hash, mGarbageCollect);
     hash = base::hash_combine(hash, mMinFilter);
     hash = base::hash_combine(hash, mMagFilter);
     hash = base::hash_combine(hash, mWrapX);
@@ -1478,14 +1500,14 @@ void TextureMap2DClass::ApplyDynamicState(State& state, Device& device, Program&
         state.blending = State::Blending::Additive;
 
     TextureMap::BindingState ts;
-    ts.time = 0.0;
+    ts.dynamic_content = state.editing_mode || !mStatic;
+    ts.current_time    = 0.0;
 
     TextureMap::BoundState binds;
     if (!mTexture.BindTextures(ts, device, binds))
         return;
 
     auto* texture = binds.textures[0];
-    texture->EnableGarbageCollection(mGarbageCollect);
     texture->SetFilter(mMinFilter);
     texture->SetFilter(mMagFilter);
     texture->SetWrapX(mWrapX);
@@ -1555,7 +1577,6 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
     data.Write("surface", mSurfaceType);
     data.Write("gamma", mGamma);
     data.Write("static", mStatic);
-    data.Write("gc", mGarbageCollect);
     data.Write("color", mBaseColor);
     data.Write("texture_min_filter", mMinFilter);
     data.Write("texture_mag_filter", mMagFilter);
@@ -1573,7 +1594,6 @@ bool TextureMap2DClass::FromJson2(const data::Reader& data)
     data.Read("surface", &mSurfaceType);
     data.Read("gamma", &mGamma);
     data.Read("static", &mStatic);
-    data.Read("gc", &mGarbageCollect);
     data.Read("color", &mBaseColor);
     data.Read("texture_min_filter", &mMinFilter);
     data.Read("texture_mag_filter", &mMagFilter);
@@ -1666,7 +1686,6 @@ TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
     std::swap(mBaseColor      , tmp.mBaseColor);
     std::swap(mTextureScale   , tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
-    std::swap(mGarbageCollect , tmp.mGarbageCollect);
     std::swap(mMinFilter      , tmp.mMinFilter);
     std::swap(mMagFilter      , tmp.mMagFilter);
     std::swap(mWrapX          , tmp.mWrapX);
@@ -1871,7 +1890,8 @@ void CustomMaterialClass::ApplyDynamicState(State& state, Device& device, Progra
     for (const auto& map : mTextureMaps)
     {
         TextureMap::BindingState ts;
-        ts.time = state.material_time;
+        ts.dynamic_content = true; // todo: need static flag. for now use dynamic (which is slower) but always correct
+        ts.current_time    = state.material_time;
         TextureMap::BoundState binds;
         if (!map.second->BindTextures(ts, device, binds))
             return;
@@ -2071,6 +2091,70 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
     return *this;
 }
 
+TextMaterial::TextMaterial(const TextBuffer& text)
+  : mText(text)
+{}
+TextMaterial::TextMaterial(TextBuffer&& text)
+  : mText(std::move(text))
+{}
+void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+{
+    raster.blending = RasterState::Blending::Transparent;
+
+    const auto hash = mText.GetHash();
+    const auto& name = std::to_string(hash);
+    auto* texture = device.FindTexture(name);
+    if (!texture)
+    {
+        auto bitmap = mText.Rasterize();
+        if (!bitmap)
+            return;
+        const auto width  = bitmap->GetWidth();
+        const auto height = bitmap->GetHeight();
+        texture = device.MakeTexture(name);
+        texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale);
+        texture->SetContentHash(hash);
+        texture->SetTransient(true);
+    }
+    program.SetTexture("kTexture", 0, *texture);
+    program.SetUniform("kColor", mColor);
+}
+void TextMaterial::ApplyStaticState(gfx::Device& device, gfx::Program& program) const
+{}
+Shader* TextMaterial::GetShader(gfx::Device& device) const
+{
+constexpr auto* src = R"(
+#version 100
+precision highp float;
+uniform sampler2D kTexture;
+uniform vec4 kColor;
+uniform float kTime;
+varying vec2 vTexCoord;
+void main() {
+   float alpha = texture2D(kTexture, vTexCoord).a;
+   gl_FragColor = vec4(kColor.r, kColor.g, kColor.b, alpha);
+}
+        )";
+    auto* shader = device.MakeShader("text-shader");
+    shader->CompileSource(src);
+    return shader;
+}
+std::string TextMaterial::GetProgramId() const
+{ return "text-shader"; }
+std::string TextMaterial::GetClassId() const
+{ return {}; }
+void TextMaterial::Update(float dt)
+{}
+void TextMaterial::SetRuntime(float runtime)
+{}
+void TextMaterial::SetUniform(const std::string& name, const Uniform& value)
+{}
+void TextMaterial::SetUniform(const std::string& name, Uniform&& value)
+{}
+void TextMaterial::ResetUniforms()
+{}
+void TextMaterial::SetUniforms(const UniformMap& uniforms)
+{}
 
 ColorClass CreateMaterialClassFromColor(const Color4f& color)
 {
@@ -2136,4 +2220,14 @@ std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const Mat
 {
     return std::make_unique<MaterialClassInst>(klass);
 }
+
+std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text)
+{
+    return std::make_unique<TextMaterial>(text);
+}
+std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text)
+{
+    return std::make_unique<TextMaterial>(std::move(text));
+}
+
 } // namespace

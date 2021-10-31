@@ -207,10 +207,9 @@ namespace gfx
         virtual Type GetDeviceType() const = 0;
 
         enum GCFlags {
-            Force      = 0x1,
-            Textures   = 0x2,
-            Programs   = 0x4,
-            Geometries = 0x8
+            Textures   = 0x1,
+            Programs   = 0x2,
+            Geometries = 0x4
         };
 
         // Delete GPU resources that are no longer being used and that are

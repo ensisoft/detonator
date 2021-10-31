@@ -313,7 +313,8 @@ public:
         }
 
         TRACE_CALL("Device::Swap",mDevice->EndFrame(true));
-        TRACE_CALL("Device::CleanGarbage",mDevice->CleanGarbage(120, gfx::Device::GCFlags::Textures));
+        // Note that we *don't* call CleanGarbage here since currently there should
+        // be nothing that is creating needless GPU resources.
     }
 
     virtual void BeginMainLoop() override
