@@ -1711,6 +1711,11 @@ void EntityWidget::on_textItem_toggled(bool on)
         {
             if (!node->HasTextItem())
             {
+                // Select some font as a default. Without this the font is an
+                // empty string which will not render any text (but rather print
+                // a cascade of crap in the debug/error logs)
+                SetValue(mUI.tiFontName, 0);
+
                 game::TextItemClass text;
                 text.SetFontSize(GetValue(mUI.tiFontSize));
                 text.SetFontName(GetValue(mUI.tiFontName));
