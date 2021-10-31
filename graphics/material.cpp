@@ -1037,8 +1037,8 @@ void main()
     vec4 tex0 = texture2D(kTexture0, c1);
     vec4 tex1 = texture2D(kTexture1, c2);
 
-    vec4 col0 = mix(kBaseColor * tex0, kBaseColor * tex0.a, kAlphaMask[0]);
-    vec4 col1 = mix(kBaseColor * tex1, kBaseColor * tex1.a, kAlphaMask[1]);
+    vec4 col0 = mix(kBaseColor * tex0, vec4(kBaseColor.rgb, kBaseColor.a * tex0.a), kAlphaMask[0]);
+    vec4 col1 = mix(kBaseColor * tex1, vec4(kBaseColor.rgb, kBaseColor.a * tex1.a), kAlphaMask[1]);
 
     vec4 color = mix(col0, col1, kBlendCoeff);
     color.a *= vAlpha;
@@ -1430,13 +1430,12 @@ void main()
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
-    vec4 texel = texture2D(kTexture, coords) * kBaseColor;
-
+    vec4 texel = texture2D(kTexture, coords);
 
     // either modulate/mask texture color with base color
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
-    vec4 col = mix(texel, kBaseColor * texel.a, kAlphaMask);
+    vec4 col = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
     col.a *= vAlpha;
 
     // apply gamma (in)correction.
@@ -2132,7 +2131,7 @@ uniform float kTime;
 varying vec2 vTexCoord;
 void main() {
    float alpha = texture2D(kTexture, vTexCoord).a;
-   gl_FragColor = vec4(kColor.r, kColor.g, kColor.b, alpha);
+   gl_FragColor = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
 }
         )";
     auto* shader = device.MakeShader("text-shader");
