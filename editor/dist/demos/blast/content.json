@@ -1864,6 +1864,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "StaticContent": true,
               "UnderlineText": false,
               "VisibleInGame": true
             },
@@ -2044,6 +2045,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
             },
@@ -2220,6 +2222,7 @@
           "text_item": {
             "flags": {
               "BlinkText": true,
+              "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
             },
