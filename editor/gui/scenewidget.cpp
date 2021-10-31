@@ -326,6 +326,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.scene.SetName("My Scene");
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
+    mState.renderer.SetEditingMode(true);
     mState.view = mUI.tree;
 
     // connect tree widget signals

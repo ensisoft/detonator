@@ -99,6 +99,7 @@ public:
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
         mRenderer.SetClassLibrary(mClasslib);
+        mRenderer.SetEditingMode(init.editing_mode);
         mPhysics.SetClassLibrary(mClasslib);
     }
     virtual bool Load() override

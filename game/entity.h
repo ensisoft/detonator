@@ -354,7 +354,10 @@ namespace game
             // Make the text blink annoyingly
             BlinkText,
             // Set text to underline
-            UnderlineText
+            UnderlineText,
+            // Static content, i.e. the text/color/ etc properties
+            // are not expected to change.
+            StaticContent
         };
         TextItemClass()
         {
@@ -391,6 +394,8 @@ namespace game
         // class getters
         bool TestFlag(Flags flag) const
         { return mBitFlags.test(flag); }
+        bool IsStatic() const
+        { return TestFlag(Flags::StaticContent); }
         const Color4f& GetTextColor() const
         { return mTextColor; }
         const std::string& GetText() const
@@ -647,6 +652,8 @@ namespace game
         { return mClass->GetVAlign(); }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        bool IsStatic() const
+        { return TestFlag(Flags::StaticContent); }
         std::size_t GetHash() const
         {
             size_t hash = 0;

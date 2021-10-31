@@ -91,6 +91,8 @@ namespace engine
           : mClassLib(classlib) {}
         void SetClassLibrary(const ClassLibrary* classlib)
         { mClassLib = classlib; }
+        void SetEditingMode(bool on_off)
+        { mEditingMode = on_off; }
 
         void BeginFrame();
 
@@ -153,6 +155,7 @@ namespace engine
             std::string drawable_class_id;
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
+        bool mEditingMode = false;
     };
 
 } // namespace

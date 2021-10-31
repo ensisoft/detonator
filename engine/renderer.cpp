@@ -288,9 +288,12 @@ void Renderer::DrawEntity(const EntityType& entity,
                 // we need to re-create the material. (i.e. the text in the text item has changed)
                 // or the rasterization parameters have changed (node size -> raster buffer size)
                 size_t hash = 0;
-                hash = base::hash_combine(hash, text->GetHash());
                 hash = base::hash_combine(hash, raster_width);
                 hash = base::hash_combine(hash, raster_height);
+                // should the changes in the content be reflected or not?
+                if (mRenderer.mEditingMode || !text->IsStatic())
+                    hash = base::hash_combine(hash, text->GetHash());
+
                 const auto& material = std::to_string(hash);
                 if (paint_node.material_class_id != material)
                 {

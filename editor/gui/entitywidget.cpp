@@ -335,6 +335,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
+    mState.renderer.SetEditingMode(true);
     mState.view = mUI.tree;
 
     // connect tree widget signals
@@ -1626,6 +1627,11 @@ void EntityWidget::on_tiBlink_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_tiStatic_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnSelectFont_clicked()
 {
     if (auto* node = GetCurrentNode())
@@ -2213,6 +2219,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiVisible, true);
     SetValue(mUI.tiUnderline, false);
     SetValue(mUI.tiBlink, false);
+    SetValue(mUI.tiStatic, false);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
@@ -2296,6 +2303,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiVisible, text->TestFlag(game::TextItemClass::Flags::VisibleInGame));
             SetValue(mUI.tiUnderline, text->TestFlag(game::TextItemClass::Flags::UnderlineText));
             SetValue(mUI.tiBlink, text->TestFlag(game::TextItemClass::Flags::BlinkText));
+            SetValue(mUI.tiStatic, text->TestFlag(game::TextItemClass::Flags::StaticContent));
         }
     }
 }
@@ -2418,6 +2426,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::VisibleInGame, GetValue(mUI.tiVisible));
         text->SetFlag(game::TextItemClass::Flags::UnderlineText, GetValue(mUI.tiUnderline));
         text->SetFlag(game::TextItemClass::Flags::BlinkText, GetValue(mUI.tiBlink));
+        text->SetFlag(game::TextItemClass::Flags::StaticContent, GetValue(mUI.tiStatic));
     }
 }
 
