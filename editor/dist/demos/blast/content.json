@@ -1858,8 +1858,8 @@
             "y": 0.5
           },
           "size": {
-            "x": 197.4628448486328,
-            "y": 101.5897445678711
+            "x": 200.0,
+            "y": 100.0
           },
           "text_item": {
             "flags": {
@@ -1872,8 +1872,8 @@
             "horizontal_align": "Center",
             "layer": 0,
             "line_height": 1.0,
-            "raster_height": 0,
-            "raster_width": 0,
+            "raster_height": 100,
+            "raster_width": 200,
             "text": "123",
             "text_color": {
               "a": 1.0,
@@ -4907,7 +4907,7 @@
                         "h": 602.0,
                         "w": 400.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
                       "text": "GAMESTUDIO \nSami Vaisanen\n\nGraphics \nUnLuckY Studio\n\nMusic\nJuhani Junkala",
                       "type": "Label"
                     }
