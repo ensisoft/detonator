@@ -175,6 +175,7 @@ namespace gui
         void on_tiVisible_stateChanged(int);
         void on_tiUnderline_stateChanged(int);
         void on_tiBlink_stateChanged(int);
+        void on_tiStatic_stateChanged(int);
         void on_btnSelectFont_clicked();
         void on_btnResetTextRasterWidth_clicked();
         void on_btnResetTextRasterHeight_clicked();

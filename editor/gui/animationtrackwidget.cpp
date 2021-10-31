@@ -131,6 +131,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     DEBUG("Create AnimationTrackWidget");
     mTimelineModel = std::make_unique<TimelineModel>(mState);
     mRenderer.SetClassLibrary(workspace);
+    mRenderer.SetEditingMode(true);
 
     mUI.setupUi(this);
     mUI.actionPlay->setEnabled(true);
