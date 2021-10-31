@@ -504,6 +504,29 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     return out;
 }
 
+std::shared_ptr<Bitmap<Grayscale>> TextBuffer::TryRasterize() const
+{
+    try
+    {
+        // hmm, maybe not exactly the right place to do this but not
+        // certainly convenient....
+        // check for empty font settings which will cause an exception
+        // to be thrown.
+        for (const auto& text : mText)
+        {
+            if (text.font.empty())
+                return nullptr;
+        }
+        return Rasterize();
+    }
+    catch (const std::exception& e)
+    {
+        ERROR(e.what());
+        ERROR("Failed to rasterize text buffer.");
+    }
+    return nullptr;
+}
+
 std::size_t TextBuffer::GetHash() const
 {
     std::size_t hash = 0;

@@ -59,8 +59,12 @@ namespace gfx
         // Set the new text buffer size.
         void SetBufferSize(unsigned width, unsigned height);
 
-        // Rasterize the text buffer contents into a bitmap
+        // Rasterize the text buffer contents into a bitmap.
+        // Throws an exception on an error.
         std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
+        // Try to rasterize the contents into a a bitmap.
+        // Returns nullptr one error.
+        std::shared_ptr<Bitmap<Grayscale>> TryRasterize() const;
 
         enum class HorizontalAlignment {
             AlignLeft,

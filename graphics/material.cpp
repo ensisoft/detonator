@@ -2105,12 +2105,18 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     auto* texture = device.FindTexture(name);
     if (!texture)
     {
-        auto bitmap = mText.Rasterize();
+        // create the texture object first. The if check above
+        // will then act as a throttle and prevent superfluous
+        // attempts to rasterize when the contents of the text
+        // buffer have not changed. 
+        texture = device.MakeTexture(name);
+
+        auto bitmap = mText.TryRasterize();
         if (!bitmap)
             return;
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
-        texture = device.MakeTexture(name);
+
         texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale);
         texture->SetContentHash(hash);
         texture->SetTransient(true);
