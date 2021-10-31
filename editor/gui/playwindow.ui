@@ -103,6 +103,29 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="lblVBO_2">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>File Cache</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="statFileCache">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="lblVBO">
             <property name="enabled">
              <bool>false</bool>
@@ -131,7 +154,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Wall time (s)</string>
+             <string>Wall time</string>
             </property>
            </widget>
           </item>
@@ -151,7 +174,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Game time (s)</string>
+             <string>Game time</string>
             </property>
            </widget>
           </item>
