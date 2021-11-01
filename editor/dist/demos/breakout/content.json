@@ -1136,8 +1136,8 @@
           },
           "name": "Node 0",
           "position": {
-            "x": -0.5,
-            "y": -0.5
+            "x": 0.0,
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -1160,10 +1160,10 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
-            "material": "B3ANINBSbA",
-            "renderpass": "Draw",
+            "material": "_Red",
+            "renderpass": "Mask",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1172,7 +1172,7 @@
           },
           "name": "node 0",
           "position": {
-            "x": -0.0,
+            "x": 0.0,
             "y": 750.0
           },
           "rotation": 0.0,
@@ -1183,42 +1183,6 @@
           "size": {
             "x": 350.0,
             "y": 1500.0
-          }
-        },
-        {
-          "class": "zlLdZaGRmN",
-          "drawable_item": {
-            "drawable": "_semi_circle",
-            "flags": {
-              "FlipVertically": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": false
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "B3ANINBSbA",
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 1",
-          "position": {
-            "x": 0.0,
-            "y": 451.5400085449219
-          },
-          "rotation": 3.1415927410125732,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 350.0,
-            "y": 350.0
           }
         },
         {
@@ -1272,10 +1236,10 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
-            "material": "B3ANINBSbA",
-            "renderpass": "Draw",
+            "material": "_Red",
+            "renderpass": "Mask",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1284,7 +1248,7 @@
           },
           "name": "Copy of node 0",
           "position": {
-            "x": -0.0,
+            "x": 0.0,
             "y": 750.0
           },
           "rotation": 0.0,
@@ -1298,19 +1262,19 @@
           }
         },
         {
-          "class": "nEW3oA2dak",
+          "class": "DPQ1nWvM1N",
           "drawable_item": {
-            "drawable": "_semi_circle",
+            "drawable": "_rect",
             "flags": {
               "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
-              "VisibleInGame": false
+              "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
-            "material": "B3ANINBSbA",
+            "material": "1Oau6Iem5r",
             "renderpass": "Draw",
             "renderstyle": "Solid",
             "timescale": 1.0
@@ -1318,19 +1282,19 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Copy of Node 1",
+          "name": "dimmer",
           "position": {
             "x": 0.0,
-            "y": 451.5400085449219
+            "y": 0.0
           },
-          "rotation": 3.1415927410125732,
+          "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 350.0,
-            "y": 350.0
+            "x": 1000.0,
+            "y": 800.0
           }
         }
       ],
@@ -1344,13 +1308,6 @@
           {
             "children": [
               {
-                "children": [
-                  {
-                    "node": {
-                      "id": "zlLdZaGRmN"
-                    }
-                  }
-                ],
                 "node": {
                   "id": "gW6NjEkLfo"
                 }
@@ -1363,13 +1320,6 @@
           {
             "children": [
               {
-                "children": [
-                  {
-                    "node": {
-                      "id": "nEW3oA2dak"
-                    }
-                  }
-                ],
                 "node": {
                   "id": "gaM59OlYN3"
                 }
@@ -1377,6 +1327,11 @@
             ],
             "node": {
               "id": "evEknn2QO5"
+            }
+          },
+          {
+            "node": {
+              "id": "DPQ1nWvM1N"
             }
           }
         ],
@@ -1842,7 +1797,7 @@
         "g": 1.0,
         "r": 1.0
       },
-      "gamma": 1.0,
+      "gamma": 0.800000011920929,
       "id": "OgRnbBquEI",
       "particle_action": "None",
       "rect": {
@@ -1937,7 +1892,7 @@
     },
     {
       "color": {
-        "a": 0.10196078568696976,
+        "a": 0.33725491166114807,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
@@ -1947,8 +1902,45 @@
       "resource_id": "B3ANINBSbA",
       "resource_name": "My Material",
       "static": false,
-      "surface": "Transparent",
+      "surface": "Emissive",
       "type": "Color"
+    },
+    {
+      "color_map0": {
+        "a": 0.23529411852359772,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.0
+      },
+      "color_map1": {
+        "a": 0.5607843399047852,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.0
+      },
+      "color_map2": {
+        "a": 0.30980393290519714,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.0
+      },
+      "color_map3": {
+        "a": 0.29411765933036804,
+        "b": 0.0,
+        "g": 0.0,
+        "r": 0.0
+      },
+      "gamma": 0.800000011920929,
+      "id": "1Oau6Iem5r",
+      "offset": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "resource_id": "1Oau6Iem5r",
+      "resource_name": "Dim",
+      "static": false,
+      "surface": "Transparent",
+      "type": "Gradient"
     }
   ],
   "scenes": [
