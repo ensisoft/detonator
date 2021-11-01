@@ -1226,7 +1226,19 @@ void Entity::Update(float dt)
         mAnimationTrack->Restart();
         for (auto& node : mNodes)
         {
-            node->Reset();
+            if (!mRenderTree.GetParent(node.get()))
+                continue;
+
+            const auto& klass = node->GetClass();
+            const auto& rotation = klass.GetRotation();
+            const auto& translation = klass.GetTranslation();
+            const auto& scale = klass.GetScale();
+            // if the node is a child node (i.e. has a parent) then reset the
+            // node's transformation based on the node's transformation relative
+            // to its parent in the entity class.
+            node->SetTranslation(translation);
+            node->SetRotation(rotation);
+            node->SetScale(scale);
         }
         return;
     }
