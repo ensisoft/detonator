@@ -342,7 +342,8 @@ void SetFlagActuator::Finish(EntityNode& node)
         text->SetFlag(TextItem::Flags::UnderlineText, next_value);
     else BUG("Unhandled flag in set flag actuator.");
 
-    DEBUG("Set EntityNode '%1' flag '%2' to '%3'.", node.GetName(), flag, next_value ? "On" : "Off");
+    // spams the log
+    // DEBUG("Set EntityNode '%1' flag '%2' to '%3'.", node.GetName(), flag, next_value ? "On" : "Off");
 }
 
 bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
