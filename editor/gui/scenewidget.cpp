@@ -1716,6 +1716,11 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
         }
         virtual bool FilterEntity(const game::SceneNodeClass& node) override
         {
+            // filter out nodes that are currently not visible.
+            // probably don't want to select any of those.
+            if (!node.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+                return false;
+
             for (const auto* n : mHits)
                 if (n == &node) return true;
             return false;
@@ -1784,13 +1789,16 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
             pos = hit_positions[i];
             break;
         }
-        else if (hit_nodes[i]->GetLayer() >= layer)
+        else if (hit_nodes[i]->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor) &&
+                 hit_nodes[i]->GetLayer() >= layer)
         {
             hit = hit_nodes[i];
             pos = hit_positions[i];
             layer = hit->GetLayer();
         }
     }
+    if (!hit->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+        return nullptr;
     *hitpos = pos;
     return hit;
 }
