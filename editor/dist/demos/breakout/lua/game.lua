@@ -4,8 +4,8 @@
 -- Called when the game is started.
 function StartGame()
     Game:SetViewport(base.FRect:new(-500.0, -400.0, 1000.0, 800.0))
-    Game:Play('Level 0')
---    Audio:PlayMusicGraph('ctr_title')
+    Game:Play('MainMenu')
+    Game:OpenUI('MainMenu')
 end
 
 -- Called as a response to Game:Play when an instance
@@ -100,7 +100,12 @@ end
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
-
+    if action.name == 'exit' then 
+        Game:Quit(0)
+    elseif action.name == 'play' then 
+        Game:CloseUI(0)
+        Game:Play('Level 0')
+    end    
 end
 
 -- Called when an audio event happens.
@@ -110,3 +115,4 @@ end
 function OnAudioEvent(event)
 
 end
+
