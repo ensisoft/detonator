@@ -1,40 +1,35 @@
 Ensisoft Gamestudio
 ===================
 
-A 2D game engine and editor.
+A 2D game engine and editor for Linux and Windows.
 
 ![Screenshot](screens/bandit-play.gif "Bandit demo")
 
 Currently supported major features.
-* Qt5 based editor for building graphics assets
-  * Separate workspaces for project based work
-  * WYSIWYG editing for animations, materials, particle systems and custom polygon shapes
-  * Process isolated editor game playback
+* Qt5 based editor
 * Text rendering
-* Various primitive shapes rendering
+* Various primitive shapes, custom polygon shapes
 * Material system
 * Particle system
-* Animated entity system
-* Window integration (https://github.com/ensisoft/wdk)
-* Minimalistic audio engine
-* Lua based scripting support including built-in code editor
+* Entity system with animation tracks
+* Audio engine
+* Lua based scripting for entities, scenes and game logic
 * Scene builder
-* UI builder
-* Box2D based physics support
-* Win32 / Linux support (both for Editor and as game build target)
+* Styleable UI system
+* Box2D based physics
 * Demo content
+* Game content packaging
+* Window integration (https://github.com/ensisoft/wdk)
 
 Planned major features not yet implemented:
 * Android and/or HTML5 build target support (TBD)
 
 Planned minor features not yet implemented:
-* Audio mixer and engine side audio integration
-* Help/API documentation for the game Lua API.
 * Acceleration structures / scene queries / ray casting
 * Several other functional and performance improvements
-* Facilities for loading/saving game data/state from Lua
+* See issues for more details
 
-![Screenshot](screens/editor-animation.png "Animation editor")
+![Screenshot](screens/editor-animation.png "Entity editor")
 Create your animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
 of nodes with various attachments for physics, rendering and text display. Animation tracks allow changing the properties
 of the nodes and transforming the tree itself over time. Each entity type can then be associated with a Lua script where
@@ -45,10 +40,23 @@ Create materials using the material editor by setting some properties for the pr
 Currently supports sprite animations, textures (including text and noise), gradient and color fills out of box.
 Custom shaders can be used too.
 
-![Screenshot](screens/editor-scene.png "Scene builder")
-Create the actual game scene using the scene editor. The entities you create in the entity editor are available here
+![Screenshot](screens/editor-scene.png "Scene editor")
+Create the game play scenes using the scene editor. The entities you create in the entity editor are available here
 for placing in the scene. Viewport visualization will quickly show you how much of the game world will be seen when
 the game plays.
+
+![Screenshot](screens/editor-ui.png "UI editor")
+Create the game's UI in the UI editor. The UI and the widgets can be styled using a JSON based style file and then individual widgets
+can have their style properties fine tuned in the editor. The style system integrates with the editor's material system too!
+
+![Screenshot](screens/editor-audio.png "Audio graph editor")
+Create audio graphs using the audio editor. Each audio graph can have a number of elements added to it. The graph then
+specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output. Currently
+supported audio backends are Waveout on Windows and Pulseaudio on Linux. Supported formats are wav, mp3, ogg and flac.
+
+![Screenshot](screens/editor-script.png "Script editor")
+Use the built-in code editor to write the Lua scripts for the entities, scenes or for the game. The editor has a built-in
+help system for accessing the engine side Lua API documentation.
 
 ![Screenshot](screens/demo-bandit.png "Editor game play window")
 During the development the game is available for play in the editor. It's possible to do live edits to the
@@ -176,11 +184,11 @@ Going from a git clone to a running game is known as the "build workflow". This 
 involving the source tree of the engine, the source tree of the game, the runtime assets provided with the
 engine and the runtime assets that are part of the game. Overall this will involve several build and packaging steps.
 
-Currently only Lua based games are supported. There's a provided game engine that is be built into a shared library
+Currently only Lua based games are supported. There's a provided game engine that is built into a shared library
 and which contains all the relevant functionality for running a game. That is it will take care of rendering the scene,
 ticking the physics engine, handling the UI input as well as invoking the Lua scripts in order to run *your* game code.
 It's possible to also not use this provided engine but write a completely different engine. In this case the interface
-to implement is the "App" interface in engine/main/interface.h.
+to implement is the "Engine" interface in engine/main/interface.h.
 
 From source code to a running game:
 1. Build the whole project as outlined in the **Build Instructions** previously.
@@ -240,17 +248,17 @@ An overview of the runtime architecture:
 1. There's a standard game engine that is built into a shared library called GameEngine.dll or libGameEngine.so.
 2. A launcher application called GameMain will read a config.json file. The JSON file contains information about
    windowing, context creation etc.
-   1. The launcher application will load the engine library and create an Application object instance.
+   1. The launcher application will load the engine library and create an <Engine> object instance.
    2. The launcher application will create the native window system window and also create the Open GL rendering context
-      which it will then give to the app instance.
+      which it will then give to the engine instance.
 3. The launcher application will then enter the top-level game loop. Inside the loop it will:
-   1. Process any window system window events to handle pending keyboard/mouse etc. events and pass them to the app as needed.
-   2. Handle events coming from the app instance. These could be for example requests to toggle full screen mode.
+   1. Process any window system window events to handle pending keyboard/mouse etc. events and pass them to the engine as needed.
+   2. Handle events coming from the engine instance. These could be for example requests to toggle full screen mode.
    3. Accumulate and track time, call functions to Update, Tick and Draw the app instance.
 
 Inside the game engine the following will take place.
 1. The various subsystems are updated and ticked. These include physics, audio, scripting etc.
-2. The renderer is used to draw the current background and foreground scenes.
+2. The renderer is used to draw the current scene.
 3. The engine will handle the input events (mouse, keyboard) coming from the host process and choose the appropriate action.
    For example If a UI is being shown the input is passed to the UI subsystem. The inputs are then also passed to the
    game scripting system and ultimately to your game's Lua scripts.
