@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <memory>
+
 #include "warnpush.h"
 #  include "ui_scriptwidget.h"
 #  include <QTextDocument>
@@ -69,12 +71,15 @@ namespace gui
         void on_btnReplaceAll_clicked();
 
         void FileWasChanged();
+        void TableSelectionChanged(const QItemSelection, const QItemSelection&);
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;
         bool LoadDocument(const QString& file);
     private:
         Ui::ScriptWidget mUI;
     private:
+        class TableModel;
+        std::unique_ptr<TableModel> mTableModel;
         app::Workspace* mWorkspace = nullptr;
         QFileSystemWatcher mWatcher;
         QTextDocument mDocument;
