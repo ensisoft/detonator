@@ -22,6 +22,8 @@
     "7tJg4l9xmT": {
         "checked_for_packing": true
     },
+    "847gBr2NKv": {
+    },
     "8xZogKY3K1": {
         "checked_for_packing": true
     },
@@ -109,6 +111,8 @@
             "timeline_6_self_id": "HrUMBDSW8j"
         }
     },
+    "kZPKqhUrT6": {
+    },
     "kkBOwiYNRn": {
         "checked_for_packing": true
     },
@@ -143,17 +147,17 @@
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
         "grab_mouse": false,
-        "mouse_pointer_drawable": "_arrow_cursor",
+        "mouse_pointer_drawable": "_block_cursor",
         "mouse_pointer_hotspot": {
-            "x": 0,
-            "y": 0
+            "x": 0.5,
+            "y": 0.5
         },
-        "mouse_pointer_material": "_Silver",
+        "mouse_pointer_material": "Rs00QF2N4E",
         "mouse_pointer_size": {
-            "x": 20,
+            "x": 80,
             "y": 20
         },
-        "mouse_pointer_visible": false,
+        "mouse_pointer_visible": true,
         "multisample_sample_count": 4,
         "num_position_iterations": 3,
         "num_velocity_iterations": 8,
@@ -173,6 +177,8 @@
         "window_vsync": false,
         "window_width": 1000,
         "working_folder": "${workspace}"
+    },
+    "rAn0G88CKj": {
     },
     "vSs0xqS3fS": {
         "checked_for_packing": true
