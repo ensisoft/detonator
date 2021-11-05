@@ -1087,7 +1087,10 @@ void BindUtil(sol::state& L)
     box["GetSize"]     = &FBox::GetSize;
     box["GetRotation"] = &FBox::GetRotation;
     box["Transform"]   = &FBox::Transform;
-    box["Reset"]       = &FBox::Reset;
+    box["Reset"]       = sol::overload(
+            [](FBox& box) {box.Reset(); },
+            [](FBox& box, float width, float height) { box.Reset(width, height); }
+            );
 
     util["JoinPath"]   = &base::JoinPath;
     util["FileExists"] = &base::FileExists;
@@ -1127,11 +1130,11 @@ void BindUtil(sol::state& L)
 
 void BindBase(sol::state& L)
 {
-    auto table = L.create_named_table("base");
-    table["debug"] = [](const std::string& str) { DEBUG(str); };
-    table["warn"]  = [](const std::string& str) { WARN(str); };
-    table["error"] = [](const std::string& str) { ERROR(str); };
-    table["info"]  = [](const std::string& str) { INFO(str); };
+    auto base = L.create_named_table("base");
+    base["debug"] = [](const std::string& str) { DEBUG(str); };
+    base["warn"]  = [](const std::string& str) { WARN(str); };
+    base["error"] = [](const std::string& str) { ERROR(str); };
+    base["info"]  = [](const std::string& str) { INFO(str); };
 
     auto trace = L.create_named_table("trace");
     trace["marker"] = sol::overload(
@@ -1142,7 +1145,7 @@ void BindBase(sol::state& L)
     trace["leave"]  = &base::TraceEndScope;
 
     sol::constructors<base::FRect(), base::FRect(float, float, float, float)> rect_ctors;
-    auto rect = table.new_usertype<base::FRect>("FRect", rect_ctors);
+    auto rect = base.new_usertype<base::FRect>("FRect", rect_ctors);
     rect["GetHeight"]      = &base::FRect::GetHeight;
     rect["GetWidth"]       = &base::FRect::GetWidth;
     rect["GetX"]           = &base::FRect::GetX;
@@ -1164,7 +1167,7 @@ void BindBase(sol::state& L)
     });
 
     sol::constructors<base::FSize(), base::FSize(float, float)> size_ctors;
-    auto size = table.new_usertype<base::FSize>("FSize", size_ctors);
+    auto size = base.new_usertype<base::FSize>("FSize", size_ctors);
     size["GetWidth"]  = &base::FSize::GetWidth;
     size["GetHeight"] = &base::FSize::GetHeight;
     size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
@@ -1173,7 +1176,7 @@ void BindBase(sol::state& L)
     size.set_function(sol::meta_function::to_string, [](const base::FSize& size) { return base::ToString(size); });
 
     sol::constructors<base::FPoint(), base::FPoint(float, float)> point_ctors;
-    auto point = table.new_usertype<base::FPoint>("FPoint", point_ctors);
+    auto point = base.new_usertype<base::FPoint>("FPoint", point_ctors);
     point["GetX"] = &base::FPoint::GetX;
     point["GetY"] = &base::FPoint::GetY;
     point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
@@ -1184,14 +1187,14 @@ void BindBase(sol::state& L)
     for (const auto& color : magic_enum::enum_values<base::Color>())
     {
         const std::string name(magic_enum::enum_name(color));
-        table[sol::create_if_nil]["Colors"][name] = magic_enum::enum_integer(color);
+        base[sol::create_if_nil]["Colors"][name] = magic_enum::enum_integer(color);
     }
 
     // todo: figure out a way to construct from color name, is that possible?
     sol::constructors<base::Color4f(),
             base::Color4f(float, float, float, float),
             base::Color4f(int, int, int, int)> color_ctors;
-    auto color = table.new_usertype<base::Color4f>("Color4f", color_ctors);
+    auto color = base.new_usertype<base::Color4f>("Color4f", color_ctors);
     color["GetRed"]     = &base::Color4f::Red;
     color["GetGreen"]   = &base::Color4f::Green;
     color["GetBlue"]    = &base::Color4f::Blue;
@@ -1200,18 +1203,32 @@ void BindBase(sol::state& L)
     color["SetGreen"]   = (void(base::Color4f::*)(float))&base::Color4f::SetGreen;
     color["SetBlue"]    = (void(base::Color4f::*)(float))&base::Color4f::SetBlue;
     color["SetAlpha"]   = (void(base::Color4f::*)(float))&base::Color4f::SetAlpha;
-    color["SetColor"]   = [](base::Color4f& color, int value) {
-        const auto color_value = magic_enum::enum_cast<base::Color>(value);
-        if (!color_value.has_value())
-            throw std::runtime_error("No such color value:" + std::to_string(value));
-        color = base::Color4f(color_value.value());
-    };
-    color["FromEnum"]   = [](int value) {
-        const auto color_value = magic_enum::enum_cast<base::Color>(value);
-        if (!color_value.has_value())
-            throw std::runtime_error("No such color value:" + std::to_string(value));
-        return base::Color4f(color_value.value());
-    };
+    color["SetColor"]   = sol::overload(
+        [](base::Color4f& color, int value) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(value);
+            if (!color_value.has_value())
+                throw std::runtime_error("No such color value:" + std::to_string(value));
+            color = base::Color4f(color_value.value());
+        },
+        [](base::Color4f& color, const std::string& name) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(name);
+            if (!color_value.has_value())
+                throw std::runtime_error("No such color name: " + name);
+            color = base::Color4f(color_value.value());
+        });
+    color["FromEnum"] = sol::overload(
+        [](int value) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(value);
+            if (!color_value.has_value())
+                throw std::runtime_error("No such color value:" + std::to_string(value));
+            return base::Color4f(color_value.value());
+        },
+        [](const std::string& name) {
+            const auto color_value = magic_enum::enum_cast<base::Color>(name);
+            if (!color_value.has_value())
+                throw std::runtime_error("No such color name: " + name);
+            return base::Color4f(color_value.value());
+        });
     color.set_function(sol::meta_function::to_string, [](const base::Color4f& color) { return base::ToString(color); });
 }
 
@@ -1560,12 +1577,12 @@ void BindGameLib(sol::state& L)
     auto table = L["game"].get_or_create<sol::table>();
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
-    classlib["FindEntityClassByName"] = &ClassLibrary::FindEntityClassByName;
-    classlib["FindEntityClassById"]   = &ClassLibrary::FindEntityClassById;
-    classlib["FindSceneClassByName"]  = &ClassLibrary::FindSceneClassByName;
-    classlib["FindSceneClassById"]    = &ClassLibrary::FindSceneClassById;
-    classlib["FindUIByName"]          = &ClassLibrary::FindUIByName;
-    classlib["FindUIById"]            = &ClassLibrary::FindUIById;
+    classlib["FindEntityClassByName"]     = &ClassLibrary::FindEntityClassByName;
+    classlib["FindEntityClassById"]       = &ClassLibrary::FindEntityClassById;
+    classlib["FindSceneClassByName"]      = &ClassLibrary::FindSceneClassByName;
+    classlib["FindSceneClassById"]        = &ClassLibrary::FindSceneClassById;
+    classlib["FindUIByName"]              = &ClassLibrary::FindUIByName;
+    classlib["FindUIById"]                = &ClassLibrary::FindUIById;
     classlib["FindAudioGraphClassByName"] = &ClassLibrary::FindAudioGraphClassByName;
     classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
