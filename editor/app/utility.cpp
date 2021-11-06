@@ -292,4 +292,26 @@ QString GetAppFilePath(const QString& name)
     return ToNativeSeparators(gAppHome + "/" + name);
 }
 
+bool ValidateQVariantJsonSupport(const QVariant& variant)
+{
+    // Qt API brainfart (QVariant::Type is deprecated)
+    const auto type = (QMetaType::Type)variant.type();
+    // todo:there's more but these should work at least.
+    return type == QMetaType::Type::Float ||
+           type == QMetaType::Type::Double ||
+           type == QMetaType::Type::Int ||
+           type == QMetaType::Type::UInt ||
+           type == QMetaType::Type::QString ||
+           type == QMetaType::Type::QColor;
+}
+bool ValidateQVariantMapJsonSupport(const QVariantMap& map)
+{
+    for (const auto& value : map)
+    {
+        if (!ValidateQVariantJsonSupport(value))
+            return false;
+    }
+    return true;
+}
+
 } // namespace
