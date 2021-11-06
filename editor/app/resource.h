@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <QString>
 #  include <QVariant>
+#  include <QVariantMap>
 #  include <QJsonObject>
 #  include <QIcon>
 #include "warnpop.h"
@@ -108,18 +109,6 @@ namespace app
         virtual bool HasProperty(const QString& name) const = 0;
         // returns true if the resource as a user property by the given name.
         virtual bool HasUserProperty(const QString& name) const = 0;
-        // Set a property value. If the property exists already the previous
-        // value is overwritten. Otherwise it's added.
-        virtual void SetProperty(const QString& name, const QVariant& value) = 0;
-        // Set a property value. If the property exists already the previous
-        // value is overwritten. Otherwise it's added.
-        virtual void SetUserProperty(const QString& name, const QVariant& value) = 0;
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns a null variant.
-        virtual QVariant GetVariantProperty(const QString& name) const = 0;
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns a null variant.
-        virtual QVariant GetUserVariantProperty(const QString& name) const = 0;
         // Load the additional properties from the json object.
         virtual void LoadProperties(const QJsonObject& json) = 0;
         // Load the additional properties from the json object.
@@ -134,36 +123,13 @@ namespace app
         // has a different/unique resource id.
         virtual std::unique_ptr<Resource> Clone() const = 0;
 
-        // helper to map the type to an icon in the application.
-        QIcon GetIcon() const
-        { return GetIcon(GetType()); }
-        static QIcon GetIcon(Resource::Type type)
-        {
-            switch (type) {
-                case Resource::Type::Material:
-                    return QIcon("icons:material.png");
-                case Resource::Type::ParticleSystem:
-                    return QIcon("icons:particle.png");
-                case Resource::Type::Shape:
-                    return QIcon("icons:polygon.png");
-                case Resource::Type::Entity:
-                    return QIcon("icons:entity.png");
-                case Resource::Type::Scene:
-                    return QIcon("icons:scene.png");
-                case Resource::Type::Script:
-                    return QIcon("icons:script.png");
-                case Resource::Type::AudioGraph:
-                    return QIcon("icons:audio.png");
-                case Resource::Type::DataFile:
-                    return QIcon("icons:database.png");
-                case Resource::Type::UI:
-                    return QIcon("icons:ui.png");
-                default: break;
-            }
-            return QIcon();
-        }
-
         // helpers
+        inline std::string GetNameUtf8() const
+        { return app::ToUtf8(GetName()); }
+        inline std::string GetIdUtf8() const
+        { return app::ToUtf8(GetId()); }
+        inline QIcon GetIcon() const
+        { return GetIcon(GetType()); }
         inline bool IsMaterial() const
         { return GetType() == Type::Material; }
         inline bool IsParticleEngine() const
@@ -183,6 +149,56 @@ namespace app
         inline bool IsUI() const
         { return GetType() == Type::UI; }
 
+        // property helpers.
+        // There's a lot of stuff that goes into QVariant but then doesn't
+        // serialize correctly. For instance QColor and QByteArray.
+
+        // Set a resource specific property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        inline void SetProperty(const QString& name, const QByteArray& bytes)
+        { SetVariantProperty(name, bytes.toBase64()); }
+        inline void SetProperty(const QString& name, const QColor& color)
+        { SetVariantProperty(name, color); }
+        inline void SetProperty(const QString& name, const QString& value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, quint64 value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, unsigned value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, int value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, double value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, float value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, const QVariantMap& map)
+        {
+            ASSERT(ValidateQVariantMapJsonSupport(map));
+            SetVariantProperty(name, map);
+        }
+
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        QByteArray GetProperty(const QString& name, const QByteArray& def) const
+        {
+            const auto& ret  = GetVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                return QByteArray::fromBase64(str.toLatin1());
+            return QByteArray();
+        }
+        bool GetProperty(const QString& name, QByteArray* out) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return false;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                *out = QByteArray::fromBase64(str.toLatin1());
+            return true;
+        }
         template<typename T>
         T GetProperty(const QString& name, const T& def) const
         {
@@ -201,6 +217,52 @@ namespace app
             return true;
         }
 
+        // Set a user specific property value. If the property exists already the previous
+        // value is overwritten. Otherwise it's added.
+        inline void SetUserProperty(const QString& name, const QByteArray& bytes)
+        { SetUserVariantProperty(name, bytes.toBase64()); }
+        inline void SetUserProperty(const QString& name, const QColor& color)
+        { SetUserVariantProperty(name, color); }
+        inline void SetUserProperty(const QString& name, const QString& value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, quint64 value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, unsigned value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, int value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, double value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, float value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, const QVariantMap& map)
+        {
+            ASSERT(ValidateQVariantMapJsonSupport(map));
+            SetVariantProperty(name, map);
+        }
+
+        // Return the value of the property identified by name.
+        // If the property doesn't exist returns a null variant.
+        QByteArray GetUserProperty(const QString& name, const QByteArray& def) const
+        {
+            const auto& ret  = GetUserVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                return QByteArray::fromBase64(str.toLatin1());
+            return QByteArray();
+        }
+        bool GetUserProperty(const QString& name, QByteArray* out) const
+        {
+            const auto& ret = GetUserVariantProperty(name);
+            if (ret.isNull())
+                return false;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                *out = QByteArray::fromBase64(str.toLatin1());
+            return true;
+        }
         template<typename T>
         T GetUserProperty(const QString& name, const T& def) const
         {
@@ -209,7 +271,6 @@ namespace app
             const auto& ret = GetUserVariantProperty(name);
             return qvariant_cast<T>(ret);
         }
-
         template<typename T>
         bool GetUserProperty(const QString& name, T* out) const
         {
@@ -249,16 +310,39 @@ namespace app
             return nullptr;
         }
 
-        std::string GetNameUtf8() const
-        { return app::ToUtf8(GetName()); }
-        std::string GetIdUtf8() const
-        { return app::ToUtf8(GetId()); }
-
+        static QIcon GetIcon(Resource::Type type)
+        {
+            switch (type) {
+                case Resource::Type::Material:
+                    return QIcon("icons:material.png");
+                case Resource::Type::ParticleSystem:
+                    return QIcon("icons:particle.png");
+                case Resource::Type::Shape:
+                    return QIcon("icons:polygon.png");
+                case Resource::Type::Entity:
+                    return QIcon("icons:entity.png");
+                case Resource::Type::Scene:
+                    return QIcon("icons:scene.png");
+                case Resource::Type::Script:
+                    return QIcon("icons:script.png");
+                case Resource::Type::AudioGraph:
+                    return QIcon("icons:audio.png");
+                case Resource::Type::DataFile:
+                    return QIcon("icons:database.png");
+                case Resource::Type::UI:
+                    return QIcon("icons:ui.png");
+                default: break;
+            }
+            return QIcon();
+        }
     protected:
         virtual void* GetIf(const std::type_info& expected_type) = 0;
         virtual const void* GetIf(const std::type_info& expected_type) const = 0;
+        virtual void SetVariantProperty(const QString& name, const QVariant& value) = 0;
+        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) = 0;
+        virtual QVariant GetVariantProperty(const QString& name) const = 0;
+        virtual QVariant GetUserVariantProperty(const QString& name) const = 0;
     private:
-
     };
 
     namespace detail {
@@ -430,34 +514,17 @@ namespace app
                 data.AppendChunk("uis", std::move(chunk));
         }
         virtual void SaveProperties(QJsonObject& json) const override
-        {
-            json[GetId()] = QJsonObject::fromVariantMap(mProps);
-        }
+        { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
         virtual void SaveUserProperties(QJsonObject& json) const override
-        {
-            json[GetId()] = QJsonObject::fromVariantMap(mUserProps);
-        }
+        { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
         virtual bool HasUserProperty(const QString& name) const override
         { return mUserProps.contains(name); }
-
-        virtual void SetProperty(const QString& name, const QVariant& value) override
-        { mProps[name] = value; }
-        virtual void SetUserProperty(const QString& name, const QVariant& value) override
-        { mUserProps[name] = value; }
-        virtual QVariant GetVariantProperty(const QString& name) const override
-        { return mProps[name]; }
-        virtual QVariant GetUserVariantProperty(const QString& name) const override
-        { return mUserProps[name]; }
         virtual void LoadProperties(const QJsonObject& object) override
-        {
-            mProps = object[GetId()].toObject().toVariantMap();
-        }
+        { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
-        {
-            mUserProps = object[GetId()].toObject().toVariantMap();
-        }
+        { mUserProps = object[GetId()].toObject().toVariantMap(); }
         virtual std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
         virtual std::unique_ptr<Resource> Clone() const override
@@ -505,6 +572,14 @@ namespace app
                 return (const void*)mContent.get();
             return nullptr;
         }
+        virtual void SetVariantProperty(const QString& name, const QVariant& value) override
+        { mProps[name] = value; }
+        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) override
+        { mUserProps[name] = value; }
+        virtual QVariant GetVariantProperty(const QString& name) const override
+        { return mProps[name]; }
+        virtual QVariant GetUserVariantProperty(const QString& name) const override
+        { return mUserProps[name]; }
     private:
         std::shared_ptr<Content> mContent;
         QString mName;
@@ -571,34 +646,17 @@ namespace app
             data.AppendChunk("materials", std::move(chunk));
         }
         virtual void SaveProperties(QJsonObject& json) const override
-        {
-            json[GetId()] = QJsonObject::fromVariantMap(mProps);
-        }
+        { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
         virtual void SaveUserProperties(QJsonObject& json) const override
-        {
-            json[GetId()] = QJsonObject::fromVariantMap(mUserProps);
-        }
+        { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
         virtual bool HasProperty(const QString& name) const override
         { return mProps.contains(name); }
         virtual bool HasUserProperty(const QString& name) const override
         { return mUserProps.contains(name); }
-
-        virtual void SetProperty(const QString& name, const QVariant& value) override
-        { mProps[name] = value; }
-        virtual void SetUserProperty(const QString& name, const QVariant& value) override
-        { mUserProps[name] = value; }
-        virtual QVariant GetVariantProperty(const QString& name) const override
-        { return mProps[name]; }
-        virtual QVariant GetUserVariantProperty(const QString& name) const override
-        { return mUserProps[name]; }
         virtual void LoadProperties(const QJsonObject& object) override
-        {
-            mProps = object[GetId()].toObject().toVariantMap();
-        }
+        { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
-        {
-            mUserProps = object[GetId()].toObject().toVariantMap();
-        }
+        { mUserProps = object[GetId()].toObject().toVariantMap(); }
         virtual std::unique_ptr<Resource> Copy() const override
         {
             auto ret = std::make_unique<MaterialResource>();
@@ -639,6 +697,14 @@ namespace app
                 return (const void*)mKlass.get();
             return nullptr;
         }
+        virtual void SetVariantProperty(const QString& name, const QVariant& value) override
+        { mProps[name] = value; }
+        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) override
+        { mUserProps[name] = value; }
+        virtual QVariant GetVariantProperty(const QString& name) const override
+        { return mProps[name]; }
+        virtual QVariant GetUserVariantProperty(const QString& name) const override
+        { return mUserProps[name]; }
     private:
         QString mName;
         std::shared_ptr<gfx::MaterialClass> mKlass;

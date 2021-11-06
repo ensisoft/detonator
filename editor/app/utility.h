@@ -23,6 +23,8 @@
 #  include <QColor>
 #  include <QJsonObject>
 #  include <QIcon>
+#  include <QVariant>
+#  include <QVariantMap>
 #  include <neargye/magic_enum.hpp>
 #  include <boost/logic/tribool.hpp>
 #  include <glm/vec2.hpp>
@@ -157,6 +159,9 @@ void InitializeAppHome(const QString& appname);
 // Get an absolute path to a file/folder in the application
 // home directory.
 QString GetAppFilePath(const QString& name);
+
+bool ValidateQVariantJsonSupport(const QVariant& variant);
+bool ValidateQVariantMapJsonSupport(const QVariantMap& map);
 
 template<typename Enum>
 Enum EnumFromString(const QString& str, Enum backup, bool* success = nullptr)
