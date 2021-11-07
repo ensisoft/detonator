@@ -168,13 +168,13 @@ void ShapeWidget::AddActions(QMenu& menu)
 
 bool ShapeWidget::SaveState(Settings& settings) const
 {
-    settings.setValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
-    settings.saveWidget("Polygon", mUI.name);
-    settings.saveWidget("Polygon", mUI.alpha);
-    settings.saveWidget("Polygon", mUI.chkShowGrid);
-    settings.saveWidget("Polygon", mUI.chkSnap);
-    settings.saveWidget("Polygon", mUI.cmbGrid);
-    settings.saveWidget("Polygon", mUI.widget);
+    settings.SetValue("Polygon", "material", (QString) GetItemId(mUI.blueprints));
+    settings.SaveWidget("Polygon", mUI.name);
+    settings.SaveWidget("Polygon", mUI.alpha);
+    settings.SaveWidget("Polygon", mUI.chkShowGrid);
+    settings.SaveWidget("Polygon", mUI.chkSnap);
+    settings.SaveWidget("Polygon", mUI.cmbGrid);
+    settings.SaveWidget("Polygon", mUI.widget);
 
     // the polygon can already serialize into JSON.
     // so let's use the JSON serialization in the animation
@@ -182,24 +182,24 @@ bool ShapeWidget::SaveState(Settings& settings) const
     // stick in the settings data stream.
     data::JsonObject json;
     mPolygon.IntoJson(json);
-    settings.setValue("Polygon", "content", base64::Encode(json.ToString()));
+    settings.SetValue("Polygon", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool ShapeWidget::LoadState(const Settings& settings)
 {
     QString material;
-    settings.getValue("Polygon", "material", &material);
-    settings.loadWidget("Polygon", mUI.name);
-    settings.loadWidget("Polygon", mUI.alpha);
-    settings.loadWidget("Polygon", mUI.chkShowGrid);
-    settings.loadWidget("Polygon", mUI.chkSnap);
-    settings.loadWidget("Polygon", mUI.cmbGrid);
-    settings.loadWidget("Polygon", mUI.widget);
+    settings.GetValue("Polygon", "material", &material);
+    settings.LoadWidget("Polygon", mUI.name);
+    settings.LoadWidget("Polygon", mUI.alpha);
+    settings.LoadWidget("Polygon", mUI.chkShowGrid);
+    settings.LoadWidget("Polygon", mUI.chkSnap);
+    settings.LoadWidget("Polygon", mUI.cmbGrid);
+    settings.LoadWidget("Polygon", mUI.widget);
     SetValue(mUI.blueprints, ListItemId(material));
     setWindowTitle(GetValue(mUI.name));
 
     std::string base64;
-    settings.getValue("Polygon", "content", &base64);
+    settings.GetValue("Polygon", "content", &base64);
 
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));

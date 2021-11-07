@@ -421,45 +421,45 @@ void SceneWidget::AddActions(QMenu& menu)
 
 bool SceneWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Scene", mUI.scaleX);
-    settings.saveWidget("Scene", mUI.scaleY);
-    settings.saveWidget("Scene", mUI.rotation);
-    settings.saveWidget("Scene", mUI.chkShowOrigin);
-    settings.saveWidget("Scene", mUI.chkShowGrid);
-    settings.saveWidget("Scene", mUI.chkShowViewport);
-    settings.saveWidget("Scene", mUI.chkSnap);
-    settings.saveWidget("Scene", mUI.cmbGrid);
-    settings.saveWidget("Scene", mUI.zoom);
-    settings.saveWidget("Scene", mUI.widget);
-    settings.setValue("Scene", "camera_offset_x", mState.camera_offset_x);
-    settings.setValue("Scene", "camera_offset_y", mState.camera_offset_y);
+    settings.SaveWidget("Scene", mUI.scaleX);
+    settings.SaveWidget("Scene", mUI.scaleY);
+    settings.SaveWidget("Scene", mUI.rotation);
+    settings.SaveWidget("Scene", mUI.chkShowOrigin);
+    settings.SaveWidget("Scene", mUI.chkShowGrid);
+    settings.SaveWidget("Scene", mUI.chkShowViewport);
+    settings.SaveWidget("Scene", mUI.chkSnap);
+    settings.SaveWidget("Scene", mUI.cmbGrid);
+    settings.SaveWidget("Scene", mUI.zoom);
+    settings.SaveWidget("Scene", mUI.widget);
+    settings.SetValue("Scene", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("Scene", "camera_offset_y", mState.camera_offset_y);
     // the scene can already serialize into JSON.
     // so let's use the JSON serialization in the scene
     // and then convert that into base64 string which we can
     // stick in the settings data stream.
     data::JsonObject json;
     mState.scene.IntoJson(json);
-    settings.setValue("Scene", "content", base64::Encode(json.ToString()));
+    settings.SetValue("Scene", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Scene", mUI.scaleX);
-    settings.loadWidget("Scene", mUI.scaleY);
-    settings.loadWidget("Scene", mUI.rotation);
-    settings.loadWidget("Scene", mUI.chkShowOrigin);
-    settings.loadWidget("Scene", mUI.chkShowGrid);
-    settings.loadWidget("Scene", mUI.chkShowViewport);
-    settings.loadWidget("Scene", mUI.chkSnap);
-    settings.loadWidget("Scene", mUI.cmbGrid);
-    settings.loadWidget("Scene", mUI.zoom);
-    settings.loadWidget("Scene", mUI.widget);
-    settings.getValue("Scene", "camera_offset_x", &mState.camera_offset_x);
-    settings.getValue("Scene", "camera_offset_y", &mState.camera_offset_y);
+    settings.LoadWidget("Scene", mUI.scaleX);
+    settings.LoadWidget("Scene", mUI.scaleY);
+    settings.LoadWidget("Scene", mUI.rotation);
+    settings.LoadWidget("Scene", mUI.chkShowOrigin);
+    settings.LoadWidget("Scene", mUI.chkShowGrid);
+    settings.LoadWidget("Scene", mUI.chkShowViewport);
+    settings.LoadWidget("Scene", mUI.chkSnap);
+    settings.LoadWidget("Scene", mUI.cmbGrid);
+    settings.LoadWidget("Scene", mUI.zoom);
+    settings.LoadWidget("Scene", mUI.widget);
+    settings.GetValue("Scene", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("Scene", "camera_offset_y", &mState.camera_offset_y);
     mCameraWasLoaded = true;
 
     std::string base64;
-    settings.getValue("Scene", "content", &base64);
+    settings.GetValue("Scene", "content", &base64);
 
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));

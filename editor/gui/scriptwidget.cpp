@@ -978,26 +978,26 @@ bool ScriptWidget::SaveState(Settings& settings) const
     // to the file they're then lost. options are to either
     // ask for save when shutting down or to save to an
     // intermediate scrap file somewhere.
-    settings.setValue("Script", "resource_id", mResourceID);
-    settings.setValue("Script", "resource_name", mResourceName);
-    settings.setValue("Script", "filename", mFilename);
-    settings.saveWidget("Script", mUI.findText);
-    settings.saveWidget("Script", mUI.replaceText);
-    settings.saveWidget("Script", mUI.findBackwards);
-    settings.saveWidget("Script", mUI.findCaseSensitive);
-    settings.saveWidget("Script", mUI.findWholeWords);
+    settings.SetValue("Script", "resource_id", mResourceID);
+    settings.SetValue("Script", "resource_name", mResourceName);
+    settings.SetValue("Script", "filename", mFilename);
+    settings.SaveWidget("Script", mUI.findText);
+    settings.SaveWidget("Script", mUI.replaceText);
+    settings.SaveWidget("Script", mUI.findBackwards);
+    settings.SaveWidget("Script", mUI.findCaseSensitive);
+    settings.SaveWidget("Script", mUI.findWholeWords);
     return true;
 }
 bool ScriptWidget::LoadState(const Settings& settings)
 {
-    settings.getValue("Script", "resource_id", &mResourceID);
-    settings.getValue("Script", "resource_name", &mResourceName);
-    settings.getValue("Script", "filename", &mFilename);
-    settings.loadWidget("Script", mUI.findText);
-    settings.loadWidget("Script", mUI.replaceText);
-    settings.loadWidget("Script", mUI.findBackwards);
-    settings.loadWidget("Script", mUI.findCaseSensitive);
-    settings.loadWidget("Script", mUI.findWholeWords);
+    settings.GetValue("Script", "resource_id", &mResourceID);
+    settings.GetValue("Script", "resource_name", &mResourceName);
+    settings.GetValue("Script", "filename", &mFilename);
+    settings.LoadWidget("Script", mUI.findText);
+    settings.LoadWidget("Script", mUI.replaceText);
+    settings.LoadWidget("Script", mUI.findBackwards);
+    settings.LoadWidget("Script", mUI.findCaseSensitive);
+    settings.LoadWidget("Script", mUI.findWholeWords);
     if (!mResourceName.isEmpty())
         setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
