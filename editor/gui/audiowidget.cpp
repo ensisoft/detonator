@@ -1190,18 +1190,18 @@ bool AudioWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
     mScene->IntoJson(json);
-    settings.setValue("Audio", "content", base64::Encode(json.ToString()));
-    settings.setValue("Audio", "graph_out_elem", (QString)GetItemId(mUI.outElem));
-    settings.setValue("Audio", "graph_out_port", (QString)GetItemId(mUI.outPort));
-    settings.setValue("Audio", "hash", mGraphHash);
-    settings.saveWidget("Audio", mUI.graphName);
-    settings.saveWidget("Audio", mUI.graphID);
+    settings.SetValue("Audio", "content", base64::Encode(json.ToString()));
+    settings.SetValue("Audio", "graph_out_elem", (QString) GetItemId(mUI.outElem));
+    settings.SetValue("Audio", "graph_out_port", (QString) GetItemId(mUI.outPort));
+    settings.SetValue("Audio", "hash", mGraphHash);
+    settings.SaveWidget("Audio", mUI.graphName);
+    settings.SaveWidget("Audio", mUI.graphID);
     return true;
 }
 bool AudioWidget::LoadState(const Settings& settings)
 {
     std::string base64;
-    settings.getValue("Audio", "content", &base64);
+    settings.GetValue("Audio", "content", &base64);
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));
     if (!ok)
@@ -1221,15 +1221,15 @@ bool AudioWidget::LoadState(const Settings& settings)
 
     QString graph_out_elem;
     QString graph_out_port;
-    settings.getValue("Audio", "graph_out_elem", &graph_out_elem);
-    settings.getValue("Audio", "graph_out_port", &graph_out_port);
-    settings.getValue("Audio", "hash", &mGraphHash);
+    settings.GetValue("Audio", "graph_out_elem", &graph_out_elem);
+    settings.GetValue("Audio", "graph_out_port", &graph_out_port);
+    settings.GetValue("Audio", "hash", &mGraphHash);
 
     SetValue(mUI.outElem, ListItemId(graph_out_elem));
     on_outElem_currentIndexChanged(0);
     SetValue(mUI.outPort, ListItemId(graph_out_port));
-    settings.loadWidget("Audio", mUI.graphName);
-    settings.loadWidget("Audio", mUI.graphID);
+    settings.LoadWidget("Audio", mUI.graphName);
+    settings.LoadWidget("Audio", mUI.graphID);
 
     GetSelectedElementProperties();
     return true;

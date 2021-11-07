@@ -420,38 +420,38 @@ void UIWidget::AddActions(QMenu& menu)
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("UI", mUI.scaleX);
-    settings.saveWidget("UI", mUI.scaleY);
-    settings.saveWidget("UI", mUI.rotation);
-    settings.saveWidget("UI", mUI.chkShowOrigin);
-    settings.saveWidget("UI", mUI.chkShowGrid);
-    settings.saveWidget("UI", mUI.chkSnap);
-    settings.saveWidget("UI", mUI.cmbGrid);
-    settings.saveWidget("UI", mUI.zoom);
-    settings.saveWidget("UI", mUI.widget);
-    settings.setValue("UI", "camera_offset_x", mState.camera_offset_x);
-    settings.setValue("UI", "camera_offset_y", mState.camera_offset_y);
+    settings.SaveWidget("UI", mUI.scaleX);
+    settings.SaveWidget("UI", mUI.scaleY);
+    settings.SaveWidget("UI", mUI.rotation);
+    settings.SaveWidget("UI", mUI.chkShowOrigin);
+    settings.SaveWidget("UI", mUI.chkShowGrid);
+    settings.SaveWidget("UI", mUI.chkSnap);
+    settings.SaveWidget("UI", mUI.cmbGrid);
+    settings.SaveWidget("UI", mUI.zoom);
+    settings.SaveWidget("UI", mUI.widget);
+    settings.SetValue("UI", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("UI", "camera_offset_y", mState.camera_offset_y);
     data::JsonObject json;
     mState.window.IntoJson(json);
-    settings.setValue("UI", "content", base64::Encode(json.ToString()));
+    settings.SetValue("UI", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool UIWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("UI", mUI.scaleX);
-    settings.loadWidget("UI", mUI.scaleY);
-    settings.loadWidget("UI", mUI.rotation);
-    settings.loadWidget("UI", mUI.chkShowOrigin);
-    settings.loadWidget("UI", mUI.chkShowGrid);
-    settings.loadWidget("UI", mUI.chkSnap);
-    settings.loadWidget("UI", mUI.cmbGrid);
-    settings.loadWidget("UI", mUI.zoom);
-    settings.loadWidget("UI", mUI.widget);
+    settings.LoadWidget("UI", mUI.scaleX);
+    settings.LoadWidget("UI", mUI.scaleY);
+    settings.LoadWidget("UI", mUI.rotation);
+    settings.LoadWidget("UI", mUI.chkShowOrigin);
+    settings.LoadWidget("UI", mUI.chkShowGrid);
+    settings.LoadWidget("UI", mUI.chkSnap);
+    settings.LoadWidget("UI", mUI.cmbGrid);
+    settings.LoadWidget("UI", mUI.zoom);
+    settings.LoadWidget("UI", mUI.widget);
 
     std::string base64;
-    settings.getValue("UI", "camera_offset_x", &mState.camera_offset_x);
-    settings.getValue("UI", "camera_offset_y", &mState.camera_offset_y);
-    settings.getValue("UI", "content", &base64);
+    settings.GetValue("UI", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("UI", "camera_offset_y", &mState.camera_offset_y);
+    settings.GetValue("UI", "content", &base64);
 
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));

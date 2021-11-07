@@ -230,38 +230,38 @@ void MainWindow::loadState()
     // Load master settings.
     Settings settings("Ensisoft", "Gamestudio Editor");
 
-    const auto log_bits       = settings.getValue("MainWindow", "log_bits", mEventLog.GetShowBits());
-    const auto window_xdim    = settings.getValue("MainWindow", "width",  width());
-    const auto window_ydim    = settings.getValue("MainWindow", "height", height());
-    const auto window_xpos    = settings.getValue("MainWindow", "xpos", x());
-    const auto window_ypos    = settings.getValue("MainWindow", "ypos", y());
-    const auto show_statbar   = settings.getValue("MainWindow", "show_statusbar", true);
-    const auto show_toolbar   = settings.getValue("MainWindow", "show_toolbar", true);
-    const auto show_eventlog  = settings.getValue("MainWindow", "show_event_log", true);
-    const auto show_workspace = settings.getValue("MainWindow", "show_workspace", true);
-    const auto& dock_state    = settings.getValue("MainWindow", "toolbar_and_dock_state", QByteArray());
-    settings.getValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
-    settings.getValue("Settings", "image_editor_executable",  &mSettings.image_editor_executable);
-    settings.getValue("Settings", "image_editor_arguments",   &mSettings.image_editor_arguments);
-    settings.getValue("Settings", "shader_editor_executable", &mSettings.shader_editor_executable);
-    settings.getValue("Settings", "shader_editor_arguments",  &mSettings.shader_editor_arguments);
-    settings.getValue("Settings", "script_editor_executable", &mSettings.script_editor_executable);
-    settings.getValue("Settings", "script_editor_arguments",  &mSettings.script_editor_arguments);
-    settings.getValue("Settings", "audio_editor_executable",  &mSettings.audio_editor_executable);
-    settings.getValue("Settings", "audio_editor_arguments",   &mSettings.audio_editor_arguments);
-    settings.getValue("Settings", "default_open_win_or_tab",  &mSettings.default_open_win_or_tab);
-    settings.getValue("Settings", "style_name", &mSettings.style_name);
-    settings.getValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
+    const auto log_bits       = settings.GetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
+    const auto window_xdim    = settings.GetValue("MainWindow", "width", width());
+    const auto window_ydim    = settings.GetValue("MainWindow", "height", height());
+    const auto window_xpos    = settings.GetValue("MainWindow", "xpos", x());
+    const auto window_ypos    = settings.GetValue("MainWindow", "ypos", y());
+    const auto show_statbar   = settings.GetValue("MainWindow", "show_statusbar", true);
+    const auto show_toolbar   = settings.GetValue("MainWindow", "show_toolbar", true);
+    const auto show_eventlog  = settings.GetValue("MainWindow", "show_event_log", true);
+    const auto show_workspace = settings.GetValue("MainWindow", "show_workspace", true);
+    const auto& dock_state    = settings.GetValue("MainWindow", "toolbar_and_dock_state", QByteArray());
+    settings.GetValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
+    settings.GetValue("Settings", "image_editor_executable", &mSettings.image_editor_executable);
+    settings.GetValue("Settings", "image_editor_arguments", &mSettings.image_editor_arguments);
+    settings.GetValue("Settings", "shader_editor_executable", &mSettings.shader_editor_executable);
+    settings.GetValue("Settings", "shader_editor_arguments", &mSettings.shader_editor_arguments);
+    settings.GetValue("Settings", "script_editor_executable", &mSettings.script_editor_executable);
+    settings.GetValue("Settings", "script_editor_arguments", &mSettings.script_editor_arguments);
+    settings.GetValue("Settings", "audio_editor_executable", &mSettings.audio_editor_executable);
+    settings.GetValue("Settings", "audio_editor_arguments", &mSettings.audio_editor_arguments);
+    settings.GetValue("Settings", "default_open_win_or_tab", &mSettings.default_open_win_or_tab);
+    settings.GetValue("Settings", "style_name", &mSettings.style_name);
+    settings.GetValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
 
     TextEditor::Settings editor_settings;
-    settings.getValue("TextEditor", "font",                   &editor_settings.font_description);
-    settings.getValue("TextEditor", "font_size",              &editor_settings.font_size);
-    settings.getValue("TextEditor", "theme",                  &editor_settings.theme);
-    settings.getValue("TextEditor", "show_line_numbers",      &editor_settings.show_line_numbers);
-    settings.getValue("TextEditor", "highlight_syntax",       &editor_settings.highlight_syntax);
-    settings.getValue("TextEditor", "highlight_current_line", &editor_settings.highlight_current_line);
-    settings.getValue("TextEditor", "insert_spaces",          &editor_settings.insert_spaces);
-    settings.getValue("TextEditor", "tab_spaces",             &editor_settings.tab_spaces);
+    settings.GetValue("TextEditor", "font", &editor_settings.font_description);
+    settings.GetValue("TextEditor", "font_size", &editor_settings.font_size);
+    settings.GetValue("TextEditor", "theme", &editor_settings.theme);
+    settings.GetValue("TextEditor", "show_line_numbers", &editor_settings.show_line_numbers);
+    settings.GetValue("TextEditor", "highlight_syntax", &editor_settings.highlight_syntax);
+    settings.GetValue("TextEditor", "highlight_current_line", &editor_settings.highlight_current_line);
+    settings.GetValue("TextEditor", "insert_spaces", &editor_settings.insert_spaces);
+    settings.GetValue("TextEditor", "tab_spaces", &editor_settings.tab_spaces);
     TextEditor::SetDefaultSettings(editor_settings);
 
     QStyle* style = QApplication::setStyle(mSettings.style_name);
@@ -323,7 +323,7 @@ void MainWindow::loadState()
     }
 
     // load previous workspace if any
-    const auto& workspace = settings.getValue("MainWindow", "current_workspace", QString(""));
+    const auto& workspace = settings.GetValue("MainWindow", "current_workspace", QString(""));
     if (workspace.isEmpty())
         return;
 
@@ -423,8 +423,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             success = false;
             continue;
         }
-        const auto& klass = settings.getValue("MainWindow", "class_name", QString(""));
-        const auto& id    = settings.getValue("MainWindow", "widget_id", QString(""));
+        const auto& klass = settings.GetValue("MainWindow", "class_name", QString(""));
+        const auto& id    = settings.GetValue("MainWindow", "widget_id", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
             widget = new MaterialWidget(workspace.get());
@@ -451,14 +451,14 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             WARN("Widget '%1 failed to load state.", widget->windowTitle());
             success = false;
         }
-        const bool has_own_window = settings.getValue("MainWindow", "has_own_window", false);
+        const bool has_own_window = settings.GetValue("MainWindow", "has_own_window", false);
         if (has_own_window)
         {
             ChildWindow* window = ShowWidget(widget , true);
-            const auto xpos  = settings.getValue("MainWindow", "window_xpos", window->x());
-            const auto ypos  = settings.getValue("MainWindow", "window_ypos", window->y());
-            const auto width = settings.getValue("MainWindow", "window_width", window->width());
-            const auto height = settings.getValue("MainWindow", "window_height", window->height());
+            const auto xpos  = settings.GetValue("MainWindow", "window_xpos", window->x());
+            const auto ypos  = settings.GetValue("MainWindow", "window_ypos", window->y());
+            const auto width = settings.GetValue("MainWindow", "window_width", window->width());
+            const auto height = settings.GetValue("MainWindow", "window_height", window->height());
             if (xpos < size.width() && ypos < size.height())
                 window->move(xpos, ypos);
 
@@ -531,8 +531,8 @@ bool MainWindow::SaveWorkspace()
         const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
 
         Settings settings(file);
-        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
-        settings.setValue("MainWindow", "widget_id", widget->GetId());
+        settings.SetValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.SetValue("MainWindow", "widget_id", widget->GetId());
         if (!widget->SaveState(settings))
         {
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
@@ -569,12 +569,12 @@ bool MainWindow::SaveWorkspace()
         const MainWidget* widget = child->GetWidget();
 
         Settings settings(file);
-        settings.setValue("MainWindow", "class_name", widget->metaObject()->className());
-        settings.setValue("MainWindow", "has_own_window", true);
-        settings.setValue("MainWindow", "window_xpos", child->x());
-        settings.setValue("MainWindow", "window_ypos", child->y());
-        settings.setValue("MainWindow", "window_width", child->width());
-        settings.setValue("MainWindow", "window_height", child->height());
+        settings.SetValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.SetValue("MainWindow", "has_own_window", true);
+        settings.SetValue("MainWindow", "window_xpos", child->x());
+        settings.SetValue("MainWindow", "window_ypos", child->y());
+        settings.SetValue("MainWindow", "window_width", child->width());
+        settings.SetValue("MainWindow", "window_height", child->height());
         if (!widget->SaveState(settings))
         {
             ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
@@ -2204,44 +2204,44 @@ bool MainWindow::SaveState()
 {
     // persist the properties of the mainwindow itself.
     Settings settings("Ensisoft", "Gamestudio Editor");
-    settings.setValue("MainWindow", "log_bits", mEventLog.GetShowBits());
-    settings.setValue("MainWindow", "width", width());
-    settings.setValue("MainWindow", "height", height());
-    settings.setValue("MainWindow", "xpos", x());
-    settings.setValue("MainWindow", "ypos", y());
-    settings.setValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
-    settings.setValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
-    settings.setValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
-    settings.setValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
-    settings.setValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
-    settings.setValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
-    settings.setValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
-    settings.setValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
-    settings.setValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
-    settings.setValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
-    settings.setValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
-    settings.setValue("Settings", "audio_editor_executable", mSettings.audio_editor_executable);
-    settings.setValue("Settings", "audio_editor_arguments", mSettings.audio_editor_arguments);
-    settings.setValue("Settings", "style_name", mSettings.style_name);
-    settings.setValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
-    settings.setValue("MainWindow", "current_workspace",
-        (mWorkspace ? mWorkspace->GetDir() : ""));
-    settings.setValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
+    settings.SetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
+    settings.SetValue("MainWindow", "width", width());
+    settings.SetValue("MainWindow", "height", height());
+    settings.SetValue("MainWindow", "xpos", x());
+    settings.SetValue("MainWindow", "ypos", y());
+    settings.SetValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
+    settings.SetValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+    settings.SetValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
+    settings.SetValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    settings.SetValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
+    settings.SetValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
+    settings.SetValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
+    settings.SetValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
+    settings.SetValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
+    settings.SetValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
+    settings.SetValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
+    settings.SetValue("Settings", "audio_editor_executable", mSettings.audio_editor_executable);
+    settings.SetValue("Settings", "audio_editor_arguments", mSettings.audio_editor_arguments);
+    settings.SetValue("Settings", "style_name", mSettings.style_name);
+    settings.SetValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
+    settings.SetValue("MainWindow", "current_workspace",
+                      (mWorkspace ? mWorkspace->GetDir() : ""));
+    settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
 
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
-    settings.setValue("TextEditor", "font",                   editor_settings.font_description);
-    settings.setValue("TextEditor", "font_size",              editor_settings.font_size);
-    settings.setValue("TextEditor", "theme",                  editor_settings.theme);
-    settings.setValue("TextEditor", "show_line_numbers",      editor_settings.show_line_numbers);
-    settings.setValue("TextEditor", "highlight_syntax",       editor_settings.highlight_syntax);
-    settings.setValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
-    settings.setValue("TextEditor", "insert_spaces",          editor_settings.insert_spaces);
-    settings.setValue("TextEditor", "tab_spaces",             editor_settings.tab_spaces);
+    settings.SetValue("TextEditor", "font", editor_settings.font_description);
+    settings.SetValue("TextEditor", "font_size", editor_settings.font_size);
+    settings.SetValue("TextEditor", "theme", editor_settings.theme);
+    settings.SetValue("TextEditor", "show_line_numbers", editor_settings.show_line_numbers);
+    settings.SetValue("TextEditor", "highlight_syntax", editor_settings.highlight_syntax);
+    settings.SetValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
+    settings.SetValue("TextEditor", "insert_spaces", editor_settings.insert_spaces);
+    settings.SetValue("TextEditor", "tab_spaces", editor_settings.tab_spaces);
 
     // QMainWindow::SaveState saves the current state of the mainwindow toolbars
     // and dockwidgets.
-    settings.setValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
+    settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     return settings.Save();
 }
 

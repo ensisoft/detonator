@@ -216,7 +216,7 @@ void MaterialWidget::AddActions(QMenu& menu)
 bool MaterialWidget::LoadState(const Settings& settings)
 {
     std::string base64;
-    settings.getValue("Material", "content", &base64);
+    settings.GetValue("Material", "content", &base64);
 
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));
@@ -234,10 +234,10 @@ bool MaterialWidget::LoadState(const Settings& settings)
     mMaterial = std::move(ret);
     mOriginalHash = mMaterial->GetHash();
 
-    settings.loadWidget("Material", mUI.materialName);
-    settings.loadWidget("Material", mUI.zoom);
-    settings.loadWidget("Material", mUI.cmbModel);
-    settings.loadWidget("Material", mUI.widget);
+    settings.LoadWidget("Material", mUI.materialName);
+    settings.LoadWidget("Material", mUI.zoom);
+    settings.LoadWidget("Material", mUI.cmbModel);
+    settings.LoadWidget("Material", mUI.widget);
 
     ApplyShaderDescription();
     GetMaterialProperties();
@@ -251,11 +251,11 @@ bool MaterialWidget::SaveState(Settings& settings) const
     data::JsonObject json;
     mMaterial->IntoJson(json);
 
-    settings.saveWidget("Material", mUI.materialName);
-    settings.saveWidget("Material", mUI.zoom);
-    settings.saveWidget("Material", mUI.cmbModel);
-    settings.saveWidget("Material", mUI.widget);
-    settings.setValue("Material", "content", base64::Encode(json.ToString()));
+    settings.SaveWidget("Material", mUI.materialName);
+    settings.SaveWidget("Material", mUI.zoom);
+    settings.SaveWidget("Material", mUI.cmbModel);
+    settings.SaveWidget("Material", mUI.widget);
+    settings.SetValue("Material", "content", base64::Encode(json.ToString()));
     return true;
 }
 

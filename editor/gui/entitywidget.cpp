@@ -468,22 +468,22 @@ void EntityWidget::AddActions(QMenu& menu)
 
 bool EntityWidget::SaveState(Settings& settings) const
 {
-    settings.saveWidget("Entity", mUI.scaleX);
-    settings.saveWidget("Entity", mUI.scaleY);
-    settings.saveWidget("Entity", mUI.rotation);
-    settings.saveWidget("Entity", mUI.chkShowOrigin);
-    settings.saveWidget("Entity", mUI.chkShowGrid);
-    settings.saveWidget("Entity", mUI.chkShowViewport);
-    settings.saveWidget("Entity", mUI.chkSnap);
-    settings.saveWidget("Entity", mUI.cmbGrid);
-    settings.saveWidget("Entity", mUI.zoom);
-    settings.saveWidget("Entity", mUI.widget);
-    settings.setValue("Entity", "camera_offset_x", mState.camera_offset_x);
-    settings.setValue("Entity", "camera_offset_y", mState.camera_offset_y);
+    settings.SaveWidget("Entity", mUI.scaleX);
+    settings.SaveWidget("Entity", mUI.scaleY);
+    settings.SaveWidget("Entity", mUI.rotation);
+    settings.SaveWidget("Entity", mUI.chkShowOrigin);
+    settings.SaveWidget("Entity", mUI.chkShowGrid);
+    settings.SaveWidget("Entity", mUI.chkShowViewport);
+    settings.SaveWidget("Entity", mUI.chkSnap);
+    settings.SaveWidget("Entity", mUI.cmbGrid);
+    settings.SaveWidget("Entity", mUI.zoom);
+    settings.SaveWidget("Entity", mUI.widget);
+    settings.SetValue("Entity", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("Entity", "camera_offset_y", mState.camera_offset_y);
 
     for (const auto& p : mTrackProperties)
     {
-        settings.setValue("Entity", app::FromUtf8(p.first), p.second);
+        settings.SetValue("Entity", app::FromUtf8(p.first), p.second);
     }
 
     // the entity can already serialize into JSON.
@@ -492,27 +492,27 @@ bool EntityWidget::SaveState(Settings& settings) const
     // stick in the settings data stream.
     data::JsonObject json;
     mState.entity->IntoJson(json);
-    settings.setValue("Entity", "content", base64::Encode(json.ToString()));
+    settings.SetValue("Entity", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
 {
-    settings.loadWidget("Entity", mUI.scaleX);
-    settings.loadWidget("Entity", mUI.scaleY);
-    settings.loadWidget("Entity", mUI.rotation);
-    settings.loadWidget("Entity", mUI.chkShowOrigin);
-    settings.loadWidget("Entity", mUI.chkShowGrid);
-    settings.loadWidget("Entity", mUI.chkShowViewport);
-    settings.loadWidget("Entity", mUI.chkSnap);
-    settings.loadWidget("Entity", mUI.cmbGrid);
-    settings.loadWidget("Entity", mUI.zoom);
-    settings.loadWidget("Entity", mUI.widget);
-    settings.getValue("Entity", "camera_offset_x", &mState.camera_offset_x);
-    settings.getValue("Entity", "camera_offset_y", &mState.camera_offset_y);
+    settings.LoadWidget("Entity", mUI.scaleX);
+    settings.LoadWidget("Entity", mUI.scaleY);
+    settings.LoadWidget("Entity", mUI.rotation);
+    settings.LoadWidget("Entity", mUI.chkShowOrigin);
+    settings.LoadWidget("Entity", mUI.chkShowGrid);
+    settings.LoadWidget("Entity", mUI.chkShowViewport);
+    settings.LoadWidget("Entity", mUI.chkSnap);
+    settings.LoadWidget("Entity", mUI.cmbGrid);
+    settings.LoadWidget("Entity", mUI.zoom);
+    settings.LoadWidget("Entity", mUI.widget);
+    settings.GetValue("Entity", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("Entity", "camera_offset_y", &mState.camera_offset_y);
     mCameraWasLoaded = true;
 
     std::string base64;
-    settings.getValue("Entity", "content", &base64);
+    settings.GetValue("Entity", "content", &base64);
 
     data::JsonObject json;
     auto [ok, error] = json.ParseString(base64::Decode(base64));
@@ -543,7 +543,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     {
         const auto& track = mState.entity->GetAnimationTrack(i);
         QVariantMap properties;
-        settings.getValue("Entity", app::FromUtf8(track.GetId()), &properties);
+        settings.GetValue("Entity", app::FromUtf8(track.GetId()), &properties);
         mTrackProperties[track.GetId()] = properties;
     }
 
