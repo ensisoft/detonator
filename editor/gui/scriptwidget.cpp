@@ -904,6 +904,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     mWatcher.addPath(mFilename);
     LoadDocument(mFilename);
     setWindowTitle(mResourceName);
+
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "help_splitter", mUI.helpSplitter);
 }
 ScriptWidget::~ScriptWidget()
 {
@@ -986,6 +989,8 @@ bool ScriptWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Script", mUI.findBackwards);
     settings.SaveWidget("Script", mUI.findCaseSensitive);
     settings.SaveWidget("Script", mUI.findWholeWords);
+    settings.SaveWidget("Script", mUI.mainSplitter);
+    settings.SaveWidget("Script", mUI.helpSplitter);
     return true;
 }
 bool ScriptWidget::LoadState(const Settings& settings)
@@ -998,6 +1003,8 @@ bool ScriptWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Script", mUI.findBackwards);
     settings.LoadWidget("Script", mUI.findCaseSensitive);
     settings.LoadWidget("Script", mUI.findWholeWords);
+    settings.LoadWidget("Script", mUI.mainSplitter);
+    settings.LoadWidget("Script", mUI.helpSplitter);
     if (!mResourceName.isEmpty())
         setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
@@ -1074,32 +1081,29 @@ void ScriptWidget::on_actionSave_triggered()
     // start watching this file if it wasn't being watched before.
     mWatcher.addPath(mFilename);
 
-    if (!mResourceID.isEmpty())
-        return;
+    if (mResourceID.isEmpty())
+    {
+        const QFileInfo info(mFilename);
+        mResourceName = info.baseName();
 
-    const QFileInfo info(mFilename);
-    mResourceName = info.baseName();
+        const auto& URI = mWorkspace->MapFileToWorkspace(mFilename);
+        DEBUG("Script file URI '%1'", URI);
 
-    // does it even make any sense to ask?
-#if 0
-    QMessageBox msg(this);
-    msg.setIcon(QMessageBox::Question);
-    msg.setWindowTitle(tr("Add to workspace?"));
-    msg.setText(tr("Would you like to add this script to the workspace?"));
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    if (msg.exec() == QMessageBox::No)
-        return;
-#endif
-
-    const auto& URI = mWorkspace->MapFileToWorkspace(mFilename);
-    DEBUG("Script file URI '%1'", URI);
-
-    app::Script script;
-    script.SetFileURI(app::ToUtf8(URI));
-    app::ScriptResource resource(script, mResourceName);
-    mWorkspace->SaveResource(resource);
-    setWindowTitle(mResourceName);
-    mResourceID = app::FromUtf8(script.GetId());
+        app::Script script;
+        script.SetFileURI(app::ToUtf8(URI));
+        app::ScriptResource resource(script, mResourceName);
+        SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+        SetUserProperty(resource, "help_splitter", mUI.helpSplitter);
+        mWorkspace->SaveResource(resource);
+        setWindowTitle(mResourceName);
+        mResourceID = app::FromUtf8(script.GetId());
+    }
+    else
+    {
+        auto* resource = mWorkspace->FindResourceById(mResourceID);
+        SetUserProperty(*resource, "main_splitter", mUI.mainSplitter);
+        SetUserProperty(*resource, "help_splitter", mUI.helpSplitter);
+    }
 }
 
 void ScriptWidget::on_actionOpen_triggered()

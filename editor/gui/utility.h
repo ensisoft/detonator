@@ -746,6 +746,9 @@ inline void SetProperty(Resource& res, const QString& name, quint64 value)
 
 // user properties.
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const QSplitter* splitter)
+{ res.SetUserProperty(name, splitter->saveState()); }
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const QString& name, const QComboBox* cmb)
 { res.SetUserProperty(name, cmb->currentText()); }
 template<typename Resource>
@@ -883,6 +886,19 @@ template<typename Resource, typename T> inline
 bool GetUserProperty(const Resource& res, const QString& name, T* out)
 {
     return res.GetUserProperty(name, out);
+}
+
+template<typename Resource>
+inline bool GetUserProperty(const Resource& res, const QString& name, QSplitter* splitter)
+{
+    QSignalBlocker s(splitter);
+    QByteArray state;
+    if (res.GetUserProperty(name, &state))
+    {
+        splitter->restoreState(state);
+        return true;
+    }
+    return true;
 }
 
 template<typename Resource>
