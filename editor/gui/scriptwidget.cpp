@@ -735,8 +735,23 @@ void InitDoc()
     DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"
                                           "Entities that have been killed will be deleted from the scene on the next iteration of game loop.");
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
-                                           "This flag is only ever true on the first iteration of the game loop during the entitys' lifetime.");
+                                           "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index.", "int", "index");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByClassName", "Find a node in the entity by it's class name.<br>"
+                                                           "If multiple nodes have the same class name it's unspecified which one is returned.<br>"
+                                                           "Returns nil if no such node could be found.",
+                 "string", "class_name");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by it's class ID.<br>"
+                                                         "Returns nil if no such node could be found.",
+                 "string", "class_id");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by it's instance ID.<br>"
+                                                            "If multiple nodes have the same ID it's unspecified which one is returned.<br>"
+                                                            "Returns nil if no such node could be found.",
+                 "string", "id");
+    DOC_METHOD_0("void", "PlayIdle", "Play the entity's idle animation (if any).");
+    DOC_METHOD_0("void", "PlayAnimationByName", "Play an animation track by the given name.");
+    DOC_METHOD_0("void", "PlayAnimationById", "Play an animation track by the given ID.");
+    DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
 
     DOC_TABLE("game.EntityArgs");
     DOC_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");
