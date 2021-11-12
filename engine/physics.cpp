@@ -384,6 +384,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
                 mTransform.Push(node->GetModelTransform());
                     mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
                 mTransform.Pop();
+                it = mEngine.mNodes.find(node->GetId());
             }
             else
             {
