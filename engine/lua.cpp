@@ -538,6 +538,12 @@ LuaGame::LuaGame(const std::string& lua_path,
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
         self.mView = view;
     };
+    engine["GetTopUI"] = [](LuaGame& self, sol::this_state state) {
+        sol::state_view lua(state);
+        if (self.mWindowStack.empty())
+            return sol::make_object(lua, sol::nil);
+        return sol::make_object(lua, self.mWindowStack.top());
+    };
     mLuaState->script_file(base::JoinPath(lua_path, game_script));
 }
 
@@ -621,10 +627,12 @@ FRect LuaGame::GetViewport() const
 void LuaGame::OnUIOpen(uik::Window* ui)
 {
     CallLua((*mLuaState)["OnUIOpen"], ui);
+    mWindowStack.push(ui);
 }
 void LuaGame::OnUIClose(uik::Window* ui, int result)
 {
     CallLua((*mLuaState)["OnUIClose"], ui, result);
+    mWindowStack.pop();
 }
 
 void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
