@@ -573,7 +573,7 @@ void InitDoc()
                                        "After this the progress bar has no progress value and will show a busy indicator instead.");
     DOC_METHOD_1("void", "SetValue", "Set the normalized progress bar progress value.", "float", "value");
     DOC_METHOD_0("bool", "HasValue", "Check whether progress bar currently has a progress value or not.");
-    DOC_METHOD_0("float", "GetValue", "Return the current progress bar value if any. If no progress value then 0.0 is returned.");
+    DOC_METHOD_0("float", "GetValue", "Get the current progress bar value if any. If no progress value is set then 0.0 is returned.");
     DOC_TABLE("uik.SpinBox");
     DOC_METHOD_1("void", "SetMin", "Set the minimum value allowed by the spin box.", "int", "min");
     DOC_METHOD_1("void", "SetMax", "Set the maximum value allowed by the spin box.", "int", "max");
@@ -638,7 +638,19 @@ void InitDoc()
     DOC_METHOD_0("float", "GetTimeScale", "Get the scaler value used to modify the drawable item time.");
     DOC_METHOD_1("void", "SetTimeScale", "Set the scaler value for scaling the drawable item time.", "float", "scaler");
     DOC_METHOD_1("bool", "TestFlag", "Test the drawable for a set flag.", "string", "flag");
-
+    DOC_METHOD_2("void", "SetFlag", "Set a drawable flag.", "string", "flag", "bool", "on_off");
+    DOC_METHOD_2("void", "SetUniform", "Set a material parameter (shader uniform) value.<br>"
+                                       "The parameter is identified by it's uniform name in the material shader.<br>"
+                                       "Supported values are float, int, base.Color4f, glm.vec2, glm.vec3, glm.vec4",
+                 "string", "name", "float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "value");
+    DOC_METHOD_1("float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "GetUniform",
+                 "Get a material parameter (shader uniform) value.<br>"
+                 "The parameter is identified by its uniform name in the material shader.",
+                 "string", "name");
+    DOC_METHOD_1("bool", "HasUniform", "Returns whether the given material parameter (shader uniform) exists.", "string", "name");
+    DOC_METHOD_1("void", "DeleteUniform", "Delete the given material parameter (shader uniform) value.<br>"
+                                          "After the value has been removed the parameter will use the default value defined in the material.",
+                 "string", "name");
 
     DOC_TABLE("game.RigidBody");
     DOC_METHOD_0("float", "GetFriction", "Return the friction value of the rigid body.");
@@ -668,7 +680,7 @@ void InitDoc()
                                                     "Possible values. 'Box', 'Circle', 'RightTriangle', 'IsoscelesTriangle', 'Trapezoid', 'Parallelogram', 'SemiCircle', 'Polygon'<br>"
                                                     "When the type is 'Polygon' you can get the shape's ID through GetPolygonShapeId.");
 
-    DOC_TABLE("TextItem");
+    DOC_TABLE("game.TextItem");
     DOC_METHOD_0("string", "GetText", "Get the current UTF-8 encoded text.");
     DOC_METHOD_0("base.Color4f", "GetColor", "Get the current text color.");
     DOC_METHOD_0("int", "GetLayer", "Get the render layer index.");
@@ -687,6 +699,104 @@ void InitDoc()
                                     "Possible flags: 'VisibleInGame', 'BlinkText', 'UnderlineText', 'StaticContent'",
                  "string", "flag_name",
                  "bool", "on_off");
+
+    DOC_TABLE("game.EntityNode");
+    DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");
+    DOC_METHOD_0("string", "GetId", "Get the entity node's instance ID.");
+    DOC_METHOD_0("string", "GetClassName", "Get the name of the entity node's class type.");
+    DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity node's class type.");
+    DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to it's parent.");
+    DOC_METHOD_0("glm.vec2", "GetScale", "Get the node's scaling factor that applies to this node and all of its children.");
+    DOC_METHOD_0("float", "GetRotation", "Get the node's rotation relative to its parent.");
+    DOC_METHOD_0("bool", "HasRigidBody", "Checks whether the node has a rigid body item.");
+    DOC_METHOD_0("bool", "HasTextItem", "Checks whether the node has a text item.");
+    DOC_METHOD_0("bool", "HasDrawable", "Checks whether the node has a drawable item.");
+    DOC_METHOD_0("game.RigidBody", "GetRigidBody", "Get the node's rigid body item if any. Returns nil if node has no rigid body.");
+    DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
+    DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. returns nil if node has no drawable item.");
+    DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
+    DOC_METHOD_1("void", "SetSize", "Set the size that applies to this node.", "glm.vec2", "size");
+    DOC_METHOD_1("void", "SetTranslation", "Set the node's translation relative to its parent.", "glm.vec2", "translation");
+    DOC_METHOD_1("void", "SetName", "Set the node's instance name.", "string", "name");
+    DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "translation");
+    DOC_METHOD_1("void", "Rotate", "Rotate the node relative to its current rotation.", "float", "rotation");
+
+    DOC_TABLE("game.Entity");
+    DOC_METHOD_0("string", "GetName", "Get the entity's human readable name.");
+    DOC_METHOD_0("string", "GetId", "Get the entity's instance ID.");
+    DOC_METHOD_0("string", "GetClassName", "Get the name of the entity's class type.");
+    DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity's class type.");
+    DOC_METHOD_0("int", "GetNumNodes", "Get the number of entity nodes in this entity.");
+    DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
+    DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
+    DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
+    DOC_METHOD_0("bool", "IsPlaying", "Checks whether the entity is currently playing an animation or not.");
+    DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
+    DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"
+                                          "Entities that have been killed will be deleted from the scene on the next iteration of game loop.");
+    DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
+                                           "This flag is only ever true on the first iteration of the game loop during the entitys' lifetime.");
+    DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index.", "int", "index");
+
+    DOC_TABLE("game.EntityArgs");
+    DOC_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");
+    DOC_PROPERTY("string", "name", "The instance name of the entity.");
+    DOC_PROPERTY("glm.vec2", "scale", "The scaling factor that will apply to all of the entity nodes.<br>"
+                                      "Default is (1.0, 1.0).");
+    DOC_PROPERTY("glm.vec2", "position", "The initial position of the entity in the scene.<br>"
+                                         "Default is (0.0, 0.0)");
+    DOC_PROPERTY("float", "rotation", "The initial rotation that will apply to the entity in the scene.<br>"
+                                      "Default is 0.0 (i.e no rotation).");
+    DOC_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
+                                   "Default is true.");
+
+    DOC_TABLE("game.Scene");
+    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
+                                                        "The scene's script script variables are accessible as properties on the scene object.<br>"
+                                                        "For example a script variable named 'score' would be accessible as Scene.score.<br>"
+                                                        "local score = Scene.score");
+    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta function<br>"
+                                                             "The scene's script script variables are accessible as properties on the scene object.<br>"
+                                                             "For example a script variable named 'score' would be accessible as Scene.score.<br>"
+                                                             "Scene.score = 123");
+    DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
+    DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
+                                                          "Returns nil if no such entity could be found.",
+                 "string", "id");
+    DOC_METHOD_1("game.Entity", "FindEntityByInstanceName", "Find an entity with the given instance name.<br>"
+                                                            "Returns nil if no such entity could be found.",
+                 "string", "name");
+    DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index.", "int", "index");
+    DOC_METHOD_1("void", "KillEntity", "Kill the entity. Killing an entity doesn't not immediately remove it from the scene but will only "
+                                       "set a flag that will indicate the new state of the entity. The entity will then continue to exist "
+                                       "for one more iteration of the game loop until it's deleted at the end of this iteration.<br>"
+                                       "This two step design allows any engine subsystems to realize and react to entities being killed.",
+                                       "game.Entity", "carcass");
+    DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene. Spawning an entity doesn't immediately place it in the scene "
+                                               "but will only add it to the list of objects to be spawned at the start of the next iteration of game loop."
+                                               "At the start of the next game loop each entity that was spawned will have their spawn flag set.<br>"
+                                               "This two step design allows any engine subsystem to realize and react to entities being spawned.",
+                 "game.EntityArgs", "args");
+    DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",
+                 "game.Entity", "entity");
+    DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
+                 "game.Entity", "entity", "game.EntityNode", "node");
+    DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
+    DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
+    DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
+
+    DOC_TABLE("game.Physics");
+    DOC_METHOD_2("void", "ApplyImpulseToCenter", "Apply an impulse to the center of the given entity node.<br>"
+                                                "The entity node should have a rigid body item.",
+                "string", "id", "glm.vec2", "impulse");
+    DOC_METHOD_2("void", "ApplyImpulseToCenter", "Apply an impulse to the center of the given entity node.<br>"
+                                                "The entity node should have a rigid body item.",
+                "game.EntityNode", "node", "glm.vec2", "impulse");
+    DOC_METHOD_2("void", "SetLinearVelocity", "Immediately adjust the linear velocity of the rigid body to the given velocity value.",
+                 "string", "id", "glm.vec2", "velocity");
+    DOC_METHOD_2("void", "SetLinearVelocity", "Immediately adjust the linear velocity of the rigid body to the given velocity value.",
+                 "game.EntityNode", "node", "glm.vec2", "velocity");
+
 
     DOC_TABLE("MouseEvent");
     DOC_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
