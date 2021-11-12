@@ -1720,10 +1720,21 @@ void BindGameLib(sol::state& L)
     scene["GetClassId"]               = &Scene::GetClassId;
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
-    physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
-    physics["ApplyImpulseToCenter"] = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::ApplyImpulseToCenter;
-    physics["SetLinearVelocity"]    = (void(PhysicsEngine::*)(const std::string&, const glm::vec2&) const)&PhysicsEngine::SetLinearVelocity;
-    physics["SetLinearVelocity"]    = (void(PhysicsEngine::*)(const EntityNode&, const glm::vec2&) const)&PhysicsEngine::SetLinearVelocity;
+    physics["ApplyImpulseToCenter"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id, const glm::vec2& vec) {
+            self.ApplyImpulseToCenter(id, vec);
+        },
+        [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vec) {
+            self.ApplyImpulseToCenter(node, vec);
+        });
+    physics["SetLinearVelocity"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id, const glm::vec2& vector) {
+            self.SetLinearVelocity(id, vector);
+        },
+        [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vector) {
+            self.SetLinearVelocity(node, vector);
+        }
+    );
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["PrepareMusicGraph"] = sol::overload(
