@@ -35,6 +35,11 @@ function OnBeginContact(ball, node, other, other_node)
     if other:GetClassName() == 'Floor' then 
         Scene:KillEntity(ball)
         Audio:PlaySoundEffect('Fail')
+        local ball_died   = game.GameEvent:new()
+        ball_died.from    = 'ball'
+        ball_died.to      = 'game'
+        ball_died.message = 'died'
+        Game:PostEvent(ball_died)
     end
 end
 
@@ -52,6 +57,9 @@ end
 
 -- Called on mouse button press events.
 function OnMousePress(ball, mouse)
+    local node = ball:FindNodeByClassName('Ball')
+    local body = node:GetRigidBody()
+    body:SetFlag('Enabled', true)
 end
 
 -- Called on mouse button release events.

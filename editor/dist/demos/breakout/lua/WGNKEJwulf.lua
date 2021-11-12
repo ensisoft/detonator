@@ -34,8 +34,13 @@ function KillEntity(level, carcass)
     if num_bricks ~= 0 then
         return
     end
-    Game:DebugPrint("Level clear!")
-    Audio:PlaySoundEffect('Level Clear')
+    local level_clear   = game.GameEvent:new()
+    level_clear.from    = 'level'
+    level_clear.to      = 'game'
+    level_clear.message = 'level-clear'
+    level_clear.value   = 0 -- score
+    Game:PostEvent(level_clear)
+
 end
 
 -- Called on every low frequency game tick.

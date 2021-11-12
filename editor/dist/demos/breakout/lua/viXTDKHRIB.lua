@@ -5,41 +5,47 @@
 -- You're free to delete functions you don't need.
 
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(green_brick, scene)
+function BeginPlay(brick, scene)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(green_brick, scene)
+function EndPlay(brick, scene)
 
 end
 
 -- Called on every low frequency game tick.
-function Tick(green_brick, game_time, dt)
+function Tick(brick, game_time, dt)
 
 end
 
 -- Called on every iteration of game loop.
-function Update(green_brick, game_time, dt)
+function Update(brick, game_time, dt)
 
 end
 
 -- Called on collision events with other objects.
-function OnBeginContact(green_brick, node, other, other_node)
+function OnBeginContact(brick, node, other, other_node)
     if other:GetClassName() == 'Ball' then 
-        if green_brick.immortal then 
+        if brick.immortal then 
             return     
         end
-        green_brick.hit_count = green_brick.hit_count - 1
-        if green_brick.hit_count == 0 then 
-            Scene:KillEntity(green_brick)
+        brick.hit_count = brick.hit_count - 1
+        if brick.hit_count == 0 then 
+            Scene:KillEntity(brick)
             Audio:PlaySoundEffect('Kill Brick', 0)
+            local kill_brick = game.GameEvent:new()
+            kill_brick.from = 'brick'
+            kill_brick.to   = 'game'
+            kill_brick.message = 'kill-brick'
+            kill_brick.value   = 100
+            Game:PostEvent(kill_brick)            
         end
     end
 end
 
 -- Called on collision events with other objects.
-function OnEndContact(green_brick, node, other, other_node)
+function OnEndContact(brick, node, other, other_node)
     if other:GetClassName() == 'Ball' then 
         local rigid_body = other_node:GetRigidBody()
         local velocity   = rigid_body:GetLinearVelocity()
@@ -51,22 +57,22 @@ function OnEndContact(green_brick, node, other, other_node)
 end
 
 -- Called on key down events.
-function OnKeyDown(green_brick, symbol, modifier_bits)
+function OnKeyDown(brick, symbol, modifier_bits)
 end
 
 -- Called on key up events.
-function OnKeyUp(green_brick, symbol, modifier_bits)
+function OnKeyUp(brick, symbol, modifier_bits)
 end
 
 -- Called on mouse button press events.
-function OnMousePress(green_brick, mouse)
+function OnMousePress(brick, mouse)
 end
 
 -- Called on mouse button release events.
-function OnMouseRelease(green_brick, mouse)
+function OnMouseRelease(brick, mouse)
 end
 
 -- Called on mouse move events.
-function OnMouseMove(green_brick, mouse)
+function OnMouseMove(brick, mouse)
 end
 
