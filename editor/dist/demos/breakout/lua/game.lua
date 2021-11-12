@@ -1,6 +1,27 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
 
+_GameStates = {
+    Menu = 1, Play = 2
+}
+
+_State = {
+    current_level = 0,
+    current_lives = 3,
+    current_score = 0,
+
+    current_state = _GameStates.Menu
+}
+
+function _SpawnBall()
+    local args = game.EntityArgs:new()
+    args.class = ClassLib:FindEntityClassByName('Ball')
+    args.name  = 'ball'
+    args.position = glm.vec2:new(0.0, 340.0)
+    Scene:SpawnEntity(args, true)
+end
+
+
 -- Called when the game is started.
 function StartGame()
     Game:SetViewport(base.FRect:new(-500.0, -400.0, 1000.0, 800.0))
@@ -12,10 +33,14 @@ end
 -- of the scene has been created and the game play begins.
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay called.')
+    Game:DebugPrint(tostring(Scene))
+    if _State.current_state == _GameStates.Play then 
+        _SpawnBall()
+    end
 end
 
 
--- Called as a response to Game:Stop when the game play ends.
+-- Called as a response to Game:Stop when the game play ends.s
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
 end
@@ -105,6 +130,18 @@ function OnUIAction(ui, action)
     elseif action.name == 'play' then 
         Game:CloseUI(0)
         Game:Play('Level 0')
+        Game:ShowMouse(false)
+        _State.current_lives = 3
+        _State.current_level = 0
+        _State.current_score = 0
+        _State.current_state = _GameStates.Play
+        local hud = Game:OpenUI('HUD')
+        local score = hud:FindWidgetByName('score', 'Label')
+        local lives = hud:FindWidgetByName('lives', 'Label')
+        local level = hud:FindWidgetByName('level', 'Label')
+        score:SetText(tostring(_State.current_score))
+        lives:SetText(tostring(_State.current_lives))
+        level:SetText(tostring(_State.current_level))
     end    
 end
 
@@ -116,3 +153,35 @@ function OnAudioEvent(event)
 
 end
 
+function OnGameEvent(event)
+    if event.to ~= 'game' then return end
+
+    if _State.current_state == _GameStates.Menu then return end
+
+    if event.from == 'ball' then 
+        if event.message == 'died' then 
+            Game:DebugPrint('Ball died')
+            _State.current_lives = _State.current_lives - 1
+            if _State.current_lives == 0 then 
+                --game over
+            else
+                local hud = Game:GetTopUI()
+                local lives = hud:FindWidgetByName('lives', 'Label')
+                lives:SetText(tostring(_State.current_lives))
+                 _SpawnBall()
+            end
+        end     
+    elseif event.from == 'level' then 
+        if event.message == 'level-clear' then
+            Game:DebugPrint("Level clear!")
+            Audio:PlaySoundEffect('Level Clear')
+        end
+    elseif event.from == 'brick' then
+        if event.message == 'kill-brick' then 
+            _State.current_score = _State.current_score + event.value
+            local hud = Game:GetTopUI()
+            local score = hud:FindWidgetByName('score', 'Label')
+            score:SetText(tostring(_State.current_score))
+        end
+    end
+end

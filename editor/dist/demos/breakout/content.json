@@ -405,7 +405,7 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
-        "WantsMouseEvents": false
+        "WantsMouseEvents": true
       },
       "id": "9G2p8G3zMT",
       "idle_track": "",
@@ -446,7 +446,7 @@
               "Bullet": true,
               "CanSleep": true,
               "DiscardRotation": false,
-              "Enabled": true,
+              "Enabled": false,
               "Sensor": false
             },
             "friction": 0.0,
@@ -1443,6 +1443,184 @@
           "name": "lights"
         }
       ]
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "v9YZBBhlpu",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "OneTwoGo",
+      "nodes": [
+        {
+          "class": "ejmP9Yt3q6",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 300.0
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/KomikaTitle-Axis.ttf",
+            "font_size": 72,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 100,
+            "raster_width": 100,
+            "text": "1",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "ejmP9Yt3q6"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "v9YZBBhlpu",
+      "resource_name": "OneTwoGo",
+      "script_file": "",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 0.3333333432674408,
+                "id": "yxR1DmSRBp",
+                "method": "Cosine",
+                "name": "TextItemText",
+                "node": "ejmP9Yt3q6",
+                "starttime": 0.0,
+                "value": "2"
+              },
+              "type": "SetValue"
+            },
+            {
+              "actuator": {
+                "duration": 0.3336434066295624,
+                "id": "LFPaaZG0Gf",
+                "method": "Cosine",
+                "name": "TextItemText",
+                "node": "ejmP9Yt3q6",
+                "starttime": 0.3333333432674408,
+                "value": "GO"
+              },
+              "type": "SetValue"
+            },
+            {
+              "actuator": {
+                "duration": 0.3339534103870392,
+                "id": "P2ogCpC3NJ",
+                "method": "Cosine",
+                "node": "ejmP9Yt3q6",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 6.2831854820251465,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 300.0,
+                  "y": 300.0
+                },
+                "starttime": 0.000465116259874776
+              },
+              "type": "Transform"
+            },
+            {
+              "actuator": {
+                "duration": 0.332558274269104,
+                "id": "A7lUFFoaYg",
+                "method": "Cosine",
+                "node": "ejmP9Yt3q6",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 12.566370964050293,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 300.0,
+                  "y": 300.0
+                },
+                "starttime": 0.33441853523254395
+              },
+              "type": "Transform"
+            },
+            {
+              "actuator": {
+                "duration": 0.33302319049835205,
+                "id": "DMFfFeFMdk",
+                "method": "Cosine",
+                "node": "ejmP9Yt3q6",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 18.84955596923828,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 300.0,
+                  "y": 300.0
+                },
+                "starttime": 0.666976809501648
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 3.0,
+          "id": "RPMBRaKZS0",
+          "looping": false,
+          "name": "My Track"
+        }
+      ]
     }
   ],
   "materials": [
@@ -1817,6 +1995,120 @@
         "id": "FHJhKbDHyr",
         "name": "22",
         "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.9490196108818054,
+        "g": 0.7803616523742676,
+        "r": 0.3843137323856354
+      },
+      "gamma": 1.0,
+      "id": "OAFWPyRj28",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "OAFWPyRj28",
+      "resource_name": "Go",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "buffer": {
+          "height": 143,
+          "horizontal_alignment": "AlignCenter",
+          "texts": [
+            {
+              "font_file": "app://fonts/KomikaTitle-Wide.ttf",
+              "font_size": 100,
+              "line_height": 1.0,
+              "string": " Go!  ",
+              "underline": false
+            }
+          ],
+          "vertical_alignment": "AlignCenter",
+          "width": 302
+        },
+        "id": "Ak4590r5r6",
+        "name": "TextBuffer",
+        "type": "TextBuffer"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.9490196108818054,
+        "g": 0.7803616523742676,
+        "r": 0.3843137323856354
+      },
+      "gamma": 1.0,
+      "id": "JmwlIMU4Nr",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "JmwlIMU4Nr",
+      "resource_name": "Two",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "buffer": {
+          "height": 100,
+          "horizontal_alignment": "AlignCenter",
+          "texts": [
+            {
+              "font_file": "app://fonts/KomikaTitle-Wide.ttf",
+              "font_size": 100,
+              "line_height": 1.0,
+              "string": "2",
+              "underline": false
+            }
+          ],
+          "vertical_alignment": "AlignCenter",
+          "width": 100
+        },
+        "id": "vb3YqX0vi5",
+        "name": "TextBuffer",
+        "type": "TextBuffer"
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
@@ -2704,43 +2996,6 @@
           "position": {
             "x": 500.0,
             "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "9G2p8G3zMT",
-          "flag_set_bits": {
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "yzjXiNb3BF",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Ball_0",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 0.0,
-            "y": 340.0
           },
           "rotation": 0.0,
           "scale": {
@@ -5951,11 +6206,6 @@
           {
             "node": {
               "id": "IIbzZzuNoe"
-            }
-          },
-          {
-            "node": {
-              "id": "yzjXiNb3BF"
             }
           },
           {
@@ -14124,11 +14374,11 @@
                   "id": "gniIyxy0BX",
                   "name": "GroupBox_1",
                   "position": {
-                    "x": 199.0,
-                    "y": 36.0
+                    "x": 200.0,
+                    "y": 50.0
                   },
                   "size": {
-                    "h": 65.0,
+                    "h": 50.0,
                     "w": 600.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
@@ -14142,11 +14392,11 @@
                         "VisibleInGame": true
                       },
                       "id": "hvTXbFSZ1E",
-                      "line_height": 1.0,
+                      "line_height": 1.5,
                       "name": "Label_1",
                       "position": {
-                        "x": 80.5,
-                        "y": 20.5
+                        "x": 77.0,
+                        "y": 5.0
                       },
                       "size": {
                         "h": 38.0,
@@ -14197,6 +14447,146 @@
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"mouse-over/border\",\"material\":\"_Cyan\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-blink\",\"value\":false},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28}]}",
                   "text": "Exit",
                   "type": "PushButton"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3J49aF64Jm",
+      "name": "HUD",
+      "resource_id": "3J49aF64Jm",
+      "resource_name": "HUD",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "5tU3106sMQ",
+              "name": "Form",
+              "position": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "size": {
+                "h": 800.0,
+                "w": 1000.0
+              },
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "9mQbjIX6H4",
+                  "name": "GroupBox_1",
+                  "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                  },
+                  "size": {
+                    "h": 52.0,
+                    "w": 1000.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
+                  "text": "GroupBox",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "SUKb95zepR",
+                      "line_height": 1.0,
+                      "name": "Label_1",
+                      "position": {
+                        "x": 38.0,
+                        "y": 16.0
+                      },
+                      "size": {
+                        "h": 20.0,
+                        "w": 90.0
+                      },
+                      "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Rs00QF2N4E\",\"type\":\"Reference\"}]}",
+                      "text": "",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "t1Mt4vvPM3",
+                      "line_height": 1.7000000476837158,
+                      "name": "lives",
+                      "position": {
+                        "x": 34.0,
+                        "y": 0.0
+                      },
+                      "size": {
+                        "h": 50.0,
+                        "w": 100.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":20},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"text-size\",\"value\":20}]}",
+                      "text": "3",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "wYK8rsBrvq",
+                      "line_height": 1.7000000476837158,
+                      "name": "score",
+                      "position": {
+                        "x": 800.0,
+                        "y": 0.0
+                      },
+                      "size": {
+                        "h": 50.0,
+                        "w": 100.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36}]}",
+                      "text": "Label",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "nd8rzInPlx",
+                      "line_height": 1.7000000476837158,
+                      "name": "level",
+                      "position": {
+                        "x": 900.0,
+                        "y": 0.0
+                      },
+                      "size": {
+                        "h": 50.0,
+                        "w": 100.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36}]}",
+                      "text": "Label",
+                      "type": "Label"
+                    }
+                  ]
                 }
               ]
             }
