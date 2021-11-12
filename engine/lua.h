@@ -25,6 +25,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <stack>
 
 #include "game/types.h"
 #include "engine/game.h"
@@ -80,6 +81,7 @@ namespace engine
         std::queue<Action> mActionQueue;
         FRect mView;
         game::Scene* mScene = nullptr;
+        std::stack<uik::Window*> mWindowStack;
     };
 
 
