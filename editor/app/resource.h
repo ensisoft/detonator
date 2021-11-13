@@ -163,6 +163,8 @@ namespace app
         { SetVariantProperty(name, value); }
         inline void SetProperty(const QString& name, quint64 value)
         { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, qint64 value)
+        { SetVariantProperty(name, value); }
         inline void SetProperty(const QString& name, unsigned value)
         { SetVariantProperty(name, value); }
         inline void SetProperty(const QString& name, int value)
@@ -226,6 +228,8 @@ namespace app
         inline void SetUserProperty(const QString& name, const QString& value)
         { SetUserVariantProperty(name, value); }
         inline void SetUserProperty(const QString& name, quint64 value)
+        { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, qint64 value)
         { SetUserVariantProperty(name, value); }
         inline void SetUserProperty(const QString& name, unsigned value)
         { SetUserVariantProperty(name, value); }

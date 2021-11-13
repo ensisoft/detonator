@@ -302,7 +302,9 @@ bool ValidateQVariantJsonSupport(const QVariant& variant)
            type == QMetaType::Type::Int ||
            type == QMetaType::Type::UInt ||
            type == QMetaType::Type::QString ||
-           type == QMetaType::Type::QColor;
+           type == QMetaType::Type::QColor ||
+           type == QMetaType::Type::ULongLong ||
+           type == QMetaType::Type::LongLong;
 }
 bool ValidateQVariantMapJsonSupport(const QVariantMap& map)
 {
