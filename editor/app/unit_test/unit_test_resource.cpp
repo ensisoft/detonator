@@ -145,42 +145,49 @@ int test_main(int argc, char* argv[])
     map["value"] = 123;
     map["string"] = "boo";
     r.SetProperty("variant_map", map);
-    r.SetProperty("eka", 123);
-    r.SetProperty("toka", 123.0f);
-    r.SetProperty("koli", QString("hip hop"));
-    r.SetProperty("neli", 123.0);
-    r.SetProperty("vika", quint64(123));
+    r.SetProperty("int", 123);
+    r.SetProperty("float", 123.0f);
+    r.SetProperty("string", QString("hip hop"));
+    r.SetProperty("double", 123.0);
+    r.SetProperty("ulonglong", quint64(123));
+    r.SetProperty("longlong", qint64(7879));
     r.SetProperty("bytes", bytes);
     r.SetProperty("color", QColor::fromRgb(100, 120, 120, 200));
-    r.SetUserProperty("foo", 42);
+
+    r.SetUserProperty("int", 42);
     r.SetUserProperty("bytes", bytes);
     r.SetUserProperty("color", QColor::fromRgb(50, 80, 90, 120));
     map.clear();
 
-    TEST_REQUIRE(r.HasProperty("eka"));
-    TEST_REQUIRE(r.HasProperty("toka"));
-    TEST_REQUIRE(r.HasProperty("koli"));
-    TEST_REQUIRE(r.HasProperty("neli"));
-    TEST_REQUIRE(r.HasProperty("vika"));
+    TEST_REQUIRE(r.HasProperty("int"));
+    TEST_REQUIRE(r.HasProperty("float"));
+    TEST_REQUIRE(r.HasProperty("string"));
+    TEST_REQUIRE(r.HasProperty("double"));
+    TEST_REQUIRE(r.HasProperty("ulonglong"));
+    TEST_REQUIRE(r.HasProperty("longlong"));
     TEST_REQUIRE(r.HasProperty("variant_map"));
     TEST_REQUIRE(r.HasProperty("bytes"));
     TEST_REQUIRE(r.HasProperty("baz") == false);
+
     TEST_REQUIRE(r.HasUserProperty("bar") == false);
     TEST_REQUIRE(r.HasUserProperty("bytes"));
 
-    TEST_REQUIRE(r.GetProperty("eka", 0) == 123);
-    TEST_REQUIRE(r.GetProperty("koli", QString("")) == "hip hop");
-    TEST_REQUIRE(r.GetProperty("vika", quint64(0)) == quint64(123));
-    TEST_REQUIRE(r.GetProperty("neli", 0.0) == real::float32(123.0));
-    TEST_REQUIRE(r.GetProperty("toka", 0.0f) == real::float32(123.0f));
+    TEST_REQUIRE(r.GetProperty("int", 0) == 123);
+    TEST_REQUIRE(r.GetProperty("string", QString("")) == "hip hop");
+    TEST_REQUIRE(r.GetProperty("ulonglong", quint64(0)) == quint64(123));
+    TEST_REQUIRE(r.GetProperty("longlong", qint64(0)) == qint64(7879));
+    TEST_REQUIRE(r.GetProperty("double", 0.0) == real::float32(123.0));
+    TEST_REQUIRE(r.GetProperty("float", 0.0f) == real::float32(123.0f));
     TEST_REQUIRE(r.GetProperty("bytes", QByteArray()) == bytes);
     TEST_REQUIRE(r.GetProperty("color", QColor()) == QColor::fromRgb(100, 120, 120, 200));
-    TEST_REQUIRE(r.GetUserProperty("foo", 0) == 42);
-    TEST_REQUIRE(r.GetUserProperty("bytes", QByteArray()) == bytes);
-    TEST_REQUIRE(r.GetUserProperty("color", QColor()) == QColor::fromRgb(50, 80, 90, 120));
     map = r.GetProperty("variant_map", map);
     TEST_REQUIRE(map["value"].toInt() == 123);
     TEST_REQUIRE(map["string"].toString() == "boo");
+
+    TEST_REQUIRE(r.GetUserProperty("int", 0) == 42);
+    TEST_REQUIRE(r.GetUserProperty("bytes", QByteArray()) == bytes);
+    TEST_REQUIRE(r.GetUserProperty("color", QColor()) == QColor::fromRgb(50, 80, 90, 120));
+
 
     QJsonObject props;
     QJsonObject user_props;
@@ -188,20 +195,22 @@ int test_main(int argc, char* argv[])
     r.SaveUserProperties(user_props);
     r.ClearProperties();
     r.ClearUserProperties();
-    TEST_REQUIRE(!r.HasProperty("eka"));
-    TEST_REQUIRE(!r.HasProperty("toka"));
-    TEST_REQUIRE(!r.HasProperty("koli"));
-    TEST_REQUIRE(!r.HasProperty("neli"));
-    TEST_REQUIRE(!r.HasProperty("vika"));
+    TEST_REQUIRE(!r.HasProperty("int"));
+    TEST_REQUIRE(!r.HasProperty("string"));
+    TEST_REQUIRE(!r.HasProperty("float"));
+    TEST_REQUIRE(!r.HasProperty("double"));
+    TEST_REQUIRE(!r.HasProperty("longlong"));
     r.LoadProperties(props);
     r.LoadUserProperties(user_props);
-    //TEST_REQUIRE(r.HasProperty("variant_map"));
-    TEST_REQUIRE(r.HasProperty("eka"));
-    TEST_REQUIRE(r.HasProperty("toka"));
-    TEST_REQUIRE(r.HasProperty("koli"));
-    TEST_REQUIRE(r.HasProperty("neli"));
-    TEST_REQUIRE(r.HasProperty("vika"));
-    TEST_REQUIRE(r.HasUserProperty("foo"));
+    TEST_REQUIRE(r.HasProperty("variant_map"));
+    TEST_REQUIRE(r.HasProperty("int"));
+    TEST_REQUIRE(r.HasProperty("string"));
+    TEST_REQUIRE(r.HasProperty("float"));
+    TEST_REQUIRE(r.HasProperty("double"));
+    TEST_REQUIRE(r.HasProperty("longlong"));
+
+    TEST_REQUIRE(r.HasUserProperty("int"));
+    TEST_REQUIRE(r.HasUserProperty("bytes"));
 
     TestResource0* ptr0 = nullptr;
     TestResource1* ptr1 = nullptr;
@@ -214,12 +223,12 @@ int test_main(int argc, char* argv[])
         Resource copy(r);
         TEST_REQUIRE(copy.GetIdUtf8() == res1.GetId());
         TEST_REQUIRE(copy.GetName() == "joojoo");
-        TEST_REQUIRE(copy.HasProperty("eka"));
-        TEST_REQUIRE(copy.HasProperty("toka"));
-        TEST_REQUIRE(copy.HasProperty("koli"));
-        TEST_REQUIRE(copy.HasProperty("neli"));
-        TEST_REQUIRE(copy.HasProperty("vika"));
-        TEST_REQUIRE(copy.HasUserProperty("foo"));
+        TEST_REQUIRE(copy.HasProperty("int"));
+        TEST_REQUIRE(copy.HasProperty("string"));
+        TEST_REQUIRE(copy.HasProperty("float"));
+        TEST_REQUIRE(copy.HasProperty("double"));
+        TEST_REQUIRE(copy.HasProperty("longlong"));
+        TEST_REQUIRE(copy.HasUserProperty("int"));
     }
 
     // copy
@@ -227,12 +236,12 @@ int test_main(int argc, char* argv[])
         auto copy = r.Copy();
         TEST_REQUIRE(copy->GetIdUtf8() == res1.GetId());
         TEST_REQUIRE(copy->GetName() == "joojoo");
-        TEST_REQUIRE(copy->HasProperty("eka"));
-        TEST_REQUIRE(copy->HasProperty("toka"));
-        TEST_REQUIRE(copy->HasProperty("koli"));
-        TEST_REQUIRE(copy->HasProperty("neli"));
-        TEST_REQUIRE(copy->HasProperty("vika"));
-        TEST_REQUIRE(copy->HasUserProperty("foo"));
+        TEST_REQUIRE(copy->HasProperty("int"));
+        TEST_REQUIRE(copy->HasProperty("string"));
+        TEST_REQUIRE(copy->HasProperty("float"));
+        TEST_REQUIRE(copy->HasProperty("longlong"));
+        TEST_REQUIRE(copy->HasProperty("ulonglong"));
+        TEST_REQUIRE(copy->HasUserProperty("int"));
     }
 
     // clone
@@ -240,12 +249,12 @@ int test_main(int argc, char* argv[])
         auto clone = r.Clone();
         TEST_REQUIRE(clone->GetIdUtf8() != res1.GetId());
         TEST_REQUIRE(clone->GetName() == "joojoo");
-        TEST_REQUIRE(clone->HasProperty("eka"));
-        TEST_REQUIRE(clone->HasProperty("toka"));
-        TEST_REQUIRE(clone->HasProperty("koli"));
-        TEST_REQUIRE(clone->HasProperty("neli"));
-        TEST_REQUIRE(clone->HasProperty("vika"));
-        TEST_REQUIRE(clone->HasUserProperty("foo"));
+        TEST_REQUIRE(clone->HasProperty("int"));
+        TEST_REQUIRE(clone->HasProperty("string"));
+        TEST_REQUIRE(clone->HasProperty("float"));
+        TEST_REQUIRE(clone->HasProperty("longlong"));
+        TEST_REQUIRE(clone->HasProperty("ulonglong"));
+        TEST_REQUIRE(clone->HasUserProperty("int"));
     }
 
     // update
@@ -254,12 +263,12 @@ int test_main(int argc, char* argv[])
         // copies over the data from r into other
         other.UpdateFrom(r);
         TEST_REQUIRE(other.GetName() == "joojoo");
-        TEST_REQUIRE(other.HasProperty("eka"));
-        TEST_REQUIRE(other.HasProperty("toka"));
-        TEST_REQUIRE(other.HasProperty("koli"));
-        TEST_REQUIRE(other.HasProperty("neli"));
-        TEST_REQUIRE(other.HasProperty("vika"));
-        TEST_REQUIRE(other.HasUserProperty("foo"));
+        TEST_REQUIRE(other.HasProperty("int"));
+        TEST_REQUIRE(other.HasProperty("string"));
+        TEST_REQUIRE(other.HasProperty("float"));
+        TEST_REQUIRE(other.HasProperty("longlong"));
+        TEST_REQUIRE(other.HasProperty("bytes"));
+        TEST_REQUIRE(other.HasUserProperty("int"));
     }
 
     // clone with a type that returns std::unique_ptr
