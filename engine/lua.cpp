@@ -261,7 +261,7 @@ sol::object GetScriptVar(const Type& object, const char* key, sol::this_state st
 {
     using namespace engine;
     sol::state_view lua(state);
-    const ScriptVar* var = object.FindScriptVar(key);
+    const ScriptVar* var = object.FindScriptVarByName(key);
     if (var && var->GetType() == ScriptVar::Type::Boolean)
         return sol::make_object(lua, var->GetValue<bool>());
     else if (var && var->GetType() == ScriptVar::Type::Float)
@@ -279,7 +279,7 @@ template<typename Type>
 void SetScriptVar(Type& object, const char* key, sol::object value)
 {
     using namespace engine;
-    const ScriptVar* var = object.FindScriptVar(key);
+    const ScriptVar* var = object.FindScriptVarByName(key);
     if (var == nullptr)
         throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
     else if (var->IsReadOnly())

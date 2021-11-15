@@ -52,6 +52,11 @@ namespace game
     public:
         using Flags = Entity::Flags;
 
+        struct ScriptVarValue {
+            std::string id;
+            ScriptVar::VariantType value;
+        };
+
         SceneNodeClass()
         {
             mClassId = base::RandomString(10);
@@ -96,6 +101,7 @@ namespace game
             mLifetime.reset();
             mFlagSetBits.clear();
             mFlagValBits.clear();
+            mScriptVarValues.clear();
         }
         void ResetLifetime()
         { mLifetime.reset(); }
@@ -137,6 +143,22 @@ namespace game
         { return mFlagSetBits.test(flag); }
         void ClearFlagSetting(Flags flag)
         { mFlagSetBits.set(flag, false); }
+        std::size_t GetNumScriptVarValues() const
+        { return mScriptVarValues.size(); }
+        ScriptVarValue& GetGetScriptVarValue(size_t index)
+        { return base::SafeIndex(mScriptVarValues, index); }
+        const ScriptVarValue& GetScriptVarValue(size_t index) const
+        { return base::SafeIndex(mScriptVarValues, index); }
+        void AddScriptVarValue(const ScriptVarValue& value)
+        { mScriptVarValues.push_back(value);}
+        void AddScriptVarValue(ScriptVarValue&& value)
+        { mScriptVarValues.push_back(std::move(value)); }
+        ScriptVarValue* FindScriptVarValueById(const std::string& id);
+        const ScriptVarValue* FindScriptVarValueById(const std::string& id) const;
+        bool DeleteScriptVarValueById(const std::string& id);
+        void SetScriptVarValue(const ScriptVarValue& value);
+
+        void ClearStaleScriptValues(const EntityClass& klass);
 
         // Get the node hash value based on the properties.
         std::size_t GetHash() const;
@@ -183,6 +205,7 @@ namespace game
         // track designation if set.
         std::string mIdleAnimationId;
         std::optional<double> mLifetime;
+        std::vector<ScriptVarValue> mScriptVarValues;
     private:
         // This is the runtime class reference to the
         // entity class that this node uses. Before creating
@@ -330,13 +353,15 @@ namespace game
         ScriptVar& GetScriptVar(size_t index);
         // Find a scripting variable with the given name. If no such variable
         // exists then nullptr is returned.
-        ScriptVar* FindScriptVar(const std::string& name);
+        ScriptVar* FindScriptVarByName(const std::string& name);
+        ScriptVar* FindScriptVarById(const std::string& id);
         // Get the scripting variable at the given index.
         // The index must be a valid index.
         const ScriptVar& GetScriptVar(size_t index) const;
         // Find a scripting variable with the given name. If no such variable
         // exists then nullptr is returned.
-        const ScriptVar* FindScriptVar(const std::string& name) const;
+        const ScriptVar* FindScriptVarByName(const std::string& name) const;
+        const ScriptVar* FindScriptVarById(const std::string& id) const;
 
         // Get the object hash value based on the property values.
         std::size_t GetHash() const;
@@ -459,7 +484,8 @@ namespace game
         // Note that the const here only implies that the object
         // may not change in terms of c++ semantics. The actual *value*
         // can still be changed as long as the variable is not read only.
-        const ScriptVar* FindScriptVar(const std::string& name) const;
+        const ScriptVar* FindScriptVarByName(const std::string& name) const;
+        const ScriptVar* FindScriptVarById(const std::string& id) const;
 
         // Value aggregate for nodes (entities) in the scene.
         struct ConstSceneNode {

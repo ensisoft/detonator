@@ -164,15 +164,15 @@
       "script_file": "HRXSPeXFUN",
       "vars": [
         {
+          "id": "Sd8W5Swonw",
           "name": "position",
           "readonly": false,
-          "type": "Float",
           "value": 0.0
         },
         {
+          "id": "QRIOhDMMW8",
           "name": "velocity",
           "readonly": false,
-          "type": "Float",
           "value": 0.0
         }
       ]
@@ -575,9 +575,9 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "ixZGSIICeW",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": true
         }
       ]
@@ -672,15 +672,15 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "BZmL4Gyum0",
           "name": "hit_count",
           "readonly": false,
-          "type": "Integer",
           "value": 2
         },
         {
+          "id": "py40Ln0bAb",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]
@@ -775,15 +775,15 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "JIbEPOZkCZ",
           "name": "hit_count",
           "readonly": false,
-          "type": "Integer",
           "value": 1
         },
         {
+          "id": "bxFqM6Xyxb",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]
@@ -878,15 +878,15 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "5UG4twU3FH",
           "name": "hit_count",
           "readonly": false,
-          "type": "Integer",
           "value": 3
         },
         {
+          "id": "vCxEuX7z0Z",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]
@@ -981,15 +981,15 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "JGbawtMq25",
           "name": "hit_count",
           "readonly": false,
-          "type": "Integer",
           "value": 4
         },
         {
+          "id": "u8klgFThAx",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]
@@ -1084,15 +1084,15 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "id": "Txs5644Cfr",
           "name": "hit_count",
           "readonly": false,
-          "type": "Integer",
           "value": 1
         },
         {
+          "id": "yyokeFraaw",
           "name": "immortal",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]

@@ -321,8 +321,8 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindAnimationTrackByName("sdgasg") == nullptr);
     TEST_REQUIRE(entity.GetNumScriptVars() == 2);
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
-    TEST_REQUIRE(entity.FindScriptVar("foobar") == nullptr);
-    TEST_REQUIRE(entity.FindScriptVar("something"));
+    TEST_REQUIRE(entity.FindScriptVarByName("foobar") == nullptr);
+    TEST_REQUIRE(entity.FindScriptVarByName("something"));
 
     // test linking.
     entity.LinkChild(nullptr, entity.FindNodeByName("root"));
@@ -526,12 +526,12 @@ void unit_test_entity_instance()
     TEST_REQUIRE(instance.GetNode(3).GetName() == "child_3");
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_3 child_2");
 
-    TEST_REQUIRE(instance.FindScriptVar("foo"));
-    TEST_REQUIRE(instance.FindScriptVar("bar"));
-    TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
-    TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
-    instance.FindScriptVar("foo")->SetValue(444);
-    TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
+    TEST_REQUIRE(instance.FindScriptVarByName("foo"));
+    TEST_REQUIRE(instance.FindScriptVarByName("bar"));
+    TEST_REQUIRE(instance.FindScriptVarByName("foo")->IsReadOnly() == false);
+    TEST_REQUIRE(instance.FindScriptVarByName("bar")->IsReadOnly() == true);
+    instance.FindScriptVarByName("foo")->SetValue(444);
+    TEST_REQUIRE(instance.FindScriptVarByName("foo")->GetValue<int>() == 444);
 
     // todo: test more of the instance api
 }

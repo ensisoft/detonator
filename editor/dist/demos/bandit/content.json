@@ -2689,21 +2689,21 @@
       ],
       "vars": [
         {
+          "id": "fiB8feSL1z",
           "name": "jump",
           "readonly": true,
-          "type": "Float",
           "value": 4.0
         },
         {
+          "id": "40WOl0jRbS",
           "name": "slide",
           "readonly": true,
-          "type": "Float",
           "value": 3.0
         },
         {
+          "id": "i1H9Y16IyZ",
           "name": "coins",
           "readonly": false,
-          "type": "Integer",
           "value": 0
         }
       ]
@@ -10338,9 +10338,9 @@
       "script_file": "",
       "vars": [
         {
+          "id": "rirgM7AvyE",
           "name": "foobar",
           "readonly": true,
-          "type": "Integer",
           "value": 123
         }
       ]

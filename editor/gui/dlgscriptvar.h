@@ -23,7 +23,7 @@
 #  include <QDialog>
 #include "warnpop.h"
 
-#include "game/fwd.h"
+#include "game/scriptvar.h"
 
 namespace gui
 {
@@ -42,4 +42,19 @@ namespace gui
     private:
         game::ScriptVar& mVar;
     };
+
+    class DlgScriptVal : public QDialog
+    {
+        Q_OBJECT
+    public:
+        DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value);
+    private slots:
+        void on_btnAccept_clicked();
+        void on_btnCancel_clicked();
+    private:
+        Ui::DlgScriptVar mUI;
+    private:
+        game::ScriptVar::VariantType& mVal;
+    };
+
 } // namespace

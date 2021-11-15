@@ -747,15 +747,15 @@
       "script_file": "4KwMiHn2Zz",
       "vars": [
         {
+          "id": "hFhxI5uRXf",
           "name": "velocity",
           "readonly": true,
-          "type": "Float",
           "value": -500.0
         },
         {
+          "id": "Gb9JXeOtbb",
           "name": "red",
           "readonly": true,
-          "type": "Boolean",
           "value": true
         }
       ]
@@ -1178,18 +1178,18 @@
       ],
       "vars": [
         {
+          "id": "wAKwhKlI98",
           "name": "velocity",
           "readonly": false,
-          "type": "Vec2",
           "value": {
             "x": 200.0,
             "y": 50.0
           }
         },
         {
+          "id": "Xt8WfHILKd",
           "name": "score",
           "readonly": false,
-          "type": "Integer",
           "value": 100
         }
       ]
@@ -1329,9 +1329,9 @@
       "script_file": "bjZ0TrwuxI",
       "vars": [
         {
+          "id": "NvQJb17Mlj",
           "name": "radius",
           "readonly": false,
-          "type": "Float",
           "value": 30.0
         }
       ]
@@ -1581,15 +1581,15 @@
       "script_file": "4KwMiHn2Zz",
       "vars": [
         {
+          "id": "CGpy59Lkmy",
           "name": "velocity",
           "readonly": false,
-          "type": "Float",
           "value": 500.0
         },
         {
+          "id": "LjhZ24Oglo",
           "name": "red",
           "readonly": true,
-          "type": "Boolean",
           "value": false
         }
       ]
@@ -4266,9 +4266,9 @@
       "script_file": "",
       "vars": [
         {
+          "id": "7OIIPrIlIQ",
           "name": "score",
           "readonly": false,
-          "type": "Integer",
           "value": 0
         }
       ]
