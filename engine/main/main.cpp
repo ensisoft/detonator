@@ -574,6 +574,7 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(mouse_cursor, "material", &config.mouse_cursor.material);
             base::JsonReadSafe(mouse_cursor, "hotspot", &config.mouse_cursor.hotspot);
             base::JsonReadSafe(mouse_cursor, "size", &config.mouse_cursor.size);
+            base::JsonReadSafe(mouse_cursor, "units", &config.mouse_cursor.units);
         }
         if (json.contains("audio"))
         {

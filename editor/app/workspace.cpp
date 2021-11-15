@@ -1268,6 +1268,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "mouse_pointer_visible"   , mSettings.mouse_pointer_visible);
     JsonWrite(project, "mouse_pointer_hotspot"   , mSettings.mouse_pointer_hotspot);
     JsonWrite(project, "mouse_pointer_size"      , mSettings.mouse_pointer_size);
+    JsonWrite(project, "mouse_pointer_units"     , mSettings.mouse_pointer_units);
     JsonWrite(project, "game_script"             , mSettings.game_script);
     JsonWrite(project, "audio_channels"          , mSettings.audio_channels);
     JsonWrite(project, "audio_sample_rate"       , mSettings.audio_sample_rate);
@@ -1369,6 +1370,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "mouse_pointer_visible",    &mSettings.mouse_pointer_visible);
     JsonReadSafe(project, "mouse_pointer_hotspot",    &mSettings.mouse_pointer_hotspot);
     JsonReadSafe(project, "mouse_pointer_size",       &mSettings.mouse_pointer_size);
+    JsonReadSafe(project, "mouse_pointer_units",      &mSettings.mouse_pointer_units);
     JsonReadSafe(project, "game_script",              &mSettings.game_script);
     JsonReadSafe(project, "audio_channels",           &mSettings.audio_channels);
     JsonReadSafe(project, "audio_sample_rate",        &mSettings.audio_sample_rate);
@@ -2313,6 +2315,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["mouse_cursor"], "show", mSettings.mouse_pointer_visible);
         base::JsonWrite(json["mouse_cursor"], "hotspot", mSettings.mouse_pointer_hotspot);
         base::JsonWrite(json["mouse_cursor"], "size", mSettings.mouse_pointer_size);
+        base::JsonWrite(json["mouse_cursor"], "units", mSettings.mouse_pointer_units);
         base::JsonWrite(json["audio"], "channels", mSettings.audio_channels);
         base::JsonWrite(json["audio"], "sample_rate", mSettings.audio_sample_rate);
         base::JsonWrite(json["audio"], "sample_type", mSettings.audio_sample_type);

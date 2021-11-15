@@ -216,6 +216,9 @@ namespace engine
                 // to a single physics world unit. 
                 glm::vec2 scale = {1.0f, 1.0f};
             } physics;
+            enum class MouseCursorUnits {
+                Pixels, Units
+            };
             struct {
                 // initial visibility.
                 bool show = true;
@@ -225,8 +228,10 @@ namespace engine
                 std::string material;
                 // normalized hotspot of the cursor
                 glm::vec2 hotspot = {0.0f, 0.0f};
-                // size of the cursor in pixels.
+                // size of the cursor in mouse cursor units.
                 glm::vec2 size = {20.0f, 20.0f};
+                // the units to be used for the mouse cursor size.
+                MouseCursorUnits units = MouseCursorUnits::Pixels;
             } mouse_cursor;
             struct Audio {
                 // PCM sample rate of the audio output.

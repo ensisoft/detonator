@@ -163,6 +163,7 @@
             "x": 80,
             "y": 20
         },
+        "mouse_pointer_units": "Pixels",
         "mouse_pointer_visible": true,
         "multisample_sample_count": 4,
         "num_position_iterations": 3,
