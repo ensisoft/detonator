@@ -184,27 +184,29 @@ public:
         mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawble);
         mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
         mShowMouseCursor = conf.mouse_cursor.show;
+        mCursorUnits = conf.mouse_cursor.units;
     }
 
     virtual void Draw() override
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
-
+        // rendering surface dimensions.
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
+        // get the game's logical viewport into the game world.
+        const auto& game_view = mGame->GetViewport();
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float game_view_width  = game_view.GetWidth();
+        const float game_view_height = game_view.GetHeight();
+        // the scaling factor for mapping game units to rendering surface (pixel) units.
+        const float game_scale  = std::min(surf_width / game_view_width, surf_height / game_view_height);
 
         if (mScene)
         {
             TRACE_SCOPE("Scene");
-            // get the game's logical viewport into the game world.
-            const auto& view = mGame->GetViewport();
-            // map the logical viewport to some area in the rendering surface
-            // so that the rendering area (the device viewport) has the same
-            // aspect ratio as the logical viewport.
-            const float width  = view.GetWidth();
-            const float height = view.GetHeight();
-            const float scale  = std::min(surf_width / width, surf_height / height);
             // low level draw packet filter for culling draw packets
             // that fall outside of the current viewport.
             class Culler : public engine::EntityInstanceDrawHook {
@@ -221,16 +223,16 @@ public:
             private:
                 const engine::FRect& mViewRect;
             };
-            Culler cull(view);
+            Culler cull(game_view);
 
             // set the actual device viewport for rendering into the window buffer.
             // the device viewport retains the game's logical viewport aspect ratio
             // and is centered in the middle of the rendering surface.
             mPainter->SetViewport(GetViewport());
             // set the logical viewport to whatever the game has set it.
-            mPainter->SetOrthographicView(view);
+            mPainter->SetOrthographicView(game_view);
             // set the pixel ratio for mapping game units to rendering surface units.
-            mPainter->SetPixelRatio(glm::vec2(scale, scale));
+            mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
 
             gfx::Transform transform;
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
@@ -305,9 +307,13 @@ public:
 
         if (mShowMouseCursor)
         {
-            const auto& offset = -mCursorHotspot*mCursorSize;
+            // scale the cursor size depending on the units of of the cursor size.
+            const auto& size   = mCursorUnits == EngineConfig::MouseCursorUnits::Units
+                                 ? mCursorSize * game_scale
+                                 : mCursorSize;
+            const auto& offset = -mCursorHotspot*size;
             gfx::FRect rect;
-            rect.Resize(mCursorSize.x, mCursorSize.y);
+            rect.Resize(size.x, size.y);
             rect.Move(mCursorPos.x, mCursorPos.y);
             rect.Translate(offset.x, offset.y);
             gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
@@ -882,6 +888,7 @@ private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
     // current mouse cursor details
+    EngineConfig::MouseCursorUnits mCursorUnits = EngineConfig::MouseCursorUnits::Pixels;
     glm::vec2 mCursorPos;
     glm::vec2 mCursorHotspot;
     glm::vec2 mCursorSize;

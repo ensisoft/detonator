@@ -512,6 +512,11 @@ namespace app
             glm::vec2 mouse_pointer_hotspot = {0.0f, 0.0f};
             // What is the pixel size of the game's custom mouse pointer.
             glm::vec2 mouse_pointer_size = {20.0f, 20.0f};
+            enum class MousePointerUnits {
+                Pixels, Units
+            };
+            // what are the units for the mouse pointer size.
+            MousePointerUnits mouse_pointer_units = MousePointerUnits::Pixels;
             // name of the game's main script
             QString game_script = "game.lua";
             // Audio PCM data type.

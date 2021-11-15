@@ -854,6 +854,11 @@ void PlayWindow::DoAppInit()
         config.mouse_cursor.drawable = app::ToUtf8(settings.mouse_pointer_drawable);
         config.mouse_cursor.hotspot  = settings.mouse_pointer_hotspot;
         config.mouse_cursor.size     = settings.mouse_pointer_size;
+        if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Pixels)
+            config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Pixels;
+        else if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Units)
+            config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
+        else BUG("Unhandled mouse cursor/pointer units.");
         config.audio.sample_type     = settings.audio_sample_type;
         config.audio.sample_rate     = settings.audio_sample_rate;
         config.audio.buffer_size     = settings.audio_buffer_size;
