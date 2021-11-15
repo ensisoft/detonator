@@ -41,6 +41,7 @@ DlgScriptVar::DlgScriptVar(QWidget* parent, game::ScriptVar& variable)
     // mUI.vec2ValueY->setMinimum(std::numeric_limits<float>::min());
 
     PopulateFromEnum<game::ScriptVar::Type>(mUI.varType);
+    SetValue(mUI.varID, variable.GetId());
     SetValue(mUI.varName, variable.GetName());
     SetValue(mUI.varType, variable.GetType());
     SetValue(mUI.chkReadOnly, variable.IsReadOnly());
@@ -79,32 +80,32 @@ void DlgScriptVar::on_btnAccept_clicked()
 {
     if (!MustHaveInput(mUI.varName))
         return;
-    const bool read_only = GetValue(mUI.chkReadOnly);
-    const auto type = (game::ScriptVar::Type)GetValue(mUI.varType);
-    const auto name = (std::string)GetValue(mUI.varName);
-    switch (type)
+    switch ((game::ScriptVar::Type)GetValue(mUI.varType))
     {
         case game::ScriptVar::Type::Vec2:
             {
                 glm::vec2 val;
                 val.x = GetValue(mUI.vec2ValueX);
                 val.y = GetValue(mUI.vec2ValueY);
-                mVar = game::ScriptVar(name, val, read_only);
+                mVar.SetNewValueType(val);
             }
             break;
         case game::ScriptVar::Type::Integer:
-            mVar = game::ScriptVar(name, (int)GetValue(mUI.intValue), read_only);
+            mVar.SetNewValueType((int)GetValue(mUI.intValue));
             break;
         case game::ScriptVar::Type::String:
-            mVar = game::ScriptVar(name, (std::string)GetValue(mUI.strValue), read_only);
+            mVar.SetNewValueType((std::string)GetValue(mUI.strValue));
             break;
         case game::ScriptVar::Type::Float:
-            mVar = game::ScriptVar(name, (float)GetValue(mUI.floatValue), read_only);
+            mVar.SetNewValueType((float)GetValue(mUI.floatValue));
             break;
         case game::ScriptVar::Type::Boolean:
-            mVar = game::ScriptVar(name, (bool)GetValue(mUI.boolValueTrue), read_only);
+            mVar.SetNewValueType(false);
+            mVar.SetNewValueType((bool)GetValue(mUI.boolValueTrue));
             break;
     }
+    mVar.SetName(GetValue(mUI.varName));
+    mVar.SetReadOnly(GetValue(mUI.chkReadOnly));
     accept();
 }
 void DlgScriptVar::on_btnCancel_clicked()
@@ -149,5 +150,115 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
             break;
     }
 }
+
+DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value)
+  : QDialog(parent)
+  , mVal(value)
+{
+    mUI.setupUi(this);
+    SetVisible(mUI.props, false);
+    SetVisible(mUI.value, true);
+
+    SetVisible(mUI.strValue, false);
+    SetVisible(mUI.intValue, false);
+    SetVisible(mUI.floatValue, false);
+    SetVisible(mUI.vec2ValueX, false);
+    SetVisible(mUI.vec2ValueY, false);
+    SetVisible(mUI.boolValueTrue, false);
+    SetVisible(mUI.boolValueFalse, false);
+    SetVisible(mUI.lblString, false);
+    SetVisible(mUI.lblInteger, false);
+    SetVisible(mUI.lblFloat, false);
+    SetVisible(mUI.lblVec2, false);
+    SetVisible(mUI.lblBool, false);
+
+    SetEnabled(mUI.strValue, true);
+    SetEnabled(mUI.intValue, true);
+    SetEnabled(mUI.floatValue, true);
+    SetEnabled(mUI.vec2ValueX, true);
+    SetEnabled(mUI.vec2ValueY, true);
+    SetEnabled(mUI.boolValueTrue, true);
+    SetEnabled(mUI.boolValueFalse, true);
+
+    switch (game::ScriptVar::GetTypeFromVariant(value))
+    {
+        case game::ScriptVar::Type::Vec2:
+            {
+                const auto& val = std::get<glm::vec2>(value);
+                SetValue(mUI.vec2ValueX, val.x);
+                SetValue(mUI.vec2ValueY, val.y);
+                SetVisible(mUI.vec2ValueX, true);
+                SetVisible(mUI.vec2ValueY, true);
+                mUI.vec2ValueX->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Float:
+            {
+                SetValue(mUI.floatValue, std::get<float>(value));
+                SetVisible(mUI.floatValue, true);
+            }
+            break;
+        case game::ScriptVar::Type::Integer:
+            {
+                SetValue(mUI.intValue, std::get<int>(value));
+                SetVisible(mUI.intValue, true);
+            }
+            break;
+        case game::ScriptVar::Type::String:
+            {
+                SetValue(mUI.strValue, std::get<std::string>(value));
+                SetVisible(mUI.strValue, true);
+            }
+            break;
+        case game::ScriptVar::Type::Boolean:
+            {
+                const auto val = std::get<bool>(value);
+                SetValue(mUI.boolValueTrue, val == true);
+                SetValue(mUI.boolValueFalse, val == false);
+                SetVisible(mUI.boolValueTrue, true);
+                SetVisible(mUI.boolValueFalse, true);
+                mUI.boolValueTrue->setFocus();
+            }
+            break;
+        default:  BUG("Unhandled ScriptVar value type.");
+    }
+    adjustSize();
+}
+
+void DlgScriptVal::on_btnAccept_clicked()
+{
+    switch (game::ScriptVar::GetTypeFromVariant(mVal))
+    {
+        case game::ScriptVar::Type::Vec2:
+            {
+                glm::vec2 val;
+                val.x = GetValue(mUI.vec2ValueX);
+                val.y = GetValue(mUI.vec2ValueY);
+                mVal = val;
+            }
+            break;
+        case game::ScriptVar::Type::Float:
+            mVal = (float)GetValue(mUI.floatValue);
+            break;
+        case game::ScriptVar::Type::Integer:
+            mVal = (int)GetValue(mUI.intValue);
+            break;
+        case game::ScriptVar::Type::String:
+            mVal = (std::string)GetValue(mUI.strValue);
+            break;
+        case game::ScriptVar::Type::Boolean:
+            mVal = (bool)GetValue(mUI.boolValueTrue);
+            break;
+
+        default:  BUG("Unhandled ScriptVar value type.");
+    }
+    accept();
+}
+
+void DlgScriptVal::on_btnCancel_clicked()
+{
+    reject();
+}
+
 
 } // namespace

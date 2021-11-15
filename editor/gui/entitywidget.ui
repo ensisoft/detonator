@@ -296,7 +296,7 @@
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>Tracks</string>
+         <string>Animation Tracks</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_18">
          <item>
@@ -366,7 +366,7 @@
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Variables</string>
+         <string>Script Variables</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_19">
          <item>

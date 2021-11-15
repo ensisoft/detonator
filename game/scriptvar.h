@@ -27,6 +27,7 @@
 #include <optional>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "data/fwd.h"
 
 namespace game
@@ -39,6 +40,8 @@ namespace game
         static constexpr bool ReadOnly = true;
         static constexpr bool ReadWrite = false;
 
+        using VariantType = std::variant<bool, float, int, std::string, glm::vec2>;
+
         // The types of values supported by the ScriptVar.
         enum class Type {
             String,
@@ -49,7 +52,8 @@ namespace game
         };
         template<typename T>
         ScriptVar(std::string name, T value, bool read_only = true)
-          : mName(std::move(name))
+          : mId(base::RandomString(10))
+          , mName(std::move(name))
           , mData(std::move(value))
           , mReadOnly(read_only)
         {}
@@ -60,6 +64,9 @@ namespace game
         { return mReadOnly; }
         // Get the type of the variable.
         Type GetType() const;
+        // Get the script variable ID.
+        std::string GetId() const
+        { return mId; }
         // Get the script variable name.
         std::string GetName() const
         { return mName; }
@@ -88,6 +95,19 @@ namespace game
         }
 
         template<typename T>
+        void SetNewValueType(T value)
+        { mData = value; }
+        void SetName(const std::string& name)
+        { mName = name; }
+        void SetReadOnly(bool read_only)
+        { mReadOnly = read_only; }
+        void SetVariantValue(VariantType value)
+        { mData = value; }
+
+        VariantType GetVariantValue() const
+        { return mData; }
+
+        template<typename T>
         bool HasType() const
         { return std::holds_alternative<T>(mData); }
 
@@ -98,12 +118,16 @@ namespace game
         void IntoJson(data::Writer& data) const;
 
         static std::optional<ScriptVar> FromJson(const data::Reader& data);
+
+        static Type GetTypeFromVariant(const VariantType& variant);
     private:
         ScriptVar() = default;
+        // ID of the script variable.
+        std::string mId;
         // name of the variable in the script.
         std::string mName;
         // the actual data.
-        mutable std::variant<bool, float, int, std::string, glm::vec2> mData;
+        mutable VariantType mData;
         // whether the variable is a read-only / constant in the
         // scripting environment. read only variables can be
         // shared by multiple object instances thus leading to

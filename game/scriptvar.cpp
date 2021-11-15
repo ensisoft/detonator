@@ -30,23 +30,13 @@
 namespace game
 {
 ScriptVar::Type ScriptVar::GetType() const
-{
-    if (std::holds_alternative<int>(mData))
-        return Type::Integer;
-    else if (std::holds_alternative<float>(mData))
-        return Type::Float;
-    else if (std::holds_alternative<bool>(mData))
-        return Type::Boolean;
-    else if (std::holds_alternative<std::string>(mData))
-        return Type::String;
-    else if (std::holds_alternative<glm::vec2>(mData))
-        return Type::Vec2;
-    BUG("Unknown ScriptVar type!");
-}
+{ return GetTypeFromVariant(mData); }
+
 
 size_t ScriptVar::GetHash() const
 {
     size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mData);
     hash = base::hash_combine(hash, mReadOnly);
@@ -55,77 +45,38 @@ size_t ScriptVar::GetHash() const
 
 void ScriptVar::IntoJson(data::Writer& data) const
 {
+    data.Write("id", mId);
     data.Write("name", mName);
     data.Write("readonly", mReadOnly);
-    data.Write("type", GetType());
-    switch (GetType())
-    {
-        case Type::Integer:
-            data.Write("value",GetValue<int>());
-            break;
-        case Type::Vec2:
-            data.Write("value", GetValue<glm::vec2>());
-            break;
-        case Type::Boolean:
-            data.Write("value",GetValue<bool>());
-            break;
-        case Type::String:
-            data.Write("value", GetValue<std::string>());
-            break;
-        case Type::Float:
-            data.Write("value", GetValue<float>());
-            break;
-    }
-}
-
-template<typename T, typename Variant>
-bool JsonReadValue(const data::Reader& data, Variant* out)
-{
-    T value;
-    if (!data.Read("value", &value))
-        return false;
-    *out = value;
-    return true;
+    data.Write("value", mData);
 }
 
 // static
 std::optional<ScriptVar> ScriptVar::FromJson(const data::Reader& data)
 {
     ScriptVar ret;
-    ScriptVar::Type type = ScriptVar::Type::Integer;
-    if (!data.Read("name", &ret.mName) ||
-        !data.Read("type", &type) ||
+    if (!data.Read("id", &ret.mId) ||
+        !data.Read("name", &ret.mName) ||
+        !data.Read("value", &ret.mData) ||
         !data.Read("readonly", &ret.mReadOnly))
         return std::nullopt;
 
-    switch (type) {
-        case Type::Integer:
-            if (!JsonReadValue<int>(data, &ret.mData))
-                return std::nullopt;
-            break;
-
-        case Type::Vec2:
-            if (!JsonReadValue<glm::vec2>(data, &ret.mData))
-                return std::nullopt;
-            break;
-
-        case Type::Float:
-            if (!JsonReadValue<float>(data, &ret.mData))
-                return std::nullopt;
-            break;
-
-        case Type::String:
-            if (!JsonReadValue<std::string>(data, &ret.mData))
-                return std::nullopt;
-            break;
-
-        case Type::Boolean:
-            if (!JsonReadValue<bool>(data, &ret.mData))
-                return std::nullopt;
-            break;
-    }
     return ret;
 }
-
+// static
+ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
+{
+    if (std::holds_alternative<int>(variant))
+        return Type::Integer;
+    else if (std::holds_alternative<float>(variant))
+        return Type::Float;
+    else if (std::holds_alternative<bool>(variant))
+        return Type::Boolean;
+    else if (std::holds_alternative<std::string>(variant))
+        return Type::String;
+    else if (std::holds_alternative<glm::vec2>(variant))
+        return Type::Vec2;
+    BUG("Unknown ScriptVar type!");
+}
 
 } // namespace

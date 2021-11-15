@@ -23,6 +23,8 @@
 #  include <QDialog>
 #include "warnpop.h"
 
+#include <memory>
+
 #include "game/entity.h"
 #include "game/scene.h"
 
@@ -32,22 +34,27 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgEntity(QWidget* parent, const game::EntityClass& klass,
-                  game::SceneNodeClass& node);
+        DlgEntity(QWidget* parent, const game::EntityClass& klass, game::SceneNodeClass& node);
+       ~DlgEntity();
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnResetIdleAnimation_clicked();
         void on_btnResetLifetime_clicked();
+        void on_btnEditVar_clicked();
+        void on_btnResetVar_clicked();
         void on_entityLifetime_valueChanged(double value);
+        void ScriptVariableSelectionChanged(const QItemSelection&,  const QItemSelection&);
     private:
         void SetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
         void GetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
     private:
         Ui::DlgEntity mUI;
     private:
+        class ScriptVarModel;
         const game::EntityClass& mEntityClass;
         game::SceneNodeClass& mNodeClass;
+        std::unique_ptr<ScriptVarModel> mScriptVars;
     };
 } // namespace

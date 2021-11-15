@@ -82,6 +82,68 @@ private:
 namespace game
 {
 
+SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(const std::string& id)
+{
+    for (auto& value : mScriptVarValues)
+    {
+        if (value.id == id)
+            return &value;
+    }
+    return nullptr;
+}
+const SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(const std::string& id) const
+{
+    for (auto& value : mScriptVarValues)
+    {
+        if (value.id == id)
+            return &value;
+    }
+    return nullptr;
+}
+
+bool SceneNodeClass::DeleteScriptVarValueById(const std::string& id)
+{
+    for (auto it=mScriptVarValues.begin(); it != mScriptVarValues.end(); ++it)
+    {
+        const auto& val = *it;
+        if (val.id == id)
+        {
+            mScriptVarValues.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+void SceneNodeClass::SetScriptVarValue(const ScriptVarValue& value)
+{
+    for (auto& val : mScriptVarValues)
+    {
+        if (val.id == value.id)
+        {
+            val.value = value.value;
+            return;
+        }
+    }
+    mScriptVarValues.push_back(value);
+}
+
+void SceneNodeClass::ClearStaleScriptValues(const EntityClass& klass)
+{
+    for (auto it=mScriptVarValues.begin(); it != mScriptVarValues.end();)
+    {
+        const auto& val = *it;
+        const auto* var = klass.FindScriptVarById(val.id);
+        if (var == nullptr) {
+            it = mScriptVarValues.erase(it);
+        } else if (ScriptVar::GetTypeFromVariant(val.value) != var->GetType()) {
+            it = mScriptVarValues.erase(it);
+        } else if(var->IsReadOnly()) {
+            it = mScriptVarValues.erase(it);
+        } else ++it;
+    }
+}
+
 std::size_t SceneNodeClass::GetHash() const
 {
     size_t hash = 0;
@@ -98,6 +160,10 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mIdleAnimationId);
     if (mLifetime.has_value())
         hash = base::hash_combine(hash, mLifetime.value());
+    for (const auto& value : mScriptVarValues) {
+        hash = base::hash_combine(hash, value.id);
+        hash = base::hash_combine(hash, value.value);
+    }
     return hash;
 }
 
@@ -132,6 +198,13 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
     data.Write("idle_animation_id", mIdleAnimationId);
     if (mLifetime.has_value())
         data.Write("lifetime", mLifetime.value());
+    for (const auto& value : mScriptVarValues)
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("id", value.id);
+        chunk->Write("value", value.value);
+        data.AppendChunk("values", std::move(chunk));
+    }
 }
 
 // static
@@ -157,6 +230,14 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
         if (!data.Read("lifetime", &lifetime))
             return std::nullopt;
         ret.mLifetime = lifetime;
+    }
+    for (unsigned i=0; i<data.GetNumChunks("values"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("values", i);
+        ScriptVarValue value;
+        chunk->Read("id", &value.id);
+        chunk->Read("value", &value.value);
+        ret.mScriptVarValues.push_back(std::move(value));
     }
     return ret;
 }
@@ -509,10 +590,17 @@ ScriptVar& SceneClass::GetScriptVar(size_t index)
     ASSERT(index <mScriptVars.size());
     return mScriptVars[index];
 }
-ScriptVar* SceneClass::FindScriptVar(const std::string& name)
+ScriptVar* SceneClass::FindScriptVarByName(const std::string& name)
 {
     for (auto& var : mScriptVars)
         if (var.GetName() == name)
+            return &var;
+    return nullptr;
+}
+ScriptVar* SceneClass::FindScriptVarById(const std::string& id)
+{
+    for (auto& var : mScriptVars)
+        if (var.GetId() == id)
             return &var;
     return nullptr;
 }
@@ -521,10 +609,17 @@ const ScriptVar& SceneClass::GetScriptVar(size_t index) const
     ASSERT(index <mScriptVars.size());
     return mScriptVars[index];
 }
-const ScriptVar* SceneClass::FindScriptVar(const std::string& name) const
+const ScriptVar* SceneClass::FindScriptVarByName(const std::string& name) const
 {
     for (auto& var : mScriptVars)
         if (var.GetName() == name)
+            return &var;
+    return nullptr;
+}
+const ScriptVar* SceneClass::FindScriptVarById(const std::string& id) const
+{
+    for (auto& var : mScriptVars)
+        if (var.GetId() == id)
             return &var;
     return nullptr;
 }
@@ -676,6 +771,32 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         {
             if (node.HasFlagSetting(flag))
                 entity->SetFlag(flag, node.TestFlag(flag));
+        }
+
+        // set the entity script variable values
+        for (size_t i=0; i<node.GetNumScriptVarValues(); ++i)
+        {
+            const auto& val = node.GetScriptVarValue(i);
+            const auto* var = entity->FindScriptVarById(val.id);
+            // deal with potentially stale data in the scene node.
+            if (var == nullptr)
+            {
+                WARN("SceneNode '%1' refers to entity script variable '%2' that no longer exists.", node.GetName(), val.id);
+                continue;
+            }
+            else if (ScriptVar::GetTypeFromVariant(val.value) != var->GetType())
+            {
+                WARN("SceneNode '%1' refers to entity script variable '%2' with incorrect type.", node.GetName(), val.id);
+                continue;
+            }
+            else if (var->IsReadOnly())
+            {
+                WARN("SceneNode '%1' tries to set a read only script variable '%1'.", node.GetName(), var->GetName());
+                continue;
+            }
+            std::visit([var](const auto& variant_value) {
+                var->SetValue(variant_value);
+            }, val.value);
         }
 
         map[&node] = entity.get();
@@ -933,7 +1054,7 @@ FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* no
     return FBox(transform.GetAsMatrix());
 }
 
-const ScriptVar* Scene::FindScriptVar(const std::string& name) const
+const ScriptVar* Scene::FindScriptVarByName(const std::string& name) const
 {
     // first check the mutable variables per this instance then check the class.
     for (const auto& var : mScriptVars)
@@ -941,7 +1062,17 @@ const ScriptVar* Scene::FindScriptVar(const std::string& name) const
         if (var.GetName() == name)
             return &var;
     }
-    return mClass->FindScriptVar(name);
+    return mClass->FindScriptVarByName(name);
+}
+const ScriptVar* Scene::FindScriptVarById(const std::string& id) const
+{
+    // first check the mutable variables per this instance then check the class.
+    for (const auto& var : mScriptVars)
+    {
+        if (var.GetId() == id)
+            return &var;
+    }
+    return mClass->FindScriptVarById(id);
 }
 
 void Scene::Update(float dt)

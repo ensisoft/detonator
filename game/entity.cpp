@@ -817,22 +817,37 @@ ScriptVar& EntityClass::GetScriptVar(size_t index)
     ASSERT(index <mScriptVars.size());
     return *mScriptVars[index];
 }
-ScriptVar* EntityClass::FindScriptVar(const std::string& name)
+ScriptVar* EntityClass::FindScriptVarByName(const std::string& name)
 {
     for (auto& var : mScriptVars)
         if (var->GetName() == name)
             return var.get();
     return nullptr;
 }
+ScriptVar* EntityClass::FindScriptVarById(const std::string& id)
+{
+    for (auto& var : mScriptVars)
+        if (var->GetId() == id)
+            return var.get();
+    return nullptr;
+}
+
 const ScriptVar& EntityClass::GetScriptVar(size_t index) const
 {
     ASSERT(index <mScriptVars.size());
     return *mScriptVars[index];
 }
-const ScriptVar* EntityClass::FindScriptVar(const std::string& name) const
+const ScriptVar* EntityClass::FindScriptVarByName(const std::string& name) const
 {
     for (auto& var : mScriptVars)
         if (var->GetName() == name)
+            return var.get();
+    return nullptr;
+}
+const ScriptVar* EntityClass::FindScriptVarById(const std::string& id) const
+{
+    for  (auto& var : mScriptVars)
+        if (var->GetId() == id)
             return var.get();
     return nullptr;
 }
@@ -1311,7 +1326,7 @@ bool Entity::HasBeenKilled() const
 bool Entity::HasBeenSpawned() const
 { return TestFlag(ControlFlags::Spawned); }
 
-const ScriptVar* Entity::FindScriptVar(const std::string& name) const
+const ScriptVar* Entity::FindScriptVarByName(const std::string& name) const
 {
     // first check the mutable variables per this instance then check the class.
     for (const auto& var : mScriptVars)
@@ -1319,7 +1334,17 @@ const ScriptVar* Entity::FindScriptVar(const std::string& name) const
         if (var.GetName() == name)
             return &var;
     }
-    return mClass->FindScriptVar(name);
+    return mClass->FindScriptVarByName(name);
+}
+const ScriptVar* Entity::FindScriptVarById(const std::string& id) const
+{
+    // first check the mutable variables per this instance then check the class.
+    for (const auto& var : mScriptVars)
+    {
+        if (var.GetId() == id)
+            return &var;
+    }
+    return mClass->FindScriptVarById(id);
 }
 
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)

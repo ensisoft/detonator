@@ -302,6 +302,11 @@ void unit_test_scene_instance_create()
     entity->SetFlag(game::EntityClass::Flags::TickEntity, true);
     entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
     entity->SetLifetime(5.0f);
+    game::ScriptVar var0("var0", 45, false);
+    game::ScriptVar var1("var1", 66, false);
+
+    entity->AddScriptVar(var0);
+    entity->AddScriptVar(var1);
 
     game::SceneClass klass;
     // set some entity nodes in the scene class.
@@ -317,6 +322,7 @@ void unit_test_scene_instance_create()
         node.SetEntity(entity);
         node.SetFlag(game::SceneNodeClass::Flags::TickEntity, false);
         node.SetFlag(game::SceneNodeClass::Flags::UpdateEntity, true);
+        node.AddScriptVarValue({var0.GetId(), 70});
         klass.AddNode(node);
     }
     {
@@ -366,15 +372,18 @@ void unit_test_scene_instance_create()
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->TestFlag(game::EntityClass::Flags::TickEntity) == true);
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->TestFlag(game::EntityClass::Flags::UpdateEntity) == false);
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_2")->GetLifetime() == real::float32(3.0f));
+    TEST_REQUIRE(instance.GetEntity(1).FindScriptVarById(var0.GetId())->GetValue<int>() == 70);
+    TEST_REQUIRE(instance.GetEntity(1).FindScriptVarById(var1.GetId())->GetValue<int>() == 66);
+
 
     // the scene instance has the initial values of scripting variables based on the
     // values set in the scene class object.
-    TEST_REQUIRE(instance.FindScriptVar("foo"));
-    TEST_REQUIRE(instance.FindScriptVar("bar"));
-    TEST_REQUIRE(instance.FindScriptVar("foo")->IsReadOnly() == false);
-    TEST_REQUIRE(instance.FindScriptVar("bar")->IsReadOnly() == true);
-    instance.FindScriptVar("foo")->SetValue(444);
-    TEST_REQUIRE(instance.FindScriptVar("foo")->GetValue<int>() == 444);
+    TEST_REQUIRE(instance.FindScriptVarByName("foo"));
+    TEST_REQUIRE(instance.FindScriptVarByName("bar"));
+    TEST_REQUIRE(instance.FindScriptVarByName("foo")->IsReadOnly() == false);
+    TEST_REQUIRE(instance.FindScriptVarByName("bar")->IsReadOnly() == true);
+    instance.FindScriptVarByName("foo")->SetValue(444);
+    TEST_REQUIRE(instance.FindScriptVarByName("foo")->GetValue<int>() == 444);
 }
 
 void unit_test_scene_instance_spawn()
