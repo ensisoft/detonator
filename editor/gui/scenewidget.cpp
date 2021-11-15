@@ -313,6 +313,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onMousePress    = std::bind(&SceneWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease  = std::bind(&SceneWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMouseWheel    = std::bind(&SceneWidget::MouseWheel, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&SceneWidget::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onKeyPress      = std::bind(&SceneWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onPaintScene    = std::bind(&SceneWidget::PaintScene, this, std::placeholders::_1,
                                             std::placeholders::_2);
@@ -1447,6 +1448,34 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     }
 }
 
+void SceneWidget::MouseDoubleClick(QMouseEvent* mickey)
+{
+    // double click is preceded by a regular click event and quick
+    // googling suggests that there's really no way to filter out
+    // single click when trying to react only to double click other
+    // than to set a timer (which adds latency).
+    // Going to simply discard any tool selection here on double click.
+    mCurrentTool.reset();
+
+    gfx::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    glm::vec2 scene_node_hitpos;
+    auto scene_node = SelectNode(mickey->pos(), &scene_node_hitpos);
+    if (!scene_node)
+        return;
+
+    auto entity_klass = scene_node->GetEntityClass();
+    if (!entity_klass)
+        return;
+
+    DlgEntity dlg(this, *entity_klass, *scene_node);
+    dlg.exec();
+}
+
 void SceneWidget::MouseWheel(QWheelEvent* wheel)
 {
     if (!mCurrentTool)
@@ -1662,6 +1691,8 @@ void SceneWidget::UpdateResourceReferences()
             node.ResetEntityParams();
             continue;
         }
+        // clear any script value that is no longer part of the entity class.
+        node.ClearStaleScriptValues(*klass);
         // resolve the runtime entity klass object reference.
         node.SetEntity(klass);
     }
