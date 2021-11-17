@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QSortFilterProxyModel>
 #  include <QMessageBox>
 #  include <QFileDialog>
 #  include <QFileInfo>
@@ -424,7 +425,7 @@ void InitDoc()
     DOC_METHOD_1("data.JsonObject", "ReadJsonFile", "Try to read the given JSON file. <br>"
                                                     "Returns new JsonObject and en empty string on success or nil and error string on error.",
                  "string", "filename");
-    DOC_METHOD_1("data.Writer", "CreateWrite", "Create a new data.Writer object based on the given format string."
+    DOC_METHOD_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string."
                                                "Format string can be one of the following: 'JSON'<br>"
                                                "Returns nil on unsupported format.",
                  "string", "format");
@@ -823,9 +824,16 @@ void InitDoc()
                                      "For a list of available modifiers see wdk.Mods.<br>"
                                      "For testing a modifier use wdk.TestMod(bits, key).");
     DOC_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
-                                       "Indicates whether sceen_coords are valid or not.");
+                                       "Indicates whether screen_coords are valid or not.");
 
-
+    std::sort(g_method_docs.begin(), g_method_docs.end(),
+        [](const auto& left, const auto& right) {
+            if (left.table < right.table)
+                return true;
+            else if (left.table == right.table && left.name < right.name)
+                return true;
+            else return false;
+        });
     done = true;
 }
 
@@ -834,7 +842,6 @@ void InitDoc()
 
 namespace gui
 {
-
 class ScriptWidget::TableModel : public QAbstractTableModel
 {
 public:
@@ -871,6 +878,29 @@ public:
     { return 4; }
 private:
 };
+class ScriptWidget::TableModelProxy : public QSortFilterProxyModel
+{
+public:
+    void SetTableModel(TableModel* model)
+    { mModel = model; }
+    void SetFilterString(const QString& text)
+    { mFilter=app::ToUtf8(text); }
+protected:
+    virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override
+    {
+        if (mFilter.empty())
+            return true;
+        const auto& doc = GetLuaMethodDoc(row);
+        if (base::Contains(doc.name, mFilter))
+            return true;
+        else if (base::Contains(doc.desc, mFilter))
+            return true;
+        return false;
+    }
+private:
+    std::string mFilter;
+    TableModel* mModel = nullptr;
+};
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
 {
@@ -878,6 +908,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
 
     mWorkspace = workspace;
     mTableModel.reset(new TableModel);
+    mTableModelProxy.reset(new TableModelProxy);
+    mTableModelProxy->setSourceModel(mTableModel.get());
+    mTableModelProxy->SetTableModel(mTableModel.get());
     QPlainTextDocumentLayout* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
     mDocument.setDocumentLayout(layout);
@@ -888,7 +921,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     //mUI.actionReplace->setShortcut(QKeySequence::Replace);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
-    mUI.tableView->setModel(mTableModel.get());
+    mUI.tableView->setModel(mTableModelProxy.get());
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
 
@@ -1356,6 +1389,12 @@ void ScriptWidget::on_btnReplaceAll_clicked()
         count++;
     }
     SetValue(mUI.findResult, QString("Replaced %1 occurrences.").arg(count));
+}
+
+void ScriptWidget::on_filter_textChanged(const QString& text)
+{
+    mTableModelProxy->SetFilterString(text);
+    mTableModelProxy->invalidate();
 }
 
 void ScriptWidget::FileWasChanged()

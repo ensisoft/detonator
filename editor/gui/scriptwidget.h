@@ -69,6 +69,7 @@ namespace gui
         void on_btnFindClose_clicked();
         void on_btnReplaceNext_clicked();
         void on_btnReplaceAll_clicked();
+        void on_filter_textChanged(const QString& text);
 
         void FileWasChanged();
         void TableSelectionChanged(const QItemSelection, const QItemSelection&);
@@ -79,7 +80,9 @@ namespace gui
         Ui::ScriptWidget mUI;
     private:
         class TableModel;
+        class TableModelProxy;
         std::unique_ptr<TableModel> mTableModel;
+        std::unique_ptr<TableModelProxy> mTableModelProxy;
         app::Workspace* mWorkspace = nullptr;
         QFileSystemWatcher mWatcher;
         QTextDocument mDocument;
