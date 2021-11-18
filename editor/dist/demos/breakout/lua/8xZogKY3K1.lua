@@ -6,7 +6,11 @@
 
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(ball, scene)
-
+    if ball.demo_ball then 
+        local node = ball:FindNodeByClassName('Ball')
+        local body = node:GetRigidBody()
+        body:SetFlag('Enabled', true)
+    end
 end
 
 -- Called when the game play ends for an entity in the scene.

@@ -32,13 +32,14 @@ function OnBeginContact(brick, node, other, other_node)
         end
         brick.hit_count = brick.hit_count - 1
         if brick.hit_count == 0 then 
+            local class = brick:GetClass()
             Scene:KillEntity(brick)
             Audio:PlaySoundEffect('Kill Brick', 0)
             local kill_brick = game.GameEvent:new()
             kill_brick.from = 'brick'
             kill_brick.to   = 'game'
             kill_brick.message = 'kill-brick'
-            kill_brick.value   = 100
+            kill_brick.value   = class.hit_count * 100
             Game:PostEvent(kill_brick)            
         end
     end

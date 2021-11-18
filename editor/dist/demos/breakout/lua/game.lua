@@ -6,8 +6,8 @@ _GameStates = {
 }
 
 _State = {
-    current_level = 0,
-    current_lives = 3,
+    current_level = 1,
+    current_lives = 2,
     current_score = 0,
 
     current_state = _GameStates.Menu
@@ -33,7 +33,6 @@ end
 -- of the scene has been created and the game play begins.
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay called.')
-    Game:DebugPrint(tostring(Scene))
     if _State.current_state == _GameStates.Play then 
         _SpawnBall()
     end
@@ -80,8 +79,7 @@ end
 -- end
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then 
---        Game:Play('Level 0')
-        Game:Play('TestLevel')
+
     end
 end
 
@@ -129,10 +127,11 @@ function OnUIAction(ui, action)
         Game:Quit(0)
     elseif action.name == 'play' then 
         Game:CloseUI(0)
-        Game:Play('Level 0')
+        Game:Play('Level 1')
         Game:ShowMouse(false)
-        _State.current_lives = 3
-        _State.current_level = 0
+        Game:GrabMouse(true)
+        _State.current_lives = 2
+        _State.current_level = 1
         _State.current_score = 0
         _State.current_state = _GameStates.Play
         local hud = Game:OpenUI('HUD')
@@ -162,8 +161,12 @@ function OnGameEvent(event)
         if event.message == 'died' then 
             Game:DebugPrint('Ball died')
             _State.current_lives = _State.current_lives - 1
-            if _State.current_lives == 0 then 
-                --game over
+            if _State.current_lives == -1 then 
+                Game:Play('MainMenu')
+                Game:OpenUI('MainMenu')
+                Game:ShowMouse(true)
+                Game:GrabMouse(false)
+                _State.current_state = _GameStates.Menu
             else
                 local hud = Game:GetTopUI()
                 local lives = hud:FindWidgetByName('lives', 'Label')
@@ -175,6 +178,22 @@ function OnGameEvent(event)
         if event.message == 'level-clear' then
             Game:DebugPrint("Level clear!")
             Audio:PlaySoundEffect('Level Clear')
+            local next_level = _State.current_level + 1
+            local scene = ClassLib:FindSceneClassByName('Level ' .. tostring(next_level))
+            if scene == nil then 
+                Game:Play('MainMenu')
+                Game:OpenUI('MainMenu')
+                Game:ShowMouse(true)
+                Game:GrabMouse(false)
+                _State.current_state = _GameStates.Menu
+            else
+                Game:DebugPrint('Level: ' .. tostring(next_level))
+                Game:Play(scene)
+                _State.current_level = next_level
+                local hud = Game:GetTopUI()
+                local level = hud:FindWidgetByName('level', 'Label')
+                level:SetText(tostring(_State.current_level))
+            end
         end
     elseif event.from == 'brick' then
         if event.message == 'kill-brick' then 

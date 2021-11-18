@@ -30,7 +30,7 @@ function KillEntity(level, carcass)
             end
         end
     end
-    Game:DebugPrint("Bricks" .. tostring(num_bricks))
+    --Game:DebugPrint("Bricks" .. tostring(num_bricks))
     if num_bricks ~= 0 then
         return
     end
@@ -38,7 +38,6 @@ function KillEntity(level, carcass)
     level_clear.from    = 'level'
     level_clear.to      = 'game'
     level_clear.message = 'level-clear'
-    level_clear.value   = 0 -- score
     Game:PostEvent(level_clear)
 
 end
