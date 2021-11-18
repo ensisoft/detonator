@@ -1096,7 +1096,15 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
     {
         auto klass = mState.workspace->GetEntityClassByName(name);
         node->SetEntity(klass);
+
+        const auto visible_in_game = node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame);
+        const auto visible_in_editor = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
+        // reset the entity instance parameters to defaults since the
+        // entity class has changed. only save the flags that are changed
+        // through the this UI.
         node->ResetEntityParams();
+        node->SetFlag(game::SceneNodeClass::Flags::VisibleInGame, visible_in_game);
+        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, visible_in_editor);
         NOTE("Entity parameters were reset to default.");
     }
 }
