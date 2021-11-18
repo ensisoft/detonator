@@ -1680,6 +1680,12 @@ void BindGameLib(sol::state& L)
     entity_node["Translate"]      = (void(EntityNode::*)(const glm::vec2&))&EntityNode::Translate;
     entity_node["Rotate"]         = (void(EntityNode::*)(float))&EntityNode::Rotate;
 
+    auto entity_class = table.new_usertype<EntityClass>("EntityClass",
+       sol::meta_function::index, &GetScriptVar<EntityClass>);
+    entity_class["GetId"]   = &EntityClass::GetId;
+    entity_class["GetName"] = &EntityClass::GetName;
+    entity_class["GetLifetime"] = &EntityClass::GetLifetime;
+
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index,     &GetScriptVar<Entity>,
         sol::meta_function::new_index, &SetScriptVar<Entity>);
@@ -1687,6 +1693,7 @@ void BindGameLib(sol::state& L)
     entity["GetId"]                = &Entity::GetId;
     entity["GetClassName"]         = &Entity::GetClassName;
     entity["GetClassId"]           = &Entity::GetClassId;
+    entity["GetClass"]             = &Entity::GetClass;
     entity["GetNumNodes"]          = &Entity::GetNumNodes;
     entity["GetTime"]              = &Entity::GetTime;
     entity["GetLayer"]             = &Entity::GetLayer;
