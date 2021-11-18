@@ -722,7 +722,23 @@ void InitDoc()
     DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "translation");
     DOC_METHOD_1("void", "Rotate", "Rotate the node relative to its current rotation.", "float", "rotation");
 
+    DOC_TABLE("game.EntityClass");
+    DOC_METHOD_0("string", "GetId", "Get the entity class ID.");
+    DOC_METHOD_0("string", "GetName", "Get the entity class name.");
+    DOC_METHOD_0("float", "GetLifetime", "Get the entity lifetime.");
+    DOC_METHOD_0("bool|float|string|int|vec2", "index",
+                 "Lua index meta function.<br>"
+                 "The entity class's script variables are accessible as properties of the entity class object.<br>"
+                 "For example a script variable named 'score' would be accessible as object.score.<br>");
+
     DOC_TABLE("game.Entity");
+    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
+                                                        "The entity's script variables are accessible as properties of the entity object.<br>"
+                                                        "For example a script variable named 'score' would be accessible as object.score.<br>");
+    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta function<br>"
+                                                           "The entity's script variables are accessible as properties of the entity object.<br>"
+                                                           "For example a script variable named 'score' would be accessible as object.score.<br>"
+                                                           "object.score = 123");
     DOC_METHOD_0("string", "GetName", "Get the entity's human readable name.");
     DOC_METHOD_0("string", "GetId", "Get the entity's instance ID.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the entity's class type.");
@@ -768,13 +784,12 @@ void InitDoc()
 
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
-                                                        "The scene's script script variables are accessible as properties on the scene object.<br>"
-                                                        "For example a script variable named 'score' would be accessible as Scene.score.<br>"
-                                                        "local score = Scene.score");
+                                                        "The scene's script variables are accessible as properties of the scene object.<br>"
+                                                        "For example a script variable named 'score' would be accessible as object.score.<br>");
     DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta function<br>"
-                                                             "The scene's script script variables are accessible as properties on the scene object.<br>"
-                                                             "For example a script variable named 'score' would be accessible as Scene.score.<br>"
-                                                             "Scene.score = 123");
+                                                             "The scene's script variables are accessible as properties of the scene object.<br>"
+                                                             "For example a script variable named 'score' would be accessible as object.score.<br>"
+                                                             "object.score = 123");
     DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
                                                           "Returns nil if no such entity could be found.",
