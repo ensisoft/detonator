@@ -307,7 +307,6 @@ void unit_test_setval_actuator()
         node_klass.SetDrawable(draw_class);
 
         game::RigidBodyItemClass rigid_body_class;
-        rigid_body_class.SetLinearVelocity(glm::vec2(2.0f, -3.0f));
         rigid_body_class.SetAngularDamping(-6.0f);
         node_klass.SetRigidBody(rigid_body_class);
 
@@ -401,8 +400,6 @@ void unit_test_kinematic_actuator()
 
         game::EntityNodeClass klass;
         game::RigidBodyItemClass body;
-        body.SetLinearVelocity(glm::vec2(0.0f, 1.0f));
-        body.SetAngularVelocity(5.0f);
         klass.SetRigidBody(body);
 
         // create node instance
@@ -416,8 +413,8 @@ void unit_test_kinematic_actuator()
         TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocityAdjustment() == real::float32(3.0f));
 
         instance.Apply(node, 0.0f);
-        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocityAdjustment() == glm::vec2(0.0f, 1.0f));
-        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocityAdjustment() == real::float32(5.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetLinearVelocityAdjustment() == glm::vec2(0.0f, 0.0f));
+        TEST_REQUIRE(node.GetRigidBody()->GetAngularVelocityAdjustment() == real::float32(0.0f));
 
     }
 }

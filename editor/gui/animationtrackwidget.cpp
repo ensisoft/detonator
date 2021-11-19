@@ -1243,14 +1243,6 @@ void AnimationTrackWidget::SetActuatorUIDefaults(const std::string& nodeId)
     {
         SetValue(mUI.setvalEndValue, draw->GetTimeScale());
     }
-    if (const auto* body = node->GetRigidBody())
-    {
-        const auto& linear_velo = body->GetLinearVelocity();
-        const auto angular_velo = body->GetAngularVelocity();
-        SetValue(mUI.kinematicEndVeloX, linear_velo.x);
-        SetValue(mUI.kinematicEndVeloY, linear_velo.y);
-        SetValue(mUI.kinematicEndVeloZ, angular_velo);
-    }
 }
 
 void AnimationTrackWidget::SetSelectedActuatorProperties()
