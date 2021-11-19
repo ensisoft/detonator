@@ -1,97 +1,111 @@
 {
     "1Oau6Iem5r": {
+        "checked_for_packing": 1
     },
     "2yOBoPmBaI": {
+        "checked_for_packing": 1,
         "elem_HWXOWk3B4g_pos_x": 0,
         "elem_HWXOWk3B4g_pos_y": 0,
         "mapping_count": 0
     },
     "3J49aF64Jm": {
+        "checked_for_packing": 1
     },
     "4RNSFQ1Pyg": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_2Qlif27snN_pos_x": 0,
         "elem_2Qlif27snN_pos_y": 0,
         "mapping_count": 0
     },
     "4zi9n5RIXq": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "7kkLq83FnE": {
+        "checked_for_packing": 1
     },
     "7tJg4l9xmT": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "847gBr2NKv": {
+        "checked_for_packing": 1
     },
     "8xZogKY3K1": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "9G2p8G3zMT": {
+        "checked_for_packing": 1
     },
     "9wG7A0qhYE": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "B3ANINBSbA": {
+        "checked_for_packing": 1
     },
     "BCh1h8kEOP": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "E8G5MCkSFp": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
+    },
+    "EjfqiKs7A1": {
+        "checked_for_packing": 1
     },
     "EtyRugQve2": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "HRXSPeXFUN": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "HjhabB4y2A": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_hsNS566ktU_pos_x": 0,
         "elem_hsNS566ktU_pos_y": 0,
         "mapping_count": 0
     },
     "J160KPStMB": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "JmwlIMU4Nr": {
+        "checked_for_packing": 1
     },
     "Jw14oLX1CD": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "KA0GT192DW": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "KeITJIrx1I": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "MUQDA03a25": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "OAFWPyRj28": {
+        "checked_for_packing": 1
     },
     "OgRnbBquEI": {
+        "checked_for_packing": 1
     },
     "Rs00QF2N4E": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "WGNKEJwulf": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "Xg0GdRiaQU": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "YOZ0Sp88fq": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "eX85urYgUe": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "gRY0JNbDCj": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "ijOB1QBrNK": {
+        "checked_for_packing": 1,
         "track_rbr7LGLiqL": {
             "4LEx6XZQ7S": "spgQgyanGo",
             "OGQodhrM9m": "4ANxKMjuR2",
@@ -115,21 +129,22 @@
         }
     },
     "kZPKqhUrT6": {
+        "checked_for_packing": 1
     },
     "kkBOwiYNRn": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "ltMbxDy6wk": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "mCZ77Xsgvh": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_lI3HDnTgut_pos_x": 0,
         "elem_lI3HDnTgut_pos_y": 0,
         "mapping_count": 0
     },
     "mSF0NAZ4A5": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "project": {
         "application_identifier": "BiwnzPsTqxdF",
@@ -169,7 +184,7 @@
         "phys_gravity_y": 10,
         "phys_scale_x": 100,
         "phys_scale_y": 100,
-        "save_window_geometry": false,
+        "save_window_geometry": true,
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
@@ -182,9 +197,14 @@
         "window_width": 1000,
         "working_folder": "${workspace}"
     },
+    "q9wPieFpP5": {
+        "checked_for_packing": 1
+    },
     "rAn0G88CKj": {
+        "checked_for_packing": 1
     },
     "v9YZBBhlpu": {
+        "checked_for_packing": 1,
         "track_RPMBRaKZS0": {
             "A7lUFFoaYg": "9E4l5BuWm7",
             "DMFfFeFMdk": "9E4l5BuWm7",
@@ -199,14 +219,14 @@
         }
     },
     "vSs0xqS3fS": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "viXTDKHRIB": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
@@ -214,5 +234,8 @@
         "packing_param_tex_padding": 2,
         "packing_param_write_config": true,
         "packing_param_write_content": true
+    },
+    "xZLaeqWePM": {
+        "checked_for_packing": 1
     }
 }
