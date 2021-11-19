@@ -1539,20 +1539,6 @@ void EntityWidget::on_rbDensity_valueChanged(double value)
 {
     UpdateCurrentNodeProperties();
 }
-
-void EntityWidget::on_rbLinearVeloX_valueChanged(double value)
-{
-    UpdateCurrentNodeProperties();
-}
-void EntityWidget::on_rbLinearVeloY_valueChanged(double value)
-{
-    UpdateCurrentNodeProperties();
-}
-void EntityWidget::on_rbAngularVelo_valueChanged(double value)
-{
-    UpdateCurrentNodeProperties();
-}
-
 void EntityWidget::on_rbIsBullet_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
@@ -2198,9 +2184,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbAngularDamping, 0.0f);
     SetValue(mUI.rbLinearDamping, 0.0f);
     SetValue(mUI.rbDensity, 0.0f);
-    SetValue(mUI.rbLinearVeloX, 0.0f);
-    SetValue(mUI.rbLinearVeloY, 0.0f);
-    SetValue(mUI.rbAngularVelo, 0.0f);
     SetValue(mUI.rbIsBullet, false);
     SetValue(mUI.rbIsSensor, false);
     SetValue(mUI.rbIsEnabled, false);
@@ -2268,9 +2251,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.rbAngularDamping, body->GetAngularDamping());
             SetValue(mUI.rbLinearDamping, body->GetLinearDamping());
             SetValue(mUI.rbDensity, body->GetDensity());
-            SetValue(mUI.rbLinearVeloX, body->GetLinearVelocity().x);
-            SetValue(mUI.rbLinearVeloY, body->GetLinearVelocity().y);
-            SetValue(mUI.rbAngularVelo, body->GetAngularVelocity());
             SetValue(mUI.rbIsBullet, body->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
             SetValue(mUI.rbIsSensor, body->TestFlag(game::RigidBodyItemClass::Flags::Sensor));
             SetValue(mUI.rbIsEnabled, body->TestFlag(game::RigidBodyItemClass::Flags::Enabled));
@@ -2388,10 +2368,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
 
     if (auto* body = node->GetRigidBody())
     {
-        glm::vec2 linear_velocity;
-        linear_velocity.x = GetValue(mUI.rbLinearVeloX);
-        linear_velocity.y = GetValue(mUI.rbLinearVeloY);
-        body->SetLinearVelocity(linear_velocity);
         body->SetPolygonShapeId(GetItemId(mUI.rbPolygon));
         body->SetSimulation(GetValue(mUI.rbSimulation));
         body->SetCollisionShape(GetValue(mUI.rbShape));
@@ -2400,7 +2376,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
         body->SetAngularDamping(GetValue(mUI.rbAngularDamping));
         body->SetLinearDamping(GetValue(mUI.rbLinearDamping));
         body->SetDensity(GetValue(mUI.rbDensity));
-        body->SetAngularVelocity(GetValue(mUI.rbAngularVelo));
 
         // flags
         body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));

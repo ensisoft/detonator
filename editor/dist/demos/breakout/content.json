@@ -118,7 +118,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -129,10 +128,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -205,7 +200,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -216,10 +210,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -278,7 +268,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -289,10 +278,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -351,7 +336,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -362,10 +346,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -440,7 +420,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": true,
@@ -451,10 +430,6 @@
             },
             "friction": 0.0,
             "linear_damping": 0.0,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": -10.0
-            },
             "polygon": "",
             "restitution": 0.0,
             "shape": "Circle",
@@ -537,7 +512,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -548,10 +522,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -634,7 +604,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -645,10 +614,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -737,7 +702,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -748,10 +712,6 @@
             },
             "friction": 0.0,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -840,7 +800,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -851,10 +810,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -943,7 +898,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -954,10 +908,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",
@@ -1046,7 +996,6 @@
           },
           "rigid_body": {
             "angular_damping": 0.5,
-            "angular_velocity": 0.0,
             "density": 1.0,
             "flags": {
               "Bullet": false,
@@ -1057,10 +1006,6 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            },
             "polygon": "",
             "restitution": 0.5,
             "shape": "Box",

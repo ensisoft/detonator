@@ -560,10 +560,6 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
     body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
     b2Body* world_body = mWorld->CreateBody(&body_def);
-    const auto& velo = body->GetLinearVelocity();
-    // set initial velocities.
-    world_body->SetLinearVelocity(b2Vec2(velo.x, velo.y));
-    world_body->SetAngularVelocity(body->GetAngularVelocity());
 
     // collision shape used for collision resolver for the body.
     std::unique_ptr<b2Shape> collision_shape;

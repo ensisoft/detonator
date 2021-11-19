@@ -154,9 +154,6 @@ namespace gui
         void on_rbAngularDamping_valueChanged(double value);
         void on_rbLinearDamping_valueChanged(double value);
         void on_rbDensity_valueChanged(double value);
-        void on_rbLinearVeloX_valueChanged(double value);
-        void on_rbLinearVeloY_valueChanged(double value);
-        void on_rbAngularVelo_valueChanged(double value);
         void on_rbIsBullet_stateChanged(int);
         void on_rbIsSensor_stateChanged(int);
         void on_rbIsEnabled_stateChanged(int);

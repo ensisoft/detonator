@@ -56,8 +56,6 @@ std::size_t RigidBodyItemClass::GetHash() const
     hash = base::hash_combine(hash, mAngularDamping);
     hash = base::hash_combine(hash, mLinearDamping);
     hash = base::hash_combine(hash, mDensity);
-    hash = base::hash_combine(hash, mLinearVelocity);
-    hash = base::hash_combine(hash, mAngularVelocity);
     return hash;
 }
 
@@ -72,8 +70,6 @@ void RigidBodyItemClass::IntoJson(data::Writer& data) const
     data.Write("angular_damping", mAngularDamping);
     data.Write("linear_damping",  mLinearDamping);
     data.Write("density",         mDensity);
-    data.Write("linear_velocity", mLinearVelocity);
-    data.Write("angular_velocity", mAngularVelocity);
 }
 // static
 std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const data::Reader& data)
@@ -87,9 +83,7 @@ std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const data::Reade
         !data.Read("restitution",     &ret.mRestitution)  ||
         !data.Read("angular_damping", &ret.mAngularDamping)  ||
         !data.Read("linear_damping",  &ret.mLinearDamping)  ||
-        !data.Read("density",         &ret.mDensity) ||
-        !data.Read("linear_velocity", &ret.mLinearVelocity) ||
-        !data.Read("angular_velocity",&ret.mAngularVelocity))
+        !data.Read("density",         &ret.mDensity))
         return std::nullopt;
     return ret;
 }

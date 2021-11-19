@@ -136,10 +136,6 @@ namespace game
         { return mBitFlags.test(flag); }
         std::string GetPolygonShapeId() const
         { return mPolygonShapeId; }
-        glm::vec2 GetLinearVelocity() const
-        { return mLinearVelocity; }
-        float GetAngularVelocity() const
-        { return mAngularVelocity; }
         void ResetPolygonShapeId()
         { mPolygonShapeId.clear(); }
         base::bitflag<Flags> GetFlags() const
@@ -161,12 +157,8 @@ namespace game
         { mLinearDamping = value; }
         void SetDensity(float value)
         { mDensity = value; }
-        void SetAngularVelocity(float value)
-        { mAngularVelocity = value; }
         void SetPolygonShapeId(const std::string& id)
         { mPolygonShapeId = id; }
-        void SetLinearVelocity(const glm::vec2& velocity)
-        { mLinearVelocity = velocity; }
 
         void IntoJson(data::Writer& data) const;
 
@@ -181,12 +173,6 @@ namespace game
         float mAngularDamping = 0.5f;
         float mLinearDamping = 0.5f;
         float mDensity = 1.0f;
-        // Initial linear velocity vector in meters per second.
-        // Pertains to kinematic bodies.
-        glm::vec2 mLinearVelocity = {0.0f, 0.0f};
-        // Initial angular velocity of rotation around the
-        // center of mass. Pertains to kinematic bodies.
-        float mAngularVelocity = 0.0f;
     };
 
     // Drawable item defines a drawable item and its material and
@@ -524,8 +510,6 @@ namespace game
         RigidBodyItem(std::shared_ptr<const RigidBodyItemClass> klass)
             : mClass(klass)
         {
-            mLinearVelocity = mClass->GetLinearVelocity();
-            mAngularVelocity = mClass->GetAngularVelocity();
             mInstanceFlags = mClass->GetFlags();
         }
 
