@@ -116,7 +116,7 @@ bool FileExists(const std::string& filename)
 #if defined(WINDOWS_OS)
     const std::filesystem::path p(base::FromUtf8(filename));
 return std::filesystem::exists(p);
-#elif defined(POSIX_OS)
+#elif defined(POSIX_OS) || defined(__EMSCRIPTEN__)
     const std::filesystem::path p(filename);
     return std::filesystem::exists(p);
 #endif
@@ -133,7 +133,7 @@ std::ifstream OpenBinaryInputStream(const std::string& filename)
 {
 #if defined(WINDOWS_OS)
     std::ifstream in(base::FromUtf8(filename), std::ios::in | std::ios::binary);
-#elif defined(POSIX_OS)
+#elif defined(POSIX_OS) || defined(__EMSCRIPTEN__)
     std::ifstream in(filename, std::ios::in | std::ios::binary);
 #else
 #  error unimplemented function
@@ -145,7 +145,7 @@ std::ofstream OpenBinaryOutputStream(const std::string& filename)
 {
 #if defined(WINDOWS_OS)
     std::ofstream out(base::FromUtf8(filename), std::ios::out | std::ios::trunc | std::ios::binary);
-#elif defined(POSIX_OS)
+#elif defined(POSIX_OS) || defined(__EMSCRIPTEN__)
     std::ofstream out(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 #else
 #  error unimplemented function.
@@ -157,7 +157,7 @@ bool OverwriteTextFile(const std::string& file, const std::string& text)
 {
 #if defined(WINDOWS_OS)
     std::ofstream out(base::FromUtf8(file), std::ios::out);
-#elif defined(POSIX_OS)
+#elif defined(POSIX_OS) || defined(__EMSCRIPTEN__)
     std::ofstream out(file, std::ios::out | std::ios::trunc);
 #else
 #  error unimplemented function.

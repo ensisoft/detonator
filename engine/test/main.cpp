@@ -27,10 +27,10 @@
 
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 
+#include "engine/main/interface.h"
 #include "base/logging.h"
 #include "base/format.h"
-#include "audio/loader.h"
-#include "audio/graph.h"
+
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -40,18 +40,24 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
+
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/state.h"
+
+#include "engine/ui.h"
+
+#if !defined(__EMSCRIPTEN__)
+#include "audio/loader.h"
+#include "audio/graph.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
 #include "engine/physics.h"
 #include "engine/format.h"
-#include "engine/ui.h"
 #include "engine/audio.h"
-#include "engine/main/interface.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#endif
 
 namespace {
     gfx::FPoint ToPoint(const glm::vec2& vec)
@@ -74,6 +80,32 @@ public:
     virtual void SetSurfaceSize(unsigned width, unsigned height)  {}
 private:
 };
+
+class HelloWasmTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        static auto klass =  gfx::CreateMaterialClassFromTexture("assets/textures/Checkerboard.png");
+
+        gfx::FRect rect;
+        rect.Resize(200, 200);
+        rect.Move(20, 20);
+        //gfx::FillRect(*mPainter, rect, gfx::Color::Yellow);
+        gfx::FillRect(painter, rect, gfx::MaterialClassInst(klass));
+
+        rect.Translate(150, 150);
+
+        gfx::DrawTextRect(painter,
+           "hello wasm!",
+           "assets/fonts/orbitron-medium.otf", 18u,
+           rect, gfx::Color::HotPink);
+    }
+private:
+
+};
+
+#if !defined(__EMSCRIPTEN__)
 
 class AudioMusicTest : public TestCase,
                        public audio::Loader
@@ -628,6 +660,8 @@ private:
     engine::PhysicsEngine mPhysics;
 };
 
+#endif // __EMSCRIPTEN__
+
 class UITest : public TestCase
 {
 public:
@@ -877,6 +911,7 @@ private:
     boost::circular_buffer<std::string> mMessageQueue;
 };
 
+
 class MyApp : public engine::Engine, public engine::ClassLibrary, public wdk::WindowListener
 {
 public:
@@ -897,19 +932,22 @@ public:
     }
 
     // Application implementation
-    virtual void Start()
+    virtual void Start() override
     {
+#if !defined(__EMSCRIPTEN__)
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new ViewportTest);
-        mTestList.emplace_back(new UITest);
         mTestList.emplace_back(new AudioEffectTest);
         mTestList.emplace_back(new AudioMusicTest);
+#endif
+        mTestList.emplace_back(new UITest);
+        mTestList.emplace_back(new HelloWasmTest);
         mTestList[mTestIndex]->Start(this);
     }
 
-    virtual void Init(const InitParams& init)
+    virtual void Init(const InitParams& init) override
     {
         mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
         mPainter = gfx::Painter::Create(mDevice);
@@ -1005,8 +1043,8 @@ public:
 
     virtual void SetHostStats(const HostStats& stats) override
     {
-        //DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
-        //    stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);
+        DEBUG("fps: %1, wall_time: %2, game_time: %3, frames: %4",
+            stats.current_fps, stats.total_wall_time, mGameTime, stats.num_frames_rendered);
     }
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
@@ -1064,6 +1102,7 @@ public:
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
+#if !defined(__EMSCRIPTEN__)
         if (name == "unit_box")
         {
             auto klass = std::make_shared<game::EntityClass>();
@@ -1228,6 +1267,7 @@ public:
             klass->AddAnimationTrack(std::move(track));
             return klass;
         }
+#endif // __EMSCRIPTEN__
         return nullptr;
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override
@@ -1239,9 +1279,11 @@ public:
 private:
     void TakeScreenshot()
     {
+#if !defined(__EMSCRIPTEN__)
         const auto& rgba = mDevice->ReadColorBuffer(1024, 768);
         gfx::WritePNG(rgba, "screenshot.png");
         INFO("Wrote screenshot");
+#endif
     }
 private:
     std::size_t mTestIndex = 0;

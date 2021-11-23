@@ -24,10 +24,12 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/utility.h"
 #include "graphics/resource.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
@@ -37,6 +39,9 @@
 #include "graphics/color4f.h"
 #include "graphics/loader.h"
 
+#if defined(WEBGL)
+#  define GL_CALL(x) mGL.x
+#else
 #define GL_CALL(x)                                      \
 do {                                                    \
     mGL.x;                                              \
@@ -48,7 +53,7 @@ do {                                                    \
         std::abort();                                   \
     }                                                   \
 } while(0)
-
+#endif
 
 namespace
 {
@@ -670,8 +675,37 @@ public:
             ASSERT(texture_min_filter != GL_NONE);
             ASSERT(texture_mag_filter != GL_NONE);
 
-            const GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-            const GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+
+#if defined(WEBGL)
+            bool force_webgl_linear = false;
+            bool force_webgl_wrap_x = false;
+            bool force_webgl_wrap_y = false;
+
+            // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+            const auto width  = texture->GetWidth();
+            const auto height = texture->GetHeight();
+            const auto name   = texture->GetName();
+            if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
+            {
+                if (!(texture_min_filter == GL_NEAREST || texture_min_filter == GL_LINEAR))
+                {
+                    texture_min_filter = GL_LINEAR;
+                    force_webgl_linear = true;
+                }
+                if (texture_wrap_x == GL_REPEAT)
+                {
+                    texture_wrap_x = GL_CLAMP_TO_EDGE;
+                    force_webgl_wrap_x = true;
+                }
+                if (texture_wrap_y == GL_REPEAT)
+                {
+                    texture_wrap_y = GL_CLAMP_TO_EDGE;
+                    force_webgl_wrap_y = true;
+                }
+            }
+#endif
             // if nothing has changed then skip all of the work
             if (mTextureUnits[unit].texture    == texture &&
                 mTextureUnits[unit].min_filter == texture_min_filter &&
@@ -687,6 +721,15 @@ public:
             // set all this dang state here, so we can easily track/understand
             // which unit the texture is bound to.
             const GLuint texture_name = texture->GetName();
+
+#if defined(WEBGL)
+            if (force_webgl_linear)
+                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture=]", texture_name);
+            if (force_webgl_wrap_x)
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=]", texture_name);
+            if (force_webgl_wrap_y)
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=]", texture_name);
+#endif
 
             // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
@@ -1145,7 +1188,18 @@ private:
                 baseFormat,
                 GL_UNSIGNED_BYTE,
                 bytes));
+
+#if defined(WEBGL)
+            // WebGL only supports mips with POT textures.
+            // This also means that with NPOT textures only linear or nearest
+            // sampling can be used since mips are not available.
+            // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+            if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
+                GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+            else WARN("WebGL doesn't support mips on NPOT textures. [texture=%1, width=%2, height=%3]", mName, xres, yres);
+#else
             GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+#endif
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;

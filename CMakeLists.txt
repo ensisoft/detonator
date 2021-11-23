@@ -102,6 +102,11 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
 link_directories("${Boost_LIBRARY_DIRS}")
 
+# this is only for CLion right now
+if (UNIX)
+    include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/emsdk/upstream/emscripten/system/include")
+endif()
+
 # see this bug report about C++14 and Qt
 # https://bugreports.qt.io/browse/QTBUG-53002
 set(CMAKE_CXX_STANDARD 17)

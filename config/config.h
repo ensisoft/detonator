@@ -28,7 +28,7 @@
 
 // some of the code uses LINUX_OS
 // we expect that POSIX_OS is Linux
-#ifdef POSIX_OS
+#if defined(POSIX_OS) && !defined(__EMSCRIPTEN__)
 #  define LINUX_OS
 #endif
 

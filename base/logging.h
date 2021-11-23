@@ -317,6 +317,19 @@ namespace base
         bitflag<WriteType> mWrites;
     };
 
+#if defined(__EMSCRIPTEN__)
+    class EmscriptenLogger : public Logger
+    {
+    public:
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override;
+        virtual void Write(LogEvent type, const char* msg) override;
+        virtual void Flush() override;
+        virtual base::bitflag<WriteType> GetWriteMask() const override
+        { return WriteType::WriteFormatted; }
+    private:
+    };
+#endif
+
 
     // Set the logger object for all threads to use. Each thread can override
     // this setting by setting a thread specific log. If a thread specific
