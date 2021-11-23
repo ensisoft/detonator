@@ -493,6 +493,7 @@ namespace game
     {
     public:
         using Type = ActuatorClass::Type;
+        virtual ~Actuator() = default;
         // Start the action/transition to be applied by this actuator.
         // The node is the node in question that the changes will be applied to.
         virtual void Start(EntityNode& node) = 0;
