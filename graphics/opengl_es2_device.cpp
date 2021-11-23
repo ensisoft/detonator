@@ -344,11 +344,11 @@ public:
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
-    virtual void SetDefaultTextureFilter(MinFilter filter)
+    virtual void SetDefaultTextureFilter(MinFilter filter) override
     {
         mDefaultMinTextureFilter = filter;
     }
-    virtual void SetDefaultTextureFilter(MagFilter filter)
+    virtual void SetDefaultTextureFilter(MagFilter filter) override
     {
         mDefaultMagTextureFilter = filter;
     }

@@ -643,7 +643,7 @@ namespace gfx
         {
             mClass = std::make_shared<PolygonClass>(klass);
         }
-        virtual void ApplyState(Program& program, RasterState& state) const
+        virtual void ApplyState(Program& program, RasterState& state) const override
         {
             state.culling = mCulling;
             state.line_width = mLineWidth;
