@@ -129,7 +129,7 @@ namespace gfx
             }
             virtual std::size_t GetContentHash() const override
             { return base::hash_combine(0, mFile); }
-            virtual void SetName(const std::string& name)
+            virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
             virtual std::unique_ptr<TextureSource> Clone() const override

@@ -56,15 +56,15 @@ public:
     {
         mPixelRatio = ratio;
     }
-    virtual void SetSurfaceSize(const USize& size)
+    virtual void SetSurfaceSize(const USize& size) override
     {
         mSurfacesize = ISize(size);
     }
-    virtual void SetViewport(const IRect& viewport)
+    virtual void SetViewport(const IRect& viewport) override
     {
         mViewport = viewport;
     }
-    virtual void SetScissor(const IRect& scissor)
+    virtual void SetScissor(const IRect& scissor) override
     {
         mScissor = scissor;
     }
