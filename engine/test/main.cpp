@@ -87,7 +87,7 @@ public:
                "Key 1 - music/SkyFire (Title Screen).ogg\n"
                "Key 2 - music/440Hz_44100Hz_16bit_05sec.mp3\n\n"
                "Effect Gain %1 (Press +/- to adjust)\n", mMusicGain),
-            "fonts/orbitron-medium.otf", 18, rect,
+            "assets/fonts/orbitron-medium.otf", 18, rect,
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::AlignTop);
     }
@@ -114,9 +114,9 @@ public:
     {
         std::string track;
         if (key.symbol == wdk::Keysym::Key1)
-            track = "music/SkyFire (Title Screen).ogg";
+            track = "assets/music/SkyFire (Title Screen).ogg";
         else if (key.symbol == wdk::Keysym::Key2)
-            track = "music/440Hz_44100Hz_16bit_05sec.mp3";
+            track = "assets/music/440Hz_44100Hz_16bit_05sec.mp3";
         else if (key.symbol == wdk::Keysym::Plus)
             mMusicGain = math::clamp(0.0f, 1.0f, mMusicGain + 0.05f);
         else if (key.symbol == wdk::Keysym::Minus)
@@ -217,7 +217,7 @@ public:
                 "Key 4 - sounds/Laser_05.mp3\n\n"
                 "Effect gain %1 (Press +/- to adjust)\n"
                 "Effect delay %2 (Press Up/Down arrow to adjust)\n", mEffectGain, mDelay),
-            "fonts/orbitron-medium.otf", 18, rect,
+            "assets/fonts/orbitron-medium.otf", 18, rect,
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::AlignTop);
     }
@@ -239,13 +239,13 @@ public:
     {
         const auto millisec = unsigned(mDelay * 1000u);
         if (key.symbol == wdk::Keysym::Key1)
-            mEngine->PlaySoundEffect(BuildEffectGraph("21", "sounds/sound 21.ogg"), millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("21", "assets/sounds/sound 21.ogg"), millisec);
         else if (key.symbol == wdk::Keysym::Key2)
-            mEngine->PlaySoundEffect(BuildEffectGraph("jump", "sounds/qubodup-cfork-ccby3-jump.ogg"), millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("jump", "assets/sounds/qubodup-cfork-ccby3-jump.ogg"), millisec);
         else if (key.symbol == wdk::Keysym::Key3)
-            mEngine->PlaySoundEffect(BuildEffectGraph("tada", "sounds/completetask_0.mp3"), millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("tada", "assets/sounds/completetask_0.mp3"), millisec);
         else if (key.symbol == wdk::Keysym::Key4)
-            mEngine->PlaySoundEffect(BuildEffectGraph("laser", "sounds/Laser_05.mp3"), millisec);
+            mEngine->PlaySoundEffect(BuildEffectGraph("laser", "assets/sounds/Laser_05.mp3"), millisec);
         else if (key.symbol == wdk::Keysym::Plus)
             mEffectGain = math::clamp(0.0f, 1.0f, mEffectGain + 0.05f);
         else if (key.symbol == wdk::Keysym::Minus)
@@ -649,7 +649,7 @@ public:
         for (const auto& print : mMessageQueue)
         {
             gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
-            gfx::DrawTextRect(painter, print, "fonts/orbitron-medium.otf", 14, rect,
+            gfx::DrawTextRect(painter, print, "assets/fonts/orbitron-medium.otf", 14, rect,
                 gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
             rect.Translate(0, 20);
         }
@@ -677,7 +677,7 @@ public:
         mStyle.SetMaterial("widget/border", engine::detail::UIColor(gfx::Color::LightGray));
         mStyle.SetProperty("widget/shape", "RoundRect");
         // static text properties
-        mStyle.SetProperty("widget/text-font", "fonts/orbitron-medium.otf");
+        mStyle.SetProperty("widget/text-font", "assets/fonts/orbitron-medium.otf");
         mStyle.SetProperty("widget/text-size", 16);
         mStyle.SetProperty("widget/text-color", gfx::Color::White);
         // button properties.
@@ -687,7 +687,7 @@ public:
         mStyle.SetMaterial("widget/pressed/button-background", engine::detail::UIColor(gfx::Color::Gray));
         mStyle.SetMaterial("widget/pressed/button-border", engine::detail::UIColor(gfx::Color::Silver));
         // editable text properties.
-        mStyle.SetProperty("widget/edit-text-font", "fonts/orbitron-medium.otf");
+        mStyle.SetProperty("widget/edit-text-font", "assets/fonts/orbitron-medium.otf");
         mStyle.SetProperty("widget/edit-text-size", 16);
         mStyle.SetProperty("widget/edit-text-color", gfx::Color::Black);
         // text edit box properties.
@@ -1038,10 +1038,10 @@ public:
     {
         if (name == "uv_test")
             return std::make_shared<gfx::TextureMap2DClass>(
-                    gfx::CreateMaterialClassFromTexture("textures/uv_test_512.png"));
+                    gfx::CreateMaterialClassFromTexture("assets/textures/uv_test_512.png"));
         else if (name == "checkerboard")
             return std::make_shared<gfx::TextureMap2DClass>(
-                    gfx::CreateMaterialClassFromTexture("textures/Checkerboard.png"));
+                    gfx::CreateMaterialClassFromTexture("assets/textures/Checkerboard.png"));
         else if (name == "color")
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
         else if (name == "object")
@@ -1261,7 +1261,7 @@ extern "C" {
 
 GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
-    DEBUG("test app");
+    DEBUG("test engine");
     return new MyApp;
 }
 
