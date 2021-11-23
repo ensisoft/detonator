@@ -256,7 +256,10 @@ bool has_debugger()
     // return we_have_tracer == 1;
 
     return false;
-
+#elif defined(WEB_OS)
+    return false;
+#else
+#  error Unimplemented function
 #endif
 }
 

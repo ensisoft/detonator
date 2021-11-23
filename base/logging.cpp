@@ -23,12 +23,18 @@
 #ifdef BASE_LOGGING_ENABLE_CURSES
 #  include <curses.h>
 #endif
+
+#ifdef __EMSCRIPTEN__
+#  include <emscripten/emscripten.h>
+#  include <emscripten/html5.h>
+#endif
 #include <cassert>
 #include <iostream>
 #include <atomic>
 #include <chrono>
 #include <cstdio>
-#include "logging.h"
+#include "base/assert.h"
+#include "base/logging.h"
 
 namespace {
 // a thread specific logger object.
@@ -121,7 +127,7 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
         return (0);
     }
     */
-#if defined(POSIX_OS)
+#if defined(LINUX_OS)
     // output terminal escape code to change text color.
     if (type == LogEvent::Debug)
         *m_out << "\033[" << 36 << "m";
@@ -152,6 +158,9 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
 
     *m_out << msg;
     SetConsoleTextAttribute(out, console.wAttributes);
+#else
+#  warning Unimplemented function
+    BUG("Unimplemented function called.");
 #endif
 }
 
@@ -200,9 +209,32 @@ void CursesLogger::Write(LogEvent type, const char* msg)
         addch('\n');
 
 #else
-    std::printf(msg);
+    std::printf("%s", msg);
 #endif
 }
+
+#if defined(__EMSCRIPTEN__)
+void EmscriptenLogger::Write(LogEvent type, const char* file, int line, const char* msg)
+{
+    // not implemented
+}
+
+void EmscriptenLogger::Write(LogEvent type, const char* msg)
+{
+    if (type == LogEvent::Warning)
+        emscripten_log(EM_LOG_CONSOLE | EM_LOG_WARN,  "%s", msg);
+    else if (type == LogEvent::Debug)
+        emscripten_log(EM_LOG_CONSOLE | EM_LOG_DEBUG, "%s", msg);
+    else if (type == LogEvent::Error)
+        emscripten_log(EM_LOG_CONSOLE | EM_LOG_ERROR, "%s", msg);
+    else if (type == LogEvent::Info)
+        emscripten_log(EM_LOG_CONSOLE | EM_LOG_INFO, "%s", msg);
+}
+void EmscriptenLogger::Flush()
+{
+    // intentionally empty.
+}
+#endif // __EMSCRIPTEN__
 
 Logger* SetGlobalLog(Logger* log)
 {

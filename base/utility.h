@@ -33,6 +33,11 @@
 namespace base
 {
 
+inline bool IsPowerOfTwo(unsigned i)
+{
+    return (i & (i-1)) == 0;
+}
+
 template<typename Key> inline
 bool Contains(const std::unordered_set<Key>& map, const Key& k)
 { return map.find(k) != map.end(); }

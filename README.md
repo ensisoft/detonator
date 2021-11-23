@@ -1,7 +1,7 @@
-Ensisoft Gamestudio
+GAMESTUDIO 2D
 ===================
 
-A 2D game engine and editor for Linux and Windows.
+A 2D game engine and editor for Linux and Windows (Just because!)
 
 ![Screenshot](screens/bandit-play.gif "Bandit demo")
 
@@ -21,8 +21,8 @@ Currently supported major features.
 * Game content packaging
 * Window integration (https://github.com/ensisoft/wdk)
 
-Planned major features not yet implemented:
-* Android and/or HTML5 build target support (TBD)
+Planned major features not yet fully implemented:
+* HTML5/WASM build target support
 
 Planned minor features not yet implemented:
 * Acceleration structures / scene queries / ray casting
@@ -64,6 +64,66 @@ game content in the editor and see the changes take place in the play window.
 
 Build Instructions
 ==================
+
+WASM
+------------------------------
+Building to WASM is currently supported only Linux and only covers only the engine not the editor.
+The build is separated from the main (CMake based) engine build and is in emscripten/ folder.
+
+- Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
+  location of emsdk is arbitrary but I've dumped it into gamestudio/ so that my IDE (Clion) can
+  easily find the emscripten headers for C++ tooling (the CMakeLists then has a matching include for this).
+```
+  $ cd gamestudio
+  $ git clone https://github.com/emscripten-core/emsdk.git
+  $ cd emsdk
+  $ git pull
+  $ ./emsdk install latest
+  $ ./emsdk activate latest
+  $ source ./emsdk_env.sh
+```
+
+- Next build the Gamestudio engine to WASM blob. Make sure that you have the emscripten tools in your path.
+I.e, emcc should be found. If they aren't you probably want to source the emsdk_env.sh file.
+
+```
+  $ which emcc
+  $ /home/user/emsdk/upstream/emscripten/emcc
+  $ emcc --version
+  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
+  $ ....
+```
+
+```
+  $ git clone https://github.com/ensisoft/gamestudio
+  $ cd gamestudio
+  $ git submodule update --init --recursive
+  $ cd emscripten
+  $ make
+``` 
+If everything went well there should now be a engine.js and engine.wasm files. The .js file contains
+the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine when the web page loads.
+   
+The content (assets) need to packaged separately and this step will likely be done by the editor when a project is built for WASM.
+But for now a manual package step is needed using file_packager.py from emsdk
+
+```
+  $ cd gamestudio/emscripten/test
+  $ /home/user/emsdk/upstream/emscripten/tools/file_packager.py ASSETS --preload assets/ --js-output=ASSETS.js
+```
+In addition a .html file is needed. It's possible to have a emcc generate some default .html file but it has a bunch of
+crap in it (silly SVG based image) and is likely to require customization so a simpler .html is provided as part of this
+source repo. The important thing is that the .html file needs to load the engine.js and the ASSETS.js scripts. These should
+be loaded after the script block that defines the var Module for the glue customization.
+```
+  <script       type="text/javascript" src="ASSETS.js"></script>
+  <script async type="text/javascript" src="engine.js"></script> 
+```
+Finally to serve the web page and all the content a web server is needed.
+```
+  $ cd gamestudio/emscripten/test
+  $ python -m http.server
+``` 
 
 Penguin Juice (Linux)
 ------------------------------

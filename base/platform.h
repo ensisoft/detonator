@@ -23,7 +23,8 @@
 
 #pragma once
 
-// assuming some msvc version for windows, gcc or clang for linux
+// assuming some msvc version for windows, gcc or clang for linux,
+// emscripten for wasm/web
 
 #if defined(_MSC_VER)
   #define __MSVC__
@@ -62,7 +63,7 @@
   #define NORETURN __declspec(noreturn)
 #endif
 
-#if defined(__GNUG__)
+#if defined(__GNUG__) && !defined(__EMSCRIPTEN__)
   #define __GCC__
   #define POSIX_OS
   #ifdef __LP64__
@@ -74,7 +75,7 @@
   #define NORETURN [[noreturn]]
 #endif
 
-#if defined(__clang__)
+#if defined(__clang__) && !defined(__EMSCRIPTEN__)
   #ifdef __LP64__
     #define X86_64
   #endif
@@ -90,12 +91,22 @@
   #define NORETURN [[noreturn]]
 #endif
 
+#if defined(__EMSCRIPTEN__)
+#  define WEBASSEMBLY
+#  define WEBGL
+#  define COMPILER_NAME "emscripten"
+#  define COMPILER_VERSION "xxxx"
+// emscripten tries to be posix compatible to some extent
+#  define POSIX_OS
+#endif
 
 // how to distinguish between Linux and MacOS ?
 // https://stackoverflow.com/questions/2166483/which-macro-to-wrap-mac-os-x-specific-code-in-c-c
 #ifdef POSIX_OS
-#  ifdef __APPLE__
+#  if defined(__APPLE__)
 #    define APPLE_OS
+#  elif defined(__EMSCRIPTEN__)
+#    define WEB_OS
 #  else
 #    define LINUX_OS
 #  endif
