@@ -96,6 +96,7 @@ message(STATUS "${Boost_LIBRARY_DIRS}")
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
 include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
