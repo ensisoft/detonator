@@ -59,23 +59,10 @@ namespace debug
     : (debug::has_debugger() ? \
         debug::do_break() : \
         debug::do_assert(#expr, __FILE__, __PRETTY_FUNCTION__, __LINE__))
-
-#ifdef _NDEBUG
-#  define CHECK(func, retval) \
-    do { \
-        const auto ret = func; \
-        assert(ret == retval); \
-    } while (0)
-#else
-#  define CHECK(func, retval) \
-    do { \
-        func; \
-    } while(0)
-#endif
-
 #define BUG(message)                                                    \
   do {                                                                  \
     debug::has_debugger()                                               \
   ? debug::do_break()                                                   \
   : debug::do_assert(message, __FILE__, __PRETTY_FUNCTION__, __LINE__); \
 } while(0)
+
