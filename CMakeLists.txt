@@ -14,23 +14,22 @@ https://github.com/ensisoft/gamestudio
 
 ")
 
-
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
-
-# libsamplerate
-# not available on Conan Center as of July-2021
 # current version is 0.2.1
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
+# current version 2.4.1
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/box2d)
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include")
 
 # this is only for CLion right now
 if (UNIX)
@@ -176,6 +175,8 @@ if (MSVC)
 
    target_link_libraries(AudioLib INTERFACE samplerate)
 endif()
+
+target_link_libraries(EngineLib INTERFACE box2d)
 
 # Editor application.
 add_executable(GSEditor
@@ -569,6 +570,8 @@ target_include_directories(EngineLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/e
 if (MSVC)
     target_compile_options(EngineLibTesting PRIVATE /bigobj)
 endif()
+
+target_link_libraries(EngineLibTesting INTERFACE box2d)
 
 add_executable(unit_test_tree     game/unit_test/unit_test_tree.cpp)
 add_executable(unit_test_anim     game/unit_test/unit_test_animation.cpp)
