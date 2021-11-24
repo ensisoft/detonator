@@ -102,7 +102,7 @@ ChromiumTraceJsonWriter::ChromiumTraceJsonWriter(const std::string& file)
     std::fprintf(mFile, "{\"traceEvents\":[\n");
 }
 
-ChromiumTraceJsonWriter::~ChromiumTraceJsonWriter()
+ChromiumTraceJsonWriter::~ChromiumTraceJsonWriter() noexcept
 {
     std::fprintf(mFile, "] }\n");
 }
