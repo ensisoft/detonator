@@ -18,7 +18,13 @@ test_engine: stb_lib
 	../base/utility.cpp \
 	../base/format.cpp \
 	../base/json.cpp \
+	../base/trace.cpp \
+	../game/animation.cpp \
+	../game/entity.cpp \
+	../game/scene.cpp \
+	../game/scriptvar.cpp \
 	../engine/test/main.cpp \
+	../engine/renderer.cpp \
 	../engine/ui.cpp \
 	../graphics/painter.cpp \
 	../graphics/material.cpp \
@@ -47,4 +53,3 @@ stb_lib:
 	../third_party/stb/stb_image.c \
 	../third_party/stb/stb_image_write.c \
 	-c \
-	

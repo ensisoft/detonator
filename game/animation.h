@@ -340,7 +340,7 @@ namespace game
         { mId = base::RandomString(10); }
         virtual Type GetType() const override
         { return Type::Transform; }
-        virtual std::string GetNodeId() const
+        virtual std::string GetNodeId() const override
         { return mNodeId; }
         virtual float GetStartTime() const override
         { return mStartTime; }

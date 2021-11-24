@@ -45,18 +45,18 @@
 #include "uikit/widget.h"
 #include "uikit/state.h"
 
+#include "game/entity.h"
+#include "game/scene.h"
+
+#include "engine/classlib.h"
+#include "engine/renderer.h"
 #include "engine/ui.h"
 
 #if !defined(__EMSCRIPTEN__)
 #include "audio/loader.h"
 #include "audio/graph.h"
-#include "engine/classlib.h"
-#include "engine/renderer.h"
 #include "engine/physics.h"
-#include "engine/format.h"
 #include "engine/audio.h"
-#include "game/entity.h"
-#include "game/scene.h"
 #endif
 
 namespace {
@@ -363,6 +363,85 @@ private:
     float mDelay      = 0.0f;
 };
 
+class PhysicsTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        mRenderer.Draw(*mScene, painter, transform);
+        mPhysics.DebugDrawObjects(painter, transform);
+    }
+    virtual void Update(float dt)
+    {
+        if (mPhysics.HaveWorld())
+        {
+            mPhysics.Step();
+            mPhysics.UpdateScene(*mScene);
+        }
+    }
+    virtual void Start(engine::ClassLibrary* loader)
+    {
+        auto klass = std::make_shared<game::SceneClass>();
+        // create ground.
+        {
+            game::SceneNodeClass ground;
+            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
+            ground.SetRotation(0.1f);
+            ground.SetEntity(loader->FindEntityClassByName("ground"));
+            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
+        }
+        {
+            game::SceneNodeClass ground;
+            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
+            ground.SetRotation(-0.4f);
+            ground.SetTranslation(glm::vec2(500.0f, 650.0f));
+            ground.SetEntity(loader->FindEntityClassByName("ground"));
+            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
+        }
+
+        // create some boxes.
+        {
+            for (int i=0; i<3; ++i)
+            {
+                game::SceneNodeClass node;
+                const auto x = 400.0f + (i & 1) * 25.0f;
+                const auto y = 300 + i * 50.0f;
+                node.SetTranslation(glm::vec2(x, y));
+                node.SetEntity(loader->FindEntityClassByName("box"));
+                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+            }
+        }
+
+        // create a few circle shapes.
+        {
+            for (int i=0; i<3; ++i)
+            {
+                game::SceneNodeClass node;
+                const auto x = 300.0f + (i & 1) * 25.0f;
+                const auto y = 300 + i * 50.0f;
+                node.SetTranslation(glm::vec2(x, y));
+                node.SetEntity(loader->FindEntityClassByName("circle"));
+                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+            }
+        }
+
+        mScene = game::CreateSceneInstance(klass);
+        mRenderer.SetClassLibrary(loader);
+        mPhysics.SetClassLibrary(loader);
+        mPhysics.SetGravity(glm::vec2(0.0f, 100.0f));
+        mPhysics.SetScale(glm::vec2(10.0f, 10.0f));
+        mPhysics.DeleteAll();
+        mPhysics.CreateWorld(*mScene);
+    }
+private:
+    std::unique_ptr<game::Scene>  mScene;
+    engine::Renderer mRenderer;
+    engine::PhysicsEngine mPhysics;
+};
+
+#endif // __EMSCRIPTEN__
+
 class ViewportTest : public TestCase
 {
 public:
@@ -553,7 +632,7 @@ public:
             }
         }
     }
-    virtual void Update(float dt)
+    virtual void Update(float dt) override
     {
         if (!mEntity)
             return;
@@ -561,7 +640,7 @@ public:
         mTime += dt;
         mEntity->Update(dt);
     }
-    virtual void Start(engine::ClassLibrary* loader)
+    virtual void Start(engine::ClassLibrary* loader) override
     {
         auto klass = loader->FindEntityClassByName("robot");
         mEntity = game::CreateEntityInstance(klass);
@@ -583,84 +662,6 @@ private:
     bool mDrawBoundingRects = true;
 };
 
-class PhysicsTest : public TestCase
-{
-public:
-    virtual void Render(gfx::Painter& painter) override
-    {
-        gfx::Transform transform;
-        mRenderer.Draw(*mScene, painter, transform);
-        mPhysics.DebugDrawObjects(painter, transform);
-    }
-    virtual void Update(float dt)
-    {
-        if (mPhysics.HaveWorld())
-        {
-            mPhysics.Step();
-            mPhysics.UpdateScene(*mScene);
-        }
-    }
-    virtual void Start(engine::ClassLibrary* loader)
-    {
-        auto klass = std::make_shared<game::SceneClass>();
-        // create ground.
-        {
-            game::SceneNodeClass ground;
-            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
-            ground.SetRotation(0.1f);
-            ground.SetEntity(loader->FindEntityClassByName("ground"));
-            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
-        }
-        {
-            game::SceneNodeClass ground;
-            ground.SetTranslation(glm::vec2(400.0f, 500.0f));
-            ground.SetRotation(-0.4f);
-            ground.SetTranslation(glm::vec2(500.0f, 650.0f));
-            ground.SetEntity(loader->FindEntityClassByName("ground"));
-            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
-        }
-
-        // create some boxes.
-        {
-            for (int i=0; i<3; ++i)
-            {
-                game::SceneNodeClass node;
-                const auto x = 400.0f + (i & 1) * 25.0f;
-                const auto y = 300 + i * 50.0f;
-                node.SetTranslation(glm::vec2(x, y));
-                node.SetEntity(loader->FindEntityClassByName("box"));
-                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
-            }
-        }
-
-        // create a few circle shapes.
-        {
-            for (int i=0; i<3; ++i)
-            {
-                game::SceneNodeClass node;
-                const auto x = 300.0f + (i & 1) * 25.0f;
-                const auto y = 300 + i * 50.0f;
-                node.SetTranslation(glm::vec2(x, y));
-                node.SetEntity(loader->FindEntityClassByName("circle"));
-                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
-            }
-        }
-
-        mScene = game::CreateSceneInstance(klass);
-        mRenderer.SetClassLibrary(loader);
-        mPhysics.SetClassLibrary(loader);
-        mPhysics.SetGravity(glm::vec2(0.0f, 100.0f));
-        mPhysics.SetScale(glm::vec2(10.0f, 10.0f));
-        mPhysics.DeleteAll();
-        mPhysics.CreateWorld(*mScene);
-    }
-private:
-    std::unique_ptr<game::Scene>  mScene;
-    engine::Renderer mRenderer;
-    engine::PhysicsEngine mPhysics;
-};
-
-#endif // __EMSCRIPTEN__
 
 class UITest : public TestCase
 {
@@ -935,13 +936,14 @@ public:
     virtual void Start() override
     {
 #if !defined(__EMSCRIPTEN__)
-        mTestList.emplace_back(new EntityTest);
+
         mTestList.emplace_back(new PhysicsTest);
-        mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new ViewportTest);
         mTestList.emplace_back(new AudioEffectTest);
         mTestList.emplace_back(new AudioMusicTest);
 #endif
+        mTestList.emplace_back(new EntityTest);
+        mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new UITest);
         mTestList.emplace_back(new HelloWasmTest);
         mTestList[mTestIndex]->Start(this);
@@ -1102,7 +1104,6 @@ public:
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
-#if !defined(__EMSCRIPTEN__)
         if (name == "unit_box")
         {
             auto klass = std::make_shared<game::EntityClass>();
@@ -1267,7 +1268,7 @@ public:
             klass->AddAnimationTrack(std::move(track));
             return klass;
         }
-#endif // __EMSCRIPTEN__
+
         return nullptr;
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassById(const std::string& id) const override
