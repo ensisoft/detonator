@@ -6,6 +6,7 @@ box2d/2.4.0
 lua/5.3.5
 sol2/3.2.3
 mpg123/1.26.4
+boost/1.76.0
 
 [generators]
 cmake
