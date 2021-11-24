@@ -26,81 +26,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
 # current version is 0.2.1
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
 
-# Unfortunately we need boost...
-set(Boost_USE_STATIC_LIBS ON)
-if(WIN32)
-    set(BOOST_ROOT $ENV{BOOST_ROOT})
-    if (NOT BOOST_ROOT)
-        set(BOOST_ROOT "c:/local/boost_1_72_0")
-        message("
-Bollocks. BOOST_ROOT was not set. Defaulting to ${BOOST_ROOT}
-TL;DR BOOST_ROOT is a variable that points to your Boost installation
-root. So for example if your Boost is installed in C:/boost_1_55_0
-your BOOST_ROOT should be c:/boost_1_55_0.
-You can set the variable in M$ command prompt with
-
-        $ set BOOST_ROOT=c:/boost_1_55_0
-
-and in Linux in your terminal (in bash)
-
-        $ export BOOST_ROOT=/usr/local/boost_1_55_0
-
-")
-    endif()
-endif()
-
-# for some reason the find_package fails on windows when we say which
-# libs we'd like to use. Anyway the linking is automatic so we'll just
-# add the libs manually to linking options for Linux.
-#find_package(Boost REQUIRED COMPONENTS system filesystem)
-find_package(Boost REQUIRED COMPONENTS)
-if(NOT Boost_FOUND)
-    if (UNIX)
-        message(FATAL_ERROR "
-Boost (http://www.boost.org) development libraries were not found.
-You should be able to use the boost dev packages available in your distro's repos.
-On Ubuntu you might want to try 'sudo apt-get install libboost-all-dev'
-On other distros please consult your distro's docs on how to install Boost.
-I'm going to crap out now. >.<
-")
-    elseif(WIN32)
-        message(FATAL_ERROR "
-Boost (http://www.boost.org) development libraries were not found.
-You can download a prebuilt binary package from http://www.boost.org.
-Or if you're using Visual Studio 2015 you can follow this direct link:
-https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-64.exe/download
-If you have boost but not in a default location or another version of boost
-you can try to specify BOOST_ROOT environment variable.
-I'm going to crap out now. >.<
-")
-    endif()
-endif()
-
-# why is this not set!?
-# should come from cmake through find_package(Boost, ...)
-if (MSVC)
-    if(NOT Boost_LIBRARY_DIRS)
-        message(WARNING "
-Boost_LIBRARY_DIRS is not set.
-I'm going to use a default for MSVS 14 2015 Win64.
-If that doesn't match your build environment/compiler/arch you will need
-to edit the line below this message manually.
-Sorry about that :-(
-")
-        set(Boost_LIBRARY_DIRS "${BOOST_ROOT}/lib64-msvc-14.0")
-    endif()
-endif()
-
-message(STATUS "${Boost_INCLUDE_DIRS}")
-message(STATUS "${Boost_LIBRARY_DIRS}")
-
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
-include_directories(BEFORE "${Boost_INCLUDE_DIRS}")
-link_directories("${Boost_LIBRARY_DIRS}")
 
 # this is only for CLion right now
 if (UNIX)
