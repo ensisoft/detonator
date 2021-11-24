@@ -2120,6 +2120,8 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale);
         texture->SetContentHash(hash);
         texture->SetTransient(true);
+        texture->SetWrapX(Texture::Wrapping::Clamp);
+        texture->SetWrapY(Texture::Wrapping::Clamp);
     }
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
