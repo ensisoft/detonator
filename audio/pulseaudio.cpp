@@ -16,7 +16,7 @@
 
 #include "config.h"
 
-#ifdef LINUX_OS
+#ifdef AUDIO_USE_PULSEAUDIO
   #include <pulse/pulseaudio.h>
 #endif
 
@@ -29,7 +29,7 @@
 #include "audio/stream.h"
 #include "audio/device.h"
 
-#ifdef LINUX_OS
+#ifdef AUDIO_USE_PULSEAUDIO
 namespace {
 void ThrowPaException(pa_context* context, const char* what)
 {
@@ -46,7 +46,7 @@ void ThrowPaException(pa_context* context, const char* what)
 namespace audio
 {
 
-#ifdef LINUX_OS
+#ifdef AUDIO_USE_PULSEAUDIO
 
 // AudioDevice implementation for PulseAudio
 class PulseAudio : public Device
@@ -413,6 +413,6 @@ std::unique_ptr<Device> Device::Create(const char* appname)
     return device;
 }
 
-#endif // LINUX_OS
+#endif // AUDIO_USE_PULSEAUDIO
 
 } // namespace
