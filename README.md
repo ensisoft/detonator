@@ -99,7 +99,10 @@ I.e, emcc should be found. If they aren't you probably want to source the emsdk_
   $ cd gamestudio
   $ git submodule update --init --recursive
   $ cd emscripten
-  $ make
+  $ mkdir build
+  $ cd build
+  $ emcmake cmake ..
+  $ make -j16 install
 ``` 
 If everything went well there should now be a engine.js and engine.wasm files. The .js file contains
 the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine when the web page loads.
@@ -108,8 +111,9 @@ The content (assets) need to packaged separately and this step will likely be do
 But for now a manual package step is needed using file_packager.py from emsdk
 
 ```
-  $ cd gamestudio/emscripten/test
-  $ /home/user/emsdk/upstream/emscripten/tools/file_packager.py ASSETS --preload assets/ --js-output=ASSETS.js
+  $ cd gamestudio/emscripten/dist  
+  $ ln -s /home/user/gamestudio/engine/test/dist/assets assets
+  $ /home/user/emsdk/upstream/emscripten/tools/file_packager.py test-engine --preload assets/ --js-output=test-assets.js
 ```
 In addition a .html file is needed. It's possible to have a emcc generate some default .html file but it has a bunch of
 crap in it (silly SVG based image) and is likely to require customization so a simpler .html is provided as part of this
@@ -175,7 +179,7 @@ https://docs.conan.io/en/latest/installation.html
   $ cmake -G "Unix Makefiles" --DCMAKE_BUILD_TYPE=RelWithDebInfo
   $ make -j16 install
 ```
-Then in order to profile and analysze the output use the combination of valgrind and kcachegrind.
+Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
 For example:
 ```
   $ cd gamestudio/audio/test/
