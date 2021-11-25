@@ -16,7 +16,7 @@
 
 #include "config.h"
 
-#ifdef WINDOWS_OS
+#ifdef AUDIO_USE_WAVEOUT
   #include <mutex>
   #include <Windows.h>
   #include <Mmsystem.h>
@@ -35,7 +35,7 @@
 namespace audio
 {
 
-#ifdef WINDOWS_OS
+#ifdef AUDIO_USE_WAVEOUT
 
 template<typename Function, typename... Args>
 void CallWaveout(Function func, const Args&... args)
@@ -482,7 +482,7 @@ std::unique_ptr<Device> Device::Create(const char* appname)
     return device;
 }
 
-#endif // WINDOWS_OS
+#endif // AUDIO_USE_WAVEOUT
 
 } // namespace
 
