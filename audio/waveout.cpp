@@ -35,7 +35,7 @@
 namespace audio
 {
 
-#ifdef AUDIO_USE_WAVEOUT
+#if defined(AUDIO_USE_WAVEOUT)
 
 template<typename Function, typename... Args>
 void CallWaveout(Function func, const Args&... args)
@@ -66,7 +66,7 @@ public:
         } 
         catch (const std::exception & e)
         {
-            ERROR("Audio source '%1' failed to prepare (%2).", name, e.what());
+            ERROR("Waveout audio source failed to prepare. [name='%1', error='%2']", name, e.what());
         }
         return nullptr;
 
@@ -213,7 +213,7 @@ private:
         {
             std::lock_guard<decltype(mutex_)> lock(mutex_);
 
-            DEBUG("Creating new WaveOut stream '%1': %2 channel(s) @ %3 Hz, %4",
+            DEBUG("Creating new WaveOut playback stream. [name='%1', channels=%2, rate=%3, format=%4]",
                 source->GetName(), source->GetNumChannels(),
                 source->GetRateHz(), source->GetFormat());
 
@@ -325,7 +325,7 @@ private:
             }
             catch (const std::exception & e)
             {
-                ERROR("Audio stream '%1' error (%2).", source_->GetName(), e.what());
+                ERROR("Waveout audio stream play error. [name='%1' error='%2']", source_->GetName(), e.what());
                 state_ = Stream::State::Error;
             }
         }
@@ -333,20 +333,20 @@ private:
         virtual void Pause() override
         {
             waveOutPause(handle_);
-            DEBUG("Pause waveout stream '%1'.", source_->GetName());
+            DEBUG("Waveout stream pause. [name='%1']", source_->GetName());
         }
 
         virtual void Resume() override
         {
             waveOutRestart(handle_);
-            DEBUG("Resume waveout stream '%1'.", source_->GetName());
+            DEBUG("Waveout stream resume. [name='%1']", source_->GetName());
         }
 
         virtual void Cancel() override
         {
             // anything that needs to be done?
             source_->Shutdown();
-            DEBUG("Cancel waveout stream '%1'.", source_->GetName());
+            DEBUG("Waveout stream cancel. [name='%1']", source_->GetName());
         }
 
         virtual void SendCommand(std::unique_ptr<Command> cmd) override
@@ -388,7 +388,7 @@ private:
             {
                 // if all the buffers have been returned from the waveout 
                 // device it's likely that we're too slow providing buffers
-                WARN("Likely audio buffer underrun detected.");
+                WARN("Waveout stream likely buffer undderrun. [name='%1']", source_->GetName());
             }
 
             try

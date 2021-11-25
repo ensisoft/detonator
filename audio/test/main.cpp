@@ -239,18 +239,18 @@ int main(int argc, char* argv[])
 
     for (const auto& file : test_files)
     {
-        INFO("Testing: '%1'", file);
+        INFO("Testing audio file. [file='%1']", file);
         base::FlushGlobalLog();
 
         auto source = std::make_unique<audio::AudioFile>(file, "test", format);
         if (!source->Open())
         {
-            ERROR("Failed to open '%1'.", file);
+            ERROR("Failed to open audio file. [file='%1']", file);
             continue;
         }
         source->SetLoopCount(loops);
         const auto id = player.Play(std::move(source));
-        DEBUG("New audio track (ID=%1).", id);
+        DEBUG("New audio track. [id=%1].", id);
 
         bool track_done = false;
         while (!track_done)
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
                 continue;
 
             const auto& track_event = std::get<audio::Player::SourceCompleteEvent>(e);
-            INFO("Audio track (ID=%1) status event %2.", track_event.id, track_event.status);
+            INFO("Audio track status event. [id=%1, status=%2]", track_event.id, track_event.status);
             track_done = true;
         }
     }
