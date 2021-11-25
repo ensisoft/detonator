@@ -50,12 +50,12 @@
 
 #include "engine/classlib.h"
 #include "engine/renderer.h"
+#include "engine/physics.h"
 #include "engine/ui.h"
 
 #if !defined(__EMSCRIPTEN__)
 #include "audio/loader.h"
 #include "audio/graph.h"
-#include "engine/physics.h"
 #include "engine/audio.h"
 #endif
 
@@ -363,6 +363,8 @@ private:
     float mDelay      = 0.0f;
 };
 
+#endif // __EMSCRIPTEN__
+
 class PhysicsTest : public TestCase
 {
 public:
@@ -372,7 +374,7 @@ public:
         mRenderer.Draw(*mScene, painter, transform);
         mPhysics.DebugDrawObjects(painter, transform);
     }
-    virtual void Update(float dt)
+    virtual void Update(float dt) override
     {
         if (mPhysics.HaveWorld())
         {
@@ -380,7 +382,7 @@ public:
             mPhysics.UpdateScene(*mScene);
         }
     }
-    virtual void Start(engine::ClassLibrary* loader)
+    virtual void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
         // create ground.
@@ -440,7 +442,6 @@ private:
     engine::PhysicsEngine mPhysics;
 };
 
-#endif // __EMSCRIPTEN__
 
 class ViewportTest : public TestCase
 {
@@ -936,12 +937,11 @@ public:
     virtual void Start() override
     {
 #if !defined(__EMSCRIPTEN__)
-
-        mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new ViewportTest);
         mTestList.emplace_back(new AudioEffectTest);
         mTestList.emplace_back(new AudioMusicTest);
 #endif
+        mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new UITest);
