@@ -85,10 +85,10 @@ public:
             if (stream->GetState() == Stream::State::Ready)
                 return stream;
 
-            ERROR("Audio source '%1' failed to prepare.", name);
+            ERROR("PulseAudio audio source failed to prepare. [name='%1']", name);
         }
         catch (const std::exception& e)
-        { ERROR("Audio source '%1' failed to prepare (%2).", name, e.what()); }
+        { ERROR("PulseAudio audio source failed to prepare. [name='%1', error='%2'].",  name, e.what()); }
         return nullptr;
     }
 
@@ -107,7 +107,6 @@ public:
 
         if (state_ == Device::State::Error)
             throw std::runtime_error("pulseaudio error");
-
     }
 
     virtual State GetState() const override
@@ -129,7 +128,7 @@ private:
         PlaybackStream(std::unique_ptr<Source> source, pa_context* context, unsigned buffer_size_ms)
             : source_(std::move(source))
         {
-            DEBUG("Creating new pulseaudio playback stream '%1': %2 channel(s) @ %3 Hz, %4",
+            DEBUG("Creating new PulseAudio playback stream. [name='%1', channels=%2, rate=%3, format=%4]",
                   source_->GetName(), source_->GetNumChannels(),
                   source_->GetRateHz(), source_->GetFormat());
             const auto& name  = source_->GetName();
@@ -200,19 +199,19 @@ private:
         virtual void Play() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
-            DEBUG("Play pulseaudio stream '%1'.", source_->GetName());
+            DEBUG("PulseAudio stream play. [name='%1']", source_->GetName());
         }
 
         virtual void Pause() override
         {
             pa_stream_cork(stream_, 1, nullptr, nullptr);
-            DEBUG("Pause pulseaudio stream '%1'.", source_->GetName());
+            DEBUG("PulseAudio stream pause. [name='%1']", source_->GetName());
         }
 
         virtual void Resume() override
         {
             pa_stream_cork(stream_, 0, nullptr, nullptr);
-            DEBUG("Resume pulseaudio stream '%1'.", source_->GetName());
+            DEBUG("PulseAudio stream resume. [name='%1']", source_->GetName());
         }
 
         virtual void Cancel() override
@@ -225,7 +224,7 @@ private:
             if (source_)
             {
                 source_->Shutdown();
-                DEBUG("Cancel pulseaudio stream '%1'.", source_->GetName());
+                DEBUG("PulseAudio stream cancel. [name='%1']", source_->GetName());
             }
         }
 
@@ -241,14 +240,17 @@ private:
     private:
         static void underflow_callback(pa_stream* stream, void* user)
         {
-            DEBUG("underflow!");
+            auto* this_ = static_cast<PlaybackStream*>(user);
+
+            WARN("PulseAudio stream underflow callback. [name='%1']", this_->source_->GetName());
         }
 
         static void drain_callback(pa_stream* stream, int success, void* user)
         {
-            DEBUG("Drained stream!");
-
             auto* this_ = static_cast<PlaybackStream*>(user);
+
+            DEBUG("PulseAudio stream drain callback. [name='%1']", this_->source_->GetName());
+
             this_->state_ = Stream::State::Complete;
         }
         static void write_callback(pa_stream* stream, size_t length, void* user)
@@ -313,19 +315,21 @@ private:
                 if (!source->HasMore(this_->num_pcm_bytes_))
                     pa_operation_unref(pa_stream_drain(this_->stream_, drain_callback, this_));
                 else if (bytes < length * 0.8)
-                    WARN("Write callback requested %1 bytes but only %2 provided", length, bytes);
+                    WARN("PulseAudio stream write possibly insufficient. [requested=%1 b, wrote=%2 b].", length, bytes);
             }
             catch (const std::exception& exception)
             {
-                ERROR("Audio source '%1' error (%2).", source->GetName(), exception.what());
+                ERROR("PulseAudio stream error. [name='%1', error='%2']", source->GetName(), exception.what());
                 this_->state_ = State::Error;
             }
         }
 
         static void state_callback(pa_stream* stream, void* user)
         {
-            DEBUG("Pulseaudio stream state callback %1", stream);
             auto* this_ = static_cast<PlaybackStream*>(user);
+
+            DEBUG("Pulseaudio stream state callback. [name='%1']", this_->source_->GetName());
+
             switch (pa_stream_get_state(stream))
             {
                 case PA_STREAM_CREATING:

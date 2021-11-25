@@ -80,7 +80,7 @@ bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
     mFile = sf_open_virtual(&virtual_io, SFM_READ, &info, (void*)io.get());
     if (!mFile)
     {
-        ERROR("SndFile decoder open on '%1' failed.", io->GetName());
+        ERROR("SndFile decoder open failed. [name='%1']", io->GetName());
         return false;
     }
     // When reading floating point wavs with the integer read functions
@@ -93,7 +93,7 @@ bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
     mChannels   = info.channels;
     mFrames     = info.frames;
     mDevice     = std::move(io);
-    DEBUG("SndFileDecoder stream '%1' has %2 PCM frames in %3 channel(s) @ %4 Hz.",
+    DEBUG("SndFileDecoder successfully opened. [name='%1' frames=%2, channels=%3, rate=%4]",
           mDevice->GetName(), mFrames, mChannels, mSampleRate);
     return true;
 }
@@ -107,7 +107,7 @@ SndFileInputStream::SndFileInputStream(const std::string& filename)
 bool SndFileInputStream::OpenFile(const std::string& filename)
 {
     auto stream = base::OpenBinaryInputStream(filename);
-    if (!stream.is_open()) ERROR_RETURN(false, "Failed to open '%1'.", filename);
+    if (!stream.is_open()) ERROR_RETURN(false, "SndFileInputStream failed to open. [file='%1']", filename);
 
     UseStream(filename, std::move(stream));
     return true;
@@ -122,7 +122,7 @@ void SndFileInputStream::UseStream(const std::string& name, std::ifstream&& stre
     mStream.seekg(0, mStream.end);
     mStreamSize = mStream.tellg();
     mStream.seekg(0, mStream.beg);
-    DEBUG("Opened audio file stream with %1 bytes from '%2'", mStreamSize, name);
+    DEBUG("SndFileInputStream using ifstream. [name='%1', bytes=%2]", name, mStreamSize);
 }
 
 std::int64_t SndFileInputStream::GetLength() const
@@ -148,7 +148,7 @@ std::int64_t SndFileInputStream::Read(void* ptr, sf_count_t count)
 
     mStream.read((char*)ptr, bytes_to_read);
     if (mStream.gcount() != bytes_to_read)
-        WARN("Stream read returned %1 bytes vs. %2 requested", mStream.gcount(), bytes_to_read);
+        WARN("SndFileInputStream stream read failed. [request=%1, returned=%2]", bytes_to_read, mStream.gcount());
     return mStream.gcount();
 }
 std::int64_t SndFileInputStream::Tell() const

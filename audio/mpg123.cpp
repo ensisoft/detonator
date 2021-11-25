@@ -59,7 +59,7 @@ Mpg123FileInputStream::Mpg123FileInputStream(const std::string& filename)
 bool Mpg123FileInputStream::OpenFile(const std::string& filename)
 {
     auto stream = base::OpenBinaryInputStream(filename);
-    if (!stream.is_open()) ERROR_RETURN(false, "Failed to open '%1'.", filename);
+    if (!stream.is_open()) ERROR_RETURN(false, "Mpg123FileInputStream failed to open. [file='%1']", filename);
 
     UseStream(filename, std::move(stream));
     return true;
@@ -75,7 +75,7 @@ void Mpg123FileInputStream::UseStream(const std::string& name, std::ifstream&& s
     mStream     = std::move(stream);
     mStreamSize = size;
     mFilename   = name;
-    DEBUG("Opened audio file stream with %1 bytes from '%2'.", size, name);
+    DEBUG("Mpg123FileInputStream using ifstream. [name='%1', bytes=%2]", name, mStreamSize);
 }
 
 long Mpg123FileInputStream::Read(void* buffer,  size_t bytes)
@@ -88,7 +88,7 @@ long Mpg123FileInputStream::Read(void* buffer,  size_t bytes)
 
     mStream.read((char*)buffer, bytes_to_read);
     if (mStream.gcount() != bytes_to_read)
-        WARN("Stream read returned %1 bytes vs. %2 requested", mStream.gcount(), bytes_to_read);
+        WARN("Mpg123FileInputStream stream read failed. [requested=%1, returned=%2]", bytes_to_read, mStream.gcount());
     return mStream.gcount();
 }
 
@@ -219,13 +219,13 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
         (mpg123_format_none(mHandle) != MPG123_OK) ||
         (mpg123_format2(mHandle, 0, MPG123_STEREO, mpg123_data_format) != MPG123_OK))
     {
-        ERROR("Mpg123 decoder format on '%1' failed with error '%2'.", io->GetName(), mpg123_strerror(mHandle));
+        ERROR("Mpg123Decoder set format failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
         return false;
     }
 
     if (mpg123_open_handle(mHandle, (void*)io.get()) != MPG123_OK)
     {
-        ERROR("Mpg123 decoder open handle on '%1' failed with error '%2'.", io->GetName(), mpg123_strerror(mHandle));
+        ERROR("Mpg123Decoder open handle failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
         return false;
     }
     mIsOpen = true;
@@ -237,7 +237,7 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
         (mpg123_format_none(mHandle) != MPG123_OK) ||
         (mpg123_format(mHandle, sample_rate, channel_count, encoding) != MPG123_OK))
     {
-        ERROR("Mpg123 decoder audio format on '%1' failed with error '%2'.", io->GetName(), mpg123_strerror(mHandle));
+        ERROR("Mpg123Decoder set format failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
         return false;
     }
 
@@ -251,14 +251,14 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
         // such as the frame count.
         if (!mpg123_scan(mHandle) != MPG123_OK)
         {
-            ERROR("Mpg123 stream '%1' scan failed with error '%2'.", io->GetName(), mpg123_strerror(mHandle));
+            ERROR("Mpg123Decoder stream scan failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
             return false;
         }
     }
     frames = mpg123_length(mHandle);
     if (frames == MPG123_ERR)
     {
-        ERROR("Mpg123 stream '%1' length failure '%2'.", io->GetName(), mpg123_strerror(mHandle));
+        ERROR("Mpg123Decoder get stream length failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
         return false;
     }
 
@@ -266,7 +266,7 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
     mFrameCount = frames;
     mOutFormat  = mpg123_data_format;
     mDevice     = std::move(io);
-    DEBUG("Mpg123 stream '%1' has %2 PCM frames in 2 channels @ %3 Hz.", mDevice->GetName(), mFrameCount, mSampleRate);
+    DEBUG("Mpg123Decoder successfully opened. [name='%1', frames=%2, channels=%3, rate=%4]", mDevice->GetName(), mFrameCount, 2, mSampleRate);
     return true;
 }
 
