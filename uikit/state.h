@@ -19,13 +19,16 @@
 #include "config.h"
 
 #include <unordered_map>
-#include <any>
+#include <variant>
 #include <string>
 
 #include "base/assert.h"
+#include "base/types.h"
 
 namespace uik
 {
+    class Widget;
+
     // Bitbag for the transient state that only exists when the
     // widget system is reacting to events such as mouse input etc.
     // Normally this state is discarded when the UI is no longer needed
@@ -51,40 +54,39 @@ namespace uik
             auto it = mState.find(key);
             if (it == mState.end())
                 return backup;
-            return std::any_cast<T>(it->second);
+            ASSERT(std::holds_alternative<T>(it->second));
+            return std::get<T>(it->second);
         }
-        template<typename T>
-        void GetValue(const std::string& key, T** out) const
+
+        bool GetValue(const std::string& key, Widget** out) const
         {
             auto it = mState.find(key);
             if (it == mState.end())
-                return;
+                return false;
             const auto& any = it->second;
-            if (any.type() == typeid(T*))
-                *out = std::any_cast<T*>(any);
-            else if (any.type() == typeid(const T*))
-                *out = const_cast<T*>(std::any_cast<const T*>(any));
-            else BUG("???");
+            ASSERT(std::holds_alternative<Widget*>(any));
+            *out = std::get<Widget*>(any);
+            return true;
         }
         template<typename T>
-        void GetValue(const std::string& key, const T** out) const
+        bool GetValue(const std::string& key, const T** out) const
         {
             auto it = mState.find(key);
             if (it == mState.end())
-                return;
+                return false;
             const auto& any = it->second;
-            if (any.type() == typeid(T*))
-                *out = std::any_cast<T*>(any);
-            else if (any.type() == typeid(const T*))
-                *out = std::any_cast<const T*>(any);
-            else BUG("???");
+            ASSERT(std::holds_alternative<Widget*>(any));
+            *out = std::get<Widget*>(any);
+            return true;
         }
         template<typename T>
         void SetValue(const std::string& key, const T& value)
         { mState[key] = value; }
         template<typename T>
-        void SetValue(const std::string& key, const T* value)
-        { mState[key] = const_cast<T*>(value); }
+        void SetValue(const std::string& key, const Widget* widget)
+        { mState[key] = const_cast<Widget*>(widget); }
+        void SetValue(const std::string& key, Widget* widget)
+        { mState[key] = widget; }
         template<typename T>
         void SetValue(const std::string& key, T* value)
         { mState[key] = value; }
@@ -92,7 +94,9 @@ namespace uik
         void Clear()
         { mState.clear(); }
     private:
-        std::unordered_map<std::string, std::any> mState;
+        using Variant = std::variant<int, float, bool, Widget*, base::FPoint>;
+
+        std::unordered_map<std::string, Variant> mState;
     };
 
 } // namespace
