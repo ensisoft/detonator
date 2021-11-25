@@ -1,7 +1,23 @@
 
 all: test_engine
 
-test_engine: stb_lib
+BUILD_DIR := .
+
+BOX2D_SRC_DIR := ../third_party/box2d/src
+
+# Find all the C and C++ files we want to compile
+# Note the single quotes around the * expressions. Make will incorrectly expand these otherwise.
+BOX2D_SRCS := $(shell find $(BOX2D_SRC_DIR) -name '*.cpp')
+
+BOX2D_OBJS := $(BOX2D_SRCS:%=$(BUILD_DIR)/%.o)
+
+BOX2D: $(BOX2D_OBJS)
+	emcc $(BOX2D_OBJS) -r -o box2d.o
+
+%.cpp.o: %.cpp
+	emcc -O3 -std=c++17 -I../third_party/box2d/include -I../third_party/box2d/src -c
+
+test_engine: stb_lib BOX2D
 	emcc \
 	-O3 \
 	-std=c++17 \
@@ -12,6 +28,9 @@ test_engine: stb_lib
 	-I../wdk \
 	-I../third_party/ \
 	-I../third_party/glm \
+	-I../third_party/box2d/include \
+	stb.o \
+	box2d.o \
 	main.cpp \
 	../base/assert.cpp \
 	../base/logging.cpp \
@@ -26,6 +45,7 @@ test_engine: stb_lib
 	../engine/test/main.cpp \
 	../engine/renderer.cpp \
 	../engine/ui.cpp \
+	../engine/physics.cpp \
 	../graphics/painter.cpp \
 	../graphics/material.cpp \
 	../graphics/drawable.cpp \
@@ -38,8 +58,6 @@ test_engine: stb_lib
 	../uikit/window.cpp \
 	../uikit/widget.cpp \
 	../third_party/base64/base64.cpp \
-	stb_image.o \
-	stb_image_write.o \
 	-s WASM=1 \
 	-s FORCE_FILESYSTEM=1 \
 	-s USE_HARFBUZZ=1 \
@@ -48,8 +66,6 @@ test_engine: stb_lib
 	-o test-engine.js
 
 stb_lib:
-	emcc \
-	-O3 \
-	../third_party/stb/stb_image.c \
-	../third_party/stb/stb_image_write.c \
-	-c \
+	emcc -O3 ../third_party/stb/stb_image.c -c
+	emcc -O3 ../third_party/stb/stb_image_write.c -c
+	emcc stb_image.o stb_image_write.o -r -o stb.o
