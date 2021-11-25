@@ -118,6 +118,7 @@ add_library(AudioLib
     audio/mpg123.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
+    audio/openal.cpp
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
@@ -405,6 +406,7 @@ add_executable(audio_test
     audio/mpg123.cpp
     audio/pulseaudio.cpp
     audio/waveout.cpp
+    audio/openal.cpp
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
@@ -419,6 +421,7 @@ target_link_libraries(audio_test samplerate)
 if (UNIX)
     target_link_libraries(audio_test pulse)
     target_link_libraries(audio_test pthread)
+#    target_link_libraries(audio_test openal)
 endif()
 install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 
@@ -621,6 +624,7 @@ add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 add_executable(unit_test_audio
         audio/unit_test/unit_test.cpp
         audio/pulseaudio.cpp
+        audio/openal.cpp
         audio/waveout.cpp
         audio/player.cpp)
 target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
@@ -628,6 +632,7 @@ target_link_libraries(unit_test_audio BaseLib)
 if (UNIX)
     target_link_libraries(unit_test_audio pulse)
     target_link_libraries(unit_test_audio pthread)
+#    target_link_libraries(unit_test_audio openal)
 endif()
 add_executable(unit_test_audio_graph
         audio/unit_test/unit_test_graph.cpp
