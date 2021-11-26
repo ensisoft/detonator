@@ -7,12 +7,65 @@ cmake_minimum_required(VERSION 3.0)
 
 project(third_party)
 
+add_library(box2d
+        box2d/src/collision/b2_broad_phase.cpp
+        box2d/src/collision/b2_chain_shape.cpp
+        box2d/src/collision/b2_circle_shape.cpp
+        box2d/src/collision/b2_collide_circle.cpp
+        box2d/src/collision/b2_collide_edge.cpp
+        box2d/src/collision/b2_collide_polygon.cpp
+        box2d/src/collision/b2_collision.cpp
+        box2d/src/collision/b2_distance.cpp
+        box2d/src/collision/b2_dynamic_tree.cpp
+        box2d/src/collision/b2_edge_shape.cpp
+        box2d/src/collision/b2_polygon_shape.cpp
+        box2d/src/collision/b2_time_of_impact.cpp
+        box2d/src/common/b2_block_allocator.cpp
+        box2d/src/common/b2_draw.cpp
+        box2d/src/common/b2_math.cpp
+        box2d/src/common/b2_settings.cpp
+        box2d/src/common/b2_stack_allocator.cpp
+        box2d/src/common/b2_timer.cpp
+        box2d/src/dynamics/b2_body.cpp
+        box2d/src/dynamics/b2_chain_circle_contact.cpp
+        box2d/src/dynamics/b2_chain_polygon_contact.cpp
+        box2d/src/dynamics/b2_circle_contact.cpp
+        box2d/src/dynamics/b2_contact.cpp
+        box2d/src/dynamics/b2_contact_manager.cpp
+        box2d/src/dynamics/b2_contact_solver.cpp
+        box2d/src/dynamics/b2_distance_joint.cpp
+        box2d/src/dynamics/b2_edge_circle_contact.cpp
+        box2d/src/dynamics/b2_edge_polygon_contact.cpp
+        box2d/src/dynamics/b2_fixture.cpp
+        box2d/src/dynamics/b2_friction_joint.cpp
+        box2d/src/dynamics/b2_gear_joint.cpp
+        box2d/src/dynamics/b2_island.cpp
+        box2d/src/dynamics/b2_joint.cpp
+        box2d/src/dynamics/b2_motor_joint.cpp
+        box2d/src/dynamics/b2_mouse_joint.cpp
+        box2d/src/dynamics/b2_polygon_circle_contact.cpp
+        box2d/src/dynamics/b2_polygon_contact.cpp
+        box2d/src/dynamics/b2_prismatic_joint.cpp
+        box2d/src/dynamics/b2_pulley_joint.cpp
+        box2d/src/dynamics/b2_revolute_joint.cpp
+        box2d/src/dynamics/b2_weld_joint.cpp
+        box2d/src/dynamics/b2_wheel_joint.cpp
+        box2d/src/dynamics/b2_world.cpp
+        box2d/src/dynamics/b2_world_callbacks.cpp
+        box2d/src/rope/b2_rope.cpp)
+target_include_directories(box2d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/box2d/src")
+target_include_directories(box2d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/box2d/include")
+if (UNIX)
+    target_compile_options(box2d PRIVATE -fPIC)
+endif()
+
 # libogg 1.3.5
 # libvorbis 1.3.7
 # flac 1.3.2
 # sndfile 1.0.31
 
 # todo: check the SSE2/3 etc extensions
+
 
 add_library(ogg
         libogg/src/bitwise.c
@@ -30,6 +83,10 @@ if (MSVC)
     # conversino from size_t to long
     add_compile_options(/wd4267)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
+
+if (UNIX)
+    add_compile_options(-Wno-implicit-function-declaration)
 endif()
 
 add_library(vorbis

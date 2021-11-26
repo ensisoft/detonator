@@ -26,7 +26,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
 # current version is 1.0.31
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsndfile)
 # current version 2.4.1
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/box2d)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/box2d)
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
