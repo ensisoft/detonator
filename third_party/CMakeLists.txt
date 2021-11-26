@@ -7,6 +7,27 @@ cmake_minimum_required(VERSION 3.0)
 
 project(third_party)
 
+if (MSVC)
+    # suppress a bunch of shit that we're not fixing
+
+    # conversion from double to float
+    add_compile_options(/wd4244)
+    # trunaction from double to float
+    add_compile_options(/wd4305)
+    # conversino from size_t to long
+    add_compile_options(/wd4267)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
+
+if (UNIX)
+    add_compile_options(-Wno-implicit-function-declaration)
+endif()
+
+if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+    message(STATUS "Enable emscripten optimization build flags.")
+    add_compile_options(-O3)
+endif()
+
 add_library(box2d
         box2d/src/collision/b2_broad_phase.cpp
         box2d/src/collision/b2_chain_shape.cpp
@@ -66,28 +87,11 @@ endif()
 
 # todo: check the SSE2/3 etc extensions
 
-
 add_library(ogg
         libogg/src/bitwise.c
         libogg/src/framing.c
         )
 target_include_directories(ogg PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libogg/include")
-
-if (MSVC)
-    # suppress a bunch of shit that we're not fixing
-
-    # conversion from double to float
-    add_compile_options(/wd4244)
-    # trunaction from double to float
-    add_compile_options(/wd4305)
-    # conversino from size_t to long
-    add_compile_options(/wd4267)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-endif()
-
-if (UNIX)
-    add_compile_options(-Wno-implicit-function-declaration)
-endif()
 
 add_library(vorbis
         libvorbis/lib/mdct.c
