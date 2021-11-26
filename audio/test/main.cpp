@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
     unsigned loops = 1;
     bool mp3_files = false;
     bool ogg_files = false;
+    bool flac_files = false;
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
     bool pcm_24bit_files = false;
@@ -50,6 +51,8 @@ int main(int argc, char* argv[])
     {
         if (!std::strcmp(argv[i], "--ogg"))
             ogg_files = true;
+        else if (!std::strcmp(argv[i], "--flac"))
+            flac_files = true;
         else if (!std::strcmp(argv[i], "--mp3"))
             mp3_files = true;
         else if (!std::strcmp(argv[i], "--8bit"))
@@ -72,12 +75,13 @@ int main(int argc, char* argv[])
             file = argv[++i];
     }
 
-    if (!(ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph) && file.empty())
+    if (!(flac_files || ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph) && file.empty())
     {
         std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
             "\t--ogg\t\tTest Ogg Vorbis encoded files.\n"
             "\t--mp3\t\tTest MP3 encoded files.\n"
+            "\t--flac\t\tTest flac encoded files.\n"
             "\t--8bit\t\tTest 8bit PCM encoded files.\n"
             "\t--16bit\t\tTest 16bit PCM encoded files.\n"
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
@@ -165,6 +169,15 @@ int main(int argc, char* argv[])
     std::vector<std::string> test_files;
     if (!file.empty())
         test_files.push_back(file);
+
+    if (flac_files)
+    {
+        test_files.push_back("FLAC/gs-16b-1c-44100hz.flac");
+        test_files.push_back("FLAC/gs-16b-2c-44100hz.flac");
+        // todo: handle broken files properly somewhere and then
+        // enable this test case.
+        //test_files.push_back("FLAC/broken/silentbreed-syncin-sample10sec.flac");
+    }
 
     if (ogg_files)
     {
