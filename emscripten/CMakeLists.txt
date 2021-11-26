@@ -14,63 +14,14 @@ https://github.com/ensisoft/gamestudio
 
 set(CMAKE_CXX_STANDARD 17)
 
-#include_directories(BEFORE "/usr/lib/emscripten/system/include")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/box2d/include")
-include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/box2d/src")
 
-# emcc --show-ports
-set(BOX2D_SOURCE_FILES
-    ../third_party/box2d/src/collision/b2_broad_phase.cpp
-    ../third_party/box2d/src/collision/b2_chain_shape.cpp
-    ../third_party/box2d/src/collision/b2_circle_shape.cpp
-    ../third_party/box2d/src/collision/b2_collide_circle.cpp
-    ../third_party/box2d/src/collision/b2_collide_edge.cpp
-    ../third_party/box2d/src/collision/b2_collide_polygon.cpp
-    ../third_party/box2d/src/collision/b2_collision.cpp
-    ../third_party/box2d/src/collision/b2_distance.cpp
-    ../third_party/box2d/src/collision/b2_dynamic_tree.cpp
-    ../third_party/box2d/src/collision/b2_edge_shape.cpp
-    ../third_party/box2d/src/collision/b2_polygon_shape.cpp
-    ../third_party/box2d/src/collision/b2_time_of_impact.cpp
-    ../third_party/box2d/src/common/b2_block_allocator.cpp
-    ../third_party/box2d/src/common/b2_draw.cpp
-    ../third_party/box2d/src/common/b2_math.cpp
-    ../third_party/box2d/src/common/b2_settings.cpp
-    ../third_party/box2d/src/common/b2_stack_allocator.cpp
-    ../third_party/box2d/src/common/b2_timer.cpp
-    ../third_party/box2d/src/dynamics/b2_body.cpp
-    ../third_party/box2d/src/dynamics/b2_chain_circle_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_chain_polygon_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_circle_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_contact_manager.cpp
-    ../third_party/box2d/src/dynamics/b2_contact_solver.cpp
-    ../third_party/box2d/src/dynamics/b2_distance_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_edge_circle_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_edge_polygon_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_fixture.cpp
-    ../third_party/box2d/src/dynamics/b2_friction_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_gear_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_island.cpp
-    ../third_party/box2d/src/dynamics/b2_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_motor_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_mouse_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_polygon_circle_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_polygon_contact.cpp
-    ../third_party/box2d/src/dynamics/b2_prismatic_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_pulley_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_revolute_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_weld_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_wheel_joint.cpp
-    ../third_party/box2d/src/dynamics/b2_world.cpp
-    ../third_party/box2d/src/dynamics/b2_world_callbacks.cpp
-    ../third_party/box2d/src/rope/b2_rope.cpp)
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 
 add_executable(test-engine
     main.cpp
@@ -103,8 +54,8 @@ add_executable(test-engine
     ../third_party/base64/base64.cpp
     ../third_party/stb/stb_image_write.c
     ../third_party/stb/stb_image.c
-    ${BOX2D_SOURCE_FILES}
     )
+target_link_libraries(test-engine box2d)
 
 # okay so these work like these (the CMake way)
 target_compile_options(test-engine PRIVATE -fbracket-depth=1024 -fexceptions)
