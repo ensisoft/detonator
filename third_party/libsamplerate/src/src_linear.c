@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include <stdbool.h>
 #include "common.h"
 
 static SRC_ERROR linear_vari_process (SRC_STATE *state, SRC_DATA *data) ;

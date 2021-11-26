@@ -187,3 +187,4 @@ void src_float_to_int_array (const float *in, int *out, int len) ;
 
 #endif	/* SAMPLERATE_H */
 
+#define SAMPLERATE_VERSION "0.2.1"
