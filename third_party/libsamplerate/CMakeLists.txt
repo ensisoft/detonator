@@ -94,10 +94,7 @@ check_include_file(unistd.h HAVE_UNISTD_H)
 
 # For examples and tests
 
-if(LIBSAMPLERATE_EXAMPLES OR BUILD_TESTING)
-  find_package(SndFile)
-  set(HAVE_SNDFILE ${SndFile_FOUND})
-endif()
+
 
 # SampleRate library
 
@@ -105,30 +102,4 @@ add_subdirectory(src)
 
 # Tests
 
-# BUILD_TESTING is declared by CTest module and is ON by default
-if(BUILD_TESTING)
-  add_subdirectory(tests)
-endif()
 
-# Examples
-
-if(LIBSAMPLERATE_EXAMPLES)
-  add_subdirectory(examples)
-endif()
-
-configure_file(config.h.cmake config.h)
-
-if(LIBSAMPLERATE_INSTALL)
-  add_subdirectory(docs)
-endif()
-
-# Packaging support
-
-# See https://cmake.org/cmake/help/v3.12/release/3.12.html#cpack
-if(CMAKE_VERSION VERSION_LESS 3.12)
-  set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-  set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-  set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-endif()
-
-include(CPack)
