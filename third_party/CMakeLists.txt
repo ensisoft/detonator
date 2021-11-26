@@ -275,3 +275,20 @@ target_compile_definitions(sndfile PRIVATE FLAC__NO_DLL)
 if (UNIX)
     target_compile_options(sndfile PRIVATE -fPIC)
 endif()
+
+# libsamplerate
+set(CPU_IS_LITTLE_ENDIAN 1)
+add_library(samplerate
+        libsamplerate/src/common.h
+        libsamplerate/src/fastest_coeffs.h
+        libsamplerate/src/high_qual_coeffs.h
+        libsamplerate/src/mid_qual_coeffs.h
+        libsamplerate/src/samplerate.c
+        libsamplerate/src/src_linear.c
+        libsamplerate/src/src_sinc.c
+        libsamplerate/src/src_zoh.c)
+target_include_directories(samplerate PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libsamplerate/src")
+target_include_directories(samplerate PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libsamplerate/include")
+target_compile_definitions(samplerate PRIVATE ENABLE_SINC_BEST_CONVERTER)
+target_compile_definitions(samplerate PRIVATE ENABLE_SINC_FAST_CONVERTER)
+target_compile_definitions(samplerate PRIVATE ENABLE_SINC_MEDIUM_CONVERTER)

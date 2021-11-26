@@ -22,7 +22,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 # current version is 0.2.1
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
 # current version is 1.0.31
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsndfile)
 # current version 2.4.1
