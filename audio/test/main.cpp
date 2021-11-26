@@ -177,8 +177,25 @@ int main(int argc, char* argv[])
     }
     if (mp3_files)
     {
-        test_files.push_back("MP3/Kalimba_short.mp3");
+        test_files.push_back("MP3/ff-16b-1c-11025hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-12000hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-16000hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-22050hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-24000hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-32000hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-44100hz.mp3");
+        test_files.push_back("MP3/ff-16b-1c-8000hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-11025hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-12000hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-16000hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-22050hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-24000hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-32000hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-44100hz.mp3");
+        test_files.push_back("MP3/ff-16b-2c-8000hz.mp3");
+
     }
+
     if (pcm_8bit_files)
     {
         test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 11025Hz.wav");
