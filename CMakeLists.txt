@@ -19,8 +19,12 @@ conan_basic_setup()
 
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 # current version is 0.2.1
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsamplerate)
+# current version is 1.0.31
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsndfile)
 # current version 2.4.1
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/box2d)
 
@@ -29,6 +33,7 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/include")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include")
 
 # this is only for CLion right now
@@ -170,11 +175,13 @@ if (UNIX)
     target_link_libraries(AudioLib INTERFACE pulse)
     target_link_libraries(AudioLib INTERFACE pthread)
     target_link_libraries(AudioLib INTERFACE samplerate)
+    target_link_libraries(AudioLib INTERFACE sndfile)
 endif()
 if (MSVC)
    target_compile_options(EngineLib  INTERFACE /bigobj)
 
    target_link_libraries(AudioLib INTERFACE samplerate)
+   target_link_libraries(AudioLib INTERFACE sndfile)
 endif()
 
 target_link_libraries(EngineLib INTERFACE box2d)
@@ -418,6 +425,7 @@ target_link_libraries(audio_test BaseLib)
 target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(audio_test ${CONAN_LIBS})
 target_link_libraries(audio_test samplerate)
+target_link_libraries(audio_test sndfile)
 if (UNIX)
     target_link_libraries(audio_test pulse)
     target_link_libraries(audio_test pthread)
@@ -642,7 +650,7 @@ add_executable(unit_test_audio_graph
         audio/format.cpp
         audio/graph.cpp)
 target_include_directories(unit_test_audio_graph PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
-target_link_libraries(unit_test_audio_graph DataLib BaseLib samplerate ${CONAN_LIBS})
+target_link_libraries(unit_test_audio_graph DataLib BaseLib samplerate sndfile ${CONAN_LIBS})
 
 add_test(NAME unit_test_audio COMMAND unit_test_audio)
 add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)
