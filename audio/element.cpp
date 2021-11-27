@@ -405,7 +405,7 @@ void StereoJoiner::Join(Allocator& allocator, BufferHandle left, BufferHandle ri
     for (unsigned i=0; i<num_frames; ++i, ++out, ++L, ++R)
     {
         out->channels[0] = L->channels[0];
-        out->channels[1] = R->channels[1];
+        out->channels[1] = R->channels[0];
     }
     mOut.PushBuffer(stereo);
 }
