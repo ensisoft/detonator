@@ -100,8 +100,8 @@ void AudioEngine::Start()
     mPlayer = std::make_unique<audio::Player>(std::move(device));
     mEffectGraphId = mPlayer->Play(std::move(effect_graph));
     mMusicGraphId  = mPlayer->Play(std::move(music_graph));
-    DEBUG("Audio effect graph playing with stream id '%1'.", mEffectGraphId);
-    DEBUG("Audio music graph playing with stream id '%1'.", mMusicGraphId);
+    DEBUG("Audio effect graph is ready. [id=%1]", mEffectGraphId);
+    DEBUG("Audio music graph is ready. [id=%1]", mMusicGraphId);
 }
 
 void AudioEngine::SetDebugPause(bool on_off)
@@ -124,10 +124,10 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
 
     auto instance = std::make_unique<audio::Graph>(graph);
     if (!instance->Prepare(*mLoader))
-        ERROR_RETURN(false, "Failed to prepare music audio graph.");
+        ERROR_RETURN(false, "Audio engine music graph prepare error. [graph=%1]", graph->GetName());
     const auto& port = instance->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-        ERROR_RETURN(false, "Music audio graph '%1' has incompatible output PCM format '%2'.", graph->GetName(), port.GetFormat());
+        ERROR_RETURN(false, "Audio engine music graph has incompatible output format. [graph=%1, format=%2]", graph->GetName(), port.GetFormat());
 
     audio::MixerSource::AddSourceCmd cmd;
     cmd.src    = std::move(instance);
@@ -206,16 +206,16 @@ void AudioEngine::SetMusicGain(float gain)
 
 bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
-    const auto name   = "fx " + std::to_string(mEffectCounter);
+    const auto name   = "FX#" + std::to_string(mEffectCounter);
     const auto paused = when != 0;
 
     auto graph = std::make_unique<audio::Graph>(name, handle);
     if (!graph->Prepare(*mLoader))
-        ERROR_RETURN(false, "Failed to prepare effect audio graph.");
+        ERROR_RETURN(false, "Audio engine sound effect audio graph prepare error. [graph%1]", handle->GetName());
 
     const auto& port = graph->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
-        ERROR_RETURN(false, "Effect '%1' audio graph has incorrect PCM format '%2'.", handle->GetName(), port.GetFormat());
+        ERROR_RETURN(false, "Audio engine sound effect graph has incompatible output format. [graph=%1, format=%2]", handle->GetName(), port.GetFormat());
 
     audio::MixerSource::AddSourceCmd add_cmd;
     add_cmd.src    = std::move(graph);
@@ -261,13 +261,13 @@ void AudioEngine::Update(AudioEventQueue* events)
 
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio source '%1' complete event (%2). ",event.id, event.status);
+    DEBUG("Audio engine source event. [id=%1, status=%s]", event.id, event.status);
 
     // intentionally empty for now.
 }
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
 {
-    DEBUG("'%1' mixer source event.", event.id == mMusicGraphId ? "Music" : "FX");
+    DEBUG("Audio engine source event. [id=%1]", event.id == mMusicGraphId ? "Music" : "FX");
     if (events == nullptr)
         return;
 

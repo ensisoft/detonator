@@ -72,7 +72,7 @@ std::string ToString(const Format& fmt)
     else if (fmt.channel_count == 2)
         cc = "Stereo";
     else cc = std::to_string(fmt.channel_count);
-    return base::FormatString("%1, %2 @ %3Hz", fmt.sample_type, cc, fmt.sample_rate);
+    return base::FormatString("%1,%2,%3Hz", fmt.sample_type, cc, fmt.sample_rate);
 }
 
 } // namespace
