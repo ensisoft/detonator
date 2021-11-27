@@ -209,7 +209,7 @@ bool Playlist::Prepare(const Loader& loader)
     const auto& master_format = mSrcs[0].GetFormat();
     if (!IsValid(master_format))
     {
-        ERROR("Playlist '%1' input port '%2' format not set.", mName, mSrcs[0].GetName());
+        ERROR("Audio playlist input port format is invalid. [elem=%1, port=%2]", mName, mSrcs[0].GetName());
         return false;
     }
 
@@ -219,12 +219,11 @@ bool Playlist::Prepare(const Loader& loader)
         const auto& name   = src.GetName();
         if (format != master_format)
         {
-            ERROR("Playlist '%1' port '%2' format (%3) is not compatible with other ports.", mName, name, format);
+            ERROR("Audio playlist port is incompatible with other ports. [elem=%1, port=%2, format=%3]", mName, name, format);
             return false;
         }
     }
-    DEBUG("Playlist '%1' prepared with %2 input port(s).", mName, mSrcs.size());
-    DEBUG("Playlist '%1' output format set to %2", mName, master_format);
+    DEBUG("Audio playlist prepared successfully. [elem=%1, srcs=%2, output=%3]", mName, mSrcs.size(), master_format);
     mOut.SetFormat(master_format);
     return true;
 }
@@ -271,7 +270,7 @@ bool StereoMaker::Prepare(const Loader& loader)
     auto format = mIn.GetFormat();
     format.channel_count = 2;
     mOut.SetFormat(format);
-    DEBUG("MonoToStereo '%1' out format set to '%2'.", mName, format);
+    DEBUG("Audio stereo maker prepared successfully. [elem=%1, output=%2]", mName, format);
     return true;
 }
 
@@ -293,7 +292,7 @@ void StereoMaker::Process(Allocator& allocator, EventQueue& events, unsigned mil
         CopyMono<float>(allocator, buffer);
     else if (format.sample_type == SampleType::Int16)
         CopyMono<short>(allocator, buffer);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio stereo maker input buffer has unsupported format. [elem=%1, format=%2]", mName, format.sample_type);
 }
 
 template<typename Type>
@@ -348,10 +347,10 @@ bool StereoJoiner::Prepare(const Loader& loader)
         out.sample_rate = left.sample_rate;
         out.sample_type = left.sample_type;
         mOut.SetFormat(out);
-        DEBUG("Joiner '%1' output set to %1", mName, out);
+        DEBUG("Audio joiner prepared successfully. [elem=%1, output=%2]", mName, out);
         return true;
     }
-    ERROR("Joiner '%1' input formats (%1, %2) are not compatible mono streams.", mName, left, right);
+    ERROR("Audio joiner input formats are not compatible. [elem=%1, left=%2, right=%3]", mName, left, right);
     return false;
 }
 
@@ -368,7 +367,7 @@ void StereoJoiner::Process(Allocator& allocator, EventQueue& events, unsigned mi
     mInRight.PullBuffer(right);
     if (left->GetByteSize() != right->GetByteSize())
     {
-        WARN("Can't join buffers with irregular number of audio frames.");
+        WARN("Audio joiner cannot join buffers with irregular number of audio frames. [elem=%1]", mName);
         return;
     }
 
@@ -379,7 +378,7 @@ void StereoJoiner::Process(Allocator& allocator, EventQueue& events, unsigned mi
         Join<float>(allocator, left, right);
     else if (format.sample_type == SampleType::Int16)
         Join<short>(allocator, left, right);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio joiner input buffer has unsupported format. [elem=%1, format=%2]", mName, format.sample_type);
 }
 
 template<typename Type>
@@ -432,10 +431,10 @@ bool StereoSplitter::Prepare(const Loader& loader)
         out.sample_type = format.sample_type;
         mOutRight.SetFormat(out);
         mOutLeft.SetFormat(out);
-        DEBUG("Splitter '%1' output set to %1", mName, out);
+        DEBUG("Audio splitter prepared successfully. [elem=%1, output=%2]", mName, out);
         return true;
     }
-    ERROR("Splitter '%1' input format (%1) is not stereo input.", mName, format);
+    ERROR("Audio splitter input format is not stereo. [elem=%1]", mName);
     return false;
 }
 
@@ -453,7 +452,7 @@ void StereoSplitter::Process(Allocator& allocator, EventQueue& events, unsigned 
         Split<float>(allocator, buffer);
     else if (format.sample_type == SampleType::Int16)
         Split<short>(allocator, buffer);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio splitter input buffer has unsupported format. [elem=%1, format=%2]", mName, format);
 }
 
 template<typename Type>
@@ -527,7 +526,7 @@ bool Mixer::Prepare(const Loader& loader)
     const auto& master_format = mSrcs[0].GetFormat();
     if (!IsValid(master_format))
     {
-        ERROR("Mixer '%1' input port '%2' format not set.", mName, mSrcs[0].GetName());
+        ERROR("Audio mixer input port format is invalid. [elem=%1, port=%2]", mName, mSrcs[0].GetName());
         return false;
     }
 
@@ -537,12 +536,11 @@ bool Mixer::Prepare(const Loader& loader)
         const auto& name   = src.GetName();
         if (format != master_format)
         {
-            ERROR("Mixer '%1' port '%2' format (%3) is not compatible with other ports.", mName, name, format);
+            ERROR("Audio mixer input port is incompatible with other ports. [elem=%1, port=%2, format=%3]", mName, name, format);
             return false;
         }
     }
-    DEBUG("Mixer '%1' prepared with %2 input port(s).", mName, mSrcs.size());
-    DEBUG("Mixer '%1' output format set to %2", mName, master_format);
+    DEBUG("Audio mixer prepared successfully. [elem=%1, srcs=%2, output=%3]", mName, mSrcs.size(), master_format);
     mOut.SetFormat(master_format);
     return true;
 }
@@ -573,7 +571,7 @@ void Mixer::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
     else if (format.sample_type == SampleType::Int16)
         ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
                                         : MixBuffers<short, 2>(src_buffers, src_gain);
-    else WARN("Unsupported format '%1'", format.sample_type);
+    else WARN("Audio mixer input buffer has unsupported format. [elem=%1, format=%2]", mName, format.sample_type);
     mOut.PushBuffer(ret);
 }
 
@@ -592,7 +590,7 @@ bool Delay::Prepare(const Loader& loader)
 {
     const auto& format = mIn.GetFormat();
     mOut.SetFormat(format);
-    DEBUG("Delay '%1' output format set to '%2'.", mName, format);
+    DEBUG("Audio delay element prepared successfully. [elem=%1, output=%2]", mName, format);
     return true;
 }
 void Delay::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
@@ -632,8 +630,8 @@ bool Effect::Prepare(const Loader& loader)
 {
     const auto& format = mIn.GetFormat();
     mSampleRate = format.sample_rate;
-    DEBUG("Fade '%1' output format set to '%2'.", mName, format);
     mOut.SetFormat(format);
+    DEBUG("Audio effect prepared successfully. [name=%1, output=%2]", mName, format);
     return true;
 }
 
@@ -650,7 +648,7 @@ void Effect::Process(Allocator& allocator, EventQueue& events, unsigned millisec
         format.channel_count == 1 ? FadeInOut<float, 1>(buffer) : FadeInOut<float, 2>(buffer);
     else if (format.sample_type == SampleType::Int16)
         format.channel_count == 1 ? FadeInOut<short, 1>(buffer) : FadeInOut<short, 2>(buffer);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio effect input buffer has incompatible format. [elem=%1, format=%2]", mName, format.sample_type);
 }
 
 void Effect::ReceiveCommand(Command& cmd)
@@ -666,8 +664,8 @@ void Effect::SetEffect(Kind effect, unsigned time, unsigned duration)
     mDuration      = duration;
     mStartTime     = time;
     mSampleTime    = 0.0f;
-    DEBUG("Set audio effect '%1' effect to %2 in %3s lasting %4s.", mName,
-          effect, time/100.0f, duration/1000.0f);
+    DEBUG("Set audio effect. [elem=%1, effect=%2, time=%3, duration=%4]",
+          mName, effect, time/1000.0f, duration/1000.0f);
 }
 
 template<typename DataType, unsigned ChannelCount>
@@ -710,7 +708,7 @@ Gain::Gain(const std::string& name, const std::string& id, float gain)
 bool Gain::Prepare(const Loader& loader)
 {
     mOut.SetFormat(mIn.GetFormat());
-    DEBUG("Gain '%1' output format set to %2.", mName, mIn.GetFormat());
+    DEBUG("Audio gain element prepared successfully. [name=%1, gain=%2, output=%3]", mName, mGain, mIn.GetFormat());
     return true;
 }
 
@@ -738,7 +736,7 @@ void Gain::ReceiveCommand(Command& cmd)
     if (auto* ptr = cmd.GetIf<SetGainCmd>())
     {
         mGain = ptr->gain;
-        DEBUG("Gain '%1' value set to %2.", mName, mGain);
+        DEBUG("Received audio gain command. [elem=%1, gain=%2]", mName, mGain);
     }
     else BUG("Unexpected command.");
 }
@@ -786,8 +784,7 @@ bool Resampler::Prepare(const Loader& loader)
     const auto& in = mIn.GetFormat();
     if (in.sample_type != SampleType::Float32)
     {
-        ERROR("Resampler '%1' requires data in '%2' format vs. %3 offered.", mName,
-              SampleType::Float32, in.sample_type);
+        ERROR("Audio re-sampler requires float32 input. [elem=%1, input=%2]", mName, in.sample_type);
         return false;
     }
 
@@ -795,7 +792,7 @@ bool Resampler::Prepare(const Loader& loader)
     mState = ::src_new(SRC_SINC_BEST_QUALITY, in.channel_count, &error);
     if (mState == NULL)
     {
-        ERROR("Resampler '%1' prepare error %2 ('%3').", mName, error, ::src_strerror(error));
+        ERROR("Audio re-sampler prepare error. [elem=%1, error=%2, what='%3']", mName, error, ::src_strerror(error));
         return false;
     }
 
@@ -804,7 +801,7 @@ bool Resampler::Prepare(const Loader& loader)
     format.channel_count = in.channel_count;
     format.sample_rate   = mSampleRate;
     mOut.SetFormat(format);
-    DEBUG("Resampler '%1' output set to '%2'", mName, format);
+    DEBUG("Audio re-sampler prepared successfully. [elem=%1, output=%2]", mName, format);
     return true;
 }
 
@@ -843,7 +840,7 @@ void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milli
     const auto ret = ::src_process(mState, &data);
     if (ret != 0)
     {
-        ERROR("Resampler '%1' resampling error %2 ('%3').", mName, ret, ::src_strerror(ret));
+        ERROR("Audio re-sampler resample error. [elem=%1, error=%2, what='%3']", mName, ret, ::src_strerror(ret));
         return;
     }
 
@@ -851,7 +848,7 @@ void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milli
     if (data.input_frames_used != data.input_frames)
     {
         const auto pending = data.input_frames - data.input_frames_used;
-        WARN("Resampler '%1' discarding %2 pending input frames.", mName, pending);
+        WARN("Audio re-sampler discarding input frames. [elem=%1, frames=%2]", mName, pending);
     }
 
     out_buffer->SetByteSize(src_frame_size * data.output_frames_gen);
@@ -918,14 +915,14 @@ bool FileSource::Prepare(const Loader& loader)
     }
     else
     {
-        ERROR("Unsupported audio file format ('%1').", mFile);
+        ERROR("Audio file source file format is unsupported. [elem=%1, file='%2']", mName, mFile);
         return false;
     }
     Format format;
     format.channel_count = decoder->GetNumChannels();
     format.sample_rate   = decoder->GetSampleRate();
     format.sample_type   = mFormat.sample_type;
-    DEBUG("Opened '%1' for reading (%2 frames) %3.", mFile, decoder->GetNumFrames(), format);
+    DEBUG("Audio file source prepared successfully. [elem=%1, file='%2', format=%3]", mName, mFile,format);
     mDecoder = std::move(decoder);
     mPort.SetFormat(format);
     mFormat = format;
@@ -954,7 +951,9 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
         ret = mDecoder->ReadFrames((short*)buff, frames);
 
     if (ret != frames)
-        WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames);
+    {
+        WARN("Unexpected number of audio frames decoded. [elem=%1, expected=%2, decoded=%3]", mName, frames, ret);
+    }
 
     mFramesRead += ret;
     if (mFramesRead == frames_available)
@@ -963,7 +962,11 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
         {
             mDecoder->Reset();
             mFramesRead = 0;
-            DEBUG("File source reset for looped playback (#%1).", mPlayCount+1);
+            DEBUG("Audio file source was reset for looped playback. [elem=%1, file='%1', count=%2]", mName, mFile, mPlayCount+1);
+        }
+        else
+        {
+            DEBUG("Audio file source is done. [elem=%1, file='%2']", mName, mFile);
         }
     }
 
@@ -1064,7 +1067,7 @@ bool BufferSource::Prepare(const Loader& loader)
     format.channel_count = decoder->GetNumChannels();
     format.sample_rate   = decoder->GetSampleRate();
     format.sample_type   = mOutputFormat.sample_type;
-    DEBUG("Opened buffer '%1' for reading (%2 frames) %3.", mName, decoder->GetNumFrames(), format);
+    DEBUG("Audio buffer source prepared successfully. [elem=%1, output=%2]", mName, format);
     mDecoder = std::move(decoder);
     mPort.SetFormat(format);
     mOutputFormat = format;
@@ -1092,11 +1095,15 @@ void BufferSource::Process(Allocator& allocator, EventQueue& events, unsigned mi
         ret = mDecoder->ReadFrames((short*)buff, frames);
 
     if (ret != frames)
-        WARN("Unexpected number of audio frames. %1 read vs. %2 expected.", ret, frames);
+    {
+        WARN("Unexpected number of audio frames decoded. [elem=%1, expected=%2, decoded=%3]", mName, frames, ret);
+    }
 
     mFramesRead += ret;
     if (mFramesRead == frames_available)
-        DEBUG("File source is done. %1 frames read.", mFramesRead);
+    {
+        DEBUG("Audio buffer source is done. [elem=%1]", mName);
+    }
 
     mPort.PushBuffer(buffer);
 }
@@ -1120,7 +1127,7 @@ void MixerSource::FadeIn::Apply(BufferHandle buffer)
         format.channel_count == 1 ? ApplyFadeIn<float, 1>(buffer) : ApplyFadeIn<float, 2>(buffer);
     else if (format.sample_type == SampleType::Int16)
         format.channel_count == 1 ? ApplyFadeIn<short, 1>(buffer) : ApplyFadeIn<short, 2>(buffer);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio mixer fade-in effect input buffer has unsupported format. [format=%1]", format.sample_type);
 }
 template<typename DataType, unsigned ChannelCount>
 void MixerSource::FadeIn::ApplyFadeIn(BufferHandle buffer)
@@ -1137,7 +1144,7 @@ void MixerSource::FadeOut::Apply(BufferHandle buffer)
         format.channel_count == 1 ? ApplyFadeOut<float, 1>(buffer) : ApplyFadeOut<float, 2>(buffer);
     else if (format.sample_type == SampleType::Int16)
         format.channel_count == 1 ? ApplyFadeOut<short, 1>(buffer) : ApplyFadeOut<short, 2>(buffer);
-    else WARN("Unsupported format %1", format.sample_type);
+    else WARN("Audio mixer fade-out effect input buffer has unsupported format. [format=%1]", format.sample_type);
 }
 template<typename DataType, unsigned ChannelCount>
 void MixerSource::FadeOut::ApplyFadeOut(BufferHandle buffer)
@@ -1177,7 +1184,7 @@ Element* MixerSource::AddSourcePtr(std::unique_ptr<Element> source, bool paused)
     src.element = std::move(source);
     src.paused  = paused;
     mSources[key] = std::move(src);
-    DEBUG("Added new MixerSource '%1' (%2) source '%3'.", mName, paused ? "Paused" : "Live", key);
+    DEBUG("Add audio mixer source object. [elem=%1, key=%2, paused=%3]", mName, key, paused);
     return ret;
 }
 
@@ -1207,13 +1214,13 @@ void MixerSource::DeleteSource(const std::string& name)
     if (it == mSources.end())
         return;
     mSources.erase(it);
-    DEBUG("Deleted MixerSource '%1' source '%2'.", mName, name);
+    DEBUG("Delete audio mixer source. [elem=%1, source=%2]", mName, name);
 }
 
 void MixerSource::DeleteSources()
 {
     mSources.clear();
-    DEBUG("Deleted MixerSource '%1' sources.", mName);
+    DEBUG("Delete all audio mixer sources. [elem=%1]", mName);
 }
 
 void MixerSource::PauseSource(const std::string& name, bool paused)
@@ -1222,7 +1229,7 @@ void MixerSource::PauseSource(const std::string& name, bool paused)
     if (it == mSources.end())
         return;
     it->second.paused = paused;
-    DEBUG("MixerSource '%1' source '%2' pause is %3.", mName, name, paused ? "On" : "Off");
+    DEBUG("Pause audio mixer source. [elem=%1, source=%2, pause=%3]", mName, name, paused);
 }
 
 void MixerSource::SetSourceEffect(const std::string& name, std::unique_ptr<Effect> effect)
@@ -1230,9 +1237,8 @@ void MixerSource::SetSourceEffect(const std::string& name, std::unique_ptr<Effec
     auto it = mSources.find(name);
     if (it == mSources.end())
         return;
+    DEBUG("Set audio mixer source effect. [elem=%1, source=%2, effect=%3]", mName, name, effect->GetName());
     it->second.effect = std::move(effect);
-    DEBUG("MixerSource '%1' source '%2' effect '%3' is active.", mName, name,
-          it->second.effect->GetName());
 }
 
 bool MixerSource::IsSourceDone() const
@@ -1250,7 +1256,7 @@ bool MixerSource::IsSourceDone() const
 
 bool MixerSource::Prepare(const Loader& loader)
 {
-    DEBUG("Prepared MixerSource '%1' with out format '%2'.", mName, mFormat);
+    DEBUG("Audio mixer successfully prepared. [elem=%1, output=%2]", mName, mFormat);
     return true;
 }
 
@@ -1333,7 +1339,7 @@ void MixerSource::Process(Allocator& allocator, EventQueue& events, unsigned mil
     else if (format.sample_type == SampleType::Int16)
         ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
                                         : MixBuffers<short, 2>(src_buffers, src_gain);
-    else WARN("Unsupported format '%1'.", format.sample_type);
+    else WARN("Audio mixer output format is unsupported. [elem=%1, format=%2]", mName, format.sample_type);
     mOut.PushBuffer(ret);
 }
 
@@ -1403,7 +1409,7 @@ void MixerSource::RemoveDoneEffects(EventQueue& events)
         event.src    = source.element->GetName();
         event.effect = std::move(source.effect);
         events.push(MakeEvent(std::move(event)));
-        DEBUG("MixerSource '%1' source '%2' effect '%3' is done.", mName, src_name, effect_name);
+        DEBUG("Audio mixer source effect is done. [elem=%1, source=%2, effect=%3]", mName, src_name, effect_name);
     }
 }
 
@@ -1421,8 +1427,7 @@ void MixerSource::RemoveDoneSources(EventQueue& events)
             event.mixer = mName;
             event.src   = std::move(element);
             events.push(MakeEvent(std::move(event)));
-            DEBUG("MixerSource '%1' source '%2' is done.", mName, it->first);
-
+            DEBUG("Audio mixer source is done. [elem=%1, source=%2]", mName, it->first);
             it = mSources.erase(it);
         }
         else ++it;
@@ -1443,7 +1448,7 @@ ZeroSource::ZeroSource(const std::string& name, const Format& format)
 
 bool ZeroSource::Prepare(const Loader& loader)
 {
-    DEBUG("Prepared ZeroSource '%1' with out format '%2'.", mName, mFormat);
+    DEBUG("Audio zero source prepared successfully. [elem=%1, output=%2]", mName, mFormat);
     return true;
 }
 
@@ -1484,7 +1489,7 @@ SineSource::SineSource(const std::string& name,
 bool SineSource::Prepare(const Loader& loader)
 {
     mPort.SetFormat(mFormat);
-    DEBUG("Sine '%1' output format set to %2", mName, mFormat);
+    DEBUG("Audio sine source prepared successfully. [elem=%1, output=%2]", mName, mFormat);
     return true;
 }
 
@@ -1564,8 +1569,8 @@ const T* GetArg(const std::unordered_map<std::string, ElementArg>& args,
     {
         if (const auto* value = std::get_if<T>(variant))
             return value;
-        else ERROR("Mismatch in audio element '%1' argument '%2' type.", elem, arg_name);
-    } else ERROR("Missing audio element '%1' argument '%2'.", elem, arg_name);
+        else ERROR("Mismatch in audio element argument type. [elem=%1, arg=%2]", elem, arg_name);
+    } else ERROR("Missing audio element argument. [elem=%1, arg=%2]", elem, arg_name);
     return nullptr;
 }
 

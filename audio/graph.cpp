@@ -551,15 +551,17 @@ bool Graph::Prepare(const Loader& loader)
         }
     }
     if (!edges.empty())
-        ERROR_RETURN(false, "Audio graph '%1' has a cycle.", mName);
+        ERROR_RETURN(false, "Audio graph cycle detected. [graph=%1]", mName);
+
+    DEBUG("Audio graph element prepare. [graph=%1]", mName);
 
     for (size_t i=0; i < order.size(); ++i)
     {
         Element* element = order[i];
-        DEBUG("Audio graph '%1' preparing audio element '%2'", mName, element->GetName());
+        //DEBUG("Prepare audio graph element. [graph=%1, elem=%2]", mName, element->GetName());
         if (!element->Prepare(loader))
         {
-            ERROR("Audio graph '%1' element '%2' failed to prepare.", mName, element->GetName());
+            ERROR("Audio graph element failed to prepare.[graph=%1, elem=%2]", mName, element->GetName());
             return false;
         }
         for (unsigned i=0; i < element->GetNumOutputPorts(); ++i)
@@ -571,7 +573,7 @@ bool Graph::Prepare(const Loader& loader)
                 if (!dst_port->CanAccept(src_port.GetFormat()))
                 {
                     const auto* dst_elem = FindInputPortOwner(dst_port);
-                    ERROR("Ports %1:%2 and %3:%4 are not compatible.",
+                    ERROR("Audio graph element link between incompatible ports. [src=%1:%2, dst=%3:%4]",
                           element->GetName(), src_port.GetName(),
                           dst_elem->GetName(), dst_port->GetName());
                     return false;
@@ -580,7 +582,7 @@ bool Graph::Prepare(const Loader& loader)
             }
             else
             {
-                WARN("Audio graph '%1' source %2:%3 has no input port assigned.",
+                WARN("Audio graph element output port has no destination port assigned. [graph=%1, elem=%2, port=%3]",
                      mName, element->GetName(), src_port.GetName());
             }
         }
@@ -590,7 +592,7 @@ bool Graph::Prepare(const Loader& loader)
             auto* src_port = FindSrcPort(&dst_port);
             if (src_port == nullptr)
             {
-                WARN("Audio graph '%1' input %2:%3 has no source port assigned.",
+                WARN("Audio graph element input port has no source port assigned. [graph=%1 elem=%2, port=%3]",
                      mName, element->GetName(), dst_port.GetName());
             }
         }
@@ -599,10 +601,10 @@ bool Graph::Prepare(const Loader& loader)
     mFormat    = mPort.GetFormat();
     if (!IsValid(mFormat))
     {
-        ERROR("Audio graph '%1' output format (%2) is not valid.", mName, mFormat);
+        ERROR("Audio graph output format is not valid. [graph=%1, format=%2]", mName, mFormat);
         return false;
     }
-    DEBUG("Audio graph '%1' output set to '%2'.", mName, mFormat);
+    DEBUG("Audio graph prepared successfully. [graph=%1 output=%2]", mName, mFormat);
     return true;
 }
 
@@ -684,7 +686,7 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
 
     if (graph_done)
     {
-        DEBUG("Audio graph '%1' is done!", mName);
+        DEBUG("Audio graph is done. [graph=%1]", mName);
     }
     mDone = graph_done;
 }
@@ -693,7 +695,7 @@ void Graph::Shutdown()
 {
     for (auto& element : mTopoOrder)
     {
-        DEBUG("Shutting down audio graph '%1' element '%2'", mName, element->GetName());
+        DEBUG("Shutting down audio graph element. [graph=%1, elem=%2]", mName, element->GetName());
         element->Shutdown();
     }
 }
@@ -865,7 +867,7 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         return max_bytes;
     }
 
-    WARN("Audio graph '%1' has no output audio buffer available.", mName);
+    WARN("Audio graph has no output audio buffer available. [graph=%1]", mName);
     return 0;
 }
 bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
@@ -883,7 +885,7 @@ void AudioGraph::RecvCommand(std::unique_ptr<Command> cmd) noexcept
     if (auto* ptr = cmd->GetIf<GraphCmd>())
     {
         if (!mGraph.DispatchCommand(ptr->dest, *ptr->cmd))
-            WARN("Audio graph '%1' command receiver element '%2' not found.", mName, ptr->dest);
+            WARN("Audio graph command receiver element not found. [graph=%1, elem=%2]", mName, ptr->dest);
     }
     else BUG("Unexpected command.");
 }
