@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <stdexcept>
+#include <algorithm>
 #include <mpg123.h>
 
 #include "base/format.h"
@@ -108,7 +109,7 @@ long Mpg123Buffer::Read(void* buffer, size_t bytes)
 {
     const auto num_bytes = mBuffer->GetSize();
     const auto num_avail = num_bytes - mOffset;
-    const auto num_bytes_to_read = std::min(num_avail, bytes);
+    const auto num_bytes_to_read = std::min(size_t(num_avail), bytes);
     if (num_bytes_to_read == 0)
         return 0;
     const auto* src = static_cast<const std::uint8_t*>(mBuffer->GetData());
@@ -249,7 +250,7 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
         // make a full parsing scan over the stream. this is only needed really
         // if the stream has no header frame with meta information about the stream
         // such as the frame count.
-        if (!mpg123_scan(mHandle) != MPG123_OK)
+        if (mpg123_scan(mHandle) != MPG123_OK)
         {
             ERROR("Mpg123Decoder stream scan failed. [name='%1', error='%2']", io->GetName(), mpg123_strerror(mHandle));
             return false;

@@ -108,7 +108,7 @@ namespace audio
           : mCapacity(capacity)
           , mData(data)
         {}
-        virtual void SetFormat(const Format& format)
+        virtual void SetFormat(const Format& format) override
         { mFormat = format; }
         virtual Format GetFormat() const override
         { return mFormat; }
@@ -129,7 +129,7 @@ namespace audio
         { return mInfos.size(); }
         virtual void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const
+        virtual const InfoTag& GetInfoTag(size_t index) const override
         { return base::SafeIndex(mInfos, index); }
     private:
         const std::size_t mCapacity = 0;
@@ -152,7 +152,7 @@ namespace audio
             ASSERT(!std::memcmp(&mBuffer[canary_offset], &canary, sizeof(canary)) &&
                    "Audio buffer out of bounds write detected.");
         }
-        virtual void SetFormat(const Format& format)
+        virtual void SetFormat(const Format& format) override
         { mFormat = format; }
         virtual Format GetFormat() const override
         { return mFormat; }
@@ -174,7 +174,7 @@ namespace audio
         { return mInfos.size(); }
         virtual void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const
+        virtual const InfoTag& GetInfoTag(size_t index) const override
         { return base::SafeIndex(mInfos, index); }
     private:
         void Resize(size_t bytes)
