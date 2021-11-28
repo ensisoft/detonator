@@ -395,9 +395,56 @@ sf_open_fd	(int fd, int mode, SF_INFO *sfinfo, int close_desc)
 	return result ;
 } /* sf_open_fd */
 
+// from StackOverlow
+// https://stackoverflow.com/questions/807244/c-compiler-asserts-how-to-implement
+
+/** A compile time assertion check.
+ *
+ *  Validate at compile time that the predicate is true without
+ *  generating code. This can be used at any point in a source file
+ *  where typedef is legal.
+ *
+ *  On success, compilation proceeds normally.
+ *
+ *  On failure, attempts to typedef an array type of negative size. The
+ *  offending line will look like
+ *      typedef assertion_failed_file_h_42[-1]
+ *  where file is the content of the second parameter which should
+ *  typically be related in some obvious way to the containing file
+ *  name, 42 is the line number in the file on which the assertion
+ *  appears, and -1 is the result of a calculation based on the
+ *  predicate failing.
+ *
+ *  \param predicate The predicate to test. It must evaluate to
+ *  something that can be coerced to a normal C boolean.
+ *
+ *  \param file A sequence of legal identifier characters that should
+ *  uniquely identify the source file in which this condition appears.
+ */
+#define CASSERT(predicate) _impl_CASSERT_LINE(predicate,__LINE__,__FILE__)
+
+#define _impl_PASTE(a,b) a##b
+#define _impl_CASSERT_LINE(predicate, line, file) \
+    typedef char _impl_PASTE(assertion_failed_##file##_,line)[2*!!(predicate)-1];
+
+#if defined(USE_SSE2)
+#  if defined(_GCC_)
+#    pragma message "sndfile SSE2 enabled"
+#  elif defined(_MSC_VER)
+#    pragma message("sndfile SSE2 enabled")
+#  endif
+#endif
+
 SNDFILE*
 sf_open_virtual	(SF_VIRTUAL_IO *sfvirtual, int mode, SF_INFO *sfinfo, void *user_data)
 {	SF_PRIVATE 	*psf ;
+
+    CASSERT(sizeof(int64_t)    == SIZEOF_INT64_T)
+    CASSERT(sizeof(long)       == SIZEOF_LONG);
+    CASSERT(sizeof(long long)  == SIZEOF_LONG_LONG);
+    CASSERT(sizeof(wchar_t)    == SIZEOF_WCHAR_T);
+    CASSERT(sizeof(sf_count_t) == SIZEOF_SF_COUNT_T);
+    CASSERT(sizeof(sf_count_t) == 8);
 
 	/* Make sure we have a valid set ot virtual pointers. */
 	if (sfvirtual->get_filelen == NULL)
@@ -3358,3 +3405,4 @@ sf_get_chunk_data (const SF_CHUNK_ITERATOR * iterator, SF_CHUNK_INFO * chunk_inf
 
 	return SFE_BAD_CHUNK_FORMAT ;
 } /* sf_get_chunk_data */
+
