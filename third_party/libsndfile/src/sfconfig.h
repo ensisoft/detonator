@@ -35,105 +35,59 @@
 /* Include the Autoconf generated file. */
 #include "config.h"
 
-/* Now fiddle the values. */
-
-#ifndef HAVE_ALSA_ASOUNDLIB_H
-#define HAVE_ALSA_ASOUNDLIB_H 0
-#endif
-
-#ifndef HAVE_BYTESWAP_H
-#define HAVE_BYTESWAP_H 0
-#endif
-
-#ifndef HAVE_DECL_S_IRGRP
-#define	HAVE_DECL_S_IRGRP 0
-#endif
-
-#ifndef HAVE_ENDIAN_H
-#define HAVE_ENDIAN_H 0
-#endif
-
-#ifndef HAVE_FSTAT64
-#define HAVE_FSTAT64 0
-#endif
-
-#ifndef HAVE_FSYNC
-#define HAVE_FSYNC 0
-#endif
-
-#ifndef HAVE_LOCALE_H
-#define HAVE_LOCALE_H 0
-#endif
-
-#ifndef HAVE_LRINT
-#define HAVE_LRINT 0
-#endif
-
-#ifndef HAVE_LRINTF
-#define HAVE_LRINTF 0
-#endif
-
-#ifndef HAVE_MMAP
-#define HAVE_MMAP 0
-#endif
-
-#ifndef HAVE_SETLOCALE
-#define HAVE_SETLOCALE 0
-#endif
-
-#ifndef HAVE_SQLITE3
-#define HAVE_SQLITE3 0
-#endif
-
-#ifndef HAVE_STDINT_H
-#define HAVE_STDINT_H 0
-#endif
-
-#ifndef HAVE_SYS_WAIT_H
-#define HAVE_SYS_WAIT_H 0
-#endif
-
-#ifndef HAVE_SYS_TIME_H
-#define HAVE_SYS_TIME_H 0
-#endif
-
-#ifndef HAVE_UNISTD_H
-#define HAVE_UNISTD_H 0
-#endif
-
-#ifndef HAVE_PIPE
-#define HAVE_PIPE 0
-#endif
-
-#ifndef HAVE_WAITPID
-#define	HAVE_WAITPID 0
-#endif
-
-#ifndef HAVE_X86INTRIN_H
-#define HAVE_X86INTRIN_H 0
-#endif
-
 #if (defined __x86_64__) || (defined _M_X64)
-#define CPU_IS_X86_64	1	/* Define both for x86_64 */
-#define CPU_IS_X86		1
+#  define CPU_IS_X86_64	1	/* Define both for x86_64 */
+#  define CPU_IS_X86	1
 #elif defined (__i486__) || defined (__i586__) || defined (__i686__) || defined (_M_IX86)
-#define CPU_IS_X86 		1
-#define CPU_IS_X86_64 	0
+#  define CPU_IS_X86 	1
+#  define CPU_IS_X86_64 0
+#elif defined(__EMSCRIPTEN__)
+#  define CPU_IS_X86_64	1	/* Define both for x86_64 */
+#  define CPU_IS_X86	1
 #else
-#define CPU_IS_X86		0
-#define CPU_IS_X86_64	0
+#  define CPU_IS_X86	0
+#  define CPU_IS_X86_64	0
 #endif
 
 #if (defined (__SSE2__) || defined (_M_AMD64) || (defined (_M_IX86_FP) && (_M_IX86_FP >= 2)) && HAVE_IMMINTRIN_H)
-#define USE_SSE2
-#endif
-
-#ifndef HAVE_SSIZE_T
-#define HAVE_SSIZE_T 0
+#  define USE_SSE2
+#elif defined(__EMSCRIPTEN__)
+//#  define USE_SS2
 #endif
 
 #if (HAVE_SSIZE_T == 0)
-#define ssize_t intptr_t
+#  define ssize_t intptr_t
 #endif
 
-#endif
+
+/* Set to 1 if flac, ogg and vorbis are available. */
+#define HAVE_EXTERNAL_XIPH_LIBS 1
+
+/* Set to 1 to enable experimental code. */
+#define ENABLE_EXPERIMENTAL_CODE 0
+
+/* Name of package */
+#define PACKAGE "libsndfile"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT ""
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "libsndfile"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "libsndfile 1.0.31"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "libsndfile"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL ""
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "1.0.31"
+
+/* Version number of package */
+#define VERSION "1.0.31"
+
+#endif // SFCONFIG_H

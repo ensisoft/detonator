@@ -1328,15 +1328,11 @@ psf_get_date_str (char *str, int maxlen)
 
 	time (&current) ;
 
-#if defined (HAVE_GMTIME_R)
+#if HAVE_GMTIME_R == 1
 	/* If the re-entrant version is available, use it. */
 	tmptr = gmtime_r (&current, &timedata) ;
-#elif defined (HAVE_GMTIME)
-	/* Otherwise use the standard one and copy the data to local storage. */
-	tmptr = gmtime (&current) ;
-	memcpy (&timedata, tmptr, sizeof (timedata)) ;
 #else
-	tmptr = NULL ;
+	tmptr = NULL;
 #endif
 
 	if (tmptr)
@@ -1407,7 +1403,7 @@ psf_rand_int32 (void)
 
 	if (value == 0)
 	{
-#if HAVE_GETTIMEOFDAY
+#if HAVE_GETTIMEOFDAY == 1
 		struct timeval tv ;
 		gettimeofday (&tv, NULL) ;
 		value = tv.tv_sec + tv.tv_usec ;
