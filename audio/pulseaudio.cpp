@@ -60,6 +60,15 @@ public:
 
         pa_context_set_state_callback(context_, state_callback, this);
         pa_context_connect(context_, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr);
+
+        // this is kinda ugly...
+        while (state_ == Device::State::None)
+        {
+            pa_mainloop_iterate(loop_, 0, nullptr);
+        }
+
+        if (state_ == Device::State::Error)
+            throw std::runtime_error("pulseaudio connect error");
     }
 
    ~PulseAudio()
@@ -98,16 +107,7 @@ public:
     }
 
     virtual void Init() override
-    {
-        // this is kinda ugly...
-        while (state_ == Device::State::None)
-        {
-            pa_mainloop_iterate(loop_, 0, nullptr);
-        }
-
-        if (state_ == Device::State::Error)
-            throw std::runtime_error("pulseaudio error");
-    }
+    { }
 
     virtual State GetState() const override
     {
@@ -409,12 +409,7 @@ private:
 // static
 std::unique_ptr<Device> Device::Create(const char* appname)
 {
-    std::unique_ptr<Device> device;
-    device = std::make_unique<PulseAudio>(appname);
-    if (device)
-        device->Init();
-
-    return device;
+    return std::make_unique<PulseAudio>(appname);
 }
 
 #endif // AUDIO_USE_PULSEAUDIO

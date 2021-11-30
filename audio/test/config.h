@@ -3,7 +3,9 @@
 
 #include "base/platform.h"
 
+#define AUDIO_LOCK_FREE_QUEUE
 #define AUDIO_ENABLE_TEST_SOUND
+#define AUDIO_USE_THREAD
 #if defined(LINUX_OS)
 #  define AUDIO_USE_PULSEAUDIO
 #else

@@ -474,12 +474,7 @@ private:
 // static
 std::unique_ptr<Device> Device::Create(const char* appname)
 {
-    std::unique_ptr<Device> device;
-    device = std::make_unique<Waveout>(appname);
-    if (device)
-        device->Init();
-
-    return device;
+    return std::make_unique<Waveout>(appname);
 }
 
 #endif // AUDIO_USE_WAVEOUT

@@ -41,3 +41,6 @@
 #else
 #  define AUDIO_USE_WAVEOUT
 #endif
+
+#define AUDIO_LOCK_FREE_QUEUE
+#define AUDIO_USE_THREAD

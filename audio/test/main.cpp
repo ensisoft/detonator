@@ -100,12 +100,20 @@ int main(int argc, char* argv[])
     audio::Player player(audio::Device::Create("audio_test"));
     if (sine)
     {
+        INFO("Playing procedural sine audio for 10 seconds.");
         auto source = std::make_unique<audio::SineGenerator>(500, format);
         const auto id = player.Play(std::move(source));
-        DEBUG("New sine wave stream = %1", id);        
-        INFO("Playing procedural sine audio for 10 seconds.");
+        DEBUG("New sine wave stream. [id=%1]", id);
+#if defined(AUDIO_USE_THREAD)
         std::this_thread::sleep_for(std::chrono::seconds(10));
         player.Cancel(id);
+#else
+        for (unsigned i=0; i<1000*10; ++i)
+        {
+            player.ProcessOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+#endif
     }
 
     if (graph)
@@ -285,7 +293,12 @@ int main(int argc, char* argv[])
         bool track_done = false;
         while (!track_done)
         {
+#if defined(AUDIO_USE_THREAD)
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
+#else
+            player.ProcessOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+#endif
             audio::Player::Event e;
             if (!player.GetEvent(&e))
                 continue;

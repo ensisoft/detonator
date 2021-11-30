@@ -25,7 +25,9 @@
 #include <memory>
 #include <variant>
 
-#include <boost/lockfree/queue.hpp>
+#if defined(AUDIO_LOCK_FREE_QUEUE)
+#  include <boost/lockfree/queue.hpp>
+#endif
 
 #include "audio/command.h"
 
@@ -113,8 +115,17 @@ namespace audio
         // Returns true if there was an event otherwise false.
         bool GetEvent(Event* event);
 
+#if !defined(AUDIO_USE_THREAD)
+        void ProcessOnce();
+#endif
     private:
-        void AudioThreadLoop(Device* ptr);
+        struct Track {
+            std::size_t id = 0;
+            std::shared_ptr<Stream> stream;
+            bool paused  = false;
+        };
+        void AudioThreadLoop(Device* device);
+        void RunAudioUpdateOnce(Device& device, std::list<Track>& track_list);
 
     private:
         struct Action {
@@ -127,12 +138,16 @@ namespace audio
             // trivial destructor type trait.
             Command* cmd = nullptr;
         };
+        void QueueAction(Action&& action);
+        bool DequeueAction(Action* action);
     private:
-        std::unique_ptr<std::thread> thread_;
-
+#if defined(AUDIO_LOCK_FREE_QUEUE)
         // queue of actions for tracks (pause/resume)
         boost::lockfree::queue<Action> track_actions_;
-        
+#else
+        std::mutex action_mutex_;
+        std::queue<Action> track_actions_;
+#endif
         // unique track id
         std::size_t trackid_ = 1;
 
@@ -141,8 +156,14 @@ namespace audio
         std::mutex event_mutex_;
         std::queue<Event> events_;
 
+#if defined(AUDIO_USE_THREAD)
         // audio thread stop flag
         std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;
+        std::unique_ptr<std::thread> thread_;
+#else
+        std::list<Track> track_list_;
+        std::unique_ptr<Device> device_;
+#endif
     };
 
 } // namespace
