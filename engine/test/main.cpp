@@ -31,6 +31,9 @@
 #include "base/logging.h"
 #include "base/format.h"
 
+#include "audio/graph.h"
+#include "audio/loader.h"
+
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -48,16 +51,11 @@
 #include "game/entity.h"
 #include "game/scene.h"
 
+#include "engine/audio.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
 #include "engine/physics.h"
 #include "engine/ui.h"
-
-#if !defined(__EMSCRIPTEN__)
-#include "audio/loader.h"
-#include "audio/graph.h"
-#include "engine/audio.h"
-#endif
 
 namespace {
     gfx::FPoint ToPoint(const glm::vec2& vec)
@@ -104,8 +102,6 @@ public:
 private:
 
 };
-
-#if !defined(__EMSCRIPTEN__)
 
 class AudioMusicTest : public TestCase,
                        public audio::Loader
@@ -263,6 +259,9 @@ public:
         mEngine->SetLoader(this);
         mEngine->Start();
         mEngine->SetSoundEffectGain(mEffectGain);
+        // when running WASM code we're single threaded and small (~20ms)
+        // audio buffers are likely going to cause stutter 
+        mEngine->SetBufferSize(40);
     }
     virtual void End() override
     { mEngine.reset(); }
@@ -362,8 +361,6 @@ private:
     float mEffectGain = 0.5f;
     float mDelay      = 0.0f;
 };
-
-#endif // __EMSCRIPTEN__
 
 class PhysicsTest : public TestCase
 {
@@ -938,9 +935,9 @@ public:
     {
 #if !defined(__EMSCRIPTEN__)
         mTestList.emplace_back(new ViewportTest);
+#endif
         mTestList.emplace_back(new AudioEffectTest);
         mTestList.emplace_back(new AudioMusicTest);
-#endif
         mTestList.emplace_back(new PhysicsTest);
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new SceneTest);
