@@ -17,11 +17,6 @@
 #include "config.h"
 
 #include <functional>
-
-#ifdef POSIX_OS
-#  include <pthread.h>
-#endif
-
 #include <list>
 
 #include "base/assert.h"
@@ -43,23 +38,35 @@ struct EnqueueCmd {
 namespace audio
 {
 
-Player::Player(std::unique_ptr<Device> device) : track_actions_(128)
+Player::Player(std::unique_ptr<Device> device)
+#if defined(AUDIO_LOCK_FREE_QUEUE)
+  : track_actions_(128)
+#endif
 {
+#if defined(AUDIO_USE_THREAD)
     run_thread_.test_and_set(std::memory_order_acquire);
     thread_.reset(new std::thread(std::bind(&Player::AudioThreadLoop, this, device.get())));
-#ifdef POSIX_OS
-    sched_param p;
-    p.sched_priority = 99;
-    ::pthread_setschedparam(thread_->native_handle(), SCHED_FIFO, &p);
-#endif
     device.release();
+#else
+    device->Init();
+    device_ = std::move(device);
+#endif
 }
 
 Player::~Player()
 {
+#if defined(AUDIO_USE_THREAD)
     // signal the audio thread to exit
     run_thread_.clear(std::memory_order_release);
     thread_->join();
+#else
+    for (auto& p : track_list_)
+    {
+        p.stream->Cancel();
+    }
+    track_list_.clear();
+    device_.reset();
+#endif
 }
 
 std::size_t Player::Play(std::unique_ptr<Source> source)
@@ -75,8 +82,7 @@ std::size_t Player::Play(std::unique_ptr<Source> source)
     action.track_id = id;
     action.do_what  = Action::Type::Enqueue;
     action.cmd      = cmd_ptr.release(); // remember to delete the raw ptr!
-    track_actions_.push(action);
-
+    QueueAction(std::move(action));
     ++trackid_;
     return id;
 }
@@ -86,7 +92,7 @@ void Player::Pause(std::size_t id)
     Action a;
     a.do_what = Action::Type::Pause;
     a.track_id = id;
-    track_actions_.push(a);
+    QueueAction(std::move(a));
 }
 
 void Player::Resume(std::size_t id)
@@ -94,7 +100,7 @@ void Player::Resume(std::size_t id)
     Action a;
     a.do_what  = Action::Type::Resume;
     a.track_id = id;
-    track_actions_.push(a);
+    QueueAction(std::move(a));
 }
 
 void Player::Cancel(std::size_t id)
@@ -102,7 +108,7 @@ void Player::Cancel(std::size_t id)
     Action a;
     a.do_what = Action::Type::Cancel;
     a.track_id = id;
-    track_actions_.push(a);
+    QueueAction(std::move(a));
 }
 
 void Player::SendCommand(std::size_t id, std::unique_ptr<Command> cmd)
@@ -111,14 +117,14 @@ void Player::SendCommand(std::size_t id, std::unique_ptr<Command> cmd)
     a.do_what  = Action::Type::Command;
     a.track_id = id;
     a.cmd      = cmd.release(); // remember to delete the raw ptr!
-    track_actions_.push(a);
+    QueueAction(std::move(a));
 }
 void Player::AskProgress(std::size_t id)
 {
     Action a;
     a.do_what  = Action::Type::Progress;
     a.track_id = id;
-    track_actions_.push(a);
+    QueueAction(std::move(a));
 }
 
 bool Player::GetEvent(Event* event)
@@ -131,133 +137,179 @@ bool Player::GetEvent(Event* event)
     return true;
 }
 
-void Player::AudioThreadLoop(Device* ptr)
+#if !defined(AUDIO_USE_THREAD)
+void Player::ProcessOnce()
 {
-    std::unique_ptr<Device> dev(ptr);
+    RunAudioUpdateOnce(*device_, track_list_);
+}
+#endif
 
-    struct Track {
-        std::size_t id = 0;
-        std::shared_ptr<Stream> stream;
-        bool paused  = false;
-    };
-    std::list<Track> playing;    // currently playing tracks
+void Player::QueueAction(Action&& action)
+{
+#if defined(AUDIO_LOCK_FREE_QUEUE)
+    track_actions_.push(std::move(action));
+#else
+    std::unique_lock<decltype(action_mutex_)> lock(action_mutex_);
+    track_actions_.push(std::move(action));
+#endif
+}
 
-    while (run_thread_.test_and_set(std::memory_order_acquire))
+bool Player::DequeueAction(Action* action)
+{
+#if defined(AUDIO_LOCK_FREE_QUEUE)
+    return track_actions_.pop(*action);
+#else
+    std::unique_lock<decltype(action_mutex_)> lock(action_mutex_);
+    if (track_actions_.empty())
+        return false;
+    *action = track_actions_.front();
+    track_actions_.pop();
+    return true;
+#endif
+}
+
+void Player::AudioThreadLoop(Device* device)
+{
+#if defined(AUDIO_USE_THREAD)
+    DEBUG("Hello from audio player thread.");
+    try
     {
-        // iterate audio device state once. (dispatches stream/device state changes)
-        dev->Poll();
+        std::unique_ptr<Device> raii(device);
 
-        // dispatch the queued track actions
-        Action track_action;    
-        while (track_actions_.pop(track_action))
+        // call device init on *this* thread in case the device
+        // has thread affinity.
+        device->Init();
+
+        std::list<Track> track_list;
+
+        while (run_thread_.test_and_set(std::memory_order_acquire))
         {
-            std::unique_ptr<Command> cmd(track_action.cmd);
-            if (track_action.do_what == Action::Type::Enqueue)
-            {
-                auto* enqueue_cmd = cmd->GetIf<EnqueueCmd>();
-                auto stream = dev->Prepare(std::move(enqueue_cmd->source));
-                if (!stream)
-                {
-                    SourceCompleteEvent event;
-                    event.id      = track_action.track_id;
-                    event.status  = TrackStatus::Failure;
-                    std::lock_guard<std::mutex> lock(event_mutex_);
-                    events_.push(std::move(event));
-                }
-                else
-                {
-                    Track item;
-                    item.id      = track_action.track_id;
-                    item.paused  = false;
-                    item.stream  = stream;
-                    item.stream->Play();
-                    playing.push_back(std::move(item));
-                }
-                continue;
-            }
-
-            auto it = std::find_if(std::begin(playing), std::end(playing),
-                [=](const Track& t) {
-                    return t.id == track_action.track_id;
-                });
-            if (it == std::end(playing))
-                continue;
-
-            auto& p = *it;
-            if (track_action.do_what == Action::Type::Pause)
-            {
-                p.stream->Pause();
-                p.paused = true;
-            }
-            else if (track_action.do_what == Action::Type::Resume)
-            {
-                p.stream->Resume();
-                p.paused = false;
-            }
-            else if (track_action.do_what == Action::Type::Command)
-            {
-                p.stream->SendCommand(std::move(cmd));
-            }
-            else if (track_action.do_what == Action::Type::Cancel)
-            {
-                p.stream->Cancel();
-                playing.erase(it);
-            }
-            else if (track_action.do_what == Action::Type::Progress)
-            {
-                SourceProgressEvent event;
-                event.id    = p.id;
-                event.time  = p.stream->GetStreamTime();
-                event.bytes = p.stream->GetStreamBytes();
-                std::lock_guard<std::mutex> lock(event_mutex_);
-                events_.push(std::move(event));
-            }
+            RunAudioUpdateOnce(*device, track_list);
+            // this wait is here to avoid "overheating the cpu" so to speak.
+            // however this creates two problems.
+            // a) it increases latency in terms of starting the playback of new audio sample.
+            // b) creates possibility for a buffer underruns in the audio playback stream.
+            // todo: probably need something more sophisticated ?
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
-        // realize the state updates (if any) of currently playing audio streams
-        // and create outgoing stream events (if any).
-        for (auto it = std::begin(playing); it != std::end(playing);)
+        // cancel pending audio streams
+        for (auto& p: track_list)
         {
-            auto& track = *it;
-            // propagate events from the stream/source if any.
-            while (auto event = track.stream->GetEvent())
-            {
-                SourceEvent ev;
-                ev.id    = track.id;
-                ev.event = std::move(event);
-                std::lock_guard<std::mutex> lock(event_mutex_);
-                events_.push(std::move(ev));
-            }
+            p.stream->Cancel();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Audio thread error. [error=%1]", e.what());
+    }
+    DEBUG("Audio player thread exiting.");
+#endif
+}
 
-            const auto state = track.stream->GetState();
-            if (state == Stream::State::Complete || state == Stream::State::Error)
+void Player::RunAudioUpdateOnce(Device& device, std::list<Track>& track_list)
+{
+    // iterate audio device state once. (dispatches stream/device state changes)
+    device.Poll();
+
+    // dispatch the queued track actions
+    Action track_action;
+    while (DequeueAction(&track_action))
+    {
+        std::unique_ptr<Command> cmd(track_action.cmd);
+        if (track_action.do_what == Action::Type::Enqueue)
+        {
+            auto* enqueue_cmd = cmd->GetIf<EnqueueCmd>();
+            auto stream = device.Prepare(std::move(enqueue_cmd->source));
+            if (!stream)
             {
-                auto source = track.stream->GetFinishedSource();
-                // generate a track completion event
                 SourceCompleteEvent event;
-                event.id      = track.id;
-                event.status  = state == Stream::State::Complete
-                                ? TrackStatus::Success
-                                : TrackStatus::Failure;
+                event.id      = track_action.track_id;
+                event.status  = TrackStatus::Failure;
                 std::lock_guard<std::mutex> lock(event_mutex_);
                 events_.push(std::move(event));
-                source->Shutdown();
-                it = playing.erase(it);
             }
-            else it++;
+            else
+            {
+                Track item;
+                item.id      = track_action.track_id;
+                item.paused  = false;
+                item.stream  = stream;
+                item.stream->Play();
+                track_list.push_back(std::move(item));
+            }
+            continue;
         }
 
-        // this wait is here to avoid "overheating the cpu" so to speak.
-        // however this creates two problems.
-        // a) it increases latency in terms of starting the playback of new audio sample.
-        // b) creates possibility for a buffer underruns in the audio playback stream. 
-        // todo: probably need something more sophisticated ?
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        auto it = std::find_if(std::begin(track_list), std::end(track_list),
+                               [=](const Track& t) {
+                                   return t.id == track_action.track_id;
+                               });
+        if (it == std::end(track_list))
+            continue;
+
+        auto& p = *it;
+        if (track_action.do_what == Action::Type::Pause)
+        {
+            p.stream->Pause();
+            p.paused = true;
+        }
+        else if (track_action.do_what == Action::Type::Resume)
+        {
+            p.stream->Resume();
+            p.paused = false;
+        }
+        else if (track_action.do_what == Action::Type::Command)
+        {
+            p.stream->SendCommand(std::move(cmd));
+        }
+        else if (track_action.do_what == Action::Type::Cancel)
+        {
+            p.stream->Cancel();
+            track_list.erase(it);
+        }
+        else if (track_action.do_what == Action::Type::Progress)
+        {
+            SourceProgressEvent event;
+            event.id    = p.id;
+            event.time  = p.stream->GetStreamTime();
+            event.bytes = p.stream->GetStreamBytes();
+            std::lock_guard<std::mutex> lock(event_mutex_);
+            events_.push(std::move(event));
+        }
     }
 
-    for (auto& p : playing)
+    // realize the state updates (if any) of currently playing audio streams
+    // and create outgoing stream events (if any).
+    for (auto it = std::begin(track_list); it != std::end(track_list);)
     {
-        p.stream->Cancel();
+        auto& track = *it;
+        // propagate events from the stream/source if any.
+        while (auto event = track.stream->GetEvent())
+        {
+            SourceEvent ev;
+            ev.id    = track.id;
+            ev.event = std::move(event);
+            std::lock_guard<std::mutex> lock(event_mutex_);
+            events_.push(std::move(ev));
+        }
+
+        const auto state = track.stream->GetState();
+        if (state == Stream::State::Complete || state == Stream::State::Error)
+        {
+            auto source = track.stream->GetFinishedSource();
+            // generate a track completion event
+            SourceCompleteEvent event;
+            event.id      = track.id;
+            event.status  = state == Stream::State::Complete
+                            ? TrackStatus::Success
+                            : TrackStatus::Failure;
+            std::lock_guard<std::mutex> lock(event_mutex_);
+            events_.push(std::move(event));
+            source->Shutdown();
+            it = track_list.erase(it);
+        }
+        else it++;
     }
 }
 

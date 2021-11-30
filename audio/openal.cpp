@@ -22,6 +22,8 @@
 #endif
 
 #include <list>
+#include <chrono>
+#include <thread>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -32,6 +34,41 @@
 #if defined(AUDIO_USE_OPENAL)
 
 namespace {
+// used for cases that are potentially failing because of resource allocation
+// failures. I.e. not BUGS made by me the programmer.
+template<typename Function, typename... Args>
+void CallOpenAL(Function func, const Args&... args)
+{
+    func(args...);
+    const auto err = alGetError();
+    if (err != AL_NO_ERROR)
+        throw std::runtime_error("OpenAL error: " + std::to_string(err));
+}
+const char* ToString(ALenum e)
+{
+#define CASE(x) if (e == x) return #x
+    CASE(AL_PLAYING);
+    CASE(AL_STOPPED);
+    CASE(AL_STREAMING);
+    CASE(AL_PAUSED);
+#undef CASE
+    return "???";
+}
+
+#define AL_CALL_IMPL(x, line)     \
+do {                              \
+    x;                            \
+    auto err = alGetError();      \
+    if (err != AL_NO_ERROR) {     \
+      ERROR("OpenAL error. [error=%1, line:%2]", err, line); \
+      std::abort();               \
+    }                             \
+} while (0)
+
+
+// used to check calls for cases where failures are thought out to be BUGS.
+#define AL_CALL(x) AL_CALL_IMPL(x, __LINE__)
+
 // Audio device implementation using OpenAL
 class OpenALDevice : public audio::Device
 {
@@ -41,8 +78,12 @@ public:
 
     ~OpenALDevice()
     {
+        // so lol, alGetError requires an active context.
         if (mContext)
+        {
+            alcMakeContextCurrent(NULL);
             alcDestroyContext(mContext);
+        }
         if (mDevice)
             alcCloseDevice(mDevice);
     }
@@ -56,7 +97,7 @@ public:
             return stream;
         }
         catch (const std::exception& e)
-        { ERROR("Audio source failed to prepare: [name=%1]", name); }
+        { ERROR("Audio source failed to prepare: [name=%1, error=%2]", name, e.what()); }
         return nullptr;
     }
     virtual void Poll() override
@@ -77,6 +118,9 @@ public:
     }
     virtual void Init() override
     {
+        ASSERT(mContext == NULL);
+        ASSERT(mDevice == NULL);
+
         const auto* default_device = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
         DEBUG("Using OpenAL default device. [name=%1]", default_device);
         mDevice = alcOpenDevice(default_device);
@@ -87,7 +131,7 @@ public:
             throw std::runtime_error("failed to create OpenAL audio context.");
 
         // todo: refactor this, this cannot work if there ever are more than one device.
-        alcMakeContextCurrent(mContext);
+        AL_CALL(alcMakeContextCurrent(mContext));
 
         mState = State::Ready;
     }
@@ -119,28 +163,27 @@ private:
             const auto valid_channels = channels == 1 || channels == 2;
             const auto valid_format   = format == audio::Source::Format::Float32 ||
                                         format == audio::Source::Format::Int16;
-            const auto valid_rate     = samplerate == 8000 || samplerate == 16000 ||
-                                        samplerate == 11025 || samplerate == 22050 ||
+            const auto valid_rate     = samplerate == 8000  || samplerate == 11025 ||
+                                        samplerate == 12000 || samplerate == 16000 ||
+                                        samplerate == 22050 || samplerate == 24000 ||
                                         samplerate == 32000 || samplerate == 44100 ||
                                         samplerate == 48000 || samplerate == 88200;
-            if (!valid_channels || !valid_format || !valid_rate)
-                throw std::runtime_error("invalid OpenAL audio format");
-
             // we throw an exception here so that the semantics are similar to what
             // happens on Pulseaudio/Waveout. Those APIs have checks in their stream
             // creation that fill then indicate an error if we pass garbage format or
             // parameters for stream creation. It might make sense however to move
             // the checking for valid input formats somewhere else (higher in the stack).
+            if (!valid_channels || !valid_format || !valid_rate)
+                throw std::runtime_error("invalid OpenAL audio format");
 
-            // todo: error checking
-            alGenSources(1, &mHandle);
-            alGenBuffers(NumBuffers, mBuffers);
+            CallOpenAL(alGenSources, 1, &mHandle);
+            CallOpenAL(alGenBuffers, NumBuffers, &mBuffers[0]);
             DEBUG("OpenAL stream source handle. [handle=%1]", mHandle);
         }
        ~PlaybackStream()
         {
-            alDeleteSources(1, &mHandle);
-            alDeleteBuffers(NumBuffers, mBuffers);
+            AL_CALL(alDeleteSources(1, &mHandle));
+            AL_CALL(alDeleteBuffers(NumBuffers, mBuffers));
             DEBUG("OpenAL stream delete. [handle=%1]", mHandle);
         }
         virtual State GetState() const override
@@ -165,6 +208,8 @@ private:
             // to the source queue and then start playback.
             try
             {
+                AL_CALL(alcMakeContextCurrent(mContext));
+
                 // the core OpenAL API seems to have only alBufferData and no way to
                 // have a the audio frame work provided buffer
                 std::vector<char> buffer;
@@ -176,15 +221,17 @@ private:
                     if (mSource->HasMore(mCurrentBytes))
                     {
                         const auto pcm_bytes = mSource->FillBuffer(&buffer[0], buffer_size);
-                        alBufferData(buffer_handle, buffer_format, &buffer[0], pcm_bytes, mSource->GetRateHz());
-                        alSourceQueueBuffers(mHandle, 1, &buffer_handle);
+                        CallOpenAL(alBufferData, buffer_handle, buffer_format, &buffer[0], pcm_bytes, mSource->GetRateHz());
+                        CallOpenAL(alSourceQueueBuffers, mHandle, 1, &buffer_handle);
                         const auto milliseconds = pcm_bytes / bytes_per_ms;
                         mCurrentBytes += pcm_bytes;
                         mCurrentTime += milliseconds;
                     }
                 }
                 // start playback.
-                alSourcePlay(mHandle);
+                AL_CALL(alSourcePlay(mHandle));
+                AL_CALL(alGetSourcei(mHandle, AL_SOURCE_STATE, &mHandleState));
+                DEBUG("OpenAL stream play started. [handle=%1, state=%2]", mHandle, ToString(mHandleState));
             }
             catch (const std::exception& e)
             {
@@ -194,15 +241,15 @@ private:
         }
         virtual void Pause() override
         {
-            alSourcePause(mHandle);
+            AL_CALL(alSourcePause(mHandle));
         }
         virtual void Resume() override
         {
-            alSourcePlay(mHandle);
+            AL_CALL(alSourcePlay(mHandle));
         }
         virtual void Cancel() override
         {
-            alSourceStop(mHandle);
+            AL_CALL(alSourceStop(mHandle));
         }
         virtual void SendCommand(std::unique_ptr<audio::Command> cmd) override
         {
@@ -223,45 +270,49 @@ private:
 
             try
             {
+                AL_CALL(alcMakeContextCurrent(mContext));
+
+                ALint handle_state = 0;
+                AL_CALL(alGetSourcei(mHandle, AL_SOURCE_STATE, &handle_state));
+
                 ALint buffers_processed = 0;
                 ALint buffers_queued    = 0;
                 ALuint buffer_handles[NumBuffers] = {};
                 // number of buffers that have been processed.
-                alGetSourcei(mHandle, AL_BUFFERS_PROCESSED, &buffers_processed);
+                AL_CALL(alGetSourcei(mHandle, AL_BUFFERS_PROCESSED, &buffers_processed));
                 // number of buffers that are still queued.
-                alGetSourcei(mHandle, AL_BUFFERS_QUEUED, &buffers_queued);
+                AL_CALL(alGetSourcei(mHandle, AL_BUFFERS_QUEUED, &buffers_queued));
 
+                if (buffers_queued == 0 && !mSource->HasMore(mCurrentBytes))
+                {
+                    mState = State::Complete;
+                    return;
+                }
                 if (buffers_queued == 0)
                 {
-                    if (!mSource->HasMore(mCurrentBytes))
-                    {
-                        mState = State::Complete;
-                        return;
-                    }
-                    else
-                    {
-                        // if source has more but the AL source queue has drained
-                        // we're likely too slow and are having a buffer underrun :<
-                        WARN("OpenAL stream encountered likely audio buffer underrun. [name='%1']", mSource->GetName());
-                    }
+                    // if source has more but the AL source queue has drained
+                    // we're likely too slow and are having a buffer underrun :<
+                    WARN("OpenAL stream encountered likely audio buffer underrun. [name='%1']", mSource->GetName());
                 }
+
                 // the core OpenAL API seems to have only alBufferData and no way to
-                // have a the audio frame work provided buffer
+                // have the audio framework provided buffer
                 std::vector<char> buffer;
                 buffer.resize(buffer_size);
 
                 // get the handles of the buffers that are now free and
                 // fill them with more PCM data and then queue back into the
                 // source queue.
-                alSourceUnqueueBuffers(mHandle, buffers_processed, buffer_handles);
+                AL_CALL(alSourceUnqueueBuffers(mHandle, buffers_processed, buffer_handles));
+
                 for (int i = 0; i < buffers_processed; ++i)
                 {
                     const auto buffer_handle = buffer_handles[i];
                     if (mSource->HasMore(mCurrentBytes))
                     {
                         const auto pcm_bytes = mSource->FillBuffer(&buffer[0], buffer_size);
-                        alBufferData(buffer_handle, buffer_format, &buffer[0], pcm_bytes, mSource->GetRateHz());
-                        alSourceQueueBuffers(mHandle, 1, &buffer_handle);
+                        CallOpenAL(alBufferData, buffer_handle, buffer_format, &buffer[0], pcm_bytes, mSource->GetRateHz());
+                        CallOpenAL(alSourceQueueBuffers, mHandle, 1, &buffer_handle);
                         const auto milliseconds   = pcm_bytes / bytes_per_ms;
                         mCurrentBytes += pcm_bytes;
                         mCurrentTime  += milliseconds;
@@ -309,11 +360,11 @@ private:
         std::uint64_t mCurrentTime = 0;
         // number of PCM bytes processed.
         std::uint64_t mCurrentBytes = 0;
-        ALCdevice* mDevice = nullptr;
-        ALCcontext* mContext = nullptr;
+        ALCdevice* mDevice = NULL;
+        ALCcontext* mContext = NULL;
         ALuint mHandle = 0;
         ALuint mBuffers[NumBuffers];
-
+        ALint mHandleState = 0;
     };
 private:
     State mState = State::None;
@@ -331,9 +382,7 @@ namespace audio
 // static
 std::unique_ptr<Device> Device::Create(const char* name)
 {
-    auto device = std::make_unique<OpenALDevice>(name);
-    device->Init();
-    return device;
+    return std::make_unique<OpenALDevice>(name);
 }
 
 } // namespace

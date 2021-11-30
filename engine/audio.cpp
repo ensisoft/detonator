@@ -247,6 +247,10 @@ void AudioEngine::KillAllSoundEffects()
 
 void AudioEngine::Update(AudioEventQueue* events)
 {
+#if !defined(AUDIO_USE_THREAD)
+    mPlayer->ProcessOnce();
+#endif
+
     // pump audio events from the audio player thread
     audio::Player::Event event;
     while (mPlayer->GetEvent(&event))
@@ -261,7 +265,7 @@ void AudioEngine::Update(AudioEventQueue* events)
 
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio engine source event. [id=%1, status=%s]", event.id, event.status);
+    DEBUG("Audio engine source event. [id=%1, status=%2]", event.id, event.status);
 
     // intentionally empty for now.
 }
