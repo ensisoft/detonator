@@ -232,6 +232,7 @@ private:
                 AL_CALL(alSourcePlay(mHandle));
                 AL_CALL(alGetSourcei(mHandle, AL_SOURCE_STATE, &mHandleState));
                 DEBUG("OpenAL stream play started. [handle=%1, state=%2]", mHandle, ToString(mHandleState));
+                mPlaying = true;
             }
             catch (const std::exception& e)
             {
@@ -241,14 +242,17 @@ private:
         }
         virtual void Pause() override
         {
+            mPlaying = false;
             AL_CALL(alSourcePause(mHandle));
         }
         virtual void Resume() override
         {
+            mPlaying = true;
             AL_CALL(alSourcePlay(mHandle));
         }
         virtual void Cancel() override
         {
+            mPlaying = false;
             AL_CALL(alSourceStop(mHandle));
         }
         virtual void SendCommand(std::unique_ptr<audio::Command> cmd) override
@@ -274,6 +278,18 @@ private:
 
                 ALint handle_state = 0;
                 AL_CALL(alGetSourcei(mHandle, AL_SOURCE_STATE, &handle_state));
+
+                if (handle_state != mHandleState)
+                {
+                #if defined(__EMSCRIPTEN__)
+                    if (handle_state == AL_STOPPED && mPlaying)
+                    {
+                        WARN("OpenAL stream stopped unexpectedly. [handle=%1]", mHandle);
+                        AL_CALL(alSourcePlay(mHandle));
+                    }
+                #endif
+                    mHandleState = handle_state;
+                }
 
                 ALint buffers_processed = 0;
                 ALint buffers_queued    = 0;
@@ -365,6 +381,10 @@ private:
         ALuint mHandle = 0;
         ALuint mBuffers[NumBuffers];
         ALint mHandleState = 0;
+        // workaround for the OpenAL implementation in emscripten crapping out
+        // and going to AL_STOPPED state. (tested with Chromium 96.0.4664.45 archlinux)
+        // and emscripten 3.0.0 3fd52e1)
+        bool mPlaying = false;
     };
 private:
     State mState = State::None;
