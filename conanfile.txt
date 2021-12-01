@@ -1,8 +1,6 @@
 [requires]
 harfbuzz/2.7.2
 freetype/2.10.4
-lua/5.3.5
-sol2/3.2.3
 mpg123/1.26.4
 boost/1.76.0
 

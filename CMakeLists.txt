@@ -34,6 +34,7 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/Khronos")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsamplerate/include")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/libsndfile/include")
+include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/lua/src")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include")
 
 # this is only for CLion right now
@@ -478,6 +479,7 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/
 target_link_libraries(GameEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
+target_link_libraries(GameEngine PRIVATE Lua)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 # hide symbols on linux
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -504,7 +506,7 @@ endif()
 # for testing c++/lua integration strategies.
 add_executable(lua-test engine/test/luatest.cpp)
 target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(lua-test PRIVATE ${CONAN_LIBS})
+target_link_libraries(lua-test PRIVATE Lua ${CONAN_LIBS})
 
 # unit tests
 enable_testing()
@@ -600,7 +602,7 @@ target_link_libraries(unit_test_entity   GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_scene    GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_anim     GameLibTesting DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_tree     GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_lua      EngineLibTesting GameLibTesting DataLib UiLib AudioLib BaseLib wdk_system ${CONAN_LIBS})
+target_link_libraries(unit_test_lua      EngineLibTesting GameLibTesting DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
 target_link_libraries(unit_test_settings EngineLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_renderer EngineLibTesting GameLibTesting GfxLib DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
 
