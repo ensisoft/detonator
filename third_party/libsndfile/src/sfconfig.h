@@ -51,8 +51,6 @@
 
 #if (defined (__SSE2__) || defined (_M_AMD64) || (defined (_M_IX86_FP) && (_M_IX86_FP >= 2)) && HAVE_IMMINTRIN_H)
 #  define USE_SSE2
-#elif defined(__EMSCRIPTEN__)
-//#  define USE_SS2
 #endif
 
 #if (HAVE_SSIZE_T == 0)
