@@ -72,6 +72,9 @@ target_link_libraries(test-engine samplerate)
 # okay so these work like these (the CMake way)
 target_compile_options(test-engine PRIVATE -fbracket-depth=1024 -fexceptions)
 target_compile_options(test-engine PRIVATE -O3)
+# disabled for now since this seems to be broken somehow
+# and creates distortion in the sound.
+#target_compile_options(test-engine PRIVATE -msse2 -msimd128)
 
 # emscripten is "special".
 # the flags that are switched on "-s" can be both linker or compile flags

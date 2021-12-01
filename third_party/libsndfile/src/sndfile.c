@@ -428,7 +428,7 @@ sf_open_fd	(int fd, int mode, SF_INFO *sfinfo, int close_desc)
     typedef char _impl_PASTE(assertion_failed_##file##_,line)[2*!!(predicate)-1];
 
 #if defined(USE_SSE2)
-#  if defined(_GCC_)
+#  if defined(__GNUC__) || defined(__clang__)
 #    pragma message "sndfile SSE2 enabled"
 #  elif defined(_MSC_VER)
 #    pragma message("sndfile SSE2 enabled")

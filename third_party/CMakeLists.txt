@@ -26,6 +26,11 @@ endif()
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     message(STATUS "Enable emscripten optimization build flags.")
     add_compile_options(-O3)
+    # -msse flag is needed to enable SSEx extensions
+    # -msimd128 is needed because of -msse flag
+    # disabled for now since this seems to be broken somehow
+    # and creates distortion in the sound.
+    #add_compile_options(-msse2 -msimd128)
 endif()
 
 add_library(box2d
