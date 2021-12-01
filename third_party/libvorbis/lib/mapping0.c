@@ -236,13 +236,13 @@ static int mapping0_forward(vorbis_block *vb){
   int                    n=vb->pcmend;
   int i,j,k;
 
-  int    *nonzero    = alloca(sizeof(*nonzero)*vi->channels);
+  int    *nonzero    = vorbis_alloca(sizeof(*nonzero)*vi->channels);
   float  **gmdct     = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct));
   int    **iwork      = _vorbis_block_alloc(vb,vi->channels*sizeof(*iwork));
   int ***floor_posts = _vorbis_block_alloc(vb,vi->channels*sizeof(*floor_posts));
 
   float global_ampmax=vbi->ampmax;
-  float *local_ampmax=alloca(sizeof(*local_ampmax)*vi->channels);
+  float *local_ampmax=vorbis_alloca(sizeof(*local_ampmax)*vi->channels);
   int blocktype=vbi->blocktype;
 
   int modenumber=vb->W;
@@ -590,8 +590,8 @@ static int mapping0_forward(vorbis_block *vb){
   /* iterate over the many masking curve fits we've created */
 
   {
-    int **couple_bundle=alloca(sizeof(*couple_bundle)*vi->channels);
-    int *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
+    int **couple_bundle=vorbis_alloca(sizeof(*couple_bundle)*vi->channels);
+    int *zerobundle=vorbis_alloca(sizeof(*zerobundle)*vi->channels);
 
     for(k=(vorbis_bitrate_managed(vb)?0:PACKETBLOBS/2);
         k<=(vorbis_bitrate_managed(vb)?PACKETBLOBS-1:PACKETBLOBS/2);
@@ -705,11 +705,11 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
   int                   i,j;
   long                  n=vb->pcmend=ci->blocksizes[vb->W];
 
-  float **pcmbundle=alloca(sizeof(*pcmbundle)*vi->channels);
-  int    *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
+  float **pcmbundle=vorbis_alloca(sizeof(*pcmbundle)*vi->channels);
+  int    *zerobundle=vorbis_alloca(sizeof(*zerobundle)*vi->channels);
 
-  int   *nonzero  =alloca(sizeof(*nonzero)*vi->channels);
-  void **floormemo=alloca(sizeof(*floormemo)*vi->channels);
+  int   *nonzero  =vorbis_alloca(sizeof(*nonzero)*vi->channels);
+  void **floormemo=vorbis_alloca(sizeof(*floormemo)*vi->channels);
 
   /* recover the spectral envelope; store it in the PCM vector for now */
   for(i=0;i<vi->channels;i++){

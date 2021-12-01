@@ -94,6 +94,7 @@ add_library(ogg
 target_include_directories(ogg PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libogg/include")
 
 add_library(vorbis
+        libvorbis/lib/os.cpp
         libvorbis/lib/mdct.c
         libvorbis/lib/smallft.c
         libvorbis/lib/block.c
@@ -118,7 +119,9 @@ add_library(vorbis
 target_include_directories(vorbis PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libvorbis/include")
 target_include_directories(vorbis PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libvorbis/lib")
 target_include_directories(vorbis PRIVATE "${CMAKE_CURRENT_LIST_DIR}/libogg/include")
-
+if (UNIX)
+    target_compile_options(vorbis PRIVATE -fPIC)
+endif()
 
 add_library(flac
         libflac/src/libFLAC/bitmath.c

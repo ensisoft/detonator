@@ -309,7 +309,7 @@ static int comp(const void *a,const void *b){
 #define EPSILON 10e-7
 static int Laguerre_With_Deflation(float *a,int ord,float *r){
   int i,m;
-  double *defl=alloca(sizeof(*defl)*(ord+1));
+  double *defl=vorbis_alloca(sizeof(*defl)*(ord+1));
   for(i=0;i<=ord;i++)defl[i]=a[i];
 
   for(m=ord;m>0;m--){
@@ -364,7 +364,7 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
 static int Newton_Raphson(float *a,int ord,float *r){
   int i, k, count=0;
   double error=1.f;
-  double *root=alloca(ord*sizeof(*root));
+  double *root=vorbis_alloca(ord*sizeof(*root));
 
   for(i=0; i<ord;i++) root[i] = r[i];
 
@@ -403,10 +403,10 @@ static int Newton_Raphson(float *a,int ord,float *r){
 int vorbis_lpc_to_lsp(float *lpc,float *lsp,int m){
   int order2=(m+1)>>1;
   int g1_order,g2_order;
-  float *g1=alloca(sizeof(*g1)*(order2+1));
-  float *g2=alloca(sizeof(*g2)*(order2+1));
-  float *g1r=alloca(sizeof(*g1r)*(order2+1));
-  float *g2r=alloca(sizeof(*g2r)*(order2+1));
+  float *g1=vorbis_alloca(sizeof(*g1)*(order2+1));
+  float *g2=vorbis_alloca(sizeof(*g2)*(order2+1));
+  float *g1r=vorbis_alloca(sizeof(*g1r)*(order2+1));
+  float *g2r=vorbis_alloca(sizeof(*g2r)*(order2+1));
   int i;
 
   /* even and odd are slightly different base cases */
