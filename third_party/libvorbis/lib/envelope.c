@@ -101,7 +101,7 @@ static int _ve_amp(envelope_lookup *ve,
      itself (for low power signals) */
 
   float minV=ve->minenergy;
-  float *vec=alloca(n*sizeof(*vec));
+  float *vec=vorbis_alloca(n*sizeof(*vec));
 
   /* stretch is used to gradually lengthen the number of windows
      considered prevoius-to-potential-trigger */

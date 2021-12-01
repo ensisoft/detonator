@@ -49,6 +49,7 @@
 #  define rint(x)   (floor((x)+0.5f))
 #  define NO_FLOAT_MATH_LIB
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
+#  define alloca _alloca
 #endif
 
 #if defined(__SYMBIAN32__) && defined(__WINS__)
@@ -78,6 +79,14 @@ void *_alloca(size_t size);
 #  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
+// ENSISOFT
+// implemented a custom alloca in case alloc has some trouble in
+// the WASM build using emscripten.
+// currently, it seems that alloca does work so using the standard alloca
+#define vorbis_alloca alloca
+
+//void* vorbis_alloca_func(size_t bytes, const char* func, int line);
+//#define vorbis_alloca(n) vorbis_alloca_func(n, __FUNCTION__, __LINE__)
 
 /* Special i386 GCC implementation */
 #if defined(__i386__) && defined(__GNUC__) && !defined(__BEOS__) && !defined(__SSE2_MATH__)
