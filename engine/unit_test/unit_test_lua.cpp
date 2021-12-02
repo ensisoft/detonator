@@ -29,6 +29,7 @@
 #include "data/json.h"
 #include "game/scene.h"
 #include "engine/lua.h"
+#include "engine/loader.h"
 
 // the test coverage here is quite poor but OTOH the binding code is
 // for the most part very straightforward just plumbing calls from Lua
@@ -36,6 +37,29 @@
 // intermediate functions such as the script variable functionality that
 // needs to be tested. Other key point is to test the basic functionality
 // just to make sure that there are no unexpected sol2 snags/bugs.
+
+class TestData : public engine::GameData {
+public:
+    TestData(const std::string& file) : mName(file)
+    { mData = base::LoadBinaryFile(file); }
+    virtual const void* GetData() const override
+    { return &mData[0]; }
+    virtual std::size_t GetSize() const override
+    { return mData.size(); }
+    virtual std::string GetName() const override
+    { return mName; }
+private:
+    const std::string mName;
+    std::vector<char> mData;
+};
+
+class TestLoader : public engine::Loader {
+public:
+    GameDataHandle LoadGameData(const std::string& uri) const override
+    { return nullptr; }
+    GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    { return std::make_shared<TestData>(filename); }
+};
 
 void unit_test_util()
 {
@@ -662,7 +686,10 @@ end
     }
     game::Scene scene(scene_class);
 
+    TestLoader loader;
+
     engine::ScriptEngine script(".");
+    script.SetDataLoader(&loader);
     script.BeginPlay(&scene);
 
     // begin play should invoke BeginPlay on the entities that are
@@ -758,8 +785,11 @@ end
         scene_class.LinkChild(nullptr, scene_class.AddNode(node));
     }
 
+    TestLoader loader;
+
     game::Scene scene(scene_class);
     engine::ScriptEngine script(".");
+    script.SetDataLoader(&loader);
     script.BeginPlay(&scene);
 
     script.BeginLoop();
@@ -835,7 +865,10 @@ end
 
     game::Scene instance(scene_class);
 
+    TestLoader loader;
+
     engine::ScriptEngine script(".");
+    script.SetDataLoader(&loader);
     script.BeginPlay(&instance);
     script.Tick(0.0, 0.0);
 
@@ -893,7 +926,10 @@ end
 
     game::Scene instance(scene_class);
 
+    TestLoader loader;
+
     engine::ScriptEngine script(".");
+    script.SetDataLoader(&loader);
     script.BeginPlay(&instance);
     script.Tick(0.0, 0.0);
 
@@ -902,7 +938,28 @@ end
     const auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event->event.message == "bar");
     TEST_REQUIRE(std::get<int>(event->event.value) == 123);
+}
 
+void unit_test_game_main_script_load()
+{
+    base::OverwriteTextFile("game_main_script_test.lua", R"(
+function LoadGame()
+  local event = game.GameEvent:new()
+  event.message = 'load'
+  Game:PostEvent(event)
+end
+    )");
+
+    TestLoader loader;
+
+    engine::LuaGame game("", "game_main_script_test.lua", "", "");
+    game.SetDataLoader(&loader);
+    TEST_REQUIRE(game.LoadGame());
+
+    engine::Action action;
+    TEST_REQUIRE(game.GetNextAction(&action));
+    const auto* event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "load");
 }
 
 int test_main(int argc, char* argv[])
@@ -920,6 +977,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_tick_update();
     unit_test_entity_private_environment();
     unit_test_entity_shared_globals();
+    unit_test_game_main_script_load();
 
     return 0;
 }

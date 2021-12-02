@@ -49,6 +49,7 @@
 #include "engine/classlib.h"
 #include "engine/physics.h"
 #include "engine/lua.h"
+#include "engine/loader.h"
 #include "engine/event.h"
 #include "engine/state.h"
 #include "uikit/window.h"
@@ -509,6 +510,8 @@ LuaGame::LuaGame(const std::string& lua_path,
                  const std::string& game_script,
                  const std::string& game_home,
                  const std::string& game_name)
+    : mLuaPath(lua_path)
+    , mGameScript(game_script)
 {
     mLuaState = std::make_unique<sol::state>();
     // todo: should this specify which libraries to load?
@@ -544,7 +547,6 @@ LuaGame::LuaGame(const std::string& lua_path,
             return sol::make_object(lua, sol::nil);
         return sol::make_object(lua, self.mWindowStack.top());
     };
-    mLuaState->script_file(base::JoinPath(lua_path, game_script));
 }
 
 LuaGame::~LuaGame() = default;
@@ -562,9 +564,35 @@ void LuaGame::SetAudioEngine(const AudioEngine* engine)
 {
     mAudioEngine = engine;
 }
-bool LuaGame::LoadGame(const ClassLibrary* loader)
+void LuaGame::SetDataLoader(const Loader* loader)
 {
-    mClasslib = loader;
+    mLoader = loader;
+}
+void LuaGame::SetClassLibrary(const ClassLibrary* classlib)
+{
+    mClasslib = classlib;
+}
+
+bool LuaGame::LoadGame()
+{
+    const auto& main_game_script = base::JoinPath(mLuaPath, mGameScript);
+    DEBUG("Loading main game script. [file='%1']", main_game_script);
+
+    const auto buffer = mLoader->LoadGameDataFromFile(main_game_script);
+    if (!buffer)
+    {
+        ERROR("Failed to load main game script data. [file='%1']", main_game_script);
+        return false;
+    }
+    const auto& view = sol::string_view((const char*)buffer->GetData(), buffer->GetSize());
+    auto result = mLuaState->script(view);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        ERROR("Failed to load game script. [file='%1', error='%2']", main_game_script, err.what());
+        return false;
+    }
+
     (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClasslib;
@@ -758,19 +786,28 @@ void ScriptEngine::BeginPlay(Scene* scene)
         auto it = script_env_map.find(script);
         if (it == script_env_map.end())
         {
-            const auto& file = base::JoinPath(mLuaPath, script + ".lua");
-            if (!base::FileExists(file))
+            const auto& script_file = base::JoinPath(mLuaPath, script + ".lua");
+            const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+            if (!script_buff)
             {
-                ERROR("Entity '%1' Lua file '%2' was not found.", klass.GetName(), file);
+                ERROR("Failed to load entity class script file. [class='%1', file='%2']", klass.GetName(), script_file);
                 continue;
             }
-            auto env = std::make_shared<sol::environment>(*state, sol::create, state->globals());
-            state->script_file(file, *env);
-            it = script_env_map.insert({script, env}).first;
+            auto script_env = std::make_shared<sol::environment>(*state, sol::create, state->globals());
+            const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
+                    script_buff->GetSize());
+            const auto& result = state->script(script_view, *script_env);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR("Failed to load entity class script. [class='%1', error='%2']", klass.GetName(), err.what());
+                continue;
+            }
+            it = script_env_map.insert({script, script_env}).first;
             //DEBUG("Loaded Lua script file '%1'.", file);
         }
         entity_env_map[klass.GetId()] = it->second;
-        DEBUG("Entity class '%1' script loaded.", klass.GetName());
+        DEBUG("Entity class script loaded. [class='%1']", klass.GetName());
     }
 
     std::unique_ptr<sol::environment> scene_env;
@@ -778,13 +815,23 @@ void ScriptEngine::BeginPlay(Scene* scene)
     {
         const auto& klass = scene->GetClass();
         const auto& script = klass.GetScriptFileId();
-        const auto& file   = base::JoinPath(mLuaPath, script + ".lua");
-        if (!base::FileExists(file)) {
-            ERROR("Scene '%1' Lua file '%2' was not found.", klass.GetName(), file);
-        } else {
+        const auto& script_file = base::JoinPath(mLuaPath, script + ".lua");
+        const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+        if (!script_buff)
+        {
+            ERROR("Failed to load scene class script file. [class='%1', file='%2']", klass.GetName(), script_file);
+        }
+        else
+        {
             scene_env = std::make_unique<sol::environment>(*state, sol::create, state->globals());
-            state->script_file(file, *scene_env);
-            DEBUG("Scene class '%1' script loaded.", klass.GetName());
+            const auto& view = sol::string_view((const char*)script_buff->GetData(),
+                                                script_buff->GetSize());
+            const auto& result = state->script(view, *scene_env);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR("Failed to load scene class script. [class='%1', error='%2']", klass.GetName(), err.what());
+            } else DEBUG("Scene class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
         }
     }
 
@@ -1421,7 +1468,11 @@ void BindWDK(sol::state& L)
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
         if (!key.has_value())
             throw std::runtime_error("No such key symbol: " + std::to_string(value));
+#if defined(WEBASSEMBLY)
+        throw std::runtime_error("TestKeyDown is not available in WASM.");
+#else
         return wdk::TestKeyDown(key.value());
+#endif
     };
     table["TestMod"] = [](int bits, int value) {
         const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);

@@ -90,11 +90,14 @@ public:
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetStateStore(&mStateStore);
         mGame->SetAudioEngine(mAudio.get());
+        mGame->SetDataLoader(mGameDataLoader);
+        mGame->SetClassLibrary(mClasslib);
         mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");
         mScripting->SetClassLibrary(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->SetStateStore(&mStateStore);
         mScripting->SetAudioEngine(mAudio.get());
+        mScripting->SetDataLoader(mGameDataLoader);
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
@@ -105,7 +108,7 @@ public:
     virtual bool Load() override
     {
         DEBUG("Loading game state.");
-        return mGame->LoadGame(mClasslib);
+        return mGame->LoadGame();
     }
 
     virtual void Start() override
