@@ -1582,7 +1582,7 @@
                   <item row="4" column="0">
                    <widget class="QLabel" name="label_32">
                     <property name="text">
-                     <string>Restitution</string>
+                     <string>Bounciness</string>
                     </property>
                    </widget>
                   </item>
