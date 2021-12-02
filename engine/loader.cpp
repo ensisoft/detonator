@@ -44,7 +44,7 @@ bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
     auto in = base::OpenBinaryInputStream(filename);
     if (!in.is_open())
     {
-        ERROR("Failed to open '%1'.", filename);
+        ERROR("Failed to open file for reading. [file='%1']", filename);
         return false;
     }
     in.seekg(0, std::ios::end);
@@ -54,11 +54,11 @@ bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
     in.read(&(*buffer)[0], size);
     if ((std::size_t)in.gcount() != size)
     {
-        ERROR("Failed to read all of '%1'.", filename);
+        ERROR("Failed to read all of file.[file='%1']", filename);
         return false;
     }
 
-    DEBUG("Loaded %1 bytes from file '%2'.", buffer->size(), filename);
+    DEBUG("Loaded file buffer. [file='%1', bytes=%2]", filename, buffer->size());
     return true;
 }
 template<typename Interface>
@@ -143,7 +143,9 @@ public:
         const auto& filename = ResolveURI(uri);
         auto stream = base::OpenBinaryInputStream(filename);
         if (!stream.is_open())
-            ERROR("Failed to open '%1'.", filename);
+        {
+            ERROR("Failed to open audio stream. [file='%1']", filename);
+        }
         return stream;
     }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
@@ -181,9 +183,9 @@ private:
             str = mApplicationPath + "/" + str.substr(6);
         else if (base::StartsWith(str, "fs://"))
             str = str.substr(5);
-        else WARN("Unmapped resource URI '%1'", URI);
+        else WARN("Unmapped resource URI. [uri='%1']", URI);
 
-        DEBUG("Mapped %1 to %2", URI, str);
+        DEBUG("New resource URI mapping. [uri='%1', file='%2']", URI, str);
         mUriCache[URI] = str;
         return str;
     }
@@ -222,7 +224,7 @@ public:
     virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
     virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
     // ContentLoader impl
-    virtual void LoadFromFile(const std::string& file) override;
+    virtual bool LoadFromFile(const std::string& file) override;
 private:
     std::string mResourceFile;
     // These are the material types that have been loaded
@@ -356,8 +358,8 @@ ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(c
 }
 
 
-template<typename Interface, typename Implementation>
-void LoadResources(const data::Reader& data, const char* type,
+template<typename Interface, typename Implementation = Interface>
+bool LoadContent(const data::Reader& data, const char* type,
     std::unordered_map<std::string, std::shared_ptr<Interface>>& out,
     std::unordered_map<std::string, std::string>* namemap)
 {
@@ -370,19 +372,22 @@ void LoadResources(const data::Reader& data, const char* type,
         chunk->Read("resource_name", &name);
         std::optional<Implementation> ret = Implementation::FromJson(*chunk);
         if (!ret.has_value())
-            throw std::runtime_error(std::string("Failed to load: ") + type + "/" + name);
+        {
+            ERROR("Failed to load game class. [type='%1', name='%2]", type, name);
+            return false;
+        }
 
         out[id] = std::make_shared<Implementation>(std::move(ret.value()));
         if (namemap)
             (*namemap)[name] = id;
-        DEBUG("Loaded '%1/%2'", type, name);
+        DEBUG("Loaded new game class. [type='%1', name='%2']", type, name);
     }
+    return true;
 }
 
-template<typename Interface>
-void LoadResources(const data::Reader& data, const char* type,
-                   std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>>& out,
-                   std::unordered_map<std::string, std::string>* namemap)
+bool LoadMaterials(const data::Reader& data, const char* type,
+                 std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>>& out,
+                 std::unordered_map<std::string, std::string>* namemap)
 {
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
@@ -393,27 +398,44 @@ void LoadResources(const data::Reader& data, const char* type,
         chunk->Read("resource_name", &name);
         auto ret = gfx::MaterialClass::FromJson(*chunk);
         if (!ret)
-            throw std::runtime_error(std::string("Failed to load: ") + type + "/" + name);
+        {
+            ERROR("Failed to load game class. [type='%1', name='%2'].", type, name);
+            return false;
+        }
 
         out[id] = std::move(ret);
         if (namemap)
             (*namemap)[name] = id;
-        DEBUG("Loaded '%1/%2'", type, name);
+        DEBUG("Loaded new game class. [type='%1', name='%2']", type, name);
     }
+    return true;
 }
 
-void ContentLoaderImpl::LoadFromFile(const std::string& file)
+bool ContentLoaderImpl::LoadFromFile(const std::string& file)
 {
-    data::JsonFile json(file);
+    data::JsonFile json;
+    const auto [success, error] = json.Load(file);
+    if (!success)
+    {
+        ERROR("Failed to load game content from file. [file=%1', error='%2']", file, error);
+        return false;
+    }
     data::JsonObject root = json.GetRootObject();
 
-    engine::LoadResources<gfx::MaterialClass>(root, "materials", mMaterials, nullptr);
-    engine::LoadResources<gfx::KinematicsParticleEngineClass, gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr);
-    engine::LoadResources<gfx::PolygonClass, gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr);
-    engine::LoadResources<game::EntityClass, game::EntityClass>(root, "entities", mEntities, &mEntityNameTable);
-    engine::LoadResources<game::SceneClass,  game::SceneClass>(root, "scenes", mScenes, &mSceneNameTable);
-    engine::LoadResources<uik::Window, uik::Window>(root, "uis", mWindows, nullptr);
-    engine::LoadResources<audio::GraphClass, audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr);
+    if (!LoadMaterials(root, "materials", mMaterials, nullptr))
+        return false;
+    if (!LoadContent<gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr))
+        return false;
+   if (!LoadContent<gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr))
+       return false;
+   if (!LoadContent<game::EntityClass>(root, "entities", mEntities, &mEntityNameTable))
+       return false;
+   if (!LoadContent<game::SceneClass>(root, "scenes", mScenes, &mSceneNameTable))
+       return false;
+   if (!LoadContent<uik::Window>(root, "uis", mWindows, nullptr))
+       return false;
+   if (!LoadContent<audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr))
+        return false;
 
     // need to resolve the entity references.
     for (auto& p : mScenes)
@@ -428,16 +450,15 @@ void ContentLoaderImpl::LoadFromFile(const std::string& file)
                 const auto& scene_name = mSceneNameTable[scene->GetId()];
                 const auto& node_name  = node.GetName();
                 const auto& node_entity_id = node.GetEntityId();
-                ERROR("Scene node '%1/'%2'' refers to entity '%3' that is not found.",
+                ERROR("Scene node refers to entity that is not found. [scene='%1', node='%2', entity=%3]",
                       scene_name, node_name, node_entity_id);
+                return false;
             }
-            else
-            {
-                node.SetEntity(klass);
-            }
+            node.SetEntity(klass);
         }
     }
     mResourceFile = file;
+    return true;
 }
 
 ClassHandle<const game::EntityClass> ContentLoaderImpl::FindEntityClassByName(const std::string& name) const

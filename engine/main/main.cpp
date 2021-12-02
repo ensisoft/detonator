@@ -450,7 +450,8 @@ int main(int argc, char* argv[])
         if (!content.empty())
         {
             const auto& path = GetPath();
-            loaders.ContentLoader->LoadFromFile(content);
+            if (!loaders.ContentLoader->LoadFromFile(content))
+                return EXIT_FAILURE;
             loaders.ResourceLoader->SetApplicationPath(path);
             loaders.ResourceLoader->SetContentPath(path);
         }
