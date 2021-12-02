@@ -542,10 +542,8 @@ void PlayWindow::RunGameLoopOnce()
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
         {
-            if (const auto* ptr = std::get_if<engine::Engine::ResizeWindow>(&request))
+            if (const auto* ptr = std::get_if<engine::Engine::ResizeSurface>(&request))
                 ResizeSurface(ptr->width, ptr->height);
-            else if (const auto* ptr = std::get_if<engine::Engine::MoveWindow>(&request))
-                this->move(ptr->xpos, ptr->ypos);
             else if (const auto* ptr = std::get_if<engine::Engine::SetFullScreen>(&request))
                 AskSetFullScreen(ptr->fullscreen);
             else if (const auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
