@@ -15,6 +15,8 @@
 #include <memory>
 #include <chrono>
 #include <unordered_map>
+#include <queue>
+#include <variant>
 
 #include "base/logging.h"
 #include "base/json.h"
@@ -271,17 +273,42 @@ public:
             wdk::WindowEventResize resize;
             resize.width  = canvas_with;
             resize.height = canvas_height;
-            mListener->OnResize(resize);
-            mEngine->OnRenderingSurfaceResized(canvas_with, canvas_height);
+            mEventQueue.push(resize);
         }
         return EM_TRUE;
     }
 
     EM_BOOL OnAnimationFrame()
     {
+        // important: make sure that the order in which stuff is done
+        // is the same across all "main application" instances.
+        // i.e., native main and editor's playwindow main.
+
         mEngine->BeginMainLoop();
 
-        // todo: dispatch queued events here!
+        // dispatch the pending user input events.
+        while (!mEventQueue.empty())
+        {
+            const auto& event = mEventQueue.front();
+            if (const auto* ptr = std::get_if<wdk::WindowEventMousePress>(&event))
+                mListener->OnMousePress(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventMouseRelease>(&event))
+                mListener->OnMouseRelease(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventMouseMove>(&event))
+                mListener->OnMouseMove(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventKeyDown>(&event))
+                mListener->OnKeyDown(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventKeyUp>(&event))
+                mListener->OnKeyUp(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventChar>(&event))
+                mListener->OnChar(*ptr);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event)) {
+                mListener->OnResize(*ptr);
+                mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+            }
+            else BUG("Unhandled window event.");
+            mEventQueue.pop();
+        }
 
 
         // Process pending application requests if any.
@@ -351,7 +378,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mListener->OnMousePress(event);
+            mEventQueue.push(event);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEUP)
         {
@@ -362,7 +389,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mListener->OnMouseRelease(event);
+            mEventQueue.push(event);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEMOVE)
         {
@@ -373,7 +400,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mListener->OnMouseMove(event);
+            mEventQueue.push(event);
         } else WARN("Unhandled mouse event.[emsc_type=%1]", emsc_type);
         return EM_TRUE;
     }
@@ -474,21 +501,21 @@ public:
         {
             wdk::WindowEventChar character;
             std::memcpy(character.utf8, emsc_event->key, sizeof(character.utf8));
-            mListener->OnChar(character);
+            mEventQueue.push(character);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_KEYDOWN)
         {
             wdk::WindowEventKeyDown key;
             key.modifiers = mods;
             key.symbol    = symbol;
-            mListener->OnKeyDown(key);
+            mEventQueue.push(key);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_KEYUP)
         {
             wdk::WindowEventKeyUp key;
             key.modifiers = mods;
             key.symbol    = symbol;
-            mListener->OnKeyUp(key);
+            mEventQueue.push(key);
         }
         return EM_TRUE;
     }
@@ -499,6 +526,17 @@ private:
     wdk::WindowListener* mListener = nullptr;
     std::unique_ptr<engine::JsonFileClassLoader> mContentLoader;
     std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
+
+    using WindowEvent = std::variant<
+        wdk::WindowEventResize,
+        wdk::WindowEventKeyUp,
+        wdk::WindowEventKeyDown,
+        wdk::WindowEventChar,
+        wdk::WindowEventMouseMove,
+        wdk::WindowEventMousePress,
+        wdk::WindowEventMouseRelease>;
+    std::queue<WindowEvent> mEventQueue;
+
     double mSeconds = 0;
     unsigned mCounter = 0;
     unsigned mFrames  = 0;
