@@ -63,35 +63,26 @@ namespace engine
     public:
         virtual ~Engine() = default;
 
-        // Request to resize the host window to some particular size.
-        // The size specifies the *inside* area of the window i.e. the
-        // renderable surface dimensions and exclude any window border,
-        // caption/title bar and/or decorations.
-        struct ResizeWindow {
-            // Desired window rendering surface width.
+        // Request to resize the rendering surface to some particular size.
+        // Note that is not necessarily the same as any window etc. that
+        // displays the rendering because of possible HDPI scaling.
+        struct ResizeSurface {
+            // Desired rendering surface width.
             unsigned width  = 0;
-            // Desired window rendering surface height.
+            // Desired rendering surface height.
             unsigned height = 0;
-        };
-        // Request to move the window to some particular location relative
-        // to the desktop origin.
-        struct MoveWindow {
-            // The new window X position in the desktop.
-            int xpos = 0;
-            // The new window Y position in the desktop.
-            int ypos = 0;
         };
         // Request to have the window put to the full-screen
         // mode or back into windowed mode. In full-screen mode
         // the window has no borders, no title bar or any kind
-        // of window decoration and it covers the whole screen.
+        // of window decoration, and it covers the whole screen.
         // Note that this is only a *request* which means it's
         // possible that for whatever reason the transition does
         // not take place. (For example the user rejected the request
-        // or the the platform doesn't support the concept of
+        // or the underlying platform doesn't support the concept of
         // full screen windows). In order to understand whether the
-        // transition *did* happen the application should listen for
-        // OnEnterFullScreen (and OnLeaveFullScreen) events.
+        // transition *did* happen the engine implementation should
+        // listen for OnEnterFullScreen (and OnLeaveFullScreen) events.
         struct SetFullScreen {
             // Request the window to be to put into full-screen mode
             // when true, or back to window mode when false.
@@ -116,38 +107,44 @@ namespace engine
 
         // Union of possible window requests.
         using Request = std::variant<
-            ResizeWindow,
-            MoveWindow,
+            ResizeSurface,
             SetFullScreen,
             ToggleFullScreen,
             QuitApp,
             GrabMouse,
             ShowMouseCursor>;
 
-        // During the runtime of the application the application may request
-        // the host to provide some service. The application may queue such
-        // requests and then provide them in the implementation of this API
-        // function. The host application will process any such request once
-        // per application main loop iteration. If there are no more requests
-        // then false should be returned otherwise returning true indicates
-        // that a new request was available.
+        // During the lifetime of the game process the engine may request
+        // the host application to provide some services. The engine may queue
+        // any such requests and then provide them to the host application through
+        // GetNextRequest function. The host application will process any such
+        // requests at every main loop iteration. If there are no more requests,
+        // then false should be returned. Otherwise returning true indicates
+        // that a new request was available and stored into out.
         // There's no actual guarantee that any of these requests are honored,
-        // that depends on the host implementation. Therefore they are just that
-        // *requests*. The application should not assume that some particular
-        // result happens as the result of the request processing.
+        // since that depends on the host platform and host implementation.
+        // Therefore, the engine should not assume that some particular result
+        // happens as the result of the request processing.
         virtual bool GetNextRequest(Request* out)
         { return false;}
 
         // Debugging options that might be set through some interface.
-        // It's up to the application whether any of these will be
-        // supported in anyway.
+        // It's up to the engine whether any of these will be supported.
         struct DebugOptions {
+            // Pause game play and sub-systems.
             bool debug_pause = false;
+            // Add some debug drawing of objects in the scene.
+            // For example physics bodies.
             bool debug_draw = false;
+            // Enable DEBUG log printing.
             bool debug_log  = false;
+            // Show current FPS in the rendering output.
             bool debug_show_fps = false;
+            // Print current FPS to the DEBUG log.
             bool debug_print_fps = false;
+            // Show debug messages in the rendering output.
             bool debug_show_msg = false;
+            // Set the font URI for debug fps/msg text rendering.
             std::string debug_font;
         };
         // Set the debug options.
@@ -397,10 +394,8 @@ namespace engine
             mQueue.pop();
             return true;
         }
-        inline void MoveWindow(int x, int y)
-        { mQueue.push(engine::Engine::MoveWindow {x, y }); }
-        inline void ResizeWindow(unsigned width, unsigned height)
-        { mQueue.push(engine::Engine::ResizeWindow{width, height}); }
+        inline void ResizeSurface(unsigned width, unsigned height)
+        { mQueue.push(engine::Engine::ResizeSurface{width, height}); }
         inline void SetFullScreen(bool fullscreen)
         { mQueue.push(engine::Engine::SetFullScreen{fullscreen}); }
         inline void ToggleFullScreen()

@@ -639,10 +639,8 @@ int main(int argc, char* argv[])
             engine::Engine::Request request;
             while (engine->GetNextRequest(&request))
             {
-                if (auto* ptr = std::get_if<engine::Engine::ResizeWindow>(&request))
+                if (auto* ptr = std::get_if<engine::Engine::ResizeSurface>(&request))
                     window.SetSize(ptr->width, ptr->height);
-                else if (auto* ptr = std::get_if<engine::Engine::MoveWindow>(&request))
-                    window.Move(ptr->xpos, ptr->ypos);
                 else if (auto* ptr = std::get_if<engine::Engine::SetFullScreen>(&request))
                     window.SetFullscreen(ptr->fullscreen);
                 else if (auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
