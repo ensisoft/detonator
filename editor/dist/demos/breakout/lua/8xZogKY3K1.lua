@@ -28,9 +28,9 @@ function Update(ball, game_time, dt)
     local node = ball:FindNodeByClassName('Ball')
     local body = node:GetRigidBody()
     local velo = glm.length(body:GetLinearVelocity())
-    if velo > 20 then
+    if velo > 15 then
         local vec = glm.normalize(body:GetLinearVelocity())
-        Physics:SetLinearVelocity(node, vec * 20.0)
+        Physics:SetLinearVelocity(node, vec * 15.0)
     end
 end
 
