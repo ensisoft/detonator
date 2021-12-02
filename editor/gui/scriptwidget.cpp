@@ -1414,7 +1414,7 @@ void ScriptWidget::on_filter_textChanged(const QString& text)
 
 void ScriptWidget::FileWasChanged()
 {
-    DEBUG("File was changed '%1'", mFilename);
+    DEBUG("File change was detected. [file='%1']", mFilename);
 
     mWatcher.addPath(mFilename);
 
@@ -1427,7 +1427,7 @@ void ScriptWidget::FileWasChanged()
     if (!io.isOpen())
     {
         // todo: the file could have been removed or renamed.
-        ERROR("Failed to open '%1' for reading. ('%2')", mFilename, io.error());
+        ERROR("Failed to open file for reading. [file='%1', error='%2']", mFilename, io.error());
         return;
     }
     QTextStream stream(&io);
@@ -1464,7 +1464,7 @@ bool ScriptWidget::LoadDocument(const QString& file)
     io.open(QIODevice::ReadOnly);
     if (!io.isOpen())
     {
-        ERROR("Failed to open '%1' for reading. (%2)", file, io.error());
+        ERROR("Failed to open script file for reading. [file='%1', error=%2]", file, io.error());
         return false;
     }
     QTextStream stream(&io);
@@ -1474,7 +1474,7 @@ bool ScriptWidget::LoadDocument(const QString& file)
     mDocument.setPlainText(data);
     mFileHash = qHash(data);
     mFilename = file;
-    DEBUG("Loaded script file '%1'", mFilename);
+    DEBUG("Loaded script file. [file='%1']", mFilename);
     return true;
 }
 
@@ -1483,11 +1483,12 @@ void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelect
     const auto& indices = mUI.tableView->selectionModel()->selectedRows();
     for (const auto& i : indices)
     {
-        const auto& method = g_method_docs[i.row()];
+        const auto& m = mTableModelProxy->mapToSource(i);
+        const auto& method = g_method_docs[m.row()];
         const auto& name = QString("%1_%2").arg(app::FromUtf8(method.table)).arg(app::FromUtf8(method.name));
         //mUI.textEdit->scrollToAnchor(name);
         mUI.textBrowser->scrollToAnchor(name);
-        DEBUG("ScrollToAnchor '%1'", name);
+        DEBUG("Scroll to anchor. [anchor='%1']", name);
     }
 }
 
