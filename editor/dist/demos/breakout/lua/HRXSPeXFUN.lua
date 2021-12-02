@@ -33,7 +33,7 @@ end
 -- Called on collision events with other objects.
 function OnBeginContact(paddle, node, other, other_node)
     if other:GetClassName() == 'Ball' then
-        Physics:ApplyImpulseToCenter(other_node, glm.vec2:new(paddle.velocity*0.001, -0.3))
+        Physics:ApplyImpulseToCenter(other_node, glm.vec2:new(paddle.velocity*0.002, -0.6))
     end
 end
 
