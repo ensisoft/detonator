@@ -724,11 +724,11 @@ public:
 
 #if defined(WEBGL)
             if (force_webgl_linear)
-                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture=]", texture_name);
+                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture=%1]", texture_name);
             if (force_webgl_wrap_x)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=]", texture_name);
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=%1]", texture_name);
             if (force_webgl_wrap_y)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=]", texture_name);
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=%1]", texture_name);
 #endif
 
             // // first select the desired texture unit.
