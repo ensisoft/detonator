@@ -46,8 +46,10 @@ namespace engine
         virtual ~Loader() = default;
         // Load game data based on a URI. The URI undergoes a resolution
         // and the content may be loaded from a resource pack etc.
+        // Returns a null handle if no such data could be loaded.
         virtual GameDataHandle LoadGameData(const std::string& uri) const = 0;
         // Load game data from a file on the file system.
+        // Returns a null handle if no such data could be loaded.
         virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const = 0;
     };
 
@@ -72,12 +74,12 @@ namespace engine
     class JsonFileClassLoader : public ClassLibrary
     {
     public:
-        // Load game content from a JSON file. Expects the file to be well formed, on
-        // an ill-formed JSON file an exception is thrown.
-        // No validation is done regarding the completeness of the loaded content,
-        // I.e. it's possible that classes refer to resources (i.e. other classes)
-        // that aren't available.
-        virtual void LoadFromFile(const std::string& file) = 0;
+        // Load game content from a JSON file. Returns true on success or
+        // false on failure if content failed to load.
+        // In general no validation is done regarding the completeness of th
+        // loaded content. I.e. it's possible that classes refer to
+        // resources (i.e. other classes) that aren't available.
+        virtual bool LoadFromFile(const std::string& file) = 0;
         // create new content loader.
         static std::unique_ptr<JsonFileClassLoader> Create();
     private:
