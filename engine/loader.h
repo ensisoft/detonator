@@ -41,6 +41,8 @@ namespace engine
     class Loader
     {
     public:
+        using GameDataHandle = engine::GameDataHandle;
+
         virtual ~Loader() = default;
         // Load game data based on a URI. The URI undergoes a resolution
         // and the content may be loaded from a resource pack etc.

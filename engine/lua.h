@@ -46,7 +46,9 @@ namespace engine
         virtual void SetStateStore(KeyValueStore* store) override;
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void SetAudioEngine(const AudioEngine* engine) override;
-        virtual bool LoadGame(const ClassLibrary* loader) override;
+        virtual void SetDataLoader(const Loader* loader) override;
+        virtual void SetClassLibrary(const ClassLibrary* classlib) override;
+        virtual bool LoadGame() override;
         virtual void StartGame() override;
         virtual void Tick(double game_time, double dt) override;
         virtual void Update(double game_time,  double dt) override;
@@ -73,9 +75,12 @@ namespace engine
         const ClassLibrary* GetClassLib() const
         { return mClasslib; }
     private:
+        const std::string mLuaPath;
+        const std::string mGameScript;
         const ClassLibrary* mClasslib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
         const AudioEngine* mAudioEngine = nullptr;
+        const Loader* mLoader = nullptr;
         KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
         std::queue<Action> mActionQueue;
@@ -97,6 +102,8 @@ namespace engine
         { mPhysicsEngine = engine; }
         void SetAudioEngine(const AudioEngine* engine)
         { mAudioEngine = engine; }
+        void SetDataLoader(const Loader* loader)
+        { mDataLoader = loader; }
         void SetStateStore(KeyValueStore* store)
         { mStateStore = store; }
         void BeginPlay(game::Scene* scene);
@@ -132,6 +139,7 @@ namespace engine
         const ClassLibrary* mClassLib = nullptr;
         const PhysicsEngine* mPhysicsEngine = nullptr;
         const AudioEngine* mAudioEngine = nullptr;
+        const Loader* mDataLoader = nullptr;
         KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
         std::unordered_map<std::string, std::shared_ptr<sol::environment>> mTypeEnvs;

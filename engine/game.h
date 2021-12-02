@@ -33,6 +33,7 @@
 
 namespace engine
 {
+    class Loader;
     class PhysicsEngine;
     class AudioEngine;
     class KeyValueStore;
@@ -60,12 +61,16 @@ namespace engine
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) = 0;
         // Set audio engine instance.
         virtual void SetAudioEngine(const AudioEngine* engine) = 0;
+        // Set the game data loader.
+        virtual void SetDataLoader(const Loader* loader) = 0;
+        // Set the class loader.
+        virtual void SetClassLibrary(const ClassLibrary* classlib) = 0;
         // Load the game data. This is called once by the engine after the
         // main application has started. In the implementation you should
         // load whatever initial game state that is needed. It's possible to
         // fail (indicated by returning false) and this will make the host
         // application exit early.
-        virtual bool LoadGame(const ClassLibrary* loader) = 0;
+        virtual bool LoadGame() = 0;
         // Start the actual game after all required initial content has been
         // loaded. At this point all the engine subsystems are available
         // including rendering, physics and audio.
