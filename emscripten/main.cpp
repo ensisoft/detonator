@@ -5,9 +5,11 @@
 #endif
 
 #include "config.h"
-
-#include <emscripten/emscripten.h>
-#include <emscripten/html5.h>
+#include "warnpush.h"
+#  include <emscripten/emscripten.h>
+#  include <emscripten/html5.h>
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
 
 #include <iostream>
 #include <memory>
@@ -15,8 +17,10 @@
 #include <unordered_map>
 
 #include "base/logging.h"
+#include "base/json.h"
 #include "wdk/events.h"
 #include "engine/main/interface.h"
+#include "engine/loader.h"
 
 // mkdir build
 // cd build
@@ -109,46 +113,154 @@ public:
     {
         base::SetThreadLog(&mLogger);
         base::EnableDebugLog(true);
-
-        mContext.reset(new WebGLContext);
-        mEngine.reset(Gamestudio_CreateEngine());
-
-        int canvas_width  = 0;
-        int canvas_height = 0;
-        emscripten_set_canvas_element_size("canvas", 1024, 768);
-        emscripten_get_canvas_element_size("canvas", &canvas_width, &canvas_height);
-
-        // IMPORTANT: make sure that the order in which the engine is setup
-        // is the same between all the launcher applications.
-        // that is engine/main/main.cpp and editor/gui/playwindow.cpp
-
-        // todo:
-        engine::Engine::Environment env;
-        mEngine->SetEnvironment(env);
-
-        // todo:
-        engine::Engine::InitParams init;
-        init.editing_mode     = false;
-        init.application_name = "test"; // TODO
-        init.surface_width    = canvas_width;
-        init.surface_height   = canvas_height;
-        init.context          = mContext.get();
-        init.game_script      = ""; // TODO:
-        mEngine->Init(init);
-
-        // todo:
-        engine::Engine::EngineConfig config;
-        mEngine->SetEngineConfig(config);
-
-        mEngine->Load();
-        mEngine->Start();
-
-        mListener = mEngine->GetWindowListener();
+        DEBUG("It's alive!");
+        INFO("Gamestudio Copyright (c) 2010-2021 Sami Vaisanen");
+        INFO("http://www.ensisoft.com");
+        INFO("http://github.com/ensisoft/gamestudio");
     }
    ~Application()
     {
         base::SetThreadLog(nullptr);
     }
+
+    bool Init()
+    {
+        // read config JSON
+        const auto [json_ok, json, json_error] = base::JsonParseFile("config.json");
+        if (!json_ok)
+        {
+            ERROR("Failed to parse config.json. [error='%1']", json_error);
+            return false;
+        }
+        std::string content;
+        std::string title;
+        std::string identifier;
+        base::JsonReadSafe(json["application"], "title",   &title);
+        base::JsonReadSafe(json["application"], "content", &content);
+        base::JsonReadSafe(json["application"], "identifier", &identifier);
+        emscripten_set_window_title(title.c_str());
+
+        unsigned window_width  = 0;
+        unsigned window_height = 0;
+        bool window_can_resize = true;
+        bool window_has_border = true;
+        bool window_set_fullscreen = false;
+        bool window_vsync = false;
+        bool window_show_cursor = false;
+        bool window_grab_mouse  = false;
+        base::JsonReadSafe(json["window"], "width", &window_width);
+        base::JsonReadSafe(json["window"], "height", &window_height);
+        base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
+        base::JsonReadSafe(json["window"], "has_border", &window_has_border);
+        base::JsonReadSafe(json["window"], "set_fullscreen", &window_set_fullscreen);
+        base::JsonReadSafe(json["window"], "vsync", &window_vsync);
+        base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
+        base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
+
+        int canvas_width  = 0;
+        int canvas_height = 0;
+        emscripten_set_canvas_element_size("canvas", window_width, window_height);
+        emscripten_get_canvas_element_size("canvas", &canvas_width, &canvas_height);
+        DEBUG("Actual canvas dimensions. [width=%1, height=%2]", canvas_width, canvas_height);
+
+        mContentLoader  = engine::JsonFileClassLoader::Create();
+        mResourceLoader = engine::FileResourceLoader::Create();
+        mContentLoader->LoadFromFile(content);
+        mResourceLoader->SetApplicationPath("");
+        mResourceLoader->SetContentPath("");
+
+        // todo: context attributes.
+        mContext.reset(new WebGLContext);
+
+        mEngine.reset(Gamestudio_CreateEngine());
+
+        // IMPORTANT: make sure that the order in which the engine is setup
+        // is the same between all the launcher applications.
+        // that is engine/main/main.cpp and editor/gui/playwindow.cpp
+
+        // todo: get these from the web UI
+        engine::Engine::DebugOptions debug;
+        debug.debug_draw      = false;
+        debug.debug_log       = true;
+        debug.debug_show_fps  = false;
+        debug.debug_show_msg  = false;
+        debug.debug_print_fps = false;
+        mEngine->SetDebugOptions(debug);
+
+        engine::Engine::Environment env;
+        env.classlib = mContentLoader.get();
+        env.graphics_loader  = mResourceLoader.get();
+        env.game_data_loader = mResourceLoader.get();
+        env.audio_loader     = mResourceLoader.get();
+        env.directory        = ".";
+        env.user_home        = ""; // todo:
+        env.game_home        = ""; // todo:
+        mEngine->SetEnvironment(env);
+
+
+        engine::Engine::InitParams init;
+        init.editing_mode     = false;
+        init.application_name = title;
+        init.context          = mContext.get();
+        init.surface_width    = canvas_width;
+        init.surface_height   = canvas_height;
+        base::JsonReadSafe(json["application"], "game_script", &init.game_script);
+        mEngine->Init(init);
+
+        // the times here are in the application timeline which
+        // is not the same as the real wall time but can drift
+        float updates_per_second = 60.0f;
+        float ticks_per_second = 1.0f;
+        base::JsonReadSafe(json["application"], "updates_per_second", &updates_per_second);
+        base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
+        DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
+
+        engine::Engine::EngineConfig config;
+        base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
+        base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
+        config.updates_per_second = updates_per_second;
+        config.ticks_per_second   = ticks_per_second;
+        if (json.contains("physics"))
+        {
+            const auto& physics_settings = json["physics"];
+            base::JsonReadSafe(physics_settings, "num_velocity_iterations", &config.physics.num_velocity_iterations);
+            base::JsonReadSafe(physics_settings, "num_position_iterations", &config.physics.num_position_iterations);
+            base::JsonReadSafe(physics_settings, "gravity", &config.physics.gravity);
+            base::JsonReadSafe(physics_settings, "scale",   &config.physics.scale);
+        }
+        if (json.contains("engine"))
+        {
+            const auto& engine_settings = json["engine"];
+            base::JsonReadSafe(engine_settings, "clear_color", &config.clear_color);
+        }
+        if (json.contains("mouse_cursor"))
+        {
+            const auto& mouse_cursor = json["mouse_cursor"];
+            base::JsonReadSafe(mouse_cursor, "show", &config.mouse_cursor.show);
+            base::JsonReadSafe(mouse_cursor, "drawable", &config.mouse_cursor.drawable);
+            base::JsonReadSafe(mouse_cursor, "material", &config.mouse_cursor.material);
+            base::JsonReadSafe(mouse_cursor, "hotspot", &config.mouse_cursor.hotspot);
+            base::JsonReadSafe(mouse_cursor, "size", &config.mouse_cursor.size);
+            base::JsonReadSafe(mouse_cursor, "units", &config.mouse_cursor.units);
+        }
+        if (json.contains("audio"))
+        {
+            const auto& audio = json["audio"];
+            base::JsonReadSafe(audio, "channels", &config.audio.channels);
+            base::JsonReadSafe(audio, "sample_rate", &config.audio.sample_rate);
+            base::JsonReadSafe(audio, "sample_type", &config.audio.sample_type);
+            base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
+        }
+        mEngine->SetEngineConfig(config);
+        // doesn't exist here.
+        mEngine->SetTracer(nullptr);
+        mEngine->Load();
+        mEngine->Start();
+
+        mListener = mEngine->GetWindowListener();
+        return true;
+    }
+
     EM_BOOL OnWindowResize(int emsc_type, const EmscriptenUiEvent* emsc_event)
     {
         if (emsc_type == EMSCRIPTEN_EVENT_RESIZE)
@@ -167,9 +279,30 @@ public:
 
     EM_BOOL OnAnimationFrame()
     {
-        const auto time_step = ElapsedSeconds();
+        mEngine->BeginMainLoop();
 
+        // todo: dispatch queued events here!
+
+
+        // Process pending application requests if any.
+        engine::Engine::Request request;
+        while (mEngine->GetNextRequest(&request))
+        {
+            // todo:
+        }
+
+        // this is the real wall time elapsed rendering the previous
+        // for each iteration of the loop we measure the time
+        // spent producing a frame. the time is then used to take
+        // some number of simulation steps in order for the simulations
+        // to catch up for the *next* frame.
+        const auto time_step = ElapsedSeconds();
+        const auto wall_time = CurrentRuntime();
+
+        // ask the application to take its simulation steps.
         mEngine->Update(time_step);
+
+        // ask the application to draw the current frame.
         mEngine->Draw();
 
         ++mFrames;
@@ -185,6 +318,9 @@ public:
             mCounter = 0;
             mSeconds = 0;
         }
+
+        mEngine->EndMainLoop();
+
         return EM_TRUE;
     }
     EM_BOOL OnMouseEvent(int emsc_type, const EmscriptenMouseEvent* emsc_event)
@@ -361,6 +497,8 @@ private:
     std::unique_ptr<WebGLContext> mContext;
     std::unique_ptr<engine::Engine> mEngine;
     wdk::WindowListener* mListener = nullptr;
+    std::unique_ptr<engine::JsonFileClassLoader> mContentLoader;
+    std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
     double mSeconds = 0;
     unsigned mCounter = 0;
     unsigned mFrames  = 0;
@@ -416,6 +554,8 @@ int main()
 {
     // todo: how to exit cleanly? is there even such thing?
     Application* app = new Application;
+    // todo: error checking and propagation to the HTML UI
+    app->Init();
 
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, EM_FALSE /* capture*/, OnWindowSizeChanged);
 
