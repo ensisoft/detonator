@@ -159,11 +159,21 @@ public:
         base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
         base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
 
-        int canvas_width  = 0;
-        int canvas_height = 0;
+        mDevicePixelRatio = emscripten_get_device_pixel_ratio();
+        DEBUG("Device pixel ratio = %1.", mDevicePixelRatio);
+
+        int canvas_render_width   = 0;
+        int canvas_render_height  = 0;
+        double canvas_display_width  = 0;
+        double canvas_display_height = 0;
+        // try to set the size of the canvas element's drawing buffer.
+        // this is *not* the same as the final display size which is determined
+        // by any CSS based size and browser's hDPI scale factor.
         emscripten_set_canvas_element_size("canvas", window_width, window_height);
-        emscripten_get_canvas_element_size("canvas", &canvas_width, &canvas_height);
-        DEBUG("Actual canvas dimensions. [width=%1, height=%2]", canvas_width, canvas_height);
+        emscripten_get_canvas_element_size("canvas", &canvas_render_width, &canvas_render_height);
+        emscripten_get_element_css_size("canvas", &canvas_display_width, &canvas_display_height);
+        DEBUG("Initial canvas render target size. [width=%1, height=%2]", canvas_render_width, canvas_render_height);
+        DEBUG("Initial canvas display (CSS logical) size. [width=%1, height=%2]", canvas_display_width, canvas_display_height);
 
         mContentLoader  = engine::JsonFileClassLoader::Create();
         mResourceLoader = engine::FileResourceLoader::Create();
@@ -204,8 +214,8 @@ public:
         init.editing_mode     = false;
         init.application_name = title;
         init.context          = mContext.get();
-        init.surface_width    = canvas_width;
-        init.surface_height   = canvas_height;
+        init.surface_width    = canvas_render_width;
+        init.surface_height   = canvas_render_height;
         base::JsonReadSafe(json["application"], "game_script", &init.game_script);
         mEngine->Init(init);
 
@@ -259,6 +269,10 @@ public:
         mEngine->Load();
         mEngine->Start();
 
+        mRenderTargetWidth   = canvas_render_width;
+        mRenderTargetHeight  = canvas_render_height;
+        mCanvasDisplayWidth  = canvas_display_width;
+        mCanvasDisplayHeight = canvas_display_height;
         mListener = mEngine->GetWindowListener();
         return true;
     }
@@ -267,12 +281,13 @@ public:
     {
         if (emsc_type == EMSCRIPTEN_EVENT_RESIZE)
         {
-            int canvas_with   = 0;
-            int canvas_height = 0;
-            emscripten_get_canvas_element_size("canvas", &canvas_with, &canvas_height);
+            int canvas_render_with   = 0;
+            int canvas_render_height = 0;
+            emscripten_get_canvas_element_size("canvas", &canvas_render_with, &canvas_render_height);
+
             wdk::WindowEventResize resize;
-            resize.width  = canvas_with;
-            resize.height = canvas_height;
+            resize.width  = canvas_render_with;
+            resize.height = canvas_render_height;
             mEventQueue.push(resize);
         }
         return EM_TRUE;
@@ -302,9 +317,27 @@ public:
                 mListener->OnKeyUp(*ptr);
             else if (const auto* ptr = std::get_if<wdk::WindowEventChar>(&event))
                 mListener->OnChar(*ptr);
-            else if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event)) {
-                mListener->OnResize(*ptr);
-                mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+            else if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event))
+            {
+                // filter out superfluous event notifications when the render target
+                // hasn't actually changed.
+                if ((mRenderTargetHeight != ptr->height) || (mRenderTargetWidth != ptr->width))
+                {
+                    // for consistency's sake call the window resize event handler.
+                    mListener->OnResize(*ptr);
+                    // this is the main engine rendering surface callback which is important.
+                    mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+
+                    mRenderTargetWidth  = ptr->width;
+                    mRenderTargetHeight = ptr->height;
+                    DEBUG("Canvas render target size changed. [width=%1, height=%2]", ptr->width, ptr->height);
+                }
+                // obtain the new (if changed) canvas display width and height.
+                // we need these for mapping the mouse coordinates from CSS display
+                // units to render target units.
+                emscripten_get_element_css_size("canvas", &mCanvasDisplayWidth, &mCanvasDisplayHeight);
+                DEBUG("Canvas display (CSS logical pixel) size changed. [width=%1, height=%2]",
+                      mCanvasDisplayWidth, mCanvasDisplayHeight);
             }
             else BUG("Unhandled window event.");
             mEventQueue.pop();
@@ -369,22 +402,54 @@ public:
             btn = wdk::MouseButton::Right;
         else WARN("Unmapped mouse button. [value=%1]", emsc_event->button);
 
+        const auto canvas_display_width  = (int)mCanvasDisplayWidth;
+        const auto canvas_display_height = (int)mCanvasDisplayHeight;
+
+        // the mouse x,y coordinates are in CSS logical pixel units.
+        // if the display size of the canvas is not the same as the
+        // render target size the mouse coordinates must be mapped.
+        auto render_target_x = emsc_event->targetX;
+        auto render_target_y = emsc_event->targetY;
+        if ((canvas_display_width != mRenderTargetWidth) ||
+            (canvas_display_height != mRenderTargetHeight))
+        {
+            const float scale = std::min(mCanvasDisplayWidth / mRenderTargetWidth,
+                                         mCanvasDisplayHeight / mRenderTargetHeight);
+            const auto scaled_render_width = mRenderTargetWidth * scale;
+            const auto scaled_render_height = mRenderTargetHeight * scale;
+
+            const auto css_xpos = emsc_event->targetX;
+            const auto css_ypos = emsc_event->targetY;
+            const auto css_offset_x = (mCanvasDisplayWidth - scaled_render_width) * 0.5;
+            const auto css_offset_y = (mCanvasDisplayHeight - scaled_render_height) * 0.5;
+
+            const auto css_normalized_xpos = (css_xpos - css_offset_x) / scaled_render_width;
+            const auto css_normalized_ypos = (css_ypos - css_offset_y) / scaled_render_height;
+            if ((css_normalized_xpos < 0.0 || css_normalized_xpos > 1.0f) ||
+                (css_normalized_ypos < 0.0 || css_normalized_ypos > 1.0f))
+                return EM_TRUE;
+
+            render_target_x = css_normalized_xpos * mRenderTargetWidth;
+            render_target_y = css_normalized_ypos * mRenderTargetHeight;
+        }
+
         if (emsc_type == EMSCRIPTEN_EVENT_MOUSEDOWN)
         {
             wdk::WindowEventMousePress event;
-            event.window_x  = emsc_event->targetX;
-            event.window_y  = emsc_event->targetY;
+            event.window_x  = render_target_x;
+            event.window_y  = render_target_y;
             event.global_y  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
             mEventQueue.push(event);
+            DEBUG("Mouse down event. [x=%1, y=%2]", event.window_x, event.window_y);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEUP)
         {
             wdk::WindowEventMouseRelease event;
-            event.window_x  = emsc_event->targetX;
-            event.window_y  = emsc_event->targetY;
+            event.window_x  = render_target_x;
+            event.window_y  = render_target_y;
             event.global_y  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
@@ -394,8 +459,8 @@ public:
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEMOVE)
         {
             wdk::WindowEventMouseMove event;
-            event.window_x  = emsc_event->targetX;
-            event.window_y  = emsc_event->targetY;
+            event.window_x  = render_target_x;
+            event.window_y  = render_target_y;
             event.global_y  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
@@ -540,7 +605,15 @@ private:
     double mSeconds = 0;
     unsigned mCounter = 0;
     unsigned mFrames  = 0;
-
+    // for High DPI display devices
+    double mDevicePixelRatio = 1.0;
+    // the underlying canvas render target size.
+    int mRenderTargetWidth  = 0;
+    int mRenderTargetHeight = 0;
+    // The display size of the canvas
+    // Not necessarily the same as the render target size.
+    double mCanvasDisplayWidth  = 0.0f;
+    double mCanvasDisplayHeight = 0.0f;
 };
 
 EM_BOOL OnWindowSizeChanged(int emsc_type, const EmscriptenUiEvent* emsc_event, void* user_data)
