@@ -277,6 +277,15 @@ public:
         return true;
     }
 
+
+    EM_BOOL OnCanvasResize(int event_type)
+    {
+        // should be called when entering/exiting soft full screen mode.
+        // not used currently since the callback seems asynchronous
+        // so what's the point. the contents are therefore in SetFullScreen.
+        return EM_TRUE;
+    }
+
     EM_BOOL OnWindowResize(int emsc_type, const EmscriptenUiEvent* emsc_event)
     {
         if (emsc_type == EMSCRIPTEN_EVENT_RESIZE)
@@ -343,12 +352,23 @@ public:
             mEventQueue.pop();
         }
 
-
         // Process pending application requests if any.
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
         {
-            // todo:
+            if (auto* ptr = std::get_if<engine::Engine::ResizeSurface>(&request))
+                HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::SetFullScreen>(&request))
+                HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
+                HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request))
+                HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::GrabMouse>(&request))
+                HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
+                HandleEngineRequest(*ptr);
+            else BUG("Unhandled engine request type.");
         }
 
         // this is the real wall time elapsed rendering the previous
@@ -383,6 +403,121 @@ public:
 
         return EM_TRUE;
     }
+    void SetFullScreen(bool fullscreen)
+    {
+        if (fullscreen == mSoftFullScreen)
+            return;
+
+        // The soft full screen is a mode where the canvas element is
+        // resized to cover the whole client area of the page.
+        // It's not a "true" full screen mode that some browsers support.
+        // The benefit of this soft full screen approach is that it can
+        // easily be done by the game itself and doesn't suffer from web
+        // security issues which prevent some operations unless done as
+        // a response to user input and inside an event handler.
+        if (fullscreen)
+        {
+            EmscriptenFullscreenStrategy fss;
+            // so this shoddily named parameter controls how the
+            // content of the canvas is scaled for displaying.
+            fss.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_ASPECT; // scale and retain aspect ratio.
+
+            // this shoddily named parameter controls how the
+            // render target (draw buffer) of the canvas object is
+            // resized/scaled when going into soft full screen mode.
+            // currently, the native main applications don't do any
+            // scaled display but derive the render target size directly
+            // from the native window's (renderable) client surface area.
+            // we should keep the same semantics here for now.
+            fss.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_HIDEF; // scale render target
+            //EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE; // keep the render target size as-is
+
+            // how to filter when scaling the content from render size to display size.
+            fss.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
+
+            // callback data. dangerous but it seems that the
+            // callback is executed immediately from the enter_soft_fullscreen.
+            // better not to use it.
+            fss.canvasResizedCallback = nullptr; //&Application::OnCanvasResize;
+            fss.canvasResizedCallbackUserData = nullptr; //this;
+            fss.canvasResizedCallbackTargetThread = 0;
+
+            // looks like this will invoke the callback immediately.
+            if (emscripten_enter_soft_fullscreen("canvas", &fss) != EMSCRIPTEN_RESULT_SUCCESS)
+            {
+                ERROR("Failed to enter soft full screen.");
+                return;
+            }
+        }
+        else
+        {
+            emscripten_exit_soft_fullscreen();
+        }
+
+        // handle canvas resize.
+
+        mSoftFullScreen = fullscreen;
+
+        // the canvas render size may or may not change depending
+        // on how the full screen change happens. if we're just
+        // scaling the rendered content for display then there's no
+        // actual change of the render target size.
+        int canvas_render_with   = 0;
+        int canvas_render_height = 0;
+        emscripten_get_canvas_element_size("canvas", &canvas_render_with, &canvas_render_height);
+
+        // enqueue a notification.
+        wdk::WindowEventResize resize;
+        resize.width  = canvas_render_with;
+        resize.height = canvas_render_height;
+        mEventQueue.push(resize);
+    }
+
+    void HandleEngineRequest(const engine::Engine::ResizeSurface& resize)
+    {
+        // note that this means the *rendering* surface size which is not
+        // the same as the display size. in web the canvas object has
+        // width and height attributes which define the size of the drawing buffer.
+        // the same canvas also can be affected by the width and height
+        // attributes of the CSS style that is applied on the canvas and
+        // these define the *display* size.
+
+        // todo: can this really fail?
+        // todo: will this result in some event? (assuming no)
+        if (emscripten_set_canvas_element_size("canvas", resize.width, resize.height) != EMSCRIPTEN_RESULT_SUCCESS)
+        {
+            ERROR("Failed to set canvas element (render target) size.[width=%1, height=%2]", resize.width, resize.height);
+            return;
+        }
+        mRenderTargetWidth  = resize.width;
+        mRenderTargetHeight = resize.height;
+        DEBUG("Request resize canvas render target. [width=%d, height=%d]", resize.width, resize.height);
+    }
+    void HandleEngineRequest(const engine::Engine::SetFullScreen& fs)
+    {
+        SetFullScreen(fs.fullscreen);
+        DEBUG("Request to change soft full screen mode. [fs=%1]", fs.fullscreen);
+    }
+    void HandleEngineRequest(const engine::Engine::ToggleFullScreen& fs)
+    {
+        SetFullScreen(!mSoftFullScreen);
+        DEBUG("Request to toggle full screen mode. [current=%1]", mSoftFullScreen);
+    }
+    void HandleEngineRequest(const engine::Engine::ShowMouseCursor& mickey)
+    {
+        WARN("Show/hide mouse cursor is not supported. [show=%1]", mickey.show);
+    }
+    void HandleEngineRequest(const engine::Engine::GrabMouse& mickey)
+    {
+        // todo: pointer lock ?
+        WARN("Mouse grab is not supported.");
+    }
+    void HandleEngineRequest(const engine::Engine::QuitApp& quit)
+    {
+        // todo: is this possible ? close the page? delete the div ?
+        WARN("Quit application is not supported.");
+    }
+
     EM_BOOL OnMouseEvent(int emsc_type, const EmscriptenMouseEvent* emsc_event)
     {
         wdk::bitflag<wdk::Keymod> mods;
@@ -585,6 +720,9 @@ public:
         return EM_TRUE;
     }
 private:
+    static EM_BOOL OnCanvasResize(int event_type, const void* reserved, void* user_data)
+    { return static_cast<Application*>(user_data)->OnCanvasResize(event_type); }
+private:
     base::EmscriptenLogger mLogger;
     std::unique_ptr<WebGLContext> mContext;
     std::unique_ptr<engine::Engine> mEngine;
@@ -601,6 +739,9 @@ private:
         wdk::WindowEventMousePress,
         wdk::WindowEventMouseRelease>;
     std::queue<WindowEvent> mEventQueue;
+
+    // flag to indicate whether currently in soft fullscreen or not
+    bool mSoftFullScreen = false;
 
     double mSeconds = 0;
     unsigned mCounter = 0;
