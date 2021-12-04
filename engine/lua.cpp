@@ -589,8 +589,12 @@ bool LuaGame::LoadGame()
     if (!result.valid())
     {
         const sol::error err = result;
-        ERROR("Failed to load game script. [file='%1', error='%2']", main_game_script, err.what());
-        return false;
+        ERROR("Lua script error. [file='%1', error='%2']", main_game_script, err.what());
+        // throwing here is just too convenient way to propagate the Lua
+        // specific error message up the stack without cluttering the interface,
+        // and when running the engine inside the editor we really want to
+        // have this lua error propagated all the way to the UI
+        throw std::runtime_error(err.what());
     }
 
     (*mLuaState)["Audio"]    = mAudioEngine;
@@ -800,8 +804,12 @@ void ScriptEngine::BeginPlay(Scene* scene)
             if (!result.valid())
             {
                 const sol::error err = result;
-                ERROR("Failed to load entity class script. [class='%1', error='%2']", klass.GetName(), err.what());
-                continue;
+                ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+                // throwing here is just too convenient way to propagate the Lua
+                // specific error message up the stack without cluttering the interface,
+                // and when running the engine inside the editor we really want to
+                // have this lua error propagated all the way to the UI
+                throw std::runtime_error(err.what());
             }
             it = script_env_map.insert({script, script_env}).first;
             //DEBUG("Loaded Lua script file '%1'.", file);
@@ -830,8 +838,14 @@ void ScriptEngine::BeginPlay(Scene* scene)
             if (!result.valid())
             {
                 const sol::error err = result;
-                ERROR("Failed to load scene class script. [class='%1', error='%2']", klass.GetName(), err.what());
-            } else DEBUG("Scene class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
+                ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+                // throwing here is just too convenient way to propagate the Lua
+                // specific error message up the stack without cluttering the interface,
+                // and when running the engine inside the editor we really want to
+                // have this lua error propagated all the way to the UI
+                throw std::runtime_error(err.what());
+            }
+            DEBUG("Scene class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
         }
     }
 

@@ -68,8 +68,9 @@ namespace engine
         // Load the game data. This is called once by the engine after the
         // main application has started. In the implementation you should
         // load whatever initial game state that is needed. It's possible to
-        // fail (indicated by returning false) and this will make the host
-        // application exit early.
+        // fail (indicated by returning false) or by throwing an exception.
+        // Failure will will make the host application exit early since the
+        // game obviously cannot be run.
         virtual bool LoadGame() = 0;
         // Start the actual game after all required initial content has been
         // loaded. At this point all the engine subsystems are available
