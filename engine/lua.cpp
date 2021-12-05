@@ -516,13 +516,28 @@ LuaGame::LuaGame(const std::string& lua_path,
     mLuaState = std::make_unique<sol::state>();
     // todo: should this specify which libraries to load?
     mLuaState->open_libraries();
-    // ? is a wildcard (usually denoted by kleene star *)
-    // todo: setup a package loader instead of messing with the path?
-    // https://github.com/ThePhD/sol2/issues/90
-    std::string path = (*mLuaState)["package"]["path"];
-    path = path + ";" + lua_path + "/?.lua";
-    path = path + ";" + lua_path + "/?/?.lua";
-    (*mLuaState)["package"]["path"] = path;
+
+    mLuaState->clear_package_loaders();
+
+    mLuaState->add_package_loader([this](std::string module) {
+        ASSERT(mLoader);
+        if (!base::EndsWith(module, ".lua"))
+            module += ".lua";
+
+        DEBUG("Loading Lua module. [module=%1]", module);
+        const auto& file = base::JoinPath(mLuaPath, module);
+        const auto& buff = mLoader->LoadGameDataFromFile(file);
+        if (!buff)
+            throw std::runtime_error("can't find lua module: " + module);
+        auto ret = mLuaState->load_buffer((const char*)buff->GetData(), buff->GetSize());
+        if (!ret.valid())
+        {
+            sol::error err = ret;
+            throw std::runtime_error(err.what());
+        }
+        return ret.get<sol::function>(); // hmm??
+    });
+
     BindBase(*mLuaState);
     BindUtil(*mLuaState);
     BindData(*mLuaState);
@@ -748,13 +763,29 @@ void ScriptEngine::BeginPlay(Scene* scene)
 
     auto state = std::make_unique<sol::state>();
     state->open_libraries();
-    // ? is a wildcard (usually denoted by kleene star *)
-    // todo: setup a package loader instead of messing with the path?
-    // https://github.com/ThePhD/sol2/issues/90
-    std::string path = (*state)["package"]["path"];
-    path = path + ";" + mLuaPath + "/?.lua";
-    path = path + ";" + mLuaPath + "/?/?.lua";
-    (*state)["package"]["path"] = path;
+
+    state->clear_package_loaders();
+
+    auto* lua_state = state.get();
+
+    lua_state->add_package_loader([lua_state, this](std::string module) {
+        ASSERT(mDataLoader);
+        if (!base::EndsWith(module, ".lua"))
+            module += ".lua";
+
+        DEBUG("Loading Lua module. [module=%1]", module);
+        const auto& file = base::JoinPath(mLuaPath, module);
+        const auto& buff = mDataLoader->LoadGameDataFromFile(file);
+        if (!buff)
+            throw std::runtime_error("can't find lua module: " + module);
+        auto ret = lua_state->load_buffer((const char*)buff->GetData(), buff->GetSize());
+        if (!ret.valid())
+        {
+            sol::error err = ret;
+            throw std::runtime_error(err.what());
+        }
+        return ret.get<sol::function>(); // hmm??
+    });
 
     BindBase(*state);
     BindUtil(*state);

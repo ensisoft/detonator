@@ -58,7 +58,11 @@ public:
     GameDataHandle LoadGameData(const std::string& uri) const override
     { return nullptr; }
     GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
-    { return std::make_shared<TestData>(filename); }
+    {
+        if (base::StartsWith(filename, "this-file-doesnt-exist"))
+            return nullptr;
+        return std::make_shared<TestData>(filename);
+    }
 };
 
 void unit_test_util()
@@ -940,9 +944,10 @@ end
     TEST_REQUIRE(std::get<int>(event->event.value) == 123);
 }
 
-void unit_test_game_main_script_load()
+void unit_test_game_main_script_load_success()
 {
-    base::OverwriteTextFile("game_main_script_test.lua", R"(
+    {
+        base::OverwriteTextFile("game_main_script_test.lua", R"(
 function LoadGame()
   local event = game.GameEvent:new()
   event.message = 'load'
@@ -950,16 +955,105 @@ function LoadGame()
 end
     )");
 
-    TestLoader loader;
+        TestLoader loader;
 
-    engine::LuaGame game("", "game_main_script_test.lua", "", "");
-    game.SetDataLoader(&loader);
-    TEST_REQUIRE(game.LoadGame());
+        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_REQUIRE(game.LoadGame());
 
-    engine::Action action;
-    TEST_REQUIRE(game.GetNextAction(&action));
-    const auto* event = std::get_if<engine::PostEventAction>(&action);
-    TEST_REQUIRE(event->event.message == "load");
+        engine::Action action;
+        TEST_REQUIRE(game.GetNextAction(&action));
+        const auto* event = std::get_if<engine::PostEventAction>(&action);
+        TEST_REQUIRE(event->event.message == "load");
+    }
+
+    // lua script requires another script
+    {
+        base::OverwriteTextFile("foobar.lua", R"(
+function SendMessage()
+   local event = game.GameEvent:new()
+   event.message = 'load'
+   Game:PostEvent(event)
+end
+function Foobar()
+   SendMessage()
+end
+
+)");
+        base::OverwriteTextFile("game_main_script_test.lua", R"(
+require('foobar')
+function LoadGame()
+  Foobar()
+end
+    )");
+        TestLoader loader;
+
+        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_REQUIRE(game.LoadGame());
+
+        engine::Action action;
+        TEST_REQUIRE(game.GetNextAction(&action));
+        const auto* event = std::get_if<engine::PostEventAction>(&action);
+        TEST_REQUIRE(event->event.message == "load");
+
+    }
+}
+
+
+void unit_test_game_main_script_load_failure()
+{
+    base::OverwriteTextFile("broken.lua", R"(
+function Broken()
+endkasd
+)");
+
+    // no such file.
+    {
+        TestLoader loader;
+
+        engine::LuaGame game("", "this-file-doesnt-exist.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_REQUIRE(!game.LoadGame());
+    }
+
+    // broken Lua code in file.
+    {
+        TestLoader loader;
+        engine::LuaGame game("", "broken.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_EXCEPTION(game.LoadGame());
+    }
+
+    // requires broken lua
+    {
+        base::OverwriteTextFile("game_main_script_test.lua", R"(
+require('broken')
+function LoadGame()
+  Foobar()
+end
+    )");
+        TestLoader loader;
+        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_EXCEPTION(game.LoadGame());
+
+    }
+
+    // requires lua module that doesn't exist
+    {
+        base::OverwriteTextFile("game_main_script_test.lua", R"(
+require('this-doesnt-exist')
+function LoadGame()
+  Foobar()
+end
+    )");
+        TestLoader loader;
+        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        game.SetDataLoader(&loader);
+        TEST_EXCEPTION(game.LoadGame());
+
+    }
 }
 
 int test_main(int argc, char* argv[])
@@ -977,7 +1071,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_tick_update();
     unit_test_entity_private_environment();
     unit_test_entity_shared_globals();
-    unit_test_game_main_script_load();
-
+    unit_test_game_main_script_load_success();
+    unit_test_game_main_script_load_failure();
     return 0;
 }
