@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charsewt=utf-8">
+    <title>Gamestudio User Guide</title>
+    <style>
+        p {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Gamestudio</h1>
+    <p> This is the Gamestudio user guide. Very much work in progress.</p>
+
+    <ul>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#materials">Materials</a></li>
+        <li><a href="#particles">Particles</a></li>
+        <li><a href="#entities">Entities</a></li>
+        <li><a href="#scenes">Scenes</a></li>
+        <li><a href="#scripts">Scripts</a></li>
+        <li><a href="#uis">Game User Interfaces</a></li>
+        <li><a href="#audio-graphs">Audio Graphs</a></li>
+        <li><a href="#custom-shapes">Custom Shapes</a></li>
+        <li><a href="#file-resources">File Resources</a></li>
+    </ul>
+
+    <h2 id="getting-started">Getting Started</h2>
+    <p>todo:</p>
+
+    <h2 id="materials">Materials</h2>
+    <p>todo:</p>
+
+    <h2 id="particles">Particles</h2>
+    <p>todo:</p>
+
+    <h2 id="entities">Entities</h2>
+    <p>todo:</p>
+
+    <h2 id="scenes">Scenes</h2>
+    <p>todo:</p>
+
+    <h2 id="scripts">Scripts</h2>
+    <p>todo:</p>
+
+    <h2 id="uis">Game User Interfaces</h2>
+    <p>todo:</p>
+
+    <h2 id="audio-graphs">Audio Graphs</h2>
+    <p>todo:</p>
+
+
+    <h2 id="custom-shapes">Custom Shapes</h2>
+    <p>todo:</p>
+
+    <h2 id="file-resources">File Resources</h2>
+    <p>When building game content it's normal to use resources created in other applications and stored somewhere else on your
+    computer. Examples of these resources are font files (.ttf, .otf), texture files (.png, .bmp, .jpe?g) and shader (.glsl)
+    files. For example you might use some image editor to create your textures or you might have downloaded them from some
+    site such as <a href="http://www.opengameart.org">http://www.opengameart.org</a>.
+    Regardless these are normally found somewhere on your computer's hard drive.</p>
+    <p>Unlike some other tools Gamestudio does *not* have an import step that would copy the files into your project tree.
+    Rather it allows you to use these files from whichever location they have. In other words Gamestudio only stores the path
+    to the resources in its own project files. When the project/workspace content is packaged the resources are all gathered
+    and packaged and then finally copied into the designated output folder.</p>
+    <p>What does this mean to you?
+        <ol>
+        <li>If you're only working on your game yourself on a single machine you can place your game resources wherever you wish
+            and any time you update your resource files the changes are reflected in your game project without any need to "reimport".
+            (Just reload your textures and/or shaders).</li>
+        <li>However if you want to be able to share your game project with other people you must store your resource files in a
+            location that is universally available on every single machine.</li>
+    </ol>
+    The simplest way is to simply place your resource files under your workspace directory. For example:
+    <br>
+    mygame/textures/player/texture0.png<br>
+    mygame/textures/player/texture1.png<br>
+    ...<br>
+    mygame/content.json<br>
+    mygame/workspace.json<br>
+    <br>
+    When a resource that is stored under the workspace is added to the project/workspace the path is always stored relative
+    to the workspace itself. This makes the whole workspace self contained and portable across machines.
+    You can then additionally add your whole game project directory into some version control tool such as Git.</p>
+</body>
+</html>
