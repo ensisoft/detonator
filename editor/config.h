@@ -26,8 +26,7 @@
 #endif
 #define APP_VERSION "0.1"
 #define APP_COPYRIGHT "Copyright (c) 2020-2021\n" \
-                      "Sami Väisänen\n"           \
-                      "Ensisoft"
+                      "Sami Väisänen, Ensisoft"   \
 
 #define APP_LINKS "http://www.ensisoft.com\n" \
                   "http://www.gamestudio.com\n" \
