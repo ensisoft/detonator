@@ -863,7 +863,12 @@ void PlayWindow::DoAppInit()
         config.audio.channels        = settings.audio_channels;
         mEngine->SetEngineConfig(config);
 
-        mEngine->Load();
+        if (!mEngine->Load())
+        {
+            Barf("Game failed to load. Please see the log for more details.");
+            return;
+        }
+
         mEngine->Start();
         mTimer.Start();
 
@@ -1244,7 +1249,6 @@ void PlayWindow::SetDebugOptions() const
 
 void PlayWindow::Barf(const std::string& msg)
 {
-    ERROR(msg);
     mEngine.reset();
     mContainer->setVisible(false);
     mUI.problem->setVisible(true);
