@@ -338,6 +338,13 @@ font: 22pt &quot;Sans Serif&quot;;</string>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
+           <widget class="QLineEdit" name="logFilter">
+            <property name="placeholderText">
+             <string>Filter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="logFilterCaseSensitive">
             <property name="text">
              <string>Case sensitive</string>
@@ -346,16 +353,6 @@ font: 22pt &quot;Sans Serif&quot;;</string>
              <bool>true</bool>
             </property>
            </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Filter</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="logFilter"/>
           </item>
           <item>
            <widget class="QPushButton" name="btnApplyFilter">
@@ -599,10 +596,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   <tabstop>gameTime</tabstop>
   <tabstop>frames</tabstop>
   <tabstop>fps</tabstop>
-  <tabstop>logFilterCaseSensitive</tabstop>
   <tabstop>logFilter</tabstop>
+  <tabstop>logFilterCaseSensitive</tabstop>
   <tabstop>btnApplyFilter</tabstop>
   <tabstop>log</tabstop>
+  <tabstop>statFileCache</tabstop>
+  <tabstop>statVBO</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
