@@ -31,25 +31,10 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent)
 {
     mUI.setupUi(this);
     setWindowTitle(APP_TITLE " " APP_VERSION);
-
-    static bool done_add_font = false;
-    static int font_id = 0;
-    if (!done_add_font)
-    {
-        font_id = QFontDatabase::addApplicationFont(":/fonts/orbitron-medium.otf");
-        done_add_font = true;
-    }
-    QString family = QFontDatabase::applicationFontFamilies(font_id).at(0);
-    QFont orbitron(family);
-    orbitron.setPixelSize(30);
     mUI.title->setText(APP_TITLE " " APP_VERSION);
     mUI.title->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    mUI.title->setFont(orbitron);
-    orbitron.setPixelSize(16);
-    mUI.copyright->setFont(orbitron);
     mUI.copyright->setText(APP_COPYRIGHT);
     mUI.copyright->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    mUI.www->setFont(orbitron);
     mUI.www->setText(APP_LINKS);
     mUI.www->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 }
