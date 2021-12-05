@@ -1,11 +1,24 @@
 GAMESTUDIO 2D
 ===================
 
-A 2D game engine and editor for Linux and Windows (Just because!)
+A 2D game engine and editor for Linux and Windows. Designed for simple single player games such as puzzle games,
+platformers and side scrollers. Eventually support is planned for (top down, 2.5D)  tile based games too for 
+real time strategy and tactics.
+
+This readme and other readme files, are for developers and cover information related to developing and building the engine itself.<br>
+For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
+
+Other readmes:
+  * [Audio](audio/README.md "Audio readme")
+  * [Graphics](graphics/README.md "Graphics readme") (todo)
+  * [Game](game/README.md "Game readme") (todo)
+  * [Engine](engine/README.md "Engine readme") (todo)
+  * [UI](uikit/README.md "UIKit readme") (todo)
+  * [WDK](wdk/README.md "WDK readme")
 
 ![Screenshot](screens/bandit-play.gif "Bandit demo")
 
-Currently supported major features.
+Currently supported major features:
 * Qt5 based editor
 * Text rendering
 * Various primitive shapes, custom polygon shapes
@@ -15,7 +28,7 @@ Currently supported major features.
 * Audio engine
 * Lua based scripting for entities, scenes and game logic
 * Scene builder
-* Styleable UI system
+* Styleable UI system 
 * Box2D based physics
 * Demo content
 * Game content packaging
@@ -23,6 +36,11 @@ Currently supported major features.
 
 Planned major features not yet fully implemented:
 * HTML5/WASM build target support
+
+Planned major features not yet implemented:
+* tile maps and tile engine
+* partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
+* OpenGL ES3 backend, WebGL2
 
 Planned minor features not yet implemented:
 * Acceleration structures / scene queries / ray casting
@@ -67,19 +85,20 @@ Build Instructions
 
 WASM
 ------------------------------
-Building to WASM is currently supported only Linux and only covers only the engine not the editor.
+Building to WASM is currently supported only Linux and only covers the engine not the editor.
 The build is separated from the main (CMake based) engine build and is in emscripten/ folder.
 
 - Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
-  location of emsdk is arbitrary but I've dumped it into gamestudio/ so that my IDE (Clion) can
+  location of emsdk is arbitrary, but I've dumped it into gamestudio/ so that my IDE (Clion) can
   easily find the emscripten headers for C++ tooling (the CMakeLists then has a matching include for this).
+- Currently, the target Emscripten version is 3.0.0. Using other version will likely break things.
 ```
   $ cd gamestudio
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
   $ ./emsdk install latest
-  $ ./emsdk activate latest
+  $ ./emsdk activate 3.0.0
   $ source ./emsdk_env.sh
 ```
 
@@ -104,7 +123,7 @@ I.e, emcc should be found. If they aren't you probably want to source the emsdk_
   $ emcmake cmake ..
   $ make -j16 install
 ``` 
-If everything went well there should now be a engine.js and engine.wasm files. The .js file contains
+If everything went well there should now be GameEngine.js and GameEngine.wasm files. The .js file contains
 the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine when the web page loads.
    
 The content (assets) need to packaged separately and this step will likely be done by the editor when a project is built for WASM.
@@ -115,7 +134,7 @@ But for now a manual package step is needed using file_packager.py from emsdk
   $ ln -s /home/user/gamestudio/engine/test/dist/assets assets
   $ /home/user/emsdk/upstream/emscripten/tools/file_packager.py test-engine --preload assets/ --js-output=test-assets.js
 ```
-In addition a .html file is needed. It's possible to have a emcc generate some default .html file but it has a bunch of
+In addition, a .html file is needed. It's possible to have a emcc generate some default .html file but it has a bunch of
 crap in it (silly SVG based image) and is likely to require customization so a simpler .html is provided as part of this
 source repo. The important thing is that the .html file needs to load the engine.js and the ASSETS.js scripts. These should
 be loaded after the script block that defines the var Module for the glue customization.
@@ -123,7 +142,7 @@ be loaded after the script block that defines the var Module for the glue custom
   <script       type="text/javascript" src="ASSETS.js"></script>
   <script async type="text/javascript" src="engine.js"></script> 
 ```
-Finally to serve the web page and all the content a web server is needed.
+Finally, to serve the web page and all the content a web server is needed.
 ```
   $ cd gamestudio/emscripten/test
   $ python -m http.server
@@ -248,7 +267,7 @@ Going from a git clone to a running game is known as the "build workflow". This 
 involving the source tree of the engine, the source tree of the game, the runtime assets provided with the
 engine and the runtime assets that are part of the game. Overall this will involve several build and packaging steps.
 
-Currently only Lua based games are supported. There's a provided game engine that is built into a shared library
+Currently, only Lua based games are supported. There's a provided game engine that is built into a shared library
 and which contains all the relevant functionality for running a game. That is it will take care of rendering the scene,
 ticking the physics engine, handling the UI input as well as invoking the Lua scripts in order to run *your* game code.
 It's possible to also not use this provided engine but write a completely different engine. In this case the interface
@@ -270,38 +289,6 @@ From source code to a running game:
       game content after the project has been packaged.
 5. After packaging launch your game by running the GameMain executable in the package output directory.
 
-Dealing with File Resources
----------------------------
-When building game content it's normal to use resources created in other applications and stored somewhere else on your
-computer. Examples of these resources are font files (.ttf, .otf), texture files (.png, .bmp, .jpe?g) and shader (.glsl)
-files. For example you might use some image editor to create your textures or you might have downloaded them from some
-site such as http://www.opengameart.org. Regardless these are normally found somewhere on your computer's hard drive.
-
-Unlike some other tools Gamestudio does *not* have an import step that would copy the files into your project tree.
-Rather it allows you to use these files from whichever location they have. In other words Gamestudio only stores the path
-to the resources in its own project files. When the project/workspace content is packaged the resources are all gathered
-and packaged and then finally copied into the designated output folder.
-
-What does this mean to you?
-
-1. If you're only working on your game yourself on a single machine you can place your game resources wherever you wish
-   and any time you update your resource files the changes are reflected in your game project without any need to "reimport".
-   (Just reload your textures and/or shaders).
-2. However if you want to be able to share your game project with other people you must store your resource files in a
-   location that is universally available on every single machine.
-
-The simplest way is to simply place your resource files under your workspace directory. For example:
-
-mygame/textures/player/texture0.png
-mygame/textures/player/texture1.png
-...
-mygame/content.json
-mygame/workspace.json
-
-When a resource that is stored under the workspace is added to the project/workspace the path is always stored relative
-to the workspace itself. This makes the whole workspace self contained and portable across machines.
-
-You can then additionally add your whole game project directory into some version control tool such as Git.
 
 System Architecture
 -------------------
@@ -328,6 +315,52 @@ Inside the game engine the following will take place.
    game scripting system and ultimately to your game's Lua scripts.
 4. The engine will handle the incoming events/requests from the game itself. For example the game might request a scene
    to be loaded or the game to be paused.
+
+Running (Unit) Tests
+--------------------
+There'a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
+a "*unit_test_*" is a unit test. There's a very simple testing utility that is available in base. [test_minimal.h](base/test_minimal.h)  
+In order to run tests after a successful build:
+
+```
+  $ cd gamestudio/build
+  $ ctest -j16
+```
+Currently, the expectation is that all cases should pass on Linux. On Windows some of the tests are unfortunately broken.
+In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
+or rendering stuff on the screen. The audio systems do not have any automation for checking for correctness. The graphics tests
+work based on a set of *gold images*. The images are provided as part of this repository but there's the problem that because
+of the differences in OpenGL implementations it's possible that the rendering output is not exactly the same between various
+vendors/implementations (such as NVIDIA, AMD, Intel etc.) This needs to be enhanced so that a set of gold images could be
+tagged with a vendor tag and multiple gold images per test could exist. (This is a todo for later)
+
+It's also possible to run the audio/graphics tests separately.
+
+
+Runs, mp3, ogg, flag and 24bit .wav test. Use --help for more information.
+```
+  $ cd gamestudio/audio/test
+  $ ./audio_test --mp3 --ogg --flac --24bit
+  $ ...
+  $ ./audio_test --help
+```
+
+Runs all tests with MSAA4. Any test rendering that differs from the expected gold image will stop the program for user input
+(press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels 
+that were not the same between result and gold and the result will be actual rendering result in whole. 
+Use --help for more information.
+```
+  $ cd gamestudio/graphics/test/dist
+  $ ./graphics_test --test --msaa4
+  $ ...
+  $ ./graphics_test --help 
+```
+
+Coding Convention & Design
+--------------------------
+- todo: c++ objects that represent classes
+- todo: asserts/logging/exceptions
+- todo: callbacks
 
 Tracing & Profiling
 -------------------
@@ -388,7 +421,7 @@ is to use a profiler such as valgrind.
 *Valgrind + callgrind + kcachegrind*
 
 The biggest problem with valgrind is that it cannot be used for the entire application. It'll be far too slow and the
-game will not be able to run properly. Instead the profiling needs to be turned on and off only for parts of the code.
+game will not be able to run properly. Instead, the profiling needs to be turned on and off only for parts of the code.
 
 I've experimented with writing little snippets like.
 
@@ -411,7 +444,7 @@ if (profiling)
 }
 ```
 This isn't the simplest way to do to it and requires having to rebuild the game engine but definitely allows for the
-most fine grained control as-to when to capture the profiling information and can limit the instrumentatio to a scope that
+most fine-grained control as-to when to capture the profiling information and can limit the instrumentation to a scope that
 is actually manageable and keeps the game still in a runnable state. 
 Then in order to run game with the profiler do:
 
