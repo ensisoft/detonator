@@ -962,7 +962,7 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
         {
             mDecoder->Reset();
             mFramesRead = 0;
-            DEBUG("Audio file source was reset for looped playback. [elem=%1, file='%1', count=%2]", mName, mFile, mPlayCount+1);
+            DEBUG("Audio file source was reset for looped playback. [elem=%1, file='%2', count=%3]", mName, mFile, mPlayCount+1);
         }
         else
         {
