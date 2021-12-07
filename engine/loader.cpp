@@ -125,16 +125,22 @@ public:
     }
     virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
     {
-        auto it = mGameDataBufferCache.find(filename);
+        // expect this to be a path relative to the content path
+        // this loading function is only used to load the Lua files
+        // which don't yet proper resource URIs. When that is fixed
+        // this function can go away!
+        const auto& file = base::JoinPath(mContentPath, filename);
+
+        auto it = mGameDataBufferCache.find(file);
         if (it != mGameDataBufferCache.end())
             return it->second;
 
         std::vector<char> buffer;
-        if (!LoadFileBuffer(filename, &buffer))
+        if (!LoadFileBuffer(file, &buffer))
             return nullptr;
 
-        auto buff = std::make_shared<GameDataFileBuffer>(filename, std::move(buffer));
-        mGameDataBufferCache[filename] = buff;
+        auto buff = std::make_shared<GameDataFileBuffer>(file, std::move(buffer));
+        mGameDataBufferCache[file] = buff;
         return buff;
     }
     // audio::Loader impl
@@ -168,7 +174,7 @@ public:
     virtual void SetApplicationPath(const std::string& path) override
     { mApplicationPath = path; }
     virtual void SetContentPath(const std::string& path) override
-    { mResourcePath = path; }
+    { mContentPath = path; }
 private:
     std::string ResolveURI(const std::string& URI) const
     {
@@ -178,7 +184,7 @@ private:
 
         std::string str = URI;
         if (base::StartsWith(str, "pck://"))
-            str = mResourcePath + "/" + str.substr(6);
+            str = mContentPath + "/" + str.substr(6);
         else if (base::StartsWith(str, "app://"))
             str = mApplicationPath + "/" + str.substr(6);
         else if (base::StartsWith(str, "fs://"))
@@ -201,7 +207,7 @@ private:
     mutable std::unordered_map<std::string,
         std::shared_ptr<const AudioFileBuffer>> mAudioFileBufferCache;
     // the root of the resource dir against which to resolve the resource URIs.
-    std::string mResourcePath;
+    std::string mContentPath;
     std::string mApplicationPath;
 };
 

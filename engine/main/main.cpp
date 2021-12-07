@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
         // if we set the global logger here then the mutex that is used to protect
         // it isn't actually no longer global (in the current logger design).
         // Two(?) solutions for this:
-        //  - move the shared common code into a shared shared library
+        //  - move the shared common code into a shared library
         //  - change the locking mechanism and put it into the logger.
         base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
         base::SetGlobalLog(&logger);
@@ -449,11 +449,16 @@ int main(int argc, char* argv[])
 
         if (!content.empty())
         {
-            const auto& path = GetPath();
-            if (!loaders.ContentLoader->LoadFromFile(content))
+            const auto& application_path = GetPath();
+            const auto& content_path = base::JoinPath(application_path, content);
+            const auto& content_file = base::JoinPath(content_path, "content.json");
+            DEBUG("Content package. [package='%1']", content);
+            DEBUG("Content path. [path='%1']", content_path);
+            DEBUG("Content file. [file='%1']", content_file);
+            if (!loaders.ContentLoader->LoadFromFile(content_file))
                 return EXIT_FAILURE;
-            loaders.ResourceLoader->SetApplicationPath(path);
-            loaders.ResourceLoader->SetContentPath(path);
+            loaders.ResourceLoader->SetApplicationPath(application_path);
+            loaders.ResourceLoader->SetContentPath(content_path);
         }
 
         // Create the app instance.

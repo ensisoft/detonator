@@ -2010,7 +2010,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     const QString& outdir = JoinPath(options.directory, options.package_name);
     if (!MakePath(outdir))
     {
-        ERROR("Failed to create %1", outdir);
+        ERROR("Failed to create output directory. [dir='%1']", outdir);
         return false;
     }
 
@@ -2101,7 +2101,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                     ASSERT(file_uri && "Missing audio element 'file' parameter.");
                     if (file_uri->empty())
                     {
-                        WARN("Audio element '%1' doesn't have input file set.");
+                        WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio->GetName(), name);
                         continue;
                     }
                     *file_uri = packer.CopyFile(*file_uri, "audio/");
@@ -2116,14 +2116,14 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             auto style_data = LoadGameData(window->GetStyleName());
             if (!style_data)
             {
-                ERROR("Failed to open '%1'", window->GetStyleName());
+                ERROR("Failed to open UI style file. [UI='%1', style='%2']", window->GetName(), window->GetStyleName());
                 errors++;
                 continue;
             }
             engine::UIStyle style;
             if (!style.LoadStyle(*style_data))
             {
-                ERROR("Failed to load UI style '%1'", window->GetStyleName());
+                ERROR("Failed to load UI style. [UI='%1', style='%2']", window->GetName(), window->GetStyleName());
                 errors++;
                 continue;
             }
@@ -2144,7 +2144,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 auto style_string = widget->GetStyleString();
                 if (style_string.empty())
                     return;
-                DEBUG("Widget '%1' style string '%2'", widget->GetId(), style_string);
+                DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
                 style.ClearProperties();
                 style.ClearMaterials();
                 style.ParseStyleString(widget->GetId(), style_string);
@@ -2166,7 +2166,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 // a) saves some space
                 // b) makes the style string copyable from one widget to another as-s
                 boost::erase_all(style_string, widget->GetId() + "/");
-                DEBUG("Reset widget '%1' style string '%2'", widget->GetId(), style_string);
+                DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
                 widget->SetStyleString(std::move(style_string));
             });
         }
@@ -2215,7 +2215,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         json_file.open(QIODevice::WriteOnly);
         if (!json_file.isOpen())
         {
-            ERROR("Failed to open file: '%1' for writing (%2)", json_filename, json_file.error());
+            ERROR("Failed to open content JSON file. [file='%1', error='%2']", json_filename, json_file.error());
             return false;
         }
 
@@ -2232,7 +2232,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         const auto &str = json.ToString();
         if (json_file.write(&str[0], str.size()) == -1)
         {
-            ERROR("Failed to write JSON file: '%1' %2", json_filename, json_file.error());
+            ERROR("Failed to write content JSON file. [file='%1', error='%2']", json_filename, json_file.error());
             return false;
         }
         json_file.flush();
@@ -2254,13 +2254,13 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     {
         emit ResourcePackingUpdate("Writing config JSON file...", 0, 0);
 
-        const auto& json_filename = JoinPath(outdir, "config.json");
+        const auto& json_filename = JoinPath(options.directory, "config.json");
         QFile json_file;
         json_file.setFileName(json_filename);
         json_file.open(QIODevice::WriteOnly);
         if (!json_file.isOpen())
         {
-            ERROR("Failed to open file: '%1' for writing (%2)", json_filename, json_file.error());
+            ERROR("Failed to open config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
             return false;
         }
         nlohmann:: json json;
@@ -2300,7 +2300,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
         base::JsonWrite(json["application"], "ticks_per_second",   (float)mSettings.ticks_per_second);
         base::JsonWrite(json["application"], "updates_per_second", (float)mSettings.updates_per_second);
-        base::JsonWrite(json["application"], "content", "content.json");
+        base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["application"], "default_mag_filter", mSettings.default_mag_filter);
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
@@ -2323,7 +2323,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
         {
-            ERROR("Failed to write JSON file: '%1' '%2'", json_filename, json_file.error());
+            ERROR("Failed to write config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
             return false;
         }
         json_file.flush();
@@ -2355,7 +2355,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     app::CopyFile(MapFileToFilesystem(mSettings.GetApplicationLibrary()),
             app::JoinPath(options.directory,engine_name));
 
-    INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), outdir);
+    INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), options.directory);
     return true;
 }
 
