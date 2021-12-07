@@ -104,6 +104,6 @@ set_target_properties(GameEngine PROPERTIES LINK_FLAGS "-s NO_DISABLE_EXCEPTION_
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/dist")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/dist")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
 #install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/test-engine.worker.js DESTINATION "${CMAKE_CURRENT_LIST_DIR}/dist")
