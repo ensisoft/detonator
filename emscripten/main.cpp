@@ -177,9 +177,9 @@ public:
 
         mContentLoader  = engine::JsonFileClassLoader::Create();
         mResourceLoader = engine::FileResourceLoader::Create();
-        mContentLoader->LoadFromFile(content);
-        mResourceLoader->SetApplicationPath("");
-        mResourceLoader->SetContentPath("");
+        mContentLoader->LoadFromFile("/" + content + "/content.json");
+        mResourceLoader->SetApplicationPath("/");
+        mResourceLoader->SetContentPath("/" + content + "/");
 
         // todo: context attributes.
         mContext.reset(new WebGLContext);

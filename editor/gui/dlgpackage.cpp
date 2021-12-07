@@ -175,7 +175,7 @@ void DlgPackage::on_btnStart_clicked()
 
     app::Workspace::ContentPackingOptions options;
     options.directory          = path;
-    options.package_name       = "";
+    options.package_name       = "pack0";
     options.combine_textures   = GetValue(mUI.chkCombineTextures);
     options.resize_textures    = GetValue(mUI.chkResizeTextures);
     options.max_texture_width  = GetValue(mUI.cmbMaxTexWidth);

@@ -86,13 +86,13 @@ public:
         mPainter->SetEditingMode(init.editing_mode);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
-        mGame = std::make_unique<engine::LuaGame>(mDirectory + "/lua", init.game_script, mGameHome, init.application_name);
+        mGame = std::make_unique<engine::LuaGame>("lua", init.game_script, mGameHome, init.application_name);
         mGame->SetPhysicsEngine(&mPhysics);
         mGame->SetStateStore(&mStateStore);
         mGame->SetAudioEngine(mAudio.get());
         mGame->SetDataLoader(mGameDataLoader);
         mGame->SetClassLibrary(mClasslib);
-        mScripting = std::make_unique<engine::ScriptEngine>(mDirectory + "/lua");
+        mScripting = std::make_unique<engine::ScriptEngine>("lua");
         mScripting->SetClassLibrary(mClasslib);
         mScripting->SetPhysicsEngine(&mPhysics);
         mScripting->SetStateStore(&mStateStore);

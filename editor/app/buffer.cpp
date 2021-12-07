@@ -35,11 +35,11 @@ bool detail::FileBufferImpl::LoadData(const QString& file, QByteArray* data)
     io.open(QIODevice::ReadOnly);
     if (!io.isOpen())
     {
-        ERROR("Failed to open '%1' for reading (%2).", file, io.error());
+        ERROR("File open error. [file='%1', error='%2']", file, io.error());
         return false;
     }
     *data = io.readAll();
-    DEBUG("Loaded %1 bytes from file '%2'.", data->size(), file);
+    DEBUG("File load done. [file='%1', bytes=%2]", file, data->size());
     return true;
 }
 

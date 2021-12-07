@@ -258,7 +258,14 @@ public:
     }
     virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
     {
-        return app::GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
+        // expect this to be a path relative to the content path
+        // (which is the workspace path here)
+        // this loading function is only used to load the Lua files
+        // which don't yet proper resource URIs. When that is fixed
+        // this function can go away!
+        const auto& file = app::JoinPath(mWorkspace.GetDir(), app::FromUtf8(filename));
+
+        return app::GameDataFileBuffer::LoadFromFile(file);
     }
     virtual std::ifstream OpenAudioStream(const std::string& URI) const override
     {

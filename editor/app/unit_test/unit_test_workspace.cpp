@@ -445,7 +445,7 @@ R"(
     TEST_REQUIRE(loader->FindDrawableClassById(poly.GetId()));
     TEST_REQUIRE(loader->FindDrawableClassById(particles.GetId()));
 
-    auto [ok, json, error] = base::JsonParseFile("TestPackage/test/config.json");
+    auto [ok, json, error] = base::JsonParseFile("TestPackage/config.json");
     TEST_REQUIRE(ok);
     TEST_REQUIRE(json["config"]["sampling"] == "MSAA16");
     TEST_REQUIRE(json["config"]["srgb"] == true);
@@ -467,7 +467,7 @@ R"(
     options.write_content_file = false;
     workspace.PackContent(resources, options);
     TEST_REQUIRE(!base::FileExists("TestPackage/test/content.json"));
-    TEST_REQUIRE(!base::FileExists("TestPackage/test/config.json"));
+    TEST_REQUIRE(!base::FileExists("TestPackage/config.json"));
 }
 
 void unit_test_packing_texture_composition(unsigned padding)
