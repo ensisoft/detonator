@@ -26,6 +26,10 @@ namespace gui
 {
     // Collection of global application settings.
     struct AppSettings {
+        // The python interpreter used to run emscripten packaging tools
+        QString python_executable;
+        // Path to emscripten sdk
+        QString emsdk;
         // the path to the currently set external image editor application.
         // for example /usr/bin/gimp
         QString image_editor_executable;
@@ -69,20 +73,6 @@ namespace gui
         // Whether to save widgets with unsaved changes automatically
         // on play or whether to ask
         bool save_automatically_on_play = false;
-
-        AppSettings()
-        {
-#if defined(POSIX_OS)
-            image_editor_executable  = "/usr/bin/gimp";
-            shader_editor_executable = "/usr/bin/gedit";
-            script_editor_executable = "/usr/bin/gedit";
-            audio_editor_executable  = "/usr/bin/audacity";
-#elif defined(WINDOWS_OS)
-            image_editor_executable  = "mspaint.exe";
-            shader_editor_executable = "notepad.exe";
-            script_editor_executable = "notepad.exe";
-#endif
-        }
     };
 
 } // namespace

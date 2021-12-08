@@ -158,7 +158,10 @@ void InitializeAppHome(const QString& appname);
 
 // Get an absolute path to a file/folder in the application
 // home directory.
-QString GetAppFilePath(const QString& name);
+QString GetAppHomeFilePath(const QString& name);
+// Get an absolute path to a file/folder in the application
+// install directory (where our currently running executable is).
+QString GetAppInstFilePath(const QString& name);
 
 bool ValidateQVariantJsonSupport(const QVariant& variant);
 bool ValidateQVariantMapJsonSupport(const QVariantMap& map);

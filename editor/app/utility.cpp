@@ -24,6 +24,7 @@
 #  include <QFileInfo>
 #  include <QTextStream>
 #  include <QRandomGenerator>
+#  include <QApplication>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -285,11 +286,16 @@ void InitializeAppHome(const QString& appname)
     gAppHome = QDir::cleanPath(appdir);
 }
 
-QString GetAppFilePath(const QString& name)
+QString GetAppHomeFilePath(const QString& name)
 {
     // pathstr is an absolute path so then this is also
     // an absolute path.
-    return ToNativeSeparators(gAppHome + "/" + name);
+    return JoinPath(gAppHome, name);
+}
+
+QString GetAppInstFilePath(const QString& name)
+{
+    return JoinPath(QCoreApplication::applicationDirPath(), name);
 }
 
 bool ValidateQVariantJsonSupport(const QVariant& variant)
