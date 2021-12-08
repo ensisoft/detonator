@@ -149,21 +149,20 @@ void Process::Kill()
 
 // static
 bool Process::RunAndCapture(const QString& executable,
-    QStringList& stdoutLines,
-    QStringList& stderrLines,
-    const QStringList& args)
+    const QString& working_dir,
+    const QStringList& args,
+    QStringList* stdout_buffer,
+    QStringList* stderr_buffer)
 {
     Process process;
-    process.onStdErr = [&](const QString& line) {
-        stderrLines.append(line);
+    process.onStdErr = [&stdout_buffer](const QString& line) {
+        stdout_buffer->append(line);
     };
-    process.onStdOut = [&](const QString& line) {
-        stdoutLines.append(line);
+    process.onStdOut = [&stderr_buffer](const QString& line) {
+        stderr_buffer->append(line);
     };
 
-    const auto& logFile    = QString("");
-    const auto& workingDir = QString("");
-    process.Start(executable, args, logFile, workingDir);
+    process.Start(executable, args, "", working_dir);
 
     const auto NeverTimeout = -1;
     process.mProcess.waitForFinished(NeverTimeout);

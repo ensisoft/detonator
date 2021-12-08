@@ -97,9 +97,10 @@ namespace app
         // has finished running (either completed successfully
         // or encountered an error) so use cautiously.
         static bool RunAndCapture(const QString& executable,
-            QStringList& stdoutLines,
-            QStringList& stderrLines,
-            const QStringList& args = QStringList());
+            const QString& working_dir,
+            const QStringList& args,
+            QStringList* stdout_buffer,
+            QStringList* stderr_buffer);
 
     private slots:
         void ProcessStdOut();

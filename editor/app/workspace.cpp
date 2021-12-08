@@ -51,6 +51,7 @@
 #include "editor/app/format.h"
 #include "editor/app/packing.h"
 #include "editor/app/buffer.h"
+#include "editor/app/process.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
 #include "engine/ui.h"
@@ -2330,6 +2331,95 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         json_file.close();
     }
 
+    if (options.write_html5_content_fs_image)
+    {
+        emit ResourcePackingUpdate("Generating HTML5 filesystem image...", 0, 0);
+
+        DEBUG("Generating HTML5 filesystem image. [emsdk='%1', python='%2']", options.emsdk_path, options.python_executable);
+
+        QString filesystem_image_name = "FILESYSTEM";
+        QStringList args;
+        args << app::JoinPath(options.emsdk_path, "/upstream/emscripten/tools/file_packager.py");
+        args << filesystem_image_name;
+        args << "--preload";
+        args << options.package_name;
+        args << "config.json";
+        args << QString("--js-output=%1.js").arg(filesystem_image_name);
+        QStringList stdout_buffer;
+        QStringList stderr_buffer;
+        Process::RunAndCapture(options.python_executable,
+                               options.directory, args, &stdout_buffer, &stderr_buffer);
+    }
+
+    if (options.copy_html5_files)
+    {
+        // these should be in the dist/ folder and are the
+        // built by the emscripten build in emscripten/
+        const QString files[] = {
+           "GameEngine.js", "GameEngine.wasm"
+        };
+        for (int i=0; i<2; ++i)
+        {
+            const auto& src = app::GetAppInstFilePath(files[i]);
+            const auto& dst = app::JoinPath(options.directory, files[i]);
+            auto[success, error] = app::CopyFile(src, dst);
+            if (!success)
+            {
+                ERROR("Failed to copy game engine file. [src='%1', dst='%2', error='%3']", src, dst, error);
+                ++errors;
+            }
+        }
+    }
+    if (options.write_html5_game_file)
+    {
+        const QString files[] = {
+           "game.html"
+        };
+        for (int i=0; i<1; ++i)
+        {
+            const auto& src = app::GetAppInstFilePath(files[i]);
+            const auto& dst = app::JoinPath(options.directory, files[i]);
+            auto[success, error] = app::CopyFile(src, dst);
+            if (!success)
+            {
+                ERROR("Failed to copy game html file. [src='1%', dst='%2', error='%3']", src, dst, error);
+                ++errors;
+            }
+        }
+    }
+
+    // Copy game main executable/engine library
+    if (options.copy_native_files)
+    {
+        QString src_exec = "GameMain";
+        QString dst_exec = mSettings.application_name;
+        if (dst_exec.isEmpty())
+            dst_exec = "GameMain";
+#if defined(WINDOWS_OS)
+        src_exec.append(".exe");
+        dst_exec.append(".exe");
+        engine_name.append(".dll");
+#elif defined(LINUX_OS)
+        engine_name.prepend("lib");
+        engine_name.append(".so");
+#endif
+        dst_exec = app::JoinPath(options.directory, dst_exec);
+        auto [success, error ] = app::CopyFile(src_exec, dst_exec);
+        if (!success)
+        {
+            ERROR("Failed to copy game executable. [src='%1', dst='%2', error='%3']", src_exec, dst_exec, error);
+            ++errors;
+        }
+        const auto& src_lib = MapFileToFilesystem(mSettings.GetApplicationLibrary());
+        const auto& dst_lib = app::JoinPath(options.directory, engine_name);
+        std::tie(success, error) = app::CopyFile(src_lib, dst_lib);
+        if (!success)
+        {
+            ERROR("Failed to copy game engine library. [src='%1', dst='%2', error='%3']", src_lib, dst_lib, error);
+            ++errors;
+        }
+    }
+
     const auto total_errors = errors + packer.GetNumErrors();
     if (total_errors)
     {
@@ -2337,23 +2427,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         WARN("Please see the log file for details.");
         return false;
     }
-    // Copy game main executable.
-    QString src_exec = "GameMain";
-    QString dst_exec = mSettings.application_name;
-    if (dst_exec.isEmpty())
-        dst_exec = "GameMain";
-#if defined(WINDOWS_OS)
-    src_exec.append(".exe");
-    dst_exec.append(".exe");
-    engine_name.append(".dll");
-#elif defined(LINUX_OS)
-    engine_name.prepend("lib");
-    engine_name.append(".so");
-#endif
-    // todo: refactor the test cases and add error checking here.
-    app::CopyFile(src_exec, app::JoinPath(options.directory, dst_exec));
-    app::CopyFile(MapFileToFilesystem(mSettings.GetApplicationLibrary()),
-            app::JoinPath(options.directory,engine_name));
 
     INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), options.directory);
     return true;
