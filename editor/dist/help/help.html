@@ -5,16 +5,74 @@
     <meta http-equiv="Content-Type" content="text/html; charsewt=utf-8">
     <title>Gamestudio User Guide</title>
     <style>
+        body {
+            background-color: #212324
+        }
+        a {
+            color: #4c93c7
+        }
+
+        h1 {
+            color: #c8c8c8;
+        }
+        h2 {
+            color: #c8c8c8;
+        }
+        h3 {
+            color: #c8c8c8;
+        }
+        h4 {
+            color: #c8c8c8;
+        }
+
         p {
             text-align: justify;
             text-justify: inter-word;
+            color: #c0bab2;
+        }
+        ol {
+            color: #c0bab2;
+        }
+        li {
+            color: #c0bab2;
+        }
+        span {
+            color: #96ae16;
+            font-style: italic;
+            font-weight: bold;
         }
 
+        img {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        #content {
+            width: 60%;
+            margin-left: 20%;
+            background-color: #1a1b1c;
+            padding: 2em;
+            font-family: monospace;
+        }
+
+        blockquote {
+            background-color: #26292b;
+            color: #c0bab2;
+            padding: 1em;
+        }
     </style>
 </head>
 <body>
-    <h1>Gamestudio</h1>
-    <p> This is the Gamestudio user guide. Very much work in progress.</p>
+    <div id="content">
+
+
+    <h1>Ensisoft Gamestudio 2D</h1>
+    <p> This is the Gamestudio user guide. Very much work in progress.<br><br>
+    If you're looking for developer information on how to build/develop the engine itself
+    see the <a href="http://github.com/ensisoft/gamestudio/blob/master/README.md">README.md</a> instead.
+    If you're looking for the Gamestudio Lua API documentation it is bundled with the Editor itself and
+    available in the Script editor.</p>
 
     <ul>
         <li><a href="#getting-started">Getting Started</a></li>
@@ -26,7 +84,8 @@
         <li><a href="#uis">Game User Interfaces</a></li>
         <li><a href="#audio-graphs">Audio Graphs</a></li>
         <li><a href="#custom-shapes">Custom Shapes</a></li>
-        <li><a href="#file-resources">File Resources</a></li>
+        <li><a href="#file-resources">Working With File Resources</a></li>
+        <li><a href="#packaging">Packaging Games</a></li>
     </ul>
 
     <h2 id="getting-started">Getting Started</h2>
@@ -57,34 +116,100 @@
     <h2 id="custom-shapes">Custom Shapes</h2>
     <p>todo:</p>
 
-    <h2 id="file-resources">File Resources</h2>
-    <p>When building game content it's normal to use resources created in other applications and stored somewhere else on your
+    <h2 id="file-resources">Working With File Resources</h2>
+    <p>When creating game content it's normal to use resources created in other applications and stored somewhere else on your
     computer. Examples of these resources are font files (.ttf, .otf), texture files (.png, .bmp, .jpe?g) and shader (.glsl)
     files. For example you might use some image editor to create your textures or you might have downloaded them from some
     site such as <a href="http://www.opengameart.org">http://www.opengameart.org</a>.
-    Regardless these are normally found somewhere on your computer's hard drive.</p>
+    Regardless these files are normally found somewhere on your computer's hard drive.</p>
     <p>Unlike some other tools Gamestudio does *not* have an import step that would copy the files into your project tree.
-    Rather it allows you to use these files from whichever location they have. In other words Gamestudio only stores the path
-    to the resources in its own project files. When the project/workspace content is packaged the resources are all gathered
+    Rather it allows you to use these files from wherever they are and Gamestudio only stores the path to these files
+    in its own project files. When the project/workspace content is packaged the resources are all gathered
     and packaged and then finally copied into the designated output folder.</p>
-    <p>What does this mean to you?
-        <ol>
-        <li>If you're only working on your game yourself on a single machine you can place your game resources wherever you wish
-            and any time you update your resource files the changes are reflected in your game project without any need to "reimport".
-            (Just reload your textures and/or shaders).</li>
-        <li>However if you want to be able to share your game project with other people you must store your resource files in a
-            location that is universally available on every single machine.</li>
+
+    <p>What does this mean to you?</p>
+
+    <ol>
+    <li>If you're only working on your game yourself on a single machine you can place your game resources wherever you wish
+        and any time you update your resource files the changes are reflected in your game project without any need to "reimport".
+        (Just reload your textures and/or shaders).</li>
+    <li>However if you want to be able to share your game project with other people you must store your resource files in a
+        location that is universally available on every single machine.</li>
     </ol>
-    The simplest way is to simply place your resource files under your workspace directory. For example:
-    <br>
-    mygame/textures/player/texture0.png<br>
-    mygame/textures/player/texture1.png<br>
+
+    <p>The simplest way is to place your resource files under your workspace directory. For example:</p>
+    <blockquote>
+    c:\mygame\textures\player\texture0.png<br>
+    c:\mygame\textures\player\texture1.png<br>
     ...<br>
-    mygame/content.json<br>
-    mygame/workspace.json<br>
+    c:\mygame\content.json<br>
+    c:\mygame\workspace.json<br>
     <br>
-    When a resource that is stored under the workspace is added to the project/workspace the path is always stored relative
-    to the workspace itself. This makes the whole workspace self contained and portable across machines.
-    You can then additionally add your whole game project directory into some version control tool such as Git.</p>
+    </blockquote>
+    <p>When a resource that is stored under the workspace is added to the project/workspace the path is always stored relative
+    to the workspace itself. This makes the whole workspace self contained and portable across machines. Essentially this means
+    that you can take the whole project folder, copy it, move it, zip it up etc. and move it somewhere else and the project will
+    continue to work as-is.<br>
+    You can also put your whole game project directory into some version control tool such as Git but that is totally up to you.</p>
+
+
+    <h2 id="packaging">Packaging Games</h2>
+    <p>Packaging is the process of combining your game's content and other related assets into a redistributable package/file bundle
+    that other people can run either on their computers or in their web browser.</p>
+
+    <h3 id="packaging-native">Packaging For Native</h3>
+    <p>todo:</p>
+
+    <h3 id="packaging-html5">Packaging For HTML5/Web</h3>
+    <p>When packaging for the web Gamestudio can prepare all that you need for you.
+    This means copying and outputting all the right .wasm and .js files that the engine, your game and your game data needs
+    in order to run in the browser. Unfortunately before this can work some additional configuration steps must be taken.</p>
+
+    <h4>1. Install Emscripten</h4>
+    <p>Unfortunately this a manual process as of now. Please see <a href="https://emscripten.org/docs/getting_started/downloads.html">Emscripten Getting Started</a>
+        on how to install Esmcripten. The goal is to be able to automate this but for now that is not possible.</p>
+
+    <h4>2. Configure Gamestudio Editor</h4>
+    <p>In Gamestudio Editor open <b>Tools|Settings</b>. Click on the Tools tab.<br><br>
+       First select your <a href="http://www.python.org">Python</a> executable.<br><br>
+       <b>If</b> you're using <b>Linux</b> this is likely to be <span>/usr/bin/python</span><br><br>
+       <b>If</b> you're using <b>Windows</b> then you have multiple options.</p>
+       <ul>
+           <li>Use Python from system installation (if any).</li>
+           <li>Use Python from Emscripten SDK. For example <span>C:\emsdk\python\3.9.2-1_64bit\python.exe</span></li>
+           <li>Use Python bundled with Gamestudio. (This is the default)</li>
+       </ul>
+       <p>Secondly select your Emscripten SDK installation folder. (See above for how to install Emscripten).
+       This path should point to the top level emsdk folder. So for example if your emsdk is installed <i>C:\emsdk</i> then
+       you should should have <i>C:\emsdk</i> here as well.</p>
+       <img src="media/tools.png">
+
+
+    <h4>Packaging For HTML5/Web</h4>
+    <p>Once you've completed the pre-requisite steps to installe Emscripten SDK and Python it's possible to package
+        the game project for the web. In Gamestudio Editor open <b>Workspace | Package</b>
+
+        In order to package for the web make sure to select the following options:<br><br>
+        * Write game config.json file<br>
+        * Deploy wasm/js game engine files<br>
+        * Generate game.html main file<br>
+        * Generate web game content file system image<br><br>
+    </p>
+    <img src="media/package.png">
+
+    <p>After the packaging is done you should have all the files that are needed to run the game in the browser
+    in the designed output folder. <i>game.html</i> will be the main html5 file that your browser should then be loading.
+    If will contain links to load the game engine JavaScript and also the filesystem JavaScript files.</p>
+    <img src="media/package-html5-output.png">
+    <p>The contents of pack0 and config.json are included in FILESYSTEM data file and can be deleted.
+    When deploying to a webserver the important files to copy are: <span>game.html, FILESYSTEM.js, FILESYSTEM, GameEngine.js and GameEngine.wasm</span></p>
+
+    <p>A useful hint for running locally is to use python's HTTP server to serve the web content. Simply open a terminal
+        in the output folder and run the following command <span>python -m http.server</span> then use your web browser to navigate to
+        <span>http://localhost:8000/game.html</span></p>
+
+    <p>The technology behind the web support is <a href="http://www.emscripten.org">Emscripten</a>.</p>
+
+    </div> <!--- content -->
 </body>
 </html>
