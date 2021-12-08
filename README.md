@@ -1,9 +1,8 @@
 GAMESTUDIO 2D
 ===================
 
-A 2D game engine and editor for Linux and Windows. Designed for simple single player games such as puzzle games,
-platformers and side scrollers. Eventually support is planned for (top down, 2.5D)  tile based games too for 
-real time strategy and tactics.
+A 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such as puzzle games,
+platformers and side scrollers. Eventually support is planned for tile based games too for real time strategy/tactics.
 
 This readme and other readme files, are for developers and cover information related to developing and building the engine itself.<br>
 For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
@@ -13,7 +12,7 @@ Other readmes:
   * [Graphics](graphics/README.md "Graphics readme") (todo)
   * [Game](game/README.md "Game readme") (todo)
   * [Engine](engine/README.md "Engine readme") (todo)
-  * [UI](uikit/README.md "UIKit readme") (todo)
+  * [UI](uikit/README.md "UIKit readme") 
   * [WDK](wdk/README.md "WDK readme")
 
 ![Screenshot](screens/bandit-play.gif "Bandit demo")
@@ -85,8 +84,8 @@ Build Instructions
 
 WASM
 ------------------------------
-Building to WASM is currently supported only Linux and only covers the engine not the editor.
-The build is separated from the main (CMake based) engine build and is in emscripten/ folder.
+Building to WASM is currently supported only on Linux and covers only the engine not the editor.
+The build is separated from the main engine build and is in emscripten/ folder.
 
 - Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
   location of emsdk is arbitrary, but I've dumped it into gamestudio/ so that my IDE (Clion) can
@@ -103,7 +102,7 @@ The build is separated from the main (CMake based) engine build and is in emscri
 ```
 
 - Next build the Gamestudio engine to WASM blob. Make sure that you have the emscripten tools in your path.
-I.e, emcc should be found. If they aren't you probably want to source the emsdk_env.sh file.
+I.e, emcc should be found. If they aren't you probably need to source the emsdk_env.sh file.
 
 ```
   $ which emcc
@@ -123,30 +122,11 @@ I.e, emcc should be found. If they aren't you probably want to source the emsdk_
   $ emcmake cmake ..
   $ make -j16 install
 ``` 
-If everything went well there should now be GameEngine.js and GameEngine.wasm files. The .js file contains
-the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine when the web page loads.
-   
-The content (assets) need to packaged separately and this step will likely be done by the editor when a project is built for WASM.
-But for now a manual package step is needed using file_packager.py from emsdk
 
-```
-  $ cd gamestudio/emscripten/dist  
-  $ ln -s /home/user/gamestudio/engine/test/dist/assets assets
-  $ /home/user/emsdk/upstream/emscripten/tools/file_packager.py test-engine --preload assets/ --js-output=test-assets.js
-```
-In addition, a .html file is needed. It's possible to have a emcc generate some default .html file but it has a bunch of
-crap in it (silly SVG based image) and is likely to require customization so a simpler .html is provided as part of this
-source repo. The important thing is that the .html file needs to load the engine.js and the ASSETS.js scripts. These should
-be loaded after the script block that defines the var Module for the glue customization.
-```
-  <script       type="text/javascript" src="ASSETS.js"></script>
-  <script async type="text/javascript" src="engine.js"></script> 
-```
-Finally, to serve the web page and all the content a web server is needed.
-```
-  $ cd gamestudio/emscripten/test
-  $ python -m http.server
-``` 
+If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder. 
+The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine
+when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
+game's output directory.
 
 Penguin Juice (Linux)
 ------------------------------
