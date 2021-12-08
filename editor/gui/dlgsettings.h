@@ -41,6 +41,8 @@ namespace gui
         void on_btnSelectShaderEditor_clicked();
         void on_btnSelectScriptEditor_clicked();
         void on_btnSelectAudioEditor_clicked();
+        void on_btnSelectPython_clicked();
+        void on_btnSelectEmsdk_clicked();
 
     private:
         Ui::DlgSettings mUI;

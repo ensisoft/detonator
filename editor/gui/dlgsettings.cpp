@@ -51,6 +51,8 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Set
     SetUIValue(mUI.edtAudioEditorArguments,  settings.audio_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
     SetUIValue(mUI.chkSaveAutomatically, settings.save_automatically_on_play);
+    SetUIValue(mUI.edtPythonExecutable, settings.python_executable);
+    SetUIValue(mUI.edtEmscriptenPath, settings.emsdk);
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -92,6 +94,8 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.cmbWinOrTab,               &mSettings.default_open_win_or_tab);
     GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
     GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
+    GetUIValue(mUI.edtPythonExecutable,       &mSettings.python_executable);
+    GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);
     // text editor settings.
     GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
@@ -178,6 +182,36 @@ void DlgSettings::on_btnSelectAudioEditor_clicked()
     const QFileInfo info(executable);
     mUI.edtAudioEditorExecutable->setText(QDir::toNativeSeparators(executable));
     mUI.edtAudioEditorExecutable->setCursorPosition(0);
+}
+
+void DlgSettings::on_btnSelectPython_clicked()
+{
+    QString filter;
+
+#if defined(WINDOWS_OS)
+    filter = "Python (python.exe)";
+#else
+    filter = "Python (python)";
+#endif
+
+    const QString& executable = QFileDialog::getOpenFileName(this,
+        tr("Select Python Executable"), QString(), filter);
+    if (executable.isEmpty())
+        return;
+
+    const QFileInfo info(executable);
+    mUI.edtPythonExecutable->setText(QDir::toNativeSeparators(executable));
+    mUI.edtPythonExecutable->setCursorPosition(0);
+}
+void DlgSettings::on_btnSelectEmsdk_clicked()
+{
+    const QString& dir = QFileDialog::getExistingDirectory(this,
+        tr("Select Emsdk folder"), QString());
+    if (dir.isEmpty())
+        return;
+
+    mUI.edtEmscriptenPath->setText(QDir::toNativeSeparators(dir));
+    mUI.edtEmscriptenPath->setCursorPosition(0);
 }
 
 } // namespace

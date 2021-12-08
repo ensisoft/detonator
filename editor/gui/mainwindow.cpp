@@ -227,6 +227,22 @@ void MainWindow::closeWidget(MainWidget* widget)
 
 void MainWindow::loadState()
 {
+#if defined(POSIX_OS)
+    mSettings.image_editor_executable  = "/usr/bin/gimp";
+    mSettings.shader_editor_executable = "/usr/bin/gedit";
+    mSettings.script_editor_executable = "/usr/bin/gedit";
+    mSettings.audio_editor_executable  = "/usr/bin/audacity";
+    mSettings.python_executable = "/usr/bin/python";
+    // no emsdk selected, user has to do that :(
+#elif defined(WINDOWS_OS)
+    mSettings.image_editor_executable  = "mspaint.exe";
+    mSettings.shader_editor_executable = "notepad.exe";
+    mSettings.script_editor_executable = "notepad.exe";
+    // todo: what python to use ?
+    // use python from emssdk ? use python packaged with gamestudio ?
+    // emsdk must be selected in any case.
+#endif
+
     // Load master settings.
     Settings settings("Ensisoft", "Gamestudio Editor");
 
@@ -252,6 +268,8 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "default_open_win_or_tab", &mSettings.default_open_win_or_tab);
     settings.GetValue("Settings", "style_name", &mSettings.style_name);
     settings.GetValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
+    settings.GetValue("Settings", "python_executable", &mSettings.python_executable);
+    settings.GetValue("Settings", "emsdk", &mSettings.emsdk);
 
     TextEditor::Settings editor_settings;
     settings.GetValue("TextEditor", "font", &editor_settings.font_description);
@@ -519,8 +537,8 @@ bool MainWindow::SaveWorkspace()
     for (int i=0; i<tabs; ++i)
     {
         const auto& temp = app::RandomString();
-        const auto& path = app::GetAppFilePath("temp");
-        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        const auto& path = app::GetAppHomeFilePath("temp");
+        const auto& file = app::GetAppHomeFilePath("temp/" + temp + ".json");
         QDir dir;
         if (!dir.mkpath(path))
         {
@@ -557,8 +575,8 @@ bool MainWindow::SaveWorkspace()
     for (const auto* child : mChildWindows)
     {
         const auto& temp = app::RandomString();
-        const auto& path = app::GetAppFilePath("temp");
-        const auto& file = app::GetAppFilePath("temp/" + temp + ".json");
+        const auto& path = app::GetAppHomeFilePath("temp");
+        const auto& file = app::GetAppHomeFilePath("temp/" + temp + ".json");
         QDir dir;
         if (!dir.mkpath(path))
         {
@@ -1547,7 +1565,7 @@ void MainWindow::on_workspace_doubleClicked()
 
 void MainWindow::on_actionPackageResources_triggered()
 {
-    DlgPackage dlg(QApplication::activeWindow(), *mWorkspace);
+    DlgPackage dlg(QApplication::activeWindow(), mSettings, *mWorkspace);
     dlg.exec();
 }
 
@@ -2224,6 +2242,8 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "audio_editor_arguments", mSettings.audio_editor_arguments);
     settings.SetValue("Settings", "style_name", mSettings.style_name);
     settings.SetValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
+    settings.SetValue("Settings", "python_executable", mSettings.python_executable);
+    settings.SetValue("Settings", "emsdk", mSettings.emsdk);
     settings.SetValue("MainWindow", "current_workspace",
                       (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
