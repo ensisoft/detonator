@@ -87,22 +87,6 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            <number>0</number>
           </property>
           <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Minimum</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>211</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QLabel" name="lblVBO_2">
             <property name="enabled">
              <bool>false</bool>
@@ -122,6 +106,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -146,6 +136,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -162,6 +158,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            <widget class="QLineEdit" name="wallTime">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -183,6 +185,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -203,6 +211,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -222,6 +236,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            <widget class="QLineEdit" name="fps">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="readOnly">
              <bool>true</bool>
