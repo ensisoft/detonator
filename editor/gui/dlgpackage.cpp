@@ -26,17 +26,20 @@
 #  include <QDir>
 #include "warnpop.h"
 
+#include "editor/gui/appsettings.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/packing.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
-#include "dlgpackage.h"
+#include "editor/gui/dlgpackage.h"
+#include "editor/gui/dlgsettings.h"
 
 namespace gui
 {
 
-DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
+DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspace& workspace)
     : QDialog(parent)
+    , mSettings(settings)
     , mWorkspace(workspace)
 {
     mUI.setupUi(this);
@@ -62,9 +65,12 @@ DlgPackage::DlgPackage(QWidget* parent, app::Workspace& workspace)
     GetProperty(workspace, "packing_param_tex_padding", mUI.spinTexPadding);
     GetProperty(workspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     GetProperty(workspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
-    GetProperty(workspace, "packing_param_write_config", mUI.chkWriteConfig);
-    GetProperty(workspace, "packing_param_write_content", mUI.chkWriteContent);
     GetProperty(workspace, "packing_param_delete_prev", mUI.chkDelete);
+    GetProperty(workspace, "packing_param_write_config", mUI.chkWriteConfig);
+    GetProperty(workspace, "packing_param_copy_native", mUI.chkCopyNative);
+    GetProperty(workspace, "packing_param_copy_html5", mUI.chkCopyHtml5);
+    GetProperty(workspace, "packing_param_generate_html5", mUI.chkGenerateHtml5);
+    GetProperty(workspace, "packing_param_generate_html5_filesys", mUI.chkGenerateHtml5FS);
     GetProperty(workspace, "packing_param_output_dir", &path);
     if (path.isEmpty()) {
         path = app::JoinPath(workspace.GetDir(), "dist");
@@ -141,7 +147,20 @@ void DlgPackage::on_btnStart_clicked()
     {
         dir.removeRecursively();
     }
-
+    if (GetValue(mUI.chkGenerateHtml5FS))
+    {
+        if (mSettings.emsdk.isEmpty())
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("You haven't given any Emscripten SDK path.\n"
+                           "Emscripten SDK is needed in order to package the game content for the web."));
+            //todo: open the settings maybe
+            msg.exec();
+            return;
+        }
+    }
 
     mUI.btnStart->setEnabled(false);
     mUI.btnClose->setEnabled(false);
@@ -168,9 +187,12 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_tex_padding", mUI.spinTexPadding);
     SetProperty(mWorkspace, "packing_param_combine_textures", mUI.chkCombineTextures);
     SetProperty(mWorkspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
-    SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
-    SetProperty(mWorkspace, "packing_param_write_content", mUI.chkWriteContent);
     SetProperty(mWorkspace, "packing_param_delete_prev", mUI.chkDelete);
+    SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
+    SetProperty(mWorkspace, "packing_param_copy_native", mUI.chkCopyNative);
+    SetProperty(mWorkspace, "packing_param_copy_html5", mUI.chkCopyHtml5);
+    SetProperty(mWorkspace, "packing_param_generate_html5", mUI.chkGenerateHtml5);
+    SetProperty(mWorkspace, "packing_param_generate_html5_filesys", mUI.chkGenerateHtml5FS);
     SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.MapFileToWorkspace(path));
 
     app::Workspace::ContentPackingOptions options;
@@ -181,8 +203,14 @@ void DlgPackage::on_btnStart_clicked()
     options.max_texture_width  = GetValue(mUI.cmbMaxTexWidth);
     options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
     options.write_config_file  = GetValue(mUI.chkWriteConfig);
-    options.write_content_file = GetValue(mUI.chkWriteContent);
     options.texture_padding    = GetValue(mUI.spinTexPadding);
+    options.write_content_file = true; // seems pointless to not write this ever
+    options.copy_native_files  = GetValue(mUI.chkCopyNative);
+    options.copy_html5_files   = GetValue(mUI.chkCopyHtml5);
+    options.write_html5_game_file = GetValue(mUI.chkGenerateHtml5);
+    options.write_html5_content_fs_image = GetValue(mUI.chkGenerateHtml5FS);
+    options.python_executable = mSettings.python_executable;
+    options.emsdk_path = mSettings.emsdk;
     const auto success = mWorkspace.PackContent(resources, options);
 
     mUI.btnStart->setEnabled(true);

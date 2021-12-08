@@ -566,6 +566,18 @@ namespace app
             // on the filtering setting on the sampler. the padding pixels
             // are filtered from the source texture.
             unsigned texture_padding = 0;
+            // Copy/deploy the native game engine files (executables and libraries)
+            bool copy_native_files = false;
+            // Copy/deploy the html5/wasm game engine files (wasm and js)
+            bool copy_html5_files = false;
+            // Generate/write/copy the main game html5 file
+            bool write_html5_game_file = false;
+            // Generate/write game content file system image for html5
+            bool write_html5_content_fs_image = false;
+            // path to python executable. need to run emscripten file packaging script.
+            QString python_executable;
+            // path to the emscripten sdk.
+            QString emsdk_path;
         };
 
         // Pack the selected resources into a deployable "package".

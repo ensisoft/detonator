@@ -241,6 +241,7 @@ void MainWindow::loadState()
     // todo: what python to use ?
     // use python from emssdk ? use python packaged with gamestudio ?
     // emsdk must be selected in any case.
+    mSettings.python_executable = app::GetAppInstFilePath("python/python.exe");
 #endif
 
     // Load master settings.

@@ -27,11 +27,13 @@
 
 namespace gui
 {
+    struct AppSettings;
+
     class DlgPackage :  public QDialog
     {
         Q_OBJECT
     public:
-        DlgPackage(QWidget* parent, app::Workspace& workspace);
+        DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspace& workspace);
 
     private slots:
         void on_btnSelectAll_clicked();
@@ -45,6 +47,7 @@ namespace gui
     private:
         Ui::DlgPackage mUI;
     private:
+        gui::AppSettings& mSettings;
         app::Workspace& mWorkspace;
         bool mPackageInProgress = false;
     };

@@ -386,6 +386,7 @@ add_executable(EditorGameHost
     editor/app/window-eventlog.cpp
     editor/app/ipc.h
     editor/app/ipc.cpp
+    editor/app/process.cpp
     editor/gui/host.cpp
     editor/gui/utility.h
     editor/gui/playwindow.h
@@ -533,7 +534,8 @@ add_executable(unit_test_ipc
         editor/app/workspace.cpp
         editor/app/buffer.cpp
         editor/app/ipc.cpp
-        editor/app/packing.cpp)
+        editor/app/packing.cpp
+        editor/app/process.cpp)
 add_executable(unit_test_resource
         editor/app/unit_test/unit_test_resource.cpp
         editor/app/utility.cpp
@@ -546,7 +548,8 @@ add_executable(unit_test_workspace
         editor/app/eventlog.cpp
         editor/app/workspace.cpp
         editor/app/buffer.cpp
-        editor/app/packing.cpp)
+        editor/app/packing.cpp
+        editor/app/process.cpp)
 add_executable(unit_test_event_log
         editor/app/unit_test/unit_test_window-eventlog.cpp
         editor/app/window-eventlog.cpp)
