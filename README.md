@@ -84,13 +84,19 @@ Build Instructions
 
 WASM
 ------------------------------
-Building to WASM is currently supported only on Linux and covers only the engine not the editor.
+Building to WASM currently supported only for the engine but not the editor.
 The build is separated from the main engine build and is in emscripten/ folder.
 
 - Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
   location of emsdk is arbitrary, but I've dumped it into gamestudio/ so that my IDE (Clion) can
   easily find the emscripten headers for C++ tooling (the CMakeLists then has a matching include for this).
 - Currently, the target Emscripten version is 3.0.0. Using other version will likely break things.
+- If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases. Drop the ninja.exe for example
+  into the emsdk folder or anywhere on your PATH.
+
+On Linux
+
+- Install Emscripten
 ```
   $ cd gamestudio
   $ git clone https://github.com/emscripten-core/emsdk.git
@@ -100,18 +106,15 @@ The build is separated from the main engine build and is in emscripten/ folder.
   $ ./emsdk activate 3.0.0
   $ source ./emsdk_env.sh
 ```
-
-- Next build the Gamestudio engine to WASM blob. Make sure that you have the emscripten tools in your path.
-I.e, emcc should be found. If they aren't you probably need to source the emsdk_env.sh file.
-
+-- Check your Emscripten installation
 ```
   $ which emcc
   $ /home/user/emsdk/upstream/emscripten/emcc
   $ emcc --version
   $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
-  $ ....
 ```
-
+- Build the Gamestudio engine into a WASM blob. Make sure that you have the emscripten tools in your path,
+  i.e. you have sourced emsdk_env.sh in your current shell.
 ```
   $ git clone https://github.com/ensisoft/gamestudio
   $ cd gamestudio
@@ -122,6 +125,43 @@ I.e, emcc should be found. If they aren't you probably need to source the emsdk_
   $ emcmake cmake ..
   $ make -j16 install
 ``` 
+
+On Windows
+- Install Emscripten
+```
+  $ cd gamestudio
+  $ git clone https://github.com/emscripten-core/emsdk.git
+  $ cd emsdk
+  $ git pull
+  $ emsdk.bat install latest
+  $ emsdk.bat activate 3.0.0
+  $ emsdk_env.bat
+```
+-- Check your Emscripten and Ninja installation
+```
+  $ where emcc
+  $ C:\coding\gamestudio\emsdk\upstream\emscripten\emcc
+  $ C:\coding\gamestudio\emsdk\upstream\emscripten\emcc.bat
+  $ emcc --version
+  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
+  $ where ninja
+  $ C:\coding\gamestudio\emsdk\ninja.exe
+  $ ninja --version
+  $ 1.10.2
+```
+- Build the Gamestudio engine into a WASM blob. Make sure you have emcc and ninja in your path i.e. you have
+  ran emsdk_env.bat in your current shell. 
+```
+  $ git clone https://github.com/ensisoft/gamestudio
+  $ cd gamestudio
+  $ git submodule update --init --recursive
+  $ cd emscripten
+  $ mkdir build
+  $ cd build
+  $ emcmake cmake .. 
+  $ ninja -j8
+  $ ninja -j8 install
+```
 
 If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder. 
 The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine
