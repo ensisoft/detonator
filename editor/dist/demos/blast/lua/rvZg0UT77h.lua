@@ -9,6 +9,20 @@ local time_to_fire_weapon = 0
 local mine_ready = true
 local mine_load_time = 0.0
 
+local _keydown_bits = 0
+
+_Keys = {
+    Left  = 0x1,
+    Right = 0x2,
+    Up    = 0x4,
+    Down  = 0x8,
+    Fire  = 0x10
+}
+
+function _TestKeyDown(key)
+    return _keydown_bits & key ~= 0
+end
+
 function FireWeapon(player, ammo_name)
     -- what's the current ship's weapon world position ?
     local weapon = player:FindNodeByClassName('Weapon')
@@ -80,14 +94,14 @@ function Update(player, game_time, dt)
     end
 
 
-    if wdk.TestKeyDown(wdk.Keys.ArrowLeft) then
+    if _TestKeyDown(_Keys.Left) then
         if hori_velocity >= 0 then
             hori_velocity = -200
         elseif hori_velocity > -600 then
             hori_velocity = hori_velocity - 100
         end
         player:PlayAnimationByName('Bank')
-    elseif wdk.TestKeyDown(wdk.Keys.ArrowRight) then
+    elseif _TestKeyDown(_Keys.Right) then
         if hori_velocity <= 0 then
             hori_velocity = 200
         elseif hori_velocity < 600 then
@@ -98,13 +112,14 @@ function Update(player, game_time, dt)
         hori_velocity = 0
     end
 
-    if wdk.TestKeyDown(wdk.Keys.ArrowUp) then
+    if _TestKeyDown(_Keys.Up) then
         if vert_velocity >= 0 then
             vert_velocity = -200
         elseif vert_velocity > -600 then
             vert_velocity = vert_velocity - 100
         end
-    elseif wdk.TestKeyDown(wdk.Keys.ArrowDown) then
+    elseif _TestKeyDown(_Keys.Down) then
+        Game:DebugPrint('homo')
         if vert_velocity <= 0 then
             vert_velocity = 200
         elseif vert_velocity < 600 then
@@ -133,7 +148,7 @@ function Update(player, game_time, dt)
 
     -- fire the weapon if some key presses were detected!
     if time_to_fire_weapon == 0 then
-        if wdk.TestKeyDown(wdk.Keys.Space) then
+        if _TestKeyDown(_Keys.Fire) then
             FireWeapon(player, 'RedBullet')
             Audio:PlaySoundEffect('Player Weapon')
         end
@@ -158,8 +173,29 @@ function OnKeyDown(player, symbol, modifier_bits)
         else 
             Audio:PlaySoundEffect('Mine Fail')
         end
+    elseif symbol == wdk.Keys.ArrowLeft then 
+        _keydown_bits = _keydown_bits | _Keys.Left
+    elseif symbol == wdk.Keys.ArrowRight then 
+        _keydown_bits = _keydown_bits | _Keys.Right
+    elseif symbol == wdk.Keys.ArrowUp then 
+        _keydown_bits = _keydown_bits | _Keys.Up
+    elseif symbol == wdk.Keys.ArrowDown then
+        _keydown_bits = _keydown_bits | _Keys.Down
+    elseif symbol == wdk.Keys.Space then 
+        _keydown_bits = _keydown_bits | _Keys.Fire
     end
 end
 
 function OnKeyUp(player, symbol, modifier_bits)
+    if symbol == wdk.Keys.ArrowLeft then 
+        _keydown_bits = _keydown_bits & ~_Keys.Left
+    elseif symbol == wdk.Keys.ArrowRight then 
+        _keydown_bits = _keydown_bits & ~_Keys.Right
+    elseif symbol == wdk.Keys.ArrowUp then 
+        _keydown_bits = _keydown_bits & ~_Keys.Up
+    elseif symbol == wdk.Keys.ArrowDown then
+        _keydown_bits = _keydown_bits & ~_Keys.Down
+    elseif symbol == wdk.Keys.Space then 
+        _keydown_bits = _keydown_bits & ~_Keys.Fire
+    end
 end
