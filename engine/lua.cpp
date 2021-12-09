@@ -57,6 +57,16 @@
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
+#if defined(WINDOWS_OS)
+#  define OS_NAME "WIN32"
+#elif defined(LINUX_OS)
+# define OS_NAME "LINUX"
+#elif defined(WEBASSEMBLY)
+# define OS_NAME "WASM"
+#else
+#  error Unknown platform
+#endif
+
 using namespace game;
 
 // About Lua error handling. The binding code here must be careful
@@ -551,6 +561,7 @@ LuaGame::LuaGame(const std::string& lua_path,
     auto table  = (*mLuaState)["game"].get_or_create<sol::table>();
     table["home"] = game_home;
     table["name"] = game_name;
+    table["OS"]   = OS_NAME;
     auto engine = table.new_usertype<LuaGame>("Engine");
     BindEngine(engine, *this);
     engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
@@ -895,6 +906,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*mLuaState)["State"]    = mStateStore;
     (*mLuaState)["Game"]     = this;
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
+    table["OS"] = OS_NAME;
     auto engine = table.new_usertype<ScriptEngine>("Engine");
     BindEngine(engine, *this);
 
