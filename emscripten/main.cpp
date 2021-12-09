@@ -84,11 +84,13 @@ public:
 
         // todo: deal with failure?
         mContext = emscripten_webgl_create_context("canvas", &attrs);
-        DEBUG("WebGL context = %1", mContext);
+        DEBUG("Create WebGL context. [context=%1]", mContext);
         emscripten_webgl_make_context_current(mContext);
     }
     ~WebGLContext()
     {
+        DEBUG("Destroy WebGL context. [context=%1]", mContext);
+        emscripten_webgl_destroy_context(mContext);
     }
     virtual void Display() override
     {
@@ -122,6 +124,7 @@ public:
     }
    ~Application()
     {
+        DEBUG("Destroy application.");
         base::SetThreadLog(nullptr);
     }
 
@@ -352,6 +355,8 @@ public:
             mEventQueue.pop();
         }
 
+        bool quit = false;
+
         // Process pending application requests if any.
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
@@ -367,7 +372,7 @@ public:
             else if (auto* ptr = std::get_if<engine::Engine::GrabMouse>(&request))
                 HandleEngineRequest(*ptr);
             else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
-                HandleEngineRequest(*ptr);
+                quit = true;
             else BUG("Unhandled engine request type.");
         }
 
@@ -401,7 +406,18 @@ public:
 
         mEngine->EndMainLoop();
 
-        return EM_TRUE;
+        if (!quit)
+            return EM_TRUE;
+
+        DEBUG("Starting shutdown sequence.");
+        mEngine->SetTracer(nullptr);
+        mEngine->Stop();
+        mEngine->Save();
+        mEngine->Shutdown();
+
+        mEngine.reset();
+        mContext.reset();
+        return EM_FALSE;
     }
     void SetFullScreen(bool fullscreen)
     {
@@ -513,10 +529,7 @@ public:
         WARN("Mouse grab is not supported.");
     }
     void HandleEngineRequest(const engine::Engine::QuitApp& quit)
-    {
-        // todo: is this possible ? close the page? delete the div ?
-        WARN("Quit application is not supported.");
-    }
+    { }
 
     EM_BOOL OnMouseEvent(int emsc_type, const EmscriptenMouseEvent* emsc_event)
     {
@@ -798,26 +811,45 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     // the time value is the time from performance.now()
     // which has 1ms resolution on ff.
     // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-    return static_cast<Application*>(user_data)->OnAnimationFrame();
+    auto* app = static_cast<Application*>(user_data);
+
+    const auto ret = app->OnAnimationFrame();
+    if (ret == EM_TRUE)
+        return EM_TRUE;
+
+    DEBUG("Unregister emscripten callbacks.");
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,   nullptr, EM_FALSE /* capture*/, nullptr);
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  nullptr, true, nullptr);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,    nullptr, true, nullptr);
+    emscripten_set_keypress_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, nullptr);
+    emscripten_set_mousedown_callback("canvas",  nullptr, true, nullptr);
+    emscripten_set_mouseup_callback("canvas",    nullptr, true, nullptr);
+    emscripten_set_mousemove_callback("canvas",  nullptr, true, nullptr);
+    emscripten_set_mouseenter_callback("canvas", nullptr, true, nullptr);
+    emscripten_set_mouseleave_callback("canvas", nullptr, true, nullptr);
+
+    DEBUG("Delete canvas element.");
+    emscripten_run_script("var el = document.getElementById('canvas'); el.remove();");
+    INFO("Thank you for playing, G'bye!");
+
+    delete app;
+    return EM_FALSE;
 }
 } // namespace
 
 int main()
 {
-    // todo: how to exit cleanly? is there even such thing?
     Application* app = new Application;
     // todo: error checking and propagation to the HTML UI
     app->Init();
-
-    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, EM_FALSE /* capture*/, OnWindowSizeChanged);
-
-    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, true, OnKeyboardEvent);
-    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, true, OnKeyboardEvent);
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,   app, EM_FALSE /* capture*/, OnWindowSizeChanged);
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  app, true, OnKeyboardEvent);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,    app, true, OnKeyboardEvent);
     emscripten_set_keypress_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, true, OnKeyboardEvent);
 
-    emscripten_set_mousedown_callback("canvas", app, true, OnMouseEvent);
-    emscripten_set_mouseup_callback("canvas", app, true, OnMouseEvent);
-    emscripten_set_mousemove_callback("canvas", app, true, OnMouseEvent);
+    emscripten_set_mousedown_callback("canvas",  app, true, OnMouseEvent);
+    emscripten_set_mouseup_callback("canvas",    app, true, OnMouseEvent);
+    emscripten_set_mousemove_callback("canvas",  app, true, OnMouseEvent);
     emscripten_set_mouseenter_callback("canvas", app, true, OnMouseEvent);
     emscripten_set_mouseleave_callback("canvas", app, true, OnMouseEvent);
     // note that this thread will return after calling this.
