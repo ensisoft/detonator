@@ -182,11 +182,18 @@ private:
         if (it != mUriCache.end())
             return it->second;
 
+        // note that there might still be some resource URIs
+        // with app:// in them even after packing. An example
+        // is a font reference in the default UI style.json file.
+        // the packing procedure in workspace puts these together
+        // with the rest of the game data so for simply use the
+        // content path for the app:// path as well.
+
         std::string str = URI;
         if (base::StartsWith(str, "pck://"))
             str = mContentPath + "/" + str.substr(6);
         else if (base::StartsWith(str, "app://"))
-            str = mApplicationPath + "/" + str.substr(6);
+            str = mContentPath + "/" + str.substr(6); // see the comment above about app://
         else if (base::StartsWith(str, "fs://"))
             str = str.substr(5);
         else WARN("Unmapped resource URI. [uri='%1']", URI);
