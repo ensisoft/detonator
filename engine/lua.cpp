@@ -854,10 +854,9 @@ void ScriptEngine::BeginPlay(Scene* scene)
                 throw std::runtime_error(err.what());
             }
             it = script_env_map.insert({script, script_env}).first;
-            //DEBUG("Loaded Lua script file '%1'.", file);
+            DEBUG("Entity class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
         }
         entity_env_map[klass.GetId()] = it->second;
-        DEBUG("Entity class script loaded. [class='%1']", klass.GetName());
     }
 
     std::unique_ptr<sol::environment> scene_env;
@@ -1150,12 +1149,29 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
     if (it != mTypeEnvs.end())
         return it->second.get();
 
-    const auto& script = klass.GetScriptFileId();
-    const auto& file   = base::JoinPath(mLuaPath, script + ".lua");
-    if (!base::FileExists(file))
+    const auto& script_id   = klass.GetScriptFileId();
+    const auto& script_file = base::JoinPath(mLuaPath, script_id + ".lua");
+    const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+    if (!script_buff)
+    {
+        ERROR("Failed to load entity class script file. [class='%1', file='%2']", klass.GetName(), script_file);
         return nullptr;
+    }
+    const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
+        script_buff->GetSize());
     auto env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
-    mLuaState->script_file(file, *env);
+    const auto& result = mLuaState->script(script_view, *env);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+        // throwing here is just too convenient way to propagate the Lua
+        // specific error message up the stack without cluttering the interface,
+        // and when running the engine inside the editor we really want to
+        // have this lua error propagated all the way to the UI
+        throw std::runtime_error(err.what());
+    }
+    DEBUG("Entity class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
     it = mTypeEnvs.insert({klassId, std::move(env)}).first;
     return it->second.get();
 }
