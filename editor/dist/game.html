@@ -9,27 +9,31 @@
         font-family: arial;
         margin: 0;
         padding: none;
-        background-color: #181a1b;
+        background-color: #101010;
+      }
+      a {
+        color: rgb(120, 120, 120);
       }
 
-      .emscripten {
+      div {
+        background-color: #101010;
         padding-right: 0;
         margin-left: auto;
         margin-right: auto;
         display: block;
-      }
-      div.emscripten {
         text-align: center;
+        color: rgb(120, 120, 120);
+        font-weight: bold;
       }
 
-      .spinner {
+      #spinner {
         height: 30px;
         width: 30px;
         margin: 0;
         margin-top: 20px;
-        margin-left: 20px;
+        margin-left: auto;
+        margin-right: auto;
         display: inline-block;
-        vertical-align: top;
 
         -webkit-animation: rotation .8s linear infinite;
         -moz-animation: rotation .8s linear infinite;
@@ -62,15 +66,6 @@
         to {transform: rotate(360deg);}
       }
 
-      #status {
-        display: inline-block;
-        vertical-align: top;
-        margin-top: 30px;
-        margin-left: 20px;
-        font-weight: bold;
-        color: rgb(120, 120, 120);
-      }
-
       #progress {
         height: 20px;
         width: 300px;
@@ -90,27 +85,72 @@
 
         Currently, scaling the content for displaying on a hDPI screen is left up to the browser.
       */
-      canvas {
+      #canvas {
         border: 0px none;
+        padding: 0px;
+        margin-top: 30px;
         background-color: black;
+      }
+
+      #error {
+        color: darkred;
+        font-size: large;
+      }
+      #ensisoft {
+        font-size: 11px;
       }
 
     </style>
   </head>
   <body>
-    <center>
-    <div class="spinner" id='spinner'></div>
-    <div class="emscripten" id="status">Downloading...</div>
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>
+
+    <div>
+      <div id="spinner"></div>
     </div>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
-    </center>
+
+    <div id="status">
+      Downloading...
+    </div>
+
+    <div>
+      <progress value="0" max="100" id="progress" hidden=true></progress>
+    </div>
+
+    <!-- This cotent is initially hidden but shown after the game has exited. -->
+    <div>
+      <p id="goodbye" hidden=true>
+      Have a good day.<br>
+      If you want to play again refresh the page!</p>
+    </div>
+
+    <!-- This content is initially hidden but shown on error. -->
+    <div>
+      <p id="error" hidden=true>
+        Oops, there was an error. :(<br>
+        See JavaScript console for details.</p>
+    </div>
+
+    <!-- Canvas which is the OpenGL ES render target.
+        Start with 0 render target width and height. So basically initially not visible.
+        when the engine initialization completes the engine will set the
+        actual render target size based on the game's config.json
+    -->
+    <div>
+      <canvas id="canvas" width=0 height=0 oncontextmenu="event.preventDefault()" tabindex=-1 ></canvas>
+    </div>
+
+    <div>
+      <p id="ensisoft">
+        GAMESTUDIO 2D Copyright (c) 2020-2021 Sami Väisänen<br>
+        <a href="http://www.ensisoft.com">http://www.ensisoft.com</a><br>
+      </p>
+    </div>
 
     <script type='text/javascript'>
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
+      var errorElement = document.getElementById('error');
 
       var Module = {
 
@@ -162,9 +202,16 @@
 
         totalDependencies: 0,
 
-        monitorRunDependencies: function(left) {
-          this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        monitorRunDependencies: function(remaining) {
+          // initialize total on first call.
+          this.totalDependencies = Math.max(this.totalDependencies, remaining);
+          if (remaining == 0) {
+            Module.setStatus('All downloads complete!');
+          } else {
+            var current = this.totalDependencies - remaining;
+            var total   = this.totalDependencies;
+            Module.setStatus('Downloading ... (' + current + '/' + total + ')');
+          }
         }
       };
 
@@ -172,10 +219,13 @@
 
       window.onerror = function(event) {
         // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-        Module.setStatus('Exception thrown, see JavaScript console');
         spinnerElement.style.display = 'none';
+        statusElement.style.display  = 'none';
+        errorElement.hidden  = false;
+
         Module.setStatus = function(text) {
-          if (text) Module.printErr('[post-exception status] ' + text);
+          console.log('Module status call after exception.');
+          console.log(text);
         };
       };
     </script>

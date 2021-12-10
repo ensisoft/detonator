@@ -434,6 +434,9 @@ public:
         if (!quit)
             return EM_TRUE;
 
+        if (mSoftFullScreen)
+            SetFullScreen(false);
+
         DEBUG("Starting shutdown sequence.");
         mEngine->SetTracer(nullptr);
         mEngine->Stop();
@@ -876,6 +879,8 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     emscripten_run_script("FS.syncfs(false, function(err) {});");
     INFO("Thank you for playing, G'bye!");
 
+    emscripten_run_script("var goodbye = document.getElementById('goodbye');"
+                          "goodbye.hidden = false;");
     delete app;
     return EM_FALSE;
 }
