@@ -79,6 +79,7 @@ target_link_libraries(GameEngine Lua)
 # okay so these work like these (the CMake way)
 target_compile_options(GameEngine PRIVATE -fbracket-depth=1024 -fexceptions)
 target_compile_options(GameEngine PRIVATE -O3)
+target_link_options(GameEngine PRIVATE -lidbfs.js)
 # disabled for now since this seems to be broken somehow
 # and creates distortion in the sound.
 #target_compile_options(test-engine PRIVATE -msse2 -msimd128)

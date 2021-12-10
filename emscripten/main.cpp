@@ -17,6 +17,9 @@
 #include <unordered_map>
 #include <queue>
 #include <variant>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "base/logging.h"
 #include "base/json.h"
@@ -54,6 +57,29 @@ double CurrentRuntime()
     const auto gone = now - start;
     return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
            (1000.0 * 1000.0);
+}
+
+std::string GenerateGameHome(const std::string& user_home, const std::string& title)
+{
+    std::string dir = "/ensisoft/";
+    dir += ".GameStudio";
+    if (mkdir(dir.c_str(), 0777) == -1)
+        WARN("Failed to create game home directory. [dir='%1', error='%2']", dir, strerror(errno));
+    dir += "/";
+    dir += title;
+    if (mkdir(dir.c_str(), 0777) == -1)
+        WARN("Failed to create game home directory. [dir='%1', error='%2']", dir, strerror(errno));
+    return dir;
+#if 0
+    std::error_code error;
+    std::filesystem::path p(user_home);
+    p /= ".GameStudio";
+    if (!std::filesystem::create_directory(p, error))
+    p /= title;
+    if (!std::filesystem::create_directory(p, error))
+        ERROR("Failed to create game home directory. [dir='%1', error='%2']", p.generic_u8string(), error.message());
+    return p.generic_u8string(); // std::string until c++20 (u8string)
+#endif
 }
 
 class WebGLContext : public gfx::Device::Context
@@ -182,7 +208,7 @@ public:
         mResourceLoader = engine::FileResourceLoader::Create();
         mContentLoader->LoadFromFile("/" + content + "/content.json");
         mResourceLoader->SetApplicationPath("/");
-        mResourceLoader->SetContentPath("/" + content + "/");
+        mResourceLoader->SetContentPath("/" + content);
 
         // todo: context attributes.
         mContext.reset(new WebGLContext);
@@ -207,11 +233,10 @@ public:
         env.graphics_loader  = mResourceLoader.get();
         env.game_data_loader = mResourceLoader.get();
         env.audio_loader     = mResourceLoader.get();
-        env.directory        = ".";
+        env.directory        = "/";
         env.user_home        = ""; // todo:
-        env.game_home        = ""; // todo:
+        env.game_home        = GenerateGameHome("/ensisoft", identifier);
         mEngine->SetEnvironment(env);
-
 
         engine::Engine::InitParams init;
         init.editing_mode     = false;
@@ -813,10 +838,26 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
     auto* app = static_cast<Application*>(user_data);
 
+    static bool init_done = false;
+    if (!init_done)
+    {
+        if (emscripten_run_script_int("Module.syncdone") == 1)
+        {
+            // todo: error checking and propagation to the HTML UI
+            app->Init();
+            init_done = true;
+        }
+    }
+    if (!init_done)
+        return EM_TRUE;
+
     const auto ret = app->OnAnimationFrame();
+    // EM_TRUE means that another frame is wanted, so the app
+    // is still running.
     if (ret == EM_TRUE)
         return EM_TRUE;
 
+    // prepare to "exit" cleanly.
     DEBUG("Unregister emscripten callbacks.");
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,   nullptr, EM_FALSE /* capture*/, nullptr);
     emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  nullptr, true, nullptr);
@@ -830,6 +871,9 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
 
     DEBUG("Delete canvas element.");
     emscripten_run_script("var el = document.getElementById('canvas'); el.remove();");
+    // try to sync changes to IDB filesystem back to a persistent storage.
+    // todo: this is async, we'd probably need to wait until callback executes?
+    emscripten_run_script("FS.syncfs(false, function(err) {});");
     INFO("Thank you for playing, G'bye!");
 
     delete app;
@@ -839,9 +883,24 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
 
 int main()
 {
+    // in emscripten the default file system is in-memory
+    // only filesystem and isn't persisted anywhere.
+    // IDBFS offers persistent storage but is unfortunately asynchronous.
+    // try to mount it here and then synchronize from browser's
+    // persistent storage into memory.
+    EM_ASM(
+        Module.syncdone = 0;
+        FS.mkdir('/ensisoft');
+        FS.mount(IDBFS, {}, '/ensisoft');
+        FS.syncfs(true, function(err) {
+            console.log('Filesystem sync. Error=', err);
+            // there's also emscripten_push_main_loop_blocker
+            Module.syncdone = 1;
+        });
+    );
+
     Application* app = new Application;
-    // todo: error checking and propagation to the HTML UI
-    app->Init();
+
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,   app, EM_FALSE /* capture*/, OnWindowSizeChanged);
     emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  app, true, OnKeyboardEvent);
     emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,    app, true, OnKeyboardEvent);
