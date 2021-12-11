@@ -76,31 +76,27 @@ target_link_libraries(GameEngine sndfile)
 target_link_libraries(GameEngine samplerate)
 target_link_libraries(GameEngine Lua)
 
-# okay so these work like these (the CMake way)
 target_compile_options(GameEngine PRIVATE -fbracket-depth=1024 -fexceptions)
 target_compile_options(GameEngine PRIVATE -O3)
-target_link_options(GameEngine PRIVATE -lidbfs.js)
 # disabled for now since this seems to be broken somehow
 # and creates distortion in the sound.
 #target_compile_options(test-engine PRIVATE -msse2 -msimd128)
 
-# emscripten is "special".
 # the flags that are switched on "-s" can be both linker or compile flags
-# and they don't work with target_compile_options or with target_link_options
+target_compile_options(GameEngine PRIVATE -sUSE_MPG123)
+target_compile_options(GameEngine PRIVATE -sUSE_HARFBUZZ)
+target_compile_options(GameEngine PRIVATE -sUSE_FREETYPE)
+target_compile_options(GameEngine PRIVATE -sUSE_BOOST_HEADERS)
 
-set_target_properties(GameEngine PROPERTIES COMPILE_FLAGS "-s USE_MPG123=1 -s USE_HARFBUZZ=1 -s USE_FREETYPE=1 -s USE_BOOST_HEADERS=1")
-
-set_target_properties(GameEngine PROPERTIES LINK_FLAGS "-s NO_DISABLE_EXCEPTION_CATCHING -s USE_MPG123=1 -s USE_HARFBUZZ=1 -s USE_FREETYPE=1 -s USE_BOOST_HEADERS=1 -s FORCE_FILESYSTEM=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 ")
-#target_compile_options(test PRIVATE -fbracket-depth=1024 -fexceptions)
-#target_compile_options(test PRIVATE -s FORCE_FILESYSTEM=1)
-#target_compile_options(test PRIVATE -s USE_HARFBUZZ=1)
-#target_compile_options(test PRIVATE -s USE_FREETYPE=1)
-#target_compile_options(test PRIVATE -s USE_BOOST_HEADERS=1)
-
-#target_link_options(test PRIVATE -s FORCE_FILESYSTEM=1)
-#target_link_options(test PRIVATE -s USE_HARFBUZZ=1)
-#target_link_options(test PRIVATE -s USE_FREETYPE=1)
-#target_link_options(test PRIVATE -s USE_BOOST_HEADERS=1)
+target_link_options(GameEngine PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
+target_link_options(GameEngine PRIVATE -sUSE_MPG123)
+target_link_options(GameEngine PRIVATE -sUSE_HARFBUZZ)
+target_link_options(GameEngine PRIVATE -sUSE_FREETYPE)
+target_link_options(GameEngine PRIVATE -sUSE_BOOST_HEADERS)
+target_link_options(GameEngine PRIVATE -sFORCE_FILESYSTEM)
+target_link_options(GameEngine PRIVATE -sWASM)
+target_link_options(GameEngine PRIVATE -sALLOW_MEMORY_GROWTH)
+target_link_options(GameEngine PRIVATE -lidbfs.js)
 
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
