@@ -1246,12 +1246,13 @@ void PlayWindow::SetDebugOptions() const
     engine::Engine::DebugOptions debug;
     debug.debug_pause     = GetValue(mUI.actionPause);
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
-    debug.debug_log       = GetValue(mUI.actionToggleDebugLog);
     debug.debug_show_msg  = GetValue(mUI.actionToggleDebugMsg);
     debug.debug_font      = "app://fonts/orbitron-medium.otf";
     debug.debug_show_fps  = InFullScreen();
     debug.debug_print_fps = false;
     mEngine->SetDebugOptions(debug);
+
+    mGameLibSetGlobalLogger(mLogger.get(),GetValue(mUI.actionToggleDebugLog));
 }
 
 void PlayWindow::Barf(const std::string& msg)

@@ -326,6 +326,7 @@ int main(int argc, char* argv[])
     try
     {
         engine::Engine::DebugOptions debug;
+        bool global_debug_log = false;
 
         std::string trace_file;
         std::string config_file;
@@ -361,17 +362,17 @@ int main(int argc, char* argv[])
 
         if (opt.WasGiven("--debug"))
         {
-            debug.debug_log  = true;
-            debug.debug_draw = true;
-            debug.debug_show_fps = true;
-            debug.debug_show_msg = true;
+            global_debug_log = true;
+            debug.debug_draw      = true;
+            debug.debug_show_fps  = true;
+            debug.debug_show_msg  = true;
             debug.debug_print_fps = true;
         }
         else
         {
+            global_debug_log = opt.WasGiven("--debug-log");
             debug.debug_print_fps = opt.WasGiven("--debug-print-fps");
             debug.debug_show_fps  = opt.WasGiven("--debug-show-fps");
-            debug.debug_log       = opt.WasGiven("--debug-log");
             debug.debug_draw      = opt.WasGiven("--debug-draw");
             debug.debug_show_msg  = opt.WasGiven("--debug-show-msg");
         }
@@ -398,7 +399,7 @@ int main(int argc, char* argv[])
         //  - change the locking mechanism and put it into the logger.
         base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
         base::SetGlobalLog(&logger);
-        base::EnableDebugLog(debug.debug_log);
+        base::EnableDebugLog(global_debug_log);
         DEBUG("It's alive!");
         INFO("Copyright (c) 2010-2020 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
@@ -439,8 +440,9 @@ int main(int argc, char* argv[])
         GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
         GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
 
-        // we've created the logger object, so pass it to the engine.
-        GameLibSetGlobalLogger(&logger, debug.debug_log);
+        // we've created the logger object, so pass it to the engine library
+        // which has its own copies of the global state.
+        GameLibSetGlobalLogger(&logger, global_debug_log);
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
