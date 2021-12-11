@@ -97,6 +97,8 @@ target_link_options(GameEngine PRIVATE -sFORCE_FILESYSTEM)
 target_link_options(GameEngine PRIVATE -sWASM)
 target_link_options(GameEngine PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(GameEngine PRIVATE -lidbfs.js)
+target_link_options(GameEngine PRIVATE -sEXPORTED_FUNCTIONS=_main,_gui_set_flag)
+target_link_options(GameEngine PRIVATE -sEXPORTED_RUNTIME_METHODS=ccall)
 
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache

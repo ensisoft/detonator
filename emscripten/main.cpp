@@ -34,6 +34,13 @@
 // python -m http.server
 
 namespace {
+struct WebGuiToggleDbgSwitchCmd {
+    std::string name;
+    bool enabled = false;
+};
+using WebGuiCmd = std::variant<WebGuiToggleDbgSwitchCmd>;
+
+std::queue<WebGuiCmd> gui_commands;
 
 // returns number of seconds elapsed since the last call
 // of this function.
@@ -219,8 +226,11 @@ public:
         // is the same between all the launcher applications.
         // that is engine/main/main.cpp and editor/gui/playwindow.cpp
 
-        // todo: get these from the web UI
+        // The initial state needs to be kept in sync with the HTML5 UI somehow!
+        // easiest thing is just to start with a known default state (all off)
+        // and then let the UI set the state.
         engine::Engine::DebugOptions debug;
+        debug.debug_pause     = false;
         debug.debug_draw      = false;
         debug.debug_show_fps  = false;
         debug.debug_show_msg  = false;
@@ -301,6 +311,26 @@ public:
         mCanvasDisplayWidth  = canvas_display_width;
         mCanvasDisplayHeight = canvas_display_height;
         mListener = mEngine->GetWindowListener();
+
+        // sync the HTML5 gui. (quite easy to do from here with all the data)
+        // from JS would need to marshall the call with ccall
+        struct LogFlag {
+            const char* name;
+            bool value;
+        };
+        LogFlag log_flags[] = {
+            {"chk-log-debug", base::IsLogEventEnabled(base::LogEvent::Debug)},
+            {"chk-log-warn", base::IsLogEventEnabled(base::LogEvent::Warning)},
+            {"chk-log-info", base::IsLogEventEnabled(base::LogEvent::Info)},
+            {"chk-log-error", base::IsLogEventEnabled(base::LogEvent::Error)}
+        };
+        for (int i=0; i<4; ++i)
+        {
+            const auto& flag = log_flags[i];
+            const auto& script = base::FormatString("var chk = document.getElementById('%1');"
+                "chk.checked = %2;", flag.name, flag.value);
+            emscripten_run_script(script.c_str());
+        }
         return true;
     }
 
@@ -331,6 +361,39 @@ public:
 
     EM_BOOL OnAnimationFrame()
     {
+        if (!gui_commands.empty())
+        {
+            engine::Engine::DebugOptions debug;
+            while (!gui_commands.empty())
+            {
+                const auto& cmd = gui_commands.front();
+                if (const auto* ptr = std::get_if<WebGuiToggleDbgSwitchCmd>(&cmd))
+                {
+                    if (ptr->name == "chk-dbg-pause")
+                        debug.debug_pause = ptr->enabled;
+                    else if (ptr->name == "chk-dbg-draw")
+                        debug.debug_draw = ptr->enabled;
+                    else if (ptr->name == "chk-dbg-show-msg")
+                        debug.debug_show_msg = ptr->enabled;
+                    else if (ptr->name == "chk-dbg-show-fps")
+                        debug.debug_show_fps = ptr->enabled;
+                    else if (ptr->name == "chk-dbg-print-fps")
+                        debug.debug_print_fps = ptr->enabled;
+                    else if (ptr->name == "chk-log-debug")
+                        base::EnableLogEvent(base::LogEvent::Debug, ptr->enabled);
+                    else if (ptr->name == "chk-log-info")
+                        base::EnableLogEvent(base::LogEvent::Info, ptr->enabled);
+                    else if (ptr->name == "chk-log-warn")
+                        base::EnableLogEvent(base::LogEvent::Warning, ptr->enabled);
+                    else if (ptr->name == "chk-log-error")
+                        base::EnableLogEvent(base::LogEvent::Error, ptr->enabled);
+                    else WARN("Unknown debug flag. [flag='%1']", ptr->name);
+                }
+                gui_commands.pop();
+            }
+            mEngine->SetDebugOptions(debug);
+        }
+
         // important: make sure that the order in which stuff is done
         // is the same across all "main application" instances.
         // i.e., native main and editor's playwindow main.
@@ -922,3 +985,12 @@ int main()
     return 0;
 }
 
+extern "C" {
+void gui_set_flag(const char* name, bool enabled)
+{
+    WebGuiToggleDbgSwitchCmd cmd;
+    cmd.name = name;
+    cmd.enabled = enabled;
+    gui_commands.push(std::move(cmd));
+}
+} // extern "C"

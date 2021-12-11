@@ -130,6 +130,18 @@
         See JavaScript console for details.</p>
     </div>
 
+    <!-- developer control panel with some UI to control the various
+      engine debugging and logging flags -->
+    <div>
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-pause">Pause
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-draw">Debug Draw
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-msg">Debug Msg
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-log-debug">Log Debug
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-log-warn">Log Warn
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-log-info">Log Info
+        <input type="checkbox" onclick='OnChkToggle(this);' id="chk-log-error">Log Error
+    </div>
+
     <!-- Canvas which is the OpenGL ES render target.
         Start with 0 render target width and height. So basically initially not visible.
         when the engine initialization completes the engine will set the
@@ -147,6 +159,13 @@
     </div>
 
     <script type='text/javascript'>
+      function OnChkToggle(chk) {
+          Module.ccall('gui_set_flag',
+            null,  // return
+            ['string', 'boolean'], // argument types
+            [chk.id, chk.checked]);
+      }
+
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
