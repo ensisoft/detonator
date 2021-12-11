@@ -28,7 +28,7 @@
 #  include <emscripten/emscripten.h>
 #  include <emscripten/html5.h>
 #endif
-#include <cassert>
+
 #include <iostream>
 #include <atomic>
 #include <chrono>
@@ -43,9 +43,12 @@ thread_local base::Logger* threadLogger;
 // global logger
 static base::Logger* globalLogger;
 
-// atomic flag to globally specify whether debug
-// logs are allowed to go through or not
+// atomic flag to globally specify which log events
+// are enabled or not.
 static std::atomic<bool> isGlobalDebugLogEnabled(false);
+static std::atomic<bool> isGlobalWarnLogEnabled(true);
+static std::atomic<bool> isGlobalInfoLogEnabled(true);
+static std::atomic<bool> isGlobalErrorLogEnabled(true);
 
 } // namespace
 
@@ -65,7 +68,7 @@ const char* ToString(base::LogEvent e)
         case LogEvent::Error:
             return "Error";
     }
-    assert(!"wat");
+    BUG("wat");
     return "";
 }
 
@@ -278,6 +281,33 @@ void FlushGlobalLog()
 bool IsDebugLogEnabled()
 {
     return isGlobalDebugLogEnabled;
+}
+
+bool IsLogEventEnabled(LogEvent type)
+{
+    if (type == LogEvent::Debug)
+        return isGlobalDebugLogEnabled;
+    else if (type == LogEvent::Warning)
+        return isGlobalWarnLogEnabled;
+    else if (type == LogEvent::Error)
+        return isGlobalWarnLogEnabled;
+    else if (type == LogEvent::Info)
+        return isGlobalInfoLogEnabled;
+    else BUG("No such log event.");
+    return false;
+}
+
+void EnableLogEvent(LogEvent type, bool on_off)
+{
+    if (type == LogEvent::Debug)
+        isGlobalDebugLogEnabled = on_off;
+    else if (type == LogEvent::Warning)
+        isGlobalWarnLogEnabled = on_off;
+    else if (type == LogEvent::Error)
+        isGlobalWarnLogEnabled = on_off;
+    else if (type == LogEvent::Info)
+        isGlobalInfoLogEnabled = on_off;
+    else BUG("No such log event.");
 }
 
 void EnableDebugLog(bool on_off)

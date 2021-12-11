@@ -359,6 +359,10 @@ namespace base
     // debug logging is on or off
     bool IsDebugLogEnabled();
 
+    bool IsLogEventEnabled(LogEvent type);
+
+    void EnableLogEvent(LogEvent type, bool on_off);
+
     // Toggle the global (pertains to all threads) setting for runtime
     // debug logging on or off
     void EnableDebugLog(bool on_off);
@@ -371,11 +375,9 @@ namespace base
     template<typename... Args>
     void WriteLog(LogEvent type, const char* file, int line, const std::string& fmt, const Args&... args)
     {
-        if (type == LogEvent::Debug)
-        {
-            if (!IsDebugLogEnabled())
-                return;
-        }
+        if (!IsLogEventEnabled(type))
+            return;
+
         // format the message in the log statement.
         WriteLogMessage(type, file, line, FormatString(fmt, args...));
     }
