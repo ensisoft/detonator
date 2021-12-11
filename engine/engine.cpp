@@ -119,7 +119,6 @@ public:
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
         mDebug = debug;
-        base::EnableDebugLog(mDebug.debug_log);
 
         if (mAudio)
             mAudio->SetDebugPause(debug.debug_pause);

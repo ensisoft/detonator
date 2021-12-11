@@ -222,7 +222,6 @@ public:
         // todo: get these from the web UI
         engine::Engine::DebugOptions debug;
         debug.debug_draw      = false;
-        debug.debug_log       = true;
         debug.debug_show_fps  = false;
         debug.debug_show_msg  = false;
         debug.debug_print_fps = false;

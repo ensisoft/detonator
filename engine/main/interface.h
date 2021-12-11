@@ -136,8 +136,6 @@ namespace engine
             // Add some debug drawing of objects in the scene.
             // For example physics bodies.
             bool debug_draw = false;
-            // Enable DEBUG log printing.
-            bool debug_log  = false;
             // Show current FPS in the rendering output.
             bool debug_show_fps = false;
             // Print current FPS to the DEBUG log.
