@@ -548,19 +548,10 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         engine->Init(params);
 
-        // the times here are in the application timeline which
-        // is not the same as the real wall time but can drift
-        float updates_per_second = 60.0f;
-        float ticks_per_second = 1.0f;
-        base::JsonReadSafe(json["application"], "updates_per_second", &updates_per_second);
-        base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
-        DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
-
         engine::Engine::EngineConfig config;
-        base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
-        base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
-        config.updates_per_second = updates_per_second;
-        config.ticks_per_second   = ticks_per_second;
+        config.ticks_per_second   = 1.0f;
+        config.updates_per_second = 60.0f;
+
         if (json.contains("physics"))
         {
             const auto& physics_settings = json["physics"];
@@ -573,6 +564,11 @@ int main(int argc, char* argv[])
         {
             const auto& engine_settings = json["engine"];
             base::JsonReadSafe(engine_settings, "clear_color", &config.clear_color);
+            base::JsonReadSafe(engine_settings, "default_min_filter", &config.default_min_filter);
+            base::JsonReadSafe(engine_settings, "default_mag_filter", &config.default_mag_filter);
+            base::JsonReadSafe(engine_settings, "updates_per_second", &config.updates_per_second);
+            base::JsonReadSafe(engine_settings, "ticks_per_second", &config.ticks_per_second);
+            DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", config.updates_per_second, config.ticks_per_second);
         }
         if (json.contains("mouse_cursor"))
         {

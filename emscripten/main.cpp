@@ -92,18 +92,34 @@ std::string GenerateGameHome(const std::string& user_home, const std::string& ti
 class WebGLContext : public gfx::Device::Context
 {
 public:
-    WebGLContext()
+    // WebGL power preference.
+    enum class PowerPreference {
+        // Request a default power preference setting
+        Default,
+        // Request a low power mode that prioritizes power saving and battery over render perf
+        LowPower,
+        // Request a high performance mode that prioritizes rendering perf
+        // over battery life/power consumption
+        HighPerf
+    };
+    WebGLContext(PowerPreference powerpref, bool antialias)
     {
         EmscriptenWebGLContextAttributes attrs;
         emscripten_webgl_init_context_attributes(&attrs);
         attrs.alpha                        = false;
         attrs.depth                        = true;
         attrs.stencil                      = true;
-        attrs.antialias                    = true;
+        attrs.antialias                    = antialias;
         attrs.majorVersion                 = 1; // WebGL 1.0 is based on OpenGL ES 2.0
         attrs.minorVersion                 = 0;
         attrs.preserveDrawingBuffer        = false;
         attrs.failIfMajorPerformanceCaveat = true;
+        attrs.powerPreference              = EM_WEBGL_POWER_PREFERENCE_DEFAULT;
+        if (powerpref == PowerPreference::HighPerf)
+            attrs.powerPreference = EM_WEBGL_POWER_PREFERENCE_HIGH_PERFORMANCE;
+        else if (powerpref == PowerPreference::LowPower)
+            attrs.powerPreference = EM_WEBGL_POWER_PREFERENCE_LOW_POWER;
+
         /*
         attrs.premultipliedAlpha           = false;
         attrs.preserveDrawingBuffer        = false;
@@ -178,23 +194,23 @@ public:
         base::JsonReadSafe(json["application"], "identifier", &identifier);
         emscripten_set_window_title(title.c_str());
 
-        unsigned window_width  = 0;
-        unsigned window_height = 0;
-        bool window_can_resize = true;
-        bool window_has_border = true;
-        bool window_set_fullscreen = false;
-        bool window_vsync = false;
-        bool window_show_cursor = false;
-        bool window_grab_mouse  = false;
-        base::JsonReadSafe(json["window"], "width", &window_width);
-        base::JsonReadSafe(json["window"], "height", &window_height);
-        base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
-        base::JsonReadSafe(json["window"], "has_border", &window_has_border);
-        base::JsonReadSafe(json["window"], "set_fullscreen", &window_set_fullscreen);
-        base::JsonReadSafe(json["window"], "vsync", &window_vsync);
-        base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
-        base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
-
+        // How the HTML5 canvas is sized on the page.
+        enum class CanvasMode {
+            // Canvas has a fixed size
+            Default,
+            // Canvas is resized to match the available client area in the page.
+            SoftFullScreen
+        };
+        CanvasMode canvas_mode = CanvasMode::Default;
+        WebGLContext::PowerPreference power_pref = WebGLContext::PowerPreference::Default;
+        unsigned canvas_width  = 0;
+        unsigned canvas_height = 0;
+        bool antialias = true;
+        base::JsonReadSafe(json["html5"], "canvas_mode", &canvas_mode);
+        base::JsonReadSafe(json["html5"], "canvas_width", &canvas_width);
+        base::JsonReadSafe(json["html5"], "canvas_height", &canvas_height);
+        base::JsonReadSafe(json["html5"], "webgl_power_pref", &power_pref);
+        base::JsonReadSafe(json["html5"], "webgl_antialias", &antialias);
         mDevicePixelRatio = emscripten_get_device_pixel_ratio();
         DEBUG("Device pixel ratio = %1.", mDevicePixelRatio);
 
@@ -205,11 +221,17 @@ public:
         // try to set the size of the canvas element's drawing buffer.
         // this is *not* the same as the final display size which is determined
         // by any CSS based size and browser's hDPI scale factor.
-        emscripten_set_canvas_element_size("canvas", window_width, window_height);
+        emscripten_set_canvas_element_size("canvas", canvas_width, canvas_height);
         emscripten_get_canvas_element_size("canvas", &canvas_render_width, &canvas_render_height);
         emscripten_get_element_css_size("canvas", &canvas_display_width, &canvas_display_height);
         DEBUG("Initial canvas render target size. [width=%1, height=%2]", canvas_render_width, canvas_render_height);
         DEBUG("Initial canvas display (CSS logical) size. [width=%1, height=%2]", canvas_display_width, canvas_display_height);
+
+        if (canvas_mode == CanvasMode::SoftFullScreen)
+        {
+            DEBUG("Enter soft fullscreen canvas mode.");
+            SetFullScreen(true);
+        }
 
         mContentLoader  = engine::JsonFileClassLoader::Create();
         mResourceLoader = engine::FileResourceLoader::Create();
@@ -218,7 +240,7 @@ public:
         mResourceLoader->SetContentPath("/" + content);
 
         // todo: context attributes.
-        mContext.reset(new WebGLContext);
+        mContext.reset(new WebGLContext(power_pref, antialias));
 
         mEngine.reset(Gamestudio_CreateEngine());
 
@@ -256,19 +278,10 @@ public:
         base::JsonReadSafe(json["application"], "game_script", &init.game_script);
         mEngine->Init(init);
 
-        // the times here are in the application timeline which
-        // is not the same as the real wall time but can drift
-        float updates_per_second = 60.0f;
-        float ticks_per_second = 1.0f;
-        base::JsonReadSafe(json["application"], "updates_per_second", &updates_per_second);
-        base::JsonReadSafe(json["application"], "ticks_per_second", &ticks_per_second);
-        DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", updates_per_second, ticks_per_second);
-
         engine::Engine::EngineConfig config;
-        base::JsonReadSafe(json["application"], "default_min_filter", &config.default_min_filter);
-        base::JsonReadSafe(json["application"], "default_mag_filter", &config.default_mag_filter);
-        config.updates_per_second = updates_per_second;
-        config.ticks_per_second   = ticks_per_second;
+        config.updates_per_second = 60.0f;
+        config.ticks_per_second   = 1.0f;
+
         if (json.contains("physics"))
         {
             const auto& physics_settings = json["physics"];
@@ -281,6 +294,11 @@ public:
         {
             const auto& engine_settings = json["engine"];
             base::JsonReadSafe(engine_settings, "clear_color", &config.clear_color);
+            base::JsonReadSafe(engine_settings, "default_min_filter", &config.default_min_filter);
+            base::JsonReadSafe(engine_settings, "default_mag_filter", &config.default_mag_filter);
+            base::JsonReadSafe(engine_settings, "updates_per_second", &config.updates_per_second);
+            base::JsonReadSafe(engine_settings, "ticks_per_second", &config.ticks_per_second);
+            DEBUG("time_step = 1.0/%1, tick_step = 1.0/%2", config.updates_per_second, config.ticks_per_second);
         }
         if (json.contains("mouse_cursor"))
         {
