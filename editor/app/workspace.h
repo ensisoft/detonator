@@ -441,6 +441,13 @@ namespace app
                 application_library_win = library;
             #endif
             }
+            // logging flags. may or may not be overridden by some UI/interface
+            // when running/launching the game. For example the GameMain may provide
+            // command line flags to override these settings.
+            bool log_debug = false;
+            bool log_warn  = true;
+            bool log_info  = true;
+            bool log_error = true;
 
             // How the HTML5 canvas is sized on the page.
             enum class CanvasMode {

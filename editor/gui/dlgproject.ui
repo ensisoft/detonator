@@ -34,20 +34,23 @@
           <string>Application settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="9" column="1">
-           <widget class="QLineEdit" name="edtAppVersion">
+          <item row="6" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLineEdit" name="edtGameScript">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_26">
             <property name="text">
-             <string>Main game script</string>
+             <string>game.lua</string>
             </property>
            </widget>
           </item>
@@ -55,13 +58,6 @@
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Identifier</string>
             </property>
            </widget>
           </item>
@@ -81,6 +77,23 @@
             </property>
            </spacer>
           </item>
+          <item row="9" column="1">
+           <widget class="QLineEdit" name="edtAppVersion">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Identifier</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtAppIdentifier">
             <property name="sizePolicy">
@@ -94,23 +107,10 @@
             </property>
            </widget>
           </item>
-          <item row="10" column="1">
-           <widget class="QLineEdit" name="edtGameScript">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_26">
             <property name="text">
-             <string>game.lua</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Name</string>
+             <string>Main game script</string>
             </property>
            </widget>
           </item>
@@ -121,6 +121,43 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_9">
+         <property name="title">
+          <string>Event log</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="chkLogErrors">
+            <property name="text">
+             <string>Log errors</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="chkLogDebug">
+            <property name="text">
+             <string>Log debug</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkLogWarnings">
+            <property name="text">
+             <string>Log warnings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="chkLogInfo">
+            <property name="text">
+             <string>Log information</string>
             </property>
            </widget>
           </item>
@@ -487,7 +524,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>610</height>
+           <height>553</height>
           </size>
          </property>
         </spacer>
@@ -1410,6 +1447,10 @@
   <tabstop>edtAppName</tabstop>
   <tabstop>edtAppVersion</tabstop>
   <tabstop>edtGameScript</tabstop>
+  <tabstop>chkLogErrors</tabstop>
+  <tabstop>chkLogDebug</tabstop>
+  <tabstop>chkLogWarnings</tabstop>
+  <tabstop>chkLogInfo</tabstop>
   <tabstop>edtAppLibrary</tabstop>
   <tabstop>btnSelectEngine</tabstop>
   <tabstop>cmbMSAA</tabstop>
@@ -1462,6 +1503,10 @@
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
   <tabstop>tab</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>checkBox_3</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

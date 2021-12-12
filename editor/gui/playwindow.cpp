@@ -676,8 +676,13 @@ bool PlayWindow::LoadGame()
     if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
         return false;
 
-    const auto debug_log = GetValue(mUI.actionToggleDebugLog);
-    mGameLibSetGlobalLogger(mLogger.get(), debug_log);
+    // right now we only have a UI for toggling the debug logs,
+    // so keep everything else turned on
+    const auto log_debug = GetValue(mUI.actionToggleDebugLog);
+    const auto log_warn  = true;
+    const auto log_info  = true;
+    const auto log_error = true;
+    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
 
     std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
     if (!engine)
@@ -714,7 +719,7 @@ void PlayWindow::Shutdown()
     mEngine.reset();
 
     if (mGameLibSetGlobalLogger)
-        mGameLibSetGlobalLogger(nullptr, false);
+        mGameLibSetGlobalLogger(nullptr, false, false, false, false);
 
     mLibrary.unload();
     mGameLibCreateEngine = nullptr;
@@ -1252,7 +1257,13 @@ void PlayWindow::SetDebugOptions() const
     debug.debug_print_fps = false;
     mEngine->SetDebugOptions(debug);
 
-    mGameLibSetGlobalLogger(mLogger.get(),GetValue(mUI.actionToggleDebugLog));
+    // right now we only have a UI for toggling the debug logs,
+    // so keep everything else turned on
+    const auto log_debug = GetValue(mUI.actionToggleDebugLog);
+    const auto log_warn  = true;
+    const auto log_info  = true;
+    const auto log_error = true;
+    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
 }
 
 void PlayWindow::Barf(const std::string& msg)

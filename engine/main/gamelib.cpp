@@ -29,10 +29,14 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
     out->ResourceLoader = engine::FileResourceLoader::Create();
 }
 
-GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug)
+GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger,
+    bool debug_log, bool warn_log, bool info_log, bool error_log)
 {
     base::SetGlobalLog(logger);
-    base::EnableDebugLog(debug);
+    base::EnableLogEvent(base::LogEvent::Debug, debug_log);
+    base::EnableLogEvent(base::LogEvent::Warning, warn_log);
+    base::EnableLogEvent(base::LogEvent::Info, info_log);
+    base::EnableLogEvent(base::LogEvent::Error, error_log);
 }
 
 } // extern "C"
