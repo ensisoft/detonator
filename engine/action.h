@@ -93,6 +93,9 @@ namespace engine
     struct PostEventAction {
         GameEvent event;
     };
+    struct ShowDeveloperUIAction {
+        bool show = true;
+    };
 
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
@@ -112,6 +115,7 @@ namespace engine
             BlockMouseAction,
             GrabMouseAction,
             RequestFullScreenAction,
-            PostEventAction>;
+            PostEventAction,
+            ShowDeveloperUIAction>;
 
 } // namespace

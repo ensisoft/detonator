@@ -500,6 +500,8 @@ public:
                 HandleEngineRequest(*ptr);
             else if (auto* ptr = std::get_if<engine::Engine::GrabMouse>(&request))
                 HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::ShowDeveloperUI>(&request))
+                HandleEngineRequest(*ptr);
             else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
                 quit = true;
             else BUG("Unhandled engine request type.");
@@ -619,6 +621,13 @@ public:
         resize.width  = canvas_render_with;
         resize.height = canvas_render_height;
         mEventQueue.push(resize);
+    }
+    void HandleEngineRequest(const engine::Engine::ShowDeveloperUI& devui)
+    {
+        if (devui.show)
+            emscripten_run_script("var ui = document.getElementById('developer-control-panel'); ui.style.display = 'block';");
+        else emscripten_run_script("var ui = document.getElementById('developer-control-panel'); ui.style.display = 'none'; ");
+        DEBUG("Request to show/hide developer UI. [show=%1]", devui.show);
     }
 
     void HandleEngineRequest(const engine::Engine::ResizeSurface& resize)

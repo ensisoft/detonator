@@ -247,6 +247,11 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         action.event = event;
         self.PushAction(std::move(action));
     };
+    engine["ShowDeveloperUI"] = [](LuaGame& self, bool show) {
+        ShowDeveloperUIAction action;
+        action.show = show;
+        self.PushAction(action);
+    };
 }
 template<typename Type>
 bool TestFlag(const Type& object, const std::string& name)
