@@ -1246,6 +1246,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "default_mag_filter"      , mSettings.default_mag_filter);
     JsonWrite(project, "webgl_power_preference"  , mSettings.webgl_power_preference);
     JsonWrite(project, "webgl_antialias"         , mSettings.webgl_antialias);
+    JsonWrite(project, "html5_developer_ui"      , mSettings.html5_developer_ui);
     JsonWrite(project, "canvas_mode"             , mSettings.canvas_mode);
     JsonWrite(project, "canvas_width"            , mSettings.canvas_width);
     JsonWrite(project, "canvas_height"           , mSettings.canvas_height);
@@ -1357,6 +1358,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "default_mag_filter",       &mSettings.default_mag_filter);
     JsonReadSafe(project, "webgl_power_preference"  , &mSettings.webgl_power_preference);
     JsonReadSafe(project, "webgl_antialias"         , &mSettings.webgl_antialias);
+    JsonReadSafe(project, "html5_developer_ui"      , &mSettings.html5_developer_ui);
     JsonReadSafe(project, "canvas_mode"             , &mSettings.canvas_mode);
     JsonReadSafe(project, "canvas_width"            , &mSettings.canvas_width);
     JsonReadSafe(project, "canvas_height"           , &mSettings.canvas_height);
@@ -2329,6 +2331,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["html5"], "canvas_mode", mSettings.canvas_mode);
         base::JsonWrite(json["html5"], "webgl_power_pref", mSettings.webgl_power_preference);
         base::JsonWrite(json["html5"], "webgl_antialias", mSettings.webgl_antialias);
+        base::JsonWrite(json["html5"], "developer_ui", mSettings.html5_developer_ui);
         base::JsonWrite(json["engine"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["engine"], "default_mag_filter", mSettings.default_mag_filter);
         base::JsonWrite(json["engine"], "ticks_per_second",   (float)mSettings.ticks_per_second);

@@ -100,6 +100,10 @@
         font-size: 11px;
       }
 
+      div#developer-control-panel {
+        display: none;
+      }
+
     </style>
   </head>
   <body>
@@ -132,7 +136,7 @@
 
     <!-- developer control panel with some UI to control the various
       engine debugging and logging flags -->
-    <div>
+    <div id="developer-control-panel">
         <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-pause">Pause
         <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-draw">Debug Draw
         <input type="checkbox" onclick='OnChkToggle(this);' id="chk-dbg-msg">Debug Msg
