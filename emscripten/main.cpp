@@ -163,14 +163,7 @@ class Application
 {
 public:
     Application()
-    {
-        base::SetThreadLog(&mLogger);
-        base::EnableDebugLog(true);
-        DEBUG("It's alive!");
-        INFO("Gamestudio Copyright (c) 2010-2021 Sami Vaisanen");
-        INFO("http://www.ensisoft.com");
-        INFO("http://github.com/ensisoft/gamestudio");
-    }
+    {}
    ~Application()
     {
         DEBUG("Destroy application.");
@@ -180,12 +173,35 @@ public:
     bool Init()
     {
         // read config JSON
-        const auto [json_ok, json, json_error] = base::JsonParseFile("config.json");
+        const char* config_file = "config.json";
+        const auto [json_ok, json, json_error] = base::JsonParseFile(config_file);
         if (!json_ok)
         {
-            ERROR("Failed to parse config.json. [error='%1']", json_error);
+            std::fprintf(stderr, "Failed to parse config file. [file='%s']", config_file);
+            std::fprintf(stderr, "Json parse error. [error='%s']", json_error.c_str());
             return false;
         }
+
+        bool global_log_debug = true;
+        bool global_log_warn  = true;
+        bool global_log_info  = true;
+        bool global_log_error = true;
+        base::JsonReadSafe(json["logging"], "debug", &global_log_debug);
+        base::JsonReadSafe(json["logging"], "warn",  &global_log_warn);
+        base::JsonReadSafe(json["logging"], "info",  &global_log_info);
+        base::JsonReadSafe(json["logging"], "error", &global_log_error);
+        base::SetGlobalLog(&mLogger);
+        base::EnableLogEvent(base::LogEvent::Debug,   global_log_debug);
+        base::EnableLogEvent(base::LogEvent::Info,    global_log_info);
+        base::EnableLogEvent(base::LogEvent::Warning, global_log_warn);
+        base::EnableLogEvent(base::LogEvent::Error,   global_log_error);
+
+        DEBUG("It's alive!");
+        INFO("Ensisoft Gamestudio 2D");
+        INFO("Gamestudio Copyright (c) 2010-2021 Sami Vaisanen");
+        INFO("http://www.ensisoft.com");
+        INFO("http://github.com/ensisoft/gamestudio");
+
         std::string content;
         std::string title;
         std::string identifier;

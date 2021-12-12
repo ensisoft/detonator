@@ -1238,6 +1238,10 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "application_version"     , mSettings.application_version);
     JsonWrite(project, "application_library_win" , mSettings.application_library_win);
     JsonWrite(project, "application_library_lin" , mSettings.application_library_lin);
+    JsonWrite(project, "logging_debug"           , mSettings.log_debug);
+    JsonWrite(project, "logging_warn"            , mSettings.log_debug);
+    JsonWrite(project, "logging_info"            , mSettings.log_debug);
+    JsonWrite(project, "logging_error"           , mSettings.log_debug);
     JsonWrite(project, "default_min_filter"      , mSettings.default_min_filter);
     JsonWrite(project, "default_mag_filter"      , mSettings.default_mag_filter);
     JsonWrite(project, "webgl_power_preference"  , mSettings.webgl_power_preference);
@@ -1345,6 +1349,10 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "application_version",      &mSettings.application_version);
     JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
     JsonReadSafe(project, "application_library_lin",  &mSettings.application_library_lin);
+    JsonReadSafe(project, "logging_debug"           , &mSettings.log_debug);
+    JsonReadSafe(project, "logging_warn"            , &mSettings.log_debug);
+    JsonReadSafe(project, "logging_info"            , &mSettings.log_debug);
+    JsonReadSafe(project, "logging_error"           , &mSettings.log_debug);
     JsonReadSafe(project, "default_min_filter",       &mSettings.default_min_filter);
     JsonReadSafe(project, "default_mag_filter",       &mSettings.default_mag_filter);
     JsonReadSafe(project, "webgl_power_preference"  , &mSettings.webgl_power_preference);
@@ -2312,6 +2320,10 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
+        base::JsonWrite(json["logging"], "debug", mSettings.log_debug);
+        base::JsonWrite(json["logging"], "warn", mSettings.log_warn);
+        base::JsonWrite(json["logging"], "info", mSettings.log_info);
+        base::JsonWrite(json["logging"], "error", mSettings.log_error);
         base::JsonWrite(json["html5"], "canvas_width", mSettings.canvas_width);
         base::JsonWrite(json["html5"], "canvas_height", mSettings.canvas_height);
         base::JsonWrite(json["html5"], "canvas_mode", mSettings.canvas_mode);

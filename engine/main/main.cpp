@@ -25,9 +25,11 @@
 #include <chrono>
 #include <iostream>
 #include <filesystem>
+#include <optional>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 #if defined(LINUX_OS)
 #  include <fenv.h>
@@ -326,7 +328,7 @@ int main(int argc, char* argv[])
     try
     {
         engine::Engine::DebugOptions debug;
-        bool global_debug_log = false;
+        std::optional<bool> debug_log_override;
 
         std::string trace_file;
         std::string config_file;
@@ -346,8 +348,7 @@ int main(int argc, char* argv[])
         opt.Add("--trace", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
         if (!opt.Parse(args, &cmdline_error, true))
         {
-            std::cerr << "Error parsing args: " << cmdline_error;
-            std::cerr << std::endl;
+            std::fprintf(stdout, "Error parsing args. [err='%s']\n", cmdline_error.c_str());
             return 0;
         }
         else if (opt.WasGiven("--help"))
@@ -362,7 +363,7 @@ int main(int argc, char* argv[])
 
         if (opt.WasGiven("--debug"))
         {
-            global_debug_log = true;
+            debug_log_override = true;
             debug.debug_draw      = true;
             debug.debug_show_fps  = true;
             debug.debug_show_msg  = true;
@@ -370,7 +371,9 @@ int main(int argc, char* argv[])
         }
         else
         {
-            global_debug_log = opt.WasGiven("--debug-log");
+            if (opt.WasGiven("--debug-log"))
+                debug_log_override = true;
+
             debug.debug_print_fps = opt.WasGiven("--debug-print-fps");
             debug.debug_show_fps  = opt.WasGiven("--debug-show-fps");
             debug.debug_draw      = opt.WasGiven("--debug-draw");
@@ -380,12 +383,30 @@ int main(int argc, char* argv[])
         debug.debug_font = opt.GetValue<std::string>("--debug-font");
         if ((debug.debug_show_msg || debug.debug_show_fps) && debug.debug_font.empty())
         {
-            std::cerr << "No debug font was given. Use --debug-font.";
-            std::cerr << std::endl;
+            std::fprintf(stdout, "No debug font was given. Use --debug-font.\n");
             return 0;
         }
 
         config_file = opt.GetValue<std::string>("--config");
+
+        const auto [json_ok, json, json_error] = base::JsonParseFile(config_file);
+        if (!json_ok)
+        {
+            std::fprintf(stderr, "Failed to parse config file. [file='%s']", config_file.c_str());
+            std::fprintf(stderr, "Json parse error. [error='%s']", json_error.c_str());
+            return EXIT_FAILURE;
+        }
+        bool global_log_debug = true;
+        bool global_log_warn  = true;
+        bool global_log_info  = true;
+        bool global_log_error = true;
+        base::JsonReadSafe(json["logging"], "debug", &global_log_debug);
+        base::JsonReadSafe(json["logging"], "warn",  &global_log_warn);
+        base::JsonReadSafe(json["logging"], "info",  &global_log_info);
+        base::JsonReadSafe(json["logging"], "error", &global_log_error);
+
+        if (debug_log_override.has_value())
+            global_log_debug = debug_log_override.value();
 
         // setting the logger is a bit dangerous here since the current
         // build configuration builds logging.cpp into this executable
@@ -399,8 +420,13 @@ int main(int argc, char* argv[])
         //  - change the locking mechanism and put it into the logger.
         base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
         base::SetGlobalLog(&logger);
-        base::EnableDebugLog(global_debug_log);
+        base::EnableLogEvent(base::LogEvent::Debug,   global_log_debug);
+        base::EnableLogEvent(base::LogEvent::Info,    global_log_info);
+        base::EnableLogEvent(base::LogEvent::Warning, global_log_warn);
+        base::EnableLogEvent(base::LogEvent::Error,   global_log_error);
+
         DEBUG("It's alive!");
+        INFO("Ensisoft Gamestudio 2D");
         INFO("Copyright (c) 2010-2020 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
         INFO("http://github.com/ensisoft/gamestudio");
@@ -416,14 +442,6 @@ int main(int argc, char* argv[])
             base::SetThreadTrace(trace_logger.get());
         }
 
-        // read config JSON
-        const auto [json_ok, json, json_error] = base::JsonParseFile(config_file);
-        if (!json_ok)
-        {
-            ERROR("Failed to parse '%1'", config_file);
-            ERROR(json_error);
-            return EXIT_FAILURE;
-        }
 
         std::string library;
         std::string content;
@@ -442,7 +460,8 @@ int main(int argc, char* argv[])
 
         // we've created the logger object, so pass it to the engine library
         // which has its own copies of the global state.
-        GameLibSetGlobalLogger(&logger, global_debug_log);
+        GameLibSetGlobalLogger(&logger,
+            global_log_debug, global_log_warn, global_log_info, global_log_error);
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
@@ -717,16 +736,14 @@ int main(int argc, char* argv[])
 
         window.Destroy();
 
-        GameLibSetGlobalLogger(nullptr, false);
+        GameLibSetGlobalLogger(nullptr, false, false, false, false);
         DEBUG("Exiting...");
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Oops there was a problem:\n";
-        std::cerr << e.what() << std::endl;
+        std::fprintf(stderr, "Oops there was a problem. [error='%s']", e.what());
         return EXIT_FAILURE;
     }
-    std::cout << "Have a good day.\n";
-    std::cout << std::endl;
+    std::printf("Exiting. Have a good day. [code=%d]\n", exit_code);
     return exit_code;
 }

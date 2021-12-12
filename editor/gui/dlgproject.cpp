@@ -100,6 +100,10 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.canvasWidth, mSettings.canvas_width);
     SetUIValue(mUI.canvasHeight, mSettings.canvas_height);
     SetUIValue(mUI.chkAntialias, mSettings.webgl_antialias);
+    SetUIValue(mUI.chkLogDebug, mSettings.log_debug);
+    SetUIValue(mUI.chkLogInfo, mSettings.log_info);
+    SetUIValue(mUI.chkLogWarnings, mSettings.log_warn);
+    SetUIValue(mUI.chkLogErrors, mSettings.log_error);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -149,6 +153,10 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.canvasWidth, &mSettings.canvas_width);
     GetUIValue(mUI.canvasHeight, &mSettings.canvas_height);
     GetUIValue(mUI.chkAntialias, &mSettings.webgl_antialias);
+    GetUIValue(mUI.chkLogDebug, &mSettings.log_debug);
+    GetUIValue(mUI.chkLogInfo, &mSettings.log_info);
+    GetUIValue(mUI.chkLogWarnings, &mSettings.log_warn);
+    GetUIValue(mUI.chkLogErrors, &mSettings.log_error);
     mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
 
