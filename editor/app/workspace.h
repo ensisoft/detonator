@@ -474,6 +474,8 @@ namespace app
             unsigned canvas_height= 768;
             // WebGL doesn't have a specific MSAA/AA setting, only a boolean flag
             bool webgl_antialias = true;
+            // flag to control HTML5 developer UI
+            bool html5_developer_ui = false;
             // default texture minification filter.
             gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Trilinear;
             // default texture magnification filter.

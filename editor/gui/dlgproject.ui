@@ -421,10 +421,34 @@
           <string>HTML5 settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbPowerPref"/>
+          </item>
           <item row="3" column="1">
            <widget class="QCheckBox" name="chkAntialias">
             <property name="text">
              <string>Antialias</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_32">
+            <property name="text">
+             <string>Canvas size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Power preference</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_27">
+            <property name="text">
+             <string>Canvas mode</string>
             </property>
            </widget>
           </item>
@@ -473,30 +497,6 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Power preference</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_27">
-            <property name="text">
-             <string>Canvas mode</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbPowerPref"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_32">
-            <property name="text">
-             <string>Canvas size</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <spacer name="horizontalSpacer_11">
             <property name="orientation">
@@ -512,6 +512,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="chkDevUI">
+            <property name="text">
+             <string>Show dev control panel</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1469,6 +1476,7 @@
   <tabstop>canvasWidth</tabstop>
   <tabstop>canvasHeight</tabstop>
   <tabstop>chkAntialias</tabstop>
+  <tabstop>chkDevUI</tabstop>
   <tabstop>ticksPerSecond</tabstop>
   <tabstop>updatesPerSecond</tabstop>
   <tabstop>numVeloIterations</tabstop>
@@ -1503,10 +1511,6 @@
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
   <tabstop>tab</tabstop>
-  <tabstop>checkBox_4</tabstop>
-  <tabstop>checkBox_2</tabstop>
-  <tabstop>checkBox</tabstop>
-  <tabstop>checkBox_3</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

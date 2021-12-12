@@ -222,11 +222,13 @@ public:
         unsigned canvas_width  = 0;
         unsigned canvas_height = 0;
         bool antialias = true;
+        bool developer_ui = false;
         base::JsonReadSafe(json["html5"], "canvas_mode", &canvas_mode);
         base::JsonReadSafe(json["html5"], "canvas_width", &canvas_width);
         base::JsonReadSafe(json["html5"], "canvas_height", &canvas_height);
         base::JsonReadSafe(json["html5"], "webgl_power_pref", &power_pref);
         base::JsonReadSafe(json["html5"], "webgl_antialias", &antialias);
+        base::JsonReadSafe(json["html5"], "developer_ui", &developer_ui);
         mDevicePixelRatio = emscripten_get_device_pixel_ratio();
         DEBUG("Device pixel ratio = %1.", mDevicePixelRatio);
 
@@ -364,6 +366,12 @@ public:
             const auto& script = base::FormatString("var chk = document.getElementById('%1');"
                 "chk.checked = %2;", flag.name, flag.value);
             emscripten_run_script(script.c_str());
+        }
+
+        if (developer_ui)
+        {
+            emscripten_run_script("var ui = document.getElementById('developer-control-panel');"
+                                  "ui.style.display = 'block'; ");
         }
         return true;
     }
@@ -977,6 +985,8 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
 
     emscripten_run_script("var goodbye = document.getElementById('goodbye');"
                           "goodbye.hidden = false;");
+    emscripten_run_script("var ui = document.getElementById('developer-control-panel');"
+                          "ui.style.display = 'none'; ");
     delete app;
     return EM_FALSE;
 }
