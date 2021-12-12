@@ -44,6 +44,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
+    PopulateFromEnum<app::Workspace::ProjectSettings::CanvasMode>(mUI.cmbCanvasMode);
+    PopulateFromEnum<app::Workspace::ProjectSettings::PowerPreference>(mUI.cmbPowerPref);
     PopulateFromEnum<app::Workspace::ProjectSettings::MousePointerUnits>(mUI.mouseUnits);
     PopulateFromEnum<audio::SampleType>(mUI.audioFormat);
     PopulateFromEnum<audio::Channels>(mUI.audioChannels);
@@ -93,6 +95,11 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.audioChannels, mSettings.audio_channels);
     SetUIValue(mUI.audioSampleRate, mSettings.audio_sample_rate);
     SetUIValue(mUI.audioBufferSize, mSettings.audio_buffer_size);
+    SetUIValue(mUI.cmbCanvasMode, mSettings.canvas_mode);
+    SetUIValue(mUI.cmbPowerPref, mSettings.webgl_power_preference);
+    SetUIValue(mUI.canvasWidth, mSettings.canvas_width);
+    SetUIValue(mUI.canvasHeight, mSettings.canvas_height);
+    SetUIValue(mUI.chkAntialias, mSettings.webgl_antialias);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -137,6 +144,11 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.audioChannels, &mSettings.audio_channels);
     GetUIValue(mUI.audioSampleRate, &mSettings.audio_sample_rate);
     GetUIValue(mUI.audioBufferSize, &mSettings.audio_buffer_size);
+    GetUIValue(mUI.cmbCanvasMode, &mSettings.canvas_mode);
+    GetUIValue(mUI.cmbPowerPref, &mSettings.webgl_power_preference);
+    GetUIValue(mUI.canvasWidth, &mSettings.canvas_width);
+    GetUIValue(mUI.canvasHeight, &mSettings.canvas_height);
+    GetUIValue(mUI.chkAntialias, &mSettings.webgl_antialias);
     mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
 

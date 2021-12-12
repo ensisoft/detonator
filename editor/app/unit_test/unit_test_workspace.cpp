@@ -459,8 +459,8 @@ R"(
     TEST_REQUIRE(json["application"]["title"] == "foobar");
     TEST_REQUIRE(json["application"]["version"] == "1.1.1");
     TEST_REQUIRE(json["application"]["library"] == "game");
-    TEST_REQUIRE(json["application"]["ticks_per_second"] == 100.0);
-    TEST_REQUIRE(json["application"]["updates_per_second"] == 50.0);
+    TEST_REQUIRE(json["engine"]["ticks_per_second"] == 100.0);
+    TEST_REQUIRE(json["engine"]["updates_per_second"] == 50.0);
 
     DeleteDir("TestPackage");
     options.write_config_file = false;

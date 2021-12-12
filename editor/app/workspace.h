@@ -442,6 +442,31 @@ namespace app
             #endif
             }
 
+            // How the HTML5 canvas is sized on the page.
+            enum class CanvasMode {
+                // Canvas has a fixed size
+                Default,
+                // Canvas is resized to match the available client area in the page.
+                SoftFullScreen
+            };
+            CanvasMode canvas_mode = CanvasMode::Default;
+            // WebGL power preference.
+            enum class PowerPreference {
+                // Request a default power preference setting
+                Default,
+                // Request a low power mode that prioritizes power saving and battery over render perf
+                LowPower,
+                // Request a high performance mode that prioritizes rendering perf
+                // over battery life/power consumption
+                HighPerf
+            };
+            PowerPreference webgl_power_preference = PowerPreference::HighPerf;
+            // HTML5 WebGL canvas render target width.
+            unsigned canvas_width = 1024;
+            // HTML5 WebGL canvas render target height
+            unsigned canvas_height= 768;
+            // WebGL doesn't have a specific MSAA/AA setting, only a boolean flag
+            bool webgl_antialias = true;
             // default texture minification filter.
             gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Trilinear;
             // default texture magnification filter.
