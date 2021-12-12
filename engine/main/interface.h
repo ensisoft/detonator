@@ -104,6 +104,9 @@ namespace engine
         struct GrabMouse {
             bool grab = false;
         };
+        struct ShowDeveloperUI {
+            bool show = true;
+        };
 
         // Union of possible window requests.
         using Request = std::variant<
@@ -112,7 +115,8 @@ namespace engine
             ToggleFullScreen,
             QuitApp,
             GrabMouse,
-            ShowMouseCursor>;
+            ShowMouseCursor,
+            ShowDeveloperUI>;
 
         // During the lifetime of the game process the engine may request
         // the host application to provide some services. The engine may queue
@@ -404,6 +408,8 @@ namespace engine
         { mQueue.push(engine::Engine::ShowMouseCursor {yes_no } ); }
         inline void GrabMouse(bool yes_no)
         { mQueue.push(engine::Engine::GrabMouse {yes_no} ); }
+        inline void ShowDeveloperUI(bool show)
+        { mQueue.push(engine::Engine::ShowDeveloperUI {show}); }
     private:
         std::queue<Request> mQueue;
     };

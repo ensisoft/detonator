@@ -813,12 +813,12 @@ private:
     void OnAction(const engine::GrabMouseAction& action)
     {
         mRequests.GrabMouse(action.grab);
-        DEBUG("Requesting to %1 mouse grabbing.", action.grab ? "enable" : "disable");
+        DEBUG("Requesting to mouse grabbing. [grabbing=%1]", action.grab ? "enable" : "disable");
     }
     void OnAction(const engine::RequestFullScreenAction& action)
     {
         mRequests.SetFullScreen(action.full_screen);
-        DEBUG("Requesting %1 mode", action.full_screen ? "FullScreen" : "Window");
+        DEBUG("Requesting window mode change. [mode=%1]", action.full_screen ? "FullScreen" : "Window");
     }
     void OnAction(const engine::PostEventAction& action)
     {
@@ -828,6 +828,11 @@ private:
         {
             mScripting->OnGameEvent(action.event);
         }
+    }
+    void OnAction(const engine::ShowDeveloperUIAction& action)
+    {
+        mRequests.ShowDeveloperUI(action.show);
+        DEBUG("Requesting developer UI. [show=%1]", action.show);
     }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
