@@ -1,12 +1,12 @@
 {
     "8UZOHE5ijx": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "Fj66N4PDUG": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "HwObefYJNC": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_EGGlghTtgy_pos_x": 265,
         "elem_EGGlghTtgy_pos_y": -110,
         "elem_qZy6ISYxl7_pos_x": -6,
@@ -22,34 +22,35 @@
         "mapping_count": 2
     },
     "IxyHIKNMIn": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "LPH6tgo9eN": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "SfDYJTRhGz": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "Ytj4tDET1a": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "e1zlPY8HTm": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "Fj66N4PDUG"
     },
     "id5BsoCSrO": {
+        "checked_for_packing": 1
     },
     "iiKBwhkDbI": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "lQlseaZOEX": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_NwwdP8ZHwL_pos_x": -108,
         "elem_NwwdP8ZHwL_pos_y": -68,
         "mapping_count": 0
     },
     "nQu4kueY9z": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_IA8Bo38BRj_pos_x": -147,
         "elem_IA8Bo38BRj_pos_y": -141,
         "elem_WK3PiWWhSR_pos_x": -419,
@@ -84,6 +85,9 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
+        "canvas_height": 768,
+        "canvas_mode": "Default",
+        "canvas_width": 1024,
         "clear_color": "4281486692",
         "command_line_arguments": "",
         "config_srgb": true,
@@ -93,6 +97,11 @@
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
         "grab_mouse": false,
+        "html5_developer_ui": false,
+        "logging_debug": false,
+        "logging_error": false,
+        "logging_info": false,
+        "logging_warn": false,
         "mouse_pointer_drawable": "_arrow_cursor",
         "mouse_pointer_hotspot": {
             "x": 0,
@@ -116,6 +125,8 @@
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
+        "webgl_antialias": true,
+        "webgl_power_preference": "HighPerf",
         "window_can_resize": true,
         "window_cursor": true,
         "window_has_border": true,
@@ -126,13 +137,13 @@
         "working_folder": "${workspace}"
     },
     "qv7w7J7Aiv": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "sUAHqYkAPp": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "tqHo3nK0b9": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_0YxK4CGXbf": {
             "KG5fOHpMYa": "AzUofLOAMl",
             "OHFoxLJrUF": "xzg62aztGL",
@@ -149,7 +160,11 @@
     },
     "workspace": {
         "packing_param_combine_textures": true,
+        "packing_param_copy_html5": true,
+        "packing_param_copy_native": true,
         "packing_param_delete_prev": true,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
@@ -159,6 +174,6 @@
         "packing_param_write_content": true
     },
     "zJgI2SZT3X": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     }
 }

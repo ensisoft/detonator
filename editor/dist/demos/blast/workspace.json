@@ -1,15 +1,15 @@
 {
     "0tJOf84hBU": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "1lANs9A0yJ": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "2HWYlifK1N": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "2Tg09vx9Yf": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_EEfBsJfH7U_pos_x": -319,
         "elem_EEfBsJfH7U_pos_y": 334,
         "elem_KUf8FAknrd_pos_x": -312,
@@ -57,34 +57,34 @@
         "mapping_count": 6
     },
     "2a488SIQsU": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "4IluygNgeR": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "4KwMiHn2Zz": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "4eIBhHhK0W": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "5697MGBZ5q": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "5LKG2wBRGq": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "5YQ8ZqObX7": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "7AdsZqt5pg": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "7NAD3QgFlq": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "8exJylNDfi": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "HyJsrevpdz",
         "transform_height": 500,
         "transform_rotation": 0,
@@ -96,7 +96,7 @@
         "use_size_derivatives": true
     },
     "9o7zbhlIlp": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "5YQ8ZqObX7",
         "transform_height": 500,
         "transform_rotation": 0,
@@ -108,7 +108,7 @@
         "use_size_derivatives": false
     },
     "A7Z5jfJF38": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_shUULfTlQd": {
             "IXQDBTw7Ub": "5AoCn7w0Cp",
             "num_timelines": 1,
@@ -117,28 +117,28 @@
         }
     },
     "AA5C8qjoDb": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "AuNZPvQDrI": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "CopZZzjQd4": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "EgsgPADEqi": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "FXdfIUPul3": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "HnopPLXPe5": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "HyJsrevpdz": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "IAJrgwvwpO": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_aJsrCvIyQ1_pos_x": -62,
         "elem_aJsrCvIyQ1_pos_y": -85,
         "elem_qERaxJoKYx_pos_x": -336,
@@ -154,67 +154,67 @@
         "mapping_count": 2
     },
     "IRvSQ66eD6": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "JnQz1XnpaF": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_7ET20Y11sb_pos_x": -38,
         "elem_7ET20Y11sb_pos_y": -41,
         "mapping_count": 0
     },
     "Kb5sHrP5bL": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "M0ePA9uzA5": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "NtNnX1kgNp": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "O2WDv7PduL": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_AruPmKN2WY_pos_x": 10,
         "elem_AruPmKN2WY_pos_y": -219,
         "mapping_count": 0
     },
     "OFJHLiHeaP": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "OtyRiUrsTd": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "PYYxBsykKG": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "QldASNFLIb": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "RKmQZx8H1s": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "RoGbL91JLQ": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "SJmzdnESeH": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_XUF0N9uLfD_pos_x": -12,
         "elem_XUF0N9uLfD_pos_y": -48,
         "mapping_count": 0
     },
     "T38qa8wN2K": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "TNyQSW6bB6": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "UWF4u1fYHa": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "XExwRNFj8H": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "XKQ1uRt5ij": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "HyJsrevpdz",
         "transform_height": 500,
         "transform_rotation": 0,
@@ -226,13 +226,13 @@
         "use_size_derivatives": false
     },
     "Z2vMjFgL9w": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "Z2zrRug3HP": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "asMmhdCBBw": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_pmax6QpW2W_pos_x": -587,
         "elem_pmax6QpW2W_pos_y": -389,
         "elem_sRv9omsQNF_pos_x": -299,
@@ -248,10 +248,10 @@
         "mapping_count": 2
     },
     "bjZ0TrwuxI": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "diUlEeS5JH": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_B1wwJqB1NE": {
             "MPkMdJ4HCb": "ZEhllNMgJq",
             "SOys5Ry1kP": "ZEhllNMgJq",
@@ -271,13 +271,13 @@
         }
     },
     "gD6Z1YvKbI": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "gMY5RFLgyd": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "hzaCI0I5sF": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "HyJsrevpdz",
         "transform_height": 500,
         "transform_rotation": 0,
@@ -289,22 +289,22 @@
         "use_size_derivatives": false
     },
     "iH79uGdYNY": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "lOfMr3YBtI": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "lu4EmBCEzh": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "nQUmTOnClw": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "pGHzP0FH33": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "pNT0bA0bpw": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_Un0uM1aEwa": {
             "fI9qj7Xw9l": "HWByLsQXTa",
             "num_timelines": 8,
@@ -347,7 +347,7 @@
         }
     },
     "pWeN1jfBre": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "nQUmTOnClw"
     },
     "project": {
@@ -360,6 +360,9 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
+        "canvas_height": 800,
+        "canvas_mode": "Default",
+        "canvas_width": 1200,
         "clear_color": "4278190080",
         "command_line_arguments": "",
         "config_srgb": true,
@@ -369,6 +372,11 @@
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
         "grab_mouse": false,
+        "html5_developer_ui": false,
+        "logging_debug": false,
+        "logging_error": false,
+        "logging_info": false,
+        "logging_warn": false,
         "mouse_pointer_drawable": "_block_cursor",
         "mouse_pointer_hotspot": {
             "x": 0.5,
@@ -392,17 +400,19 @@
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
+        "webgl_antialias": true,
+        "webgl_power_preference": "HighPerf",
         "window_can_resize": true,
         "window_cursor": false,
         "window_has_border": true,
-        "window_height": 768,
+        "window_height": 800,
         "window_mode": "Windowed",
         "window_vsync": false,
-        "window_width": 1024,
+        "window_width": 1200,
         "working_folder": "${workspace}"
     },
     "q4pUEDx2rE": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_AnvwndODTH": {
             "8l8mk3xaCl": "MYkNyOARX5",
             "num_timelines": 2,
@@ -415,7 +425,7 @@
         }
     },
     "qHa3OPkRrg": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "elem_0bDiXIAGRF_pos_x": -155,
         "elem_0bDiXIAGRF_pos_y": -235,
         "elem_AjbLvZAh2J_pos_x": -433,
@@ -431,10 +441,10 @@
         "mapping_count": 2
     },
     "qOIpuPbyL1": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "qklhbbEm10": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "material": "White",
         "transform_height": 500,
         "transform_rotation": 0,
@@ -446,19 +456,19 @@
         "use_size_derivatives": false
     },
     "r9CF1o27zZ": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "rrmZfWe97e": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "rvZg0UT77h": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "s4zt0bFnAL": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "sX3kBAhLxU": {
-        "checked_for_packing": true,
+        "checked_for_packing": 1,
         "track_I02pgQSswr": {
             "1jnvOlzIjr": "Dvw7e4xzOm",
             "21YaGXkIQp": "Qo01Z4fCRq",
@@ -473,17 +483,21 @@
         }
     },
     "tetreytAkz": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "vg5yQskPIv": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "wXtbrxNRpX": {
-        "checked_for_packing": true
+        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
+        "packing_param_copy_html5": true,
+        "packing_param_copy_native": true,
         "packing_param_delete_prev": false,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
