@@ -49,6 +49,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<app::Workspace::ProjectSettings::MousePointerUnits>(mUI.mouseUnits);
     PopulateFromEnum<audio::SampleType>(mUI.audioFormat);
     PopulateFromEnum<audio::Channels>(mUI.audioChannels);
+    PopulateFontNames(mUI.cmbDebugFont);
     SetList(mUI.mouseDrawable, workspace.ListCursors());
     SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
     SetUIValue(mUI.edtAppIdentifier, mSettings.application_identifier);
@@ -105,6 +106,11 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkLogWarnings, mSettings.log_warn);
     SetUIValue(mUI.chkLogErrors, mSettings.log_error);
     SetUIValue(mUI.chkDevUI, mSettings.html5_developer_ui);
+    SetUIValue(mUI.cmbDebugFont, mSettings.debug_font);
+    SetUIValue(mUI.chkDebugShowFps, mSettings.debug_show_fps);
+    SetUIValue(mUI.chkDebugShowMsg, mSettings.debug_show_msg);
+    SetUIValue(mUI.chkDebugDraw, mSettings.debug_draw);
+    SetUIValue(mUI.chkDebugPrintFps, mSettings.debug_print_fps);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -159,6 +165,11 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkLogWarnings, &mSettings.log_warn);
     GetUIValue(mUI.chkLogErrors, &mSettings.log_error);
     GetUIValue(mUI.chkDevUI, &mSettings.html5_developer_ui);
+    GetUIValue(mUI.cmbDebugFont, &mSettings.debug_font);
+    GetUIValue(mUI.chkDebugShowFps, &mSettings.debug_show_fps);
+    GetUIValue(mUI.chkDebugShowMsg, &mSettings.debug_show_msg);
+    GetUIValue(mUI.chkDebugDraw, &mSettings.debug_draw);
+    GetUIValue(mUI.chkDebugPrintFps, &mSettings.debug_print_fps);
     mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
 
@@ -189,6 +200,11 @@ void DlgProject::on_btnSelectEngine_clicked()
 void DlgProject::on_btnResetClearColor_clicked()
 {
     SetUIValue(mUI.clearColor, QColor(50, 77, 100, 255));
+}
+
+void DlgProject::on_btnResetDebugFont_clicked()
+{
+    SetValue(mUI.cmbDebugFont, "");
 }
 
 void DlgProject::on_btnSelectMaterial_clicked()

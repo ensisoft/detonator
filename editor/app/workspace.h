@@ -441,6 +441,12 @@ namespace app
                 application_library_win = library;
             #endif
             }
+            // Debug font (if any) used by the engine to print debug messages.
+            QString debug_font;
+            bool debug_show_fps = false;
+            bool debug_show_msg = false;
+            bool debug_draw = false;
+            bool debug_print_fps = false;
             // logging flags. may or may not be overridden by some UI/interface
             // when running/launching the game. For example the GameMain may provide
             // command line flags to override these settings.

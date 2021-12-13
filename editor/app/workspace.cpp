@@ -1238,6 +1238,11 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "application_version"     , mSettings.application_version);
     JsonWrite(project, "application_library_win" , mSettings.application_library_win);
     JsonWrite(project, "application_library_lin" , mSettings.application_library_lin);
+    JsonWrite(project, "debug_font"              , mSettings.debug_font);
+    JsonWrite(project, "debug_show_fps"          , mSettings.debug_show_fps);
+    JsonWrite(project, "debug_show_msg"          , mSettings.debug_show_msg);
+    JsonWrite(project, "debug_draw"              , mSettings.debug_draw);
+    JsonWrite(project, "debug_print_fps"         , mSettings.debug_print_fps);
     JsonWrite(project, "logging_debug"           , mSettings.log_debug);
     JsonWrite(project, "logging_warn"            , mSettings.log_debug);
     JsonWrite(project, "logging_info"            , mSettings.log_debug);
@@ -1350,6 +1355,11 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "application_version",      &mSettings.application_version);
     JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
     JsonReadSafe(project, "application_library_lin",  &mSettings.application_library_lin);
+    JsonReadSafe(project, "debug_font"              , &mSettings.debug_font);
+    JsonReadSafe(project, "debug_show_fps"          , &mSettings.debug_show_fps);
+    JsonReadSafe(project, "debug_show_msg"          , &mSettings.debug_show_msg);
+    JsonReadSafe(project, "debug_draw"              , &mSettings.debug_draw);
+    JsonReadSafe(project, "debug_print_fps"         , &mSettings.debug_print_fps);
     JsonReadSafe(project, "logging_debug"           , &mSettings.log_debug);
     JsonReadSafe(project, "logging_warn"            , &mSettings.log_debug);
     JsonReadSafe(project, "logging_info"            , &mSettings.log_debug);
@@ -2223,6 +2233,14 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
+    if (!mSettings.debug_font.isEmpty())
+    {
+        // todo: should change the font URI.
+        // but right now this still also works since there's a hack for this
+        // in the loader in engine/ (Also same app:// thing applies to the UI style files)
+        packer.CopyFile(app::ToUtf8(mSettings.debug_font), "fonts/");
+    }
+
     // write content file ?
     if (options.write_content_file)
     {
@@ -2322,6 +2340,11 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
+        base::JsonWrite(json["debug"], "font", ToUtf8(mSettings.debug_font));
+        base::JsonWrite(json["debug"], "show_msg", mSettings.debug_show_msg);
+        base::JsonWrite(json["debug"], "show_fps", mSettings.debug_show_fps);
+        base::JsonWrite(json["debug"], "draw", mSettings.debug_draw);
+        base::JsonWrite(json["debug"], "print_fps", mSettings.debug_print_fps);
         base::JsonWrite(json["logging"], "debug", mSettings.log_debug);
         base::JsonWrite(json["logging"], "warn", mSettings.log_warn);
         base::JsonWrite(json["logging"], "info", mSettings.log_info);
