@@ -39,6 +39,7 @@ namespace gui
         void on_btnCancel_clicked();
         void on_btnSelectEngine_clicked();
         void on_btnResetClearColor_clicked();
+        void on_btnResetDebugFont_clicked();
         void on_btnSelectMaterial_clicked();
     private:
         Ui::DlgProject mUI;

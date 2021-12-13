@@ -275,6 +275,15 @@ public:
         debug.debug_show_fps  = false;
         debug.debug_show_msg  = false;
         debug.debug_print_fps = false;
+        if (json.contains("debug"))
+        {
+            const auto& debug_settings = json["debug"];
+            base::JsonReadSafe(debug_settings, "font", &debug.debug_font);
+            base::JsonReadSafe(debug_settings, "show_fps", &debug.debug_show_fps);
+            base::JsonReadSafe(debug_settings, "show_msg", &debug.debug_show_msg);
+            base::JsonReadSafe(debug_settings, "draw", &debug.debug_draw);
+            mDebugFont = debug.debug_font;
+        }
         mEngine->SetDebugOptions(debug);
 
         engine::Engine::Environment env;
@@ -350,19 +359,23 @@ public:
 
         // sync the HTML5 gui. (quite easy to do from here with all the data)
         // from JS would need to marshall the call with ccall
-        struct LogFlag {
+        struct UIFlag {
             const char* name;
             bool value;
         };
-        LogFlag log_flags[] = {
+        UIFlag flags[] = {
             {"chk-log-debug", base::IsLogEventEnabled(base::LogEvent::Debug)},
             {"chk-log-warn", base::IsLogEventEnabled(base::LogEvent::Warning)},
             {"chk-log-info", base::IsLogEventEnabled(base::LogEvent::Info)},
-            {"chk-log-error", base::IsLogEventEnabled(base::LogEvent::Error)}
+            {"chk-log-error", base::IsLogEventEnabled(base::LogEvent::Error)},
+            {"chk-show-fps", debug.debug_show_fps},
+            {"chk-print-fps", debug.debug_print_fps},
+            {"chk-dbg-draw", debug.debug_draw},
+            {"chk-dbg-msg", debug.debug_show_msg}
         };
-        for (int i=0; i<4; ++i)
+        for (int i=0; i<8; ++i)
         {
-            const auto& flag = log_flags[i];
+            const auto& flag = flags[i];
             const auto& script = base::FormatString("var chk = document.getElementById('%1');"
                 "chk.checked = %2;", flag.name, flag.value);
             emscripten_run_script(script.c_str());
@@ -406,21 +419,22 @@ public:
         if (!gui_commands.empty())
         {
             engine::Engine::DebugOptions debug;
+            debug.debug_font = mDebugFont;
             while (!gui_commands.empty())
             {
                 const auto& cmd = gui_commands.front();
                 if (const auto* ptr = std::get_if<WebGuiToggleDbgSwitchCmd>(&cmd))
                 {
-                    if (ptr->name == "chk-dbg-pause")
+                    if (ptr->name == "chk-pause")
                         debug.debug_pause = ptr->enabled;
+                    if (ptr->name == "chk-show-fps")
+                        debug.debug_show_fps = ptr->enabled;
+                    else if (ptr->name == "chk-print-fps")
+                        debug.debug_print_fps = ptr->enabled;
                     else if (ptr->name == "chk-dbg-draw")
                         debug.debug_draw = ptr->enabled;
-                    else if (ptr->name == "chk-dbg-show-msg")
+                    else if (ptr->name == "chk-dbg-msg")
                         debug.debug_show_msg = ptr->enabled;
-                    else if (ptr->name == "chk-dbg-show-fps")
-                        debug.debug_show_fps = ptr->enabled;
-                    else if (ptr->name == "chk-dbg-print-fps")
-                        debug.debug_print_fps = ptr->enabled;
                     else if (ptr->name == "chk-log-debug")
                         base::EnableLogEvent(base::LogEvent::Debug, ptr->enabled);
                     else if (ptr->name == "chk-log-info")
@@ -893,7 +907,8 @@ private:
         wdk::WindowEventMousePress,
         wdk::WindowEventMouseRelease>;
     std::queue<WindowEvent> mEventQueue;
-
+    // debug font URI (if any)
+    std::string mDebugFont;
     // flag to indicate whether currently in soft fullscreen or not
     bool mSoftFullScreen = false;
 
