@@ -60,6 +60,8 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
         mUI.listWidget->addItem(item);
     }
     QString path;
+    GetProperty(workspace, "packing_param_pack_height", mUI.cmbPackHeight);
+    GetProperty(workspace, "packing_param_pack_width", mUI.cmbPackWidth);
     GetProperty(workspace, "packing_param_max_tex_height", mUI.cmbMaxTexHeight);
     GetProperty(workspace, "packing_param_max_tex_width", mUI.cmbMaxTexWidth);
     GetProperty(workspace, "packing_param_tex_padding", mUI.spinTexPadding);
@@ -182,6 +184,8 @@ void DlgPackage::on_btnStart_clicked()
         }
     }
     // remember the settings.
+    SetProperty(mWorkspace, "packing_param_pack_height", mUI.cmbPackHeight);
+    SetProperty(mWorkspace, "packing_param_pack_width", mUI.cmbPackWidth);
     SetProperty(mWorkspace, "packing_param_max_tex_height", mUI.cmbMaxTexHeight);
     SetProperty(mWorkspace, "packing_param_max_tex_width", mUI.cmbMaxTexWidth);
     SetProperty(mWorkspace, "packing_param_tex_padding", mUI.spinTexPadding);
@@ -196,21 +200,23 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.MapFileToWorkspace(path));
 
     app::Workspace::ContentPackingOptions options;
-    options.directory          = path;
-    options.package_name       = "pack0";
-    options.combine_textures   = GetValue(mUI.chkCombineTextures);
-    options.resize_textures    = GetValue(mUI.chkResizeTextures);
-    options.max_texture_width  = GetValue(mUI.cmbMaxTexWidth);
-    options.max_texture_height = GetValue(mUI.cmbMaxTexHeight);
-    options.write_config_file  = GetValue(mUI.chkWriteConfig);
-    options.texture_padding    = GetValue(mUI.spinTexPadding);
-    options.write_content_file = true; // seems pointless to not write this ever
-    options.copy_native_files  = GetValue(mUI.chkCopyNative);
-    options.copy_html5_files   = GetValue(mUI.chkCopyHtml5);
-    options.write_html5_game_file = GetValue(mUI.chkGenerateHtml5);
-    options.write_html5_content_fs_image = GetValue(mUI.chkGenerateHtml5FS);
-    options.python_executable = mSettings.python_executable;
-    options.emsdk_path = mSettings.emsdk;
+    options.directory                     = path;
+    options.package_name                  = "pack0";
+    options.combine_textures              = GetValue(mUI.chkCombineTextures);
+    options.resize_textures               = GetValue(mUI.chkResizeTextures);
+    options.texture_pack_height           = GetValue(mUI.cmbPackHeight);
+    options.texture_pack_width            = GetValue(mUI.cmbPackWidth);
+    options.max_texture_width             = GetValue(mUI.cmbMaxTexWidth);
+    options.max_texture_height            = GetValue(mUI.cmbMaxTexHeight);
+    options.write_config_file             = GetValue(mUI.chkWriteConfig);
+    options.texture_padding               = GetValue(mUI.spinTexPadding);
+    options.write_content_file            = true; // seems pointless to not write this ever
+    options.copy_native_files             = GetValue(mUI.chkCopyNative);
+    options.copy_html5_files              = GetValue(mUI.chkCopyHtml5);
+    options.write_html5_game_file         = GetValue(mUI.chkGenerateHtml5);
+    options.write_html5_content_fs_image  = GetValue(mUI.chkGenerateHtml5FS);
+    options.python_executable             = mSettings.python_executable;
+    options.emsdk_path                    = mSettings.emsdk;
     const auto success = mWorkspace.PackContent(resources, options);
 
     mUI.btnStart->setEnabled(true);

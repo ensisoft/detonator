@@ -503,15 +503,17 @@ void unit_test_packing_texture_composition(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
+        options.directory          = "TestPackage";
+        options.package_name       = "";
         options.write_content_file = true;
-        options.write_config_file = true;
-        options.combine_textures = true;
-        options.resize_textures = false;
-        options.max_texture_width = 1024;
+        options.write_config_file  = true;
+        options.combine_textures   = true;
+        options.resize_textures    = false;
+        options.texture_pack_width = 1024;
+        options.texture_pack_width = 1024;
+        options.max_texture_width  = 1024;
         options.max_texture_height = 1024;
-        options.texture_padding = padding;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -540,15 +542,17 @@ void unit_test_packing_texture_composition(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
-        options.write_content_file = true;
-        options.write_config_file = true;
-        options.combine_textures = true;
-        options.resize_textures = false;
-        options.max_texture_width = 1024;
-        options.max_texture_height = 1024;
-        options.texture_padding = padding;
+        options.directory           = "TestPackage";
+        options.package_name        = "";
+        options.write_content_file  = true;
+        options.write_config_file   = true;
+        options.combine_textures    = true;
+        options.resize_textures     = false;
+        options.max_texture_width   = 1024;
+        options.max_texture_height  = 1024;
+        options.texture_pack_width  = 1024;
+        options.texture_pack_height = 1024;
+        options.texture_padding     = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -557,8 +561,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
         const auto& bmp = generated.AsBitmap<gfx::RGB>();
-        TEST_REQUIRE((bmp.GetWidth() == 64 + 2*padding && bmp.GetHeight() == 128 + 4*padding) ||
-                          (bmp.GetWidth() == 128+4*padding && bmp.GetHeight() == 64 + 2*padding));
+        TEST_REQUIRE(bmp.GetWidth() == 1024 && bmp.GetWidth() == 1024);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == (64+2*padding)*(64+2*padding));
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == (64+2*padding)*(64+2*padding));
     }
@@ -578,15 +581,17 @@ void unit_test_packing_texture_composition(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
-        options.write_content_file = true;
-        options.write_config_file  = true;
-        options.combine_textures   = false;
-        options.resize_textures    = false;
-        options.max_texture_width  = 1024;
-        options.max_texture_height = 1024;
-        options.texture_padding    = padding;
+        options.directory           = "TestPackage";
+        options.package_name        = "";
+        options.write_content_file  = true;
+        options.write_config_file   = true;
+        options.combine_textures    = false;
+        options.resize_textures     = false;
+        options.max_texture_width   = 1024;
+        options.max_texture_height  = 1024;
+        options.texture_pack_width  = 1024;
+        options.texture_pack_height = 1024;
+        options.texture_padding     = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
@@ -600,7 +605,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::RGB>()));
     }
 
-    // texture size that exceeds the max texture sizes and no resizing
+    // texture size that exceeds the max texture sizes and no resizing and no packing
     {
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
@@ -614,11 +619,11 @@ void unit_test_packing_texture_composition(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
+        options.directory          = "TestPackage";
+        options.package_name       = "";
         options.write_content_file = true;
         options.write_config_file  = true;
-        options.combine_textures   = true;
+        options.combine_textures   = false;
         options.resize_textures    = false;
         options.max_texture_width  = 512;
         options.max_texture_height = 512;
@@ -647,11 +652,11 @@ void unit_test_packing_texture_composition(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
+        options.directory          = "TestPackage";
+        options.package_name       = "";
         options.write_content_file = true;
         options.write_config_file  = true;
-        options.combine_textures   = true;
+        options.combine_textures   = false;
         options.resize_textures    = true;
         options.max_texture_width  = 512;
         options.max_texture_height = 512;
@@ -889,15 +894,15 @@ void unit_test_packing_texture_rects(unsigned padding)
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
-        options.directory = "TestPackage";
-        options.package_name = "";
+        options.directory          = "TestPackage";
+        options.package_name       = "";
         options.write_content_file = true;
-        options.write_config_file = true;
-        options.combine_textures = true;
-        options.resize_textures = false;
-        options.max_texture_width = 1024;
+        options.write_config_file  = true;
+        options.combine_textures   = true;
+        options.resize_textures    = false;
+        options.max_texture_width  = 1024;
         options.max_texture_height = 1024;
-        options.texture_padding = padding;
+        options.texture_padding    = padding;
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));

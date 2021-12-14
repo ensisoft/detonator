@@ -101,10 +101,15 @@ class ResourcePacker : public gfx::Packer
 public:
     using ObjectHandle = gfx::Packer::ObjectHandle;
 
-    ResourcePacker(const QString& outdir, unsigned max_width, unsigned max_height, unsigned padding, bool resize_large, bool pack_small)
+    ResourcePacker(const QString& outdir,
+                   unsigned max_width, unsigned max_height,
+                   unsigned pack_width, unsigned pack_height, unsigned padding,
+                   bool resize_large, bool pack_small)
         : kOutDir(outdir)
         , kMaxTextureWidth(max_width)
         , kMaxTextureHeight(max_height)
+        , kTexturePackWidth(pack_width)
+        , kTexturePackHeight(pack_height)
         , kTexturePadding(padding)
         , kResizeLargeTextures(resize_large)
         , kPackSmallTextures(pack_small)
@@ -167,7 +172,7 @@ public:
 
         if (!app::MakePath(app::JoinPath(kOutDir, "textures")))
         {
-            ERROR("Failed to create %1/%2", kOutDir, "textures");
+            ERROR("Failed to create texture directory. [dir='%1/%2']", kOutDir, "textures");
             mNumErrors++;
             return;
         }
@@ -192,20 +197,25 @@ public:
 
         // map original file handle to a new generated texture entry
         // which defines either a box inside a generated texture pack
-        // (combination of multiple textures) or a downsampled
-        // (originally large) texture.
+        // (combination of multiple textures) or a downscaled (originally large) texture.
         std::unordered_map<std::string, GeneratedTextureEntry> relocation_map;
-
-        // duplicate source file entries are discarded.
-        std::set<std::string> dupemap;
+        // map image URIs to URIs. If the image has been resampled
+        // the source URI maps to a file in the /tmp. Otherwise, it maps to itself.
+        std::unordered_map<std::string, QString> image_map;
 
         // 1. go over the list of textures, ignore duplicates
-        // 2. select textures that seem like a good "fit" for packing. (size ?)
-        // 3. combine the textures into atlas/atlasses.
+        // 2. if the texture is larger than max texture size resize it
+        // 3. if the texture can be combined pick it for combining otherwise
+        //    generate a texture entry and copy into output
+        // then:
+        // 4. combine the textures that have been selected for combining
+        //    into atlas/atlasses.
         // -- composite the actual image files.
-        // 4. copy the src image contents into the container image.
-        // 5. write the container/packed image into the package folder
-        // 6. update the textures whose source images were packaged (the file handle and the rectangle box)
+        // 5. copy the src image contents into the container image.
+        // 6. write the container/packed image into the package folder
+        // 7. update the textures whose source images were packaged
+        //    - the file handle/URI needs to be remapped
+        //    - and the rectangle box needs to be remapped
 
         int cur_step = 0;
         int max_step = static_cast<int>(mTextureMap.size());
@@ -217,7 +227,7 @@ public:
             const TextureSource& tex = it->second;
             if (tex.file.empty())
                 continue;
-            else if (auto it = dupemap.find(tex.file) != dupemap.end())
+            else if (auto it = image_map.find(tex.file) != image_map.end())
                 continue;
 
             const QFileInfo info(app::FromUtf8(tex.file));
@@ -225,102 +235,79 @@ public:
             const QPixmap src_pix(src_file);
             if (src_pix.isNull())
             {
-                ERROR("Failed to open image: '%1'", src_file);
+                ERROR("Failed to open image file. [file='%1']", src_file);
                 mNumErrors++;
                 continue;
             }
+            QString img_file = src_file;
+            QString img_name = info.fileName();
+            auto img_width  = src_pix.width();
+            auto img_height = src_pix.height();
+            DEBUG("Loading image file. [file='%1', width=%2, height=%3]", src_file, img_width, img_height);
 
-            const auto width  = src_pix.width();
-            const auto height = src_pix.height();
-            DEBUG("Image %1 %2x%3 px", src_file, width, height);
-            if (width >= kMaxTextureWidth || height >= kMaxTextureHeight)
+            if (kResizeLargeTextures && (img_width > kMaxTextureWidth || img_height > kMaxTextureHeight))
             {
-                QString filename;
-                if ((width > kMaxTextureWidth || height > kMaxTextureHeight) && kResizeLargeTextures)
-                {
-                    auto it = mResourceMap.find(tex.file);
-                    if (it != mResourceMap.end())
-                    {
-                        DEBUG("Skipping duplicate copy of '%1'", tex.file);
-                        filename = app::FromUtf8(it->second);
-                    }
-                    else
-                    {
-                        const auto scale = std::min(kMaxTextureWidth / (float) width,
-                                                    kMaxTextureHeight / (float) height);
-                        const auto dst_width = width * scale;
-                        const auto dst_height = height * scale;
-                        QPixmap buffer(dst_width, dst_height);
-                        buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
-                        QPainter painter(&buffer);
-                        painter.setCompositionMode(QPainter::CompositionMode_Source);
-                        const QRectF dst_rect(0, 0, dst_width, dst_height);
-                        const QRectF src_rect(0, 0, width, height);
-                        painter.drawPixmap(dst_rect, src_pix, src_rect);
+                const auto scale = std::min(kMaxTextureWidth / (float)img_width,
+                                            kMaxTextureHeight / (float)img_height);
+                const auto dst_width  = img_width * scale;
+                const auto dst_height = img_height * scale;
+                QPixmap buffer(dst_width, dst_height);
+                buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
+                QPainter painter(&buffer);
+                painter.setCompositionMode(QPainter::CompositionMode_Source);
+                const QRectF dst_rect(0, 0, dst_width, dst_height);
+                const QRectF src_rect(0, 0, img_width, img_height);
+                painter.drawPixmap(dst_rect, src_pix, src_rect);
 
-                        // create a scratch file into which write the re-sampled image file
-                        // and then copy from here to the packing location. This lets the
-                        // file name collision mapping to work as-is.
-                        const QString& name = info.baseName() + ".png";
-                        const QString temp = app::JoinPath(QDir::tempPath(), name);
-                        QImageWriter writer;
-                        writer.setFormat("PNG");
-                        writer.setQuality(100);
-                        writer.setFileName(temp);
-                        if (!writer.write(buffer.toImage()))
-                        {
-                            ERROR("Failed to write re-sampling temp image '%1'", temp);
-                            mNumErrors++;
-                            continue;
-                        }
-                        auto pckid = CopyFile(app::ToUtf8(temp), "textures");
-                        DEBUG("Texture '%1' (%2x%3px) was re-sampled.", src_file, width, height);
-                        // a bit of a hack to have this code here.. but strike the cached
-                        // temp file path from the map of already copied and replace with the
-                        // actual *source* image name which is what we really want to be using.
-                        mResourceMap.erase(app::ToUtf8(temp));
-                        mResourceMap[tex.file] = pckid;
-                        filename = app::FromUtf8(pckid);
-                    }
-                }
-                else
+                // create a scratch file into which write the re-sampled image file
+                const QString& name = app::RandomString() + ".png";
+                const QString temp  = app::JoinPath(QDir::tempPath(), name);
+                QImageWriter writer;
+                writer.setFormat("PNG");
+                writer.setQuality(100);
+                writer.setFileName(temp);
+                if (!writer.write(buffer.toImage()))
                 {
-                    // copy the file as is, since it's just at the max allowed
-                    // texture size.
-                    filename = app::FromUtf8(CopyFile(tex.file , "textures"));
+                    ERROR("Failed to write temp image. [file='%1']", temp);
+                    mNumErrors++;
+                    continue;
                 }
-
-                GeneratedTextureEntry self;
-                self.width = 1.0f;
-                self.height = 1.0f;
-                self.xpos = 0.0f;
-                self.ypos = 0.0f;
-                self.texture_file = filename;
-                relocation_map[tex.file] = std::move(self);
+                DEBUG("Image was resampled and resized. [src='%1', dst='%2', width=%3, height=%4]", src_file, temp, img_width, img_height);
+                img_width  = dst_width;
+                img_height = dst_height;
+                img_file   = temp;
+                img_name   = info.baseName() + ".png";
+                // map the input image to an image in /tmp/
+                image_map[tex.file] = temp;
             }
-            else if (!kPackSmallTextures || !tex.can_be_combined)
+            else
             {
-                // add as an identity texture relocation entry.
+                // the input image maps to itself since there's no
+                // scratch image that is needed.
+                image_map[tex.file] = app::FromUtf8(tex.file);
+            }
+
+            if (kPackSmallTextures && tex.can_be_combined && img_width < kTexturePackWidth && img_height < kTexturePackHeight)
+            {
+                // add as a source for texture packing
+                app::PackingRectangle rc;
+                rc.width  = img_width + kTexturePadding * 2;
+                rc.height = img_height + kTexturePadding * 2;
+                rc.cookie = tex.file; // this is just used as an ID here.
+                sources.push_back(rc);
+            }
+            else
+            {
+                // Generate a texture entry.
                 GeneratedTextureEntry self;
                 self.width  = 1.0f;
                 self.height = 1.0f;
                 self.xpos   = 0.0f;
                 self.ypos   = 0.0f;
-                self.texture_file   = app::FromUtf8(CopyFile(tex.file, "textures"));
+                self.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(img_file), "textures", img_name));
                 relocation_map[tex.file] = std::move(self);
             }
-            else
-            {
-                // add as a source for texture packing
-                app::PackingRectangle rc;
-                rc.width  = src_pix.width() + kTexturePadding * 2;
-                rc.height = src_pix.height() + kTexturePadding * 2;
-                rc.cookie = tex.file;
-                sources.push_back(rc);
-            }
-
-            dupemap.insert(tex.file);
-        }
+        } // for
 
         unsigned atlas_number = 0;
         cur_step = 0;
@@ -330,8 +317,7 @@ public:
         {
             progress("Packing textures...", cur_step++, max_step);
 
-            app::RectanglePackSize packing_rect_result;
-            app::PackRectangles({kMaxTextureWidth, kMaxTextureHeight}, sources, &packing_rect_result);
+            app::PackRectangles({kTexturePackWidth, kTexturePackHeight}, sources, nullptr);
             // ok, some of the textures might have failed to pack on this pass.
             // separate the ones that were successfully packed from the ones that
             // weren't. then composite the image for the success cases.
@@ -349,8 +335,11 @@ public:
                 // then what's the point ?
                 // we'd just end up wasting space, so just leave it as is.
                 const auto& rc = *first_success;
+                ASSERT(image_map.find(rc.cookie) != image_map.end());
+                QString file = image_map[rc.cookie];
+
                 GeneratedTextureEntry gen;
-                gen.texture_file = app::FromUtf8(CopyFile(rc.cookie, "textures"));
+                gen.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(file), "textures"));
                 gen.width  = 1.0f;
                 gen.height = 1.0f;
                 gen.xpos   = 0.0f;
@@ -360,9 +349,8 @@ public:
                 continue;
             }
 
-
             // composition buffer.
-            QPixmap buffer(packing_rect_result.width, packing_rect_result.height);
+            QPixmap buffer(kTexturePackWidth, kTexturePackHeight);
             buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
 
             QPainter painter(&buffer);
@@ -378,22 +366,24 @@ public:
                 const auto width  = padded_width - kTexturePadding*2;
                 const auto height = padded_height - kTexturePadding*2;
 
-                const QFileInfo info(app::FromUtf8(rc.cookie));
+                ASSERT(image_map.find(rc.cookie) != image_map.end());
+                const QString img_file = image_map[rc.cookie];
+                const QFileInfo info(img_file);
                 const QString file(info.absoluteFilePath());
                 // compensate for possible texture sampling issues by padding the
                 // image with some extra pixels by growing it a few pixels on both
                 // axis.
                 const QRectF dst(rc.xpos, rc.ypos, padded_width, padded_height);
                 const QRectF src(0, 0, width, height);
-                const QPixmap pix(file);
-                if (pix.isNull())
+                const QPixmap img(file);
+                if (img.isNull())
                 {
-                    ERROR("Failed to open image: '%1'", file);
+                    ERROR("Failed to open texture packing image. [file='%1']", file);
                     mNumErrors++;
                 }
                 else
                 {
-                    painter.drawPixmap(dst, pix, src);
+                    painter.drawPixmap(dst, img, src);
                 }
             }
 
@@ -406,11 +396,11 @@ public:
             writer.setFileName(file);
             if (!writer.write(buffer.toImage()))
             {
-                ERROR("Failed to write image '%1'", file);
+                ERROR("Failed to write image. [file='%1']", file);
                 mNumErrors++;
             }
-            const float pack_width  = packing_rect_result.width;
-            const float pack_height = packing_rect_result.height;
+            const float pack_width  = kTexturePackWidth; //packing_rect_result.width;
+            const float pack_height = kTexturePackHeight; //packing_rect_result.height;
 
             // create mapping for each source texture to the generated
             // texture.
@@ -430,14 +420,15 @@ public:
                 gen.xpos           = (float)xpos / pack_width;
                 gen.ypos           = (float)ypos / pack_height;
                 relocation_map[rc.cookie] = gen;
-                DEBUG("Packed %1 into %2", rc.cookie, gen.texture_file);
+                DEBUG("New image packing entry. [id='%1', dst='%2']", rc.cookie, gen.texture_file);
             }
 
             // done with these.
             sources.erase(first_success, sources.end());
 
             atlas_number++;
-        }
+        } // while (!sources.empty())
+
         cur_step = 0;
         max_step = static_cast<int>(mTextureMap.size());
         // update texture object mappings, file handles and texture boxes.
@@ -476,18 +467,18 @@ public:
     size_t GetNumFilesCopied() const
     { return mNumFilesCopied; }
 
-    std::string CopyFile(const std::string& file, const QString& where)
+    std::string CopyFile(const std::string& file, const QString& where, const QString& name = "")
     {
         auto it = mResourceMap.find(file);
         if (it != std::end(mResourceMap))
         {
-            DEBUG("Skipping duplicate copy of '%1'", file);
+            DEBUG("Skipping duplicate file copy. [file='%1']", file);
             return it->second;
         }
 
         if (!app::MakePath(app::JoinPath(kOutDir, where)))
         {
-            ERROR("Failed to create '%1/%2'", kOutDir, where);
+            ERROR("Failed to create directory. [dir='%1/%2']", kOutDir, where);
             mNumErrors++;
             // todo: what to return on error ?
             return "";
@@ -498,7 +489,7 @@ public:
         const QFileInfo src_info(app::FromUtf8(file));
         if (!src_info.exists())
         {
-            ERROR("File %1 could not be found!", file);
+            ERROR("Could not find file. [file='%1']", file);
             mNumErrors++;
             // todo: what to return on error ?
             return "";
@@ -506,7 +497,9 @@ public:
 
         const QString& src_file = src_info.absoluteFilePath(); // resolved path.
         const QString& src_name = src_info.fileName();
-        QString dst_name = src_name;
+        QString dst_name = name;
+        if (dst_name.isEmpty())
+            dst_name = src_name;
         QString dst_file = app::JoinPath(kOutDir, app::JoinPath(where, dst_name));
         // try to generate a different name for the file when a file
         // by the same name already exists.
@@ -545,23 +538,25 @@ private:
         // if src equals dst then we can actually skip the copy, no?
         if (src == dst)
         {
-            DEBUG("Skipping copy of '%1' to '%2'", src, dst);
+            DEBUG("Skipping copy of file onto itself. [src='%1', dst='%2']", src, dst);
             return;
         }
         auto [success, error] = app::CopyFile(src, dst);
         if (!success)
         {
-            ERROR("Failed to copy '%1' into '%2' (%3).", src, dst, error);
+            ERROR("Failed to copy file. [src='%1', dst='%2' error=%3]", src, dst, error);
             mNumErrors++;
             return;
         }
         mNumFilesCopied++;
-        DEBUG("Copied '%1' into '%2'.", src, dst);
+        DEBUG("File copy done. [src='%1', dst='%2']", src, dst);
     }
 private:
     const QString kOutDir;
     const unsigned kMaxTextureHeight = 0;
     const unsigned kMaxTextureWidth = 0;
+    const unsigned kTexturePackWidth = 0;
+    const unsigned kTexturePackHeight = 0;
     const unsigned kTexturePadding = 0;
     const bool kResizeLargeTextures = true;
     const bool kPackSmallTextures = true;
@@ -2060,9 +2055,15 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         mutable_copies.push_back(resource->Copy());
     }
 
+    DEBUG("Max texture size. [width=%1, height=%2]", options.max_texture_width, options.max_texture_height);
+    DEBUG("Pack size. [width=%1, height=%2]", options.texture_pack_width, options.texture_pack_height);
+    DEBUG("Pack flags. [resize=%1, combine=%2]", options.resize_textures, options.combine_textures);
+
     ResourcePacker packer(outdir,
         options.max_texture_width,
         options.max_texture_height,
+        options.texture_pack_width,
+        options.texture_pack_height,
         options.texture_padding,
         options.resize_textures,
         options.combine_textures);
