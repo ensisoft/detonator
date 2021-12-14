@@ -11,6 +11,7 @@
 local game_tick_count = 0
 local ship_velo_increment = 0
 local prev_formation = -1
+local developer_ui = false
 
 States = {
     Menu = 1,
@@ -258,6 +259,9 @@ function OnKeyDown(symbol, modifier_bits)
                 EnterMenu()
             end
         end
+    elseif symbol == wdk.Keys.F12 then 
+        developer_ui = not developer_ui
+        Game:ShowDeveloperUI(developer_ui)
     end
 end
 
