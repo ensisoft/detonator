@@ -247,7 +247,7 @@ void AudioEngine::KillAllSoundEffects()
 
 void AudioEngine::Update(AudioEventQueue* events)
 {
-#if !defined(AUDIO_USE_THREAD)
+#if !defined(AUDIO_USE_PLAYER_THREAD)
     mPlayer->ProcessOnce();
 #endif
 

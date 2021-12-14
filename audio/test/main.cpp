@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
         auto source = std::make_unique<audio::SineGenerator>(500, format);
         const auto id = player.Play(std::move(source));
         DEBUG("New sine wave stream. [id=%1]", id);
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
         std::this_thread::sleep_for(std::chrono::seconds(10));
         player.Cancel(id);
 #else
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
         bool track_done = false;
         while (!track_done)
         {
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 #else
             player.ProcessOnce();

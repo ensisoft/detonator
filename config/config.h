@@ -43,4 +43,4 @@
 #endif
 
 #define AUDIO_LOCK_FREE_QUEUE
-#define AUDIO_USE_THREAD
+#define AUDIO_USE_PLAYER_THREAD
