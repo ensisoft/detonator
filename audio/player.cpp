@@ -43,7 +43,7 @@ Player::Player(std::unique_ptr<Device> device)
   : track_actions_(128)
 #endif
 {
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
     run_thread_.test_and_set(std::memory_order_acquire);
     thread_.reset(new std::thread(std::bind(&Player::AudioThreadLoop, this, device.get())));
     device.release();
@@ -55,7 +55,7 @@ Player::Player(std::unique_ptr<Device> device)
 
 Player::~Player()
 {
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
     // signal the audio thread to exit
     run_thread_.clear(std::memory_order_release);
     thread_->join();
@@ -137,7 +137,7 @@ bool Player::GetEvent(Event* event)
     return true;
 }
 
-#if !defined(AUDIO_USE_THREAD)
+#if !defined(AUDIO_USE_PLAYER_THREAD)
 void Player::ProcessOnce()
 {
     RunAudioUpdateOnce(*device_, track_list_);
@@ -170,7 +170,7 @@ bool Player::DequeueAction(Action* action)
 
 void Player::AudioThreadLoop(Device* device)
 {
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
     DEBUG("Hello from audio player thread.");
     try
     {

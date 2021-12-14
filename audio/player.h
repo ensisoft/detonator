@@ -115,7 +115,7 @@ namespace audio
         // Returns true if there was an event otherwise false.
         bool GetEvent(Event* event);
 
-#if !defined(AUDIO_USE_THREAD)
+#if !defined(AUDIO_USE_PLAYER_THREAD)
         void ProcessOnce();
 #endif
     private:
@@ -156,7 +156,7 @@ namespace audio
         std::mutex event_mutex_;
         std::queue<Event> events_;
 
-#if defined(AUDIO_USE_THREAD)
+#if defined(AUDIO_USE_PLAYER_THREAD)
         // audio thread stop flag
         std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;
         std::unique_ptr<std::thread> thread_;
