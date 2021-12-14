@@ -452,7 +452,7 @@ public:
         // IMPORTANT !
         // the program doesn't set the uniforms directly but instead of compares the uniform
         // value against a cached hash in order to elide redundant uniform sets.
-        // However this means that if a uniform value is set but the draw that uses the
+        // However, this means that if a uniform value is set but the draw that uses the
         // program doesn't actually draw anything doing an early return here would mean
         // that the uniform state setting would be skipped. This would later lead to
         // incorrect assumption about the state of the program. I.e. using the program
@@ -465,7 +465,7 @@ public:
         size_t num_uniforms = myprog->GetNumUniformsSet();
         for (size_t i=0; i<num_uniforms; ++i)
         {
-            const auto& uniform = myprog->GetSetUniform(i);
+            const auto& uniform = myprog->GetUniformSetting(i);
             const auto& value   = uniform.value;
             const auto location = uniform.location;
             if (const auto* ptr = std::get_if<int>(&value))
@@ -587,14 +587,14 @@ public:
         // for all textures used by this draw, look if the texture
         // is already bound to some unit. if it is already bound
         // and texture parameters haven't changed then nothing needs to be
-        // done. Otherwise see if there's a free texture slot and bind
-        // if there or lastly "evict" some texture from some unit and overwrite
-        // with new texture.
+        // done. Otherwise, see if there's a free texture unit slot or lastly
+        // "evict" some texture from some unit and overwrite the binding with
+        // this texture.
         size_t unit = 0;
 
         for (size_t i=0; i<num_textures; ++i)
         {
-            const auto& sampler = myprog->GetSetSampler(i);
+            const auto& sampler = myprog->GetSamplerSetting(i);
             // it's possible that this is nullptr when the shader compiler
             // has removed the un-used texture sampler reference. In other
             // words the glGetUniformLocation returns -1.
@@ -706,7 +706,7 @@ public:
                 }
             }
 #endif
-            // if nothing has changed then skip all of the work
+            // if nothing has changed then skip all the work
             if (mTextureUnits[unit].texture    == texture &&
                 mTextureUnits[unit].min_filter == texture_min_filter &&
                 mTextureUnits[unit].mag_filter == texture_mag_filter &&
@@ -753,7 +753,7 @@ public:
 
         // start drawing geometry.
 
-        // the brain damaged API goes like this.. when using DrawArrays with a client side
+        // the brain-damaged API goes like this... when using DrawArrays with a client side
         // data pointer the argument is actually a pointer to the data.
         // When using a VBO the pointer is not a pointer but an offset to the VBO.
         const uint8_t* base_ptr =  (const uint8_t*)mygeom->GetByteOffset();
@@ -948,6 +948,13 @@ public:
                 stats->streaming_vbo_mem_use   += buffer.offset;
             }
         }
+    }
+    virtual void GetDeviceCaps(DeviceCaps* caps) const override
+    {
+        std::memset(caps, 0, sizeof(*caps));
+        GLint num_texture_units = 0;
+        GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num_texture_units));
+        caps->num_texture_units = num_texture_units;
     }
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
@@ -1683,9 +1690,9 @@ private:
         { return mSamplers.size(); }
         size_t GetNumUniformsSet() const
         { return mUniforms.size(); }
-        const Sampler& GetSetSampler(size_t index) const
+        const Sampler& GetSamplerSetting(size_t index) const
         { return mSamplers[index]; }
-        const Uniform& GetSetUniform(size_t index) const
+        const Uniform& GetUniformSetting(size_t index) const
         { return mUniforms[index]; }
         GLuint GetName() const
         { return mProgram; }

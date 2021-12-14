@@ -389,6 +389,10 @@ public:
     {
 
     }
+    virtual void GetDeviceCaps(DeviceCaps* caps) const override
+    {
+
+    }
 
     const TestTexture& GetTexture(size_t index) const
     {

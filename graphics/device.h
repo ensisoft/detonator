@@ -245,6 +245,11 @@ namespace gfx
         };
         virtual void GetResourceStats(ResourceStats* stats) const = 0;
 
+        struct DeviceCaps {
+            unsigned num_texture_units = 0;
+        };
+        virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
+
         // Create a rendering device of the requested type.
         // Context should be a valid non null context object with the
         // right version.
