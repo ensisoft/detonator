@@ -1382,6 +1382,231 @@ void main() {
 
 }
 
+void unit_test_max_texture_units_single_texture()
+{
+    // create enough textures to saturate all texture units.
+    // then do enough draws to have all texture units become used.
+    // then check that textures get evicted/rebound properly.
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+        std::make_shared<TestContext>(10, 10));
+    gfx::Device::DeviceCaps caps = {};
+    dev->GetDeviceCaps(&caps);
+
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+        { {-1,  1}, {0, 0} },
+        { {-1, -1}, {0, 1} },
+        { { 1, -1}, {1, 1} },
+        { {-1,  1}, {0, 0} },
+        { { 1, -1}, {1, 1} },
+        { { 1,  1}, {1, 0} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const char* vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+  vTexCoord = aTexCoord;
+})";
+    const char* fssrc =
+            R"(#version 100
+precision mediump float;
+varying vec2 vTexCoord;
+uniform sampler2D kTexture;
+void main() {
+  gl_FragColor = texture2D(kTexture, vTexCoord.xy);
+})";
+    auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+
+    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    bmp.Fill(gfx::Color::Green);
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    for (unsigned  i=0; i<caps.num_texture_units; ++i)
+    {
+        auto* texture = dev->MakeTexture("texture_" + std::to_string(i));
+        texture->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+        dev->BeginFrame();
+        program->SetTexture("kTexture", 0, *texture);
+        dev->Draw(*program, *geom, state);
+        dev->EndFrame();
+        const auto& ret = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(gfx::Compare(bmp, ret));
+    }
+
+    // by now we should have all the texture units in use.
+    // create yet another texture and use it to draw thereby
+    // forcing some previous texture to be evicted.
+
+    {
+        gfx::Bitmap<gfx::RGBA> pink(10, 10);
+        pink.Fill(gfx::Color::HotPink);
+        auto* texture = dev->MakeTexture("pink");
+        texture->SetFilter(gfx::Texture::MinFilter::Trilinear);
+        texture->SetFilter(gfx::Texture::MagFilter::Linear);
+        texture->Upload(pink.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+
+        {
+            dev->BeginFrame();
+            program->SetTexture("kTexture", 0, *texture);
+            dev->Draw(*program, *geom, state);
+            dev->EndFrame();
+            const auto& ret = dev->ReadColorBuffer(10, 10);
+            TEST_REQUIRE(gfx::Compare(pink, ret));
+        }
+
+        // change the filtering.
+        texture->SetFilter(gfx::Texture::MinFilter::Linear);
+        texture->SetFilter(gfx::Texture::MagFilter::Linear);
+
+        {
+            dev->BeginFrame();
+            program->SetTexture("kTexture", 0, *texture);
+            dev->Draw(*program, *geom, state);
+            dev->EndFrame();
+            const auto& ret = dev->ReadColorBuffer(10, 10);
+            TEST_REQUIRE(gfx::Compare(pink, ret));
+        }
+    }
+}
+
+void unit_test_max_texture_units_many_textures()
+{
+    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
+        std::make_shared<TestContext>(10, 10));
+
+    gfx::Device::DeviceCaps caps = {};
+    dev->GetDeviceCaps(&caps);
+
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+        { {-1,  1}, {0, 0} },
+        { {-1, -1}, {0, 1} },
+        { { 1, -1}, {1, 1} },
+        { {-1,  1}, {0, 0} },
+        { { 1, -1}, {1, 1} },
+        { { 1,  1}, {1, 0} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    // saturate texture units.
+    {
+        const char* vssrc =
+                R"(#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+  vTexCoord = aTexCoord;
+})";
+        const char* fssrc =
+                R"(#version 100
+precision mediump float;
+varying vec2 vTexCoord;
+uniform sampler2D kTexture;
+void main() {
+  gl_FragColor = texture2D(kTexture, vTexCoord.xy);
+})";
+        auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+
+        gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+        bmp.Fill(gfx::Color::Green);
+
+        gfx::Device::State state;
+        state.blending     = gfx::Device::State::BlendOp::None;
+        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+        state.bWriteColor  = true;
+        state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+        for (unsigned  i=0; i<caps.num_texture_units; ++i)
+        {
+            auto* texture = dev->MakeTexture("texture_" + std::to_string(i));
+            texture->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+            dev->BeginFrame();
+            program->SetTexture("kTexture", 0, *texture);
+            dev->Draw(*program, *geom, state);
+            dev->EndFrame();
+            const auto& ret = dev->ReadColorBuffer(10, 10);
+            TEST_REQUIRE(gfx::Compare(bmp, ret));
+        }
+    }
+
+    // do test, render with multiple textures.
+    {
+        const char* fssrc =
+                R"(#version 100
+precision mediump float;
+uniform sampler2D kTexture0;
+uniform sampler2D kTexture1;
+uniform sampler2D kTexture2;
+uniform sampler2D kTexture3;
+void main() {
+    gl_FragColor =
+        texture2D(kTexture0, vec2(0.0)) +
+        texture2D(kTexture1, vec2(0.0)) +
+        texture2D(kTexture2, vec2(0.0)) +
+        texture2D(kTexture3, vec2(0.0));
+})";
+        const char* vssrc =
+                R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+        auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+        // setup 4 textures and the output from fragment shader
+        // is then the sum of all of these, i.e. white.
+        gfx::Bitmap<gfx::RGBA> r(1, 1);
+        gfx::Bitmap<gfx::RGBA> g(1, 1);
+        gfx::Bitmap<gfx::RGBA> b(1, 1);
+        gfx::Bitmap<gfx::RGBA> a(1, 1);
+        r.SetPixel(0, 0, gfx::Color::Red);
+        g.SetPixel(0, 0, gfx::Color::Green);
+        b.SetPixel(0, 0, gfx::Color::Blue);
+        a.SetPixel(0, 0, gfx::RGBA(0, 0, 0, 0xff));
+        auto* tex0 = dev->MakeTexture("tex0");
+        auto* tex1 = dev->MakeTexture("tex1");
+        auto* tex2 = dev->MakeTexture("tex2");
+        auto* tex3 = dev->MakeTexture("tex3");
+        tex0->Upload(r.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
+        tex1->Upload(g.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
+        tex2->Upload(b.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
+        tex3->Upload(a.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
+
+        dev->BeginFrame();
+
+        program->SetTexture("kTexture0", 0, *tex0);
+        program->SetTexture("kTexture1", 1, *tex1);
+        program->SetTexture("kTexture2", 2, *tex2);
+        program->SetTexture("kTexture3", 3, *tex3);
+
+        gfx::Device::State state;
+        state.blending = gfx::Device::State::BlendOp::None;
+        state.bWriteColor = true;
+        state.viewport = gfx::IRect(0, 0, 10, 10);
+        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+        dev->Draw(*program, *geom, state);
+        dev->EndFrame();
+
+        const auto& ret = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(ret.Compare(gfx::Color::White));
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1399,11 +1624,11 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix4x4_uniform();
     unit_test_uniform_sampler_optimize_bug();
     unit_test_render_dynamic();
-
     unit_test_clean_garbage();
-
     unit_test_buffer_allocation();
-
+    unit_test_max_texture_units_single_texture();
+    unit_test_max_texture_units_many_textures();
+    // bugs
     unit_test_empty_draw_lost_uniform_bug();
     return 0;
 }
