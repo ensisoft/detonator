@@ -200,6 +200,100 @@ void unit_test_shutdown_with_active_streams()
     }
 }
 
+
+void unit_test_thread_proxy()
+{
+    // success.
+    {
+        auto test = std::make_unique<TestSource>(44100, 2, 10, 11);
+        const auto size = audio::Source::BuffSize(test->GetFormat(),
+                                                  test->GetNumChannels(),
+                                                  test->GetRateHz(), 20);
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+
+        TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
+        TEST_REQUIRE(proxy->GetRateHz() == 44100);
+        TEST_REQUIRE(proxy->GetNumChannels() == 2);
+
+        proxy->Prepare(size);
+        TEST_REQUIRE(proxy->HasMore(0));
+
+        std::uint64_t bytes = 0;
+        std::vector<char> buffer;
+        buffer.resize(size);
+
+        for (unsigned i=0; i<10; ++i)
+        {
+            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            TEST_REQUIRE(ret);
+            bytes += ret;
+        }
+        TEST_REQUIRE(proxy->HasMore(bytes) == false);
+
+        proxy->Shutdown();
+    }
+
+    // cancellation
+    {
+        auto test = std::make_unique<TestSource>(44100, 2, 10, 11);
+        const auto size = audio::Source::BuffSize(test->GetFormat(),
+                                                  test->GetNumChannels(),
+                                                  test->GetRateHz(), 20);
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+
+        TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
+        TEST_REQUIRE(proxy->GetRateHz() == 44100);
+        TEST_REQUIRE(proxy->GetNumChannels() == 2);
+
+        proxy->Prepare(size);
+        TEST_REQUIRE(proxy->HasMore(0));
+
+        std::uint64_t bytes = 0;
+        std::vector<char> buffer;
+        buffer.resize(size);
+
+        for (unsigned i=0; i<5; ++i)
+        {
+            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            TEST_REQUIRE(ret);
+            bytes += ret;
+        }
+        TEST_REQUIRE(proxy->HasMore(bytes) == true);
+
+        proxy->Shutdown();
+    }
+
+    // exception
+    {
+        auto test = std::make_unique<TestSource>(44100, 2, 10, 9);
+        const auto size = audio::Source::BuffSize(test->GetFormat(),
+                                                  test->GetNumChannels(),
+                                                  test->GetRateHz(), 20);
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+
+        TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
+        TEST_REQUIRE(proxy->GetRateHz() == 44100);
+        TEST_REQUIRE(proxy->GetNumChannels() == 2);
+
+        proxy->Prepare(size);
+        TEST_REQUIRE(proxy->HasMore(0));
+
+        std::uint64_t bytes = 0;
+        std::vector<char> buffer;
+        buffer.resize(size);
+
+        for (unsigned i=0; i<8; ++i)
+        {
+            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            TEST_REQUIRE(ret);
+            bytes += ret;
+        }
+        TEST_EXCEPTION(proxy->FillBuffer(&buffer[0], buffer.size()));
+
+        proxy->Shutdown();
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
@@ -212,5 +306,6 @@ int test_main(int argc, char* argv[])
     unit_test_pause_resume();
     unit_test_cancel();
     unit_test_shutdown_with_active_streams();
+    unit_test_thread_proxy();
     return 0;
 }

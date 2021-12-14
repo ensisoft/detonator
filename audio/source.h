@@ -22,10 +22,14 @@
 #include <vector>
 #include <memory>
 #include <optional>
+#include <thread>
+#include <queue>
+#include <condition_variable>
+
+#include <cmath>
 
 #if defined(AUDIO_ENABLE_TEST_SOUND)
 #  include "base/math.h"
-#  include <cmath>
 #endif
 
 #include "base/assert.h"
@@ -41,7 +45,7 @@ namespace audio
     // Source provides low level access to series of buffers of PCM encoded
     // audio data. This interface is designed for integration against the
     // platforms/OS's audio API and is something that is called by the platform
-    // specific audio system. For example on Linux the when a pulse audio callback
+    // specific audio system. For example on Linux when a pulse audio callback
     // occurs for stream write the data is sourced from the source object in a
     // separate audio/playback thread.
     class Source
@@ -55,16 +59,22 @@ namespace audio
         virtual ~Source() = default;
         // Get the sample rate in Hz.
         virtual unsigned GetRateHz() const noexcept = 0;
-        // Get the number of channels. Typically either 1 for Mono
+        // Get the number of channels. Typically, either 1 for Mono
         // or 2 for stereo sound.
         virtual unsigned GetNumChannels() const noexcept = 0;
-        // Get the PCM byte format of the sample.
+        // Get the PCM sample data format.
         virtual Format GetFormat() const noexcept = 0;
-        // Get the (human readable) name of the sample if any
-        // For example the underlying filename.
+        // Get the (human-readable) name of the source if any.
+        // Could be for example the underlying filename.
         virtual std::string GetName() const noexcept = 0;
+        // Prepare source for device access and playback. After this
+        // there will be calls to FillBuffer and HasMore.
+        // buffer_size is the maximum expected buffer size that will
+        // used when calling FillBuffer.
+        virtual void Prepare(unsigned buffer_size)
+        { /* intentionally empty  */ }
         // Fill the given device buffer with PCM data.
-        // Returns the number of *bytes* written into buff.
+        // Should return the number of *bytes* written into buff.
         // May throw an exception.
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) = 0;
         // Returns true if there's more audio data available 
@@ -93,7 +103,51 @@ namespace audio
             else BUG("Unhandled format.");
             return 0;
         }
+        static int BuffSize(Format format, unsigned channels, unsigned hz, unsigned  ms)
+        {
+            const auto samples_per_ms = hz / 1000.0;
+            const auto sample_size = ByteSize(format);
+            const auto samples = (unsigned)std::ceil(samples_per_ms * ms);
+            const auto buff_size = sample_size * samples * channels;
+            return buff_size;
+        }
     private:
+    };
+
+    class SourceThreadProxy : public Source
+    {
+    public:
+        SourceThreadProxy(std::unique_ptr<Source> source);
+       ~SourceThreadProxy();
+        virtual unsigned GetRateHz() const noexcept override;
+        virtual unsigned GetNumChannels() const noexcept override;
+        virtual Format GetFormat() const noexcept override;
+        virtual std::string GetName() const noexcept override;
+        virtual void Prepare(unsigned buffer_size) override;
+        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
+        virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
+        virtual void Shutdown() noexcept override;
+        virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
+        virtual std::unique_ptr<Event> GetEvent() noexcept override;
+    private:
+        void ThreadLoop();
+    private:
+        const unsigned mSampleRate = 0;
+        const unsigned mChannels = 0;
+        const Format mFormat = Format::Float32;
+        const std::string mName;
+        mutable std::mutex mMutex;
+        unsigned mBufferSize = 0;
+        std::unique_ptr<Source> mSource;
+        std::unique_ptr<std::thread> mThread;
+        std::queue<std::unique_ptr<Event>> mEvents;
+        std::queue<std::unique_ptr<Command>> mCommands;
+        std::condition_variable mCondition;
+        std::queue<std::vector<char>> mEmptyQueue;
+        std::queue<std::vector<char>> mFillQueue;
+        std::exception_ptr mException;
+        bool mShutdown = false;
+        bool mDone = false;
     };
 
     // AudioFile implements reading audio samples from an
@@ -115,7 +169,7 @@ namespace audio
         virtual unsigned GetNumChannels() const noexcept override;
         // Get the PCM byte format of the sample.
         virtual Format GetFormat() const noexcept override;
-        // Get the human readable name of the sample if any.
+        // Get the human-readable name of the sample if any.
         virtual std::string GetName() const noexcept override;
         // Fill the buffer with PCM data.
         virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;

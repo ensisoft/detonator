@@ -639,7 +639,8 @@ add_executable(unit_test_audio
         audio/pulseaudio.cpp
         audio/openal.cpp
         audio/waveout.cpp
-        audio/player.cpp)
+        audio/player.cpp
+        audio/proxy.cpp)
 target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(unit_test_audio BaseLib)
 if (UNIX)
