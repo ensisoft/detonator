@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>762</height>
+    <width>461</width>
+    <height>769</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,205 +62,287 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="chkResizeTextures">
      <property name="title">
-      <string>Texture packing</string>
+      <string>Resize textures</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Max output height</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Max output width</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="cmbMaxTexWidth">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-          <property name="currentIndex">
-           <number>4</number>
-          </property>
-          <item>
-           <property name="text">
-            <string>64</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>128</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>256</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>512</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>1024</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2048</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>4096</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>8192</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>16384</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="cmbMaxTexHeight">
-          <property name="editable">
-           <bool>true</bool>
-          </property>
-          <property name="currentIndex">
-           <number>4</number>
-          </property>
-          <item>
-           <property name="text">
-            <string>64</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>128</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>256</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>512</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>1024</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2048</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>4096</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>8192</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>16384</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSpinBox" name="spinTexPadding">
-          <property name="value">
-           <number>2</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Texture padding</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QCheckBox" name="chkCombineTextures">
-          <property name="text">
-           <string>Combine textures</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="chkResizeTextures">
-          <property name="text">
-           <string>Resize large textures</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Preferred</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Max height</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>409</width>
-          <height>20</height>
-         </size>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbMaxTexHeight">
+        <property name="editable">
+         <bool>true</bool>
         </property>
-       </spacer>
+        <property name="currentIndex">
+         <number>4</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8192</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16384</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Max width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="cmbMaxTexWidth">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+        <property name="currentIndex">
+         <number>4</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8192</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16384</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="chkCombineTextures">
+     <property name="title">
+      <string>Pack textures</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Pack height</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbPackHeight">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <property name="currentIndex">
+         <number>4</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8192</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16384</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Pack width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="cmbPackWidth">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <property name="currentIndex">
+         <number>4</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8192</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16384</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Padding</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="spinTexPadding">
+        <property name="value">
+         <number>2</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -271,41 +353,6 @@
       <string>Output options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="chkDelete">
-        <property name="text">
-         <string>Delete old directory and its contents</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLineEdit" name="editOutDir">
-        <property name="placeholderText">
-         <string>Output Directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="chkWriteConfig">
-        <property name="text">
-         <string>Write game config.json file</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QToolButton" name="btnBrowse">
-        <property name="text">
-         <string>Browse ...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../resource/resource.qrc">
-          <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0">
        <widget class="QCheckBox" name="chkCopyNative">
         <property name="text">
@@ -313,10 +360,10 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
-       <widget class="QCheckBox" name="chkGenerateHtml5">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="chkDelete">
         <property name="text">
-         <string>Generate game.html main file</string>
+         <string>Delete old directory and its contents</string>
         </property>
        </widget>
       </item>
@@ -331,6 +378,41 @@
        <widget class="QCheckBox" name="chkCopyHtml5">
         <property name="text">
          <string>Deploy wasm/js game engine files</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLineEdit" name="editOutDir">
+        <property name="placeholderText">
+         <string>Output Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QToolButton" name="btnBrowse">
+        <property name="text">
+         <string>Browse ...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resource/resource.qrc">
+          <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="chkWriteConfig">
+        <property name="text">
+         <string>Write game config.json file</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QCheckBox" name="chkGenerateHtml5">
+        <property name="text">
+         <string>Generate game.html main file</string>
         </property>
        </widget>
       </item>
@@ -387,11 +469,13 @@
   <tabstop>btnSelectAll</tabstop>
   <tabstop>btnSelectNone</tabstop>
   <tabstop>listWidget</tabstop>
+  <tabstop>chkResizeTextures</tabstop>
   <tabstop>cmbMaxTexHeight</tabstop>
   <tabstop>cmbMaxTexWidth</tabstop>
-  <tabstop>spinTexPadding</tabstop>
   <tabstop>chkCombineTextures</tabstop>
-  <tabstop>chkResizeTextures</tabstop>
+  <tabstop>cmbPackHeight</tabstop>
+  <tabstop>cmbPackWidth</tabstop>
+  <tabstop>spinTexPadding</tabstop>
   <tabstop>editOutDir</tabstop>
   <tabstop>btnBrowse</tabstop>
   <tabstop>chkDelete</tabstop>

@@ -599,6 +599,12 @@ namespace app
             unsigned max_texture_height = 1024;
             // Max texture width, Textures larger than this will be downsized.
             unsigned max_texture_width  = 1024;
+            // The width of the texture pack(atlas) to use when
+            // combine_textures is enabled.
+            unsigned texture_pack_width = 1024;
+            // The height of the texture pack(atlas) to use when
+            // combine_textures is enabled.
+            unsigned texture_pack_height  = 1024;
             // Padding pixels to use in order to create some extra "cushion" pixels
             // between adjacent packed textures in order to mitigate sampling
             // artifacts. If textures are packed next to each other the sampling
