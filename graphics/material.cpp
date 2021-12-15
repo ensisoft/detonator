@@ -109,6 +109,7 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
 {
     try
     {
+        DEBUG("Loading texture file. [file='%1']", mFile);
         // in case of an image load exception, catch and log and return null.
         // Todo: image class should probably provide a non-throw load
         // but then it also needs some mechanism for getting the error
@@ -122,13 +123,12 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
             return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
         else WARN("Unexpected texture bit depth.", mFile);
 
-        ERROR("Failed to load texture. '%1'", mFile);
+        ERROR("Failed to load texture. [file='%1']", mFile);
         return nullptr;
     }
     catch (const std::exception& e)
     {
-        ERROR(e.what());
-        ERROR("Failed to load texture. '%1'", mFile);
+        ERROR("Failed to load texture. [file='%1', error='%2']", mFile, e.what());
     }
     return nullptr;
 }
@@ -398,7 +398,7 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
     {
         const auto& sprite  = mSprites[frame_index[i]];
         const auto& source  = sprite.source;
-        const auto& name    = source->GetId();
+        const auto& name    = source->GetGpuId();
         auto* texture = device.FindTexture(name);
 
         bool needs_upload = false;
@@ -528,7 +528,7 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
         return false;
 
     const auto& source  = mSource;
-    const auto& name    = mSource->GetId();
+    const auto& name    = mSource->GetGpuId();
     auto* texture = device.FindTexture(name);
 
     bool needs_upload = false;
