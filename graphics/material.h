@@ -72,16 +72,19 @@ namespace gfx
         virtual Source GetSourceType() const = 0;
         // Get texture source class/resource id.
         virtual std::string GetId() const = 0;
-        // Get the human readable / and settable name.
+        // Get the identifier to be used for the GPU side resource.
+        virtual std::string GetGpuId() const
+        { return GetId(); }
+        // Get the human-readable / and settable name.
         virtual std::string GetName() const = 0;
         // Get the texture source hash value based on the properties
         // of the texture source object itself *and* its content.
         virtual std::size_t GetHash() const = 0;
-        // Get the texture hash that is used to map the content to a
-        // GPU side object. This hash value only covers the bits of
-        // the *content* i.e the content of the IBitmap to be generated.
+        // Get the hash value based on the content of the texture source.
+        // This hash value only covers the bits of the *content* i.e.
+        // the content of the IBitmap to be generated.
         virtual std::size_t GetContentHash() const = 0;
-        // Set the texture source human readable name.
+        // Set the texture source human-readable name.
         virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
@@ -118,6 +121,8 @@ namespace gfx
             { return Source::Filesystem; }
             virtual std::string GetId() const override
             { return mId; }
+            virtual std::string GetGpuId() const override
+            { return mFile; }
             virtual std::string GetName() const override
             { return mName; }
             virtual std::size_t GetHash() const override

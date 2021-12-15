@@ -211,6 +211,8 @@ public:
         TEST_REQUIRE(index < mTextures.size());
         return *mTextures[index].texture;
     }
+    size_t GetNumTextures() const
+    { return mTextures.size(); }
     TextureBinding* FindTextureBinding(const std::string& sampler)
     {
         for (auto& binding : mTextures)
@@ -413,6 +415,8 @@ public:
         mShaderIndexMap.clear();
         mShaders.clear();
     }
+    size_t GetNumTextures() const
+    { return mTextures.size(); }
 
 private:
     std::unordered_map<std::string, std::size_t> mTextureIndexMap;
@@ -1264,8 +1268,8 @@ void unit_test_static_poly()
 {
     gfx::PolygonClass poly;
 
-    // polygon marked static but we're in edit mode so the
-    // contents should get reuploaded as needed.
+    // polygon is marked static, but we're in edit mode so the
+    // contents should get re-uploaded as needed.
     poly.SetStatic(true);
 
     const gfx::Vertex verts[3] = {
@@ -1327,6 +1331,40 @@ void unit_test_static_poly()
     TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
 }
 
+// multiple materials with textures should only load the
+// same texture object once onto the device.
+void unit_test_packed_texture_bug()
+{
+    gfx::RgbaBitmap bmp;
+    bmp.Resize(10, 10);
+    bmp.Fill(gfx::Color::HotPink);
+    gfx::WritePNG(bmp, "test-texture.png");
+
+    // several materials
+    {
+        gfx::TextureMap2DClass material0;
+        material0.SetTexture(gfx::LoadTextureFromFile("test-texture.png"));
+        gfx::TextureMap2DClass material1;
+        material1.SetTexture(gfx::LoadTextureFromFile("test-texture.png"));
+
+        TestDevice device;
+        TestProgram program;
+        gfx::MaterialClass::State env;
+        env.material_time = 0.0f;
+        env.editing_mode  = false;
+        material0.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(device.GetNumTextures() == 1);
+
+        material1.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(device.GetNumTextures() == 1);
+    }
+
+    // single material but with multiple texture maps
+    {
+
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_material_uniforms();
@@ -1335,7 +1373,8 @@ int test_main(int argc, char* argv[])
     unit_test_material_uniform_folding();
     unit_test_custom_uniforms();
     unit_test_custom_textures();
-
     unit_test_static_poly();
+
+    unit_test_packed_texture_bug();
     return 0;
 }
