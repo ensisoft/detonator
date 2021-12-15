@@ -251,10 +251,12 @@ public:
                                             kMaxTextureHeight / (float)img_height);
                 const auto dst_width  = img_width * scale;
                 const auto dst_height = img_height * scale;
-                QPixmap buffer(dst_width, dst_height);
+                //QPixmap buffer(dst_width, dst_height);
+                QImage buffer(dst_width, dst_height, QImage::Format::Format_RGBA8888);
                 buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
                 QPainter painter(&buffer);
                 painter.setCompositionMode(QPainter::CompositionMode_Source);
+                painter.setRenderHint(QPainter::SmoothPixmapTransform, true); // bi-linear filtering
                 const QRectF dst_rect(0, 0, dst_width, dst_height);
                 const QRectF src_rect(0, 0, img_width, img_height);
                 painter.drawPixmap(dst_rect, src_pix, src_rect);
@@ -266,7 +268,7 @@ public:
                 writer.setFormat("PNG");
                 writer.setQuality(100);
                 writer.setFileName(temp);
-                if (!writer.write(buffer.toImage()))
+                if (!writer.write(buffer))
                 {
                     ERROR("Failed to write temp image. [file='%1']", temp);
                     mNumErrors++;
