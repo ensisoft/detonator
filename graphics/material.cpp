@@ -137,12 +137,14 @@ void detail::TextureFileSource::IntoJson(data::Writer& data) const
     data.Write("id",   mId);
     data.Write("file", mFile);
     data.Write("name", mName);
+    data.Write("flags", mFlags);
 }
 bool detail::TextureFileSource::FromJson(const data::Reader& data)
 {
     return data.Read("id",   &mId) &&
            data.Read("file", &mFile) &&
-           data.Read("name", &mName);
+           data.Read("name", &mName) &&
+           data.Read("flags", &mFlags);
 }
 
 void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
@@ -1244,8 +1246,8 @@ void SpriteClass::BeginPacking(Packer* packer) const
         // since the HW sampler coords are outside the sub rectangle coords.
         // for example if the wrapping is set to wrap on x and our box is
         // 0.25 units the HW sampler would not help us here to wrap when the
-        // X coordinate is 0.26. Instead we need to do the wrap manually.
-        // However this can cause rendering artifacts when texture sampling
+        // X coordinate is 0.26. Instead, we need to do the wrap manually.
+        // However, this can cause rendering artifacts when texture sampling
         // is done depending on the current filter being used.
         bool can_combine = true;
 

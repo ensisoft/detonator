@@ -32,6 +32,7 @@
 #include "base/utility.h"
 #include "base/assert.h"
 #include "base/hash.h"
+#include "base/bitflag.h"
 #include "data/fwd.h"
 #include "graphics/texture.h"
 #include "graphics/packer.h"
@@ -113,8 +114,16 @@ namespace gfx
         class TextureFileSource : public TextureSource
         {
         public:
+            enum class Flags {
+                AllowPacking,
+                AllowResizing
+            };
             TextureFileSource()
-            { mId = base::RandomString(10); }
+            {
+                mId = base::RandomString(10);
+                mFlags.set(Flags::AllowResizing, true);
+                mFlags.set(Flags::AllowPacking, true);
+            }
             TextureFileSource(const std::string& file) : TextureFileSource()
             { mFile = file; }
             virtual Source GetSourceType() const override
@@ -130,6 +139,7 @@ namespace gfx
                 auto hash = GetContentHash();
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
+                hash = base::hash_combine(hash, mFlags);
                 return hash;
             }
             virtual std::size_t GetContentHash() const override
@@ -152,6 +162,10 @@ namespace gfx
             virtual void BeginPacking(Packer* packer) const override
             {
                 packer->PackTexture(this, mFile);
+                packer->SetTextureFlag(this, Packer::TextureFlags::AllowedToPack,
+                    TestFlag(Flags::AllowPacking));
+                packer->SetTextureFlag(this, Packer::TextureFlags::AllowedToResize,
+                    TestFlag(Flags::AllowResizing));
             }
             virtual void FinishPacking(const Packer* packer) override
             {
@@ -161,10 +175,15 @@ namespace gfx
             { mFile = file; }
             const std::string& GetFilename() const
             { return mFile; }
+            bool TestFlag(Flags flag) const
+            { return mFlags.test(flag); }
+            void SetFlag(Flags flag, bool on_off)
+            { mFlags.set(flag, on_off); }
         private:
             std::string mId;
             std::string mFile;
             std::string mName;
+            base::bitflag<Flags> mFlags;
         private:
         };
 

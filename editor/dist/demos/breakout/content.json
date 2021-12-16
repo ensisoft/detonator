@@ -1601,6 +1601,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/paddleBlu.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "f14OR9A2E0",
         "name": "paddleBlu",
         "type": "Filesystem"
@@ -1644,6 +1648,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/ballBlue.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "ayp8TvzMbA",
         "name": "ballBlue",
         "type": "Filesystem"
@@ -1687,6 +1695,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_blue_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "IfPXOd3Ckr",
         "name": "element_blue_rectangle_glossy",
         "type": "Filesystem"
@@ -1730,6 +1742,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_red_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "UadbRD19J6",
         "name": "element_red_rectangle_glossy",
         "type": "Filesystem"
@@ -1773,6 +1789,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_green_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "3iYjIJvA3e",
         "name": "element_green_rectangle_glossy",
         "type": "Filesystem"
@@ -1816,6 +1836,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_purple_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "IPwfsHtC5k",
         "name": "element_purple_rectangle_glossy",
         "type": "Filesystem"
@@ -1859,6 +1883,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_yellow_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "zyuF1qAgw6",
         "name": "element_yellow_rectangle_glossy",
         "type": "Filesystem"
@@ -1902,6 +1930,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://textures/element_grey_rectangle_glossy.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "6epMauMCop",
         "name": "element_grey_rectangle_glossy",
         "type": "Filesystem"
@@ -1945,6 +1977,10 @@
       "surface": "Opaque",
       "texture": {
         "file": "ws://backgrounds/22.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "FHJhKbDHyr",
         "name": "22",
         "type": "Filesystem"

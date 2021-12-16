@@ -110,6 +110,8 @@ namespace gui
         void on_rectY_valueChanged(double value);
         void on_rectW_valueChanged(double value);
         void on_rectH_valueChanged(double value);
+        void on_chkAllowPacking_stateChanged(int);
+        void on_chkAllowResizing_stateChanged(int);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
@@ -118,6 +120,7 @@ namespace gui
     private:
         void ApplyShaderDescription();
         void SetTextureRect();
+        void SetTextureFlags();
         void SetMaterialProperties();
         void GetMaterialProperties();
         void GetTextureProperties();

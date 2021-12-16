@@ -2368,6 +2368,10 @@
       "textures": [
         {
           "file": "ws://textures/Red/Ship3/1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "DsKu8WXlgk",
           "name": "1",
           "rect": {
@@ -2380,6 +2384,10 @@
         },
         {
           "file": "ws://textures/Red/Ship3/2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "HEHUPZWYfi",
           "name": "2",
           "rect": {
@@ -2392,6 +2400,10 @@
         },
         {
           "file": "ws://textures/Red/Ship3/3.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "E3EKRUY8jm",
           "name": "3",
           "rect": {
@@ -2404,6 +2416,10 @@
         },
         {
           "file": "ws://textures/Red/Ship3/4.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "xKIwXXftpJ",
           "name": "4",
           "rect": {
@@ -2416,6 +2432,10 @@
         },
         {
           "file": "ws://textures/Red/Ship3/5.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "LtzUk2Bypd",
           "name": "5",
           "rect": {
@@ -2453,6 +2473,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Red/bullet.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "Uq1XErPGt9",
         "name": "bullet",
         "type": "Filesystem"
@@ -2496,6 +2520,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Blue/Ship2/0.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "wDtHYRHN35",
         "name": "0",
         "type": "Filesystem"
@@ -2539,6 +2567,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Asteroids/asteroid_dark.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "7ozeiqjW51",
         "name": "asteroid_dark",
         "type": "Filesystem"
@@ -2594,6 +2626,10 @@
       "textures": [
         {
           "file": "ws://textures/Effects/Red Explosion/1_0.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "vOx40r7XtN",
           "name": "1_0",
           "rect": {
@@ -2606,6 +2642,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "XFQuQa6ke7",
           "name": "1_1",
           "rect": {
@@ -2618,6 +2658,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "HNGXvPNbH4",
           "name": "1_2",
           "rect": {
@@ -2630,6 +2674,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_3.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "nyevSP2lkN",
           "name": "1_3",
           "rect": {
@@ -2642,6 +2690,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_4.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "5Sk4vRsayC",
           "name": "1_4",
           "rect": {
@@ -2654,6 +2706,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_5.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "wGQw5zOGxG",
           "name": "1_5",
           "rect": {
@@ -2666,6 +2722,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_6.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "Yu9STIukB5",
           "name": "1_6",
           "rect": {
@@ -2678,6 +2738,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_7.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "eEJH2tXxbB",
           "name": "1_7",
           "rect": {
@@ -2690,6 +2754,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_8.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "zmqJoLWQCT",
           "name": "1_8",
           "rect": {
@@ -2702,6 +2770,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_9.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "voaz6zPgC4",
           "name": "1_9",
           "rect": {
@@ -2714,6 +2786,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_10.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "5yIKOF9JIU",
           "name": "1_10",
           "rect": {
@@ -2726,6 +2802,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_11.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ZNu0n6eDas",
           "name": "1_11",
           "rect": {
@@ -2738,6 +2818,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_12.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "XZOU6mTi3y",
           "name": "1_12",
           "rect": {
@@ -2750,6 +2834,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_13.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "IYEJE6HxP5",
           "name": "1_13",
           "rect": {
@@ -2762,6 +2850,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_14.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "it6sXiULQ0",
           "name": "1_14",
           "rect": {
@@ -2774,6 +2866,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_15.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "YU2RFJUhLn",
           "name": "1_15",
           "rect": {
@@ -2786,6 +2882,10 @@
         },
         {
           "file": "ws://textures/Effects/Red Explosion/1_16.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "UmBLh98Ua7",
           "name": "1_16",
           "rect": {
@@ -2835,6 +2935,10 @@
       "textures": [
         {
           "file": "ws://textures/Effects/Blue Explosion/1_0.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "3tu85ryruW",
           "name": "1_0",
           "rect": {
@@ -2847,6 +2951,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "rwPYQ2LwsY",
           "name": "1_1",
           "rect": {
@@ -2859,6 +2967,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "h2uBKgs8LL",
           "name": "1_2",
           "rect": {
@@ -2871,6 +2983,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_3.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "bS5Rgiv7fD",
           "name": "1_3",
           "rect": {
@@ -2883,6 +2999,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_4.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "mweahbO7bu",
           "name": "1_4",
           "rect": {
@@ -2895,6 +3015,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_5.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "e4efoyYERF",
           "name": "1_5",
           "rect": {
@@ -2907,6 +3031,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_6.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ydCAYjobBF",
           "name": "1_6",
           "rect": {
@@ -2919,6 +3047,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_7.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ez21XmMXXU",
           "name": "1_7",
           "rect": {
@@ -2931,6 +3063,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_8.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "g8zJS2INPy",
           "name": "1_8",
           "rect": {
@@ -2943,6 +3079,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_9.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "sIaXh5eA4u",
           "name": "1_9",
           "rect": {
@@ -2955,6 +3095,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_10.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "oUnTwROR5P",
           "name": "1_10",
           "rect": {
@@ -2967,6 +3111,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_11.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "CMJOBGoizy",
           "name": "1_11",
           "rect": {
@@ -2979,6 +3127,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_12.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "RdUkzEK9Ys",
           "name": "1_12",
           "rect": {
@@ -2991,6 +3143,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_13.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "aum5n0OTTr",
           "name": "1_13",
           "rect": {
@@ -3003,6 +3159,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_14.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "lQuXfLIv1R",
           "name": "1_14",
           "rect": {
@@ -3015,6 +3175,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_15.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "78h0IzaBAm",
           "name": "1_15",
           "rect": {
@@ -3027,6 +3191,10 @@
         },
         {
           "file": "ws://textures/Effects/Blue Explosion/1_16.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "yFfZgvBT64",
           "name": "1_16",
           "rect": {
@@ -3064,6 +3232,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Blue/bullet.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "KEKTLLkPjy",
         "name": "bullet",
         "type": "Filesystem"
@@ -3119,6 +3291,10 @@
       "textures": [
         {
           "file": "ws://textures/Red/Spacemine/1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "qg19pdfC8l",
           "name": "1",
           "rect": {
@@ -3131,6 +3307,10 @@
         },
         {
           "file": "ws://textures/Red/Spacemine/2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "v6RMllUmIT",
           "name": "2",
           "rect": {
@@ -3166,6 +3346,10 @@
           "sampler_name": "kTexture0",
           "texture": {
             "file": "ws://textures/ParticlePack/spark_06.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true
+            },
             "id": "39bNNiokoM",
             "name": "spark_06",
             "type": "Filesystem"
@@ -3295,6 +3479,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Background/bg_1_1.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "NjsRA8HdkH",
         "name": "bg_1_1",
         "type": "Filesystem"
@@ -3448,6 +3636,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Menu Screen/optionst_buttons.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "i1mArtd5tU",
         "name": "optionst_buttons",
         "type": "Filesystem"
@@ -3491,6 +3683,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "sxHrljrhni",
         "name": "Creditst_buttons",
         "type": "Filesystem"
@@ -3534,6 +3730,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Menu Screen/play_buttons.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "LFMiq02vEK",
         "name": "play_buttons",
         "type": "Filesystem"
@@ -3577,6 +3777,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Menu Screen/exit_buttons.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "Xk7ul0CO91",
         "name": "exit_buttons",
         "type": "Filesystem"
@@ -3620,6 +3824,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/cursor/crosshair158.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "rtMnrhrbtN",
         "name": "crosshair158",
         "type": "Filesystem"
@@ -3661,6 +3869,10 @@
           "sampler_name": "kTexture",
           "texture": {
             "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true
+            },
             "id": "9sBNbuo9j9",
             "name": "Creditst_buttons",
             "type": "Filesystem"
@@ -3694,6 +3906,10 @@
           "sampler_name": "kTexture",
           "texture": {
             "file": "ws://textures/Menu Screen/optionst_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true
+            },
             "id": "KyLn5d0Z7B",
             "name": "optionst_buttons",
             "type": "Filesystem"
@@ -3727,6 +3943,10 @@
           "sampler_name": "kTexture",
           "texture": {
             "file": "ws://textures/Menu Screen/exit_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true
+            },
             "id": "2MFvJwTS9Y",
             "name": "exit_buttons",
             "type": "Filesystem"
@@ -3760,6 +3980,10 @@
           "sampler_name": "kTexture",
           "texture": {
             "file": "ws://textures/Menu Screen/play_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true
+            },
             "id": "8qTZM3yPRi",
             "name": "play_buttons",
             "type": "Filesystem"
@@ -3795,6 +4019,10 @@
       "surface": "Emissive",
       "texture": {
         "file": "ws://textures/SmokeParticle.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "mn29S3i6zn",
         "name": "SmokeParticle",
         "type": "Filesystem"
@@ -3838,6 +4066,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/RoundParticle.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "Y6tN5Yy5IM",
         "name": "RoundParticle",
         "type": "Filesystem"

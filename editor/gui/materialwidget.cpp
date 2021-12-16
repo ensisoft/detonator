@@ -702,6 +702,10 @@ void MaterialWidget::on_rectW_valueChanged(double value)
 { SetTextureRect(); }
 void MaterialWidget::on_rectH_valueChanged(double value)
 { SetTextureRect(); }
+void MaterialWidget::on_chkAllowPacking_stateChanged(int)
+{ SetTextureFlags(); }
+void MaterialWidget::on_chkAllowResizing_stateChanged(int)
+{ SetTextureFlags(); }
 
 void MaterialWidget::AddNewTextureMapFromFile()
 {
@@ -1095,6 +1099,27 @@ void MaterialWidget::SetTextureRect()
         auto* source = custom->FindTextureSourceById(GetItemId(mUI.textures));
         ASSERT(source);
         custom->SetTextureSourceRect(source, rect);
+    }
+}
+
+void MaterialWidget::SetTextureFlags()
+{
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+    gfx::TextureSource* source = nullptr;
+    if (auto* texture = mMaterial->AsTexture())
+        source = texture->GetTextureSource();
+    else if (auto* sprite = mMaterial->AsSprite())
+        source = sprite->GetTextureSource(row);
+    else if (auto* custom = mMaterial->AsCustom())
+        source = custom->FindTextureSourceById(GetItemId(mUI.textures));
+    else BUG("Unhandled material type.");
+
+    if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+    {
+        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
+        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
     }
 }
 
@@ -1496,6 +1521,8 @@ void MaterialWidget::GetTextureProperties()
     SetValue(mUI.rectY, 0.0f);
     SetValue(mUI.rectW, 1.0f);
     SetValue(mUI.rectH, 1.0f);
+    SetEnabled(mUI.chkAllowPacking,  false);
+    SetEnabled(mUI.chkAllowResizing, false);
     mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
 
     const auto current = mUI.textures->currentRow();
@@ -1558,6 +1585,10 @@ void MaterialWidget::GetTextureProperties()
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
     {
         SetValue(mUI.textureFile, ptr->GetFilename());
+        SetValue(mUI.chkAllowPacking, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
+        SetValue(mUI.chkAllowResizing, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
+        SetEnabled(mUI.chkAllowPacking, true);
+        SetEnabled(mUI.chkAllowResizing, true);
     }
 }
 

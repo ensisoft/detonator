@@ -56,9 +56,12 @@ namespace gfx
         virtual void SetTextureBox(ObjectHandle instance, const gfx::FRect& box) = 0;
 
         enum class TextureFlags {
-            // texture can be combined with other textures into a larger
-            // texture file (atlas)
-            CanCombine
+            // texture can be combined with other textures into a larger texture file (atlas)
+            CanCombine,
+            // Texture flags allow resizing.
+            AllowedToResize,
+            // Texture flags allow packing/combining.
+            AllowedToPack
         };
         // Set the texture flags that impact how the texture can be packed
         virtual void SetTextureFlag(ObjectHandle instance, TextureFlags flag, bool on_off) = 0;
@@ -66,7 +69,7 @@ namespace gfx
         virtual void PackFont(ObjectHandle instance, const std::string& file) = 0;
 
         // The resource packer may assign new URIs to the
-        // resources that are packed. These API's are used to fetch
+        // resources that are packed. These APIs are used to fetch
         // the new identifiers that will be used to identify the
         // resources after packing.
         virtual std::string GetPackedShaderId(ObjectHandle instance) const = 0;
