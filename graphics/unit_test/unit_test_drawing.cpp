@@ -82,7 +82,7 @@ public:
     { return mWrapX; }
     virtual Wrapping GetWrapY() const override
     { return mWrapY; }
-    virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) override
+    virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
     {
         mWidth  = xres;
         mHeight = yres;

@@ -730,6 +730,13 @@ public:
             if (force_webgl_wrap_y)
                 WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=%1]", texture_name);
 #endif
+            if (texture_mag_filter == GL_NEAREST_MIPMAP_NEAREST ||
+                texture_mag_filter == GL_NEAREST_MIPMAP_LINEAR ||
+                texture_mag_filter == GL_LINEAR_MIPMAP_LINEAR)
+            {
+                if (!texture->HasMips())
+                    WARN("Texture filter requires mips but texture doesn't have any! [texture=%1]", texture_name);
+            }
 
             // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
@@ -1148,7 +1155,7 @@ private:
             DEBUG("Deleted texture object. [name=%1]", mName);
         }
 
-        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) override
+        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
         {
             DEBUG("Loading texture. [name=%1, size=%2x%3 px]", mName, xres, yres);
 
@@ -1196,17 +1203,27 @@ private:
                 GL_UNSIGNED_BYTE,
                 bytes));
 
-#if defined(WEBGL)
-            // WebGL only supports mips with POT textures.
-            // This also means that with NPOT textures only linear or nearest
-            // sampling can be used since mips are not available.
-            // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-            if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
+            mHasMips = false;
+
+            if (mips)
+            {
+            #if defined(WEBGL)
+                // WebGL only supports mips with POT textures.
+                // This also means that with NPOT textures only linear or nearest
+                // sampling can be used since mips are not available.
+                // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+                if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
+                {
+                    GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+                    mHasMips = true;
+                }
+                else WARN("WebGL doesn't support mips on NPOT textures. [texture=%1, width=%2, height=%3]", mName, xres, yres);
+            #else
                 GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
-            else WARN("WebGL doesn't support mips on NPOT textures. [texture=%1, width=%2, height=%3]", mName, xres, yres);
-#else
-            GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
-#endif
+                mHasMips = true;
+            #endif
+            }
+
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
@@ -1216,8 +1233,7 @@ private:
         }
 
         // refer actual state setting to the point when
-        // when the texture is actually used in a program's
-        // sampler
+        // the texture is actually used in a program's sampler
         virtual void SetFilter(MinFilter filter) override
         { mMinFilter = filter; }
         virtual void SetFilter(MagFilter filter) override
@@ -1251,6 +1267,8 @@ private:
         // internal
         bool IsTransient() const
         { return mTransient; }
+        bool HasMips() const
+        { return mHasMips; }
         GLuint GetName() const
         { return mName; }
         void SetLastUseFrameNumber(size_t frame_number) const
@@ -1273,6 +1291,7 @@ private:
         mutable std::size_t mFrameNumber = 0;
         std::size_t mHash = 0;
         bool mTransient = false;
+        bool mHasMips   = false;
     };
 
     class GeomImpl : public Geometry

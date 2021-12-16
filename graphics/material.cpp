@@ -2092,8 +2092,7 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
     return *this;
 }
 
-TextMaterial::TextMaterial(const TextBuffer& text)
-  : mText(text)
+TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
 {}
 TextMaterial::TextMaterial(TextBuffer&& text)
   : mText(std::move(text))
