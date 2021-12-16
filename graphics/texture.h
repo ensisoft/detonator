@@ -112,7 +112,9 @@ namespace gfx
         virtual Wrapping GetWrapY() const = 0;
         // Upload the texture contents from the given buffer.
         // Will overwrite any previous contents and reshape the texture dimensions.
-        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format) = 0;
+        // If mips is false (no mipmap generation) the texture minification
+        // text filter must be set to not use any mips either.
+        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips=true) = 0;
         // Get the texture width. Initially 0 until Upload is called
         // and new texture contents are uploaded.
         virtual unsigned GetWidth() const = 0;
@@ -127,8 +129,8 @@ namespace gfx
         virtual size_t GetContentHash() const = 0;
         // Set a flag indicating whether the texture is transient
         // or not. Transient textures are removed after some
-        // time and only exist temporarily. Currently used just
-        // to render text.
+        // time and only exist temporarily.
+        // Currently, used only when rendering text.
         virtual void SetTransient(bool on_off) = 0;
     protected:
     private:
