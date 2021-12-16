@@ -4934,6 +4934,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "TjsZJr2sQ7",
         "name": "StoneBlock",
         "type": "Filesystem"
@@ -4977,6 +4981,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile1.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "UW1bHwIOYN",
         "name": "tile1",
         "type": "Filesystem"
@@ -5020,6 +5028,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile2.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "1L0NLDlohh",
         "name": "tile2",
         "type": "Filesystem"
@@ -5063,6 +5075,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile3.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "opPOu5Zxym",
         "name": "tile3",
         "type": "Filesystem"
@@ -5106,6 +5122,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile4.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "bf9vvUkU8z",
         "name": "tile4",
         "type": "Filesystem"
@@ -5149,6 +5169,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile5.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "nGBPZqmLjP",
         "name": "tile5",
         "type": "Filesystem"
@@ -5192,6 +5216,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile6.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "k0Sk1nBWdT",
         "name": "tile6",
         "type": "Filesystem"
@@ -5235,6 +5263,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile7.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "j72PHAGAdY",
         "name": "tile7",
         "type": "Filesystem"
@@ -5278,6 +5310,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile8.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "JYj1uzo5dM",
         "name": "tile8",
         "type": "Filesystem"
@@ -5321,6 +5357,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile9.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "MTJR3MwqeH",
         "name": "tile9",
         "type": "Filesystem"
@@ -5364,6 +5404,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile10.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "uTPJbltI6X",
         "name": "tile10",
         "type": "Filesystem"
@@ -5407,6 +5451,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile11.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "QuEr4UqFv8",
         "name": "tile11",
         "type": "Filesystem"
@@ -5450,6 +5498,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile12.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "3abTOlTyNg",
         "name": "tile12",
         "type": "Filesystem"
@@ -5493,6 +5545,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile13.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "iRCZftM09d",
         "name": "tile13",
         "type": "Filesystem"
@@ -5536,6 +5592,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile14.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "8vzY1g1hNE",
         "name": "tile14",
         "type": "Filesystem"
@@ -5579,6 +5639,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile15.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "aU4MmT5Ijz",
         "name": "tile15",
         "type": "Filesystem"
@@ -5622,6 +5686,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Tile/tile16.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "OJ1iQ6oOYo",
         "name": "tile16",
         "type": "Filesystem"
@@ -5665,6 +5733,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Bush (1).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "nw0nj0q6rr",
         "name": "Bush (1)",
         "type": "Filesystem"
@@ -5708,6 +5780,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Bush (2).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "dqweGyyY7y",
         "name": "Bush (2)",
         "type": "Filesystem"
@@ -5751,6 +5827,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "e5hYa8gAem",
         "name": "Cactus (1)",
         "type": "Filesystem"
@@ -5794,6 +5874,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "hihoJpZg1t",
         "name": "Cactus (2)",
         "type": "Filesystem"
@@ -5837,6 +5921,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "yd4fOCuEbL",
         "name": "Cactus (3)",
         "type": "Filesystem"
@@ -5880,6 +5968,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Crate.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "pvUC2KetOE",
         "name": "Crate",
         "type": "Filesystem"
@@ -5923,6 +6015,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Grass (1).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "Xa2UuFmZoJ",
         "name": "Grass (1)",
         "type": "Filesystem"
@@ -5966,6 +6062,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Grass (2).png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "5Fp5rlwNuS",
         "name": "Grass (2)",
         "type": "Filesystem"
@@ -6009,6 +6109,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Sign.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "l1TbCYb4HB",
         "name": "Sign",
         "type": "Filesystem"
@@ -6052,6 +6156,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/SignArrow.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "zwS5KQkPF0",
         "name": "SignArrow",
         "type": "Filesystem"
@@ -6095,6 +6203,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Skeleton.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "G9qKL2EODD",
         "name": "Skeleton",
         "type": "Filesystem"
@@ -6138,6 +6250,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Stone.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "nPrpJjXUg5",
         "name": "Stone",
         "type": "Filesystem"
@@ -6181,6 +6297,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/Objects/Tree.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "9NfwzTr3yN",
         "name": "Tree",
         "type": "Filesystem"
@@ -6224,6 +6344,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/BG_layer_0.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "aEYiykIEUb",
         "name": "BG_layer_0",
         "type": "Filesystem"
@@ -6279,6 +6403,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "lsDm9xaD2L",
           "name": "__Bandit02_Idle_000",
           "rect": {
@@ -6291,6 +6419,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "yZ9wtTdHRY",
           "name": "__Bandit02_Idle_001",
           "rect": {
@@ -6303,6 +6435,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "mxUtQC7aQF",
           "name": "__Bandit02_Idle_002",
           "rect": {
@@ -6315,6 +6451,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "dHhy3tALI5",
           "name": "__Bandit02_Idle_003",
           "rect": {
@@ -6327,6 +6467,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "5RaivjL0Hb",
           "name": "__Bandit02_Idle_004",
           "rect": {
@@ -6339,6 +6483,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "RhiTAfKt74",
           "name": "__Bandit02_Idle_005",
           "rect": {
@@ -6351,6 +6499,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "3KSaRAlBH0",
           "name": "__Bandit02_Idle_006",
           "rect": {
@@ -6363,6 +6515,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "N5s5nyZ5Ib",
           "name": "__Bandit02_Idle_007",
           "rect": {
@@ -6375,6 +6531,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_008.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "fOiZlepCvl",
           "name": "__Bandit02_Idle_008",
           "rect": {
@@ -6387,6 +6547,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_009.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "yPuh4BAttL",
           "name": "__Bandit02_Idle_009",
           "rect": {
@@ -6399,6 +6563,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_010.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "RZh4Bi6S62",
           "name": "__Bandit02_Idle_010",
           "rect": {
@@ -6411,6 +6579,10 @@
         },
         {
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_011.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "IjNMUgONUy",
           "name": "__Bandit02_Idle_011",
           "rect": {
@@ -6460,6 +6632,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ADbm6G759D",
           "name": "__Bandit02_Walk_000",
           "rect": {
@@ -6472,6 +6648,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "kBs4BEJxFk",
           "name": "__Bandit02_Walk_001",
           "rect": {
@@ -6484,6 +6664,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "DRQRAwWo0M",
           "name": "__Bandit02_Walk_002",
           "rect": {
@@ -6496,6 +6680,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "waihgKt70A",
           "name": "__Bandit02_Walk_003",
           "rect": {
@@ -6508,6 +6696,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "N3IluHyFCA",
           "name": "__Bandit02_Walk_004",
           "rect": {
@@ -6520,6 +6712,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "wa3MTJsJbM",
           "name": "__Bandit02_Walk_005",
           "rect": {
@@ -6532,6 +6728,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "wTxY99zC6R",
           "name": "__Bandit02_Walk_006",
           "rect": {
@@ -6544,6 +6744,10 @@
         },
         {
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "oYKuoYQFgC",
           "name": "__Bandit02_Walk_007",
           "rect": {
@@ -6593,6 +6797,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "eptt19lzUd",
           "name": "__Bandit02_JumpUP_000",
           "rect": {
@@ -6605,6 +6813,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "J2mHET2LI6",
           "name": "__Bandit02_JumpUP_001",
           "rect": {
@@ -6617,6 +6829,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "2iKz7f2R8S",
           "name": "__Bandit02_JumpUP_002",
           "rect": {
@@ -6629,6 +6845,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "pLJCSS0IdM",
           "name": "__Bandit02_JumpUP_003",
           "rect": {
@@ -6641,6 +6861,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "KAXti7LY02",
           "name": "__Bandit02_JumpUP_004",
           "rect": {
@@ -6653,6 +6877,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "X06OiLmUep",
           "name": "__Bandit02_JumpUP_005",
           "rect": {
@@ -6665,6 +6893,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "4I11qxNCdX",
           "name": "__Bandit02_JumpUP_006",
           "rect": {
@@ -6677,6 +6909,10 @@
         },
         {
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "G21MKjk4pF",
           "name": "__Bandit02_JumpUP_007",
           "rect": {
@@ -6726,6 +6962,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "rhlMPpQKBH",
           "name": "__Bandit02_Attack_000",
           "rect": {
@@ -6738,6 +6978,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "kX3zx9umE6",
           "name": "__Bandit02_Attack_001",
           "rect": {
@@ -6750,6 +6994,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "R3m6PbNOWE",
           "name": "__Bandit02_Attack_002",
           "rect": {
@@ -6762,6 +7010,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "06s6OnrZnb",
           "name": "__Bandit02_Attack_003",
           "rect": {
@@ -6774,6 +7026,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "XKPtQEYjuG",
           "name": "__Bandit02_Attack_004",
           "rect": {
@@ -6786,6 +7042,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ykrqQnB6Fy",
           "name": "__Bandit02_Attack_005",
           "rect": {
@@ -6798,6 +7058,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "5q3PLD8zSM",
           "name": "__Bandit02_Attack_006",
           "rect": {
@@ -6810,6 +7074,10 @@
         },
         {
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "R2wBdmeRW7",
           "name": "__Bandit02_Attack_007",
           "rect": {
@@ -6859,6 +7127,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "9urAW8NmQb",
           "name": "__Bandit02_FallDown_000",
           "rect": {
@@ -6871,6 +7143,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "n7BC1Nv7kn",
           "name": "__Bandit02_FallDown_001",
           "rect": {
@@ -6883,6 +7159,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "rMR5Amjua8",
           "name": "__Bandit02_FallDown_002",
           "rect": {
@@ -6895,6 +7175,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "69yf8mQekx",
           "name": "__Bandit02_FallDown_003",
           "rect": {
@@ -6907,6 +7191,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "8GUeBBAZLo",
           "name": "__Bandit02_FallDown_004",
           "rect": {
@@ -6919,6 +7207,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "CBQQjXRCnP",
           "name": "__Bandit02_FallDown_005",
           "rect": {
@@ -6931,6 +7223,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "0ExH2AW2Zy",
           "name": "__Bandit02_FallDown_006",
           "rect": {
@@ -6943,6 +7239,10 @@
         },
         {
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "Bb7JvET8C0",
           "name": "__Bandit02_FallDown_007",
           "rect": {
@@ -6992,6 +7292,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "AQFxlDxqks",
           "name": "__Bandit02_Hurt_000",
           "rect": {
@@ -7004,6 +7308,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "kyy7htNP0O",
           "name": "__Bandit02_Hurt_001",
           "rect": {
@@ -7016,6 +7324,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "Kf52D6y0z5",
           "name": "__Bandit02_Hurt_002",
           "rect": {
@@ -7028,6 +7340,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "6uC8OYvMs1",
           "name": "__Bandit02_Hurt_003",
           "rect": {
@@ -7040,6 +7356,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "lTXpze4OXO",
           "name": "__Bandit02_Hurt_004",
           "rect": {
@@ -7052,6 +7372,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "rK1tOnvEKA",
           "name": "__Bandit02_Hurt_005",
           "rect": {
@@ -7064,6 +7388,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "sF85FM2yrm",
           "name": "__Bandit02_Hurt_006",
           "rect": {
@@ -7076,6 +7404,10 @@
         },
         {
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "QisQwp6eB6",
           "name": "__Bandit02_Hurt_007",
           "rect": {
@@ -7125,6 +7457,10 @@
       "textures": [
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_000.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "P42qqr4xvz",
           "name": "__Bandit02_Die_000",
           "rect": {
@@ -7137,6 +7473,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_001.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "EEJ7GOQJ47",
           "name": "__Bandit02_Die_001",
           "rect": {
@@ -7149,6 +7489,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_002.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "vCgECOfMoD",
           "name": "__Bandit02_Die_002",
           "rect": {
@@ -7161,6 +7505,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_003.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "fyq8iUOxjz",
           "name": "__Bandit02_Die_003",
           "rect": {
@@ -7173,6 +7521,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_004.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "6WJxFehrMw",
           "name": "__Bandit02_Die_004",
           "rect": {
@@ -7185,6 +7537,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_005.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "GYupJ99D2q",
           "name": "__Bandit02_Die_005",
           "rect": {
@@ -7197,6 +7553,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_006.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "2Z4Xn3zi3l",
           "name": "__Bandit02_Die_006",
           "rect": {
@@ -7209,6 +7569,10 @@
         },
         {
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_007.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "WFh1DOYa82",
           "name": "__Bandit02_Die_007",
           "rect": {
@@ -7246,6 +7610,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/BG_layer_1.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "3KLuHOjPOz",
         "name": "BG_layer_1",
         "type": "Filesystem"
@@ -7289,6 +7657,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/desert tile set/BG_layer_2.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "sBOmW38aFS",
         "name": "BG_layer_2",
         "type": "Filesystem"
@@ -7344,6 +7716,10 @@
       "textures": [
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "PYmRNyEFSl",
           "name": "star coin rotate 1",
           "rect": {
@@ -7356,6 +7732,10 @@
         },
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "yrPLN00zzw",
           "name": "star coin rotate 2",
           "rect": {
@@ -7368,6 +7748,10 @@
         },
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "X80Yotnth3",
           "name": "star coin rotate 3",
           "rect": {
@@ -7380,6 +7764,10 @@
         },
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "IsB0BGUba8",
           "name": "star coin rotate 4",
           "rect": {
@@ -7392,6 +7780,10 @@
         },
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "nCBLyGHvzm",
           "name": "star coin rotate 5",
           "rect": {
@@ -7404,6 +7796,10 @@
         },
         {
           "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "7rYNRwJpHs",
           "name": "star coin rotate 6",
           "rect": {

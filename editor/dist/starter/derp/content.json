@@ -590,6 +590,10 @@
       "textures": [
         {
           "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "Co5k1txT4A",
           "name": "frame-1",
           "rect": {
@@ -602,6 +606,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "ZQ9hjH0jrY",
           "name": "frame-2",
           "rect": {
@@ -614,6 +622,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "JOpHaH1Pd9",
           "name": "frame-3",
           "rect": {
@@ -626,6 +638,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "TyAai2iMIa",
           "name": "frame-4",
           "rect": {
@@ -638,6 +654,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "iC2CbjCCZB",
           "name": "frame-5",
           "rect": {
@@ -650,6 +670,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "Bo8rzdihtz",
           "name": "frame-6",
           "rect": {
@@ -662,6 +686,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "0pSTZodGsq",
           "name": "frame-7",
           "rect": {
@@ -674,6 +702,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "833XmLF5lN",
           "name": "frame-8",
           "rect": {
@@ -711,6 +743,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Background/full_background.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": false
+        },
         "id": "szhPHqYeqg",
         "name": "full_background",
         "type": "Filesystem"
@@ -766,6 +802,10 @@
       "textures": [
         {
           "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "QPWkqRqYkY",
           "name": "frame-1",
           "rect": {
@@ -778,6 +818,10 @@
         },
         {
           "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
+          "flags": {
+            "AllowPacking": true,
+            "AllowResizing": true
+          },
           "id": "L1mEfJMq1o",
           "name": "frame-2",
           "rect": {
@@ -815,6 +859,10 @@
       "surface": "Transparent",
       "texture": {
         "file": "ws://textures/Spikes/sharp wood.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
         "id": "wJ2fqkub2J",
         "name": "sharp wood",
         "type": "Filesystem"

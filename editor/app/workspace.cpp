@@ -130,8 +130,13 @@ public:
     }
     virtual void SetTextureFlag(ObjectHandle instance, gfx::Packer::TextureFlags flags, bool on_off) override
     {
-        ASSERT(flags == gfx::Packer::TextureFlags::CanCombine);
-        mTextureMap[instance].can_be_combined = on_off;
+        if (flags == gfx::Packer::TextureFlags::CanCombine)
+            mTextureMap[instance].can_be_combined = on_off;
+        else if (flags == gfx::Packer::TextureFlags::AllowedToPack)
+            mTextureMap[instance].allowed_to_combine = on_off;
+        else if (flags == gfx::Packer::TextureFlags::AllowedToResize)
+            mTextureMap[instance].allowed_to_resize = on_off;
+        else BUG("Unhandled texture packing flag.");
     }
     virtual void PackFont(ObjectHandle instance, const std::string& file) override
     {
@@ -245,7 +250,7 @@ public:
             auto img_height = src_pix.height();
             DEBUG("Loading image file. [file='%1', width=%2, height=%3]", src_file, img_width, img_height);
 
-            if (kResizeLargeTextures && (img_width > kMaxTextureWidth || img_height > kMaxTextureHeight))
+            if (kResizeLargeTextures && (img_width > kMaxTextureWidth || img_height > kMaxTextureHeight) && tex.allowed_to_resize)
             {
                 const auto scale = std::min(kMaxTextureWidth / (float)img_width,
                                             kMaxTextureHeight / (float)img_height);
@@ -289,7 +294,7 @@ public:
                 image_map[tex.file] = app::FromUtf8(tex.file);
             }
 
-            if (kPackSmallTextures && tex.can_be_combined && img_width < kTexturePackWidth && img_height < kTexturePackHeight)
+            if (kPackSmallTextures && tex.can_be_combined && tex.allowed_to_combine && img_width < kTexturePackWidth && img_height < kTexturePackHeight)
             {
                 // add as a source for texture packing
                 app::PackingRectangle rc;
@@ -574,6 +579,8 @@ private:
         std::string file;
         gfx::FRect  rect;
         bool can_be_combined = true;
+        bool allowed_to_resize = true;
+        bool allowed_to_combine = true;
     };
     std::unordered_map<ObjectHandle, TextureSource> mTextureMap;
 

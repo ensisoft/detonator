@@ -1010,10 +1010,23 @@
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_37">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Height</string>
+             <string>ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLineEdit" name="textureWidth">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -1024,26 +1037,10 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_38">
+          <item row="6" column="2">
+           <widget class="QCheckBox" name="chkAllowPacking">
             <property name="text">
-             <string>Depth</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QLineEdit" name="textureHeight">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
+             <string>Allow packing</string>
             </property>
            </widget>
           </item>
@@ -1054,7 +1051,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="3" rowspan="4">
+          <item row="3" column="3" rowspan="6">
            <widget class="QLabel" name="texturePreview">
             <property name="minimumSize">
              <size>
@@ -1076,13 +1073,6 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
-           <widget class="QPushButton" name="btnEditTexture">
-            <property name="text">
-             <string>Edit Texture</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="2">
            <widget class="QLineEdit" name="textureDepth">
             <property name="sizePolicy">
@@ -1099,6 +1089,23 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="2" colspan="2">
+           <widget class="QLineEdit" name="textureID">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_38">
+            <property name="text">
+             <string>Depth</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="2" colspan="2">
            <widget class="QLineEdit" name="textureFile">
             <property name="sizePolicy">
@@ -1112,33 +1119,40 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLineEdit" name="textureWidth">
+          <item row="4" column="2">
+           <widget class="QLineEdit" name="textureHeight">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="text">
+             <string/>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_13">
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>ID</string>
+             <string>Height</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2" colspan="2">
-           <widget class="QLineEdit" name="textureID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="7" column="2">
+           <widget class="QCheckBox" name="chkAllowResizing">
+            <property name="text">
+             <string>Allow resizing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1" colspan="3">
+           <widget class="QPushButton" name="btnEditTexture">
+            <property name="text">
+             <string>Edit Texture</string>
             </property>
            </widget>
           </item>
@@ -1485,13 +1499,15 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
-  <tabstop>btnEditTexture</tabstop>
+  <tabstop>chkAllowPacking</tabstop>
+  <tabstop>chkAllowResizing</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
   <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
+  <tabstop>btnEditTexture</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
