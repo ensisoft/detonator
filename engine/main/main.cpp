@@ -479,13 +479,14 @@ int main(int argc, char* argv[])
             const auto& application_path = GetPath();
             const auto& content_path = base::JoinPath(application_path, content);
             const auto& content_file = base::JoinPath(content_path, "content.json");
-            DEBUG("Content package. [package='%1']", content);
-            DEBUG("Content path. [path='%1']", content_path);
-            DEBUG("Content file. [file='%1']", content_file);
+            DEBUG("Content package: '%1'", content);
+            DEBUG("Content path: '%1']", content_path);
+            DEBUG("Content file: '%1']", content_file);
             if (!loaders.ContentLoader->LoadFromFile(content_file))
                 return EXIT_FAILURE;
             loaders.ResourceLoader->SetApplicationPath(application_path);
             loaders.ResourceLoader->SetContentPath(content_path);
+            loaders.ResourceLoader->PreloadFiles();
         }
 
         // Create the app instance.

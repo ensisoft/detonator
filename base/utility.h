@@ -33,6 +33,10 @@
 namespace base
 {
 
+template<typename T, size_t N> inline
+size_t ArraySize(const T (&array)[N])
+{ return N; }
+
 inline bool IsPowerOfTwo(unsigned i)
 {
     return (i & (i-1)) == 0;

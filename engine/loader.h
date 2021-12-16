@@ -65,6 +65,9 @@ namespace engine
         virtual void SetApplicationPath(const std::string& path) = 0;
         // Set the filesystem path in which to look for resource files
         virtual void SetContentPath(const std::string& path) = 0;
+        // Preload files into loader file buffers so that they're already available
+        // in the buffers when needed.
+        virtual void PreloadFiles() = 0;
         // Create new file resource loader.
         static std::unique_ptr<FileResourceLoader> Create();
     private:

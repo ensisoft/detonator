@@ -21,6 +21,7 @@
 #include "warnpop.h"
 
 #include <fstream>
+#include <filesystem>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -39,7 +40,7 @@
 namespace engine
 {
 
-bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer)
+bool LoadFileBufferFromDisk(const std::string& filename, std::vector<char>* buffer)
 {
     auto in = base::OpenBinaryInputStream(filename);
     if (!in.is_open())
@@ -175,7 +176,50 @@ public:
     { mApplicationPath = path; }
     virtual void SetContentPath(const std::string& path) override
     { mContentPath = path; }
+    virtual void PreloadFiles() override
+    {
+        DEBUG("Preloading file buffers.");
+        const char* dirs[] = {
+          "audio", "fonts", "lua", "textures", "ui", "shaders/es2"
+        };
+        size_t bytes_loaded = 0;
+        for (size_t i=0; i<base::ArraySize(dirs); ++i)
+        {
+            const auto& dir = dirs[i];
+            const auto& path = base::JoinPath(mContentPath, dir);
+            for (const auto& entry : std::filesystem::directory_iterator(path))
+            {
+                if (!entry.is_regular_file())
+                    continue;
+                const auto& file = entry.path().generic_u8string();
+                std::vector<char> buffer;
+                if (!LoadFileBufferFromDisk(file, &buffer))
+                    continue;
+                const auto size = buffer.size();
+                bytes_loaded += buffer.size();
+                mPreloadedFiles[file] = std::move(buffer);
+            }
+        }
+    }
 private:
+    bool LoadFileBuffer(const std::string& filename, std::vector<char>* buffer) const
+    {
+        if (mPreloadedFiles.empty())
+            return LoadFileBufferFromDisk(filename, buffer);
+
+        auto it = mPreloadedFiles.find(filename);
+        if (it == mPreloadedFiles.end())
+        {
+            WARN("Missed preloaded file buffer. entry. [file='%1']", filename);
+            return LoadFileBufferFromDisk(filename, buffer);
+        }
+        // ditch the preloaded buffer since it'll be now cached in a higher
+        // level of a buffer object, i.e. graphics buffer, audio buffer etc.
+        *buffer = std::move(it->second);
+        mPreloadedFiles.erase(it);
+        return true;
+    }
+
     std::string ResolveURI(const std::string& URI) const
     {
         auto it = mUriCache.find(URI);
@@ -203,6 +247,8 @@ private:
         return str;
     }
 private:
+    // transient stash of files that have been preloaded
+    mutable std::unordered_map<std::string, std::vector<char>> mPreloadedFiles;
     // cache of URIs that have been resolved to file
     // names already.
     mutable std::unordered_map<std::string, std::string> mUriCache;
