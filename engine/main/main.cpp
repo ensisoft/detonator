@@ -329,6 +329,7 @@ int main(int argc, char* argv[])
     {
         engine::Engine::DebugOptions debug;
         std::optional<bool> debug_log_override;
+        std::optional<bool> vsync_override;
 
         std::string trace_file;
         std::string config_file;
@@ -346,6 +347,7 @@ int main(int argc, char* argv[])
         opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
         opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
         opt.Add("--trace", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
+        opt.Add("--vsync", "Force vsync on or off.", false);
         if (!opt.Parse(args, &cmdline_error, true))
         {
             std::fprintf(stdout, "Error parsing args. [err='%s']\n", cmdline_error.c_str());
@@ -359,6 +361,10 @@ int main(int argc, char* argv[])
         if (opt.WasGiven("--trace"))
         {
             trace_file = opt.GetValue<std::string>("--trace");
+        }
+        if (opt.WasGiven("--vsync"))
+        {
+            vsync_override = opt.GetValue<bool>("--vsync");
         }
 
         if (opt.WasGiven("--debug"))
@@ -536,6 +542,9 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["window"], "vsync", &window_vsync);
         base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
         base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
+
+        if (vsync_override.has_value())
+            window_vsync = vsync_override.value();
 
         wdk::Window window;
         // makes sure to connect the listener before creating the window
