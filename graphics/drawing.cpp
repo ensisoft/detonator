@@ -98,6 +98,13 @@ void DrawTextRect(Painter& painter,
     buff.AddText(text_and_style);
     TextMaterial material(std::move(buff));
     material.SetColor(color);
+    // todo: we should/could check the painter whether it has a
+    // a view transformation set that will change the texture mapping
+    // between the rasterized fragments and the underlying texture object.
+    // if there's no such transform i.e. the rectangle to be shaded on the
+    // screen maps closely to the texture buffer, we can use fast point
+    // sampling (using NEAREST filtering).
+    material.SetPointSampling(true);
 
     Transform t;
     t.Resize(rect);

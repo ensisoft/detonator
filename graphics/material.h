@@ -1527,9 +1527,20 @@ namespace gfx
         virtual void SetUniforms(const UniformMap& uniforms) override;
         void SetColor(const Color4f& color)
         { mColor = color; }
+        // Set point sampling to true in order to use a fast filtering
+        // when sampling from the texture. This should be for maximum perf
+        // ideally when the geometry to be drawn matches closely with the
+        // rasterized text texture/buffer. So when the texture maps onto
+        // a rectangle and there's now transformation that would change the
+        // rasterized dimensions (in pixels) of the rectangle from the
+        // dimensions of the rasterized text texture.
+        // The default is true.
+        void SetPointSampling(bool on_off)
+        { mPointSampling = on_off; }
     private:
         TextBuffer mText;
         Color4f mColor = Color::White;
+        bool mPointSampling = true;
     };
 
     // Create material based on a simple color only.

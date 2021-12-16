@@ -2118,11 +2118,30 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
 
-        texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale);
+        // current text rendering use cases for this TextMaterial
+        // are such that we expect the rendered geometry to match
+        // the underlying rasterized text texture size almost exactly.
+        // this means that we can skip the mipmap generation and use
+        // a simple fast nearest/linear texture filter without mips.
+        const bool mips = false;
+
+        texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
         texture->SetContentHash(hash);
         texture->SetTransient(true);
         texture->SetWrapX(Texture::Wrapping::Clamp);
         texture->SetWrapY(Texture::Wrapping::Clamp);
+        // see the comment above about mipmaps. it's relevant regarding
+        // the possible filtering settings that we can use here.
+        if (mPointSampling)
+        {
+            texture->SetFilter(Texture::MagFilter::Nearest);
+            texture->SetFilter(Texture::MinFilter::Nearest);
+        }
+        else
+        {
+            texture->SetFilter(Texture::MagFilter::Linear);
+            texture->SetFilter(Texture::MinFilter::Linear);
+        }
     }
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
