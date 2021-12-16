@@ -269,22 +269,20 @@ public:
         // The initial state needs to be kept in sync with the HTML5 UI somehow!
         // easiest thing is just to start with a known default state (all off)
         // and then let the UI set the state.
-        engine::Engine::DebugOptions debug;
-        debug.debug_pause     = false;
-        debug.debug_draw      = false;
-        debug.debug_show_fps  = false;
-        debug.debug_show_msg  = false;
-        debug.debug_print_fps = false;
+        mDebugOptions.debug_pause     = false;
+        mDebugOptions.debug_draw      = false;
+        mDebugOptions.debug_show_fps  = false;
+        mDebugOptions.debug_show_msg  = false;
+        mDebugOptions.debug_print_fps = false;
         if (json.contains("debug"))
         {
             const auto& debug_settings = json["debug"];
-            base::JsonReadSafe(debug_settings, "font", &debug.debug_font);
-            base::JsonReadSafe(debug_settings, "show_fps", &debug.debug_show_fps);
-            base::JsonReadSafe(debug_settings, "show_msg", &debug.debug_show_msg);
-            base::JsonReadSafe(debug_settings, "draw", &debug.debug_draw);
-            mDebugFont = debug.debug_font;
+            base::JsonReadSafe(debug_settings, "font",     &mDebugOptions.debug_font);
+            base::JsonReadSafe(debug_settings, "show_fps", &mDebugOptions.debug_show_fps);
+            base::JsonReadSafe(debug_settings, "show_msg", &mDebugOptions.debug_show_msg);
+            base::JsonReadSafe(debug_settings, "draw",     &mDebugOptions.debug_draw);
         }
-        mEngine->SetDebugOptions(debug);
+        mEngine->SetDebugOptions(mDebugOptions);
 
         engine::Engine::Environment env;
         env.classlib = mContentLoader.get();
@@ -365,13 +363,13 @@ public:
         };
         UIFlag flags[] = {
             {"chk-log-debug", base::IsLogEventEnabled(base::LogEvent::Debug)},
-            {"chk-log-warn", base::IsLogEventEnabled(base::LogEvent::Warning)},
-            {"chk-log-info", base::IsLogEventEnabled(base::LogEvent::Info)},
+            {"chk-log-warn",  base::IsLogEventEnabled(base::LogEvent::Warning)},
+            {"chk-log-info",  base::IsLogEventEnabled(base::LogEvent::Info)},
             {"chk-log-error", base::IsLogEventEnabled(base::LogEvent::Error)},
-            {"chk-show-fps", debug.debug_show_fps},
-            {"chk-print-fps", debug.debug_print_fps},
-            {"chk-dbg-draw", debug.debug_draw},
-            {"chk-dbg-msg", debug.debug_show_msg}
+            {"chk-show-fps",  mDebugOptions.debug_show_fps},
+            {"chk-print-fps", mDebugOptions.debug_print_fps},
+            {"chk-dbg-draw",  mDebugOptions.debug_draw},
+            {"chk-dbg-msg",   mDebugOptions.debug_show_msg}
         };
         for (int i=0; i<8; ++i)
         {
@@ -418,23 +416,21 @@ public:
     {
         if (!gui_commands.empty())
         {
-            engine::Engine::DebugOptions debug;
-            debug.debug_font = mDebugFont;
             while (!gui_commands.empty())
             {
                 const auto& cmd = gui_commands.front();
                 if (const auto* ptr = std::get_if<WebGuiToggleDbgSwitchCmd>(&cmd))
                 {
                     if (ptr->name == "chk-pause")
-                        debug.debug_pause = ptr->enabled;
+                        mDebugOptions.debug_pause = ptr->enabled;
                     if (ptr->name == "chk-show-fps")
-                        debug.debug_show_fps = ptr->enabled;
+                        mDebugOptions.debug_show_fps = ptr->enabled;
                     else if (ptr->name == "chk-print-fps")
-                        debug.debug_print_fps = ptr->enabled;
+                        mDebugOptions.debug_print_fps = ptr->enabled;
                     else if (ptr->name == "chk-dbg-draw")
-                        debug.debug_draw = ptr->enabled;
+                        mDebugOptions.debug_draw = ptr->enabled;
                     else if (ptr->name == "chk-dbg-msg")
-                        debug.debug_show_msg = ptr->enabled;
+                        mDebugOptions.debug_show_msg = ptr->enabled;
                     else if (ptr->name == "chk-log-debug")
                         base::EnableLogEvent(base::LogEvent::Debug, ptr->enabled);
                     else if (ptr->name == "chk-log-info")
@@ -447,7 +443,7 @@ public:
                 }
                 gui_commands.pop();
             }
-            mEngine->SetDebugOptions(debug);
+            mEngine->SetDebugOptions(mDebugOptions);
         }
 
         // important: make sure that the order in which stuff is done
@@ -907,8 +903,8 @@ private:
         wdk::WindowEventMousePress,
         wdk::WindowEventMouseRelease>;
     std::queue<WindowEvent> mEventQueue;
-    // debug font URI (if any)
-    std::string mDebugFont;
+    // current engine debug options.
+    engine::Engine::DebugOptions mDebugOptions;
     // flag to indicate whether currently in soft fullscreen or not
     bool mSoftFullScreen = false;
 
