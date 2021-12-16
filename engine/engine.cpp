@@ -477,7 +477,11 @@ public:
 
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
-        DEBUG("Rendering surface resized to %1x%2", width, height);
+        // ignore accidental superfluous notifications.
+        if (width == mSurfaceWidth && height == mSurfaceHeight)
+            return;
+
+        DEBUG("Rendering surface resized. [width=%1, height=%2]", width, height);
         mSurfaceWidth = width;
         mSurfaceHeight = height;
         mPainter->SetSurfaceSize(width, height);
