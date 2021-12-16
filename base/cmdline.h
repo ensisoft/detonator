@@ -27,6 +27,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cassert>
+#include <cstring>
 
 // simplistic command line parser
 //
@@ -64,6 +65,23 @@ namespace base
         template<>
         std::string FromString<std::string>(const char* str)
         { return str; }
+        template<>
+        bool FromString<bool>(const char* str)
+        {
+            if (!std::strcmp(str, "1") ||
+                !std::strcmp(str, "on") ||
+                !std::strcmp(str, "ON") ||
+                !std::strcmp(str, "True") ||
+                !std::strcmp(str, "true"))
+                return true;
+            if (!std::strcmp(str, "0") ||
+                !std::strcmp(str, "off") ||
+                !std::strcmp(str, "OFF") ||
+                !std::strcmp(str, "False") ||
+                !std::strcmp(str, "false"))
+                return false;
+            throw std::runtime_error(std::string("Can't interpret '") + str + "' as boolean flag. (1, 0, on, off, True, False)");
+        }
     } // detail
 
     // CommandLineArgumentStack initialized from a set of arguments given as a
