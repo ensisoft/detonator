@@ -2145,7 +2145,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                         WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio->GetName(), name);
                         continue;
                     }
-                    *file_uri = packer.CopyFile(*file_uri, "audio/");
+                    *file_uri = packer.CopyFile(*file_uri, "audio");
                 }
             }
         }
@@ -2175,11 +2175,11 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 std::string src_font_uri;
                 std::string dst_font_uri;
                 p.prop.GetValue(&src_font_uri);
-                dst_font_uri = packer.CopyFile(src_font_uri, "fonts/");
+                dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
                 p.prop.SetValue(dst_font_uri);
                 style.SetProperty(p.key, p.prop);
             }
-            window->SetStyleName(packer.CopyFile(window->GetStyleName(), "ui/"));
+            window->SetStyleName(packer.CopyFile(window->GetStyleName(), "ui"));
             // for each widget, parse the style string and see if there are more font-name props.
             window->ForEachWidget([&style, &packer](uik::Widget* widget) {
                 auto style_string = widget->GetStyleString();
@@ -2196,7 +2196,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                     std::string src_font_uri;
                     std::string dst_font_uri;
                     p.prop.GetValue(&src_font_uri);
-                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts/");
+                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
                     p.prop.SetValue(dst_font_uri);
                     style.SetProperty(p.key, p.prop);
                 }
