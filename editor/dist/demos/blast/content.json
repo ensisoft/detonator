@@ -123,30 +123,6 @@
     {
       "elements": [
         {
-          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 3.ogg",
-          "arg_loops": 1,
-          "arg_type": "Float32",
-          "id": "KUf8FAknrd",
-          "name": "FileSource_2",
-          "type": "FileSource"
-        },
-        {
-          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 2.ogg",
-          "arg_loops": 1,
-          "arg_type": "Float32",
-          "id": "EEfBsJfH7U",
-          "name": "FileSource_1",
-          "type": "FileSource"
-        },
-        {
-          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 1.ogg",
-          "arg_loops": 1,
-          "arg_type": "Float32",
-          "id": "LoG45mUAF4",
-          "name": "FileSource",
-          "type": "FileSource"
-        },
-        {
           "id": "R4vRj4xxUb",
           "input_ports": [
             {
@@ -161,29 +137,60 @@
           ],
           "name": "Playlist",
           "type": "Playlist"
+        },
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 1.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "LoG45mUAF4",
+          "name": "FileSource",
+          "type": "FileSource"
+        },
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 2.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "EEfBsJfH7U",
+          "name": "FileSource_1",
+          "type": "FileSource"
+        },
+        {
+          "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 3.ogg",
+          "arg_loops": 1,
+          "arg_type": "Float32",
+          "id": "KUf8FAknrd",
+          "name": "FileSource_2",
+          "type": "FileSource"
         }
       ],
       "id": "2Tg09vx9Yf",
       "links": [
         {
           "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in0",
+          "id": "tSktfotxUl",
+          "src_elem": "LoG45mUAF4",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
           "dst_port": "in2",
-          "id": "sWL6k9FtFH",
+          "id": "Ibzl3DkAwY",
+          "src_elem": "KUf8FAknrd",
+          "src_port": "out"
+        },
+        {
+          "dst_elem": "R4vRj4xxUb",
+          "dst_port": "in0",
+          "id": "EHbWuZoFtK",
           "src_elem": "LoG45mUAF4",
           "src_port": "out"
         },
         {
           "dst_elem": "R4vRj4xxUb",
           "dst_port": "in1",
-          "id": "qjI5N9KnZ6",
+          "id": "vyM6kwP8Rq",
           "src_elem": "EEfBsJfH7U",
-          "src_port": "out"
-        },
-        {
-          "dst_elem": "R4vRj4xxUb",
-          "dst_port": "in0",
-          "id": "10b18zjUz6",
-          "src_elem": "KUf8FAknrd",
           "src_port": "out"
         },
         {
@@ -196,15 +203,8 @@
         {
           "dst_elem": "R4vRj4xxUb",
           "dst_port": "in1",
-          "id": "vyM6kwP8Rq",
+          "id": "qjI5N9KnZ6",
           "src_elem": "EEfBsJfH7U",
-          "src_port": "out"
-        },
-        {
-          "dst_elem": "R4vRj4xxUb",
-          "dst_port": "in0",
-          "id": "EHbWuZoFtK",
-          "src_elem": "LoG45mUAF4",
           "src_port": "out"
         }
       ],
@@ -524,6 +524,49 @@
             "x": 6.832275390625,
             "y": 7.5390625
           }
+        },
+        {
+          "class": "y66i7aGIlt",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Message",
+          "position": {
+            "x": 2.0,
+            "y": -112.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 244.0,
+            "y": 109.0
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "ws://fonts/MAXI_L_S.TTF",
+            "font_size": 18,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.600000023841858,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "LET'S GO!",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
         }
       ],
       "render_tree": {
@@ -565,6 +608,11 @@
                 ],
                 "node": {
                   "id": "zP7K5Htw9Y"
+                }
+              },
+              {
+                "node": {
+                  "id": "y66i7aGIlt"
                 }
               }
             ],
@@ -665,7 +713,7 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "4IluygNgeR",
+            "material": "kqbXBoi7yD",
             "renderpass": "Draw",
             "renderstyle": "Solid",
             "timescale": 1.0
@@ -678,63 +726,20 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rotation": 0.0,
+          "rotation": -1.572018027305603,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 30.0,
+            "x": 60.0,
             "y": 60.0
-          }
-        },
-        {
-          "class": "MYUjvQktA9",
-          "drawable_item": {
-            "drawable": "qklhbbEm10",
-            "flags": {
-              "FlipVertically": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "4IluygNgeR",
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Trail",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 180.0,
-            "y": 200.0
           }
         }
       ],
       "render_tree": {
         "children": [
           {
-            "children": [
-              {
-                "node": {
-                  "id": "MYUjvQktA9"
-                }
-              }
-            ],
             "node": {
               "id": "pfOmm2UnnY"
             }
@@ -1512,63 +1517,20 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rotation": 3.1415927410125732,
+          "rotation": -3.1415927410125732,
           "scale": {
             "x": 1.0,
             "y": 1.0
           },
           "size": {
-            "x": 30.0,
-            "y": 60.0
-          }
-        },
-        {
-          "class": "TqmZOL4SIb",
-          "drawable_item": {
-            "drawable": "qklhbbEm10",
-            "flags": {
-              "FlipVertically": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "s4zt0bFnAL",
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 180.0,
-            "y": 200.0
+            "x": 45.20549774169922,
+            "y": 45.20549774169922
           }
         }
       ],
       "render_tree": {
         "children": [
           {
-            "children": [
-              {
-                "node": {
-                  "id": "TqmZOL4SIb"
-                }
-              }
-            ],
             "node": {
               "id": "UIG3lUtmPm"
             }
@@ -2050,10 +2012,10 @@
               "VisibleInGame": true
             },
             "font_name": "ws://fonts/MAXI_L_S.TTF",
-            "font_size": 36,
+            "font_size": 28,
             "horizontal_align": "Left",
             "layer": 0,
-            "line_height": 1.0,
+            "line_height": 1.5,
             "raster_height": 0,
             "raster_width": 0,
             "text": "0",
@@ -2329,6 +2291,73 @@
       "resource_id": "XExwRNFj8H",
       "resource_name": "Stars",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "AnA5w5xqxv",
+      "idle_track": "",
+      "lifetime": 0.15000000596046448,
+      "name": "Flash",
+      "nodes": [
+        {
+          "class": "e8XQLuBDRE",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_White",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 3.5,
+            "y": -8.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1268.0,
+            "y": 895.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "e8XQLuBDRE"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "AnA5w5xqxv",
+      "resource_name": "Flash",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -2546,9 +2575,9 @@
     {
       "color": {
         "a": 1.0,
-        "b": 0.35803768038749695,
-        "g": 0.35803768038749695,
-        "r": 0.3687953054904938
+        "b": 0.35686275362968445,
+        "g": 0.35686275362968445,
+        "r": 0.3686274588108063
       },
       "gamma": 1.0,
       "id": "lOfMr3YBtI",
@@ -3350,7 +3379,7 @@
               "AllowPacking": true,
               "AllowResizing": true
             },
-            "id": "39bNNiokoM",
+            "id": "n0vn2swGKX",
             "name": "spark_06",
             "type": "Filesystem"
           },
@@ -4103,6 +4132,53 @@
       "static": false,
       "surface": "Transparent",
       "type": "Color"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "gamma": 1.0,
+      "id": "kqbXBoi7yD",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "kqbXBoi7yD",
+      "resource_name": "Red Laser",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "file": "ws://textures/Lasers/02.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true
+        },
+        "id": "J2M9Sam3oM",
+        "name": "02",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "particles": [
@@ -5149,6 +5225,27 @@
                   ]
                 }
               ]
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "LO4Wpy1bLb",
+              "line_height": 1.0,
+              "name": "Label_2",
+              "position": {
+                "x": 200.0,
+                "y": 650.0
+              },
+              "size": {
+                "h": 28.0,
+                "w": 200.0
+              },
+              "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-size\",\"value\":10},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+              "text": "Press Esc to exit",
+              "type": "Label"
             }
           ]
         }
@@ -5326,6 +5423,27 @@
                       "style": "",
                       "type": "Slider",
                       "value": 0.5
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "3EHAtbL5RT",
+                      "line_height": 1.0,
+                      "name": "Label_2",
+                      "position": {
+                        "x": 101.0,
+                        "y": 538.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 200.0
+                      },
+                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-size\",\"value\":10},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "text": "Press Esc to exit",
+                      "type": "Label"
                     }
                   ]
                 }

@@ -10,6 +10,7 @@ local mine_ready = true
 local mine_load_time = 0.0
 
 local _keydown_bits = 0
+local _tick = 0
 
 _Keys = {
     Left  = 0x1,
@@ -20,7 +21,22 @@ _Keys = {
 }
 
 function _TestKeyDown(key)
-    return _keydown_bits & key ~= 0
+    if game.OS == 'WASM' then 
+        return _keydown_bits & key ~= 0
+    end
+    local val = 0
+    if key == _Keys.Left then 
+        val = wdk.Keys.ArrowLeft 
+    elseif key == _Keys.Right then 
+        val = wdk.Keys.ArrowRight 
+    elseif key == _Keys.Up then 
+        val = wdk.Keys.ArrowUp  
+    elseif key == _Keys.Down then
+        val = wdk.Keys.ArrowDown 
+    elseif key == _Keys.Fire then 
+        val = wdk.Keys.Space 
+    end
+    return wdk.TestKeyDown(val)
 end
 
 function FireWeapon(player, ammo_name)
@@ -63,6 +79,12 @@ end
 
 -- Called on every low frequency game tick.
 function Tick(player, game_time, dt)
+    _tick = _tick + 1
+    if _tick == 2 then 
+        local msg = player:FindNodeByClassName('Message')
+        local txt = msg:GetTextItem()
+        txt:SetFlag('VisibleInGame', false)
+    end
 end
 
 local hori_velocity = 0
@@ -119,7 +141,6 @@ function Update(player, game_time, dt)
             vert_velocity = vert_velocity - 100
         end
     elseif _TestKeyDown(_Keys.Down) then
-        Game:DebugPrint('homo')
         if vert_velocity <= 0 then
             vert_velocity = 200
         elseif vert_velocity < 600 then
