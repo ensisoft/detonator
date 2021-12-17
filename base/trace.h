@@ -203,21 +203,35 @@ namespace base
 
 } // namespace
 
-#define TRACE_START() base::TraceStart()
-#define TRACE_SCOPE(name, ...) base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__))
-#define TRACE_ENTER(name, ...) base::ManualTracingScope foo_##name(#name, base::detail::FormatTraceComment(__VA_ARGS__))
-#define TRACE_LEAVE(name) foo_##name.EndScope()
-#define TRACE_CALL(name, call, ...)                                                          \
+#if defined(BASE_TRACING_ENABLE_TRACING)
+#  define TRACE_START() base::TraceStart()
+#  define TRACE_SCOPE(name, ...) base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__))
+#  define TRACE_ENTER(name, ...) base::ManualTracingScope foo_##name(#name, base::detail::FormatTraceComment(__VA_ARGS__))
+#  define TRACE_LEAVE(name) foo_##name.EndScope()
+#  define TRACE_CALL(name, call, ...)                                                          \
 do {                                                                                         \
    base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
    call;                                                                                     \
 } while (0)
-#define TRACE_BLOCK(name, block, ...)                                                        \
+#  define TRACE_BLOCK(name, block, ...)                                                        \
 do {                                                                                         \
    base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
    block                                                                                     \
 } while (0)
-
+#else
+#  define TRACE_START()
+#  define TRACE_SCOPE(name, ...)
+#  define TRACE_ENTER(name, ...)
+#  define TRACE_LEAVE(name)
+#  define TRACE_CALL(name, call, ...) \
+do {                                  \
+  call;                               \
+} while(0)
+#define TRACE_BLOCK(name, block, ...) \
+do {                                  \
+ block;                               \
+} while(0)
+#endif
 
 
 
