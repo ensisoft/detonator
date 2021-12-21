@@ -315,7 +315,9 @@ function OnUIAction(ui, action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
-        Audio:PlaySoundEffect('Menu Click', 0)
+        if State:GetValue('play_effects', false) then 
+            Audio:PlaySoundEffect('Menu Click', 0)
+        end
         EnterGame()
     elseif action.name == 'options' then
         Game:OpenUI('Options')
@@ -347,15 +349,21 @@ function OnGameEvent(event)
         Game:Stop(0)
         Game:Play('Menu')
         Audio:KillMusic('Game Music')
+        local play_music = State:GetValue('play_music', false)
+        local play_effects = State:GetValue('play_effects', false)
         local ui = Game:OpenUI('GameOver')  
         local highscore = ui:FindWidgetByName('highscore')
         local old_score = State:GetValue('high_score', 0)
         highscore:SetVisible(event.value > old_score)        
         if event.value > old_score then 
             State.high_score = event.value
-            Audio:PlaySoundEffect('Victory', 1000)
-            Audio:PlayMusic('Ending', 5000)
-        else 
+            if play_effects then 
+                Audio:PlaySoundEffect('Victory', 1000)
+            end
+            if play_music then 
+                Audio:PlayMusic('Ending', 5000)
+            end
+        elseif play_music then 
             Audio:PlayMusic('Ending')
         end
     end
