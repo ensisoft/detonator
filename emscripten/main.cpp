@@ -23,6 +23,8 @@
 
 #include "base/logging.h"
 #include "base/json.h"
+#include "base/trace.h"
+#include "base/utility.h"
 #include "wdk/events.h"
 #include "engine/main/interface.h"
 #include "engine/loader.h"
@@ -414,6 +416,19 @@ public:
 
     EM_BOOL OnAnimationFrame()
     {
+        // make sure the tracing state only changes before
+        // any trace macros are called. otherwise, there'll
+        // be an assert.
+        if (mToggleTracing.has_value())
+        {
+            ToggleTracing(mToggleTracing.value());
+            mToggleTracing.reset();
+        }
+
+        TRACE_START();
+        TRACE_ENTER(MainLoop);
+
+        TRACE_ENTER(GuiCmd);
         if (!gui_commands.empty())
         {
             while (!gui_commands.empty())
@@ -439,19 +454,23 @@ public:
                         base::EnableLogEvent(base::LogEvent::Warning, ptr->enabled);
                     else if (ptr->name == "chk-log-error")
                         base::EnableLogEvent(base::LogEvent::Error, ptr->enabled);
+                    else if (ptr->name == "chk-toggle-trace")
+                        mToggleTracing = ptr->enabled;
                     else WARN("Unknown debug flag. [flag='%1']", ptr->name);
                 }
                 gui_commands.pop();
             }
             mEngine->SetDebugOptions(mDebugOptions);
         }
+        TRACE_LEAVE(GuiCmd);
 
         // important: make sure that the order in which stuff is done
         // is the same across all "main application" instances.
         // i.e., native main and editor's playwindow main.
 
-        mEngine->BeginMainLoop();
+        TRACE_CALL("Engine::BeginMainLoop", mEngine->BeginMainLoop());
 
+        TRACE_ENTER(EventDispatch);
         // dispatch the pending user input events.
         while (!mEventQueue.empty())
         {
@@ -493,9 +512,11 @@ public:
             else BUG("Unhandled window event.");
             mEventQueue.pop();
         }
+        TRACE_LEAVE(EventDispatch);
 
         bool quit = false;
 
+        TRACE_ENTER(EngineRequest);
         // Process pending application requests if any.
         engine::Engine::Request request;
         while (mEngine->GetNextRequest(&request))
@@ -516,6 +537,7 @@ public:
                 quit = true;
             else BUG("Unhandled engine request type.");
         }
+        TRACE_LEAVE(EngineRequest);
 
         // this is the real wall time elapsed rendering the previous
         // for each iteration of the loop we measure the time
@@ -526,10 +548,10 @@ public:
         const auto wall_time = CurrentRuntime();
 
         // ask the application to take its simulation steps.
-        mEngine->Update(time_step);
+        TRACE_CALL("Engine::Update", mEngine->Update(time_step));
 
         // ask the application to draw the current frame.
-        mEngine->Draw();
+        TRACE_CALL("Engine::Draw", mEngine->Draw());
 
         ++mFrames;
         ++mCounter;
@@ -545,7 +567,11 @@ public:
             mSeconds = 0;
         }
 
-        mEngine->EndMainLoop();
+        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
+        TRACE_LEAVE(MainLoop);
+        // dump trace if needed.
+        if (mTraceLogger)
+            mTraceLogger->Write(*mTraceWriter);
 
         if (!quit)
             return EM_TRUE;
@@ -563,6 +589,25 @@ public:
         mContext.reset();
         return EM_FALSE;
     }
+    void ToggleTracing(bool enable)
+    {
+        if (enable && mTraceLogger)
+            return;
+        else if (!enable && !mTraceLogger)
+            return;
+        mTraceWriter.reset();
+        mTraceLogger.reset();
+        base::SetThreadTrace(nullptr);
+        if (enable)
+        {
+            mTraceWriter.reset(new base::ChromiumTraceJsonWriter("/trace.json"));
+            mTraceLogger.reset(new base::TraceLog(1000));
+            base::SetThreadTrace(mTraceLogger.get());
+
+        }
+        DEBUG("Toggle tracing. [enable=%1]", enable);
+    }
+
     void SetFullScreen(bool fullscreen)
     {
         if (fullscreen == mSoftFullScreen)
@@ -893,6 +938,9 @@ private:
     wdk::WindowListener* mListener = nullptr;
     std::unique_ptr<engine::JsonFileClassLoader> mContentLoader;
     std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
+    std::unique_ptr<base::TraceLog> mTraceLogger;
+    std::unique_ptr<base::TraceWriter> mTraceWriter;
+    std::optional<bool> mToggleTracing;
 
     using WindowEvent = std::variant<
         wdk::WindowEventResize,
