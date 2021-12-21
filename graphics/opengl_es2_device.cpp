@@ -312,6 +312,7 @@ public:
         mTextureUnits.resize(max_texture_units);
 
         // set some initial state
+        GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
         GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glEnable(GL_CULL_FACE));
         GL_CALL(glCullFace(GL_BACK));
@@ -416,7 +417,7 @@ public:
 
     virtual Texture* MakeTexture(const std::string& name) override
     {
-        auto texture = std::make_unique<TextureImpl>(mGL);
+        auto texture = std::make_unique<TextureImpl>(mGL, mTextureUnits);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
         return ret;
@@ -574,8 +575,6 @@ public:
             case Device::MagFilter::Nearest: default_texture_mag_filter = GL_NEAREST; break;
             case Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
         }
-
-
 
         // set program texture bindings
         size_t num_textures = myprog->GetNumSamplersSet();
@@ -740,13 +739,20 @@ public:
 
             // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
+
             // bind the 2D texture.
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+            if (mTextureUnits[unit].texture != texture)
+                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
             // set texture parameters, wrapping and min/mag filters.
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+            if (mTextureUnits[unit].wrap_x != texture_wrap_x)
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
+            if (mTextureUnits[unit].wrap_y != texture_wrap_y)
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
+            if (mTextureUnits[unit].mag_filter != texture_mag_filter)
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
+            if (mTextureUnits[unit].min_filter != texture_min_filter)
+                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+
             // set the texture unit to the sampler
             GL_CALL(glUniform1i(sampler.location, unit));
 
@@ -1144,7 +1150,9 @@ private:
     class TextureImpl : public Texture
     {
     public:
-        TextureImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        TextureImpl(const OpenGLFunctions& funcs, TextureUnits& units)
+           : mGL(funcs)
+           , mTextureUnits(units)
         {
             GL_CALL(glGenTextures(1, &mName));
             DEBUG("New texture object. [name=%1]", mName);
@@ -1176,22 +1184,18 @@ private:
                     sizeFormat = GL_ALPHA;
                     baseFormat = GL_ALPHA;
                     break;
-                default: assert(!"unknown texture format."); break;
+                default: BUG("Unknown texture format."); break;
             }
 
-            GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
             GL_CALL(glActiveTexture(GL_TEXTURE0));
 
-            // In order to upload the texture data we must bind the texture
-            // to a texture unit. we must make sure not to overwrite any other
-            // texture objects that might be bound to the unit. for example
-            // if the rendering code is running a loop where it's first creating
-            // texture objects if they don't exist and then setting them to a
-            // sampler (which will do a bind). Then going another iteration of this
-            // loop would overwrite the texture from before. Oooops!
-            GLint current_texture = 0;
-            GL_CALL(glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture));
+            // trash the last texture unit in the hopes that it would not
+            // cause a rebind later.
+            const auto last = mTextureUnits.size() - 1;
+            const auto unit = GL_TEXTURE0 + last;
+
             // bind our texture here.
+            GL_CALL(glActiveTexture(unit));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
             GL_CALL(glTexImage2D(GL_TEXTURE_2D,
                 0, // mip level
@@ -1227,9 +1231,12 @@ private:
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
-
-            // restore previous texture.
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, current_texture));
+            // we trashed this texture unit's texture binding.
+            mTextureUnits[last].texture = this;
+            mTextureUnits[last].wrap_x  = GL_NONE;
+            mTextureUnits[last].wrap_y  = GL_NONE;
+            mTextureUnits[last].min_filter = GL_NONE;
+            mTextureUnits[last].mag_filter = GL_NONE;
         }
 
         // refer actual state setting to the point when
@@ -1277,7 +1284,7 @@ private:
         { return mFrameNumber; }
     private:
         const OpenGLFunctions& mGL;
-
+        TextureUnits& mTextureUnits;
         GLuint mName = 0;
     private:
         MinFilter mMinFilter = MinFilter::Default;
