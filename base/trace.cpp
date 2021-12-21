@@ -105,6 +105,8 @@ ChromiumTraceJsonWriter::ChromiumTraceJsonWriter(const std::string& file)
 ChromiumTraceJsonWriter::~ChromiumTraceJsonWriter() noexcept
 {
     std::fprintf(mFile, "] }\n");
+    std::fflush(mFile);
+    std::fclose(mFile);
 }
 
 void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
