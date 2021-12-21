@@ -171,7 +171,9 @@ function Update(player, game_time, dt)
     if time_to_fire_weapon == 0 then
         if _TestKeyDown(_Keys.Fire) then
             FireWeapon(player, 'RedBullet')
-            Audio:PlaySoundEffect('Player Weapon')
+            if State:GetValue('play_effects', false) then 
+                Audio:PlaySoundEffect('Player Weapon')
+            end
         end
        -- limit the firing rate
        time_to_fire_weapon = 6
@@ -192,7 +194,9 @@ function OnKeyDown(player, symbol, modifier_bits)
             mine_ready = false
             mine_load_time = 5.0
         else 
-            Audio:PlaySoundEffect('Mine Fail')
+            if State:GetValue('play_effects', false) then 
+                Audio:PlaySoundEffect('Mine Fail')
+            end
         end
     elseif symbol == wdk.Keys.ArrowLeft then 
         _keydown_bits = _keydown_bits | _Keys.Left
