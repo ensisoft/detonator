@@ -719,22 +719,23 @@ public:
 
             // set all this dang state here, so we can easily track/understand
             // which unit the texture is bound to.
-            const GLuint texture_name = texture->GetName();
+            const auto texture_handle = texture->GetHandle();
+            const auto& texture_name  = texture->GetName();
 
 #if defined(WEBGL)
             if (force_webgl_linear)
-                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture=%1]", texture_name);
+                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture='%1']", texture_name);
             if (force_webgl_wrap_x)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=%1]", texture_name);
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
             if (force_webgl_wrap_y)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture=%1]", texture_name);
+                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
 #endif
             if (texture_mag_filter == GL_NEAREST_MIPMAP_NEAREST ||
                 texture_mag_filter == GL_NEAREST_MIPMAP_LINEAR ||
                 texture_mag_filter == GL_LINEAR_MIPMAP_LINEAR)
             {
                 if (!texture->HasMips())
-                    WARN("Texture filter requires mips but texture doesn't have any! [texture=%1]", texture_name);
+                    WARN("Texture filter requires mips but texture doesn't have any! [texture='%1']", texture_name);
             }
 
             // // first select the desired texture unit.
@@ -742,7 +743,7 @@ public:
 
             // bind the 2D texture.
             if (mTextureUnits[unit].texture != texture)
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_name));
+                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_handle));
             // set texture parameters, wrapping and min/mag filters.
             if (mTextureUnits[unit].wrap_x != texture_wrap_x)
                 GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
@@ -1154,19 +1155,18 @@ private:
            : mGL(funcs)
            , mTextureUnits(units)
         {
-            GL_CALL(glGenTextures(1, &mName));
-            DEBUG("New texture object. [name=%1]", mName);
+            GL_CALL(glGenTextures(1, &mHandle));
+            DEBUG("New texture object. [handle=%1]", mHandle);
         }
         ~TextureImpl()
         {
-            GL_CALL(glDeleteTextures(1, &mName));
-            DEBUG("Deleted texture object. [name=%1]", mName);
+            GL_CALL(glDeleteTextures(1, &mHandle));
+            DEBUG("Deleted texture object. [name='%1', handle=%2]", mName, mHandle);
         }
 
         virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
         {
-            DEBUG("Loading texture. [name=%1, size=%2x%3 px]", mName, xres, yres);
-
+            DEBUG("Loading texture. [name='%1', size=%2x%3, handle=%4]", mName, xres, yres, mHandle);
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
             switch (format)
@@ -1196,7 +1196,7 @@ private:
 
             // bind our texture here.
             GL_CALL(glActiveTexture(unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mName));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
             GL_CALL(glTexImage2D(GL_TEXTURE_2D,
                 0, // mip level
                 sizeFormat,
@@ -1221,7 +1221,7 @@ private:
                     GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
                     mHasMips = true;
                 }
-                else WARN("WebGL doesn't support mips on NPOT textures. [texture=%1, width=%2, height=%3]", mName, xres, yres);
+                else WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, xres, yres);
             #else
                 GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
                 mHasMips = true;
@@ -1266,6 +1266,8 @@ private:
         { return mFormat; }
         virtual void SetContentHash(size_t hash) override
         { mHash = hash; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual size_t GetContentHash() const override
         { return mHash; }
         virtual void SetTransient(bool on_off) override
@@ -1276,16 +1278,18 @@ private:
         { return mTransient; }
         bool HasMips() const
         { return mHasMips; }
-        GLuint GetName() const
-        { return mName; }
+        GLuint GetHandle() const
+        { return mHandle; }
         void SetLastUseFrameNumber(size_t frame_number) const
         { mFrameNumber = frame_number; }
-        size_t GetLastUsedFrameNumber() const
+        std::size_t GetLastUsedFrameNumber() const
         { return mFrameNumber; }
+        const std::string& GetName() const
+        { return mName; }
     private:
         const OpenGLFunctions& mGL;
         TextureUnits& mTextureUnits;
-        GLuint mName = 0;
+        GLuint mHandle = 0;
     private:
         MinFilter mMinFilter = MinFilter::Default;
         MagFilter mMagFilter = MagFilter::Default;
@@ -1297,6 +1301,7 @@ private:
         Format mFormat = Texture::Format::Grayscale;
         mutable std::size_t mFrameNumber = 0;
         std::size_t mHash = 0;
+        std::string mName;
         bool mTransient = false;
         bool mHasMips   = false;
     };
