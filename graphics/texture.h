@@ -132,6 +132,9 @@ namespace gfx
         // time and only exist temporarily.
         // Currently, used only when rendering text.
         virtual void SetTransient(bool on_off) = 0;
+        // Set a (human-readable) name for the texture object.
+        // Used for improved debug/log messages.
+        virtual void SetName(const std::string& name) = 0;
     protected:
     private:
     };

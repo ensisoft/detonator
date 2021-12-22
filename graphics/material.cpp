@@ -110,7 +110,7 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
     try
     {
         DEBUG("Loading texture file. [file='%1']", mFile);
-        // in case of an image load exception, catch and log and return null.
+        // in case of an image load exception, catch and log and returnnull.
         // Todo: image class should probably provide a non-throw load
         // but then it also needs some mechanism for getting the error
         // message why it failed.
@@ -422,6 +422,7 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
             const auto width  = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
             const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
+            texture->SetName(source->GetName());
             texture->Upload(bitmap->GetDataPtr(), width, height, format);
             if (!content_hash)
                 content_hash = source->GetContentHash();
@@ -553,6 +554,7 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
         const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
+        texture->SetName(mSource->GetName());
         texture->Upload(bitmap->GetDataPtr(), width, height, format);
         if (!content_hash)
             content_hash = source->GetContentHash();
@@ -2124,7 +2126,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         // this means that we can skip the mipmap generation and use
         // a simple fast nearest/linear texture filter without mips.
         const bool mips = false;
-
+        texture->SetName("TextMaterial");
         texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
         texture->SetContentHash(hash);
         texture->SetTransient(true);

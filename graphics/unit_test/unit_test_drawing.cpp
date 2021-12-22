@@ -100,6 +100,8 @@ public:
     { return mHash; }
     virtual void SetTransient(bool on_off) override
     { mTransient = on_off; }
+    virtual void SetName(const std::string&) override
+    {}
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
