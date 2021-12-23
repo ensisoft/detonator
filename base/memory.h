@@ -238,17 +238,28 @@ namespace mem
         HeapAllocator<0> mHeap;
     };
 
+    // Fixed allocator (in terms of allocation size) interface.
+    class IFixedAllocator
+    {
+    public:
+        virtual ~IFixedAllocator() = default;
+        virtual void* Allocate() noexcept = 0;
+        virtual void Free(void* mem) noexcept = 0;
+    private:
+
+    };
+
     // Wrapper for combining heap based memory allocation
     // with pool based memory management strategy.
     template<size_t ObjectSize>
-    class HeapMemoryPool
+    class HeapMemoryPool : public IFixedAllocator
     {
     public:
         HeapMemoryPool(size_t pool_size)
           : mPoolSize(pool_size)
           , mPool(pool_size)
         {}
-        void* Allocate()
+        virtual void* Allocate() noexcept override
         {
             detail::MemoryPoolAllocHeader block;
             if (!mPool.Allocate(&block))
@@ -260,7 +271,7 @@ namespace mem
             ++mAllocCount;
             return (uint8_t*)mem + sizeof(block);
         }
-        void Free(void* mem)
+        virtual void Free(void* mem) noexcept override
         {
             detail::MemoryPoolAllocHeader block;
             std::memcpy(&block, (uint8_t*)mem - sizeof(block), sizeof(block));
