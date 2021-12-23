@@ -22,10 +22,21 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <functional>
+
 #include "base/test_float.h"
 #include "base/test_minimal.h"
 #include "base/color4f.h"
 #include "base/types.h"
+#include "base/utility.h"
+
+#undef MIN
+#undef MAX
+#undef min
+#undef max
 
 namespace base {
 
@@ -65,6 +76,57 @@ static bool operator==(const FPoint& lhs, const FPoint& rhs)
 static bool operator!=(const FPoint& lhs, const FPoint& rhs)
 { return !(lhs == rhs); }
 
+struct TestTimes {
+    unsigned iterations = 0;
+    double average = 0.0f;
+    double minimum = 0.0f;
+    double maximum = 0.0f;
+    double median  = 0.0f;
+    double total   = 0.0f;
+};
+
+static TestTimes TimedTest(unsigned iterations, std::function<void()> function)
+{
+    std::vector<double> times;
+    times.resize(iterations);
+    for (unsigned i=0; i<iterations; ++i)
+    {
+        base::ElapsedTimer timer;
+        timer.Start();
+        function();
+        times[i] = timer.SinceStart();
+    }
+    auto min_time = std::numeric_limits<double>::max();
+    auto max_time = std::numeric_limits<double>::min();
+    auto sum_time = 0.0f;
+    for (auto time : times)
+    {
+        min_time = std::min(min_time, time);
+        max_time = std::max(max_time, time);
+        sum_time += time;
+    }
+    std::sort(times.begin(), times.end());
+    TestTimes ret;
+    ret.iterations = iterations;
+    ret.average    = sum_time / times.size();
+    ret.minimum    = min_time;
+    ret.maximum    = max_time;
+    ret.total      = sum_time;
+
+    const auto index = iterations/2;
+
+    if (iterations % 2)
+        ret.median = times[index];
+    else ret.median = (times[index-1] + times[index]) / 2.0;
+    return ret;
+}
+
+static void PrintTestTimes(const char* name, const TestTimes& times)
+{
+    std::printf("\nTest='%s' times (s): total=%g, min=%g, max=%g, avg=%g, median=%g\n",
+                name, times.total, times.minimum, times.maximum, times.average, times.median);
+}
+
 } // base
 
 namespace glm {
@@ -74,3 +136,4 @@ static bool operator!=(const glm::vec2& lhs, const glm::vec2& rhs)
 { return !(lhs == rhs); }
 
 } // glm
+
