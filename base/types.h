@@ -236,9 +236,9 @@ namespace base
         // Return true if the point p is within this rectangle.
         bool TestPoint(const Point<T>& p) const
         {
-            if (p.GetX() <= mX || p.GetY() <= mY)
+            if (p.GetX() < mX || p.GetY() < mY)
                 return false;
-            else if (p.GetX() >= mX + mWidth || p.GetY() >= mY + mHeight)
+            else if (p.GetX() > mX + mWidth || p.GetY() > mY + mHeight)
                 return false;
             return true;
         }
@@ -346,13 +346,13 @@ namespace base
         const auto rhs_right  = rhs_left + rhs.GetWidth();
         const auto rhs_bottom = rhs_top + rhs.GetHeight();
         // no intersection conditions
-        if (lhs_right <= rhs_left)
+        if (lhs_right < rhs_left)
             return R();
-        else if (lhs_left >= rhs_right)
+        else if (lhs_left > rhs_right)
             return R();
-        else if (lhs_top >= rhs_bottom)
+        else if (lhs_top > rhs_bottom)
             return R();
-        else if (lhs_bottom <= rhs_top)
+        else if (lhs_bottom < rhs_top)
             return R();
 
         const auto right  = std::min(lhs_right, rhs_right);
@@ -378,10 +378,10 @@ namespace base
         const auto rhs_right  = rhs_left + rhs.GetWidth();
         const auto rhs_bottom = rhs_top + rhs.GetHeight();
         // no intersection conditions
-        if ((lhs_right <= rhs_left) ||
-            (lhs_left >= rhs_right) ||
-            (lhs_top >= rhs_bottom) ||
-            (lhs_bottom <= rhs_top))
+        if ((lhs_right < rhs_left) ||
+            (lhs_left > rhs_right) ||
+            (lhs_top > rhs_bottom) ||
+            (lhs_bottom < rhs_top))
             return false;
         return true;
     }
