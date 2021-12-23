@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <algorithm> // for min, max
+#include <tuple>
 
 namespace base
 {
@@ -132,6 +133,9 @@ namespace base
     class Rect
     {
     public:
+        using PointT = Point<T>;
+        using SizeT  = Size<T>;
+
         Rect() = default;
         Rect(T x, T y, T width, T height)
           : mX(x)
@@ -148,10 +152,10 @@ namespace base
             mHeight = static_cast<T>(other.GetHeight());
         }
         Rect(T x, T y, const Size<T>& size)
-                : mX(x)
-                , mY(y)
-                , mWidth(size.GetWidth())
-                , mHeight(size.GetHeight())
+          : mX(x)
+          , mY(y)
+          , mWidth(size.GetWidth())
+          , mHeight(size.GetHeight())
         {}
         Rect(const Point<T>& pos, T width, T height)
         {
@@ -288,8 +292,7 @@ namespace base
         }
 
         // Inverse of Normalize. Assuming a normalized rectangle
-        // expand it to a non-normalized rectangle given the
-        // dimensions.
+        // expand it to a non-normalized rectangle given the dimensions.
         template<typename F>
         Rect<F> Expand(const Size<F>& space) const
         {
@@ -317,6 +320,27 @@ namespace base
             const unsigned h = mHeight * space.GetHeight();
             return Rect<unsigned>(x, y, w, h);
         }
+        // Split the rect into 4 sub-quadrants.
+        std::tuple<Rect, Rect, Rect, Rect> Quadrants() const
+        {
+            const auto half = T(2);
+            const auto half_width = mWidth/half;
+            const auto half_height = mHeight/half;
+            const Rect r0(mX, mY, half_width, half_height);
+            const Rect r1(mX, mY+half_height, half_width, half_height);
+            const Rect r2(mX+half_width, mY, half_width, half_height);
+            const Rect r3(mX+half_width, mY+half_height, half_width, half_height);
+            return {r0, r1, r2, r3};
+        }
+        // Get the 4 corners of the rectangle.
+        std::tuple<PointT, PointT, PointT, PointT> Corners() const
+        {
+            const PointT p0(mX, mY);
+            const PointT p1(mX, mY+mHeight);
+            const PointT p2(mX+mWidth, mY);
+            const PointT p3(mX+mWidth, mY+mHeight);
+            return {p0, p1, p2, p3};
+        }
     private:
         T mX = 0;
         T mY = 0;
@@ -328,8 +352,21 @@ namespace base
     using FRect = Rect<float>;
     using IRect = Rect<int>;
 
+    // Test whether the rectangle A contains rectangle B completely.
+    template<typename T>
+    bool Contains(const Rect<T>& a, const Rect<T>& b)
+    {
+        // if all the corners of B are within A then B
+        // is completely within A
+        const auto [p0, p1, p2, p3] = b.Corners();
+        if (!a.TestPoint(p0) || !a.TestPoint(p1) ||
+            !a.TestPoint(p2) || !a.TestPoint(p3))
+            return false;
+        return true;
+    }
+
     // Find the intersection of the two rectangles
-    // and return the rectangle that represents the intersect.
+    // and return the rectangle that represents the intersection.
     template<typename T>
     Rect<T> Intersect(const Rect<T>& lhs, const Rect<T>& rhs)
     {
@@ -400,9 +437,9 @@ namespace base
         const auto rhs_right  = rhs_left + rhs.GetWidth();
         const auto rhs_bottom = rhs_top + rhs.GetHeight();
 
-        const auto left = std::min(lhs_left, rhs_left);
-        const auto right = std::max(lhs_right, rhs_right);
-        const auto top = std::min(lhs_top, rhs_top);
+        const auto left   = std::min(lhs_left, rhs_left);
+        const auto right  = std::max(lhs_right, rhs_right);
+        const auto top    = std::min(lhs_top, rhs_top);
         const auto bottom = std::max(lhs_bottom, rhs_bottom);
         return R(left, top, right - left, bottom - top);
     }
