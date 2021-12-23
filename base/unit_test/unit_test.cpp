@@ -83,6 +83,28 @@ void unit_test_rect()
     TEST_REQUIRE(r.GetY() == T(100));
 }
 
+void unit_test_rect_quadrants()
+{
+    {
+        base::FRect rect(0.0f, 0.0f, 100.0f, 50.0f);
+        const auto [q0, q1, q2, q3] = rect.Quadrants();
+        TEST_REQUIRE(q0 == base::FRect(0.0f, 0.0f, 50.0f, 25.0f));
+        TEST_REQUIRE(q1 == base::FRect(0.0f, 25.0f, 50.0f, 25.0f));
+        TEST_REQUIRE(q2 == base::FRect(50.0f, 0.0f, 50.0f, 25.0f));
+        TEST_REQUIRE(q3 == base::FRect(50.0f, 25.0f, 50.0f, 25.0f));
+    }
+
+    {
+        base::FRect rect(-100.0f, -100.0f, 200.0f, 200.0f);
+        const auto [q0, q1, q2, q3] = rect.Quadrants();
+        TEST_REQUIRE(q0 == base::FRect(-100.0f, -100.0f, 100.0f, 100.0f));
+        TEST_REQUIRE(q1 == base::FRect(-100.0f, 0.0f, 100.0f, 100.0f));
+        TEST_REQUIRE(q2 == base::FRect(0.0f, -100.0f, 100.0f, 100.0f));
+        TEST_REQUIRE(q3 == base::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+    }
+}
+
+
 template<typename T>
 void unit_test_rect_intersect()
 {
@@ -281,6 +303,7 @@ void unit_test_trace()
 int test_main(int argc, char* argv[])
 {
     unit_test_rect<int>();
+    unit_test_rect_quadrants();
     unit_test_rect_intersect<float>();
     unit_test_rect_intersect<int>();
     unit_test_rect_union<float>();
