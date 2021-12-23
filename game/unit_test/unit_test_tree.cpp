@@ -16,11 +16,17 @@
 
 #include "config.h"
 
-#include <string>
 #include <cstddef>
+#include <cstdio>
+#include <string>
 #include <iostream>
+#include <limits>
+#include <algorithm>
 
 #include "base/test_minimal.h"
+#include "base/test_help.h"
+#include "base/utility.h"
+#include "base/math.h"
 #include "data/json.h"
 #include "game/tree.h"
 #include "game/treeop.h"
@@ -75,7 +81,7 @@ std::string WalkTree(game::RenderTree<MyNode>& tree)
         names.pop_back();
     return names;
 }
-void unit_test_tree()
+void unit_test_render_tree()
 {
     // test link child
     {
@@ -249,7 +255,7 @@ void unit_test_tree()
     }
 }
 
-void unit_test_treeop()
+void unit_test_render_tree_op()
 {
     {
         using MyTree = game::RenderTree<MyNode>;
@@ -307,9 +313,396 @@ void unit_test_treeop()
     }
 }
 
+struct Entity {
+    std::string name;
+    base::FRect rect;
+};
+
+void unit_test_quadtree()
+{
+    // basic test
+    {
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+        TEST_REQUIRE(tree->HasChildren() == false);
+        TEST_REQUIRE(tree->HasItems() == false);
+        TEST_REQUIRE(tree->GetRect() == base::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+
+        Entity e;
+        e.name = "entity";
+
+        TEST_REQUIRE(tree.Insert(base::FRect(0.0f, 0.0f, 5.0f, 5.0f), &e));
+        TEST_REQUIRE(tree->HasItems() == true);
+        TEST_REQUIRE(tree->HasChildren() == false);
+
+        std::vector<Entity*> result;
+        game::QueryQuadTree(base::FRect(6.0f, 6.0f, 10.0f, 10.0f), tree, &result);
+        TEST_REQUIRE(result.empty());
+        game::QueryQuadTree(base::FRect(0.0f, 0.0f, 1.0f, 1.0f), tree, &result);
+        TEST_REQUIRE(result[0]->name == "entity");
+
+        result.clear();
+        game::QueryQuadTree(base::FRect(0.0f, 0.0f, 100.0f, 100.0f), tree, &result);
+        TEST_REQUIRE(result[0]->name == "entity");
+
+        tree.Clear();
+        TEST_REQUIRE(tree->HasChildren() == false);
+        TEST_REQUIRE(tree->HasItems() == false);
+        TEST_REQUIRE(tree->GetRect() == base::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+        result.clear();
+        game::QueryQuadTree(base::FRect(0.0f, 0.0f, 100.0f, 100.0f), tree, &result);
+        TEST_REQUIRE(result.empty());
+
+    }
+
+    // test an object in every top level quadrant
+    {
+        std::vector<Entity> objects;
+        objects.resize(4);
+        objects[0].name = "e0";
+        objects[1].name = "e1";
+        objects[2].name = "e2";
+        objects[3].name = "e3";
+
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+
+        base::FRect rect(0.0f, 0.0f, 10.0f, 10.0f);
+
+        rect.Move(10.0f, 10.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[0]));
+
+        rect.Move(10.0f, 60.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[1]));
+
+        rect.Move(60.0f, 0.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[2]));
+
+        rect.Move(60.0f, 60.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[3]));
+
+        // Quadrants
+        // _____________
+        // |  0  |  2  |
+        // |_____|_____|
+        // |  1  |  3  |
+        // |_____|_____|
+        //
+
+        TEST_REQUIRE(tree->HasChildren() == true);
+        TEST_REQUIRE(tree->GetNumItems() == 0);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->HasChildren() == false);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->HasItems() == true);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetRect() == base::FRect(0.0f, 0.0f, 50.0f, 50.0f));
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetItemObject(0)->name == "e0");
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetItemRect(0) == base::FRect(10.0f, 10.0f, 10.0f, 10.0f));
+
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->HasChildren() == false);
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->HasItems() == true);
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetRect() == base::FRect(0.0f, 50.0f, 50.0f, 50.0f));
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemObject(0)->name == "e1");
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemRect(0) == base::FRect(10.0f, 60.0f, 10.0f, 10.0f));
+
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->HasChildren() == false);
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->HasItems() == true);
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetRect() == base::FRect(50.0f, 0.0f, 50.0f, 50.0f));
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetItemObject(0)->name == "e2");
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetItemRect(0) == base::FRect(60.0f, 0.0f, 10.0f, 10.0f));
+
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->HasChildren() == false);
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->HasItems() == true);
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetRect() == base::FRect(50.0f, 50.0f, 50.0f, 50.0f));
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemObject(0)->name == "e3");
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemRect(0) == base::FRect(60.0f, 60.0f, 10.0f, 10.0f));
+
+        // query different areas.
+        // whole space
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 100.0f, 100.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 4);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e1");
+            TEST_REQUIRE(result[2]->name == "e2");
+            TEST_REQUIRE(result[3]->name == "e3");
+        }
+        // q0
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e0");
+        }
+        // q1
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 50.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e1");
+        }
+        // q2
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(50.0f, 0.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e2");
+        }
+
+        // q3
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(50.0f, 50.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e3");
+        }
+        // q0+q2
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 100.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 2);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e2");
+        }
+        // q0+q1
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 50.0f, 100.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 2);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e1");
+        }
+    }
+
+    // test recursive split (quadrant within a top level quadrant)
+    {
+        std::vector<Entity> objects;
+        objects.resize(4);
+        objects[0].name = "e0";
+        objects[1].name = "e1";
+        objects[2].name = "e2";
+        objects[3].name = "e3";
+
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+
+        base::FRect rect(0.0f, 0.0f, 10.0f, 10.0f);
+
+        rect.Move(10.0f, 10.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[0]));
+
+        rect.Move(10.0f, 35.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[1]));
+
+        rect.Move(35.0f, 10.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[2]));
+
+        rect.Move(35.0f, 35.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[3]));
+
+        // query different areas.
+        // whole space
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 100.0f, 100.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 4);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e1");
+            TEST_REQUIRE(result[2]->name == "e2");
+            TEST_REQUIRE(result[3]->name == "e3");
+        }
+        // q0
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 4);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e1");
+            TEST_REQUIRE(result[2]->name == "e2");
+            TEST_REQUIRE(result[3]->name == "e3");
+        }
+        // q0 > q0
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 25.0f, 25.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e0");
+        }
+    }
+
+
+    // test an object that is split between quadrants
+    {
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+
+        Entity e0;
+        e0.name = "e0";
+
+        Entity e1;
+        e1.name = "e1";
+
+        // add one item in order to make the node split on the next insert
+        TEST_REQUIRE(tree.Insert(base::FRect(0.0f, 0.0f, 20.0f, 20.0f), &e0));
+
+        // right in the middle so gets split to every quadrant
+        TEST_REQUIRE(tree.Insert(base::FRect(45.0f, 45.0f, 10.0f, 10.0f), &e1));
+
+        TEST_REQUIRE(tree->HasChildren());
+        // top level q0 should be split
+        {
+            const auto* q0 = tree->GetChildQuadrant(0);
+            TEST_REQUIRE(q0->GetChildQuadrant(0)->GetItemObject(0)->name == "e0");
+            TEST_REQUIRE(q0->GetChildQuadrant(3)->GetItemObject(0)->name == "e1");
+        }
+
+        // query different areas
+        // q0
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 0.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 2);
+            TEST_REQUIRE(result[0]->name == "e0");
+            TEST_REQUIRE(result[1]->name == "e1");
+        }
+
+        // q1
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(0.0f, 50.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e1");
+        }
+        // q2
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(50.0f, 0.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e1");
+        }
+        // q3
+        {
+            std::vector<Entity*> result;
+            game::QueryQuadTree(base::FRect(50.0f, 50.0f, 50.0f, 50.0f), tree, &result);
+            TEST_REQUIRE(result.size() == 1);
+            TEST_REQUIRE(result[0]->name == "e1");
+        }
+    }
+
+    {
+        std::vector<Entity> entities;
+        entities.resize(10*10);
+        for (int row=0; row<10; ++row)
+        {
+            for (int col=0; col<10; ++col)
+            {
+                const auto x = col * 10 + 2.5;
+                const auto y = row * 10 + 2.5;
+                const auto w = 5.0f;
+                const auto h = 5.0f;
+                entities[row * 10 + col].name = std::to_string(row) + ":" + std::to_string(col);
+                entities[row * 10 + col].rect = base::FRect(x, y, w, h);
+            }
+        }
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 2);
+        for (auto& entity : entities)
+            TEST_REQUIRE(tree.Insert(entity.rect, (Entity*)&entity));
+
+        for (auto& entity : entities)
+        {
+            std::set<Entity*> ret;
+            game::QueryQuadTree(entity.rect, tree, &ret);
+            TEST_REQUIRE(ret.size() == 1);
+            TEST_REQUIRE(*ret.begin() == &entity);
+        }
+    }
+}
+
+void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
+{
+    std::printf("Total quadtree nodes = %d\n", game::QuadTree<Entity>::FindMaxNumNodes(max_levels));
+
+    // let's say we have a game space 1000x1000 units in size.
+    // we place evenly 100x100  units in this space each within
+    // their own 10x10 "cell"
+    std::vector<Entity> entities;
+    entities.resize(100*100);
+
+    for (int row=0; row<100; ++row)
+    {
+        for (int col=0; col<100; ++col)
+        {
+            const auto x = col * 10 + 2.5;
+            const auto y = row * 10 + 2.5;
+            const auto w = 5.0f;
+            const auto h = 5.0f;
+            entities[row * 100 + col].name = std::to_string(row) + ":" + std::to_string(col);
+            entities[row * 100 + col].rect = base::FRect(x, y, w, h);
+        }
+    }
+
+    // measure tree build times.
+    // the time to clear the tree is included here since that'd
+    // be a realistic use-case (clear tree, then rebuild)
+    {
+        game::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
+
+        const auto& ret = base::TimedTest(100, [&entities, &tree]() {
+            for (auto& entity : entities)
+                TEST_REQUIRE(tree.Insert(entity.rect, (Entity*)&entity));
+            tree.Clear();
+        });
+        base::PrintTestTimes("Build QuadTree", ret);
+    }
+
+    // build tree once and query several times.
+    // for example let's say there was a game loop that
+    // for each object checks whether it's in collision
+    // with another object. so a naive O(N²) algorithm.
+    {
+        const auto baseline = base::TimedTest(10, [&entities]() {
+            for (unsigned i = 0; i < entities.size(); ++i) {
+                for (unsigned j = i+1; j < entities.size(); ++j) {
+                    const auto& a = entities[i];
+                    const auto& b = entities[j];
+                    auto ret = base::Intersect(a.rect, b.rect);
+                    if (!ret.IsEmpty())
+                        std::printf("side effect for not optimizing the test away!");
+                }
+            }
+        });
+        base::PrintTestTimes("Baseline O(N²) collision", baseline);
+    }
+
+    {
+        game::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
+        for (auto& entity : entities)
+            TEST_REQUIRE(tree.Insert(entity.rect, &entity));
+
+        const auto ret = base::TimedTest(10, [&entities, &tree]() {
+            for (const auto& entity : entities) {
+                std::set<Entity*> ret;
+                game::QueryQuadTree(entity.rect, tree, &ret);
+                TEST_REQUIRE(ret.size() == 1); // should always just find itself.
+                if (*ret.begin() != &entity)
+                    std::printf("side effect for not optimizing the test away!");
+            }
+        });
+        base::PrintTestTimes("QuadTree based collision", ret);
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
-    unit_test_tree();
-    unit_test_treeop();
+    unit_test_render_tree();
+    unit_test_render_tree_op();
+    unit_test_quadtree();
+
+    unsigned num_items  = game::QuadTree<Entity>::DefaultMaxItems;
+    unsigned max_levels = game::QuadTree<Entity>::DefaultMaxLevels;
+    for (int i=1; i<argc; ++i)
+    {
+        if (!std::strcmp("--max-items", argv[i]))
+            num_items = std::atoi(argv[++i]);
+        else if (!std::strcmp("--max-levels", argv[i]))
+            max_levels = std::atoi(argv[++i]);
+        else std::printf("Unrecognized cmdline param: '%s'\n", argv[i]);
+    }
+    perf_test_quadtree_even_grid(num_items, max_levels);
     return 0;
 }
