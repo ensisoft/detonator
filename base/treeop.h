@@ -18,6 +18,9 @@
 
 #include "config.h"
 
+#include <vector>
+#include <set>
+
 #include "base/tree.h"
 
 namespace base
@@ -84,5 +87,44 @@ bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* pa
         path->clear();
     return false;
 }
+
+namespace detail {
+    template<typename Object> inline
+    void StoreObject(std::vector<Object>* vector, Object object)
+    { vector->push_back(object); }
+    template<typename Object> inline
+    void StoreObject(std::set<Object>* set, Object object)
+    { set->insert(object); }
+
+    template<typename Object, typename Container>
+    void QueryQuadTree(const base::FRect& area_of_interest, const QuadTreeNode<Object>& node, Container* result)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            const auto& test = base::Intersect(area_of_interest, rect);
+            if (!test.IsEmpty())
+                StoreObject(result, node.GetItemObject(i));
+        }
+        if (!node.HasChildren())
+            return;
+        for (size_t i=0; i<4; ++i)
+        {
+            const auto* quadrant = node.GetChildQuadrant(i);
+            const auto& rect = quadrant->GetRect();
+            const auto& area = base::Intersect(area_of_interest, rect);
+            if (!area.IsEmpty())
+                QueryQuadTree(area, *quadrant, result);
+        }
+    }
+} // namespace detail
+
+template<typename Object>
+void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<Object>& quadtree,  std::vector<Object>* result)
+{ detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
+
+template<typename Object>
+void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<Object>& quadtree, std::set<Object>* result)
+{ detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
 
 } // namespace
