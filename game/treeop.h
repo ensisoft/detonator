@@ -44,6 +44,7 @@ namespace game
 
 using base::SearchChild;
 using base::SearchParent;
+using base::QueryQuadTree;
 
 template<typename Node>
 class TreeNodeFromJson
