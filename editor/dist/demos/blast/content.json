@@ -1820,8 +1820,8 @@
             "y": 0.5
           },
           "size": {
-            "x": 200.0,
-            "y": 100.0
+            "x": 256.0,
+            "y": 128.0
           },
           "text_item": {
             "flags": {
@@ -1835,8 +1835,8 @@
             "horizontal_align": "Center",
             "layer": 0,
             "line_height": 1.0,
-            "raster_height": 100,
-            "raster_width": 200,
+            "raster_height": 128,
+            "raster_width": 256,
             "text": "123",
             "text_color": {
               "a": 1.0,
