@@ -6346,7 +6346,7 @@
         "file": "ws://textures/desert tile set/BG_layer_0.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": false
         },
         "id": "aEYiykIEUb",
         "name": "BG_layer_0",
@@ -7612,7 +7612,7 @@
         "file": "ws://textures/desert tile set/BG_layer_1.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": false
         },
         "id": "3KLuHOjPOz",
         "name": "BG_layer_1",
@@ -7659,7 +7659,7 @@
         "file": "ws://textures/desert tile set/BG_layer_2.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": false
         },
         "id": "sBOmW38aFS",
         "name": "BG_layer_2",
