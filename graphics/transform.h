@@ -121,14 +121,17 @@ namespace gfx
         // Get the transformation expressed as a matrix.
         glm::mat4 GetAsMatrix() const
         {
-            glm::mat4 ret(1.0f);
-            for (auto it = mTransform.rbegin(); it != mTransform.rend(); ++it)
+            // remember that generally A*B != B*A but (A*B)*C = A*(B*C)
+            // https://en.wikipedia.org/wiki/Matrix_(mathematics)#Basic_operations
+
+            // what we want is the following.
+            // ret = mTransform[0] * mTransform[1] ... * mTransform[n]
+            glm::mat4 ret = mTransform[0];
+            for (size_t i=1; i<mTransform.size(); ++i)
             {
-                // what we want is the following.
-                // ret = mTransform[0] * mTransform[1] ... * mTransform[n]
-                ret = *it * ret;
+                ret *= mTransform[i];
             }
-            return ret; // mTransform;
+            return ret;
         }
 
         // Begin a new scope for the next transformation using an identity matrix.
