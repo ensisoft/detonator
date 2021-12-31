@@ -100,6 +100,10 @@ void unit_test_entity_node()
     text.SetAlign(game::TextItemClass::HorizontalTextAlign::Left);
     text.SetTextColor(game::Color::HotPink);
 
+    game::SpatialNodeClass spatial;
+    spatial.SetShape(game::SpatialNodeClass::Shape::AABB);
+    spatial.SetFlag(game::SpatialNodeClass::Flags::ReportOverlap, true);
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetSize(glm::vec2(100.0f, 100.0f));
@@ -109,10 +113,12 @@ void unit_test_entity_node()
     node.SetDrawable(draw);
     node.SetRigidBody(body);
     node.SetTextItem(text);
+    node.SetSpatialNode(spatial);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
     TEST_REQUIRE(node.HasTextItem());
+    TEST_REQUIRE(node.HasSpatialNode());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -143,6 +149,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
     TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
     TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
+    TEST_REQUIRE(node.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
 
     // to/from json
     {
@@ -153,6 +160,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret->HasDrawable());
         TEST_REQUIRE(ret->HasRigidBody());
         TEST_REQUIRE(ret->HasTextItem());
+        TEST_REQUIRE(ret->HasSpatialNode());
         TEST_REQUIRE(ret->GetName()         == "root");
         TEST_REQUIRE(ret->GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret->GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -178,6 +186,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
         TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
         TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
+        TEST_REQUIRE(node.GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
+        TEST_REQUIRE(node.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
         TEST_REQUIRE(ret->GetHash() == node.GetHash());
     }
 
@@ -213,6 +223,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetTextItem()->GetFontName() == "fontname.otf");
         TEST_REQUIRE(clone.GetTextItem()->GetRasterWidth() == 100);
         TEST_REQUIRE(clone.GetTextItem()->GetRasterHeight() == 200);
+        TEST_REQUIRE(clone.GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
+        TEST_REQUIRE(clone.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
     }
 
     // test instance state.
@@ -228,6 +240,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.GetRotation()     == real::float32(1.5f));
         TEST_REQUIRE(instance.HasRigidBody());
         TEST_REQUIRE(instance.HasDrawable());
+        TEST_REQUIRE(instance.HasSpatialNode());
         TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
         TEST_REQUIRE(instance.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::Mask);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");
@@ -237,6 +250,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance->GetTextItem()->GetFontName() == "fontname.otf");
         TEST_REQUIRE(instance->GetTextItem()->GetRasterWidth() == 100);
         TEST_REQUIRE(instance->GetTextItem()->GetRasterHeight() == 200);
+        TEST_REQUIRE(instance->GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
+        TEST_REQUIRE(instance->GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
 
         instance.SetName("foobar");
         instance.SetSize(glm::vec2(200.0f, 200.0f));

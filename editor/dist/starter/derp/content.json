@@ -885,6 +885,13 @@
   ],
   "scenes": [
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "iiKBwhkDbI",
       "name": "My Scene",
       "nodes": [
@@ -1037,6 +1044,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {

@@ -339,6 +339,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &SceneWidget::ResourceToBeDeleted);
     connect(workspace, &app::Workspace::ResourceUpdated,      this, &SceneWidget::ResourceUpdated);
 
+    PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.ID, mState.scene.GetId());
@@ -375,8 +376,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
-
-
 
     UpdateResourceReferences();
     DisplayCurrentNodeProperties();
@@ -788,6 +787,54 @@ bool SceneWidget::GetStats(Stats* stats) const
 void SceneWidget::on_name_textChanged(const QString&)
 {
     mState.scene.SetName(GetValue(mUI.name));
+}
+
+void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(const QString&)
+{
+    mState.scene.SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
+    if (mState.scene.IsDynamicSpatialIndexEnabled())
+        SetEnabled(mUI.spatialIndex, true);
+    else SetEnabled(mUI.spatialIndex, false);
+}
+
+void SceneWidget::on_spRectX_valueChanged(double value)
+{
+    auto rect = mState.scene.GetDynamicSpatialRect();
+    rect.SetX(GetValue(mUI.spRectX));
+    mState.scene.SetDynamicSpatialRect(rect);
+}
+void SceneWidget::on_spRectY_valueChanged(double value)
+{
+    auto rect = mState.scene.GetDynamicSpatialRect();
+    rect.SetY(GetValue(mUI.spRectY));
+    mState.scene.SetDynamicSpatialRect(rect);
+}
+void SceneWidget::on_spRectW_valueChanged(double value)
+{
+    auto rect = mState.scene.GetDynamicSpatialRect();
+    rect.SetWidth(GetValue(mUI.spRectW));
+    mState.scene.SetDynamicSpatialRect(rect);
+}
+void SceneWidget::on_spRectH_valueChanged(double value)
+{
+    auto rect = mState.scene.GetDynamicSpatialRect();
+    rect.SetHeight(GetValue(mUI.spRectH));
+    mState.scene.SetDynamicSpatialRect(rect);
+}
+
+void SceneWidget::on_spQuadMaxLevels_valueChanged(int)
+{
+    game::SceneClass::QuadTreeArgs args;
+    args.max_levels = GetValue(mUI.spQuadMaxLevels);
+    args.max_items  = GetValue(mUI.spQuadMaxItems);
+    mState.scene.SetDynamicSpatialIndexArgs(args);
+}
+void SceneWidget::on_spQuadMaxItems_valueChanged(int)
+{
+    game::SceneClass::QuadTreeArgs args;
+    args.max_levels = GetValue(mUI.spQuadMaxLevels);
+    args.max_items  = GetValue(mUI.spQuadMaxItems);
+    mState.scene.SetDynamicSpatialIndexArgs(args);
 }
 
 void SceneWidget::on_actionPlay_triggered()
@@ -1618,11 +1665,23 @@ void SceneWidget::DisplayCurrentNodeProperties()
 void SceneWidget::DisplaySceneProperties()
 {
     const auto vars = mState.scene.GetNumScriptVars();
+    const auto& rect = mState.scene.GetDynamicSpatialRect();
+    const auto& args = mState.scene.GetQuadTreeArgs();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     SetValue(mUI.name, mState.scene.GetName());
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.scriptFile, ListItemId(mState.scene.GetScriptFileId()));
+    SetValue(mUI.spRectX, rect.GetX());
+    SetValue(mUI.spRectY, rect.GetY());
+    SetValue(mUI.spRectW, rect.GetWidth());
+    SetValue(mUI.spRectH, rect.GetHeight());
+    SetValue(mUI.spQuadMaxLevels, args.max_levels);
+    SetValue(mUI.spQuadMaxItems, args.max_items);
+    SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
+    if (mState.scene.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::Disabled)
+        SetEnabled(mUI.spatialIndex, false);
+    else SetEnabled(mUI.spatialIndex, true);
 
     setWindowTitle(GetValue(mUI.name));
 }

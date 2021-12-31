@@ -120,9 +120,16 @@ void unit_test_scene_class()
     }
 
     // build-up a test scene with some scene nodes.
+    game::SceneClass::QuadTreeArgs quadtree;
+    quadtree.max_levels = 8;
+    quadtree.max_items = 10;
+
     game::SceneClass klass;
     klass.SetName("my scene");
     klass.SetScriptFileId("script.lua");
+    klass.SetDynamicSpatialIndexArgs(quadtree);
+    klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialRect(game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
     {
@@ -165,6 +172,10 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetNumScriptVars() == 2);
     TEST_REQUIRE(klass.GetScriptVar(0).GetName() == "foo");
     TEST_REQUIRE(klass.GetScriptVar(1).GetName() == "bar");
+    TEST_REQUIRE(klass.GetQuadTreeArgs().max_items == 10);
+    TEST_REQUIRE(klass.GetQuadTreeArgs().max_levels == 8);
+    TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
+    TEST_REQUIRE(klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
 
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
@@ -189,6 +200,10 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "foo");
         TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "bar");
+        TEST_REQUIRE(ret->GetQuadTreeArgs().max_items == 10);
+        TEST_REQUIRE(ret->GetQuadTreeArgs().max_levels == 8);
+        TEST_REQUIRE(ret->GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
+        TEST_REQUIRE(ret->GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 
@@ -772,6 +787,231 @@ void unit_test_scene_instance_transform()
 
 }
 
+void unit_test_scene_spatial_query()
+{
+    auto entity0 = std::make_shared<game::EntityClass>();
+    {
+        game::EntityNodeClass parent;
+        parent.SetName("parent");
+        parent.SetSize(glm::vec2(10.0f, 10.0f));
+        parent.SetTranslation(glm::vec2(0.0f, 0.0f));
+        parent.CreateSpatialNode();
+        entity0->LinkChild(nullptr,  entity0->AddNode(parent));
+
+        game::EntityNodeClass child0;
+        child0.SetName("child0");
+        child0.SetSize(glm::vec2(20.0f, 20.0f));
+        child0.SetTranslation(glm::vec2(20.0f, 20.0f));
+        child0.CreateSpatialNode();
+        entity0->LinkChild(entity0->FindNodeByName("parent"), entity0->AddNode(child0));
+    }
+    auto entity1 = std::make_shared<game::EntityClass>();
+    {
+        game::EntityNodeClass node;
+        node.SetName("node");
+        node.SetSize(glm::vec2(5.0f, 5.0f));
+        node.SetTranslation(glm::vec2(15.0f, 15.0f));
+        node.CreateSpatialNode();
+        entity1->LinkChild(nullptr,  entity1->AddNode(node));
+    }
+
+    game::SceneClass klass;
+    // setup a scene with 2 entities where the second entity
+    // is  linked to one of the nodes in the first entity
+    {
+        game::SceneNodeClass node;
+        node.SetName("entity0");
+        node.SetEntity(entity0);
+        node.SetTranslation(glm::vec2(-50.0f, -50.0f));
+        klass.LinkChild(nullptr, klass.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("entity1");
+        node.SetEntity(entity1);
+        // link this sucker to so that the nodes in entity1 are transformed relative
+        // to child0 node in entity0
+        node.SetParentRenderTreeNodeId(entity0->FindNodeByName("child0")->GetId());
+        node.SetTranslation(glm::vec2(100.0f, 100.0f));
+        klass.LinkChild(klass.FindNodeByName("entity0"), klass.AddNode(node));
+    }
+
+    klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialRect(game::FRect(-800.0f, -800.0f, 1600.0f, 1600.0f));
+
+    auto scene = game::CreateSceneInstance(klass);
+    TEST_REQUIRE(scene->HasSpatialIndex());
+    //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 0);
+
+    scene->UpdateSpatialIndex();
+    //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 3);
+
+    // find all
+    {
+        std::vector<const game::EntityNode*> ret;
+        scene->QuerySpatialNodes(game::FRect(-800.0f, -800.0f, 1600.0f, 1600.0f), &ret);
+        TEST_REQUIRE(ret.size() == 3);
+        TEST_REQUIRE(ret[0]->GetName() == "parent");
+        TEST_REQUIRE(ret[1]->GetName() == "child0");
+        TEST_REQUIRE(ret[2]->GetName() == "node");
+    }
+
+    {
+        // find in the top left quadrant
+        std::vector<const game::EntityNode*> ret;
+        scene->QuerySpatialNodes(game::FRect(-800.0f, -800.0f, 800.0f, 800.0f), &ret);
+        TEST_REQUIRE(ret.size() == 2);
+        TEST_REQUIRE(ret[0]->GetName() == "parent");
+        TEST_REQUIRE(ret[1]->GetName() == "child0");
+    }
+
+    {
+        // find in top bottom quadrant
+        std::vector<const game::EntityNode*> ret;
+        scene->QuerySpatialNodes(game::FRect(0.0f, 0.0f, 800.0f, 800.0f), &ret);
+        TEST_REQUIRE(ret.size() == 1);
+        TEST_REQUIRE(ret[0]->GetName() == "node");
+    }
+
+    {
+        // find nothing
+        std::vector<const game::EntityNode*> ret;
+        scene->QuerySpatialNodes(game::FRect(-800.0f, 0.0f, 800.0f, 800.0f), &ret);
+        TEST_REQUIRE(ret.empty());
+    }
+}
+
+void unit_test_scene_spatial_update()
+{
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("entity");
+    {
+        game::EntityNodeClass node;
+        node.SetName("node");
+        node.SetSize(glm::vec2(10.0f, 10.0f));
+        node.CreateSpatialNode();
+        entity->LinkChild(nullptr, entity->AddNode(node));
+    }
+
+    game::FRect rect(0.0f, 0.0f, 1000.0f, 1000.0f);
+
+    game::SceneClass klass;
+    klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialRect(rect);
+    auto scene = game::CreateSceneInstance(klass);
+    TEST_REQUIRE(scene->HasSpatialIndex());
+
+    for (unsigned i=0; i<100; ++i)
+    {
+        // spawn some new entities into the scene.
+        // remember that the entities are actually added
+        // to the scene on the *next* frame that follows
+        // the frame that spawns them.
+        scene->BeginLoop();
+        for (unsigned i=0; i<100; ++i)
+        {
+            const auto x = math::rand<5231211>(5.0f, 995.0f);
+            const auto y = math::rand<8882239>(5.0f, 995.0f);
+            game::EntityArgs args;
+            args.position.x = x;
+            args.position.y = y;
+            args.id = std::to_string(i);
+            args.name = std::to_string(i);
+            args.klass = entity;
+            scene->SpawnEntity(args);
+        }
+        scene->EndLoop();
+
+        // on this iteration of the game loop the entities
+        // are actually created and added to the scene.
+        {
+            scene->BeginLoop();
+            scene->Update(1.0f/60.0f);
+            scene->UpdateSpatialIndex();
+            // post update step, the entity nodes should now
+            // be queryable from the index.
+            std::set<game::EntityNode*> result;
+            scene->QuerySpatialNodes(rect, &result);
+            TEST_REQUIRE(result.size() == 100);
+
+            scene->EndLoop();
+        }
+
+        // same as above, entity nodes are expected to be found.
+        // check each entity node for being found in the index.
+        {
+            scene->BeginLoop();
+            scene->Update(1.0f/60.0f);
+            scene->UpdateSpatialIndex();
+
+            for (size_t i = 0; i < scene->GetNumEntities(); ++i)
+            {
+                const auto& entity = scene->GetEntity(i);
+                for (size_t i = 0; i < entity->GetNumNodes(); ++i)
+                {
+                    const auto& node = entity.GetNode(i);
+                    const auto& node_rect = scene->FindEntityNodeBoundingRect(&entity, &node);
+                    std::set<const game::EntityNode*> result;
+                    scene->QuerySpatialNodes(node_rect, &result);
+                    TEST_REQUIRE(!result.empty());
+                    TEST_REQUIRE(result.find(&node) != result.end());
+
+                    result.clear();
+                    scene->QuerySpatialNodes(node_rect.Center(), &result);
+                    TEST_REQUIRE(!result.empty());
+                    TEST_REQUIRE(result.find(&node) != result.end());
+                }
+            }
+
+            scene->EndLoop();
+        }
+
+        // kill all entities in the scene. remember that the entities
+        // continue to exist for another frame with the kill flag
+        // being set to true.
+        {
+            scene->BeginLoop();
+            scene->Update(1.0f/60.0f);
+
+            for (size_t i = 0; i < scene->GetNumEntities(); ++i)
+            {
+                auto& entity = scene->GetEntity(i);
+                scene->KillEntity(&entity);
+            }
+            scene->UpdateSpatialIndex();
+            scene->EndLoop();
+        }
+
+        // entities still exist in killed state.
+        {
+            scene->BeginLoop();
+            scene->Update(1.0f/60.0f);
+            scene->UpdateSpatialIndex();
+
+            std::set<game::EntityNode*> result;
+            scene->QuerySpatialNodes(rect, &result);
+            TEST_REQUIRE(scene->GetNumEntities() == 100);
+            TEST_REQUIRE(result.size() == 100);
+
+            scene->EndLoop();
+        }
+
+        {
+            scene->BeginLoop();
+            scene->Update(1.0f/60.0f);
+            scene->UpdateSpatialIndex();
+
+            std::set<game::EntityNode*> result;
+            scene->QuerySpatialNodes(rect, &result);
+            TEST_REQUIRE(scene->GetNumEntities() == 0);
+            TEST_REQUIRE(result.size() == 0);
+
+            scene->EndLoop();
+        }
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_node();
@@ -780,5 +1020,7 @@ int test_main(int argc, char* argv[])
     unit_test_scene_instance_spawn();
     unit_test_scene_instance_kill();
     unit_test_scene_instance_transform();
+    unit_test_scene_spatial_query();
+    unit_test_scene_spatial_update();
     return 0;
 }

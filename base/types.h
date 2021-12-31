@@ -341,6 +341,11 @@ namespace base
             const PointT p3(mX+mWidth, mY+mHeight);
             return {p0, p1, p2, p3};
         }
+        PointT Center() const
+        {
+            const auto half = T(2);
+            return PointT(mX + mWidth/half, mY + mHeight/half);
+        }
     private:
         T mX = 0;
         T mY = 0;

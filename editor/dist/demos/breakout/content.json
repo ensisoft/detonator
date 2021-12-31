@@ -2239,6 +2239,13 @@
   ],
   "scenes": [
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "q9wPieFpP5",
       "name": "Level 4",
       "nodes": [
@@ -4019,6 +4026,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -4269,6 +4278,13 @@
       "script_file": "WGNKEJwulf"
     },
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "EjfqiKs7A1",
       "name": "Level 2",
       "nodes": [
@@ -5753,6 +5769,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -5963,6 +5981,13 @@
       "script_file": "WGNKEJwulf"
     },
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "xZLaeqWePM",
       "name": "Level 3",
       "nodes": [
@@ -8076,6 +8101,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -8371,6 +8398,13 @@
       "script_file": "WGNKEJwulf"
     },
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "7kkLq83FnE",
       "name": "Level 1",
       "nodes": [
@@ -10151,6 +10185,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -10401,6 +10437,13 @@
       "script_file": "WGNKEJwulf"
     },
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "kZPKqhUrT6",
       "name": "MainMenu",
       "nodes": [
@@ -17145,6 +17188,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
