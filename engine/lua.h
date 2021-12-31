@@ -110,6 +110,7 @@ namespace engine
         void EndPlay(game::Scene* scene);
         void Tick(double game_time, double dt);
         void Update(double game_time, double dt);
+        void PostUpdate(double game_time);
         void BeginLoop();
         void EndLoop();
         bool GetNextAction(Action* out);

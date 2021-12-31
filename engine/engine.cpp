@@ -880,6 +880,7 @@ private:
             }
             TRACE_CALL("Renderer::Update",mRenderer.Update(*mScene, game_time, dt));
             TRACE_CALL("Scripting::Update",mScripting->Update(game_time, dt));
+            TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(game_time));
         }
 
         std::vector<engine::AudioEvent> audio_events;

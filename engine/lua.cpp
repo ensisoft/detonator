@@ -984,6 +984,21 @@ void ScriptEngine::Update(double game_time, double dt)
         }
     }
 }
+void ScriptEngine::PostUpdate(double game_time)
+{
+    TRACE_SCOPE("Lua::Entity::PostUpdate");
+    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (!entity->TestFlag(Entity::Flags::UpdateEntity))
+            continue;
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["PostUpdate"], entity, game_time);
+        }
+    }
+}
+
 void ScriptEngine::BeginLoop()
 {
     // entities spawned in the scene during calls to update/tick
