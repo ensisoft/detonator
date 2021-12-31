@@ -173,6 +173,7 @@ namespace gui
         void on_tiUnderline_stateChanged(int);
         void on_tiBlink_stateChanged(int);
         void on_tiStatic_stateChanged(int);
+        void on_spnShape_currentIndexChanged(const QString&);
         void on_btnSelectFont_clicked();
         void on_btnResetTextRasterWidth_clicked();
         void on_btnResetTextRasterHeight_clicked();
@@ -180,6 +181,7 @@ namespace gui
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
         void on_textItem_toggled(bool on);
+        void on_spatialNode_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
 
         void TreeCurrentNodeChangedEvent();

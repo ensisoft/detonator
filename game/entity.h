@@ -46,6 +46,37 @@
 
 namespace game
 {
+    class SpatialNodeClass
+    {
+    public:
+        enum class Shape {
+            AABB
+        };
+        enum class Flags {
+            ReportOverlap
+        };
+        SpatialNodeClass();
+        std::size_t GetHash() const;
+        Shape GetShape() const
+        { return mShape; }
+        void SetShape(Shape shape)
+        { mShape = shape; }
+        void SetFlag(Flags flag, bool on_off)
+        { mFlags.set(flag, on_off); }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
+        base::bitflag<Flags> GetFlags() const
+        { return mFlags; }
+
+        void IntoJson(data::Writer& data) const;
+
+        static std::optional<SpatialNodeClass> FromJson(const data::Reader& data);
+    private:
+        Shape mShape = Shape::AABB;
+        base::bitflag<Flags> mFlags;
+    };
+
+
     class RigidBodyItemClass
     {
     public:
@@ -73,7 +104,7 @@ namespace game
             // The collision shape is a circle based on the largest extent of
             // the node's box.
             Circle,
-            // The collision shape is a right angled triangle where the
+            // The collision shape is a right-angled triangle where the
             // height of the triangle is the height of the box and the
             // width is the width of the node's box
             RightTriangle,
@@ -202,14 +233,7 @@ namespace game
             // Whether to flip (mirror) the item about Y axis
             FlipVertically,
         };
-        DrawableItemClass()
-        {
-            mBitFlags.set(Flags::VisibleInGame, true);
-            mBitFlags.set(Flags::UpdateDrawable, true);
-            mBitFlags.set(Flags::UpdateMaterial, true);
-            mBitFlags.set(Flags::RestartDrawable, true);
-            mBitFlags.set(Flags::FlipVertically, false);
-        }
+        DrawableItemClass();
 
         std::size_t GetHash() const;
 
@@ -311,7 +335,7 @@ namespace game
         MaterialParamMap mMaterialParams;
     };
 
-    // TextItem allows human readable text entity node attachment with
+    // TextItem allows human-readable text entity node attachment with
     // some simple properties that defined how the text should look.
     class TextItemClass
     {
@@ -672,6 +696,27 @@ namespace game
         base::bitflag<Flags> mFlags;
     };
 
+    class SpatialNode
+    {
+    public:
+        using Flags = SpatialNodeClass::Flags;
+        using Shape = SpatialNodeClass::Shape;
+        SpatialNode(std::shared_ptr<const SpatialNodeClass> klass)
+          : mClass(klass)
+        {}
+        bool TestFlag(Flags flag) const
+        { return mClass->TestFlag(flag); }
+        Shape GetShape() const
+        { return mClass->GetShape(); }
+        // class access
+        const SpatialNodeClass& GetClass() const
+        { return *mClass; }
+        const SpatialNodeClass* operator->() const
+        { return mClass.get(); }
+    private:
+        std::shared_ptr<const SpatialNodeClass> mClass;
+    };
+
     class EntityNodeClass
     {
     public:
@@ -689,7 +734,7 @@ namespace game
         // Get the class id.
         std::string GetId() const
         { return mClassId; }
-        // Get the human readable name for this class.
+        // Get the human-readable name for this class.
         std::string GetName() const
         { return mName; }
         // Get the hash value based on the class object properties.
@@ -708,16 +753,16 @@ namespace game
         // Get node's rotation relative to its parent node.
         float GetRotation() const
         { return mRotation; }
-        // Set the human readable node name.
+        // Set the human-readable node name.
         void SetName(const std::string& name)
         { mName = name; }
-        // Set the node's scale. The scale applies to all of
+        // Set the node's scale. The scale applies to all
         // the subsequent hierarchy, i.e. all the nodes that
         // are in the tree under this node.
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
         // Set the node's translation relative to the parent
-        // of the this node.
+        // of this node.
         void SetTranslation(const glm::vec2& vec)
         { mPosition = vec; }
         // Set the node's containing box size.
@@ -740,6 +785,16 @@ namespace game
         void SetDrawable(const DrawableItemClass& drawable);
         // Attach a text item to this node class.
         void SetTextItem(const TextItemClass& text);
+        // Attach a spatial index node to this node class.
+        void SetSpatialNode(const SpatialNodeClass& node);
+        // Create and attach a rigid body with default settings.
+        void CreateRigidBody();
+        // Create and attach a drawable with default settings.
+        void CreateDrawable();
+        // Create and attach a text item with default settings.
+        void CreateTextItem();
+        // Create and attach spatial index  node with default settings.
+        void CreateSpatialNode();
 
         void RemoveDrawable()
         { mDrawable.reset(); }
@@ -747,6 +802,8 @@ namespace game
         { mRigidBody.reset(); }
         void RemoveTextItem()
         { mTextItem.reset(); }
+        void RemoveSpatialNode()
+        { mSpatialNode.reset(); }
 
         // Get the rigid body shared class object if any.
         std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const
@@ -757,6 +814,9 @@ namespace game
         // Get the text item class object if any.
         std::shared_ptr<const TextItemClass> GetSharedTextItem() const
         { return mTextItem; }
+        // Get the spatial index node if any.
+        std::shared_ptr<const SpatialNodeClass> GetSharedSpatialNode() const
+        { return mSpatialNode; }
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const
@@ -766,6 +826,8 @@ namespace game
         { return !!mDrawable; }
         bool HasTextItem() const
         { return !!mTextItem; }
+        bool HasSpatialNode() const
+        { return !!mSpatialNode; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -779,6 +841,10 @@ namespace game
         // has been set then returns nullptr:
         TextItemClass* GetTextItem()
         { return mTextItem.get(); }
+        // Get the spatial index node if any. If no spatial index node object
+        // has been set then returns nullptr.
+        SpatialNodeClass* GetSpatialNode()
+        { return mSpatialNode.get(); }
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
         const RigidBodyItemClass* GetRigidBody() const
@@ -791,6 +857,10 @@ namespace game
         // has been set then returns nullptr:
         const TextItemClass* GetTextItem() const
         { return mTextItem.get(); }
+        // Get the spatial index node if any. If no spatial index node object
+        // has been set then returns nullptr.
+        const SpatialNodeClass* GetSpatialNode() const
+        { return mSpatialNode.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -816,7 +886,7 @@ namespace game
     private:
         // the resource id.
         std::string mClassId;
-        // human readable name of the class.
+        // human-readable name of the class.
         std::string mName;
         // translation of the node relative to its parent.
         glm::vec2 mPosition = {0.0f, 0.0f};
@@ -832,6 +902,8 @@ namespace game
         std::shared_ptr<DrawableItemClass> mDrawable;
         // text item if any.
         std::shared_ptr<TextItemClass> mTextItem;
+        // spatial node if any.
+        std::shared_ptr<SpatialNodeClass> mSpatialNode;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -906,6 +978,9 @@ namespace game
         // Get the node's text item if any. If no text item
         // is set then returns nullptr.
         const TextItem* GetTextItem() const;
+        // Get the node's spatial node if any. If no spatial node
+        // is set then returns nullptr.
+        const SpatialNode* GetSpatialNode() const;
 
         bool HasRigidBody() const
         { return !!mRigidBody; }
@@ -913,6 +988,8 @@ namespace game
         { return !!mDrawable; }
         bool HasTextItem() const
         { return !!mTextItem; }
+        bool HasSpatialNode() const
+        { return !!mSpatialNode; }
 
         // shortcut for class getters.
         std::string GetClassId() const

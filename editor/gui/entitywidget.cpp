@@ -354,6 +354,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
+    PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -1621,6 +1622,11 @@ void EntityWidget::on_tiStatic_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnSelectFont_clicked()
 {
     if (auto* node = GetCurrentNode())
@@ -1744,6 +1750,28 @@ void EntityWidget::on_textItem_toggled(bool on)
         }
         DisplayCurrentNodeProperties();
     }
+}
+void EntityWidget::on_spatialNode_toggled(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on)
+        {
+            if (!node->HasSpatialNode())
+            {
+                game::SpatialNodeClass sp;
+                sp.SetShape(GetValue(mUI.spnShape));
+                node->SetSpatialNode(sp);
+                DEBUG("Added spatial node to '%1'.", node->GetName());
+            }
+        }
+        else
+        {
+            node->RemoveSpatialNode();
+            DEBUG("Removed spatial node from '%1'.", node->GetName());
+        }
+    }
+    DisplayCurrentNodeProperties();
 }
 
 void EntityWidget::on_tree_customContextMenuRequested(QPoint)
@@ -2175,6 +2203,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.drawableItem, false);
     SetValue(mUI.rigidBodyItem, false);
     SetValue(mUI.textItem, false);
+    SetValue(mUI.spatialNode, false);
     SetValue(mUI.dsMaterial, QString(""));
     SetValue(mUI.dsDrawable, QString(""));
     SetValue(mUI.dsLayer, 0);
@@ -2206,6 +2235,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiUnderline, false);
     SetValue(mUI.tiBlink, false);
     SetValue(mUI.tiStatic, false);
+    SetValue(mUI.spnShape, game::SpatialNodeClass::Shape::AABB);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
@@ -2287,6 +2317,11 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiUnderline, text->TestFlag(game::TextItemClass::Flags::UnderlineText));
             SetValue(mUI.tiBlink, text->TestFlag(game::TextItemClass::Flags::BlinkText));
             SetValue(mUI.tiStatic, text->TestFlag(game::TextItemClass::Flags::StaticContent));
+        }
+        if (const auto* sp = node->GetSpatialNode())
+        {
+            SetValue(mUI.spatialNode, true);
+            SetValue(mUI.spnShape, sp->GetShape());
         }
     }
 }
@@ -2405,6 +2440,11 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::UnderlineText, GetValue(mUI.tiUnderline));
         text->SetFlag(game::TextItemClass::Flags::BlinkText, GetValue(mUI.tiBlink));
         text->SetFlag(game::TextItemClass::Flags::StaticContent, GetValue(mUI.tiStatic));
+    }
+
+    if (auto* sp = node->GetSpatialNode())
+    {
+        sp->SetShape(GetValue(mUI.spnShape));
     }
 }
 

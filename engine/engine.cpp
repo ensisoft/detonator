@@ -749,6 +749,7 @@ private:
     void OnAction(const engine::PlayAction& action)
     {
         mScene = game::CreateSceneInstance(action.klass);
+        mScene->UpdateSpatialIndex();
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
         mScripting->BeginPlay(mScene.get());
@@ -864,7 +865,7 @@ private:
     {
         if (mScene)
         {
-            TRACE_CALL("Scene::Update",mScene->Update(dt));
+            TRACE_CALL("Scene::Update", mScene->Update(dt));
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
@@ -878,8 +879,22 @@ private:
                     }
                 );
             }
-            TRACE_CALL("Renderer::Update",mRenderer.Update(*mScene, game_time, dt));
-            TRACE_CALL("Scripting::Update",mScripting->Update(game_time, dt));
+            TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, game_time, dt));
+            TRACE_CALL("Scripting::Update", mScripting->Update(game_time, dt));
+            // make sure the various "updates" that might change entity/entity node
+            // position/transformations in the scene happen *before* spatial index is
+            // updated so that the index in-fact reflects the latest changes when
+            // PostUpdate is called. The important updates are:
+            // * physics
+            // * animations/scene
+            // * scripting
+            TRACE_CALL("Scene::UpdateSpatialIndex", mScene->UpdateSpatialIndex());
+        }
+
+        TRACE_CALL("Game::Update", mGame->Update(game_time, dt));
+
+        if (mScene)
+        {
             TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(game_time));
         }
 
@@ -889,8 +904,6 @@ private:
         {
             mGame->OnAudioEvent(event);
         }
-
-        TRACE_CALL("Game::Update",mGame->Update(game_time, dt));
 
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(dt);

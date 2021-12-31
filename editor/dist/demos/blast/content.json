@@ -4350,6 +4350,13 @@
   ],
   "scenes": [
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "UWF4u1fYHa",
       "name": "Game",
       "nodes": [
@@ -4539,6 +4546,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -4582,6 +4591,13 @@
       ]
     },
     {
+      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_rect": {
+        "h": 0.0,
+        "w": 0.0,
+        "x": 0.0,
+        "y": 0.0
+      },
       "id": "Z2zrRug3HP",
       "name": "Menu",
       "nodes": [
@@ -4660,6 +4676,8 @@
           }
         }
       ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {

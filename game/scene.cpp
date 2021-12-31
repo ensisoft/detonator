@@ -242,6 +242,11 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
     return ret;
 }
 
+SceneClass::SceneClass()
+{
+    mClassId = base::RandomString(10);
+}
+
 SceneClass::SceneClass(const SceneClass& other)
 {
     std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
@@ -250,6 +255,9 @@ SceneClass::SceneClass(const SceneClass& other)
     mName       = other.mName;
     mScriptFile = other.mScriptFile;
     mScriptVars = other.mScriptVars;
+    mDynamicSpatialIndex = other.mDynamicSpatialIndex;
+    mDynamicSpatialRect  = other.mDynamicSpatialRect;
+    mQuadTreeArgs = other.mQuadTreeArgs;
     for (const auto& node : other.mNodes)
     {
         auto copy = std::make_unique<SceneNodeClass>(*node);
@@ -630,6 +638,10 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mScriptFile);
+    hash = base::hash_combine(hash, mDynamicSpatialIndex);
+    hash = base::hash_combine(hash, mDynamicSpatialRect);
+    hash = base::hash_combine(hash, mQuadTreeArgs.max_items);
+    hash = base::hash_combine(hash, mQuadTreeArgs.max_levels);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const SceneNodeClass* node) {
@@ -647,6 +659,10 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("id", mClassId);
     data.Write("name", mName);
     data.Write("script_file", mScriptFile);
+    data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
+    data.Write("dynamic_spatial_rect", mDynamicSpatialRect);
+    data.Write("quadtree_max_items", mQuadTreeArgs.max_items);
+    data.Write("quadtree_max_levels", mQuadTreeArgs.max_levels);
     for (const auto& node : mNodes)
     {
         auto chunk = data.NewWriteChunk();
@@ -670,7 +686,11 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
     SceneClass ret;
     if (!data.Read("id", &ret.mClassId) ||
         !data.Read("name", &ret.mName) ||
-        !data.Read("script_file", &ret.mScriptFile))
+        !data.Read("script_file", &ret.mScriptFile) ||
+        !data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex) ||
+        !data.Read("dynamic_spatial_rect", &ret.mDynamicSpatialRect) ||
+        !data.Read("quadtree_max_items", &ret.mQuadTreeArgs.max_items) ||
+        !data.Read("quadtree_max_levels", &ret.mQuadTreeArgs.max_levels))
         return std::nullopt;
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
@@ -714,6 +734,9 @@ SceneClass SceneClass::Clone() const
     ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
         return map[node];
     });
+    ret.mDynamicSpatialRect = mDynamicSpatialRect;
+    ret.mDynamicSpatialIndex = mDynamicSpatialIndex;
+    ret.mQuadTreeArgs = mQuadTreeArgs;
     return ret;
 }
 
@@ -729,6 +752,9 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     mNodes      = std::move(tmp.mNodes);
     mScriptVars = std::move(tmp.mScriptVars);
     mRenderTree = tmp.mRenderTree;
+    mDynamicSpatialIndex = tmp.mDynamicSpatialIndex;
+    mDynamicSpatialRect  = tmp.mDynamicSpatialRect;
+    mQuadTreeArgs = tmp.mQuadTreeArgs;
     return *this;
 }
 
@@ -736,6 +762,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
   : mClass(klass)
 {
     std::unordered_map<const SceneNodeClass*, const Entity*> map;
+
+    bool spatial_nodes = false;
 
     // spawn an entity instance for each scene node class
     // in the scene class
@@ -751,6 +779,13 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         args.id       = node.GetId();
         ASSERT(args.klass);
         auto entity   = CreateEntityInstance(args);
+
+        for (size_t j=0; j<entity->GetNumNodes(); ++j)
+        {
+            const auto& node = entity->GetNode(j);
+            if (node->HasSpatialNode())
+                spatial_nodes = true;
+        }
 
         // these need always be set for each entity spawned from scene
         // placement node.
@@ -815,10 +850,26 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         if (!var.IsReadOnly())
             mScriptVars.push_back(std::move(var));
     }
+
+    const auto index = mClass->GetDynamicSpatialIndex();
+    if (index == SceneClass::SpatialIndex::QuadTree)
+    {
+        const auto& rect = mClass->GetDynamicSpatialRect();
+        const auto& args = mClass->GetQuadTreeArgs();
+        mSpatialIndex.reset(new QuadTreeIndex<EntityNode>(rect, args.max_items, args.max_levels));
+    }
+    if (spatial_nodes && !mSpatialIndex)
+    {
+        WARN("Scene entities have spatial nodes but scene has no spatial index set.\n"
+             "Spatial indexing and spatial queries will not work.\n"
+             "You can enable spatial indexing in the scene editor.");
+    }
 }
 
 Scene::Scene(const SceneClass& klass) : Scene(std::make_shared<SceneClass>(klass))
 {}
+
+Scene::~Scene() = default;
 
 Entity& Scene::GetEntity(size_t index)
 {
@@ -924,6 +975,8 @@ void Scene::BeginLoop()
 
 void Scene::EndLoop()
 {
+    std::set<EntityNode*> killed_spatial_nodes;
+
     for (auto& entity : mEntities)
     {
         // turn off spawn flags.
@@ -936,8 +989,21 @@ void Scene::EndLoop()
         mRenderTree.DeleteNode(entity.get());
         mIdMap.erase(entity->GetId());
         mNameMap.erase(entity->GetName());
+
+        if (mSpatialIndex)
+        {
+            for (size_t i = 0; i < entity->GetNumNodes(); ++i)
+            {
+                auto& node = entity->GetNode(i);
+                if (node.HasSpatialNode())
+                    killed_spatial_nodes.insert(&node);
+            }
+        }
     }
-    // delete from the container the ones that were killed.
+    if (mSpatialIndex)
+        mSpatialIndex->Erase(killed_spatial_nodes);
+
+    // delete the entities that were killed from the container
     mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
         return entity->TestFlag(Entity::ControlFlags::Killed);
     }), mEntities.end());
@@ -959,8 +1025,8 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
 
 glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
 {
-    // if the parent of this entity is the root node then the
-    // the matrix will be simply identity
+    // if the parent of this entity is the root node
+    // then the matrix will be simply identity
     if (!mRenderTree.HasNode(entity) || !mRenderTree.GetParent(entity))
         return glm::mat4(1.0f);
 
@@ -1094,6 +1160,78 @@ void Scene::Update(float dt)
         if (entity->HasIdleTrack())
             entity->PlayIdle();
     }
+}
+
+void Scene::UpdateSpatialIndex()
+{
+    if (!mSpatialIndex)
+        return;
+
+    using SpatialIndex = Scene::SpatialIndex;
+
+    mSpatialIndex->BeginInsert();
+    // iterate over the render tree and look for
+    // entity nodes that have SpatialNode attachment.
+    // for the nodes with spatial node compute the nodes
+    // AABB and place the node into the spatial index.
+    class Visitor : public RenderTree::Visitor {
+    public:
+        Visitor(SpatialIndex& index) : mIndex(index)
+        {}
+
+        virtual void EnterNode(Entity* entity) override
+        {
+            if (!entity)
+                return;
+            // parent node to scene transform.
+            glm::mat4 parent_node_transform(1.0f);
+            if (const auto* parent_entity = GetParent())
+            {
+                const auto* parent_node = parent_entity->FindNodeByClassId(entity->GetParentNodeClassId());
+                parent_node_transform   = parent_entity->FindNodeTransform(parent_node);
+            }
+            mParents.push(entity);
+            mTransform.Push(parent_node_transform);
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                auto& node = entity->GetNode(i);
+                if (const auto* spatial = node.GetSpatialNode())
+                {
+                    mTransform.Push(entity->FindNodeModelTransform(&node));
+                    if (spatial->GetShape() == SpatialNode::Shape::AABB)
+                    {
+                        const auto aabb = ComputeBoundingRect(mTransform.GetAsMatrix());
+                        mIndex.Insert(aabb, &node);
+                    } else BUG("Unimplemented spatial shape insertion.");
+                    mTransform.Pop();
+                }
+            }
+        }
+        virtual void LeaveNode(Entity* entity) override
+        {
+            if (!entity)
+                return;
+
+            mTransform.Pop();
+            mParents.pop();
+        }
+    private:
+        Entity* GetParent() const
+        {
+            if (mParents.empty())
+                return nullptr;
+            return mParents.top();
+        }
+    private:
+        std::stack<Entity*> mParents;
+        Transform mTransform;
+        SpatialIndex& mIndex;
+    };
+
+    Visitor visitor(*mSpatialIndex);
+    mRenderTree.PreOrderTraverse(visitor);
+
+    mSpatialIndex->EndInsert();
 }
 
 std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass)

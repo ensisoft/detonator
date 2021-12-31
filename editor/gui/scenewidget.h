@@ -78,6 +78,13 @@ namespace gui
         virtual bool GetStats(Stats* stats) const override;
     private slots:
         void on_name_textChanged(const QString&);
+        void on_cmbSpatialIndex_currentIndexChanged(const QString&);
+        void on_spRectX_valueChanged(double value);
+        void on_spRectY_valueChanged(double value);
+        void on_spRectW_valueChanged(double value);
+        void on_spRectH_valueChanged(double value);
+        void on_spQuadMaxLevels_valueChanged(int);
+        void on_spQuadMaxItems_valueChanged(int);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

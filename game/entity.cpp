@@ -44,6 +44,30 @@ namespace {
 namespace game
 {
 
+SpatialNodeClass::SpatialNodeClass()
+{}
+std::size_t SpatialNodeClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mShape);
+    hash = base::hash_combine(hash, mFlags);
+    return hash;
+}
+void SpatialNodeClass::IntoJson(data::Writer& data) const
+{
+    data.Write("shape", mShape);
+    data.Write("flags", mFlags);
+}
+// static
+std::optional<SpatialNodeClass> SpatialNodeClass::FromJson(const data::Reader& data)
+{
+    SpatialNodeClass ret;
+    if (!data.Read("shape", &ret.mShape) ||
+        !data.Read("flags", &ret.mFlags))
+        return std::nullopt;
+    return ret;
+}
+
 std::size_t RigidBodyItemClass::GetHash() const
 {
     size_t hash = 0;
@@ -86,6 +110,15 @@ std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const data::Reade
         !data.Read("density",         &ret.mDensity))
         return std::nullopt;
     return ret;
+}
+
+DrawableItemClass::DrawableItemClass()
+{
+    mBitFlags.set(Flags::VisibleInGame, true);
+    mBitFlags.set(Flags::UpdateDrawable, true);
+    mBitFlags.set(Flags::UpdateMaterial, true);
+    mBitFlags.set(Flags::RestartDrawable, true);
+    mBitFlags.set(Flags::FlipVertically, false);
 }
 
 std::size_t DrawableItemClass::GetHash() const
@@ -277,6 +310,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mDrawable = std::make_shared<DrawableItemClass>(*other.mDrawable);
     if (other.mTextItem)
         mTextItem = std::make_shared<TextItemClass>(*other.mTextItem);
+    if (other.mSpatialNode)
+        mSpatialNode = std::make_shared<SpatialNodeClass>(*other.mSpatialNode);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
@@ -291,6 +326,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mDrawable  = std::move(other.mDrawable);
     mTextItem  = std::move(other.mTextItem);
     mBitFlags  = std::move(other.mBitFlags);
+    mSpatialNode = std::move(other.mSpatialNode);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -309,6 +345,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mDrawable->GetHash());
     if (mTextItem)
         hash = base::hash_combine(hash, mTextItem->GetHash());
+    if (mSpatialNode)
+        hash = base::hash_combine(hash, mSpatialNode->GetHash());
     return hash;
 }
 
@@ -325,6 +363,31 @@ void EntityNodeClass::SetDrawable(const DrawableItemClass &drawable)
 void EntityNodeClass::SetTextItem(const TextItemClass& text)
 {
     mTextItem = std::make_shared<TextItemClass>(text);
+}
+
+void EntityNodeClass::SetSpatialNode(const SpatialNodeClass& node)
+{
+    mSpatialNode = std::make_shared<SpatialNodeClass>(node);
+}
+
+void EntityNodeClass::CreateRigidBody()
+{
+    mRigidBody = std::make_shared<RigidBodyItemClass>();
+}
+
+void EntityNodeClass::CreateDrawable()
+{
+    mDrawable = std::make_shared<DrawableItemClass>();
+}
+
+void EntityNodeClass::CreateTextItem()
+{
+    mTextItem = std::make_shared<TextItemClass>();
+}
+
+void EntityNodeClass::CreateSpatialNode()
+{
+    mSpatialNode = std::make_shared<SpatialNodeClass>();
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -376,6 +439,12 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mTextItem->IntoJson(*chunk);
         data.Write("text_item", std::move(chunk));
     }
+    if (mSpatialNode)
+    {
+        auto chunk = data.NewWriteChunk();
+        mSpatialNode->IntoJson(*chunk);
+        data.Write("spatial_node", std::move(chunk));
+    }
 }
 
 // static
@@ -414,6 +483,13 @@ std::optional<EntityNodeClass> EntityNodeClass::FromJson(const data::Reader& dat
             return std::nullopt;
         ret.mTextItem = std::make_shared<TextItemClass>(std::move(text.value()));
     }
+    if (const auto& chunk = data.GetReadChunk("spatial_node"))
+    {
+        auto node = SpatialNodeClass::FromJson(*chunk);
+        if (!node.has_value())
+            return std::nullopt;
+        ret.mSpatialNode = std::make_shared<SpatialNodeClass>(std::move(node.value()));
+    }
     return ret;
 }
 
@@ -438,6 +514,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mRigidBody = std::move(tmp.mRigidBody);
     mDrawable  = std::move(tmp.mDrawable);
     mTextItem  = std::move(tmp.mTextItem);
+    mSpatialNode = std::move(tmp.mSpatialNode);
     mBitFlags  = std::move(tmp.mBitFlags);
     return *this;
 }
@@ -465,6 +542,8 @@ EntityNode::EntityNode(const EntityNode& other)
         mDrawable = std::make_unique<DrawableItem>(*other.GetDrawable());
     if (other.HasTextItem())
         mTextItem = std::make_unique<TextItem>(*other.GetTextItem());
+    if (other.HasSpatialNode())
+        mSpatialNode = std::make_unique<SpatialNode>(*other.GetSpatialNode());
 }
 
 EntityNode::EntityNode(EntityNode&& other)
@@ -479,6 +558,7 @@ EntityNode::EntityNode(EntityNode&& other)
     mRigidBody = std::move(other.mRigidBody);
     mDrawable  = std::move(other.mDrawable);
     mTextItem  = std::move(other.mTextItem);
+    mSpatialNode = std::move(other.mSpatialNode);
 }
 
 EntityNode::EntityNode(const EntityNodeClass& klass) : EntityNode(std::make_shared<EntityNodeClass>(klass))
@@ -502,6 +582,9 @@ const RigidBodyItem* EntityNode::GetRigidBody() const
 const TextItem* EntityNode::GetTextItem() const
 { return mTextItem.get(); }
 
+const SpatialNode* EntityNode::GetSpatialNode() const
+{ return mSpatialNode.get(); }
+
 void EntityNode::Reset()
 {
     mPosition = mClass->GetTranslation();
@@ -514,6 +597,8 @@ void EntityNode::Reset()
         mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
     if (mClass->HasTextItem())
         mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
+    if (mClass->HasSpatialNode())
+        mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
 }
 
 glm::mat4 EntityNode::GetNodeTransform() const

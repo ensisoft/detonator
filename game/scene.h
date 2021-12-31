@@ -30,9 +30,11 @@
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 #include "base/bitflag.h"
 #include "data/fwd.h"
+#include "game/index.h"
 #include "game/entity.h"
 #include "game/tree.h"
 #include "game/types.h"
@@ -223,8 +225,16 @@ namespace game
         using RenderTreeNode  = SceneNodeClass;
         using RenderTreeValue = SceneNodeClass;
 
-        SceneClass()
-        { mClassId = base::RandomString(10); }
+        enum class SpatialIndex {
+            Disabled,
+            QuadTree
+        };
+        struct QuadTreeArgs {
+            unsigned max_items = 4;
+            unsigned max_levels = 3;
+        };
+
+        SceneClass();
         // Copy construct a deep copy of the scene.
         SceneClass(const SceneClass& other);
 
@@ -373,7 +383,7 @@ namespace game
         // Get the scene class object id.
         std::string GetId() const
         { return mClassId; }
-        // Get the human readable name of the class.
+        // Get the human-readable name of the class.
         std::string GetName() const
         { return mName; }
         // Get the associated script file ID.
@@ -386,13 +396,27 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+        SpatialIndex GetDynamicSpatialIndex() const
+        { return mDynamicSpatialIndex; }
+        FRect GetDynamicSpatialRect() const
+        { return mDynamicSpatialRect; }
+        QuadTreeArgs GetQuadTreeArgs() const
+        { return mQuadTreeArgs; }
 
+        void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args)
+        { mQuadTreeArgs = args; }
+        void SetDynamicSpatialIndex(SpatialIndex index)
+        { mDynamicSpatialIndex = index; }
+        void SetDynamicSpatialRect(const FRect& rect)
+        { mDynamicSpatialRect = rect; }
         void SetName(const std::string& name)
         { mName = name; }
         void SetScriptFileId(const std::string& file)
         { mScriptFile = file; }
         bool HasScriptFile() const
         { return !mScriptFile.empty(); }
+        bool IsDynamicSpatialIndexEnabled() const
+        { return mDynamicSpatialIndex != SpatialIndex::Disabled; }
         void ResetScriptFile()
         { mScriptFile.clear(); }
 
@@ -427,6 +451,9 @@ namespace game
         RenderTree mRenderTree;
         // Scripting variables.
         std::vector<ScriptVar> mScriptVars;
+        SpatialIndex mDynamicSpatialIndex = SpatialIndex::Disabled;
+        FRect mDynamicSpatialRect;
+        QuadTreeArgs mQuadTreeArgs;
     };
 
     // Scene is the runtime representation of a scene based on some scene class
@@ -442,10 +469,12 @@ namespace game
         using RenderTree      = game::RenderTree<Entity>;
         using RenderTreeNode  = Entity;
         using RenderTreeValue = Entity;
+        using SpatialIndex    = game::SpatialIndex<EntityNode>;
 
         Scene(std::shared_ptr<const SceneClass> klass);
         Scene(const SceneClass& klass);
         Scene(const Scene& other) = delete;
+       ~Scene();
 
         // Get the entity by index. The index must be valid.
         Entity& GetEntity(size_t index);
@@ -465,13 +494,13 @@ namespace game
         // name it's undefined which one is returned.
         const Entity* FindEntityByInstanceName(const std::string& name) const;
         // Kill entity and mark it for removal later. Note that this will propagate
-        // the kill to all of the entity's children as well. If this is not what
+        // the kill to all the entity's children as well. If this is not what
         // you want then unlink the appropriate children first.
         void KillEntity(Entity* entity);
         // Spawn a new entity in the scene. Returns a pointer to the spawned
         // entity or nullptr if spawning failed.
         // if link_to_root is true the new entity is automatically linked to the
-        // root of the scene graph. Otherwise you can use LinkEntity to link
+        // root of the scene graph. Otherwise, you can use LinkEntity to link
         // to any other entity or later RelinkEntity to relink to some other
         // entity in the scene graph.
         Entity* SpawnEntity(const EntityArgs& args, bool link_to_root = true);
@@ -530,12 +559,12 @@ namespace game
         // the scene coordinate space.
         // If the entity is not part of this scene the result is undefined.
         FRect FindEntityBoundingRect(const Entity* entity) const;
-        // Find the bounding (axis aligned) rectangle that encloses the
+        // Find the axis-aligned bounding box (AABB) that encloses the
         // given entity node's model. The returned rectangle is in the scene
         // coordinate space. If the entity is not part of this scene or
         // if the node is not part of the entity the result is undefined.
         FRect FindEntityNodeBoundingRect(const Entity* entity, const EntityNode* node) const;
-        // Find the bounding box (object oriented) rectangle that encloses the
+        // Find the oriented bounding box (OOB) that encloses the
         // given entity node's model. The returned box is in the scene coordinate space
         // and has the dimensions and orientation corresponding to the node's
         // model transformation. If the entity is not part of this scene or
@@ -544,6 +573,27 @@ namespace game
 
         void Update(float dt);
 
+        void UpdateSpatialIndex();
+
+        inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<EntityNode*>* result)
+        { query_spatial_nodes(area_of_interest, result); }
+        inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<const EntityNode*>* result) const
+        { query_spatial_nodes(area_of_interest, result); }
+        inline void QuerySpatialNodes(const FRect& area_of_interest, std::vector<EntityNode*>* result)
+        { query_spatial_nodes(area_of_interest, result); }
+        inline void QuerySpatialNodes(const FRect& area_of_interest, std::vector<const EntityNode*>* result) const
+        { query_spatial_nodes(area_of_interest, result); }
+        inline void QuerySpatialNodes(const FPoint& point, std::set<EntityNode*>* result)
+        { query_spatial_nodes(point, result); }
+        inline void QuerySpatialNodes(const FPoint& point, std::set<const EntityNode*>* result) const
+        { query_spatial_nodes(point, result); }
+        inline void QuerySpatialNodes(const FPoint& point, std::vector<EntityNode*>* result)
+        { query_spatial_nodes(point, result); }
+        inline void QuerySpatialNodes(const FPoint& point, std::vector<const EntityNode*>* result) const
+        { query_spatial_nodes(point, result); }
+
+        const SpatialIndex* GetSpatialIndex() const
+        { return mSpatialIndex.get(); }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
@@ -551,13 +601,13 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
-
+        double GetTime() const
+        { return mCurrentTime; }
+        bool HasSpatialIndex() const
+        { return !!mSpatialIndex; }
         // Get the current number of entities in the scene.
         size_t GetNumEntities() const
         { return mEntities.size(); }
-        double GetTime() const
-        { return mCurrentTime; }
-
         std::string GetClassName() const
         { return mClass->GetName(); }
         std::string GetClassId() const
@@ -571,6 +621,14 @@ namespace game
         // Disabled.
         Scene& operator=(const Scene&) = delete;
     private:
+        template<typename Predicate, typename ResultContainer>
+        void query_spatial_nodes(const Predicate& predicate, ResultContainer* result) const
+        {
+            if (mSpatialIndex)
+                mSpatialIndex->Query(predicate, result);
+        }
+
+    private:
         // the class object.
         std::shared_ptr<const SceneClass> mClass;
         // Entities currently in the scene.
@@ -578,7 +636,7 @@ namespace game
         // lookup table for mapping entity ids to entities.
         std::unordered_map<std::string, Entity*> mIdMap;
         // lookup table for mapping entity names to entities.
-        // the names are *human readable* and set by the designer
+        // the names are *human-readable* and set by the designer
         // so it's possible that there could be name collisions.
         std::unordered_map<std::string, Entity*> mNameMap;
         // The list of script variables.
@@ -594,6 +652,8 @@ namespace game
         // kill set of entities that were killed but have
         // not yet been removed from the scene.
         std::unordered_set<Entity*> mKillSet;
+        // Spatial index for object (entity node) queries (if any)
+        std::unique_ptr<SpatialIndex> mSpatialIndex;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);

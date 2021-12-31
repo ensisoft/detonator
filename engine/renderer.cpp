@@ -47,21 +47,24 @@ void Renderer::BeginFrame()
 }
 
 void Renderer::Draw(const Entity& entity,
-                    gfx::Painter& painter, gfx::Transform& transform,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform,
                     EntityInstanceDrawHook* hook)
 {
     DrawEntity<Entity, EntityNode>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const EntityClass& entity,
-                    gfx::Painter& painter, gfx::Transform& transform,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform,
                     EntityClassDrawHook* hook)
 {
     DrawEntity<EntityClass, EntityNodeClass>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const Scene& scene,
-                    gfx::Painter& painter, gfx::Transform& transform,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform,
                     SceneInstanceDrawHook* scene_hook,
                     EntityInstanceDrawHook* entity_hook)
 {
@@ -70,7 +73,8 @@ void Renderer::Draw(const Scene& scene,
 }
 
 void Renderer::Draw(const SceneClass& scene,
-                    gfx::Painter& painter, gfx::Transform& transform,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform,
                     SceneClassDrawHook* scene_hook,
                     EntityClassDrawHook* entity_hook)
 {
@@ -189,7 +193,8 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
 
 template<typename SceneType, typename EntityType, typename NodeType>
 void Renderer::DrawScene(const SceneType& scene,
-                         gfx::Painter& painter, gfx::Transform& transform,
+                         gfx::Painter& painter,
+                         gfx::Transform& transform,
                          SceneDrawHook<EntityType>* scene_hook,
                          EntityDrawHook<NodeType>* entity_hook)
 {
@@ -223,7 +228,8 @@ void Renderer::DrawScene(const SceneType& scene,
 
 template<typename EntityType, typename Node>
 void Renderer::DrawEntity(const EntityType& entity,
-                          gfx::Painter& painter, gfx::Transform& transform,
+                          gfx::Painter& painter,
+                          gfx::Transform& transform,
                           EntityDrawHook<Node>* hook)
 
 {
