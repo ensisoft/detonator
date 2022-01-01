@@ -273,9 +273,17 @@ namespace base
         class QuadTreeNode
         {
         public:
+            QuadTreeNode(const QuadTreeNode&) = delete;
             QuadTreeNode(const base::FRect& rect)
-                    : mRect(rect)
+                : mRect(rect)
             {}
+            ~QuadTreeNode()
+            {
+                ASSERT(mQuadrants[0] == nullptr &&
+                       mQuadrants[1] == nullptr &&
+                       mQuadrants[2] == nullptr &&
+                       mQuadrants[3] == nullptr);
+            }
             bool Insert(const base::FRect& rect, Object object, mem::IFixedAllocator& alloc,
                         unsigned max_items, unsigned level)
             {
@@ -363,6 +371,45 @@ namespace base
                     mQuadrants[i] = nullptr;
                 }
             }
+            template<typename Predicate>
+            void Erase(const Predicate& predicate, mem::IFixedAllocator& alloc, unsigned max_items)
+            {
+                for (auto it = mItems.begin(); it != mItems.end();)
+                {
+                    auto& item = *it;
+                    if (predicate(item.object, item.rect))
+                        it = mItems.erase(it);
+                    else ++it;
+                }
+                if (!HasChildren())
+                    return;
+
+                // so ideally an object that was split between different quadrants
+                // would be combined back into a single object/rectangle. but the
+                // problem is that there's no simple generic way to realize object
+                // identity right now. I.e. there's no knowledge connecting an object
+                // in one quadrant to another object in an adjacent quadrant. doing this
+                // would require some kind of split-table/link or place a requirement
+                // on the type T to be uniquely identifiable.
+                size_t items = 0;
+                for (int i=0; i<4; ++i)
+                {
+                    mQuadrants[i]->Erase(predicate, alloc, max_items);
+                    items += mQuadrants[i]->GetNumItems();
+                }
+                if (items > max_items)
+                    return;
+
+                for (int i=0; i<4; ++i)
+                {
+                    mQuadrants[i]->MoveItems(mItems);
+                    mQuadrants[i]->Clear(alloc);
+                    mQuadrants[i]->~QuadTreeNode();
+                    alloc.Free((void*)mQuadrants[i]);
+                    mQuadrants[i] = nullptr;
+                }
+            }
+
             inline bool HasChildren() const
             { return !!mQuadrants[0]; }
             inline bool HasItems() const
@@ -377,11 +424,24 @@ namespace base
             { return base::SafeIndex(mItems, index).object; }
             std::size_t GetNumItems() const
             { return mItems.size(); }
+            std::size_t GetSize() const
+            {
+                size_t ret = mItems.size();
+                for (int i=0; i<4; ++i)
+                {
+                    if (mQuadrants[i])
+                        ret += mQuadrants[i]->GetSize();
+                }
+                return ret;
+            }
+            QuadTreeNode& operator=(const QuadTreeNode&) = delete;
         private:
             struct Item {
                 base::FRect rect;
                 Object object;
             };
+            void MoveItems(std::vector<Item>& out) const
+            { base::AppendVector(out, std::move(mItems)); }
         private:
             const base::FRect mRect;
             std::vector<Item> mItems;
@@ -413,7 +473,7 @@ namespace base
           , mRoot(base::FRect(0.0f, 0.0f, width, height))
           , mPool(FindMaxNumNodes(max_levels))
         {}
-        QuadTree(float x, float y, float width, float, float height, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
+        QuadTree(float x, float y, float width, float height, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
           : mMaxItems(max_items)
           , mMaxLevels(max_levels)
           , mRoot(base::FRect(x, y, width, height))
@@ -431,14 +491,25 @@ namespace base
           , mRoot(base::FRect(0.0f, 0.0f, size))
           , mPool(FindMaxNumNodes(max_levels))
         {}
+       ~QuadTree()
+        {
+            mRoot.Clear(mPool);
+        }
         bool Insert(const base::FRect& rect, Object object)
         { return mRoot.Insert(rect, object, mPool, mMaxItems, mMaxLevels-1);  }
         void Clear()
         { mRoot.Clear(mPool); }
+        template<typename Predicate>
+        void Erase(const Predicate& predicate)
+        { mRoot.Erase(predicate, mPool, mMaxItems); }
+
         const TreeNode& GetRoot() const
         { return mRoot; }
         const TreeNode* operator->() const
         { return &mRoot; }
+        size_t GetSize() const
+        { return mRoot.GetSize(); }
+
         static unsigned FindMaxNumNodes(unsigned levels)
         {
             unsigned nodes = 0;
