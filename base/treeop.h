@@ -118,13 +118,34 @@ namespace detail {
             return;
         for (size_t i=0; i<4; ++i)
         {
-            const auto* quadrant = node.GetChildQuadrant(i);
-            const auto& rect = quadrant->GetRect();
+            const auto* quad = node.GetChildQuadrant(i);
+            const auto& rect = quad->GetRect();
             const auto& area = base::Intersect(area_of_interest, rect);
             if (!area.IsEmpty())
-                QueryQuadTree(area, *quadrant, result);
+                QueryQuadTree(area, *quad, result);
         }
     }
+
+    template<typename Object, typename Container>
+    void QueryQuadTree(const base::FPoint& point, const QuadTreeNode<Object>& node, Container* result)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (rect.TestPoint(point))
+                StoreObject(node.GetItemObject(i), result);
+        }
+        if (!node.HasChildren())
+            return;
+        for (size_t i=0; i<4; ++i)
+        {
+            const auto* quad = node.GetChildQuadrant(i);
+            const auto& rect = quad->GetRect();
+            if (rect.TestPoint(point))
+                QueryQuadTree(point, *quad, result);
+        }
+    }
+
 } // namespace detail
 
 template<typename SrcObject, typename RetObject> inline
@@ -138,5 +159,17 @@ void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<SrcObject
 template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
 { detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
+
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result)
+{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result)
+{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
+{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
 
 } // namespace
