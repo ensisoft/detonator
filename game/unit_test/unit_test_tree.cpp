@@ -318,7 +318,7 @@ struct Entity {
     base::FRect rect;
 };
 
-void unit_test_quadtree()
+void unit_test_quadtree_insert_query()
 {
     // basic test
     {
@@ -613,6 +613,148 @@ void unit_test_quadtree()
     }
 }
 
+void unit_test_quadtree_erase()
+{
+    // Quadrants
+    // _____________
+    // |  0  |  2  |
+    // |_____|_____|
+    // |  1  |  3  |
+    // |_____|_____|
+    //
+
+    // test an object in every top level quadrant
+    {
+        std::vector<Entity> objects;
+        objects.resize(4);
+        objects[0].name = "e0";
+        objects[1].name = "e1";
+        objects[2].name = "e2";
+        objects[3].name = "e3";
+
+        game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+
+        base::FRect rect(0.0f, 0.0f, 10.0f, 10.0f);
+
+        rect.Move(10.0f, 10.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[0]));
+        rect.Move(10.0f, 60.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[1]));
+        rect.Move(60.0f, 0.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[2]));
+        rect.Move(60.0f, 60.0f);
+        TEST_REQUIRE(tree.Insert(rect, &objects[3]));
+
+        TEST_REQUIRE(tree.GetRoot().HasChildren());
+        // nothing should be erased
+        tree.Erase([](const Entity* e, const base::FRect& rect) {
+            return e->name == "keke";
+        });
+        TEST_REQUIRE(tree->HasChildren());
+
+        tree.Erase([](const Entity* e, const base::FRect& rect) {
+            return e->name == "e0";
+        });
+        TEST_REQUIRE(tree->HasChildren() == true);
+        TEST_REQUIRE(tree->GetSize() == 3);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetNumItems() == 0);
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetNumItems() == 1);
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetNumItems() == 1);
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetNumItems() == 1);
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemObject(0)->name == "e1");
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetItemObject(0)->name == "e2");
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemObject(0)->name == "e3");
+
+        // erase everything
+        tree.Erase([](const Entity* e, const base::FRect& rect) {
+            return true;
+        });
+        TEST_REQUIRE(tree->GetSize() == 0);
+        TEST_REQUIRE(tree->HasChildren() == false);
+    }
+
+    {
+        std::vector<Entity> objects;
+        objects.resize(4);
+        objects[0].name = "e0";
+        objects[1].name = "e1";
+        objects[2].name = "e2";
+        objects[3].name = "e3";
+        game::QuadTree<Entity*> tree(-50.0f, -50.0f,100.0f, 100.0f, 4);
+
+        base::FRect rect(-20.0f, -20.0f, 10.0f, 10.0f);
+        tree.Insert(rect, &objects[0]);
+
+        rect.Move(-20.0f, 20.0f);
+        tree.Insert(rect, &objects[1]);
+
+        rect.Move(20.0f, -20.0f);
+        tree.Insert(rect, &objects[2]);
+
+        rect.Move(20.0f, 20.0f);
+        tree.Insert(rect, &objects[3]);
+        TEST_REQUIRE(tree->HasChildren() == false);
+        TEST_REQUIRE(tree->GetItemObject(0)->name == "e0");
+        TEST_REQUIRE(tree->GetItemObject(1)->name == "e1");
+        TEST_REQUIRE(tree->GetItemObject(2)->name == "e2");
+        TEST_REQUIRE(tree->GetItemObject(3)->name == "e3");
+
+        // add one more to cause the root node to split into child
+        // quadrants.
+        rect.Move(-25.0f, -25.0f);
+        Entity ent;
+        ent.name = "ent";
+        tree.Insert(rect, &ent);
+        TEST_REQUIRE(tree->HasChildren());
+        TEST_REQUIRE(tree->GetNumItems() == 0);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetItemObject(0)->name == "e0");
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemObject(0)->name == "e1");
+        TEST_REQUIRE(tree->GetChildQuadrant(2)->GetItemObject(0)->name == "e2");
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemObject(0)->name == "e3");
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetItemObject(1)->name == "ent");
+
+        // delete the 5th element which will cause the quadrants
+        // to be deleted.
+        tree.Erase([](Entity* ent, const base::FRect& rect) {
+            return ent->name == "ent";
+        });
+
+        TEST_REQUIRE(tree->HasChildren() == false);
+        TEST_REQUIRE(tree->GetItemObject(0)->name == "e0");
+        TEST_REQUIRE(tree->GetItemObject(1)->name == "e1");
+        TEST_REQUIRE(tree->GetItemObject(2)->name == "e2");
+        TEST_REQUIRE(tree->GetItemObject(3)->name == "e3");
+    }
+
+    // test erasing an object that was split between quadrants
+    // currently there's no merging of object back into a single
+    // shape since there's no generic way to realize object identity.
+    {
+        game::QuadTree<Entity*> tree(-50.0f, -50.0f,100.0f, 100.0f, 1);
+
+        Entity first;
+        first.name = "first";
+        first.rect = base::FRect(-10.0f, -20.0f, 10.0f, 10.0f);
+        tree.Insert(first.rect, &first);
+        TEST_REQUIRE(tree->GetItemObject(0)->name == "first");
+
+        Entity split;
+        split.rect = base::FRect(-10.0f, 20.0f, 20.0f, 20.0f);
+        split.name = "split";
+        tree.Insert(split.rect, &split);
+        TEST_REQUIRE(tree->GetChildQuadrant(0)->GetItemObject(0)->name == "first");
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemObject(0)->name == "split");
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemObject(0)->name == "split");
+
+        tree.Erase([](Entity* entity, const base::FRect& rect) {
+            return entity->name == "first";
+        });
+        TEST_REQUIRE(tree->HasChildren() == true);
+        TEST_REQUIRE(tree->GetChildQuadrant(1)->GetItemObject(0)->name == "split");
+        TEST_REQUIRE(tree->GetChildQuadrant(3)->GetItemObject(0)->name == "split");
+    }
+}
+
 void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
 {
     std::printf("Total quadtree nodes = %d\n", game::QuadTree<Entity>::FindMaxNumNodes(max_levels));
@@ -691,18 +833,23 @@ int test_main(int argc, char* argv[])
 {
     unit_test_render_tree();
     unit_test_render_tree_op();
-    unit_test_quadtree();
+    unit_test_quadtree_insert_query();
+    unit_test_quadtree_erase();
 
+    bool perf_test = false;
     unsigned num_items  = game::QuadTree<Entity>::DefaultMaxItems;
     unsigned max_levels = game::QuadTree<Entity>::DefaultMaxLevels;
     for (int i=1; i<argc; ++i)
     {
-        if (!std::strcmp("--max-items", argv[i]))
+        if (!std::strcmp("--perftest", argv[i]))
+            perf_test = true;
+        else if (!std::strcmp("--max-items", argv[i]))
             num_items = std::atoi(argv[++i]);
         else if (!std::strcmp("--max-levels", argv[i]))
             max_levels = std::atoi(argv[++i]);
         else std::printf("Unrecognized cmdline param: '%s'\n", argv[i]);
     }
-    perf_test_quadtree_even_grid(num_items, max_levels);
+    if (perf_test)
+        perf_test_quadtree_even_grid(num_items, max_levels);
     return 0;
 }
