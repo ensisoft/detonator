@@ -26,47 +26,36 @@ function Update(bullet, game_time, dt)
         Scene:KillEntity(bullet)
         return
     end
+end
 
+function PostUpdate(bullet, game_time)   
     -- check if this bullet is hitting anything
-    local num_entities = Scene:GetNumEntities()
-    for i=0, num_entities-1, 1 do
-        local entity = Scene:GetEntity(i)
+    local bullet_node = bullet:FindNodeByClassName('Bullet')
+    local bullet_pos  = bullet_node:GetTranslation()
+    local query_ret   = Scene:QuerySpatialNodes(bullet_pos)
+    while query_ret:HasNext() do
+        local node = query_ret:Get()
+        local entity = node:GetEntity()
+        local node_pos = node:GetTranslation()
         if entity:GetClassName() == 'Ship2' and bullet.red then
-            -- player's bullet hit invader ship
-            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local ship_pos = util.GetTranslationFromMatrix(matrix)
-            local distance = glm.length(ship_pos - bullet_pos)
-            if (distance <= 50.0) then
-                Game:DebugPrint('enemy was hit!')
-                Scene:KillEntity(entity)
-                Scene:KillEntity(bullet)
-                SpawnExplosion(ship_pos, 'BlueExplosion')
-                SpawnScore(ship_pos, entity.score)
-                local score = Scene:FindEntityByInstanceName('GameScore')
-                local node  = score:FindNodeByClassName('text')
-                local text  = node:GetTextItem()
-                Scene.score = Scene.score + entity.score
-                text:SetText(tostring(Scene.score))
-            end
-        elseif entity:GetClassName() == 'Player' and bullet.red == false then
-            -- invader ship bullet hit player's ship
-            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local ship_pos = util.GetTranslationFromMatrix(matrix)
-            local distance = glm.length(ship_pos - bullet_pos)
-            if (distance <= 50.0) then
-                Game:DebugPrint('you were hit!')
-                Scene:KillEntity(entity)
-                SpawnExplosion(ship_pos, 'RedExplosion')
-            end
+            Game:DebugPrint('Enemy was hit!')
+            Scene:KillEntity(entity)
+            Scene:KillEntity(bullet)
+            SpawnExplosion(node_pos, 'BlueExplosion')
+            SpawnScore(node_pos, entity.score)
+            local score = Scene:FindEntityByInstanceName('GameScore')
+            local node  = score:FindNodeByClassName('text')
+            local text  = node:GetTextItem()
+            Scene.score = Scene.score + entity.score
+            text:SetText(tostring(Scene.score))
         elseif entity:GetClassName() == 'Asteroid' and bullet.red then
-            local matrix = Scene:FindEntityNodeTransform(entity, entity:FindNodeByClassName('Body'))
-            local rock_pos = util.GetTranslationFromMatrix(matrix)
-            local distance = glm.length(rock_pos -bullet_pos)
-            local radius   = entity.radius
-            if (distance <= radius) then
-                Scene:KillEntity(bullet)
-            end
+            Scene:KillEntity(bullet)
+        elseif entity:GetClassName() == 'Player' and bullet.red == false then 
+            Game:DebugPrint('You were hit!')
+            Scene:KillEntity(entity)
+            SpawnExplosion(node_pos, 'RedExplosion')
         end
+        query_ret:Next()     
     end
 end
 

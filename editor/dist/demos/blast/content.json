@@ -306,10 +306,10 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
+          "name": "Skin",
           "position": {
-            "x": -0.0,
-            "y": 0.0
+            "x": 0.5,
+            "y": 0.5
           },
           "rotation": 0.0,
           "scale": {
@@ -567,6 +567,32 @@
             },
             "vertical_align": "Center"
           }
+        },
+        {
+          "class": "MThUBoKUmu",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 77.8499984741211,
+            "y": 78.4800033569336
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          }
         }
       ],
       "render_tree": {
@@ -574,50 +600,57 @@
           {
             "children": [
               {
-                "node": {
-                  "id": "37wPuCDipF"
-                }
-              },
-              {
                 "children": [
                   {
                     "node": {
-                      "id": "fKBJvFFCHC"
+                      "id": "37wPuCDipF"
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "node": {
+                          "id": "fKBJvFFCHC"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "Os7YCfrooA"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "PBF6jATZjy"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "xphEakE0UJ"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "MFH7NpW3GP"
+                        }
+                      }
+                    ],
+                    "node": {
+                      "id": "zP7K5Htw9Y"
                     }
                   },
                   {
                     "node": {
-                      "id": "Os7YCfrooA"
-                    }
-                  },
-                  {
-                    "node": {
-                      "id": "PBF6jATZjy"
-                    }
-                  },
-                  {
-                    "node": {
-                      "id": "xphEakE0UJ"
-                    }
-                  },
-                  {
-                    "node": {
-                      "id": "MFH7NpW3GP"
+                      "id": "y66i7aGIlt"
                     }
                   }
                 ],
                 "node": {
-                  "id": "zP7K5Htw9Y"
-                }
-              },
-              {
-                "node": {
-                  "id": "y66i7aGIlt"
+                  "id": "6IMWYKiN1b"
                 }
               }
             ],
             "node": {
-              "id": "6IMWYKiN1b"
+              "id": "MThUBoKUmu"
             }
           }
         ],
@@ -802,12 +835,12 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
+          "name": "Skin",
           "position": {
             "x": 0.0,
             "y": 0.0
           },
-          "rotation": -3.1415927410125732,
+          "rotation": -0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
@@ -1063,6 +1096,32 @@
             "x": 207.04705810546875,
             "y": 176.97109985351563
           }
+        },
+        {
+          "class": "2tozdk6Tzf",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.5000000596046448,
+            "y": -0.4999999701976776
+          },
+          "rotation": 3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          }
         }
       ],
       "render_tree": {
@@ -1070,43 +1129,50 @@
           {
             "children": [
               {
+                "children": [
+                  {
+                    "node": {
+                      "id": "dUDZP9QwKv"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "Y1oeiOvTtt"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "5aEJYp5IlZ"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "8J3bnYn7k3"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "Ej7SOQuTSS"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "XEEkJGHbxM"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "sWMIUMAUPt"
+                    }
+                  }
+                ],
                 "node": {
-                  "id": "dUDZP9QwKv"
-                }
-              },
-              {
-                "node": {
-                  "id": "Y1oeiOvTtt"
-                }
-              },
-              {
-                "node": {
-                  "id": "5aEJYp5IlZ"
-                }
-              },
-              {
-                "node": {
-                  "id": "8J3bnYn7k3"
-                }
-              },
-              {
-                "node": {
-                  "id": "Ej7SOQuTSS"
-                }
-              },
-              {
-                "node": {
-                  "id": "XEEkJGHbxM"
-                }
-              },
-              {
-                "node": {
-                  "id": "sWMIUMAUPt"
+                  "id": "WOIwH6Bxgh"
                 }
               }
             ],
             "node": {
-              "id": "WOIwH6Bxgh"
+              "id": "2tozdk6Tzf"
             }
           }
         ],
@@ -1317,11 +1383,44 @@
             "x": 88.0,
             "y": 88.0
           }
+        },
+        {
+          "class": "kp7A9ShK5w",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Hitbox",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 55.0,
+            "y": 55.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          }
         }
       ],
       "render_tree": {
         "children": [
           {
+            "children": [
+              {
+                "node": {
+                  "id": "kp7A9ShK5w"
+                }
+              }
+            ],
             "node": {
               "id": "z5Hf9L3Qvp"
             }
@@ -4350,12 +4449,12 @@
   ],
   "scenes": [
     {
-      "dynamic_spatial_index": "Disabled",
+      "dynamic_spatial_index": "QuadTree",
       "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
+        "h": 800.0,
+        "w": 1200.0,
+        "x": -600.0,
+        "y": -400.0
       },
       "id": "UWF4u1fYHa",
       "name": "Game",
@@ -4425,7 +4524,7 @@
           "name": "Background",
           "parent_render_tree_node": "",
           "position": {
-            "x": -0.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rotation": 0.0,
@@ -4547,7 +4646,7 @@
         }
       ],
       "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
+      "quadtree_max_levels": 1,
       "render_tree": {
         "children": [
           {
