@@ -698,8 +698,11 @@ void InitDoc()
                                      "Possible flags: 'VisibleInGame', 'BlinkText', 'UnderlineText', 'StaticContent'");
     DOC_METHOD_2("void", "SetFlag", "Set a text item flag.<br>"
                                     "Possible flags: 'VisibleInGame', 'BlinkText', 'UnderlineText', 'StaticContent'",
-                 "string", "flag_name",
-                 "bool", "on_off");
+                 "string", "flag_name","bool", "on_off");
+
+    DOC_TABLE("game.SpatialNode");
+    DOC_METHOD_0("string", "GetShape", "Get the shape used for spatial indexing.<br>"
+                                       "Possible values. 'AABB'");
 
     DOC_TABLE("game.EntityNode");
     DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");
@@ -712,9 +715,12 @@ void InitDoc()
     DOC_METHOD_0("bool", "HasRigidBody", "Checks whether the node has a rigid body item.");
     DOC_METHOD_0("bool", "HasTextItem", "Checks whether the node has a text item.");
     DOC_METHOD_0("bool", "HasDrawable", "Checks whether the node has a drawable item.");
+    DOC_METHOD_0("bool", "HasSpatialNode", "Checks whether the node has a spatial indexing node.");
     DOC_METHOD_0("game.RigidBody", "GetRigidBody", "Get the node's rigid body item if any. Returns nil if node has no rigid body.");
     DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
-    DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. returns nil if node has no drawable item.");
+    DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. Returns nil if node has no drawable item.");
+    DOC_METHOD_0("game.SpatialNode", "GetSpatialNode", "Get the node's spatial node if any. Returns nil if node has no spatial node.");
+    DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity that owns this entity node.");
     DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
     DOC_METHOD_1("void", "SetSize", "Set the size that applies to this node.", "glm.vec2", "size");
     DOC_METHOD_1("void", "SetTranslation", "Set the node's translation relative to its parent.", "glm.vec2", "translation");
@@ -782,6 +788,16 @@ void InitDoc()
     DOC_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
                                    "Default is true.");
 
+    DOC_TABLE("game.SpatialQueryResultSet");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the result set is an empty set or not.");
+    DOC_METHOD_0("bool", "HasNext", "Check whether the result set has a next item or not.");
+    DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the result set. <br>"
+                                 "Returns true if there is a next item or false when there are no more items.");
+    DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the result set. <br>"
+                                  "The iteration is already started automatically when the query is created.<br>"
+                                  "So this only needs to be called if restarting.");
+    DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
+
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
@@ -815,6 +831,12 @@ void InitDoc()
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
+    DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
+                                                                    "whose spatial nodes intersect with the given search rectangle.",
+                 "base.FRect", "area_of_interest");
+    DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
+                                                                    "whose spatial nodes intersect with the given point.",
+                 "base.FPoint|glm.vec2", "point");
 
     DOC_TABLE("game.Physics");
     DOC_METHOD_2("void", "ApplyImpulseToCenter", "Apply an impulse to the center of the given entity node.<br>"
