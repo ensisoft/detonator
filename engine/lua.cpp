@@ -516,6 +516,41 @@ void BindGlmVectorOp(sol::usertype<Vector>& vec)
     vec["normalize"] = [](const Vector& vec) { return glm::normalize(vec); };
 }
 
+template<typename T>
+class SpatialQueryResultSet
+{
+public:
+    using Set = std::set<T>;
+    SpatialQueryResultSet(Set&& result)
+      : mResult(std::move(result))
+    { mBegin = mResult.begin(); }
+    SpatialQueryResultSet(const Set& result)
+      : mResult(result)
+    { mBegin = mResult.begin(); }
+    SpatialQueryResultSet()
+    { mBegin = mResult.begin(); }
+    T GetCurrent() const
+    {
+        if (mBegin == mResult.end())
+            throw std::runtime_error("SpatialQueryResultSet iteration error.");
+        return *mBegin;
+    }
+    void BeginIteration()
+    { mBegin = mResult.begin(); }
+    bool HasNext() const
+    { return mBegin != mResult.end(); }
+    bool IsEmpty() const
+    { return mResult.empty(); }
+    bool Next()
+    {
+        ++mBegin;
+        return mBegin != mResult.end();
+    }
+private:
+    Set mResult;
+    typename Set::iterator mBegin;
+};
+
 } // namespace
 
 namespace engine
@@ -1803,6 +1838,11 @@ void BindGameLib(sol::state& L)
     text["TestFlag"]      = &TestFlag<TextItem>;
     text["SetFlag"]       = &SetFlag<TextItem>;
 
+    auto spn = table.new_usertype<SpatialNode>("SpatialNode");
+    spn["GetShape"] = [](const SpatialNode* node) {
+        return magic_enum::enum_name(node->GetShape());
+    };
+
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
     entity_node["GetName"]        = &EntityNode::GetName;
@@ -1814,9 +1854,12 @@ void BindGameLib(sol::state& L)
     entity_node["HasRigidBody"]   = &EntityNode::HasRigidBody;
     entity_node["HasTextItem"]    = &EntityNode::HasTextItem;
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
+    entity_node["HasSpatialNode"] = &EntityNode::HasSpatialNode;
     entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
     entity_node["GetRigidBody"]   = (RigidBodyItem*(EntityNode::*)(void))&EntityNode::GetRigidBody;
     entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
+    entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
+    entity_node["GetEntity"]      = (Entity*(EntityNode::*)(void))&EntityNode::GetEntity;
     entity_node["SetScale"]       = &EntityNode::SetScale;
     entity_node["SetSize"]        = &EntityNode::SetSize;
     entity_node["SetTranslation"] = &EntityNode::SetTranslation;
@@ -1863,6 +1906,14 @@ void BindGameLib(sol::state& L)
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
     entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
 
+    using DynamicSpatialQueryResultSet = SpatialQueryResultSet<EntityNode*>;
+    auto query_result_set = table.new_usertype<DynamicSpatialQueryResultSet>("SpatialQueryResultSet");
+    query_result_set["IsEmpty"] = &DynamicSpatialQueryResultSet::IsEmpty;
+    query_result_set["HasNext"] = &DynamicSpatialQueryResultSet::HasNext;
+    query_result_set["Next"]    = &DynamicSpatialQueryResultSet::Next;
+    query_result_set["Begin"]   = &DynamicSpatialQueryResultSet::BeginIteration;
+    query_result_set["Get"]     = &DynamicSpatialQueryResultSet::GetCurrent;
+
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
        sol::meta_function::new_index, &SetScriptVar<Scene>);
@@ -1877,6 +1928,23 @@ void BindGameLib(sol::state& L)
     scene["GetTime"]                  = &Scene::GetTime;
     scene["GetClassName"]             = &Scene::GetClassName;
     scene["GetClassId"]               = &Scene::GetClassId;
+    scene["QuerySpatialNodes"]        = sol::overload(
+        [](Scene& scene, const base::FPoint& point) {
+            std::set<EntityNode*> result;
+            scene.QuerySpatialNodes(point, &result);
+            return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
+        },
+        [](Scene& scene, const glm::vec2& point) {
+            std::set<EntityNode*> result;
+            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), &result);
+            return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
+        },
+        [](Scene& scene, const base::FRect& rect) {
+            std::set<EntityNode*> result;
+            scene.QuerySpatialNodes(rect, &result);
+            return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
+        }
+    );
 
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = sol::overload(
