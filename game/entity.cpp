@@ -1025,6 +1025,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     {
         auto node_klass = mClass->GetSharedEntityNodeClass(i);
         auto node_inst  = CreateEntityNodeInstance(node_klass);
+        node_inst->SetEntity(this);
         map[node_klass.get()] = node_inst.get();
         mNodes.push_back(std::move(node_inst));
     }

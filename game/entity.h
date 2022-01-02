@@ -835,7 +835,7 @@ namespace game
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
-
+    class Entity;
 
     class EntityNode
     {
@@ -859,6 +859,8 @@ namespace game
         { mRotation = rotation; }
         void SetName(const std::string& name)
         { mName = name; }
+        void SetEntity(Entity* entity)
+        { mEntity = entity; }
         void Translate(const glm::vec2& vec)
         { mPosition += vec; }
         void Translate(float dx, float dy)
@@ -881,6 +883,10 @@ namespace game
         { return mRotation; }
         bool TestFlag(Flags flags) const
         { return mClass->TestFlag(flags); }
+        Entity* GetEntity()
+        { return mEntity; }
+        const Entity* GetEntity() const
+        { return mEntity; }
 
         // Get the node's drawable item if any. If no drawable
         // item is set then returns nullptr.
@@ -953,6 +959,10 @@ namespace game
         std::unique_ptr<DrawableItem> mDrawable;
         // text item if any
         std::unique_ptr<TextItem> mTextItem;
+        // spatial node if any
+        std::unique_ptr<SpatialNode> mSpatialNode;
+        // The entity that owns this node.
+        Entity* mEntity = nullptr;
     };
 
     class EntityClass
@@ -1247,7 +1257,7 @@ namespace game
         // the instance scale to be used. note that if the entity
         // has rigid body changing the scale dynamically later on
         // after the physics simulation object has been created may
-        // not work correctly. therefore it's important to use the 
+        // not work correctly. Therefore, it's important to use the
         // scaling factor here to set the scale when creating a new 
         // entity.
         glm::vec2  scale    = {1.0f, 1.0f};
@@ -1295,8 +1305,8 @@ namespace game
 
         // Add a new node to the entity. Note that this doesn't yet insert the
         // node into the render tree. You can either use the render tree directly
-        // to find a place where to insert the node or then use some of the
-        // provided functions such as LinkChild.
+        // to find a place where to insert the node or then use some provided
+        // functions such as LinkChild.
         // The return value is the pointer of the new node that exists in the entity
         // after the call returns.
         EntityNode* AddNode(const EntityNode& node);
@@ -1323,7 +1333,7 @@ namespace game
         EntityNode* FindNodeByClassId(const std::string& id);
         // Find a entity node by node's instance id. Returns nullptr if no such node could be found.
         EntityNode* FindNodeByInstanceId(const std::string& id);
-        // Find a entity node by it's instance name. Returns nullptr if no such node could be found.
+        // Find a entity node by its instance name. Returns nullptr if no such node could be found.
         EntityNode* FindNodeByInstanceName(const std::string& name);
         // Get the entity node by index. The index must be valid.
         const EntityNode& GetNode(size_t index) const;
@@ -1337,10 +1347,10 @@ namespace game
         const EntityNode* FindNodeByClassId(const std::string& id) const;
         // Find entity node by node's instance id. Returns nullptr if no such node could be found.
         const EntityNode* FindNodeByInstanceId(const std::string& id) const;
-        // Find a entity node by it's instance name. Returns nullptr if no such node could be found.
+        // Find a entity node by its instance name. Returns nullptr if no such node could be found.
         const EntityNode* FindNodeByInstanceName(const std::string& name) const;
         // Delete the node at the given index. This will also delete any
-        // child nodes this node might have by recursing the render tree.
+        // child nodes that this node might have.
         void DeleteNode(EntityNode* node);
 
         // Perform coarse hit test to see if the given x,y point
