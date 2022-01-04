@@ -26,6 +26,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 #include "base/assert.h"
 #include "base/platform.h"
@@ -43,8 +44,12 @@ inline bool IsPowerOfTwo(unsigned i)
 }
 
 template<typename Key> inline
-bool Contains(const std::unordered_set<Key>& map, const Key& k)
-{ return map.find(k) != map.end(); }
+bool Contains(const std::unordered_set<Key>& set, const Key& k)
+{ return set.find(k) != set.end(); }
+
+template<typename Key> inline
+bool Contains(const std::set<Key>& set, const Key& k)
+{ return set.find(k) != set.end(); }
 
 template<typename T>
 void AppendVector(std::vector<T>& head, const std::vector<T>& tail)
