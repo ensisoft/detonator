@@ -124,10 +124,15 @@ void unit_test_scene_class()
     quadtree.max_levels = 8;
     quadtree.max_items = 10;
 
+    game::SceneClass::DenseGridArgs densegrid;
+    densegrid.num_cols = 7;
+    densegrid.num_rows = 5;
+
     game::SceneClass klass;
     klass.SetName("my scene");
     klass.SetScriptFileId("script.lua");
     klass.SetDynamicSpatialIndexArgs(quadtree);
+    klass.SetDynamicSpatialIndexArgs(densegrid);
     klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
     klass.SetDynamicSpatialRect(game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
     TEST_REQUIRE(klass.GetNumNodes() == 0);
@@ -174,6 +179,8 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetScriptVar(1).GetName() == "bar");
     TEST_REQUIRE(klass.GetQuadTreeArgs().max_items == 10);
     TEST_REQUIRE(klass.GetQuadTreeArgs().max_levels == 8);
+    TEST_REQUIRE(klass.GetDenseGridArgs().num_cols == 7);
+    TEST_REQUIRE(klass.GetDenseGridArgs().num_rows == 5);
     TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
     TEST_REQUIRE(klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
 
@@ -202,6 +209,8 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "bar");
         TEST_REQUIRE(ret->GetQuadTreeArgs().max_items == 10);
         TEST_REQUIRE(ret->GetQuadTreeArgs().max_levels == 8);
+        TEST_REQUIRE(ret->GetDenseGridArgs().num_cols == 7);
+        TEST_REQUIRE(ret->GetDenseGridArgs().num_rows == 5);
         TEST_REQUIRE(ret->GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
         TEST_REQUIRE(ret->GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
@@ -787,7 +796,7 @@ void unit_test_scene_instance_transform()
 
 }
 
-void unit_test_scene_spatial_query()
+void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
 {
     auto entity0 = std::make_shared<game::EntityClass>();
     {
@@ -836,7 +845,7 @@ void unit_test_scene_spatial_query()
         klass.LinkChild(klass.FindNodeByName("entity0"), klass.AddNode(node));
     }
 
-    klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialIndex(index);
     klass.SetDynamicSpatialRect(game::FRect(-800.0f, -800.0f, 1600.0f, 1600.0f));
 
     auto scene = game::CreateSceneInstance(klass);
@@ -881,7 +890,7 @@ void unit_test_scene_spatial_query()
     }
 }
 
-void unit_test_scene_spatial_update()
+void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
 {
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("entity");
@@ -896,7 +905,7 @@ void unit_test_scene_spatial_update()
     game::FRect rect(0.0f, 0.0f, 1000.0f, 1000.0f);
 
     game::SceneClass klass;
-    klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialIndex(index);
     klass.SetDynamicSpatialRect(rect);
     auto scene = game::CreateSceneInstance(klass);
     TEST_REQUIRE(scene->HasSpatialIndex());
@@ -1020,7 +1029,9 @@ int test_main(int argc, char* argv[])
     unit_test_scene_instance_spawn();
     unit_test_scene_instance_kill();
     unit_test_scene_instance_transform();
-    unit_test_scene_spatial_query();
-    unit_test_scene_spatial_update();
+    unit_test_scene_spatial_query(game::SceneClass::SpatialIndex::QuadTree);
+    unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::QuadTree);
+    unit_test_scene_spatial_query(game::SceneClass::SpatialIndex::DenseGrid);
+    unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::DenseGrid);
     return 0;
 }

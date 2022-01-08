@@ -885,6 +885,8 @@
   ],
   "scenes": [
     {
+      "dense_grid_cols": 1,
+      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,

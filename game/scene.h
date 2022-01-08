@@ -227,11 +227,16 @@ namespace game
 
         enum class SpatialIndex {
             Disabled,
-            QuadTree
+            QuadTree,
+            DenseGrid
         };
         struct QuadTreeArgs {
             unsigned max_items = 4;
             unsigned max_levels = 3;
+        };
+        struct DenseGridArgs {
+            unsigned num_rows = 1;
+            unsigned num_cols = 1;
         };
 
         SceneClass();
@@ -400,9 +405,13 @@ namespace game
         { return mDynamicSpatialIndex; }
         FRect GetDynamicSpatialRect() const
         { return mDynamicSpatialRect; }
-        QuadTreeArgs GetQuadTreeArgs() const
+        const QuadTreeArgs& GetQuadTreeArgs() const
         { return mQuadTreeArgs; }
+        const DenseGridArgs& GetDenseGridArgs() const
+        { return mDenseGridArgs; }
 
+        void SetDynamicSpatialIndexArgs(const DenseGridArgs& args)
+        { mDenseGridArgs = args; }
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args)
         { mQuadTreeArgs = args; }
         void SetDynamicSpatialIndex(SpatialIndex index)
@@ -454,6 +463,7 @@ namespace game
         SpatialIndex mDynamicSpatialIndex = SpatialIndex::Disabled;
         FRect mDynamicSpatialRect;
         QuadTreeArgs mQuadTreeArgs;
+        DenseGridArgs mDenseGridArgs;
     };
 
     // Scene is the runtime representation of a scene based on some scene class

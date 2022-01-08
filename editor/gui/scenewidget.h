@@ -85,6 +85,8 @@ namespace gui
         void on_spRectH_valueChanged(double value);
         void on_spQuadMaxLevels_valueChanged(int);
         void on_spQuadMaxItems_valueChanged(int);
+        void on_spDenseGridRows_valueChanged(int);
+        void on_spDenseGridCols_valueChanged(int);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
