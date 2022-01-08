@@ -837,6 +837,20 @@ void SceneWidget::on_spQuadMaxItems_valueChanged(int)
     mState.scene.SetDynamicSpatialIndexArgs(args);
 }
 
+void SceneWidget::on_spDenseGridRows_valueChanged(int)
+{
+    game::SceneClass::DenseGridArgs args;
+    args.num_rows = GetValue(mUI.spDenseGridRows);
+    args.num_cols = GetValue(mUI.spDenseGridCols);
+    mState.scene.SetDynamicSpatialIndexArgs(args);
+}
+void SceneWidget::on_spDenseGridCols_valueChanged(int)
+{
+    game::SceneClass::DenseGridArgs args;
+    args.num_rows = GetValue(mUI.spDenseGridRows);
+    args.num_cols = GetValue(mUI.spDenseGridCols);
+    mState.scene.SetDynamicSpatialIndexArgs(args);
+}
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1666,7 +1680,8 @@ void SceneWidget::DisplaySceneProperties()
 {
     const auto vars = mState.scene.GetNumScriptVars();
     const auto& rect = mState.scene.GetDynamicSpatialRect();
-    const auto& args = mState.scene.GetQuadTreeArgs();
+    const auto& quadtree_args = mState.scene.GetQuadTreeArgs();
+    const auto& densegrid_args = mState.scene.GetDenseGridArgs();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     SetValue(mUI.name, mState.scene.GetName());
@@ -1676,8 +1691,10 @@ void SceneWidget::DisplaySceneProperties()
     SetValue(mUI.spRectY, rect.GetY());
     SetValue(mUI.spRectW, rect.GetWidth());
     SetValue(mUI.spRectH, rect.GetHeight());
-    SetValue(mUI.spQuadMaxLevels, args.max_levels);
-    SetValue(mUI.spQuadMaxItems, args.max_items);
+    SetValue(mUI.spQuadMaxLevels, quadtree_args.max_levels);
+    SetValue(mUI.spQuadMaxItems, quadtree_args.max_items);
+    SetValue(mUI.spDenseGridRows, densegrid_args.num_rows);
+    SetValue(mUI.spDenseGridCols, densegrid_args.num_cols);
     SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
     if (mState.scene.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::Disabled)
         SetEnabled(mUI.spatialIndex, false);

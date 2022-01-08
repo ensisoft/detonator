@@ -26,6 +26,7 @@
 #include <vector>
 #include <cstddef>
 
+#include "base/grid.h"
 #include "game/tree.h"
 #include "game/treeop.h"
 #include "game/types.h"
@@ -66,7 +67,8 @@ namespace game
         class SpatialQuery {
         public:
             virtual ~SpatialQuery() = default;
-            virtual void Execute(const QuadTree<T*>& tree) = 0;
+            virtual void Execute(const base::QuadTree<T*>& tree) = 0;
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) = 0;
         private:
         };
         template<typename Predicate, typename ResultContainer>
@@ -76,8 +78,10 @@ namespace game
                : mPredicate(predicate)
                , mResult(result)
             {}
-            virtual void Execute(const QuadTree<T*>& tree) override
+            virtual void Execute(const base::QuadTree<T*>& tree) override
             { QueryQuadTree(mPredicate, tree, mResult); }
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) override
+            { grid.FindObjects(mPredicate, mResult); }
         private:
             const Predicate mPredicate;
             ResultContainer* mResult = nullptr;
@@ -109,7 +113,7 @@ namespace game
         virtual void Erase(const std::set<T*> killset) override
         {
             mTree.Erase([&killset](T* object, const base::FRect&) {
-                return killset.find(object) != killset.end();
+                return base::Contains(killset, object);
             });
         }
     protected:
@@ -119,6 +123,33 @@ namespace game
     private:
         QuadTree<T*> mTree;
         size_t mNumItems = 0;
+    };
+
+    template<typename T>
+    class DenseGridIndex : public SpatialIndex<T>
+    {
+    public:
+        DenseGridIndex(const game::FRect& area, unsigned rows, unsigned cols)
+          : mGrid(area, rows, cols)
+        {}
+        virtual void BeginInsert() override
+        { mGrid.Clear(); }
+        virtual bool Insert(const FRect& rect, T* object) override
+        { return mGrid.Insert(rect, object); }
+        virtual void EndInsert() override
+        {}
+        virtual void Erase(const std::set<T*> killset) override
+        {
+            mGrid.Erase([&killset](T* object, const base::FRect& rect) {
+                return base::Contains(killset, object);
+            });
+        }
+    protected:
+        using SpatialQuery = typename SpatialIndex<T>::SpatialQuery;
+        virtual void ExecuteQuery(SpatialQuery& query) const override
+        { query.Execute(mGrid); }
+    private:
+        base::DenseSpatialGrid<T*> mGrid;
     };
 
 } // namespace
