@@ -89,7 +89,7 @@ public:
             switch (section) {
                 case 0: return "Type";
                 case 1: return "Name";
-                case 2: return "Data";
+                case 2: return "Value";
                 default: BUG("Unknown script variable data index.");
             }
         }
