@@ -654,6 +654,11 @@ void InitDoc()
                  "string", "name");
 
     DOC_TABLE("game.RigidBody");
+    DOC_METHOD_0("bool", "IsEnabled", "Check whether the body is enabled in the physics simulation or not.");
+    DOC_METHOD_0("bool", "IsSensor", "Check whether the body is a sensor only body.");
+    DOC_METHOD_0("bool", "IsBullet", "Check whether the body is a fast moving (bullet) body.");
+    DOC_METHOD_0("bool", "CanSleep", "Check whether the body can sleep in the physics simulation or not.");
+    DOC_METHOD_0("bool", "DiscardRotation", "Check whether the body discards any rotation or not.");
     DOC_METHOD_0("float", "GetFriction", "Return the friction value of the rigid body.");
     DOC_METHOD_0("float", "GetRestitution", "Return the restitution value of the rigid body.");
     DOC_METHOD_0("float", "GetAngularDamping", "Return the angular damping of the rigid body.");
@@ -665,6 +670,9 @@ void InitDoc()
     DOC_METHOD_1("void", "AdjustLinearVelocity", "Set a value (m/s) to adjust the linear velocity of the the rigid body.<br>"
                                                  "The adjustment will be applied on the next iteration of the physics update",
                  "glm.vec2", "velocity");
+    DOC_METHOD_2("void", "AdjustLinearVelocity", "Set a value (m/s) to adjust the linear velocity of the the rigid body.<br>"
+                                                 "The adjustment will be applied on the next iteration of the physics update",
+                 "float", "x", "float", "y");
     DOC_METHOD_1("void", "AdjustAngularVelocity", "Set a value (rad/s) to adjust the rotational velocity of the rigid body.<br>"
                                                   "The adjustment will be applied on the next iteration of the physics update.",
                  "float", "velocity");

@@ -594,6 +594,16 @@ namespace game
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
         }
+        bool IsEnabled() const
+        { return TestFlag(Flags::Enabled); }
+        bool IsSensor() const
+        { return TestFlag(Flags::Sensor); }
+        bool IsBullet() const
+        { return TestFlag(Flags::Bullet); }
+        bool CanSleep() const
+        { return TestFlag(Flags::CanSleep); }
+        bool DiscardRotation() const
+        { return TestFlag(Flags::DiscardRotation); }
 
         const RigidBodyItemClass& GetClass() const
         { return *mClass.get(); }

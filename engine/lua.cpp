@@ -604,9 +604,16 @@ LuaGame::LuaGame(const std::string& lua_path,
     table["OS"]   = OS_NAME;
     auto engine = table.new_usertype<LuaGame>("Engine");
     BindEngine(engine, *this);
-    engine["SetViewport"] = [](LuaGame& self, const FRect& view) {
-        self.mView = view;
-    };
+    engine["SetViewport"] = sol::overload(
+        [](LuaGame& self, const FRect& view) {
+            self.mView = view;
+        },
+        [](LuaGame& self, float x, float y, float width, float height) {
+            self.mView = base::FRect(x, y, width, height);
+        },
+        [](LuaGame& self, float width, float height) {
+            self.mView = base::FRect(0.0f,  0.0f, width, height);
+        });
     engine["GetTopUI"] = [](LuaGame& self, sol::this_state state) {
         sol::state_view lua(state);
         if (self.mWindowStack.empty())
@@ -1807,6 +1814,11 @@ void BindGameLib(sol::state& L)
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
+    body["IsEnabled"]             = &RigidBodyItem::IsEnabled;
+    body["IsSensor"]              = &RigidBodyItem::IsSensor;
+    body["IsBullet"]              = &RigidBodyItem::IsBullet;
+    body["CanSleep"]              = &RigidBodyItem::CanSleep;
+    body["DiscardRotation"]       = &RigidBodyItem::DiscardRotation;
     body["GetFriction"]           = &RigidBodyItem::GetFriction;
     body["GetRestitution"]        = &RigidBodyItem::GetRestitution;
     body["GetAngularDamping"]     = &RigidBodyItem::GetAngularDamping;
@@ -1815,7 +1827,13 @@ void BindGameLib(sol::state& L)
     body["GetPolygonShapeId"]     = &RigidBodyItem::GetPolygonShapeId;
     body["GetLinearVelocity"]     = &RigidBodyItem::GetLinearVelocity;
     body["GetAngularVelocity"]    = &RigidBodyItem::GetAngularVelocity;
-    body["AdjustLinearVelocity"]  = &RigidBodyItem::AdjustLinearVelocity;
+    body["AdjustLinearVelocity"]  = sol::overload(
+            [](RigidBodyItem& body, const glm::vec2& velocity) {
+                body.AdjustLinearVelocity(velocity);
+            },
+            [](RigidBodyItem& body, float x, float y) {
+                body.AdjustLinearVelocity(glm::vec2(x, y));
+            });
     body["AdjustAngularVelocity"] = &RigidBodyItem::AdjustAngularVelocity;
     body["TestFlag"]              = &TestFlag<RigidBodyItem>;
     body["SetFlag"]               = &SetFlag<RigidBodyItem>;
