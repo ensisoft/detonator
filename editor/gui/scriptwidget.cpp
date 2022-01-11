@@ -461,8 +461,8 @@ void InitDoc()
     DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec2", "vec", "int", "index");
     DOC_METHOD_2("glm.vec2", "operator +", "Lua addition meta function", "glm.vec2", "a", "glm.vec2", "b");
     DOC_METHOD_2("glm.vec2", "operator -", "Lua subtraction meta function", "glm.vec2", "a", "glm.vec2", "b");
-    DOC_METHOD_2("glm.vec2", "operator *", "Lua multiplication meta function", "glm.vec2", "vec", "float", "scalar");
-    DOC_METHOD_2("glm.vec2", "operator /", "Lua division meta function", "glm.vec2", "vec", "float", "scalar");
+    DOC_METHOD_2("glm.vec2", "operator *", "Lua multiplication meta function", "glm.vec2|float", "a", "glm.vec2|float", "b");
+    DOC_METHOD_2("glm.vec2", "operator /", "Lua division meta function", "glm.vec2|float", "a", "glm.vec2|float", "b");
     DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec2", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec2", "normalize", "Return a normalized copy of the vector.");
@@ -475,8 +475,8 @@ void InitDoc()
     DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec3", "vec", "int", "index");
     DOC_METHOD_2("glm.vec3", "operator +", "Lua addition meta function", "glm.vec3", "a", "glm.vec3", "b");
     DOC_METHOD_2("glm.vec3", "operator -", "Lua subtraction meta function", "glm.vec3", "a", "glm.vec3", "b");
-    DOC_METHOD_2("glm.vec3", "operator *", "Lua multiplication meta function", "glm.vec3", "vec", "float", "scalar");
-    DOC_METHOD_2("glm.vec3", "operator /", "Lua division meta function", "glm.vec3", "vec", "float", "scalar");
+    DOC_METHOD_2("glm.vec3", "operator *", "Lua multiplication meta function", "glm.vec3|float", "a", "glm.vec3|float", "b");
+    DOC_METHOD_2("glm.vec3", "operator /", "Lua division meta function", "glm.vec3|float", "a", "glm.vec3|float", "b");
     DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec3", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec3", "normalize", "Return a normalized copy of the vector.");
@@ -490,8 +490,8 @@ void InitDoc()
     DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec4", "vec", "int", "index");
     DOC_METHOD_2("glm.vec4", "operator +", "Lua addition meta function", "glm.vec4", "a", "glm.vec4", "b");
     DOC_METHOD_2("glm.vec4", "operator -", "Lua subtraction meta function", "glm.vec4", "a", "glm.vec4", "b");
-    DOC_METHOD_2("glm.vec4", "operator *", "Lua multiplication meta function", "glm.vec4", "vec", "float", "scalar");
-    DOC_METHOD_2("glm.vec4", "operator /", "Lua division meta function", "glm.vec4", "vec", "float", "scalar");
+    DOC_METHOD_2("glm.vec4", "operator *", "Lua multiplication meta function", "glm.vec4|float", "a", "glm.vec4|float", "b");
+    DOC_METHOD_2("glm.vec4", "operator /", "Lua division meta function", "glm.vec4|float", "b", "glm.vec4|float", "b");
     DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec4", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec4", "normalize", "Return a normalized copy of the vector.");
