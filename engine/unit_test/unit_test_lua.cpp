@@ -33,7 +33,7 @@
 
 // the test coverage here is quite poor but OTOH the binding code is
 // for the most part very straightforward just plumbing calls from Lua
-// to the C++ implementation. However there are some more complicated
+// to the C++ implementation. However, there are some more complicated
 // intermediate functions such as the script variable functionality that
 // needs to be tested. Other key point is to test the basic functionality
 // just to make sure that there are no unexpected sol2 snags/bugs.
@@ -170,9 +170,22 @@ end
 function multiply(vector, scalar)
    return vector * scalar
 end
+function multiply_2(scalar, vector)
+   return scalar * vector
+end
+function multiply_3(vector_a, vector_b)
+   return vector_a * vector_b
+end
 function divide(vector, scalar)
    return vector / scalar
 end
+function divide_2(scalar, vector)
+   return scalar / vector
+end
+function divide_3(vector_a, vector_b)
+   return vector_a / vector_b
+end
+
     )");
 
     // oob
@@ -216,11 +229,34 @@ end
         TEST_REQUIRE(real::equals(ret.x, 2.0f * a.x));
         TEST_REQUIRE(real::equals(ret.y, 2.0f * a.y));
     }
+    // multiply
+    {
+        glm::vec2 ret = L["multiply_2"](2.0f, a);
+        TEST_REQUIRE(real::equals(ret.x, 2.0f * a.x));
+        TEST_REQUIRE(real::equals(ret.y, 2.0f * a.y));
+    }
+    {
+        glm::vec2 ret = L["multiply_3"](a, b);
+        TEST_REQUIRE(real::equals(ret.x, a.x * b.x));
+        TEST_REQUIRE(real::equals(ret.y, a.y * b.y));
+    }
+
     // divide
     {
         glm::vec2 ret = L["divide"](a, 2.0f);
         TEST_REQUIRE(real::equals(ret.x, a.x / 2.0f));
         TEST_REQUIRE(real::equals(ret.y, a.y / 2.0f));
+    }
+    {
+        glm::vec2 ret = L["divide_2"](3.0f, a);
+        TEST_REQUIRE(real::equals(ret.x, 1.0f/a.x * 3.0f));
+        TEST_REQUIRE(real::equals(ret.y, 1.0f/a.y * 3.0f));
+    }
+
+    {
+        glm::vec2 ret = L["divide_3"](a, b);
+        TEST_REQUIRE(real::equals(ret.x, a.x / b.x));
+        TEST_REQUIRE(real::equals(ret.y, a.y / b.y));
     }
 
     // add vectors

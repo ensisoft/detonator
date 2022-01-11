@@ -500,15 +500,28 @@ void BindGlmVectorOp(sol::usertype<Vector>& vec)
     vec.set_function(sol::meta_function::subtraction, [](const Vector& a, const Vector& b) {
         return a - b;
     });
-    vec.set_function(sol::meta_function::multiplication, [](const Vector& vector, float scalar) {
-        return vector * scalar;
-    });
-    vec.set_function(sol::meta_function::multiplication, [](float scalar, const Vector& vector) {
-        return vector * scalar;
-    });
-    vec.set_function(sol::meta_function::division, [](const Vector& vector, float scalar) {
-        return vector / scalar;
-    });
+    vec.set_function(sol::meta_function::multiplication, sol::overload(
+        [](float scalar, const Vector& vector) {
+            return vector * scalar;
+        },
+        [](const Vector& vector, float scalar) {
+            return vector * scalar;
+        },
+        [](const Vector& a, const Vector& b) {
+            return a * b;
+        }
+    ));
+    vec.set_function(sol::meta_function::division, sol::overload(
+        [](float scalar, const Vector& vector) {
+            return scalar / vector;
+        },
+        [](const Vector& vector, float scalar) {
+            return vector / scalar;
+        },
+        [](const Vector& a, const Vector& b) {
+            return a / b;
+        }
+    ));
     vec.set_function(sol::meta_function::to_string, [](const Vector& vector) {
         return base::ToString(vector);
     });
