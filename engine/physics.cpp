@@ -40,6 +40,9 @@ inline b2Vec2 GetPosition(const b2Vec2& vec2)
 inline b2Vec2 ToBox2D(const glm::vec2& vector)
 { return b2Vec2 {vector.x, vector.y}; }
 
+inline glm::vec2 ToGlm(const b2Vec2& vector)
+{ return glm::vec2 { vector.x, vector.y }; }
+
 namespace engine
 {
 
@@ -213,49 +216,68 @@ void PhysicsEngine::DeleteBody(const EntityNode& node)
     DeleteBody(node->GetId());
 }
 
-void PhysicsEngine::ApplyImpulseToCenter(const std::string& id, const glm::vec2& impulse) const
+bool PhysicsEngine::ApplyImpulseToCenter(const std::string& id, const glm::vec2& impulse)
 {
-    auto it = mNodes.find(id);
-    if (it == mNodes.end())
+    if (auto* ptr = FindPhysicsNode(id))
     {
-        WARN("Applying impulse to a physics body that doesn't exist: '%1'", id);
-        return;
+        auto* body = ptr->world_body;
+        if (body->GetType() != b2_dynamicBody)
+        {
+            WARN("Applying impulse to non-dynamic body has no effect. [node='%1']", id);
+            return false;
+        }
+        body->ApplyLinearImpulseToCenter(b2Vec2(impulse.x, impulse.y), true /*wake */);
+        return true;
     }
-    auto& node = it->second;
-    auto* body = node.world_body;
-    if (body->GetType() != b2_dynamicBody)
-    {
-        WARN("Applying impulse to non dynamic body ('%1') will have no effect.", id);
-        return;
-    }
-    body->ApplyLinearImpulseToCenter(b2Vec2(impulse.x, impulse.y), true /*wake */);
+    WARN("No such physics node. [node='%1']", id);
+    return false;
 }
 
-void PhysicsEngine::ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse) const
+bool PhysicsEngine::ApplyImpulseToCenter(const EntityNode& node, const glm::vec2& impulse)
 {
-    ApplyImpulseToCenter(node.GetId(), impulse);
+    return ApplyImpulseToCenter(node.GetId(), impulse);
 }
 
-void PhysicsEngine::SetLinearVelocity(const EntityNode& node, const glm::vec2& velocity) const
+bool PhysicsEngine::ApplyForceToCenter(const game::EntityNode& node, const glm::vec2& force)
 {
-    SetLinearVelocity(node.GetId(), velocity);
+    return ApplyForceToCenter(node.GetId(), force);
 }
-void PhysicsEngine::SetLinearVelocity(const std::string& id, const glm::vec2& velocity) const
+bool PhysicsEngine::ApplyForceToCenter(const std::string& node, const glm::vec2& force)
 {
-    auto it = mNodes.find(id);
-    if (it == mNodes.end())
+    if (auto* ptr = FindPhysicsNode(node))
     {
-        WARN("Setting linear velocity on a physics body that doesn't exist: '%1'", id);
-        return;
+        auto* body = ptr->world_body;
+        if (body->GetType() != b2_dynamicBody)
+        {
+            WARN("Applying force to non-dynamic body has no effect. [node='%1']", node);
+            return false;
+        }
+        body->ApplyForceToCenter(ToBox2D(force), true /* wake*/);
+        return true;
     }
-    auto& node = it->second;
-    auto* body = node.world_body;
-    if (body->GetType() == b2_staticBody)
+    WARN("No such physics node. [node='%1']", node);
+    return false;
+}
+
+bool PhysicsEngine::SetLinearVelocity(const EntityNode& node, const glm::vec2& velocity)
+{
+    return SetLinearVelocity(node.GetId(), velocity);
+}
+bool PhysicsEngine::SetLinearVelocity(const std::string& id, const glm::vec2& velocity)
+{
+    if (auto* ptr = FindPhysicsNode(id))
     {
-        WARN("Setting linear velocity on a static body will have no effect.", id);
-        return;
+        auto* body = ptr->world_body;
+        if (body->GetType() == b2_staticBody)
+        {
+            WARN("Setting linear velocity on a static body has no effect. [node='%1']", id);
+            return false;
+        }
+        body->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
+        return true;
     }
-    body->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
+    WARN("No such physics node. [node='%1']", id);
+    return false;
 }
 
 void PhysicsEngine::CreateWorld(const Scene& scene)
@@ -289,6 +311,49 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
     Transform transform;
     transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
     AddEntity(transform.GetAsMatrix(), entity);
+}
+
+std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const game::EntityNode& node) const
+{
+    return FindCurrentLinearVelocity(node.GetId());
+}
+std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const std::string& node) const
+{
+    if (const auto* ptr = FindPhysicsNode(node))
+    {
+        const auto* body = ptr->world_body;
+        return std::make_tuple(true, ToGlm(body->GetLinearVelocity()));
+    }
+    WARN("No such physics node. [node='%1']", node);
+    return std::make_tuple(false, glm::vec2(0.0f, 0.0f));
+}
+std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const game::EntityNode& node) const
+{
+    return FindCurrentAngularVelocity(node.GetId());
+}
+std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const std::string& node) const
+{
+    if (const auto* ptr = FindPhysicsNode(node))
+    {
+        const auto* body = ptr->world_body;
+        return std::make_tuple(true, body->GetAngularVelocity());
+    }
+    WARN("No such physics node. [node='%1']", node);
+    return std::make_tuple(false, 0.0f);
+}
+std::tuple<bool, float> PhysicsEngine::FindMass(const game::EntityNode& node) const
+{
+    return FindMass(node.GetId());
+}
+std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
+{
+    if (const auto* ptr = FindPhysicsNode(node))
+    {
+        const auto* body = ptr->world_body;
+        return std::make_tuple(true, body->GetMass());
+    }
+    WARN("No such physics node. [node='%1']", node);
+    return std::make_tuple(false, 0.0f);
 }
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
@@ -718,6 +783,22 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     mNodes[node.GetId()]   = physics_node;
     mFixtures[fixture_ptr] = node.GetId();
     DEBUG("Created new physics body '%1'", debug_name);
+}
+
+PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id)
+{
+    auto it = mNodes.find(id);
+    if (it == mNodes.end())
+        return nullptr;
+    return &it->second;
+}
+
+const PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id) const
+{
+    auto it = mNodes.find(id);
+    if (it == mNodes.end())
+        return nullptr;
+    return &it->second;
 }
 
 } // namespace
