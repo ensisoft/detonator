@@ -1980,19 +1980,51 @@ void BindGameLib(sol::state& L)
     auto physics = table.new_usertype<PhysicsEngine>("Physics");
     physics["ApplyImpulseToCenter"] = sol::overload(
         [](PhysicsEngine& self, const std::string& id, const glm::vec2& vec) {
-            self.ApplyImpulseToCenter(id, vec);
+            return self.ApplyImpulseToCenter(id, vec);
         },
         [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vec) {
-            self.ApplyImpulseToCenter(node, vec);
+            return self.ApplyImpulseToCenter(node, vec);
+        });
+    physics["ApplyForceToCenter"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id, const glm::vec2& vec) {
+            return self.ApplyForceToCenter(id, vec);
+        },
+        [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vec) {
+            return self.ApplyForceToCenter(node, vec);
         });
     physics["SetLinearVelocity"] = sol::overload(
         [](PhysicsEngine& self, const std::string& id, const glm::vec2& vector) {
-            self.SetLinearVelocity(id, vector);
+            return self.SetLinearVelocity(id, vector);
         },
         [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vector) {
-            self.SetLinearVelocity(node, vector);
+            return self.SetLinearVelocity(node, vector);
+        });
+    physics["FindCurrentLinearVelocity"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id) {
+            return self.FindCurrentLinearVelocity(id);
+        },
+        [](PhysicsEngine& self, const EntityNode& node) {
+            return self.FindCurrentLinearVelocity(node);
         }
     );
+    physics["FindCurrentAngularVelocity"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id) {
+            return self.FindCurrentAngularVelocity(id);
+        },
+        [](PhysicsEngine& self, const EntityNode& node) {
+            return self.FindCurrentAngularVelocity(node);
+        }
+    );
+    physics["FindMass"] = sol::overload(
+        [](PhysicsEngine& self, const std::string& id) {
+            return self.FindMass(id);
+        },
+        [](PhysicsEngine& self, const EntityNode& node) {
+            return self.FindMass(node);
+        }
+    );
+    physics["GetScale"]   = &PhysicsEngine::GetScale;
+    physics["GetGravity"] = &PhysicsEngine::GetGravity;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["PrepareMusicGraph"] = sol::overload(

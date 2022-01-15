@@ -26,6 +26,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <tuple>
 #include <unordered_map>
 
 #include "graphics/fwd.h"
@@ -72,11 +73,11 @@ namespace engine
         // The default is x=1.0f, y=1.0f
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
-        // Set the time step for setting the physics simulation forward.
+        // Set the time step for stepping the physics simulation forward.
         // If time step is for example 1/60.0f then for 1 second of
-        // real time simulation one need to call Tick 60 times.
-        // The higher the frequency of ticks (with smaller) time step
-        // the better the simulation in general. However the increased
+        // real time simulation one need to call Step 60 times.
+        // The higher the frequency of steps (with smaller time steps)
+        // the better the simulation in general. However, the increased
         // simulation accuracy comes at a higher computational cost.
         // The default is 1/60.0f.
         void SetTimestep(float step)
@@ -85,6 +86,10 @@ namespace engine
         { mNumVelocityIterations = iter; }
         void SetNumPositionIterations(unsigned iter)
         { mNumPositionIterations = iter; }
+        glm::vec2 GetScale() const
+        { return mScale; }
+        glm::vec2 GetGravity() const
+        { return mGravity; }
 
         // Returns if we have a current world simulation.
         bool HaveWorld() const
@@ -110,19 +115,22 @@ namespace engine
         // Apply an impulse (defined as a vector with magnitude and direction) to
         // the center of the node's rigid body. The body must be dynamic in order for
         // this to work. Newtons per seconds or Kgs per meters per second.
-        void ApplyImpulseToCenter(const game::EntityNode& node, const glm::vec2& impulse) const;
-        void ApplyImpulseToCenter(const std::string& node, const glm::vec2& impulse) const;
-
-        void SetLinearVelocity(const game::EntityNode& node, const glm::vec2& velocity) const;
-        void SetLinearVelocity(const std::string& node, const glm::vec2& velocity) const;
+        // Returns true if impulse was applied.
+        bool ApplyImpulseToCenter(const game::EntityNode& node, const glm::vec2& impulse);
+        bool ApplyImpulseToCenter(const std::string& node, const glm::vec2& impulse);
+        // todo:
+        bool ApplyForceToCenter(const game::EntityNode& node, const glm::vec2& force);
+        bool ApplyForceToCenter(const std::string& node, const glm::vec2& force);
+        // todo:
+        bool SetLinearVelocity(const game::EntityNode& node, const glm::vec2& velocity);
+        bool SetLinearVelocity(const std::string& node, const glm::vec2& velocity);
 
         // Initialize the physics world based on the scene.
-        // The scene is traversed and then for each scene entity
-        // that has a rigid bodies a physics simulation body is
-        // created based on the rigid body definition. This will
-        // create a new physics world object. So you should make
-        // sure to set all the desired parameters (such as gravity)
-        // before calling this.
+        // The scene is traversed and then for each rigid body
+        // a physics body is created.
+        // Calling this function will create a new physics world
+        // and destroy any previous world. Any physics parameters
+        // such as gravity should be set before calling this function.
         void CreateWorld(const game::Scene& scene);
 
         // Initialize the physics world based on a single entity.
@@ -136,14 +144,24 @@ namespace engine
         // before calling this.
         void CreateWorld(const game::Entity& entity);
 
+        std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const game::EntityNode& node) const;
+        std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const std::string& node) const;
+        std::tuple<bool, float> FindCurrentAngularVelocity(const game::EntityNode& node) const;
+        std::tuple<bool, float> FindCurrentAngularVelocity(const std::string& node) const;
+        std::tuple<bool, float> FindMass(const game::EntityNode& node) const;
+        std::tuple<bool, float> FindMass(const std::string& node) const;
+
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
     private:
+        struct PhysicsNode;
         void UpdateEntity(const glm::mat4& model_to_world, game::Entity& scene);
         void AddEntity(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntityNode(const glm::mat4& model_to_world, const game::Entity& entity, const game::EntityNode& node);
+        PhysicsNode* FindPhysicsNode(const std::string& id);
+        const PhysicsNode* FindPhysicsNode(const std::string& id) const;
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mClassLib = nullptr;
@@ -158,7 +176,7 @@ namespace engine
             glm::vec2 world_extents;
             // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
-            // flag for culling physics nodes that have are no longer
+            // flag for culling physics nodes that are no longer
             // alive in the scene.
             bool alive = true;
             // the polygon shape id if any. empty string

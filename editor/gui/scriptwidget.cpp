@@ -847,17 +847,30 @@ void InitDoc()
                  "base.FPoint|glm.vec2", "point");
 
     DOC_TABLE("game.Physics");
-    DOC_METHOD_2("void", "ApplyImpulseToCenter", "Apply an impulse to the center of the given entity node.<br>"
-                                                "The entity node should have a rigid body item.",
-                "string", "id", "glm.vec2", "impulse");
-    DOC_METHOD_2("void", "ApplyImpulseToCenter", "Apply an impulse to the center of the given entity node.<br>"
-                                                "The entity node should have a rigid body item.",
-                "game.EntityNode", "node", "glm.vec2", "impulse");
-    DOC_METHOD_2("void", "SetLinearVelocity", "Immediately adjust the linear velocity of the rigid body to the given velocity value.",
-                 "string", "id", "glm.vec2", "velocity");
-    DOC_METHOD_2("void", "SetLinearVelocity", "Immediately adjust the linear velocity of the rigid body to the given velocity value.",
-                 "game.EntityNode", "node", "glm.vec2", "velocity");
+    DOC_METHOD_2("bool", "ApplyImpulseToCenter", "Apply an impulse in Newtons per second to the center of the given physics node.<br>"
+                                                "Returns true if impulse was applied otherwise false.",
+                "string|game.EntityNode", "id|node", "glm.vec2", "impulse");
+    DOC_METHOD_2("bool", "ApplyForceToCenter", "Apply force in Newtons to the center of the given physics node. <br>"
+                                               "Returns true if force was applied otherwise false",
+                 "string|game.EntityNode", "id|node", "glm.vec2", "force");
+    DOC_METHOD_2("bool", "SetLinearVelocity", "Immediately adjust the linear velocity (meters per second) of the rigid body to the given velocity value."
+                                              "Returns true if the velocity was adjusted otherwise false.",
+                 "string|game.EntityNode", "id|node", "glm.vec2", "velocity");
 
+    DOC_METHOD_1("bool, glm.vec2", "FindCurrentLinearVelocity", "Find the current linear velocity of a physics body.<br>"
+                                                                "Returns true and the current velocity if the body was found otherwise false and zero vector.<br>"
+                                                                "meters per second in world space.",
+                 "string|game.EntityNode", "id|node");
+    DOC_METHOD_1("bool, float", "FindCurrentAngularVelocity", "Find the current angular velocity of a physics body.<br>"
+                                                              "Returns true and the current velocity if the body was found, otherwise false and 0 velocity.<br>"
+                                                              "Radians per second in world space.",
+                 "string|game.EntityNode", "id|node");
+    DOC_METHOD_1("bool, float", "FindMass", "Find the mass of a physics body based on size and density.<br>"
+                                            "Returns true and mass if the body was found, otherwise false and 0 mass.<br>"
+                                            "Kilograms",
+                 "string|game.EntityNode", "id|node");
+    DOC_METHOD_0("glm.vec2", "GetScale", "Get the current scaling coefficient for scaling game units to physics world.");
+    DOC_METHOD_0("glm.vec2", "GetGravity", "Get the current physics world gravity vector.");
 
     DOC_TABLE("MouseEvent");
     DOC_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
