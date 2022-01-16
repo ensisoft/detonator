@@ -1158,28 +1158,6 @@ Entity::Entity(const EntityClass& klass)
   : Entity(std::make_shared<EntityClass>(klass))
 {}
 
-EntityNode* Entity::AddNode(const EntityNode& node)
-{
-    mNodes.emplace_back(new EntityNode(node));
-    return mNodes.back().get();
-}
-EntityNode* Entity::AddNode(EntityNode&& node)
-{
-    mNodes.emplace_back(new EntityNode(std::move(node)));
-    return mNodes.back().get();
-}
-
-EntityNode* Entity::AddNode(std::unique_ptr<EntityNode> node)
-{
-    mNodes.push_back(std::move(node));
-    return mNodes.back().get();
-}
-
-void Entity::LinkChild(EntityNode* parent, EntityNode* child)
-{
-    game::LinkChild(mRenderTree, parent, child);
-}
-
 EntityNode& Entity::GetNode(size_t index)
 {
     ASSERT(index < mNodes.size());
@@ -1246,11 +1224,6 @@ const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
         if (node->GetName() == name)
             return node.get();
     return nullptr;
-}
-
-void Entity::DeleteNode(EntityNode* node)
-{
-    game::DeleteNode(mRenderTree, node, mNodes);
 }
 
 void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)

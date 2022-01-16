@@ -1389,25 +1389,7 @@ namespace game
         Entity(std::shared_ptr<const EntityClass> klass);
         Entity(const EntityClass& klass);
         Entity(const Entity& other) = delete;
-
-        // Add a new node to the entity. Note that this doesn't yet insert the
-        // node into the render tree. You can either use the render tree directly
-        // to find a place where to insert the node or then use some provided
-        // functions such as LinkChild.
-        // The return value is the pointer of the new node that exists in the entity
-        // after the call returns.
-        EntityNode* AddNode(const EntityNode& node);
-        EntityNode* AddNode(EntityNode&& node);
-        EntityNode* AddNode(std::unique_ptr<EntityNode> node);
-
-        // Link the given child node with the parent.
-        // The parent may be a nullptr in which case the child
-        // is added to the root of the entity. The child node needs
-        // to be a valid node and needs to point to node that is not
-        // yet any part of the render tree and is a node that belongs
-        // to this entity.
-        void LinkChild(EntityNode* parent, EntityNode* child);
-
+        
         // Get the entity node by index. The index must be valid.
         EntityNode& GetNode(size_t index);
         // Find entity node by class name. Returns nullptr if no such node could be found.
@@ -1436,9 +1418,6 @@ namespace game
         const EntityNode* FindNodeByInstanceId(const std::string& id) const;
         // Find a entity node by its instance name. Returns nullptr if no such node could be found.
         const EntityNode* FindNodeByInstanceName(const std::string& name) const;
-        // Delete the node at the given index. This will also delete any
-        // child nodes that this node might have.
-        void DeleteNode(EntityNode* node);
 
         // Perform coarse hit test to see if the given x,y point
         // intersects with any node's box in the entity.
