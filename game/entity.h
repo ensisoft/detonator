@@ -165,11 +165,11 @@ namespace game
         { return mDensity; }
         bool TestFlag(Flags flag) const
         { return mBitFlags.test(flag); }
-        std::string GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const
         { return mPolygonShapeId; }
         void ResetPolygonShapeId()
         { mPolygonShapeId.clear(); }
-        base::bitflag<Flags> GetFlags() const
+        const base::bitflag<Flags>& GetFlags() const
         { return mBitFlags; }
 
         void SetCollisionShape(CollisionShape shape)
@@ -269,9 +269,9 @@ namespace game
         { mMaterialParams = std::move(params); }
 
         // class getters.
-        std::string GetDrawableId() const
+        const std::string& GetDrawableId() const
         { return mDrawableId; }
-        std::string GetMaterialId() const
+        const std::string& GetMaterialId() const
         { return mMaterialId; }
         int GetLayer() const
         { return mLayer; }
@@ -285,7 +285,7 @@ namespace game
         { return mRenderPass; }
         RenderStyle GetRenderStyle() const
         { return mRenderStyle; }
-        base::bitflag<Flags> GetFlags() const
+        const base::bitflag<Flags>& GetFlags() const
         { return mBitFlags; }
         MaterialParamMap GetMaterialParams()
         { return mMaterialParams; }
@@ -464,9 +464,9 @@ namespace game
             mInstanceTimeScale = mClass->GetTimeScale();
             mMaterialParams = mClass->GetMaterialParams();
         }
-        std::string GetMaterialId() const
+        const std::string& GetMaterialId() const
         { return mClass->GetMaterialId(); }
-        std::string GetDrawableId() const
+        const std::string& GetDrawableId() const
         { return mClass->GetDrawableId(); }
         int GetLayer() const
         { return mClass->GetLayer(); }
@@ -553,7 +553,7 @@ namespace game
         { return mClass->GetDensity(); }
         bool TestFlag(Flags flag) const
         { return mInstanceFlags.test(flag); }
-        std::string GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const
         { return mClass->GetPolygonShapeId(); }
         base::bitflag<Flags> GetFlags() const
         { return mInstanceFlags; }
@@ -562,7 +562,7 @@ namespace game
         // The linear velocity expresses how fast the object is
         // moving and to which direction. It's expressed in meters per second
         // using the world coordinate space.
-        glm::vec2 GetLinearVelocity() const
+        const glm::vec2& GetLinearVelocity() const
         { return mLinearVelocity; }
         // Get the current instantaneous angular velocity of the
         // rigid body under the physics simulation.
@@ -587,7 +587,7 @@ namespace game
         { return mAngularVelocityAdjustment.has_value(); }
         float GetAngularVelocityAdjustment() const
         { return mAngularVelocityAdjustment.value(); }
-        glm::vec2 GetLinearVelocityAdjustment() const
+        const glm::vec2& GetLinearVelocityAdjustment() const
         { return mLinearVelocityAdjustment.value(); }
         void ClearVelocityAdjustments()
         {
@@ -742,23 +742,23 @@ namespace game
         EntityNodeClass(EntityNodeClass&& other);
 
         // Get the class id.
-        std::string GetId() const
+        const std::string& GetId() const
         { return mClassId; }
         // Get the human-readable name for this class.
-        std::string GetName() const
+        const std::string& GetName() const
         { return mName; }
         // Get the hash value based on the class object properties.
         std::size_t GetHash() const;
 
         // Get the node's translation relative to its parent node.
-        glm::vec2 GetTranslation() const
+        const glm::vec2& GetTranslation() const
         { return mPosition; }
         // Get the node's scale factor. The scale factor applies to
         // whole hierarchy of nodes.
-        glm::vec2 GetScale() const
+        const glm::vec2& GetScale() const
         { return mScale; }
         // Get the node's box size.
-        glm::vec2 GetSize() const
+        const glm::vec2& GetSize() const
         { return mSize;}
         // Get node's rotation relative to its parent node.
         float GetRotation() const
@@ -951,15 +951,15 @@ namespace game
         { mRotation += dr; }
 
         // instance getters.
-        std::string GetId() const
+        const std::string& GetId() const
         { return mInstId; }
-        std::string GetName() const
+        const std::string& GetName() const
         { return mName; }
-        glm::vec2 GetTranslation() const
+        const glm::vec2& GetTranslation() const
         { return mPosition; }
-        glm::vec2 GetScale() const
+        const glm::vec2& GetScale() const
         { return mScale; }
-        glm::vec2 GetSize() const
+        const glm::vec2& GetSize() const
         { return mSize; }
         float GetRotation() const
         { return mRotation; }
@@ -1002,9 +1002,9 @@ namespace game
         { return !!mSpatialNode; }
 
         // shortcut for class getters.
-        std::string GetClassId() const
+        const std::string& GetClassId() const
         { return mClass->GetId(); }
-        std::string GetClassName() const
+        const std::string& GetClassName() const
         { return mClass->GetName(); }
         int GetLayer() const
         { return mClass->GetLayer(); }
@@ -1272,17 +1272,19 @@ namespace game
         { return mAnimationTracks.size(); }
         std::size_t GetNumScriptVars() const
         { return mScriptVars.size(); }
-        std::string GetId() const
+        std::size_t GetNumJoints() const
+        { return mJoints.size(); }
+        const std::string& GetId() const
         { return mClassId; }
-        std::string GetIdleTrackId() const
+        const std::string& GetIdleTrackId() const
         { return mIdleTrackId; }
-        std::string GetName() const
+        const std::string& GetName() const
         { return mName; }
-        std::string GetScriptFileId() const
+        const std::string& GetScriptFileId() const
         { return mScriptFile; }
         float GetLifetime() const
         { return mLifetime; }
-        base::bitflag<Flags> GetFlags() const
+        const base::bitflag<Flags>& GetFlags() const
         { return mFlags; }
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
@@ -1512,20 +1514,22 @@ namespace game
         { return mLifetime; }
         double GetTime() const
         { return mCurrentTime; }
-        std::string GetIdleTrackId() const
+        const std::string& GetIdleTrackId() const
         { return mIdleTrackId; }
-        std::string GetParentNodeClassId() const
+        const std::string& GetParentNodeClassId() const
         { return mParentNodeId; }
-        std::string GetClassId() const
+        const std::string& GetClassId() const
         { return mClass->GetId(); }
-        std::string GetClassName() const
+        const std::string& GetId() const
+        { return mInstanceId; }
+        const std::string& GetClassName() const
         { return mClass->GetName(); }
+        const std::string& GetName() const
+        { return mInstanceName; }
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
-        std::string GetName() const
-        { return mInstanceName; }
-        std::string GetId() const
-        { return mInstanceId; }
+        std::size_t GetNumJoins() const
+        { return mClass->GetNumJoints(); }
         int GetLayer() const
         { return mLayer; }
         bool TestFlag(ControlFlags flag) const
