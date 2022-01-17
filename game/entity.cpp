@@ -831,30 +831,47 @@ void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>*
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
+void EntityClass::CoarseHitTest(const glm::vec2& pos, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
+{
+    game::CoarseHitTest(mRenderTree, pos.x,pos.y, hits, hitbox_positions);
+}
 void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
-glm::vec2 EntityClass::MapCoordsFromNodeModel(float x, float y, const EntityNodeClass* node) const
+void EntityClass::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    return game::MapCoordsFromNode(mRenderTree, x, y, node);
+    game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
 }
-glm::vec2 EntityClass::MapCoordsToNodeModel(float x, float y, const EntityNodeClass* node) const
+glm::vec2 EntityClass::MapCoordsFromNodeBox(float x, float y, const EntityNodeClass* node) const
 {
-    return game::MapCoordsToNode(mRenderTree, x, y, node);
+    return game::MapCoordsFromNodeBox(mRenderTree, x, y, node);
 }
+glm::vec2 EntityClass::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const
+{
+    return game::MapCoordsFromNodeBox(mRenderTree, pos.x, pos.y, node);
+}
+glm::vec2 EntityClass::MapCoordsToNodeBox(float x, float y, const EntityNodeClass* node) const
+{
+    return game::MapCoordsToNodeBox(mRenderTree, x, y, node);
+}
+glm::vec2 EntityClass::MapCoordsToNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const
+{
+    return game::MapCoordsToNodeBox(mRenderTree, pos.x, pos.y, node);
+}
+
 FRect EntityClass::FindNodeBoundingRect(const EntityNodeClass* node) const
 {
-    return game::GetBoundingRect(mRenderTree, node);
+    return game::FindBoundingRect(mRenderTree, node);
 }
 FRect EntityClass::GetBoundingRect() const
 {
-    return game::GetBoundingRect(mRenderTree);
+    return game::FindBoundingRect(mRenderTree);
 }
 
 FBox EntityClass::FindNodeBoundingBox(const EntityNodeClass* node) const
 {
-    return game::GetBoundingBox(mRenderTree, node);
+    return game::FindBoundingBox(mRenderTree, node);
 }
 
 glm::mat4 EntityClass::FindNodeTransform(const EntityNodeClass* node) const
@@ -1231,19 +1248,37 @@ void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
 
+void Entity::CoarseHitTest(const glm::vec2& pos, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
+{
+    game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
+}
+
 void Entity::CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
-
-glm::vec2 Entity::MapCoordsFromNodeModel(float x, float y, const EntityNode* node) const
+void Entity::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    return game::MapCoordsFromNode(mRenderTree, x, y, node);
+    game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
 }
 
-glm::vec2 Entity::MapCoordsToNodeModel(float x, float y, const EntityNode* node) const
+glm::vec2 Entity::MapCoordsFromNodeBox(float x, float y, const EntityNode* node) const
 {
-    return game::MapCoordsToNode(mRenderTree, x, y, node);
+    return game::MapCoordsFromNodeBox(mRenderTree, x, y, node);
+}
+glm::vec2 Entity::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNode* node) const
+{
+    return game::MapCoordsFromNodeBox(mRenderTree, pos.x, pos.y, node);
+}
+
+glm::vec2 Entity::MapCoordsToNodeBox(float x, float y, const EntityNode* node) const
+{
+    return game::MapCoordsToNodeBox(mRenderTree, x, y, node);
+}
+
+glm::vec2 Entity::MapCoordsToNodeBox(const glm::vec2& pos, const EntityNode* node) const
+{
+    return game::MapCoordsToNodeBox(mRenderTree, pos.x, pos.y, node);
 }
 
 glm::mat4 Entity::FindNodeTransform(const EntityNode* node) const
@@ -1257,17 +1292,17 @@ glm::mat4 Entity::FindNodeModelTransform(const EntityNode* node) const
 
 FRect Entity::FindNodeBoundingRect(const EntityNode* node) const
 {
-    return game::GetBoundingRect(mRenderTree, node);
+    return game::FindBoundingRect(mRenderTree, node);
 }
 
 FRect Entity::GetBoundingRect() const
 {
-    return game::GetBoundingRect(mRenderTree);
+    return game::FindBoundingRect(mRenderTree);
 }
 
 FBox Entity::FindNodeBoundingBox(const EntityNode* node) const
 {
-    return game::GetBoundingBox(mRenderTree, node);
+    return game::FindBoundingBox(mRenderTree, node);
 }
 
 void Entity::Update(float dt)

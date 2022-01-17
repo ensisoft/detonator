@@ -507,6 +507,12 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
 }
+void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<SceneNodeClass*>* hits,
+                               std::vector<glm::vec2>* hitbox_positions)
+{
+    CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
+}
+
 void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
                        std::vector<glm::vec2>* hitbox_positions) const
 {
@@ -536,7 +542,13 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
     }
 }
 
-glm::vec2 SceneClass::MapCoordsFromNodeModel(float x, float y, const SceneNodeClass* node) const
+void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<const SceneNodeClass*>* hits,
+                               std::vector<glm::vec2>* hitbox_positions) const
+{
+    CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
+}
+
+glm::vec2 SceneClass::MapCoordsFromNodeBox(float x, float y, const SceneNodeClass* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
@@ -550,7 +562,12 @@ glm::vec2 SceneClass::MapCoordsFromNodeModel(float x, float y, const SceneNodeCl
     // todo: should we return something else maybe ?
     return glm::vec2(0.0f, 0.0f);
 }
-glm::vec2 SceneClass::MapCoordsToNodeModel(float x, float y, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsFromNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const
+{
+    return MapCoordsFromNodeBox(pos.x, pos.y, node);
+}
+
+glm::vec2 SceneClass::MapCoordsToNodeBox(float x, float y, const SceneNodeClass* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
@@ -563,6 +580,10 @@ glm::vec2 SceneClass::MapCoordsToNodeModel(float x, float y, const SceneNodeClas
     }
     // todo: should we return something else maybe ?
     return glm::vec2(0.0f, 0.0f);
+}
+glm::vec2 SceneClass::MapCoordsToNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const
+{
+    return MapCoordsToNodeBox(pos.x, pos.y, node);
 }
 
 glm::mat4 SceneClass::FindNodeTransform(const SceneNodeClass* node) const

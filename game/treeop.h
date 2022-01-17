@@ -369,7 +369,7 @@ void CoarseHitTest(const RenderTree<Node>& tree, float x, float y,
 }
 
 template<typename Node>
-glm::vec2 MapCoordsFromNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
+glm::vec2 MapCoordsFromNodeBox(const RenderTree<Node>& tree, float x, float y, const Node* node)
 {
     const auto& mat = FindUnscaledNodeModelTransform(tree, node);
     const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
@@ -377,7 +377,7 @@ glm::vec2 MapCoordsFromNode(const RenderTree<Node>& tree, float x, float y, cons
 }
 
 template<typename Node>
-glm::vec2 MapCoordsToNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
+glm::vec2 MapCoordsToNodeBox(const RenderTree<Node>& tree, float x, float y, const Node* node)
 {
     const auto& mat = glm::inverse(FindUnscaledNodeModelTransform(tree, node));
     const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
@@ -385,13 +385,13 @@ glm::vec2 MapCoordsToNode(const RenderTree<Node>& tree, float x, float y, const 
 }
 
 template<typename Node>
-FBox GetBoundingBox(const RenderTree<Node>& tree, const Node* node)
+FBox FindBoundingBox(const RenderTree<Node>& tree, const Node* node)
 {
     return FBox(FindNodeModelTransform(tree, node));
 }
 
 template<typename Node>
-FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
+FRect FindBoundingRect(const RenderTree<Node>& tree, const Node* node)
 {
     const auto& mat = FindNodeModelTransform(tree, node);
 
@@ -399,7 +399,7 @@ FRect GetBoundingRect(const RenderTree<Node>& tree, const Node* node)
 }
 
 template<typename Node>
-FRect GetBoundingRect(const RenderTree<Node>& tree)
+FRect FindBoundingRect(const RenderTree<Node>& tree)
 {
     class Visitor : public RenderTree<Node>::ConstVisitor {
     public:
