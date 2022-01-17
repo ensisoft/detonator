@@ -340,14 +340,20 @@ namespace game
         // hitbox_positions vector.
         void CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
+        void CoarseHitTest(const glm::vec2& pos, std::vector<SceneNodeClass*>* hits,
+                           std::vector<glm::vec2>* hitbox_positions = nullptr);
         void CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
+        void CoarseHitTest(const glm::vec2& pos, std::vector<const SceneNodeClass*>* hits,
+                           std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in some node's (see SceneNode::FindNodeTransform) space
-        // into scene coordinate space.
-        glm::vec2 MapCoordsFromNodeModel(float x, float y, const SceneNodeClass* node) const;
-        // Map coordinates in scene's coordinate space into some node's model coordinate space.
-        glm::vec2 MapCoordsToNodeModel(float x, float y, const SceneNodeClass* node) const;
+        // Map coordinates in node's OOB space into entity coordinate space. The origin of
+        // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
+        glm::vec2 MapCoordsFromNodeBox(float x, float y, const SceneNodeClass* node) const;
+        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const;
+        // Map coordinates in scene coordinate space into node's OOB coordinate space.
+        glm::vec2 MapCoordsToNodeBox(float x, float y, const SceneNodeClass* node) const;
+        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const;
 
         glm::mat4 FindNodeTransform(const SceneNodeClass* node) const;
 
