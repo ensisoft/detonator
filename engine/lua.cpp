@@ -1782,6 +1782,8 @@ void BindUIK(sol::state& L)
 void BindGameLib(sol::state& L)
 {
     auto table = L["game"].get_or_create<sol::table>();
+    table["X"] = glm::vec2(1.0f, 0.0f);
+    table["Y"] = glm::vec2(0.0f, 1.0f);
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"]     = &ClassLibrary::FindEntityClassByName;
@@ -1956,6 +1958,8 @@ void BindGameLib(sol::state& L)
     scene["SpawnEntity"]              = &Scene::SpawnEntity;
     scene["FindEntityTransform"]      = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]  = &Scene::FindEntityNodeTransform;
+    scene["MapEntityNodeVector"]      = &Scene::MapEntityNodeVector;
+    scene["MapEntityNodePoint"]       = &Scene::MapEntityNodePoint;
     scene["GetTime"]                  = &Scene::GetTime;
     scene["GetClassName"]             = &Scene::GetClassName;
     scene["GetClassId"]               = &Scene::GetClassId;
@@ -2025,6 +2029,13 @@ void BindGameLib(sol::state& L)
     );
     physics["GetScale"]   = &PhysicsEngine::GetScale;
     physics["GetGravity"] = &PhysicsEngine::GetGravity;
+    physics["GetTimeStep"] = &PhysicsEngine::GetTimeStep;
+    physics["GetNumPositionIterations"] = &PhysicsEngine::GetNumPositionIterations;
+    physics["GetNumVelocityIterations"] = &PhysicsEngine::GetNumVelocityIterations;
+    physics["MapVectorFromGame"] = &PhysicsEngine::MapVectorFromGame;
+    physics["MapVectorToGame"]   = &PhysicsEngine::MapVectorToGame;
+    physics["MapAngleFromGame"]  = &PhysicsEngine::MapAngleFromGame;
+    physics["MapAngleToGame"]    = &PhysicsEngine::MapAngleToGame;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["PrepareMusicGraph"] = sol::overload(

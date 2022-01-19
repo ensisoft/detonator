@@ -1156,6 +1156,23 @@ FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* no
     return FBox(transform.GetAsMatrix());
 }
 
+glm::vec2 Scene::MapEntityNodeVector(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
+{
+    const auto& mat = FindEntityNodeTransform(entity, node);
+    // we assume here that the vector represents a direction
+    // thus translation is not desired. hence, _w = 0.0f.
+    const auto& ret = mat * glm::vec4(vector, 1.0f, 0.0f);
+    // return normalized result.
+    return glm::normalize(glm::vec2(ret.x, ret.y));
+}
+
+FPoint Scene::MapEntityNodePoint(const Entity* entity, const EntityNode* node, const FPoint& point) const
+{
+    const auto& mat = FindEntityNodeTransform(entity, node);
+    const auto& ret = mat * glm::vec4(point.GetY(), point.GetY(), 1.0f, 1.0f);
+    return FPoint(ret.x, ret.y);
+}
+
 const ScriptVar* Scene::FindScriptVarByName(const std::string& name) const
 {
     // first check the mutable variables per this instance then check the class.
