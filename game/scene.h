@@ -586,6 +586,16 @@ namespace game
         // model transformation. If the entity is not part of this scene or
         // the node is not part of the entity the result is undefined.
         FBox FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* node) const;
+        // Map a directional (unit length) vector relative to some entity node basis
+        // vectors into world/scene basis vectors. Returns a normalized vector relative
+        // to the scene/world basis vectors.
+        // If the entity is not in the scene or if the node is not part of the
+        // entity the result is undefined.
+        glm::vec2 MapEntityNodeVector(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const;
+        // Map a point relative to the entity node's local origin into a world space point.
+        // If the entity is not in the scene or if the node is not part of the entity
+        // the result is undefined.
+        FPoint MapEntityNodePoint(const Entity* entity, const EntityNode* node, const FPoint& point) const;
 
         void Update(float dt);
 

@@ -561,7 +561,7 @@ namespace game
         // rigid body under the physics simulation.
         // The linear velocity expresses how fast the object is
         // moving and to which direction. It's expressed in meters per second
-        // using the world coordinate space.
+        // using the physics world coordinate space.
         const glm::vec2& GetLinearVelocity() const
         { return mLinearVelocity; }
         // Get the current instantaneous angular velocity of the
@@ -570,15 +570,25 @@ namespace game
         // around its own center in radians per second.
         float GetAngularVelocity() const
         { return mAngularVelocity; }
+        // Update the current linear velocity in m/s.
+        // The updates are coming from the physics engine.
         void SetLinearVelocity(const glm::vec2& velocity)
         { mLinearVelocity = velocity; }
+        // Update the current angular velocity in r/s
+        // The updates are coming from the physics engine.
         void SetAngularVelocity(float velocity)
         { mAngularVelocity = velocity; }
         void SetFlag(Flags flag, bool on_off)
         { mInstanceFlags.set(flag, on_off); }
 
+        // Set a new linear velocity adjustment to be applied
+        // on the next update of the physics engine. The velocity
+        // is in meters per second.
         void AdjustLinearVelocity(const glm::vec2& velocity)
         { mLinearVelocityAdjustment = velocity; }
+        // Set a new angular velocity adjustment to be applied
+        // on the next update of the physics engine. The velocity
+        // is in radians per second.
         void AdjustAngularVelocity(float radians)
         { mAngularVelocityAdjustment = radians; }
         bool HasLinearVelocityAdjustment() const

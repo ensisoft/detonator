@@ -86,10 +86,32 @@ namespace engine
         { mNumVelocityIterations = iter; }
         void SetNumPositionIterations(unsigned iter)
         { mNumPositionIterations = iter; }
+        float GetTimeStep() const
+        { return mTimestep; }
+        unsigned GetNumVelocityIterations() const
+        { return mNumVelocityIterations; }
+        unsigned GetNumPositionIterations() const
+        { return mNumPositionIterations; }
+        // Get the current scaling vector.
         glm::vec2 GetScale() const
         { return mScale; }
+        // Get the current gravity vector.
         glm::vec2 GetGravity() const
         { return mGravity; }
+        // Map vector (either direction or position) from game world to the
+        // physics world using the current scaling vector.
+        glm::vec2 MapVectorFromGame(const glm::vec2& scene_vector) const
+        { return scene_vector / mScale; }
+        // Map vector (either direction of position) from physics world to the
+        // game world using the current scaling vector.
+        glm::vec2 MapVectorToGame(const glm::vec2& phys_world_vector) const
+        { return phys_world_vector * mScale; }
+        // Map an angle (in radians) from game world to physics world.
+        float MapAngleFromGame(float radians) const
+        { return radians; }
+        // Map an angle (in radians) from physics world to game world.
+        float MapAngleToGame(float radians) const
+        { return radians; }
 
         // Returns if we have a current world simulation.
         bool HaveWorld() const
