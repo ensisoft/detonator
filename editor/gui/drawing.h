@@ -34,6 +34,7 @@ namespace gui
 {
 
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view);
+void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer);
 
 enum class GridDensity {
     Grid10x10   = 10,
@@ -72,17 +73,20 @@ public:
     {}
 
     template<typename Node>
-    DrawHook(const Node* selected, bool playing)
+    DrawHook(const Node* selected)
         : mSelectedItem(selected)
-        , mPlaying(playing)
     {}
 
     template<typename Node>
-    DrawHook(const Node* selected, bool playing, const game::FRect& view)
+    DrawHook(const Node* selected, const game::FRect& view)
       : mSelectedItem(selected)
-      , mPlaying(playing)
       , mViewRect(view)
     {}
+
+    void SetDrawVectors(bool on_off)
+    { mDrawVectors = on_off; }
+    void SetIsPlaying(bool on_off)
+    { mPlaying = on_off; }
 
     // EntityNode
     virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
@@ -203,6 +207,14 @@ private:
         glm::quat orientation;
         glm::decompose(mat, scale, orientation, translation, skew,  perspective);
 
+        // draw the basis vectors
+        if (mDrawVectors)
+        {
+            trans.Push();
+                DrawBasisVectors(trans, packets, layer);
+            trans.Pop();
+        }
+
         // draw the resize indicator. (lower right corner box)
         trans.Push();
             trans.Scale(10.0f/scale.x, 10.0f/scale.y);
@@ -229,11 +241,11 @@ private:
     }
 private:
     const void* mSelectedItem = nullptr;
-    const bool mPlaying   = false;
+    const game::FRect mViewRect;
+    bool mPlaying        = false;
     bool mDrawSelection  = false;
     bool mDrawIndicators = true;
-    const game::FRect mViewRect;
+    bool mDrawVectors    = false;
 };
-
 
 } // namespace

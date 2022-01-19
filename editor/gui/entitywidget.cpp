@@ -1914,7 +1914,9 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
-    DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing);
+    DrawHook hook(GetCurrentNode());
+    hook.SetDrawVectors(true);
+    hook.SetIsPlaying(mPlayState == PlayState::Playing);
 
     // begin the animation transformation space
     view.Push();

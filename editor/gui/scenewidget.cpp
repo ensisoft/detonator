@@ -1399,7 +1399,9 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // for improved perf.
     const game::FRect rect(0, 0, width, height);
 
-    DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing, rect);
+    DrawHook hook(GetCurrentNode(), rect);
+    hook.SetIsPlaying(mPlayState == PlayState::Playing);
+    hook.SetDrawVectors(false);
 
     // begin the animation transformation space
     view.Push();

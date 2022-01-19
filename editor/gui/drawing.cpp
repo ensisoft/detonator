@@ -59,6 +59,48 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
     view.Pop();
 }
 
+void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer)
+{
+    //static auto green = gfx::Create
+    static auto green = std::make_shared<gfx::MaterialClassInst>(
+            gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static auto red   = std::make_shared<gfx::MaterialClassInst>(
+            gfx::CreateMaterialClassFromColor(gfx::Color::Red));
+    static auto arrow = std::make_shared<gfx::Arrow>();
+
+    // draw the X vector
+    view.Push();
+        view.Scale(100.0f, 5.0f);
+        view.Translate(0.0f, -2.5f);
+        engine::DrawPacket x;
+        x.transform = view.GetAsMatrix();
+        x.material  = green;
+        x.drawable  = arrow;
+        x.layer     = layer;
+        packets.push_back(std::move(x));
+    view.Pop();
+
+    // draw the Y vector
+    view.Push();
+        view.Scale(100.0f, 5.0f);
+        view.Translate(-50.0f, -2.5f);
+        view.Rotate(math::Pi * 0.5f);
+        view.Translate(0.0f, 50.0f);
+        engine::DrawPacket y;
+        y.transform = view.GetAsMatrix();
+        y.material  = red;
+        y.drawable  = arrow;
+        y.layer     = layer;
+        packets.push_back(std::move(y));
+    view.Pop();
+
+    view.Push();
+        view.Scale(2.5f, 2.5f);
+        view.Translate(-1.25f, -1.25f);
+        //painter.Draw(gfx::RoundRectangle(), view, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
+    view.Pop();
+}
+
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     GridDensity grid,
     float zoom,
