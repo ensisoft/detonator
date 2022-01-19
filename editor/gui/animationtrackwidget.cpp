@@ -1671,7 +1671,9 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         }
         else
         {
-            DrawHook hook(GetCurrentNode(), mPlayState == PlayState::Playing);
+            DrawHook hook(GetCurrentNode());
+            hook.SetIsPlaying(mPlayState == PlayState::Playing);
+            hook.SetDrawVectors(false);
             mRenderer.Draw(*mEntity, painter, view, &hook);
         }
         mRenderer.EndFrame();
