@@ -23,6 +23,7 @@
 #include "graphics/transform.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
+#include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "engine/physics.h"
 #include "engine/loader.h"
@@ -49,6 +50,18 @@ namespace engine
 PhysicsEngine::PhysicsEngine(const ClassLibrary* loader)
   : mClassLib(loader)
 {}
+
+float PhysicsEngine::MapLengthFromGame(float length) const
+{
+    const auto& dir = glm::normalize(glm::vec2(1.0f, 1.0f));
+    return glm::length(MapVectorFromGame(dir * length));
+}
+
+float PhysicsEngine::MapLengthToGame(float meters) const
+{
+    const auto dir = glm::normalize(glm::vec2(1.0f, 1.0f));
+    return glm::length(MapVectorToGame(dir * meters));
+}
 
 void PhysicsEngine::UpdateScene(game::Scene& scene)
 {
@@ -367,6 +380,8 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
     view.Push();
     view.Scale(mScale);
 
+    std::unordered_set<b2Joint*> joints;
+
     // there's b2Draw api for debug drawing but it seems that
     // when wanting to debug the *game* (not the physics engine
     // integration issues itself) this is actually more straightforward
@@ -408,6 +423,29 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
                 painter.Draw(*poly, view, mat);
             }
         } else BUG("!unhandled collision shape for debug drawing.");
+
+        b2JointEdge* joint_list = physics_node.world_body->GetJointList();
+        while (joint_list)
+        {
+            b2Joint* joint = joint_list->joint;
+            if (base::Contains(joints, joint))
+            {
+                joint_list = joint_list->next;
+                continue;
+            }
+
+            if (joint->GetType() == b2JointType::e_distanceJoint)
+            {
+                b2DistanceJoint* dj = static_cast<b2DistanceJoint*>(joint);
+                const auto& src_world_anchor = ToGlm(dj->GetAnchorA());
+                const auto& dst_world_anchor = ToGlm(dj->GetAnchorB());
+                gfx::DrawLine(painter,
+                    gfx::FPoint(src_world_anchor.x, src_world_anchor.y),
+                    gfx::FPoint(dst_world_anchor.x, dst_world_anchor.y), gfx::Color::HotPink, 2.0f);
+            }
+            joints.insert(joint);
+            joint_list = joint_list->next;
+        }
 
         view.Pop();
         view.Pop();
@@ -551,7 +589,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
 }
 
 
-void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& entity)
+void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& entity)
 {
     using RenderTree = Entity::RenderTree;
 
@@ -578,7 +616,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
                 return;
 
             mTransform.Push(node->GetModelTransform());
-            mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
+                mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
             mTransform.Pop();
         }
         virtual void LeaveNode(const EntityNode* node) override
@@ -592,10 +630,71 @@ void PhysicsEngine::AddEntity(const glm::mat4& model_to_world, const Entity& ent
         PhysicsEngine& mEngine;
         Transform mTransform;
     };
-    Visitor visitor(model_to_world, entity, *this);
+    Visitor visitor(entity_to_world, entity, *this);
 
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
+
+    Transform trans(entity_to_world);
+
+    // create joints between physics bodies based on the
+    // entity joint definitions
+    for (size_t i=0; i<entity.GetNumJoints(); ++i)
+    {
+        const auto& joint = entity.GetJoint(i);
+        const auto* src_node = joint.GetSrcNode();
+        const auto* dst_node = joint.GetDstNode();
+        PhysicsNode* src_physics_node = FindPhysicsNode(src_node->GetId());
+        PhysicsNode* dst_physics_node = FindPhysicsNode(dst_node->GetId());
+        ASSERT(src_physics_node && dst_physics_node);
+
+        // the local anchor points are relative to the node itself.
+        const auto& src_local_anchor = joint.GetSrcAnchorPoint();
+        const auto& dst_local_anchor = joint.GetDstAnchorPoint();
+
+        // transform the anchor points into the physics world.
+        trans.Push(entity.FindNodeTransform(src_node));
+            const auto& src_world_anchor = trans.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+        trans.Pop();
+        trans.Push(entity.FindNodeTransform(dst_node));
+            const auto& dst_world_anchor = trans.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
+        trans.Pop();
+        // distance between the anchor points is the same as the distance
+        // between the anchor points in the physics world.
+        const auto distance = glm::length(dst_world_anchor - src_world_anchor);
+
+        const auto type = joint.GetType();
+
+        if (type == Entity::PhysicsJointType::Distance)
+        {
+            const auto& params = std::get<EntityClass::DistanceJointParams>(joint.GetParams());
+
+            b2DistanceJointDef def = {};
+            def.bodyA = src_physics_node->world_body;
+            def.bodyB = dst_physics_node->world_body;
+            def.localAnchorA = ToBox2D(src_local_anchor);
+            def.localAnchorB = ToBox2D(dst_local_anchor);
+            if (params.min_distance.has_value())
+                def.minLength = MapLengthFromGame(params.min_distance.value());
+            else def.minLength = distance;
+            if (params.max_distance.has_value())
+                def.maxLength = MapLengthFromGame(params.max_distance.value());
+            else def.maxLength = distance;
+            def.stiffness    = params.stiffness;
+            def.damping      = params.damping;
+            if (def.minLength > def.maxLength) {
+                WARN("Entity distance joint min distance exceeds max distance. [entity='%1', joint='%2', min_dist=%3, max_dist=%4]",
+                     entity.GetClassName(), entity.GetName(), joint.GetName(), def.minLength, def.maxLength);
+                def.minLength = def.maxLength;
+            }
+            // the joint is deleted whenever either body is deleted.
+            auto* ret = mWorld->CreateJoint(&def);
+            DEBUG("Created new physics distance joint. [entity='%1/%2' joint='%3', src='%4', dst='%5', min=%6, max=%7]",
+                  entity.GetClassName(), entity.GetName(), joint.GetName(), src_node->GetName(), dst_node->GetName(),
+                  def.minLength, def.maxLength);
+        }
+        else BUG("Unhandled physics joint type.");
+    }
 }
 
 void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node)

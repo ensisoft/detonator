@@ -635,12 +635,12 @@ EntityClass::EntityClass()
 
 EntityClass::EntityClass(const EntityClass& other)
 {
-    mClassId = other.mClassId;
-    mName    = other.mName;
+    mClassId     = other.mClassId;
+    mName        = other.mName;
     mScriptFile  = other.mScriptFile;
     mIdleTrackId = other.mIdleTrackId;
-    mFlags = other.mFlags;
-    mLifetime = other.mLifetime;
+    mFlags       = other.mFlags;
+    mLifetime    = other.mLifetime;
 
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
@@ -658,14 +658,21 @@ EntityClass::EntityClass(const EntityClass& other)
         mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
     }
 
+    // make a deep copy of the script variables
     for (const auto& var : other.mScriptVars)
     {
         mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
     }
 
+    // make a deep copy of the joints
+    for (const auto& joint : other.mJoints)
+    {
+        mJoints.push_back(std::make_shared<PhysicsJoint>(*joint));
+    }
+
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
-            return map[node];
-        });
+        return map[node];
+    });
 }
 
 EntityNodeClass* EntityClass::AddNode(const EntityNodeClass& node)
@@ -682,6 +689,121 @@ EntityNodeClass* EntityClass::AddNode(std::unique_ptr<EntityNodeClass> node)
 {
     mNodes.push_back(std::move(node));
     return mNodes.back().get();
+}
+
+EntityClass::PhysicsJoint* EntityClass::AddJoint(const PhysicsJoint& joint)
+{
+    mJoints.push_back(std::make_shared<PhysicsJoint>(joint));
+    return mJoints.back().get();
+}
+
+EntityClass::PhysicsJoint* EntityClass::AddJoint(PhysicsJoint&& joint)
+{
+    mJoints.push_back(std::make_shared<PhysicsJoint>(std::move(joint)));
+    return mJoints.back().get();
+}
+
+void EntityClass::SetJoint(size_t index, const PhysicsJoint& joint)
+{
+    *base::SafeIndex(mJoints, index) = joint;
+}
+void EntityClass::SetJoint(size_t index, PhysicsJoint&& joint)
+{
+    *base::SafeIndex(mJoints, index) = std::move(joint);
+}
+
+EntityClass::PhysicsJoint& EntityClass::GetJoint(size_t index)
+{
+    return *base::SafeIndex(mJoints, index);
+}
+EntityClass::PhysicsJoint* EntityClass::FindJointById(const std::string& id)
+{
+    for (auto& joint : mJoints)
+        if (joint->id == id) return joint.get();
+
+    return nullptr;
+}
+EntityClass::PhysicsJoint* EntityClass::FindJointByNodeId(const std::string& id)
+{
+    for (auto& joint : mJoints)
+    {
+        if (joint->src_node_id == id ||
+            joint->dst_node_id == id)
+            return joint.get();
+    }
+    return nullptr;
+}
+
+const EntityClass::PhysicsJoint& EntityClass::GetJoint(size_t index) const
+{
+    return *base::SafeIndex(mJoints, index);
+}
+const EntityClass::PhysicsJoint* EntityClass::FindJointById(const std::string& id) const
+{
+    for (auto& joint : mJoints)
+        if (joint->id == id) return joint.get();
+
+    return nullptr;
+}
+const EntityClass::PhysicsJoint* EntityClass::FindJointByNodeId(const std::string& id) const
+{
+    for (auto& joint : mJoints)
+    {
+        if (joint->src_node_id == id ||
+            joint->dst_node_id == id)
+            return joint.get();
+    }
+    return nullptr;
+}
+
+void EntityClass::DeleteJointById(const std::string& id)
+{
+    for (auto it = mJoints.begin(); it != mJoints.end(); ++it)
+    {
+        if ((*it)->id == id)
+        {
+            mJoints.erase(it);
+            return;
+        }
+    }
+}
+
+void EntityClass::DeleteJoint(std::size_t index)
+{
+    base::SafeErase(mJoints, index);
+}
+
+void EntityClass::DeleteInvalidJoints()
+{
+    mJoints.erase(std::remove_if(mJoints.begin(), mJoints.end(),
+        [this](const auto& joint) {
+            const auto* dst_node = FindNodeById(joint->dst_node_id);
+            const auto* src_node = FindNodeById(joint->src_node_id);
+            if (!dst_node || !src_node || (dst_node == src_node) ||
+                !dst_node->HasRigidBody() ||
+                !src_node->HasRigidBody())
+                return true;
+            return false;
+    }), mJoints.end());
+}
+
+void EntityClass::FindInvalidJoints(std::vector<PhysicsJoint*>* invalid)
+{
+    // a joint is considered invalid when
+    // - the src and dst nodes are the same.
+    // - either dst or src node doesn't exist
+    // - either dst or src node doesn't have rigid body
+    for (auto& joint : mJoints)
+    {
+        const auto* dst_node = FindNodeById(joint->dst_node_id);
+        const auto* src_node = FindNodeById(joint->src_node_id);
+        if (!src_node || !dst_node || (dst_node == src_node) ||
+            !dst_node->HasRigidBody() ||
+            !src_node->HasRigidBody())
+        {
+            invalid->push_back(joint.get());
+        }
+    }
 }
 
 EntityNodeClass& EntityClass::GetNode(size_t index)
@@ -813,6 +935,13 @@ void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child,
 
 void EntityClass::DeleteNode(EntityNodeClass* node)
 {
+    // Erase joints that refer to this node in order to maintain
+    // the invariant that the joints are always valid.
+    mJoints.erase(std::remove_if(mJoints.begin(), mJoints.end(),
+                                 [node](const auto& joint) {
+        return joint->src_node_id == node->GetId() ||
+               joint->dst_node_id == node->GetId();
+    }), mJoints.end());
     game::DeleteNode(mRenderTree, node, mNodes);
 }
 
@@ -970,6 +1099,28 @@ std::size_t EntityClass::GetHash() const
 
     for (const auto& var : mScriptVars)
         hash = base::hash_combine(hash, var->GetHash());
+
+    for (const auto& joint : mJoints)
+    {
+        size_t jh = 0;
+        jh = base::hash_combine(jh, joint->id);
+        jh = base::hash_combine(jh, joint->type);
+        jh = base::hash_combine(jh, joint->src_node_id);
+        jh = base::hash_combine(jh, joint->dst_node_id);
+        jh = base::hash_combine(jh, joint->dst_node_anchor_point);
+        jh = base::hash_combine(jh, joint->src_node_anchor_point);
+        jh = base::hash_combine(jh, joint->name);
+        if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->min_distance.has_value());
+            jh = base::hash_combine(jh, ptr->max_distance.has_value());
+            jh = base::hash_combine(jh, ptr->max_distance.value_or(0.0f));
+            jh = base::hash_combine(jh, ptr->min_distance.value_or(0.0f));
+            jh = base::hash_combine(jh, ptr->stiffness);
+            jh = base::hash_combine(jh, ptr->damping);
+        }
+        hash = base::hash_combine(hash, jh);
+    }
     return hash;
 }
 
@@ -1000,6 +1151,28 @@ void EntityClass::IntoJson(data::Writer& data) const
         auto chunk = data.NewWriteChunk();
         var->IntoJson(*chunk);
         data.AppendChunk("vars", std::move(chunk));
+    }
+
+    for (const auto& joint : mJoints)
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("id", joint->id);
+        chunk->Write("type", joint->type);
+        chunk->Write("src_node_id", joint->src_node_id);
+        chunk->Write("dst_node_id", joint->dst_node_id);
+        chunk->Write("src_node_anchor_point", joint->src_node_anchor_point);
+        chunk->Write("dst_node_anchor_point", joint->dst_node_anchor_point);
+        chunk->Write("name", joint->name);
+        if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
+        {
+            if (ptr->min_distance.has_value())
+                chunk->Write("min_dist", ptr->min_distance.value());
+            if (ptr->max_distance.has_value())
+                chunk->Write("max_dist", ptr->max_distance.value());
+            chunk->Write("damping", ptr->damping);
+            chunk->Write("stiffness", ptr->stiffness);
+        }
+        data.AppendChunk("joints", std::move(chunk));
     }
 
     auto chunk = data.NewWriteChunk();
@@ -1043,6 +1216,39 @@ std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
             return std::nullopt;
         ret.mScriptVars.push_back(std::make_shared<ScriptVar>(var.value()));
     }
+    for (unsigned i=0; i<data.GetNumChunks("joints"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("joints", i);
+        auto joint = std::make_shared<PhysicsJoint>();
+        auto& jref = *joint;
+        chunk->Read("id", &jref.id);
+        chunk->Read("type", &jref.type);
+        chunk->Read("src_node_id", &jref.src_node_id);
+        chunk->Read("dst_node_id", &jref.dst_node_id);
+        chunk->Read("src_node_anchor_point", &jref.src_node_anchor_point);
+        chunk->Read("dst_node_anchor_point", &jref.dst_node_anchor_point);
+        chunk->Read("name", &jref.name);
+        if (jref.type == PhysicsJointType::Distance)
+        {
+            DistanceJointParams params;
+            chunk->Read("damping", &params.damping);
+            chunk->Read("stiffness", &params.stiffness);
+            if (chunk->HasValue("min_dist"))
+            {
+                float value = 0.0f;
+                chunk->Read("min_dist", &value);
+                params.min_distance = value;
+            }
+            if (chunk->HasValue("max_dist"))
+            {
+                float value = 0.0f;
+                chunk->Read("max_dist", &value);
+                params.max_distance = value;
+            }
+            joint->params = params;
+        }
+        ret.mJoints.push_back(std::move(joint));
+    }
 
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
@@ -1056,7 +1262,7 @@ EntityClass EntityClass::Clone() const
     EntityClass ret;
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
-    // make a deep copy of the nodes.
+    // make a deep clone of the nodes.
     for (const auto& node : mNodes)
     {
         auto clone = std::make_unique<EntityNodeClass>(node->Clone());
@@ -1064,7 +1270,7 @@ EntityClass EntityClass::Clone() const
         ret.mNodes.push_back(std::move(clone));
     }
 
-    // make a deep copy of the animation tracks
+    // make a deep clone of the animation tracks
     for (const auto& track : mAnimationTracks)
     {
         auto clone = std::make_unique<AnimationTrackClass>(track->Clone());
@@ -1085,10 +1291,24 @@ EntityClass EntityClass::Clone() const
             actuator.SetNodeId(cloned_node->GetId());
         }
     }
-
+    // make a deep copy of the scripting variables.
     for (const auto& var : mScriptVars)
     {
         ret.mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
+    }
+
+    // make a deep clone of the joints.
+    for (const auto& joint : mJoints)
+    {
+        auto clone   = std::make_shared<PhysicsJoint>(*joint);
+        clone->id    = base::RandomString(10);
+        // map the src and dst node IDs.
+        const auto* old_src_node = FindNodeById(joint->src_node_id);
+        const auto* old_dst_node = FindNodeById(joint->dst_node_id);
+        ASSERT(old_src_node && old_dst_node);
+        clone->src_node_id = map[old_src_node]->GetId();
+        clone->dst_node_id = map[old_dst_node]->GetId();
+        ret.mJoints.push_back(std::move(clone));
     }
 
     ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityNodeClass* node) {
@@ -1103,15 +1323,16 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
         return *this;
 
     EntityClass tmp(other);
-    mClassId     = std::move(tmp.mClassId);
-    mName        = std::move(tmp.mName);
-    mIdleTrackId = std::move(tmp.mIdleTrackId);
-    mNodes       = std::move(tmp.mNodes);
-    mScriptVars  = std::move(tmp.mScriptVars);
-    mScriptFile  = std::move(tmp.mScriptFile);
-    mFlags       = std::move(tmp.mFlags);
-    mLifetime    = tmp.mLifetime;
-    mRenderTree  = tmp.mRenderTree;
+    mClassId         = std::move(tmp.mClassId);
+    mName            = std::move(tmp.mName);
+    mIdleTrackId     = std::move(tmp.mIdleTrackId);
+    mNodes           = std::move(tmp.mNodes);
+    mJoints          = std::move(tmp.mJoints);
+    mScriptVars      = std::move(tmp.mScriptVars);
+    mScriptFile      = std::move(tmp.mScriptFile);
+    mFlags           = std::move(tmp.mFlags);
+    mLifetime        = std::move(tmp.mLifetime);
+    mRenderTree      = std::move(tmp.mRenderTree);
     mAnimationTracks = std::move(tmp.mAnimationTracks);
     return *this;
 }
@@ -1119,7 +1340,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
 Entity::Entity(std::shared_ptr<const EntityClass> klass)
     : mClass(klass)
 {
-    std::unordered_map<const EntityNodeClass*, const EntityNode*> map;
+    std::unordered_map<const EntityNodeClass*, EntityNode*> map;
 
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
@@ -1131,8 +1352,10 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
         map[node_klass.get()] = node_inst.get();
         mNodes.push_back(std::move(node_inst));
     }
-
-    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const EntityNodeClass* node) {
+    // build render tree by mapping class entity node class objects
+    // to entity node instance objects
+    mRenderTree.FromTree(mClass->GetRenderTree(),
+        [&map](const EntityNodeClass* node) {
             return map[node];
         });
 
@@ -1142,6 +1365,23 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
         auto var = klass->GetSharedScriptVar(i);
         if (!var->IsReadOnly())
             mScriptVars.push_back(*var);
+    }
+
+    // create local joints by mapping the entity class joints from
+    // entity class nodes to entity nodes in this entity instance.
+    for (size_t i=0; i<mClass->GetNumJoints(); ++i)
+    {
+        const auto& joint_klass = mClass->GetSharedJoint(i);
+        const auto* klass_src_node = mClass->FindNodeById(joint_klass->src_node_id);
+        const auto* klass_dst_node = mClass->FindNodeById(joint_klass->dst_node_id);
+        ASSERT(klass_src_node && klass_dst_node);
+        auto* inst_src_node = map[klass_src_node];
+        auto* inst_dst_node = map[klass_dst_node];
+        ASSERT(inst_src_node && inst_dst_node);
+        PhysicsJoint joint(joint_klass,
+                           FastId(10),
+                           inst_src_node, inst_dst_node);
+        mJoints.push_back(std::move(joint));
     }
 
     mInstanceId  = FastId(10);
@@ -1413,6 +1653,32 @@ bool Entity::HasBeenKilled() const
 
 bool Entity::HasBeenSpawned() const
 { return TestFlag(ControlFlags::Spawned); }
+
+const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
+{
+    return base::SafeIndex(mJoints, index);
+}
+
+const Entity::PhysicsJoint* Entity::FindJointById(const std::string& id) const
+{
+    for (const auto& joint : mJoints)
+    {
+        if (joint.GetId() == id)
+            return &joint;
+    }
+    return nullptr;
+}
+
+const Entity::PhysicsJoint* Entity::FindJointByNodeId(const std::string& id) const
+{
+    for (const auto& joint : mJoints)
+    {
+        if (joint.GetSrcId() == id ||
+            joint.GetDstId() == id)
+            return &joint;
+    }
+    return nullptr;
+}
 
 const ScriptVar* Entity::FindScriptVarByName(const std::string& name) const
 {

@@ -1093,14 +1093,106 @@ namespace game
             WantsMouseEvents,
         };
 
+        enum class PhysicsJointType {
+            Distance
+        };
+
+        struct DistanceJointParams {
+            std::optional<float> min_distance;
+            std::optional<float> max_distance;
+            float stiffness = 0.0f;
+            float damping   = 0.0f;
+            DistanceJointParams()
+            {
+                min_distance.reset();
+                max_distance.reset();
+            }
+        };
+
+        using PhysicsJointParams = std::variant<DistanceJointParams>;
+
+        // PhysicsJoint defines an optional physics engine constraint
+        // between two bodies in the physics world. In other words
+        // between two entity nodes that both have a rigid body
+        // attachment. The two entity nodes are identified by their
+        // node IDs. The distinction between "source" and "destination"
+        // is arbitrary and not relevant.
+        struct PhysicsJoint {
+            // The type of the joint.
+            PhysicsJointType type = PhysicsJointType::Distance;
+            // The source node ID.
+            std::string src_node_id;
+            // The destination node ID.
+            std::string dst_node_id;
+            // the anchor point within the body
+            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
+            // the anchor point within the body.
+            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
+            // ID of this joint.
+            std::string id;
+            // human-readable name of the joint.
+            std::string name;
+            // PhysicsJoint parameters (depending on the type)
+            PhysicsJointParams params;
+        };
+
         EntityClass();
         EntityClass(const EntityClass& other);
 
         // Add a new node to the entity.
         // Returns a pointer to the node that was added to the entity.
+        // The returned EntityNodeClass object pointer is only guaranteed
+        // to be valid until the next call to AddNode/Delete. It is not
+        // safe for the caller to hold on to it long term. Instead, the
+        // assumed use of the pointer is to simplify for example calling
+        // LinkChild for linking the node to the entity's render tree.
         EntityNodeClass* AddNode(const EntityNodeClass& node);
         EntityNodeClass* AddNode(EntityNodeClass&& node);
         EntityNodeClass* AddNode(std::unique_ptr<EntityNodeClass> node);
+
+        // PhysicsJoint lifetimes.
+        // For any API function returning a PhysicsJoint* (or const PhysicsJoint*) it's
+        // safe to assume that the returned object pointer is valid only
+        // until the next call to modify the list of joints. I.e. any call to
+        // AddJoint or DeleteJoint can invalidate any previously returned PhysicsJoint*
+        // pointer. The caller should not hold on to these pointers long term.
+
+        // Add a new joint definition linking 2 entity nodes with rigid bodies
+        // together using a physics joint. The joints must refer to valid nodes
+        // that already exist (i.e. the src and dst node class IDst must be valid).
+        PhysicsJoint* AddJoint(const PhysicsJoint& joint);
+        PhysicsJoint* AddJoint(PhysicsJoint&& joint);
+        // Respecify the details of a joint at the given index.
+        void SetJoint(size_t index, const PhysicsJoint& joint);
+        void SetJoint(size_t index, PhysicsJoint&& joint);
+        // Get the joint at the given index. The index must be valid.
+        PhysicsJoint& GetJoint(size_t index);
+        // Find a joint by the given joint ID. Returns nullptr if no
+        // such joint could be found.
+        PhysicsJoint* FindJointById(const std::string& id);
+        // Find a joint by a node id, i.e. when the joint specifies a
+        // connection between either src or dst node having the given
+        // node ID. In case of multiple joints connecting between the
+        // same nodes the returned node is the first one found.
+        PhysicsJoint* FindJointByNodeId(const std::string& id);
+        // Get the joint at the given index. The index must be valid.
+        const PhysicsJoint& GetJoint(size_t index) const;
+        // Find a joint by the given joint ID. Returns nullptr if no
+        // such joint could be found.
+        const PhysicsJoint* FindJointById(const std::string& id) const;
+        // Find a joint by a node id, i.e. when the joint specifies a
+        // connection between either src or dst node having the given
+        // node ID. In case of multiple joints connecting between the
+        // same nodes the returned node is the first one found.
+        const PhysicsJoint* FindJointByNodeId(const std::string& id) const;
+        // Delete a joint by the given ID.
+        void DeleteJointById(const std::string& id);
+        // Delete a joint by the given index. The index must be valid.
+        void DeleteJoint(std::size_t index);
+        // todo:
+        void DeleteInvalidJoints();
+        // todo:
+        void FindInvalidJoints(std::vector<PhysicsJoint*>* invalid);
 
         // Get the node by index. The index must be valid.
         EntityNodeClass& GetNode(size_t index);
@@ -1282,6 +1374,8 @@ namespace game
         { return mAnimationTracks.size(); }
         std::size_t GetNumScriptVars() const
         { return mScriptVars.size(); }
+        std::size_t GetNumJoints() const
+        { return mJoints.size(); }
         const std::string& GetId() const
         { return mClassId; }
         const std::string& GetIdleTrackId() const
@@ -1301,6 +1395,8 @@ namespace game
         { return mAnimationTracks[index]; }
         std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const
         { return mScriptVars[index]; }
+        std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const
+        { return mJoints[index]; }
 
         // Serialize the entity into JSON.
         void IntoJson(data::Writer& data) const;
@@ -1323,6 +1419,8 @@ namespace game
         std::vector<std::shared_ptr<AnimationTrackClass>> mAnimationTracks;
         // the list of nodes that belong to this entity.
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
+        // the list of joints that belong to this entity.
+        std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
         // The render tree for hierarchical traversal and
         // transformation of the entity and its nodes.
         RenderTree mRenderTree;
@@ -1388,7 +1486,6 @@ namespace game
             EnableLogging
         };
         using Flags = EntityClass::Flags;
-
         using RenderTree      = game::RenderTree<EntityNode>;
         using RenderTreeNode  = EntityNode;
         using RenderTreeValue = EntityNode;
@@ -1491,6 +1588,56 @@ namespace game
         // Returns true the spawn control flag has been set.
         bool HasBeenSpawned() const;
 
+        using PhysicsJointClass = EntityClass::PhysicsJoint;
+        using PhysicsJointType  = EntityClass::PhysicsJointType;
+        using PhysicsJointParams = EntityClass::PhysicsJointParams;
+        class PhysicsJoint
+        {
+        public:
+            PhysicsJoint(const std::shared_ptr<const PhysicsJointClass>& joint,
+                         std::string joint_id,
+                         EntityNode* src_node,
+                         EntityNode* dst_node)
+              : mClass(joint)
+              , mId(std::move(joint_id))
+              , mSrcNode(src_node)
+              , mDstNode(dst_node)
+            {}
+            PhysicsJointType GetType() const
+            { return mClass->type; }
+            const EntityNode* GetSrcNode() const
+            { return mSrcNode; }
+            const EntityNode* GetDstNode() const
+            { return mDstNode; }
+            const std::string& GetSrcId() const
+            { return mDstNode->GetId(); }
+            const std::string& GetDstId() const
+            { return mDstNode->GetId(); }
+            const std::string& GetId() const
+            { return mId; }
+            const std::string& GetName() const
+            { return mClass->name; }
+            const glm::vec2& GetSrcAnchorPoint() const
+            { return mClass->src_node_anchor_point; }
+            const glm::vec2& GetDstAnchorPoint() const
+            { return mClass->dst_node_anchor_point; }
+            const PhysicsJointClass* operator->() const
+            { return mClass.get(); }
+            const PhysicsJointClass& GetClass() const
+            { return *mClass; }
+            const PhysicsJointParams& GetParams() const
+            { return mClass->params; }
+        private:
+            std::shared_ptr<const PhysicsJointClass> mClass;
+            std::string mId;
+            EntityNode* mSrcNode = nullptr;
+            EntityNode* mDstNode = nullptr;
+        };
+
+        const PhysicsJoint& GetJoint(std::size_t index) const;
+        const PhysicsJoint* FindJointById(const std::string& id) const;
+        const PhysicsJoint* FindJointByNodeId(const std::string& id) const;
+
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
         // Note that the const here only implies that the object
@@ -1536,6 +1683,8 @@ namespace game
         { return mInstanceName; }
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
+        std::size_t GetNumJoints() const
+        { return mJoints.size(); }
         int GetLayer() const
         { return mLayer; }
         bool TestFlag(ControlFlags flag) const
@@ -1572,6 +1721,8 @@ namespace game
         // the list of script variables. read-only ones can
         // be shared between all instances and the EntityClass.
         std::vector<ScriptVar> mScriptVars;
+        // list of physics joints between nodes with rigid bodies.
+        std::vector<PhysicsJoint> mJoints;
         // the render tree for hierarchical traversal and transformation
         // of the entity and its nodes.
         RenderTree mRenderTree;

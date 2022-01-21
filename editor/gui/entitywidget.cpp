@@ -50,6 +50,7 @@
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgmaterialparams.h"
+#include "editor/gui/dlgjoint.h"
 #include "editor/gui/clipboard.h"
 #include "base/assert.h"
 #include "base/format.h"
@@ -64,6 +65,77 @@
 
 namespace gui
 {
+
+class EntityWidget::JointModel : public QAbstractTableModel
+{
+public:
+    JointModel(EntityWidget::State& state) : mState(state)
+    {}
+    virtual QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto& joint = mState.entity->GetJoint(index.row());
+        const auto* src   = mState.entity->FindNodeById(joint.src_node_id);
+        const auto* dst   = mState.entity->FindNodeById(joint.dst_node_id);
+        if (role == Qt::DisplayRole)
+        {
+            switch (index.column()) {
+                case 0: return app::toString(joint.type);
+                case 1: return app::FromUtf8(joint.name);
+                case 2: return app::FromUtf8(src->GetName());
+                case 3: return app::FromUtf8(dst->GetName());
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            switch (section) {
+                case 0: return "Type";
+                case 1: return "Name";
+                case 2: return "Node";
+                case 3: return "Node";
+                default: BUG("Unknown script variable data index.");
+            }
+        }
+        return QVariant();
+    }
+    virtual int rowCount(const QModelIndex&) const override
+    {
+        return static_cast<int>(mState.entity->GetNumJoints());
+    }
+    virtual int columnCount(const QModelIndex&) const override
+    { return 4; }
+
+    void AddJoint(game::EntityClass::PhysicsJoint&& joint)
+    {
+        const auto count = static_cast<int>(mState.entity->GetNumJoints());
+        beginInsertRows(QModelIndex(), count, count);
+        mState.entity->AddJoint(std::move(joint));
+        endInsertRows();
+    }
+    void EditJoint(size_t row, game::EntityClass::PhysicsJoint&& joint)
+    {
+        mState.entity->SetJoint(row, std::move(joint));
+        emit dataChanged(index(row, 0), index(row, 4));
+    }
+    void DeleteJoint(size_t row)
+    {
+        beginRemoveRows(QModelIndex(), row, row);
+        mState.entity->DeleteJoint(row);
+        endRemoveRows();
+    }
+
+    void Reset()
+    {
+        beginResetModel();
+        endResetModel();
+    }
+private:
+    EntityWidget::State& mState;
+};
 
 class EntityWidget::ScriptVarModel : public QAbstractTableModel
 {
@@ -144,7 +216,8 @@ private:
                 return var.GetValue<int>();
             case game::ScriptVar::Type::Vec2: {
                 const auto& val = var.GetValue<glm::vec2>();
-                return QString("%1,%2").arg(QString::number(val.x, 'f', 2))
+                return QString("%1,%2")
+                        .arg(QString::number(val.x, 'f', 2))
                         .arg(QString::number(val.y, 'f', 2));
             }
         }
@@ -301,9 +374,11 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mScriptVarModel.reset(new ScriptVarModel(mState));
+    mJointModel.reset(new JointModel(mState));
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
+    mUI.jointList->setModel(mJointModel.get());
     QHeaderView* verticalHeader = mUI.scriptVarList->verticalHeader();
     verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
     verticalHeader->setDefaultSectionSize(16);
@@ -407,6 +482,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     DisplayCurrentCameraLocation();
 
     mScriptVarModel->Reset();
+    mJointModel->Reset();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
@@ -555,6 +631,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     DisplayCurrentCameraLocation();
 
     mScriptVarModel->Reset();
+    mJointModel->Reset();
     mRenderTree.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
@@ -747,6 +824,7 @@ void EntityWidget::Undo()
     mState.view->Rebuild();
     mUndoStack.pop_back();
     mScriptVarModel->Reset();
+    mJointModel->Reset();
     DisplayCurrentNodeProperties();
     NOTE("Undo!");
 }
@@ -1340,6 +1418,48 @@ void EntityWidget::on_btnDeleteScriptVar_clicked()
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 }
 
+void EntityWidget::on_btnNewJoint_clicked()
+{
+    game::EntityClass::PhysicsJoint joint;
+    joint.id = base::RandomString(10);
+    DlgJoint dlg(this, *mState.entity, joint);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mJointModel->AddJoint(std::move(joint));
+    SetEnabled(mUI.btnEditJoint, true);
+    SetEnabled(mUI.btnDeleteJoint, true);
+}
+void EntityWidget::on_btnEditJoint_clicked()
+{
+    auto items = mUI.jointList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    auto joint = mState.entity->GetJoint(index.row());
+    DlgJoint dlg(this, *mState.entity, joint);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mJointModel->EditJoint(index.row(), std::move(joint));
+
+}
+void EntityWidget::on_btnDeleteJoint_clicked()
+{
+    auto items = mUI.jointList->selectionModel()->selectedRows();
+    if (items.isEmpty())
+        return;
+
+    // single selection for now.
+    const auto index = items[0];
+    mJointModel->DeleteJoint(index.row());
+    const auto joints = mState.entity->GetNumJoints();
+    SetEnabled(mUI.btnEditJoint, joints > 0);
+    SetEnabled(mUI.btnDeleteJoint, joints > 0);
+}
+
 void EntityWidget::on_btnSelectMaterial_clicked()
 {
     if (auto* node = GetCurrentNode())
@@ -1720,6 +1840,10 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
         node->SetRigidBody(body);
         DEBUG("Added rigid body to '%1'", node->GetName());
     }
+
+    mState.entity->DeleteInvalidJoints();
+    mJointModel->Reset();
+    DisplayEntityProperties();
     DisplayCurrentNodeProperties();
 }
 
@@ -1899,8 +2023,9 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
 
     // apply the view transformation. The view transformation is not part of the
-    // animation per-se but it's the transformation that transforms the animation
-    // and its components from the space of the animation to the global space.
+    // entity per-se, but it's the transformation that transforms the entity
+    // and its nodes from the entity space to the view space, i.e. relative to
+    // the current viewport/view offset
     gfx::Transform view;
     view.Push();
     view.Scale(xs, ys);
@@ -1918,15 +2043,32 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     hook.SetDrawVectors(true);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
 
-    // begin the animation transformation space
+    // begin the entity transformation space
     view.Push();
+        // Draw entity
         mState.renderer.BeginFrame();
         mState.renderer.Draw(*mState.entity, painter, view, &hook);
         mState.renderer.EndFrame();
+        // Draw joints, drawn in the entity space.
+        for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
+        {
+            const auto& joint = mState.entity->GetJoint(i);
+            if (joint.type == game::EntityClass::PhysicsJointType::Distance)
+            {
+                const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
+                const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
+                const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
+                const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
+                const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
+                const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
+                DrawLine(view, src_point, dst_point, painter);
+            }
+        }
     view.Pop();
 
     if (mCurrentTool)
         mCurrentTool->Render(painter, view);
+
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
@@ -2164,11 +2306,14 @@ void EntityWidget::DisplayEntityProperties()
     SetList(mUI.trackList, tracks);
     SetList(mUI.idleTrack, tracks);
 
-    const auto vars = mState.entity->GetNumScriptVars();
+    const auto vars   = mState.entity->GetNumScriptVars();
+    const auto joints = mState.entity->GetNumJoints();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteTrack, false);
     SetEnabled(mUI.btnEditTrack, false);
+    SetEnabled(mUI.btnEditJoint, joints > 0);
+    SetEnabled(mUI.btnDeleteJoint, joints > 0);
 
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityID, mState.entity->GetId());

@@ -229,6 +229,9 @@ add_executable(GSEditor
     editor/gui/dlgabout.h
     editor/gui/dlgabout.ui
     editor/gui/dlgabout.cpp
+    editor/gui/dlgjoint.h
+    editor/gui/dlgjoint.ui
+    editor/gui/dlgjoint.cpp
     editor/gui/dlgsettings.h
     editor/gui/dlgsettings.ui
     editor/gui/dlgsettings.cpp

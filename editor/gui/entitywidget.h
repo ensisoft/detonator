@@ -119,6 +119,9 @@ namespace gui
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
+        void on_btnNewJoint_clicked();
+        void on_btnEditJoint_clicked();
+        void on_btnDeleteJoint_clicked();
         void on_btnSelectMaterial_clicked();
         void on_btnMaterialParams_clicked();
         void on_trackList_itemSelectionChanged();
@@ -223,6 +226,7 @@ namespace gui
     private:
         class PlaceShapeTool;
         class ScriptVarModel;
+        class JointModel;
         enum class PlayState {
             Playing, Paused, Stopped
         };
@@ -243,6 +247,7 @@ namespace gui
         std::unique_ptr<TreeModel> mRenderTree;
         std::unique_ptr<MouseTool> mCurrentTool;
         std::unique_ptr<ScriptVarModel> mScriptVarModel;
+        std::unique_ptr<JointModel> mJointModel;
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mEntityTime   = 0.0;

@@ -612,6 +612,9 @@ void InitDoc()
     DOC_PROPERTY("string", "type", "Type of the action in question.");
     DOC_PROPERTY("int|float|bool|string", "value", "The value associated with the action.");
 
+    DOC_TABLE("game");
+    DOC_PROPERTY("glm.vec2", "X", "Unit length X vector. Defined as glm.vec2(1.0, 0.0)");
+    DOC_PROPERTY("glm.vec2", "Y", "Unit length Y vector. Defined as glm.vec2(0.0, 1.0)");
 
     DOC_TABLE("game.ClassLibrary");
     DOC_METHOD_1("game.EntityClass", "FindEntityClassByName", "Find an entity class by name.<br>"
@@ -836,6 +839,11 @@ void InitDoc()
                  "game.Entity", "entity");
     DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
                  "game.Entity", "entity", "game.EntityNode", "node");
+    DOC_METHOD_3("glm.vec2", "MapEntityNodeVector", "Map a a direction vector relative to entity node coordinate basis into scene/world space.<br>"
+                                                    "The resulting vector is not not translated unit length direction vector in world space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
+    DOC_METHOD_3("base.FPoint", "MapEntityNodePoint", "Map a point relative to entity node coordinate space into world space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
@@ -871,6 +879,20 @@ void InitDoc()
                  "string|game.EntityNode", "id|node");
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the current scaling coefficient for scaling game units to physics world.");
     DOC_METHOD_0("glm.vec2", "GetGravity", "Get the current physics world gravity vector.");
+    DOC_METHOD_0("float", "GetTimeStep", "Get the current time step (in seconds) taken on every simulation step.<br>"
+                                         "This value is the 1.0/updates where updates is the number of engine updates taken per second.<br>");
+    DOC_METHOD_0("unsigned", "GetNumPositionIterations", "Get the number of position iterations taken on every physics update.<br>"
+                                                    "This value can be changed in the project|engine settings.");
+    DOC_METHOD_0("unsigned", "GetNumVelocityIterations", "Get the number of velocity iterations taken on every physics update.<br>"
+                                                    "This value can be changed in the project|engine settings.");
+    DOC_METHOD_1("glm.vec2", "MapVectorFromGame", "Map a vector from the game/world space into physics world.",
+                 "glm.vec2", "vector");
+    DOC_METHOD_1("glm.vec2", "MapVectorToGame", "Map a vector from physics world into game world",
+                 "glm.vec2", "vector");
+    DOC_METHOD_1("float", "MapAngleFromGame", "Map an angle (in radians) from game world into physics world.",
+                 "float", "angle");
+    DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (in radians) from physics world into game world.",
+                 "float", "angle");
 
     DOC_TABLE("MouseEvent");
     DOC_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");

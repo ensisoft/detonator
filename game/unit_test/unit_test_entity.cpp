@@ -316,6 +316,25 @@ void unit_test_entity_class()
         entity.AddScriptVar(otherthing);
     }
 
+    // physics joint
+    {
+        game::EntityClass::PhysicsJoint joint;
+        joint.name = "test";
+        joint.dst_node_id = entity.GetNode(0).GetId();
+        joint.src_node_id = entity.GetNode(1).GetId();
+        joint.type        = game::EntityClass::PhysicsJointType::Distance;
+        joint.id          = base::RandomString(10);
+        joint.src_node_anchor_point = glm::vec2(-1.0f, 2.0f);
+        joint.dst_node_anchor_point = glm::vec2(2.0f, -1.0f);
+        game::EntityClass::DistanceJointParams params;
+        params.damping = 2.0f;
+        params.stiffness = 3.0f;
+        params.min_distance = 4.0f;
+        params.max_distance = 5.0f;
+        joint.params = params;
+        entity.AddJoint(std::move(joint));
+    }
+
     TEST_REQUIRE(entity.GetNumNodes() == 3);
     TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
     TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");
@@ -334,6 +353,9 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
     TEST_REQUIRE(entity.FindScriptVarByName("foobar") == nullptr);
     TEST_REQUIRE(entity.FindScriptVarByName("something"));
+    TEST_REQUIRE(entity.GetNumJoints() == 1);
+    TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
+    TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
 
     // test linking.
     entity.LinkChild(nullptr, entity.FindNodeByName("root"));
@@ -358,6 +380,20 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetNumTracks() == 2);
         TEST_REQUIRE(ret->FindAnimationTrackByName("test1"));
         TEST_REQUIRE(ret->GetNumScriptVars() == 2);
+        TEST_REQUIRE(ret->GetNumJoints() == 1);
+        TEST_REQUIRE(entity.GetJoint(0).name == "test");
+        TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
+        TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
+        TEST_REQUIRE(entity.GetJoint(0).src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
+        TEST_REQUIRE(entity.GetJoint(0).dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
+        const auto* joint_params = std::get_if<game::EntityClass::DistanceJointParams>(&entity.GetJoint(0).params);
+        TEST_REQUIRE(joint_params);
+        TEST_REQUIRE(joint_params->damping == real::float32(2.0f));
+        TEST_REQUIRE(joint_params->stiffness == real::float32(3.0f));
+        TEST_REQUIRE(joint_params->min_distance.has_value());
+        TEST_REQUIRE(joint_params->max_distance.has_value());
+        TEST_REQUIRE(joint_params->min_distance.value() == real::float32(4.0f));
+        TEST_REQUIRE(joint_params->max_distance.value() == real::float32(5.0f));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 

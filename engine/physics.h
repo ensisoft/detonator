@@ -112,7 +112,9 @@ namespace engine
         // Map an angle (in radians) from physics world to game world.
         float MapAngleToGame(float radians) const
         { return radians; }
-
+        // Map length (in game units) from game world to physics world.
+        float MapLengthFromGame(float length) const;
+        float MapLengthToGame(float meters) const;
         // Returns if we have a current world simulation.
         bool HaveWorld() const
         { return !!mWorld; }
