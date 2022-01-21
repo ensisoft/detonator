@@ -1258,6 +1258,12 @@ void BindUtil(sol::state& L)
     util["GetScaleFromMatrix"]       = &GetScaleFromMatrix;
     util["GetTranslationFromMatrix"] = &GetTranslationFromMatrix;
     util["RotateVector"]             = &RotateVector;
+    util["ToVec2"] = [](const base::FPoint& point) {
+        return glm::vec2(point.GetX(), point.GetY());
+    };
+    util["ToPoint"] = [](const glm::vec2& vec2) {
+        return base::FPoint(vec2.x, vec2.y);
+    };
 
     // see comments at RandomEngine about why this is done.
     util["RandomSeed"] = &RandomEngine::Seed;
