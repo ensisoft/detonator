@@ -839,10 +839,10 @@ void InitDoc()
                  "game.Entity", "entity");
     DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
                  "game.Entity", "entity", "game.EntityNode", "node");
-    DOC_METHOD_3("glm.vec2", "MapEntityNodeVector", "Map a a direction vector relative to entity node coordinate basis into scene/world space.<br>"
+    DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a a directional vector relative to entity node coordinate basis into scene/world space.<br>"
                                                     "The resulting vector is not not translated unit length direction vector in world space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
-    DOC_METHOD_3("base.FPoint", "MapEntityNodePoint", "Map a point relative to entity node coordinate space into world space.",
+    DOC_METHOD_3("base.FPoint", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");

@@ -1156,7 +1156,7 @@ FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* no
     return FBox(transform.GetAsMatrix());
 }
 
-glm::vec2 Scene::MapEntityNodeVector(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
+glm::vec2 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
 {
     const auto& mat = FindEntityNodeTransform(entity, node);
     // we assume here that the vector represents a direction
@@ -1166,7 +1166,7 @@ glm::vec2 Scene::MapEntityNodeVector(const Entity* entity, const EntityNode* nod
     return glm::normalize(glm::vec2(ret.x, ret.y));
 }
 
-FPoint Scene::MapEntityNodePoint(const Entity* entity, const EntityNode* node, const FPoint& point) const
+FPoint Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const FPoint& point) const
 {
     const auto& mat = FindEntityNodeTransform(entity, node);
     const auto& ret = mat * glm::vec4(point.GetY(), point.GetY(), 1.0f, 1.0f);
