@@ -182,6 +182,8 @@ void InitDoc()
                  "glm.vec2", "matrix");
     DOC_METHOD_2("glm.vec2", "RotateVector",  "Transform a vector through a rotation matrix based on the given angle in radians.",
                  "glm.vec2", "vector", "float", "angle");
+    DOC_METHOD_1("glm.vec2", "ToVec2", "glm.vec2 conversion helper", "base.FPoint", "point");
+    DOC_METHOD_1("base.FPoint", "ToPoint", "base.FPoint conversion  helper", "glm.vec2", "vec2");
 
     DOC_METHOD_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
                                      "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
