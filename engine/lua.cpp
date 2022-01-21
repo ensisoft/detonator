@@ -1958,8 +1958,8 @@ void BindGameLib(sol::state& L)
     scene["SpawnEntity"]              = &Scene::SpawnEntity;
     scene["FindEntityTransform"]      = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]  = &Scene::FindEntityNodeTransform;
-    scene["MapEntityNodeVector"]      = &Scene::MapEntityNodeVector;
-    scene["MapEntityNodePoint"]       = &Scene::MapEntityNodePoint;
+    scene["MapVectorFromEntityNode"]  = &Scene::MapVectorFromEntityNode;
+    scene["MapPointFromEntityNode"]   = &Scene::MapPointFromEntityNode;
     scene["GetTime"]                  = &Scene::GetTime;
     scene["GetClassName"]             = &Scene::GetClassName;
     scene["GetClassId"]               = &Scene::GetClassId;
