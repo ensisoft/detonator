@@ -313,7 +313,7 @@ namespace base
                 }
 
                 // split the rect into 4 smaller quadrants
-                const auto [q0, q1, q2, q3] = mRect.Quadrants();
+                const auto [q0, q1, q2, q3] = mRect.GetQuadrants();
                 const base::FRect quadrant_rects[4] = {
                         q0, q1, q2, q3
                 };

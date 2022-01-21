@@ -379,7 +379,7 @@ void unit_test_quadtree_insert_query()
         rect.Move(60.0f, 60.0f);
         TEST_REQUIRE(tree.Insert(rect, &objects[3]));
 
-        // Quadrants
+        // GetQuadrants
         // _____________
         // |  0  |  2  |
         // |_____|_____|
@@ -615,7 +615,7 @@ void unit_test_quadtree_insert_query()
 
 void unit_test_quadtree_erase()
 {
-    // Quadrants
+    // GetQuadrants
     // _____________
     // |  0  |  2  |
     // |_____|_____|
