@@ -321,7 +321,7 @@ namespace base
             return Rect<unsigned>(x, y, w, h);
         }
         // Split the rect into 4 sub-quadrants.
-        std::tuple<Rect, Rect, Rect, Rect> Quadrants() const
+        std::tuple<Rect, Rect, Rect, Rect> GetQuadrants() const
         {
             const auto half = T(2);
             const auto half_width = mWidth/half;
@@ -333,7 +333,7 @@ namespace base
             return {r0, r1, r2, r3};
         }
         // Get the 4 corners of the rectangle.
-        std::tuple<PointT, PointT, PointT, PointT> Corners() const
+        std::tuple<PointT, PointT, PointT, PointT> GetCorners() const
         {
             const PointT p0(mX, mY);
             const PointT p1(mX, mY+mHeight);
@@ -341,7 +341,7 @@ namespace base
             const PointT p3(mX+mWidth, mY+mHeight);
             return {p0, p1, p2, p3};
         }
-        PointT Center() const
+        PointT GetCenter() const
         {
             const auto half = T(2);
             return PointT(mX + mWidth/half, mY + mHeight/half);
@@ -363,7 +363,7 @@ namespace base
     {
         // if all the corners of B are within A then B
         // is completely within A
-        const auto [p0, p1, p2, p3] = b.Corners();
+        const auto [p0, p1, p2, p3] = b.GetCorners();
         if (!a.TestPoint(p0) || !a.TestPoint(p1) ||
             !a.TestPoint(p2) || !a.TestPoint(p3))
             return false;

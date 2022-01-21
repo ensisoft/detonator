@@ -966,7 +966,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
                     TEST_REQUIRE(result.find(&node) != result.end());
 
                     result.clear();
-                    scene->QuerySpatialNodes(node_rect.Center(), &result);
+                    scene->QuerySpatialNodes(node_rect.GetCenter(), &result);
                     TEST_REQUIRE(!result.empty());
                     TEST_REQUIRE(result.find(&node) != result.end());
                 }

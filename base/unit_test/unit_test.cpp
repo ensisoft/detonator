@@ -87,7 +87,7 @@ void unit_test_rect_quadrants()
 {
     {
         base::FRect rect(0.0f, 0.0f, 100.0f, 50.0f);
-        const auto [q0, q1, q2, q3] = rect.Quadrants();
+        const auto [q0, q1, q2, q3] = rect.GetQuadrants();
         TEST_REQUIRE(q0 == base::FRect(0.0f, 0.0f, 50.0f, 25.0f));
         TEST_REQUIRE(q1 == base::FRect(0.0f, 25.0f, 50.0f, 25.0f));
         TEST_REQUIRE(q2 == base::FRect(50.0f, 0.0f, 50.0f, 25.0f));
@@ -96,7 +96,7 @@ void unit_test_rect_quadrants()
 
     {
         base::FRect rect(-100.0f, -100.0f, 200.0f, 200.0f);
-        const auto [q0, q1, q2, q3] = rect.Quadrants();
+        const auto [q0, q1, q2, q3] = rect.GetQuadrants();
         TEST_REQUIRE(q0 == base::FRect(-100.0f, -100.0f, 100.0f, 100.0f));
         TEST_REQUIRE(q1 == base::FRect(-100.0f, 0.0f, 100.0f, 100.0f));
         TEST_REQUIRE(q2 == base::FRect(0.0f, -100.0f, 100.0f, 100.0f));
