@@ -1956,20 +1956,23 @@ void BindGameLib(sol::state& L)
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
        sol::meta_function::new_index, &SetScriptVar<Scene>);
-    scene["GetNumEntities"]           = &Scene::GetNumEntities;
-    scene["FindEntityByInstanceId"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
-    scene["FindEntityByInstanceName"] = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
-    scene["GetEntity"]                = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
-    scene["KillEntity"]               = &Scene::KillEntity;
-    scene["SpawnEntity"]              = &Scene::SpawnEntity;
-    scene["FindEntityTransform"]      = &Scene::FindEntityTransform;
-    scene["FindEntityNodeTransform"]  = &Scene::FindEntityNodeTransform;
-    scene["MapVectorFromEntityNode"]  = &Scene::MapVectorFromEntityNode;
-    scene["MapPointFromEntityNode"]   = &Scene::MapPointFromEntityNode;
-    scene["GetTime"]                  = &Scene::GetTime;
-    scene["GetClassName"]             = &Scene::GetClassName;
-    scene["GetClassId"]               = &Scene::GetClassId;
-    scene["QuerySpatialNodes"]        = sol::overload(
+    scene["GetTime"]                    = &Scene::GetTime;
+    scene["GetClassName"]               = &Scene::GetClassName;
+    scene["GetClassId"]                 = &Scene::GetClassId;
+    scene["GetNumEntities"]             = &Scene::GetNumEntities;
+    scene["GetEntity"]                  = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
+    scene["KillEntity"]                 = &Scene::KillEntity;
+    scene["SpawnEntity"]                = &Scene::SpawnEntity;
+    scene["FindEntityByInstanceId"]     = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
+    scene["FindEntityByInstanceName"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
+    scene["FindEntityTransform"]        = &Scene::FindEntityTransform;
+    scene["FindEntityNodeTransform"]    = &Scene::FindEntityNodeTransform;
+    scene["FindEntityBoundingRect"]     = &Scene::FindEntityBoundingRect;
+    scene["FindEntityNodeBoundingRect"] = &Scene::FindEntityNodeBoundingRect;
+    scene["FindEntityNodeBoundingBox"]  = &Scene::FindEntityNodeBoundingBox;
+    scene["MapVectorFromEntityNode"]    = &Scene::MapVectorFromEntityNode;
+    scene["MapPointFromEntityNode"]     = &Scene::MapPointFromEntityNode;
+    scene["QuerySpatialNodes"]          = sol::overload(
         [](Scene& scene, const base::FPoint& point) {
             std::set<EntityNode*> result;
             scene.QuerySpatialNodes(point, &result);

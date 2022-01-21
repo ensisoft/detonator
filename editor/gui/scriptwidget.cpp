@@ -844,6 +844,11 @@ void InitDoc()
                  "game.Entity", "entity");
     DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
                  "game.Entity", "entity", "game.EntityNode", "node");
+    DOC_METHOD_1("base.FRect", "FindEntityBoundingRect", "Find the axis aligned bounding box (AABB) for the entity in the scene.", "game.Entity", "entity");
+    DOC_METHOD_2("base.FRect", "FindEntityNodeBoundingRect", "Find the axis aligned bounding box (AABB) for the entity node in the scene",
+                 "game.Entity", "entity", "game.EntityNode", "node");
+    DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the oriented bounding box (OOB) for the entity node in the scene.",
+                 "game.Entity", "entity", "game.EntityNode", "node");
     DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a a directional vector relative to entity node coordinate basis into scene/world space.<br>"
                                                     "The resulting vector is not not translated unit length direction vector in world space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
