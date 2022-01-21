@@ -180,6 +180,9 @@ void InitDoc()
                  "glm.vec2", "matrix");
     DOC_METHOD_1("glm.vec2", "GetTranslationFromMatrix", "Get the translation component from the given matrix.",
                  "glm.vec2", "matrix");
+    DOC_METHOD_2("glm.vec2", "RotateVector",  "Transform a vector through a rotation matrix based on the given angle in radians.",
+                 "glm.vec2", "vector", "float", "angle");
+
     DOC_METHOD_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
                                      "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
                                      "int", "seed");
