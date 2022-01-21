@@ -296,7 +296,7 @@
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>Animation Tracks</string>
+         <string>Animation</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_18">
          <item>
@@ -341,19 +341,37 @@
                 <property name="text">
                  <string>New ...</string>
                 </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btnEditTrack">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Edit ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btnDeleteTrack">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Delete</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                 </property>
                </widget>
               </item>
@@ -366,7 +384,7 @@
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Script Variables</string>
+         <string>Scripting</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_19">
          <item>
@@ -420,6 +438,10 @@
                 <property name="text">
                  <string>New ...</string>
                 </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                </property>
                </widget>
               </item>
               <item>
@@ -430,6 +452,10 @@
                 <property name="text">
                  <string>Edit ...</string>
                 </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                </property>
                </widget>
               </item>
               <item>
@@ -439,6 +465,110 @@
                 </property>
                 <property name="text">
                  <string>Delete</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>Physics</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_23">
+         <item>
+          <widget class="QGroupBox" name="groupBox_6">
+           <property name="title">
+            <string>Rigid body joints</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_22">
+            <item>
+             <widget class="QTableView" name="jointList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderDefaultSectionSize">
+               <number>21</number>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnNewJoint">
+                <property name="text">
+                 <string>New ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnEditJoint">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Edit ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnDeleteJoint">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                 </property>
                </widget>
               </item>
@@ -2444,6 +2574,10 @@
   <tabstop>btnNewScriptVar</tabstop>
   <tabstop>btnEditScriptVar</tabstop>
   <tabstop>btnDeleteScriptVar</tabstop>
+  <tabstop>jointList</tabstop>
+  <tabstop>btnNewJoint</tabstop>
+  <tabstop>btnEditJoint</tabstop>
+  <tabstop>btnDeleteJoint</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
@@ -2520,6 +2654,8 @@
   <tabstop>tiBlink</tabstop>
   <tabstop>tiStatic</tabstop>
   <tabstop>tiText</tabstop>
+  <tabstop>spatialNode</tabstop>
+  <tabstop>spnShape</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

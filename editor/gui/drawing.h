@@ -33,6 +33,10 @@
 namespace gui
 {
 
+void DrawLine(const gfx::Transform& view,
+              const glm::vec2& src, const glm::vec2& dst,
+              gfx::Painter& painter);
+
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view);
 void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer);
 

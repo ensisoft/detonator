@@ -65,7 +65,10 @@ inline gfx::Color4f ToGfx(const QColor& color)
     const float b  = color.blueF();
     return gfx::Color4f(r, g, b, a);
 }
-
+inline gfx::FPoint ToGfx(const glm::vec2& p)
+{
+    return gfx::FPoint(p.x, p.y);
+}
 inline gfx::FPoint ToGfx(const QPoint& p)
 {
     return gfx::FPoint(p.x(), p.y());
@@ -1017,6 +1020,16 @@ template<typename Widget>
 inline int GetCount(Widget* widget)
 {
     return widget->count();
+}
+
+inline bool MustHaveInput(QComboBox* box)
+{
+    if (box->currentIndex() == -1)
+    {
+        box->setFocus();
+        return false;
+    }
+    return true;
 }
 
 inline bool MustHaveInput(QLineEdit* line)

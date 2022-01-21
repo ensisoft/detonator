@@ -33,6 +33,15 @@
 
 namespace gui
 {
+void DrawLine(const gfx::Transform& view,
+              const glm::vec2& src, const glm::vec2& dst,
+              gfx::Painter& painter)
+{
+    const auto& mat = view.GetAsMatrix();
+    const auto& s = mat * glm::vec4(src, 1.0f, 1.0f);
+    const auto& d = mat * glm::vec4(dst, 1.0f, 1.0f);
+    gfx::DrawLine(painter, gfx::FPoint(s.x, s.y), gfx::FPoint(d.x, d.y), gfx::Color::DarkYellow, 2.0f);
+}
 
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
 {
