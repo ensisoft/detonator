@@ -437,8 +437,8 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             if (joint->GetType() == b2JointType::e_distanceJoint)
             {
                 b2DistanceJoint* dj = static_cast<b2DistanceJoint*>(joint);
-                const auto& src_world_anchor = ToGlm(dj->GetAnchorA());
-                const auto& dst_world_anchor = ToGlm(dj->GetAnchorB());
+                const auto& src_world_anchor = MapVectorToGame(ToGlm(dj->GetAnchorA()));
+                const auto& dst_world_anchor = MapVectorToGame(ToGlm(dj->GetAnchorB()));
                 gfx::DrawLine(painter,
                     gfx::FPoint(src_world_anchor.x, src_world_anchor.y),
                     gfx::FPoint(dst_world_anchor.x, dst_world_anchor.y), gfx::Color::HotPink, 2.0f);
