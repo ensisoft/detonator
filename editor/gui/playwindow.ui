@@ -304,8 +304,20 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <addaction name="actionLogShowWarning"/>
     <addaction name="actionLogShowError"/>
    </widget>
+   <widget class="QMenu" name="menuSurface">
+    <property name="title">
+     <string>Surface</string>
+    </property>
+    <widget class="QMenu" name="menuResize">
+     <property name="title">
+      <string>Resize</string>
+     </property>
+    </widget>
+    <addaction name="menuResize"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuApplication"/>
+   <addaction name="menuSurface"/>
    <addaction name="menuLog"/>
    <addaction name="menuView"/>
   </widget>
@@ -608,6 +620,16 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="toolTip">
     <string>Open window event log</string>
+   </property>
+  </action>
+  <action name="action1920x1080">
+   <property name="text">
+    <string>1920x1080</string>
+   </property>
+  </action>
+  <action name="action1280x720">
+   <property name="text">
+    <string>1280x720</string>
    </property>
   </action>
  </widget>

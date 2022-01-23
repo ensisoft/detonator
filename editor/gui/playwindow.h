@@ -87,6 +87,7 @@ namespace gui
     private slots:
         void DoAppInit();
         void ActivateWindow();
+        void SelectResolution();
         void on_actionPause_toggled(bool val);
         void on_actionClose_triggered();
         void on_actionClearLog_triggered();
