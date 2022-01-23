@@ -1368,6 +1368,30 @@ void BindBase(sol::state& L)
     rect["Move"]           = (void(base::FRect::*)(float, float))&base::FRect::Move;
     rect["Translate"]      = (void(base::FRect::*)(float, float))&base::FRect::Translate;
     rect["IsEmpty"]        = &base::FRect::IsEmpty;
+    rect["TestPoint"]      = sol::overload(
+        [](const base::FRect& rect, float x, float y) {
+            return rect.TestPoint(x, y);
+        },
+        [](const base::FRect& rect, const FPoint& point) {
+            return rect.TestPoint(point);
+        });
+    rect["MapToGlobal"] = sol::overload(
+        [](const base::FRect& rect, float x, float y) {
+            return rect.MapToGlobal(x, y);
+        },
+        [](const base::FRect& rect, const FPoint& point) {
+            return rect.MapToGlobal(point);
+        });
+    rect["MapToLocal"] = sol::overload(
+        [](const base::FRect& rect, float x, float y) {
+            return rect.MapToLocal(x, y);
+        },
+        [](const base::FRect& rect, const FPoint& point) {
+            return rect.MapToLocal(point);
+        });
+    rect["GetQuadrants"]   = &base::FRect::GetQuadrants;
+    rect["GetCorners"]     = &base::FRect::GetCorners;
+    rect["GetCenter"]      = &base::FRect::GetCenter;
     rect["Combine"]        = &base::Union<float>;
     rect["Intersect"]      = &base::Intersect<float>;
     rect["TestIntersect"]  = &base::DoesIntersect<float>;
