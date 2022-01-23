@@ -1,0 +1,107 @@
+{
+    "6M7kjbtJOK": {
+    },
+    "7zQLUleDer": {
+    },
+    "9jMLWUyAWj": {
+    },
+    "ETnTKLXRXi": {
+    },
+    "Fwn9yS1gWF": {
+    },
+    "QCSIpWak63": {
+    },
+    "Xg0GdRiaQU": {
+    },
+    "XwQTFkhxPJ": {
+    },
+    "a8UWU1fUNZ": {
+    },
+    "dK1EdyK1h8": {
+    },
+    "dgq5ss7Iy9": {
+    },
+    "kpR98Mlxaz": {
+    },
+    "kppKkQuA0g": {
+    },
+    "lTi7YXjdsz": {
+    },
+    "project": {
+        "application_identifier": "I1ULdjZPMrzH",
+        "application_library_lin": "app://libGameEngine.so",
+        "application_library_win": "app://GameEngine.dll",
+        "application_name": "",
+        "application_version": "",
+        "audio_buffer_size": 20,
+        "audio_channels": "Stereo",
+        "audio_sample_rate": 44100,
+        "audio_sample_type": "Float32",
+        "canvas_height": 768,
+        "canvas_mode": "Default",
+        "canvas_width": 1024,
+        "clear_color": "4281486692",
+        "command_line_arguments": "",
+        "config_srgb": true,
+        "debug_draw": false,
+        "debug_font": "",
+        "debug_print_fps": false,
+        "debug_show_fps": false,
+        "debug_show_msg": false,
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "game_script": "game.lua",
+        "game_viewport_height": 800,
+        "game_viewport_width": 1000,
+        "grab_mouse": false,
+        "html5_developer_ui": false,
+        "logging_debug": false,
+        "logging_error": false,
+        "logging_info": false,
+        "logging_warn": false,
+        "mouse_pointer_drawable": "_block_cursor",
+        "mouse_pointer_hotspot": {
+            "x": 0,
+            "y": 0
+        },
+        "mouse_pointer_material": "_HotPink",
+        "mouse_pointer_size": {
+            "x": 20,
+            "y": 20
+        },
+        "mouse_pointer_units": "Pixels",
+        "mouse_pointer_visible": false,
+        "multisample_sample_count": 4,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 0,
+        "phys_scale_x": 100,
+        "phys_scale_y": 100,
+        "save_window_geometry": false,
+        "ticks_per_second": 1,
+        "updates_per_second": 60,
+        "use_gamehost_process": true,
+        "webgl_antialias": true,
+        "webgl_power_preference": "HighPerf",
+        "window_can_resize": true,
+        "window_cursor": true,
+        "window_has_border": true,
+        "window_height": 768,
+        "window_mode": "Windowed",
+        "window_vsync": true,
+        "window_width": 1024,
+        "working_folder": "${workspace}"
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_delete_prev": true,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_output_dir": "ws://dist",
+        "packing_param_resize_large_textures": true,
+        "packing_param_tex_padding": 2,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
+    }
+}
