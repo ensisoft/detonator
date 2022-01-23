@@ -2339,10 +2339,10 @@ void MainWindow::ShowHelpWidget()
 {
     // todo: could build the demo setup here dynamically.
 
-    mUI.lblBanditDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/bandit"));
-    mUI.lblBlastDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/blast"));
-    mUI.lblBreakDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/breakout"));
-    mUI.lblPlaygroundDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/playground"));
+    //mUI.lblBanditDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/bandit"));
+    //mUI.lblBlastDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/blast"));
+    //mUI.lblBreakDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/breakout"));
+    //mUI.lblPlaygroundDir->setText(app::JoinPath(qApp->applicationDirPath(), "demos/playground"));
 
     if (mWorkspace && mCurrentWidget)
     {
