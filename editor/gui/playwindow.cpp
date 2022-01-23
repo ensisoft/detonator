@@ -439,6 +439,18 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
     mUI.problem->setVisible(false);
 
+    const auto& resolutions = app::ListResolutions();
+    for (unsigned i=0; i<resolutions.size(); ++i)
+    {
+        const auto& rez = resolutions[i];
+        QAction* action = mUI.menuResize->addAction(QString("%1 (%2x%3)")
+            .arg(rez.name)
+            .arg(rez.width)
+            .arg(rez.height));
+        action->setData(i);
+        connect(action, &QAction::triggered, this, &PlayWindow::SelectResolution);
+    }
+
     const auto& settings = mWorkspace.GetProjectSettings();
     setWindowTitle(settings.application_name);
     mLogger->SetLogTag(settings.application_name);
@@ -528,6 +540,7 @@ void PlayWindow::RunGameLoopOnce()
                 const auto& event = *it;
                 if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event)) {
                     mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+                    mEngine->DebugPrintString(base::FormatString("Surface resized to %1x%2", ptr->width, ptr->height));
                     ActivateWindow();
                 }
                 else if (const auto* ptr = std::get_if<wdk::WindowEventMouseRelease>(&event))
@@ -909,6 +922,16 @@ void PlayWindow::ActivateWindow()
     //mSurface->setKeyboardGrabEnabled(true);
     mSurface->raise();
     mSurface->requestActivate();
+}
+
+void PlayWindow::SelectResolution()
+{
+    auto* action = qobject_cast<QAction*>(sender());
+
+    const auto index = action->data().toUInt();
+    const auto& list = app::ListResolutions();
+    const auto& rez  = list[index];
+    ResizeSurface(rez.width, rez.height);
 }
 
 void PlayWindow::on_actionPause_toggled(bool val)
