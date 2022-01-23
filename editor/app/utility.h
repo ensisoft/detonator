@@ -52,6 +52,14 @@
 namespace app
 {
 
+struct Resolution {
+    QString name;
+    unsigned width  = 0;
+    unsigned height = 0;
+};
+
+std::vector<Resolution> ListResolutions();
+
  // move this somewhere else.
 struct ListItem {
     QString name;

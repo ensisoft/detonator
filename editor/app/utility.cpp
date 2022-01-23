@@ -57,6 +57,27 @@ QString ToNativeSeparators(QString p)
 namespace app
 {
 
+std::vector<Resolution> ListResolutions()
+{
+    // some resolutions from
+    // https://en.wikipedia.org/wiki/Graphics_display_resolution
+    static std::vector<Resolution> resolutions;
+    if (resolutions.empty())
+    {
+        resolutions.push_back({"FHD", 1920, 1080});
+        resolutions.push_back({"HD+", 1600, 900});
+        resolutions.push_back({"SHD", 1280, 720});
+        resolutions.push_back({"UXGA", 1600, 1200});
+        resolutions.push_back({"WXGA", 1366, 768});
+        resolutions.push_back({"SXGA", 1280, 1024});
+        resolutions.push_back({"XGA", 1024, 768});
+        resolutions.push_back({"SVGA", 800, 600});
+        resolutions.push_back({"WVGA", 768, 480});
+        resolutions.push_back({"VGA", 640, 480});
+    }
+    return resolutions;
+}
+
 std::uint64_t GetFileHash(const QString& file)
 {
     QFile stream(file);
