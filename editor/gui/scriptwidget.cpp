@@ -476,9 +476,9 @@ void InitDoc()
                  "string", "filename");
 
     DOC_TABLE("glm");
-    DOC_FUNCTION_2("glm.vec2", "dot", "Compute the dot product of the given vectors.", "glm.vec2", "a", "glm.vec2", "b");
-    DOC_FUNCTION_2("glm.vec3", "dot", "Compute the dot product of the given vectors.", "glm.vec3", "a", "glm.vec3", "b");
-    DOC_FUNCTION_2("glm.vec4", "dot", "Compute the dot product of the given vectors.", "glm.vec4", "a", "glm.vec4", "b");
+    DOC_FUNCTION_2("glm.vec2", "dot", "Compute the dot product between two vectors.", "glm.vec2", "a", "glm.vec2", "b");
+    DOC_FUNCTION_2("glm.vec3", "dot", "Compute the dot product between two vectors.", "glm.vec3", "a", "glm.vec3", "b");
+    DOC_FUNCTION_2("glm.vec4", "dot", "Compute the dot product between two vectors.", "glm.vec4", "a", "glm.vec4", "b");
     DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec2", "vec");
     DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec3", "vec");
     DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec4", "vec");
