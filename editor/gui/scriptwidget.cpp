@@ -52,7 +52,11 @@ struct LuaMethodArg {
 
 };
 enum class LuaMemberType {
-    Property, Function, Method, MetaMethod
+    TableProperty,
+    ObjectProperty,
+    Function,
+    Method,
+    MetaMethod
 };
 
 struct LuaMemberDoc {
@@ -144,12 +148,12 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddProperty(const std::string& type, const std::string& name, const std::string& desc)
+void AddProperty(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Property;
+    doc.type  = type;
     doc.table = table_name;
-    doc.ret   = type;
+    doc.ret   = ret;
     doc.name  = name;
     doc.desc  = desc;
     g_method_docs.push_back(std::move(doc));
@@ -179,7 +183,8 @@ const LuaMemberDoc& GetLuaMethodDoc(size_t index)
 #define DOC_FUNCTION_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
 #define DOC_FUNCTION_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
 
-#define DOC_PROPERTY(type, name, desc) AddProperty(type, name, desc)
+#define DOC_TABLE_PROPERTY(type, name, desc) AddProperty(LuaMemberType::TableProperty, type, name, desc)
+#define DOC_OBJECT_PROPERTY(type, name, desc) AddProperty(LuaMemberType::ObjectProperty, type, name, desc)
 
 void InitDoc()
 {
@@ -341,7 +346,7 @@ void InitDoc()
     for (const auto& color : magic_enum::enum_values<base::Color>())
     {
         const std::string name(magic_enum::enum_name(color));
-        DOC_PROPERTY("int", name, base::FormatString("Color value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", name, base::FormatString("Color value for '%1'.", name));
     }
 
     DOC_TABLE("base.Color4f");
@@ -499,8 +504,8 @@ void InitDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec2", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec2", "normalize", "Return a normalized copy of the vector.");
-    DOC_PROPERTY("float", "x", "X component of the vector.");
-    DOC_PROPERTY("float", "y", "Y component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
 
     DOC_TABLE("glm.vec3");
     DOC_METHOD_0("glm.vec3", "new", "Construct a new glm.vec3.");
@@ -513,9 +518,9 @@ void InitDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec3", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec3", "normalize", "Return a normalized copy of the vector.");
-    DOC_PROPERTY("float", "x", "X component of the vector.");
-    DOC_PROPERTY("float", "y", "Y component of the vector.");
-    DOC_PROPERTY("float", "z", "Z component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
 
     DOC_TABLE("glm.vec4");
     DOC_METHOD_0("glm.vec4", "new", "Construct a new glm.vec3.");
@@ -528,10 +533,10 @@ void InitDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec4", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec4", "normalize", "Return a normalized copy of the vector.");
-    DOC_PROPERTY("float", "x", "X component of the vector.");
-    DOC_PROPERTY("float", "y", "Y component of the vector.");
-    DOC_PROPERTY("float", "z", "Z component of the vector.");
-    DOC_PROPERTY("float", "w", "W component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "w", "W component of the vector.");
 
     DOC_TABLE("wdk");
     DOC_FUNCTION_1("string", "KeyStr", "Convert a key value to a named key string.", "int", "key");
@@ -547,19 +552,19 @@ void InitDoc()
     for (const auto& key : magic_enum::enum_values<wdk::Keysym>())
     {
         const std::string name(magic_enum::enum_name(key));
-        DOC_PROPERTY("int", name, base::FormatString("Key value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", name, base::FormatString("Key value for '%1'.", name));
     }
     DOC_TABLE("wdk.Mods");
     for (const auto& mod : magic_enum::enum_values<wdk::Keymod>())
     {
         const std::string name(magic_enum::enum_name(mod));
-        DOC_PROPERTY("int", name, base::FormatString("Modifier value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", name, base::FormatString("Modifier value for '%1'.", name));
     }
     DOC_TABLE("wdk.Buttons");
     for (const auto& btn : magic_enum::enum_values<wdk::MouseButton>())
     {
         const std::string name(magic_enum::enum_name(btn));
-        DOC_PROPERTY("int", name, base::FormatString("Mouse button value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", name, base::FormatString("Mouse button value for '%1'.", name));
     }
 
     DOC_TABLE("uik");
@@ -640,14 +645,14 @@ void InitDoc()
                  "uik.Widget", "widget");
     DOC_METHOD_1("uik.Widget", "GetWidget", "Get a widget by the given index.", "int", "index");
     DOC_TABLE("uik.Action");
-    DOC_PROPERTY("string", "name", "Name of the widget that triggered the action.");
-    DOC_PROPERTY("string", "id", "ID of the widget that triggered the action.");
-    DOC_PROPERTY("string", "type", "Type of the action in question.");
-    DOC_PROPERTY("int|float|bool|string", "value", "The value associated with the action.");
+    DOC_TABLE_PROPERTY("string", "name", "Name of the widget that triggered the action.");
+    DOC_TABLE_PROPERTY("string", "id", "ID of the widget that triggered the action.");
+    DOC_TABLE_PROPERTY("string", "type", "Type of the action in question.");
+    DOC_TABLE_PROPERTY("int|float|bool|string", "value", "The value associated with the action.");
 
     DOC_TABLE("game");
-    DOC_PROPERTY("glm.vec2", "X", "Unit length X vector. Defined as glm.vec2(1.0, 0.0)");
-    DOC_PROPERTY("glm.vec2", "Y", "Unit length Y vector. Defined as glm.vec2(0.0, 1.0)");
+    DOC_TABLE_PROPERTY("glm.vec2", "X", "Unit length X vector. Defined as glm.vec2(1.0, 0.0)");
+    DOC_TABLE_PROPERTY("glm.vec2", "Y", "Unit length Y vector. Defined as glm.vec2(0.0, 1.0)");
 
     DOC_TABLE("game.ClassLibrary");
     DOC_METHOD_1("game.EntityClass", "FindEntityClassByName", "Find an entity class by name.<br>"
@@ -821,15 +826,15 @@ void InitDoc()
     DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
 
     DOC_TABLE("game.EntityArgs");
-    DOC_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");
-    DOC_PROPERTY("string", "name", "The instance name of the entity.");
-    DOC_PROPERTY("glm.vec2", "scale", "The scaling factor that will apply to all of the entity nodes.<br>"
+    DOC_OBJECT_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");
+    DOC_OBJECT_PROPERTY("string", "name", "The instance name of the entity.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "scale", "The scaling factor that will apply to all of the entity nodes.<br>"
                                       "Default is (1.0, 1.0).");
-    DOC_PROPERTY("glm.vec2", "position", "The initial position of the entity in the scene.<br>"
+    DOC_OBJECT_PROPERTY("glm.vec2", "position", "The initial position of the entity in the scene.<br>"
                                          "Default is (0.0, 0.0)");
-    DOC_PROPERTY("float", "rotation", "The initial rotation that will apply to the entity in the scene.<br>"
+    DOC_OBJECT_PROPERTY("float", "rotation", "The initial rotation that will apply to the entity in the scene.<br>"
                                       "Default is 0.0 (i.e no rotation).");
-    DOC_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
+    DOC_OBJECT_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
                                    "Default is true.");
 
     DOC_TABLE("game.SpatialQueryResultSet");
@@ -933,15 +938,15 @@ void InitDoc()
                  "float", "angle");
 
     DOC_TABLE("MouseEvent");
-    DOC_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
-    DOC_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
+    DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
                                             "Only valid when over_scene is true.");
-    DOC_PROPERTY("int", "button", "The mouse button value that was pressed.<br>"
+    DOC_OBJECT_PROPERTY("int", "button", "The mouse button value that was pressed.<br>"
                                   "For a list of available buttons see wdk.Buttons");
-    DOC_PROPERTY("int", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
+    DOC_OBJECT_PROPERTY("int", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
                                      "For a list of available modifiers see wdk.Mods.<br>"
                                      "For testing a modifier use wdk.TestMod(bits, key).");
-    DOC_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
+    DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
                                        "Indicates whether screen_coords are valid or not.");
 
     std::sort(g_method_docs.begin(), g_method_docs.end(),
@@ -1153,7 +1158,10 @@ R"(<div class="method" name="%1_%2" id="%1_%2">
         }
         else
         {
-            const auto& name = member.table + "." + member.name;
+            std::string name;
+            if (member.type == LuaMemberType::TableProperty)
+                name = member.table + "." + member.name;
+            else name = "obj." + member.name;
 
             stream << QString(
 R"(<div class="member" name="%1_%2" id="%1_%2">
