@@ -893,6 +893,9 @@ void InitDoc()
 
     DOC_TABLE("game.EntityArgs");
     DOC_OBJECT_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");
+    DOC_OBJECT_PROPERTY("string", "id", "The instance ID of the entity.<br>"
+                                        "The ID should be unique in the current scene across the entities and entity nodes.<br>"
+                                        "If no ID is set (id is an empty string) one will be generated when the entity is spawned.");
     DOC_OBJECT_PROPERTY("string", "name", "The instance name of the entity.");
     DOC_OBJECT_PROPERTY("glm.vec2", "scale", "The scaling factor that will apply to all of the entity nodes.<br>"
                                       "Default is (1.0, 1.0).");
