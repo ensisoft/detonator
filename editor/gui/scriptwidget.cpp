@@ -682,7 +682,7 @@ void InitDoc()
                  "float", "seconds");
     DOC_METHOD_1("void", "GrabMouse", "Request the host application to enable/disable mouse grabbing.", "bool", "grab");
     DOC_METHOD_1("void", "ShowMouse", "Request the host application to show/hide the OS mouse cursor.", "bool", "show");
-    DOC_METHOD_1("void", "ShowDebug", "Toggle debug messages on/off in the engine.", "bool", "on_off");
+    DOC_METHOD_1("void", "ShowDebug", "Toggle debug messages on/off in the engine.", "bool", "show");
     DOC_METHOD_1("void", "SetFullScreen", "Request the host application to toggle full screen mode.", "bool", "full_screen");
     DOC_METHOD_1("void", "BlockKeyboard", "Toggle blocking keyboard events on/off.<br>"
                                           "When keyboard block is enabled the keyboard events are coming from the OS are not processed,<br>"
@@ -824,10 +824,10 @@ void InitDoc()
     DOC_METHOD_0("string", "GetId", "Get the entity node's instance ID.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the entity node's class type.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity node's class type.");
-    DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to it's parent.");
+    DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to its parent.");
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the node's scaling factor that applies to this node and all of its children.");
     DOC_METHOD_0("float", "GetRotation", "Get the node's rotation relative to its parent.");
-    DOC_METHOD_0("bool", "HasRigidBody", "Checks whether the node has a rigid body item.");
+    DOC_METHOD_0("bool", "HasRigidBody", "Checks whether the node has a rigid body.");
     DOC_METHOD_0("bool", "HasTextItem", "Checks whether the node has a text item.");
     DOC_METHOD_0("bool", "HasDrawable", "Checks whether the node has a drawable item.");
     DOC_METHOD_0("bool", "HasSpatialNode", "Checks whether the node has a spatial indexing node.");
@@ -848,18 +848,18 @@ void InitDoc()
     DOC_METHOD_0("string", "GetName", "Get the entity class name.");
     DOC_METHOD_0("float", "GetLifetime", "Get the entity lifetime.");
     DOC_METHOD_0("bool|float|string|int|vec2", "index",
-                 "Lua index meta function.<br>"
+                 "Lua index meta method.<br>"
                  "The entity class's script variables are accessible as properties of the entity class object.<br>"
                  "For example a script variable named 'score' would be accessible as object.score.<br>");
 
     DOC_TABLE("game.Entity");
-    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
+    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The entity's script variables are accessible as properties of the entity object.<br>"
                                                         "For example a script variable named 'score' would be accessible as object.score.<br>");
-    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta function<br>"
+    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta method.<br>"
                                                            "The entity's script variables are accessible as properties of the entity object.<br>"
                                                            "For example a script variable named 'score' would be accessible as object.score.<br>"
-                                                           "object.score = 123");
+                                                           "Note that you cannot write to the variable if it is marked as 'Read Only'");
     DOC_METHOD_0("string", "GetName", "Get the entity's human readable name.");
     DOC_METHOD_0("string", "GetId", "Get the entity's instance ID.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the entity's class type.");
@@ -871,7 +871,7 @@ void InitDoc()
     DOC_METHOD_0("bool", "IsPlaying", "Checks whether the entity is currently playing an animation or not.");
     DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
     DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"
-                                          "Entities that have been killed will be deleted from the scene on the next iteration of game loop.");
+                                          "Entities that have been killed will be deleted from the scene at the end of this game loop.");
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
                                            "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index.", "int", "index");
@@ -914,25 +914,26 @@ void InitDoc()
     DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
 
     DOC_TABLE("game.Scene");
-    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta function.<br>"
+    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
-                                                        "For example a script variable named 'score' would be accessible as object.score.<br>");
-    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta function<br>"
+                                                        "For example a script variable named 'score' would be accessible as object.score.");
+    DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta method.<br>"
                                                              "The scene's script variables are accessible as properties of the scene object.<br>"
-                                                             "For example a script variable named 'score' would be accessible as object.score.<br>"
-                                                             "object.score = 123");
+                                                             "For example a script variable named 'score' would be accessible as object.score.");
     DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
                                                           "Returns nil if no such entity could be found.",
                  "string", "id");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceName", "Find an entity with the given instance name.<br>"
-                                                            "Returns nil if no such entity could be found.",
+                                                            "Returns nil if no such entity could be found.<br>"
+                                                            "In case of multiple entities with the same name the first one with a matching name is returned.<br>",
                  "string", "name");
     DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index.", "int", "index");
-    DOC_METHOD_1("void", "KillEntity", "Kill the entity. Killing an entity doesn't not immediately remove it from the scene but will only "
+    DOC_METHOD_1("void", "KillEntity", "Flag an entity for removal from the scene. <br>"
+                                       "Killing an entity doesn't not immediately remove it from the scene but will only "
                                        "set a flag that will indicate the new state of the entity. The entity will then continue to exist "
-                                       "for one more iteration of the game loop until it's deleted at the end of this iteration.<br>"
-                                       "This two step design allows any engine subsystems to realize and react to entities being killed.",
+                                       "for one more iteration of the game loop until it's deleted at the end of this *next* iteration.<br>"
+                                       "This two step design allows any engine subsystems (or game) to realize and react to entities being killed by looking at the kill flag state.",
                                        "game.Entity", "carcass");
     DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene. Spawning an entity doesn't immediately place it in the scene "
                                                "but will only add it to the list of objects to be spawned at the start of the next iteration of game loop."
@@ -949,9 +950,9 @@ void InitDoc()
     DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the oriented bounding box (OOB) for the entity node in the scene.",
                  "game.Entity", "entity", "game.EntityNode", "node");
     DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a a directional vector relative to entity node coordinate basis into scene/world space.<br>"
-                                                    "The resulting vector is not not translated unit length direction vector in world space.",
+                                                    "The resulting vector is not translated, unit length direction vector in world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
-    DOC_METHOD_3("base.FPoint", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world space.",
+    DOC_METHOD_3("base.FPoint", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
@@ -970,7 +971,7 @@ void InitDoc()
     DOC_METHOD_2("bool", "ApplyForceToCenter", "Apply force in Newtons to the center of the given physics node. <br>"
                                                "Returns true if force was applied otherwise false",
                  "string|game.EntityNode", "id|node", "glm.vec2", "force");
-    DOC_METHOD_2("bool", "SetLinearVelocity", "Immediately adjust the linear velocity (meters per second) of the rigid body to the given velocity value."
+    DOC_METHOD_2("bool", "SetLinearVelocity", "Immediately adjust the linear velocity (m/s) of the rigid body to the given velocity value."
                                               "Returns true if the velocity was adjusted otherwise false.",
                  "string|game.EntityNode", "id|node", "glm.vec2", "velocity");
 
@@ -994,13 +995,13 @@ void InitDoc()
                                                     "This value can be changed in the project|engine settings.");
     DOC_METHOD_0("unsigned", "GetNumVelocityIterations", "Get the number of velocity iterations taken on every physics update.<br>"
                                                     "This value can be changed in the project|engine settings.");
-    DOC_METHOD_1("glm.vec2", "MapVectorFromGame", "Map a vector from the game/world space into physics world.",
+    DOC_METHOD_1("glm.vec2", "MapVectorFromGame", "Map a vector from the game world space into physics world.",
                  "glm.vec2", "vector");
     DOC_METHOD_1("glm.vec2", "MapVectorToGame", "Map a vector from physics world into game world",
                  "glm.vec2", "vector");
-    DOC_METHOD_1("float", "MapAngleFromGame", "Map an angle (in radians) from game world into physics world.",
+    DOC_METHOD_1("float", "MapAngleFromGame", "Map an angle (radians) from game world into physics world.",
                  "float", "angle");
-    DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (in radians) from physics world into game world.",
+    DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (radians) from physics world into game world.",
                  "float", "angle");
 
     DOC_TABLE("MouseEvent");
