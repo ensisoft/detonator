@@ -191,6 +191,14 @@ void InitDoc()
     static bool done = false;
     if (done == true) return;
 
+    // global objects
+    DOC_TABLE("_G");
+    DOC_TABLE_PROPERTY("game.Audio", "Audio", "Global audio engine instance.");
+    DOC_TABLE_PROPERTY("game.Physics", "Physics", "Global physics engine instance.");
+    DOC_TABLE_PROPERTY("game.ClassLib", "ClassLib", "Global class library instance.");
+    DOC_TABLE_PROPERTY("game.KeyValueStore", "State", "Global key-value store instance.");
+    DOC_TABLE_PROPERTY("game.Engine", "Game", "Global game engine instance.");
+
     DOC_TABLE("util");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
                  "glm.mat4", "matrix");
@@ -655,6 +663,62 @@ void InitDoc()
     DOC_TABLE("game");
     DOC_TABLE_PROPERTY("glm.vec2", "X", "Unit length X vector. Defined as glm.vec2(1.0, 0.0)");
     DOC_TABLE_PROPERTY("glm.vec2", "Y", "Unit length Y vector. Defined as glm.vec2(0.0, 1.0)");
+    DOC_TABLE_PROPERTY("string", "home", "Platform specific filesystem path to game's 'home' folder.<br>"
+                                         "For example on Linux: /home/user/.GameStudio/<ID>");
+    DOC_TABLE_PROPERTY("string", "name", "Name of the game. See the project settings for how to change the name.");
+    DOC_TABLE_PROPERTY("string", "OS", "Name of the underlying operating system.<br>"
+                                       "One of 'LINUX', 'WIN32' or 'WASM'");
+    DOC_TABLE("game.Engine");
+    DOC_METHOD_1("void", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.",
+                 "game.SceneClass|string", "klass|name");
+    // todo: resume/suspend
+    DOC_METHOD_0("void", "Stop", "Stop play of the current scene. Will invoke EndPlay callbacks and game play cleanly.");
+    DOC_METHOD_1("void", "Quit", "Quit the game by asking the host application to exit.",
+                                 "int", "exit_code");
+    DOC_METHOD_1("void", "Delay", "Insert a time delay into the engine request queue. <br>"
+                                  "All the functions in the game.Engine interface are pushed into a queue and<br>"
+                                  "adding a delay will postpone the processing of all subsequent engine requests.<br>"
+                                  "For example if Delay(2.0) OpenUI('MyUI') the UI will be opened after 2 seconds.",
+                 "float", "seconds");
+    DOC_METHOD_1("void", "GrabMouse", "Request the host application to enable/disable mouse grabbing.", "bool", "grab");
+    DOC_METHOD_1("void", "ShowMouse", "Request the host application to show/hide the OS mouse cursor.", "bool", "show");
+    DOC_METHOD_1("void", "ShowDebug", "Toggle debug messages on/off in the engine.", "bool", "on_off");
+    DOC_METHOD_1("void", "SetFullScreen", "Request the host application to toggle full screen mode.", "bool", "full_screen");
+    DOC_METHOD_1("void", "BlockKeyboard", "Toggle blocking keyboard events on/off.<br>"
+                                          "When keyboard block is enabled the keyboard events are coming from the OS are not processed,<br>"
+                                          "and none of the entity/scene keyboard handlers are called.<br>"
+                                          "Note that this does not block low level keyboard polling such as wdk.TestKeyDown from working,<br>"
+                                          "but only *event* based keyboard processing is affected.",
+                 "bool", "block");
+    DOC_METHOD_1("void", "BlockMouse", "Toggle blocking mouse events on/off.<br>"
+                                       "When mouse block is enabled the mouse events coming from the OS are not processed<br>"
+                                       "and none of the entity/scene mouse event handlers are called.",
+                 "bool", "block");
+    DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
+    DOC_METHOD_0("void", "DebugClear", "Clear all previous debug prints from the game window.");
+    DOC_METHOD_1("uik.Window", "OpenUI", "Open a new uik.Window and place it on the top of the UI Window stack.<br>"
+                                         "The window will remain open until CloseUI is called.<br>"
+                                         "Returns a reference to the window that was opened so it's possible to use the<br>"
+                                         "returned window object to query for widgets etc. and set their initial values conveniently.",
+                 "uik.Window|string", "window|name");
+    DOC_METHOD_0("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.");
+    DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
+    DOC_METHOD_1("void", "ShowDeveloperUI", "Toggle developer UI visibility (when supported by the host app/platform.", "bool", "show");
+    DOC_METHOD_1("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
+                                        "This method is only available in the game main script.<br>"
+                                        "The initial viewport is a viewport without any dimensions.",
+                 "base.FRect", "viewport");
+    DOC_METHOD_4("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
+                                        "This method is only available in the game main script.<br>"
+                                        "The initial viewport is a viewport without any dimensions.",
+                 "float", "x", "float", "y", "float", "width", "float", "height");
+    DOC_METHOD_2("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
+                                        "This method is only available in the game main script.<br>"
+                                        "The initial viewport is a viewport without any dimensions.<br>"
+                                        "This function keeps the viewport at 0,0 and resizes it to the given width and height.",
+                 "float", "width", "float", "height");
+    DOC_METHOD_0("uik.Window", "GetTopUI", "Get the topmost UI Window from the window stack. If no window is currently open then nil is returned.<br>"
+                                           "This method is only available in the game main script.");
 
     DOC_TABLE("game.ClassLibrary");
     DOC_METHOD_1("game.EntityClass", "FindEntityClassByName", "Find an entity class by name.<br>"
