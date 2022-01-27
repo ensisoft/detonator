@@ -1253,6 +1253,8 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << QString("function OnMouseRelease(%1, mouse)\nend\n\n").arg(var);
     stream << "-- Called on mouse move events.\n";
     stream << QString("function OnMouseMove(%1, mouse)\nend\n\n").arg(var);
+    stream << "-- Called on game events.\n";
+    stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
 
     io.flush();
     io.close();
