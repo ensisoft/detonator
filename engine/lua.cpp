@@ -74,22 +74,22 @@ using namespace game;
 // exceptional condition. Normally in the engine code BUG is an
 // error made by the programmer of the engine and results in a
 // stack strace and a core dump. Logical error conditions are
-// conditions that the code needs to be prepared to deal with, e.g
+// conditions that the code needs to be prepared to deal with, e.g.
 // failed/mangled data in various content files, missing data files
-// etc. Finally exceptional conditions are conditions that happen
+// etc. Finally, exceptional conditions are conditions that happen
 // as some unexpected failure (most typically an underlying OS
 // resource allocation has failed). Exceptions are normally not
 // used for logical error conditions (oops, this texture file could
 // not be read etc.)
 //
-// However here when dealing with calls coming from the running game
+// However, here when dealing with calls coming from the running game
 // what could normally be considered a BUG in other parts of the
 // engine code may not be so here since the code here needs to be
 // prepared to deal with mistakes in the Lua code. (That being said
 // it's still possible that *this* code contains BUGS too)
 // For example: If an OOB array access is attempted it's normally a bug
-// in the calling code and triggers an ASSERT. However when coming from
-// a Lua it must be an expected condition. I.e we must expect that the
+// in the calling code and triggers an ASSERT. However, when coming from
+// a Lua it must be an expected condition. I.e. we must expect that the
 // Lua code will call us wrong and be prepared to deal with such situations.
 //
 // So what strategies are there for dealing with this?
@@ -101,16 +101,16 @@ using namespace game;
 // 3. raise a Lua error and let the caller either fail or use pcall
 //
 // It seems that the option number 3 is the most reasonable of these
-// i.e in case of any buggy calls coming from lua a lua error is raised
-// and then it's the callers responsibility to deal with that somehow
+// i.e. in case of any buggy calls coming from lua a lua error is raised,
+// and then it's the caller's responsibility to deal with that somehow
 // by for example wrapping the call inside pcall.
-// And for better or for worse an std exception can be used to indicate
+// And for better or for worse a std exception can be used to indicate
 // to sol that Lua error should be raised. (Quickly looking didn't see
 // another way of raising Lua errors, maybe it does exist but sol2 docs
-// are sucn an awful mess..)
+// are such an awful mess...)
 // The problem with the exceptions though is that when this code has
 // BUGS i.e. calls the sol2 API incorrectly for example sol2 will then
-// throw an exception. So that muddles the waters a bit unfortunately..
+// throw an exception. So that muddles the waters a bit, unfortunately...
 
 namespace {
 template<typename... Args>
