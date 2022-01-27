@@ -187,6 +187,8 @@ public:
         {
             const auto& dir = dirs[i];
             const auto& path = base::JoinPath(mContentPath, dir);
+            if (!base::FileExists(path))
+                continue;
             for (const auto& entry : std::filesystem::directory_iterator(path))
             {
                 if (!entry.is_regular_file())
