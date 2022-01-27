@@ -1962,6 +1962,7 @@ void BindGameLib(sol::state& L)
     entity["TestFlag"]             = &TestFlag<Entity>;
 
     auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());
+    entity_args["id"]       = sol::property(&EntityArgs::id);
     entity_args["class"]    = sol::property(&EntityArgs::klass);
     entity_args["name"]     = sol::property(&EntityArgs::name);
     entity_args["scale"]    = sol::property(&EntityArgs::scale);
