@@ -52,7 +52,7 @@ struct LuaMethodArg {
 
 };
 enum class LuaMemberType {
-    Property, Function
+    Property, Function, Method, MetaMethod
 };
 
 struct LuaMemberDoc {
@@ -71,10 +71,10 @@ void SetTable(const std::string& name)
     table_name = name;
 }
 
-void AddMethod(const std::string& ret, const std::string& name, const std::string& desc)
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Function;
+    doc.type  = type;
     doc.table = table_name;
     doc.ret   = ret;
     doc.name  = name;
@@ -82,11 +82,11 @@ void AddMethod(const std::string& ret, const std::string& name, const std::strin
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddMethod(const std::string& ret, const std::string& name, const std::string& desc,
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
                const std::string& arg0_type, const std::string& arg0_name)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Function;
+    doc.type  = type;
     doc.table = table_name;
     doc.ret   = ret;
     doc.name  = name;
@@ -94,12 +94,12 @@ void AddMethod(const std::string& ret, const std::string& name, const std::strin
     doc.args.push_back({arg0_name,  arg0_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(const std::string& ret, const std::string& name, const std::string& desc,
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
                const std::string& arg0_type, const std::string& arg0_name,
                const std::string& arg1_type, const std::string& arg1_name)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Function;
+    doc.type  = type;
     doc.table = table_name;
     doc.ret   = ret;
     doc.name  = name;
@@ -108,13 +108,13 @@ void AddMethod(const std::string& ret, const std::string& name, const std::strin
     doc.args.push_back({arg1_name,  arg1_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(const std::string& ret, const std::string& name, const std::string& desc,
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
                const std::string& arg0_type, const std::string& arg0_name,
                const std::string& arg1_type, const std::string& arg1_name,
                const std::string& arg2_type, const std::string& arg2_name)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Function;
+    doc.type  = type;
     doc.table = table_name;
     doc.ret   = ret;
     doc.name  = name;
@@ -125,14 +125,14 @@ void AddMethod(const std::string& ret, const std::string& name, const std::strin
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddMethod(const std::string& ret, const std::string& name, const std::string& desc,
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
                const std::string& arg0_type, const std::string& arg0_name,
                const std::string& arg1_type, const std::string& arg1_name,
                const std::string& arg2_type, const std::string& arg2_name,
                const std::string& arg3_type, const std::string& arg3_name)
 {
     LuaMemberDoc doc;
-    doc.type  = LuaMemberType::Function;
+    doc.type  = type;
     doc.table = table_name;
     doc.ret   = ret;
     doc.name  = name;
@@ -161,11 +161,24 @@ const LuaMemberDoc& GetLuaMethodDoc(size_t index)
 { return g_method_docs[index]; }
 
 #define DOC_TABLE(name) SetTable(name)
-#define DOC_METHOD_0(ret, name, desc) AddMethod(ret, name, desc)
-#define DOC_METHOD_1(ret, name, desc, a0type, a0name) AddMethod(ret, name, desc, a0type, a0name)
-#define DOC_METHOD_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(ret, name, desc, a0type, a0name, a1type, a1name)
-#define DOC_METHOD_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
-#define DOC_METHOD_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
+#define DOC_METHOD_0(ret, name, desc) AddMethod(LuaMemberType::Method, ret, name, desc)
+#define DOC_METHOD_1(ret, name, desc, a0type, a0name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name)
+#define DOC_METHOD_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name)
+#define DOC_METHOD_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
+#define DOC_METHOD_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
+
+#define DOC_META_METHOD_0(ret, name, desc) AddMethod(LuaMemberType::MetaMethod, ret, name, desc)
+#define DOC_META_METHOD_1(ret, name, desc, a0type, a0name) AddMethod(LuaMemberType::MetaMethod, ret, name, desc, a0type, a0name)
+#define DOC_META_METHOD_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(LuaMemberType::MetaMethod, ret, name, desc, a0type, a0name, a1type, a1name)
+#define DOC_META_METHOD_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(LuaMemberType::MetaMethod, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
+#define DOC_META_METHOD_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(LuaMemberType::MetaMethod, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
+
+#define DOC_FUNCTION_0(ret, name, desc) AddMethod(LuaMemberType::Function, ret, name, desc)
+#define DOC_FUNCTION_1(ret, name, desc, a0type, a0name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name)
+#define DOC_FUNCTION_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name, a1type, a1name)
+#define DOC_FUNCTION_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
+#define DOC_FUNCTION_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(LuaMemberType::Function, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
+
 #define DOC_PROPERTY(type, name, desc) AddProperty(type, name, desc)
 
 void InitDoc()
@@ -174,35 +187,35 @@ void InitDoc()
     if (done == true) return;
 
     DOC_TABLE("util");
-    DOC_METHOD_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
+    DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
                  "glm.mat4", "matrix");
-    DOC_METHOD_1("glm.vec2", "GetScaleFromMatrix", "Get the scale component from the given matrix.",
+    DOC_FUNCTION_1("glm.vec2", "GetScaleFromMatrix", "Get the scale component from the given matrix.",
                  "glm.vec2", "matrix");
-    DOC_METHOD_1("glm.vec2", "GetTranslationFromMatrix", "Get the translation component from the given matrix.",
+    DOC_FUNCTION_1("glm.vec2", "GetTranslationFromMatrix", "Get the translation component from the given matrix.",
                  "glm.vec2", "matrix");
-    DOC_METHOD_2("glm.vec2", "RotateVector",  "Transform a vector through a rotation matrix based on the given angle in radians.",
+    DOC_FUNCTION_2("glm.vec2", "RotateVector",  "Transform a vector through a rotation matrix based on the given angle in radians.",
                  "glm.vec2", "vector", "float", "angle");
-    DOC_METHOD_1("glm.vec2", "ToVec2", "glm.vec2 conversion helper", "base.FPoint", "point");
-    DOC_METHOD_1("base.FPoint", "ToPoint", "base.FPoint conversion  helper", "glm.vec2", "vec2");
+    DOC_FUNCTION_1("glm.vec2", "ToVec2", "glm.vec2 conversion helper", "base.FPoint", "point");
+    DOC_FUNCTION_1("base.FPoint", "ToPoint", "base.FPoint conversion  helper", "glm.vec2", "vec2");
 
-    DOC_METHOD_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
+    DOC_FUNCTION_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
                                      "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
                                      "int", "seed");
-    DOC_METHOD_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>"
+    DOC_FUNCTION_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>"
                                         "This is an overloaded function and takes either ints or floats for min/max.<br>"
                                         "The type of the returned value depends on the type of min/max parameters.",
                  "int|float", "min", "int|float", "max");
-    DOC_METHOD_2("string", "JoinPath", "Concatenate file system paths together.<br>"
+    DOC_FUNCTION_2("string", "JoinPath", "Concatenate file system paths together.<br>"
                                        "No assumption is made regarding the validity of the paths.",
                  "string", "a", "string", "b");
-    DOC_METHOD_1("bool", "FileExists", "Check whether the given file exists on the file system or not. <br>"
+    DOC_FUNCTION_1("bool", "FileExists", "Check whether the given file exists on the file system or not. <br>"
                                        "The given filename is expected to be UTF-8 encoded."
                                        "Returns true if the file exists otherwise false. ",
                  "string", "filename");
-    DOC_METHOD_1("string", "RandomString", "Generate a random alpha numeric string of specified length.<br>"
+    DOC_FUNCTION_1("string", "RandomString", "Generate a random alpha numeric string of specified length.<br>"
                                            "Useful for things such as pseudo-unique identifiers.",
                  "int", "length");
-    DOC_METHOD_2("string", "FormatString", "Format a string with %1, %2,...%n placeholders with N variable arguments.<br>"
+    DOC_FUNCTION_2("string", "FormatString", "Format a string with %1, %2,...%n placeholders with N variable arguments.<br>"
                                            "For example: FormatString('this is %1 that is %2', 123, 'foo') returns 'this is 123 that is foo'.<br>"
                                            "Supported types: string, int, float, bool "
                                            "base.FSize, base.FPoint, base.FRect, base.Color4f "
@@ -234,29 +247,29 @@ void InitDoc()
 
 
     DOC_TABLE("base");
-    DOC_METHOD_1("void", "debug", "Print a debug message in the application log.",
+    DOC_FUNCTION_1("void", "debug", "Print a debug message in the application log.",
                  "string", "message");
-    DOC_METHOD_1("void", "warn", "Print a warning message in the application log.",
+    DOC_FUNCTION_1("void", "warn", "Print a warning message in the application log.",
                  "string", "message");
-    DOC_METHOD_1("void", "error", "Print an error message in the application log.",
+    DOC_FUNCTION_1("void", "error", "Print an error message in the application log.",
                  "string", "message");
-    DOC_METHOD_1("void", "info", "Print an information message in the application log.",
+    DOC_FUNCTION_1("void", "info", "Print an information message in the application log.",
                  "string", "message");
 
     DOC_TABLE("trace");
-    DOC_METHOD_1("void", "marker", "Set a marker message in the application trace.",
+    DOC_FUNCTION_1("void", "marker", "Set a marker message in the application trace.",
                  "string", "message");
-    DOC_METHOD_2("void", "marker", "Set a marker message in the application trace in the given trace entry.<br>"
+    DOC_FUNCTION_2("void", "marker", "Set a marker message in the application trace in the given trace entry.<br>"
                                    "The given trace entry index MUST BE VALID.<br>"
                                    "Do not call this function unless you know what you're doing.<br>"
                                    "For a safer alternative use the overload without index.",
                  "string", "message",
                  "int", "index");
-    DOC_METHOD_1("int", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
+    DOC_FUNCTION_1("int", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
                                  "You must manually call trace.leave with index that you received from this call. "
                                  "Not doing so will likely crash the application. ",
                  "string", "scope_name");
-    DOC_METHOD_1("void", "leave", "Leave a tracing scope that was entered previously.<br>"
+    DOC_FUNCTION_1("void", "leave", "Leave a tracing scope that was entered previously.<br>"
                                   "The index must be from a previous call to trace.enter.",
                  "int", "index");
 
@@ -292,16 +305,16 @@ void InitDoc()
     DOC_METHOD_0("base.FRect, base.FRect, base.FRect, base.FRect", "GetQuadrants", "Split the rectangle into 4 quadrants.");
     DOC_METHOD_0("base.FPoint, base.FPoint, base.FPoint, base.FPoint", "GetCorners", "Get the 4 corners of the rectangle.");
     DOC_METHOD_0("base.FPoint", "GetCenter", "Get the center point of the rectangle.");
-    DOC_METHOD_2("base.FRect", "Combine", "Create an union of the given rectangles.<br>"
+    DOC_FUNCTION_2("base.FRect", "Combine", "Create an union of the given rectangles.<br>"
                                           "Example: local union = base.FRect.Combine(a, b)",
                  "base.FRect", "a", "base.FRect", "b");
-    DOC_METHOD_2("base.FRect", "Intersect", "Create an intersection of the given rectangles.<br>"
+    DOC_FUNCTION_2("base.FRect", "Intersect", "Create an intersection of the given rectangles.<br>"
                                             "Example: local intersection = base.FRect.Intersect(a, b)",
                  "base.FRect", "a", "base.FRect", "b");
-    DOC_METHOD_2("bool", "TestIntersect", "Test whether the rectangles intersect.<br>"
+    DOC_FUNCTION_2("bool", "TestIntersect", "Test whether the rectangles intersect.<br>"
                                           "Example: local ret = base.FRect.TestIntersect(a, b)",
                  "base.FRect", "a", "base.FRect", "b");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function.",
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.",
                  "base.FRect", "rect");
 
     DOC_TABLE("base.FSize");
@@ -310,19 +323,19 @@ void InitDoc()
                "float", "width", "float", "height");
     DOC_METHOD_0("float", "GetWidth", "Get the width of the size.");
     DOC_METHOD_0("float", "GetHeight", "Get the height of the size.");
-    DOC_METHOD_2("base.FSize", "operator *", "Lua multiplication meta function.", "base.FSize", "size", "float", "scalar");
-    DOC_METHOD_2("base.FSize", "operator +", "Lua addition meta function.", "base.FSize", "lhs", "base.FSize", "rhs");
-    DOC_METHOD_2("base.FSize", "operator -", "Lua subtraction meta function.", "base.FSize", "lhs", "base.FSize", "rhs");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function.", "base.FSize", "size");
+    DOC_META_METHOD_2("base.FSize", "operator *", "Lua multiplication meta method.", "base.FSize", "size", "float", "scalar");
+    DOC_META_METHOD_2("base.FSize", "operator +", "Lua addition meta method.", "base.FSize", "lhs", "base.FSize", "rhs");
+    DOC_META_METHOD_2("base.FSize", "operator -", "Lua subtraction meta method.", "base.FSize", "lhs", "base.FSize", "rhs");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.FSize", "size");
 
     DOC_TABLE("base.FPoint");
     DOC_METHOD_0("base.FPoint", "new", "Construct a new point with zero x, y position.");
     DOC_METHOD_0("base.FPoint", "new", "Construct a new point with the given x,y position.");
     DOC_METHOD_0("float", "GetX", "Get the x position.");
     DOC_METHOD_0("float", "GetY", "Get the y position.");
-    DOC_METHOD_2("base.FPoint", "operator +", "Lua addition meta function", "base.FPoint", "lhs", "base.FPoint", "rhs");
-    DOC_METHOD_2("base.FPoint", "operator -", "Lua subtraction meta function", "base.FPoint", "lhs", "base.FPoint", "rhs");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function.", "base.FPoint", "point");
+    DOC_META_METHOD_2("base.FPoint", "operator +", "Lua addition meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
+    DOC_META_METHOD_2("base.FPoint", "operator -", "Lua subtraction meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.FPoint", "point");
 
     DOC_TABLE("base.Colors");
     for (const auto& color : magic_enum::enum_values<base::Color>())
@@ -348,8 +361,8 @@ void InitDoc()
     DOC_METHOD_1("void", "SetAlpha", "Set normalized alpha channel value.", "float", "alpha");
     DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color value.", "int", "color");
     DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color name.", "string", "color");
-    DOC_METHOD_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color value.", "int", "color");
-    DOC_METHOD_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color name.", "string", "color");
+    DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color value.", "int", "color");
+    DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color name.", "string", "color");
 
     DOC_TABLE("data.Reader");
     DOC_METHOD_1("bool, float", "ReadFloat", "Read a float value from the data chunk.",
@@ -436,40 +449,40 @@ void InitDoc()
     DOC_METHOD_1("data.JsonObject", "ParseJsonString", "Create a new JsonObject based on the JSON string.<br>"
                                     "Returns a new JsonObject and an empty string on success or nil and error string on error.",
                  "string", "json");
-    DOC_METHOD_2("data.JsonObject", "ParseJsonString", "Create a new JsonObject based on the JSON data buffer.<br>"
+    DOC_FUNCTION_2("data.JsonObject", "ParseJsonString", "Create a new JsonObject based on the JSON data buffer.<br>"
                                                        "Returns a new JsonObject and an empty string on success or nil and an error string on error.",
                  "todo", "json_data", "size_t", "data_len");
-    DOC_METHOD_2("bool, string", "WriteJsonFile", "Write the contents of the JsonObject into a file.<br>"
+    DOC_FUNCTION_2("bool, string", "WriteJsonFile", "Write the contents of the JsonObject into a file.<br>"
                                                   "Returns true and en empty string on success or false and error string on error.",
                  "data.JsonObject", "json", "string", "filename");
-    DOC_METHOD_1("data.JsonObject", "ReadJsonFile", "Try to read the given JSON file. <br>"
+    DOC_FUNCTION_1("data.JsonObject", "ReadJsonFile", "Try to read the given JSON file. <br>"
                                                     "Returns new JsonObject and en empty string on success or nil and error string on error.",
                  "string", "filename");
-    DOC_METHOD_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string."
+    DOC_FUNCTION_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string."
                                                "Format string can be one of the following: 'JSON'<br>"
                                                "Returns nil on unsupported format.",
                  "string", "format");
-    DOC_METHOD_2("bool, string", "WriteFile", "Dump the contents of the given Writer into a file.<br>"
+    DOC_FUNCTION_2("bool, string", "WriteFile", "Dump the contents of the given Writer into a file.<br>"
                                               "Returns true and en empty string on success or false and an error string on error.",
                  "data.Writer", "data", "string", "filename");
-    DOC_METHOD_1("data.Reader, string", "ReadFile", "Try to read the given file in some supported format.<br>"
+    DOC_FUNCTION_1("data.Reader, string", "ReadFile", "Try to read the given file in some supported format.<br>"
                                                     "Currently supported formats: JSON.<br>"
                                                     "Returns a new data.Reader and an empty string on success or nil and an error string on error.",
                  "string", "filename");
 
     DOC_TABLE("glm");
-    DOC_METHOD_2("glm.vec2", "dot", "Compute the dot product of the given vectors.", "glm.vec2", "a", "glm.vec2", "b");
-    DOC_METHOD_2("glm.vec3", "dot", "Compute the dot product of the given vectors.", "glm.vec3", "a", "glm.vec3", "b");
-    DOC_METHOD_2("glm.vec4", "dot", "Compute the dot product of the given vectors.", "glm.vec4", "a", "glm.vec4", "b");
-    DOC_METHOD_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec2", "vec");
-    DOC_METHOD_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec3", "vec");
-    DOC_METHOD_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec4", "vec");
-    DOC_METHOD_1("glm.vec2", "normalize", "Return a normalized copy of the vector.", "glm.vec2", "vec");
-    DOC_METHOD_1("glm.vec3", "normalize", "Return a normalized copy of the vector.", "glm.vec3", "vec");
-    DOC_METHOD_1("glm.vec4", "normalize", "Return a normalized copy of the vector.", "glm.vec4", "vec");
+    DOC_FUNCTION_2("glm.vec2", "dot", "Compute the dot product of the given vectors.", "glm.vec2", "a", "glm.vec2", "b");
+    DOC_FUNCTION_2("glm.vec3", "dot", "Compute the dot product of the given vectors.", "glm.vec3", "a", "glm.vec3", "b");
+    DOC_FUNCTION_2("glm.vec4", "dot", "Compute the dot product of the given vectors.", "glm.vec4", "a", "glm.vec4", "b");
+    DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec2", "vec");
+    DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec3", "vec");
+    DOC_FUNCTION_1("float", "length", "Return the length (magnitude) of the vector.", "glm.vec4", "vec");
+    DOC_FUNCTION_1("glm.vec2", "normalize", "Return a normalized copy of the vector.", "glm.vec2", "vec");
+    DOC_FUNCTION_1("glm.vec3", "normalize", "Return a normalized copy of the vector.", "glm.vec3", "vec");
+    DOC_FUNCTION_1("glm.vec4", "normalize", "Return a normalized copy of the vector.", "glm.vec4", "vec");
 
     DOC_TABLE("glm.mat4");
-    DOC_METHOD_0("glm.vec2, glm.vec2, float", "decompose", "Decompose the given 4x4 transformation matrix.<br>"
+    DOC_FUNCTION_0("glm.vec2, glm.vec2, float", "decompose", "Decompose the given 4x4 transformation matrix.<br>"
                                                            "Returns: <br>"
                                                            "a glm.vec2 with the translation coefficients.<br>"
                                                            "a glm.vec2 with the scale coefficients.<br>"
@@ -478,12 +491,12 @@ void InitDoc()
     DOC_TABLE("glm.vec2");
     DOC_METHOD_0("glm.vec2", "new", "Construct a new glm.vec2.");
     DOC_METHOD_2("glm.vec2", "new", "Construct a new glm.vec2.", "float", "x", "float", "y");
-    DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec2", "vec", "int", "index");
-    DOC_METHOD_2("glm.vec2", "operator +", "Lua addition meta function", "glm.vec2", "a", "glm.vec2", "b");
-    DOC_METHOD_2("glm.vec2", "operator -", "Lua subtraction meta function", "glm.vec2", "a", "glm.vec2", "b");
-    DOC_METHOD_2("glm.vec2", "operator *", "Lua multiplication meta function", "glm.vec2|float", "a", "glm.vec2|float", "b");
-    DOC_METHOD_2("glm.vec2", "operator /", "Lua division meta function", "glm.vec2|float", "a", "glm.vec2|float", "b");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec2", "vec");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec2", "vec", "int", "index");
+    DOC_META_METHOD_2("glm.vec2", "operator +", "Lua addition meta method.", "glm.vec2", "a", "glm.vec2", "b");
+    DOC_META_METHOD_2("glm.vec2", "operator -", "Lua subtraction meta method.", "glm.vec2", "a", "glm.vec2", "b");
+    DOC_META_METHOD_2("glm.vec2", "operator *", "Lua multiplication meta method.", "glm.vec2|float", "a", "glm.vec2|float", "b");
+    DOC_META_METHOD_2("glm.vec2", "operator /", "Lua division meta method.", "glm.vec2|float", "a", "glm.vec2|float", "b");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec2", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec2", "normalize", "Return a normalized copy of the vector.");
     DOC_PROPERTY("float", "x", "X component of the vector.");
@@ -492,12 +505,12 @@ void InitDoc()
     DOC_TABLE("glm.vec3");
     DOC_METHOD_0("glm.vec3", "new", "Construct a new glm.vec3.");
     DOC_METHOD_3("glm.vec3", "new", "Construct a new glm.vec3.", "float", "x", "float", "y", "float", "z");
-    DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec3", "vec", "int", "index");
-    DOC_METHOD_2("glm.vec3", "operator +", "Lua addition meta function", "glm.vec3", "a", "glm.vec3", "b");
-    DOC_METHOD_2("glm.vec3", "operator -", "Lua subtraction meta function", "glm.vec3", "a", "glm.vec3", "b");
-    DOC_METHOD_2("glm.vec3", "operator *", "Lua multiplication meta function", "glm.vec3|float", "a", "glm.vec3|float", "b");
-    DOC_METHOD_2("glm.vec3", "operator /", "Lua division meta function", "glm.vec3|float", "a", "glm.vec3|float", "b");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec3", "vec");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec3", "vec", "int", "index");
+    DOC_META_METHOD_2("glm.vec3", "operator +", "Lua addition meta method.", "glm.vec3", "a", "glm.vec3", "b");
+    DOC_META_METHOD_2("glm.vec3", "operator -", "Lua subtraction meta  method.", "glm.vec3", "a", "glm.vec3", "b");
+    DOC_META_METHOD_2("glm.vec3", "operator *", "Lua multiplication meta method.", "glm.vec3|float", "a", "glm.vec3|float", "b");
+    DOC_META_METHOD_2("glm.vec3", "operator /", "Lua division meta method.", "glm.vec3|float", "a", "glm.vec3|float", "b");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec3", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec3", "normalize", "Return a normalized copy of the vector.");
     DOC_PROPERTY("float", "x", "X component of the vector.");
@@ -507,12 +520,12 @@ void InitDoc()
     DOC_TABLE("glm.vec4");
     DOC_METHOD_0("glm.vec4", "new", "Construct a new glm.vec3.");
     DOC_METHOD_4("glm.vec4", "new", "Construct a new glm.vec3.", "float", "x", "float", "y", "float", "z", "float", "w");
-    DOC_METHOD_2("float", "operator []", "Lua index meta function", "glm.vec4", "vec", "int", "index");
-    DOC_METHOD_2("glm.vec4", "operator +", "Lua addition meta function", "glm.vec4", "a", "glm.vec4", "b");
-    DOC_METHOD_2("glm.vec4", "operator -", "Lua subtraction meta function", "glm.vec4", "a", "glm.vec4", "b");
-    DOC_METHOD_2("glm.vec4", "operator *", "Lua multiplication meta function", "glm.vec4|float", "a", "glm.vec4|float", "b");
-    DOC_METHOD_2("glm.vec4", "operator /", "Lua division meta function", "glm.vec4|float", "b", "glm.vec4|float", "b");
-    DOC_METHOD_1("string", "tostring", "Lua tostring meta function", "glm.vec4", "vec");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec4", "vec", "int", "index");
+    DOC_META_METHOD_2("glm.vec4", "operator +", "Lua addition meta method.", "glm.vec4", "a", "glm.vec4", "b");
+    DOC_META_METHOD_2("glm.vec4", "operator -", "Lua subtraction meta method.", "glm.vec4", "a", "glm.vec4", "b");
+    DOC_META_METHOD_2("glm.vec4", "operator *", "Lua multiplication meta method.", "glm.vec4|float", "a", "glm.vec4|float", "b");
+    DOC_META_METHOD_2("glm.vec4", "operator /", "Lua division meta method.", "glm.vec4|float", "b", "glm.vec4|float", "b");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec4", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec4", "normalize", "Return a normalized copy of the vector.");
     DOC_PROPERTY("float", "x", "X component of the vector.");
@@ -521,13 +534,13 @@ void InitDoc()
     DOC_PROPERTY("float", "w", "W component of the vector.");
 
     DOC_TABLE("wdk");
-    DOC_METHOD_1("string", "KeyStr", "Convert a key value to a named key string.", "int", "key");
-    DOC_METHOD_1("string", "BtnStr", "Convert a mouse button value to a named button string.", "int", "button");
-    DOC_METHOD_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "int", "modifier");
-    DOC_METHOD_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "int", "mod_bits");
-    DOC_METHOD_1("bool", "TestKeyDown", "Test whether the given keyboard key is currently down.<br>"
+    DOC_FUNCTION_1("string", "KeyStr", "Convert a key value to a named key string.", "int", "key");
+    DOC_FUNCTION_1("string", "BtnStr", "Convert a mouse button value to a named button string.", "int", "button");
+    DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "int", "modifier");
+    DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "int", "mod_bits");
+    DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the given keyboard key is currently down.<br>"
                                         "The key value is one of the key values in in wdk.Keys", "int", "key");
-    DOC_METHOD_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
+    DOC_FUNCTION_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
                  "int", "modifier_bits", "int", "modifier_value");
 
     DOC_TABLE("wdk.Keys");
@@ -550,7 +563,7 @@ void InitDoc()
     }
 
     DOC_TABLE("uik");
-    DOC_METHOD_2("uik.Widget", "WidgetCast", "Downcast a Widget object to concrete widget type.<br>"
+    DOC_FUNCTION_2("uik.Widget", "WidgetCast", "Downcast a Widget object to concrete widget type.<br>"
                                              "Returns nil if the widget doesn't have the right type.",
                  "uik.Widget", "widget", "string", "downcast_type");
 
@@ -961,7 +974,8 @@ public:
             else if (index.column() == 2) return app::FromUtf8(doc.name);
             else if (index.column() == 3) return app::FromUtf8(doc.desc);
         } else if (role == Qt::DecorationRole && index.column() == 1)  {
-            if (doc.type == LuaMemberType::Function)
+            if (doc.type == LuaMemberType::Function || doc.type == LuaMemberType::Method  ||
+                doc.type == LuaMemberType::MetaMethod)
                 return QIcon("icons:function.png");
             else return QIcon("icons:bullet_red.png");
         }
@@ -1099,7 +1113,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     // build method documentation bodies.
     for (const auto& member : g_method_docs)
     {
-        if (member.type == LuaMemberType::Function)
+        if (member.type == LuaMemberType::Function ||
+            member.type == LuaMemberType::Method ||
+            member.type == LuaMemberType::MetaMethod)
         {
             std::string args;
             for (const auto& a : member.args)
@@ -1115,6 +1131,13 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
                 args.pop_back();
                 args.pop_back();
             }
+            std::string name;
+            if (member.type == LuaMemberType::Function)
+                name = member.table + "." + member.name;
+            else if (member.type == LuaMemberType::Method)
+                name = "obj:" + member.name;
+            else name = member.name;
+
             stream << QString(
 R"(<div class="method" name="%1_%2" id="%1_%2">
   <div class="signature">
@@ -1124,12 +1147,14 @@ R"(<div class="method" name="%1_%2" id="%1_%2">
   <div class="description">%6</div>
 </div>
 )").arg(app::FromUtf8(member.table)).arg(app::FromUtf8(member.name))
-                    .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(member.name))
+                    .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(name))
                     .arg(app::FromUtf8(args))
                     .arg(app::FromUtf8(member.desc));
         }
         else
         {
+            const auto& name = member.table + "." + member.name;
+
             stream << QString(
 R"(<div class="member" name="%1_%2" id="%1_%2">
    <div class="signature">
@@ -1139,7 +1164,7 @@ R"(<div class="member" name="%1_%2" id="%1_%2">
    <div class="description">%5</div>
 </div>
 )").arg(app::FromUtf8(member.table)).arg(app::FromUtf8(member.name))
-   .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(member.name))
+   .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(name))
    .arg(app::FromUtf8(member.desc));
         }
     }
