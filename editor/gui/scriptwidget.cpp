@@ -951,6 +951,16 @@ void InitDoc()
     DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
                                        "Indicates whether screen_coords are valid or not.");
 
+    DOC_TABLE("GameEvent");
+    DOC_OBJECT_PROPERTY("string", "from", "Free form name or identifier of the sender.");
+    DOC_OBJECT_PROPERTY("string", "to", "Free form name or identifier of the event receiver.");
+    DOC_OBJECT_PROPERTY("string", "message", "Message string.");
+    DOC_OBJECT_PROPERTY("...", "value", "The value associated with the event.<br>"
+                                        "Possible types: <br>"
+                                        "bool, int, float, string<br>"
+                                        "glm.vec2, glm.vec3, glm.vec4<br>"
+                                        "base.Color4f, base.FPoint, base.FSize, base.FRect");
+
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
             if (left.table < right.table)
