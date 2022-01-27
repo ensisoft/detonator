@@ -544,7 +544,9 @@ void InitDoc()
     DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "int", "modifier");
     DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "int", "mod_bits");
     DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the given keyboard key is currently down.<br>"
-                                        "The key value is one of the key values in in wdk.Keys", "int", "key");
+                                        "The key value is one of the key values in in wdk.Keys. <br>"
+                                        "This function is only available on Windows and Linux. ",
+                                        "int", "key");
     DOC_FUNCTION_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
                  "int", "modifier_bits", "int", "modifier_value");
 
