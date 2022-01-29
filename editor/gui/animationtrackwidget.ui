@@ -41,24 +41,30 @@
               <property name="enabled">
                <bool>true</bool>
               </property>
+              <property name="suffix">
+               <string> s</string>
+              </property>
              </widget>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_11">
               <property name="text">
-               <string>Delay (s)</string>
+               <string>Delay</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Duration (s)</string>
+               <string>Duration</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
              <widget class="QDoubleSpinBox" name="duration">
+              <property name="suffix">
+               <string> s</string>
+              </property>
               <property name="decimals">
                <number>2</number>
               </property>
@@ -603,6 +609,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="suffix">
+             <string> s</string>
+            </property>
             <property name="maximum">
              <double>100.000000000000000</double>
             </property>
@@ -663,14 +672,14 @@
           <item row="2" column="1">
            <widget class="QLabel" name="label_16">
             <property name="text">
-             <string>Start time (s)</string>
+             <string>Start time</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>End time (s)</string>
+             <string>End time</string>
             </property>
            </widget>
           </item>
@@ -678,6 +687,9 @@
            <widget class="QDoubleSpinBox" name="actuatorStartTime">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> s</string>
             </property>
             <property name="maximum">
              <double>100.000000000000000</double>
