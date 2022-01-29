@@ -1007,7 +1007,43 @@ void InitDoc()
     DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (radians) from physics world into game world.",
                  "float", "angle");
 
-    DOC_TABLE("MouseEvent");
+    DOC_TABLE("game.Audio");
+    DOC_METHOD_1("bool", "PrepareMusicGraph", "Prepare a new named music graph for playback.<br>"
+                                              "The audio graph is initially only prepared and sent to the audio mixer in paused state.<br>"
+                                              "In order to start the actual audio playback ResumeMusic must be called separately.<br>"
+                                              "Returns true if the audio graph was prepared successfully or false on error.",
+                 "audio.GraphClass|string", "graph|name");
+    DOC_METHOD_1("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is also started immediately.",
+                 "audio.GraphClass|string", "graph|name");
+    DOC_METHOD_2("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is started after some delay (in milliseconds) elapses.",
+                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
+    DOC_METHOD_1("void", "ResumeMusic", "Resume the playback of the named music graph immediately.", "string", "name");
+    DOC_METHOD_2("void", "ResumeMusic", "Resume the playback of the named music graph after some delay (in milliseconds) elapses.",
+                 "string", "track_name", "unsigned", "delay");
+    DOC_METHOD_1("void", "PauseMusic", "Pause the playback of the named music graph immediately.", "string", "name");
+    DOC_METHOD_2("void", "PauseMusic", "Pause the playback of the named music graph after some delay (in milliseconds) elapses.",
+                 "string", "name", "unsigned", "delay");
+    DOC_METHOD_1("void", "KillMusic", "Kill the named music graph immediately.", "string", "name");
+    DOC_METHOD_2("void", "KillMusic", "Kill the named music graph after some delay (in milliseconds) elapses.",
+                 "string", "name", "unsigned", "delay");
+    DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music tracks.");
+    DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music track commands.", "string", "name");
+    DOC_METHOD_3("void", "SetMusicEffect", "Set an audio effect on the named music track.<br>"
+                                           "Effect can be one of the following: 'FadeIn', 'FadeOut'",
+                 "string", "track_name", "string", "effect_name", "unsigned", "duration");
+    DOC_METHOD_1("void", "SetMusicGain", "Set the overall music gain (volume adjustment) in the audio mixer.", "float", "gain");
+    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect immediately.", "audio.GraphClass|string", "graph|name");
+    DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect after some delay (in milliseconds) elapses.",
+                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
+    DOC_METHOD_1("void", "SetSoundEffectGain", "Set the overall sound effect gain (volume adjustment) in the audio mixer.", "float", "gain");
+
+    DOC_TABLE("game.AudioEvent");
+    DOC_OBJECT_PROPERTY("string", "type", "The type of the audio event.<br>"
+                                          "One of the following: 'TrackDone'");
+    DOC_OBJECT_PROPERTY("string", "track", "Name of the track to which the event pertains to.");
+    DOC_OBJECT_PROPERTY("string", "source", "Source of the audio event. Either 'music' or 'effect'");
+
+    DOC_TABLE("game.MouseEvent");
     DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
     DOC_OBJECT_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
                                             "Only valid when over_scene is true.");
@@ -1019,7 +1055,7 @@ void InitDoc()
     DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
                                        "Indicates whether screen_coords are valid or not.");
 
-    DOC_TABLE("GameEvent");
+    DOC_TABLE("game.GameEvent");
     DOC_OBJECT_PROPERTY("string", "from", "Free form name or identifier of the sender.");
     DOC_OBJECT_PROPERTY("string", "to", "Free form name or identifier of the event receiver.");
     DOC_OBJECT_PROPERTY("string", "message", "Message string.");
