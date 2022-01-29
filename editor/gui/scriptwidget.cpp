@@ -916,6 +916,26 @@ void InitDoc()
                                   "So this only needs to be called if restarting.");
     DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
 
+    DOC_TABLE("game.ScriptVar");
+    DOC_METHOD_0("bool|float|string|int|vec2", "GetValue", "Get the value of the script variable.");
+    DOC_METHOD_0("string", "GetName", "Get the script variable name.");
+    DOC_METHOD_0("string", "GetId", "Get the script variable ID.");
+
+    DOC_TABLE("game.SceneClass");
+    DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
+                                                        "The scene class's script variables are accessible as properties of the scene class object.<br>"
+                                                        "For example a script variable named 'score' would be accessible as object.score.<br>");
+    DOC_METHOD_0("string", "GetName", "Get the name of the class.");
+    DOC_METHOD_0("string", "GetId", "Get the ID of the class.");
+    DOC_METHOD_0("size_t", "GetNumScriptVars", "Get the number of script variables.");
+    DOC_METHOD_1("game.ScriptVar", "GetScriptVar", "Get the script variable at the given index. The index must be valid.", "size_t", "index");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by id. <br>"
+                                                        "Returns nil if no such script variable could be found.",
+                 "string", "id");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable by name.<br>"
+                                                          "Returns nil if no such script variable could be found.",
+                 "string", "name");
+
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
@@ -960,6 +980,7 @@ void InitDoc()
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
+    DOC_METHOD_0("game.SceneClass", "GetClass", "Get the scene's class object.");
     DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
                                                                     "whose spatial nodes intersect with the given search rectangle.",
                  "base.FRect", "area_of_interest");

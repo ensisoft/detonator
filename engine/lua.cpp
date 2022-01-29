@@ -272,24 +272,32 @@ void SetFlag(Type& object, const std::string& name, bool on_off)
     object.SetFlag(enum_val.value(), on_off);
 }
 
+sol::object ObjectFromScriptVarValue(const ScriptVar& var, sol::this_state state)
+{
+    sol::state_view lua(state);
+    const auto type = var.GetType();
+    if (type == ScriptVar::Type::Boolean)
+        return sol::make_object(lua, var.GetValue<bool>());
+    else if (type == ScriptVar::Type::Float)
+        return sol::make_object(lua, var.GetValue<float>());
+    else if (type == ScriptVar::Type::String)
+        return sol::make_object(lua, var.GetValue<std::string>());
+    else if (type == ScriptVar::Type::Integer)
+        return sol::make_object(lua, var.GetValue<int>());
+    else if (type == ScriptVar::Type::Vec2)
+        return sol::make_object(lua, var.GetValue<glm::vec2>());
+    else BUG("Unhandled ScriptVar type.");
+}
+
 template<typename Type>
 sol::object GetScriptVar(const Type& object, const char* key, sol::this_state state)
 {
     using namespace engine;
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVarByName(key);
-    if (var && var->GetType() == ScriptVar::Type::Boolean)
-        return sol::make_object(lua, var->GetValue<bool>());
-    else if (var && var->GetType() == ScriptVar::Type::Float)
-        return sol::make_object(lua, var->GetValue<float>());
-    else if (var && var->GetType() == ScriptVar::Type::String)
-        return sol::make_object(lua, var->GetValue<std::string>());
-    else if (var && var->GetType() == ScriptVar::Type::Integer)
-        return sol::make_object(lua, var->GetValue<int>());
-    else if (var && var->GetType() == ScriptVar::Type::Vec2)
-        return sol::make_object(lua, var->GetValue<glm::vec2>());
-    else if (var) BUG("Unhandled ScriptVar type.");
-    throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+    if (!var)
+        throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+    return ObjectFromScriptVarValue(*var, state);
 }
 template<typename Type>
 void SetScriptVar(Type& object, const char* key, sol::object value)
@@ -1978,12 +1986,27 @@ void BindGameLib(sol::state& L)
     query_result_set["Begin"]   = &DynamicSpatialQueryResultSet::BeginIteration;
     query_result_set["Get"]     = &DynamicSpatialQueryResultSet::GetCurrent;
 
+    auto script_var = table.new_usertype<ScriptVar>("ScriptVar");
+    script_var["GetValue"] = ObjectFromScriptVarValue;
+    script_var["GetName"]  = &ScriptVar::GetName;
+    script_var["GetId"]    = &ScriptVar::GetId;
+
+    auto scene_class = table.new_usertype<SceneClass>("SceneClass",
+        sol::meta_function::index,     &GetScriptVar<SceneClass>);
+    scene_class["GetName"] = &SceneClass::GetName;
+    scene_class["GetId"]   = &SceneClass::GetId;
+    scene_class["GetNumScriptVars"] = &SceneClass::GetNumScriptVars;
+    scene_class["GetScriptVar"]     = (const ScriptVar&(SceneClass::*)(size_t)const)&SceneClass::GetScriptVar;
+    scene_class["FindScriptVarById"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarById;
+    scene_class["FindScriptVarByName"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarByName;
+
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
        sol::meta_function::new_index, &SetScriptVar<Scene>);
     scene["GetTime"]                    = &Scene::GetTime;
     scene["GetClassName"]               = &Scene::GetClassName;
     scene["GetClassId"]                 = &Scene::GetClassId;
+    scene["GetClass"]                   = &Scene::GetClass;
     scene["GetNumEntities"]             = &Scene::GetNumEntities;
     scene["GetEntity"]                  = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
     scene["KillEntity"]                 = &Scene::KillEntity;
