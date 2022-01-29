@@ -100,7 +100,6 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_entityName_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
-        void on_chkEntityLifetime_stateChanged(int);
         void on_chkKillAtLifetime_stateChanged(int);
         void on_chkTickEntity_stateChanged(int);
         void on_chkUpdateEntity_stateChanged(int);
@@ -119,6 +118,7 @@ namespace gui
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
+        void on_btnResetLifetime_clicked();
         void on_btnNewJoint_clicked();
         void on_btnEditJoint_clicked();
         void on_btnDeleteJoint_clicked();

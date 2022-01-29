@@ -1142,17 +1142,14 @@ void EntityWidget::on_entityName_textChanged(const QString& text)
 
 void EntityWidget::on_entityLifetime_valueChanged(double value)
 {
+    const bool limit_lifetime = value > 0.0;
     mState.entity->SetLifetime(GetValue(mUI.entityLifetime));
+    mState.entity->SetFlag(game::EntityClass::Flags::LimitLifetime, limit_lifetime);
 }
 
 void EntityWidget::on_chkKillAtLifetime_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::KillAtLifetime, GetValue(mUI.chkKillAtLifetime));
-}
-
-void EntityWidget::on_chkEntityLifetime_stateChanged(int)
-{
-    mState.entity->SetFlag(game::EntityClass::Flags::LimitLifetime, GetValue(mUI.chkEntityLifetime));
 }
 
 void EntityWidget::on_chkTickEntity_stateChanged(int)
@@ -1418,6 +1415,12 @@ void EntityWidget::on_btnDeleteScriptVar_clicked()
     const auto vars = mState.entity->GetNumScriptVars();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
+}
+void EntityWidget::on_btnResetLifetime_clicked()
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::LimitLifetime, false);
+    mState.entity->SetLifetime(0.0f);
+    SetValue(mUI.entityLifetime, 0.0f);
 }
 
 void EntityWidget::on_btnNewJoint_clicked()
@@ -2321,8 +2324,8 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.entityID, mState.entity->GetId());
     SetValue(mUI.idleTrack, ListItemId(mState.entity->GetIdleTrackId()));
     SetValue(mUI.scriptFile, ListItemId(mState.entity->GetScriptFileId()));
-    SetValue(mUI.entityLifetime, mState.entity->GetLifetime());
-    SetValue(mUI.chkEntityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime));
+    SetValue(mUI.entityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime)
+                                 ? mState.entity->GetLifetime() : 0.0f);
     SetValue(mUI.chkKillAtLifetime, mState.entity->TestFlag(game::EntityClass::Flags::KillAtLifetime));
     SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));

@@ -138,14 +138,12 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     mUI.tableView->setModel(mScriptVars.get());
 
     SetValue(mUI.grpEntity, tr("Entity instance - '%1'").arg(app::FromUtf8(node.GetName())));
-
-    SetValue(mUI.chkEntityLifetime, Qt::PartiallyChecked);
+    SetValue(mUI.entityLifetime, 0.0f);
     SetValue(mUI.chkKillAtLifetime, Qt::PartiallyChecked);
     SetValue(mUI.chkUpdateEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkTickEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkKeyEvents, Qt::PartiallyChecked);
     SetValue(mUI.chkMouseEvents, Qt::PartiallyChecked);
-
     SetEnabled(mUI.btnResetVar, false);
     SetEnabled(mUI.btnEditVar, false);
 
@@ -163,7 +161,6 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     if (mNodeClass.HasLifetimeSetting())
         SetValue(mUI.entityLifetime, mNodeClass.GetLifetime());
 
-    GetFlag(game::SceneNodeClass::Flags::LimitLifetime, mUI.chkEntityLifetime);
     GetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
     GetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
     GetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
@@ -179,12 +176,19 @@ DlgEntity::~DlgEntity() = default;
 void DlgEntity::on_btnAccept_clicked()
 {
     mNodeClass.SetIdleAnimationId(GetItemId(mUI.idleAnimation));
-    mNodeClass.ResetLifetime();
-    const float lifetime = GetValue(mUI.entityLifetime);
-    if (lifetime != -1.0)
-        mNodeClass.SetLifetime(lifetime);
 
-    SetFlag(game::SceneNodeClass::Flags::LimitLifetime, mUI.chkEntityLifetime);
+    const float lifetime = GetValue(mUI.entityLifetime);
+    if (lifetime != 0.0)
+    {
+        mNodeClass.SetLifetime(lifetime);
+        mNodeClass.SetFlag(game::SceneNodeClass::Flags::LimitLifetime, true);
+    }
+    else
+    {
+        mNodeClass.ResetLifetime();
+        mNodeClass.SetFlag(game::SceneNodeClass::Flags::LimitLifetime, false);
+    }
+
     SetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
     SetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
     SetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
@@ -205,7 +209,7 @@ void DlgEntity::on_btnResetIdleAnimation_clicked()
 
 void DlgEntity::on_btnResetLifetime_clicked()
 {
-    SetValue(mUI.entityLifetime, -1.0);
+    SetValue(mUI.entityLifetime, 0.0);
 }
 
 void DlgEntity::on_btnEditVar_clicked()
