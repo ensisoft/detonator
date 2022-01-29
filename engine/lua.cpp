@@ -2070,6 +2070,8 @@ void BindGameLib(sol::state& L)
     physics["MapVectorToGame"]   = &PhysicsEngine::MapVectorToGame;
     physics["MapAngleFromGame"]  = &PhysicsEngine::MapAngleFromGame;
     physics["MapAngleToGame"]    = &PhysicsEngine::MapAngleToGame;
+    physics["SetGravity"]        = &PhysicsEngine::SetGravity;
+    physics["SetScale"]          = &PhysicsEngine::SetScale;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["PrepareMusicGraph"] = sol::overload(
