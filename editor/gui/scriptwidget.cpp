@@ -1006,6 +1006,17 @@ void InitDoc()
                  "float", "angle");
     DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (radians) from physics world into game world.",
                  "float", "angle");
+    DOC_METHOD_1("void", "SetGravity", "Set the physics engine gravity vector.<br>"
+                                       "Normally the gravity setting is applied through project settings but<br>"
+                                       "this function allows explicit control to override that value.<br>"
+                                       "The new gravity setting should be called before any physics world is created.",
+                 "glm.vec2", "gravity");
+    DOC_METHOD_1("void", "SetGravity", "Set the physics engine scaling vector for scaling units from game to physics world and vice versa.<br>"
+                                       "Normally the scale setting is applied through project settings but<br>"
+                                       "this function allows explicit control to override that value.<br>"
+                                       "The new gravity setting should be called before any physics world is created.",
+                 "glm.vec2", "scale");
+
 
     DOC_TABLE("game.Audio");
     DOC_METHOD_1("bool", "PrepareMusicGraph", "Prepare a new named music graph for playback.<br>"
