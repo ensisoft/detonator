@@ -101,6 +101,7 @@
   "entities": [
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -308,6 +309,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -419,6 +421,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -486,6 +489,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -900,6 +904,7 @@
         {
           "entity": "tqHo3nK0b9",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -910,6 +915,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -937,6 +943,7 @@
         {
           "entity": "qv7w7J7Aiv",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -947,6 +954,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -974,6 +982,7 @@
         {
           "entity": "Ytj4tDET1a",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -984,6 +993,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -1011,6 +1021,7 @@
         {
           "entity": "IxyHIKNMIn",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -1021,6 +1032,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
