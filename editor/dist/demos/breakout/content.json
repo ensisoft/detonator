@@ -2252,8 +2252,6 @@
   ],
   "scenes": [
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,
@@ -4137,8 +4135,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -4389,8 +4385,6 @@
       "script_file": "WGNKEJwulf"
     },
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,
@@ -5962,8 +5956,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -6174,8 +6166,6 @@
       "script_file": "WGNKEJwulf"
     },
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,
@@ -8410,8 +8400,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -8707,8 +8695,6 @@
       "script_file": "WGNKEJwulf"
     },
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,
@@ -10592,8 +10578,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
@@ -10844,8 +10828,6 @@
       "script_file": "WGNKEJwulf"
     },
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
       "dynamic_spatial_rect": {
         "h": 0.0,
@@ -17961,8 +17943,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {
