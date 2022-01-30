@@ -52,7 +52,7 @@
         <item row="2" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QComboBox" name="scriptFile">
+           <widget class="QComboBox" name="cmbScripts">
             <property name="placeholderText">
              <string>Select Script ...</string>
             </property>
@@ -1457,7 +1457,7 @@
  <tabstops>
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
-  <tabstop>scriptFile</tabstop>
+  <tabstop>cmbScripts</tabstop>
   <tabstop>btnAddScript</tabstop>
   <tabstop>btnResetScript</tabstop>
   <tabstop>cmbSpatialIndex</tabstop>

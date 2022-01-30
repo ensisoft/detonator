@@ -789,6 +789,11 @@ void SceneWidget::on_name_textChanged(const QString&)
     mState.scene.SetName(GetValue(mUI.name));
 }
 
+void SceneWidget::on_cmbScripts_currentIndexChanged(const QString)
+{
+    mState.scene.SetScriptFileId(GetItemId(mUI.cmbScripts));
+}
+
 void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(const QString&)
 {
     mState.scene.SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
@@ -977,7 +982,7 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
 void SceneWidget::on_btnResetScript_clicked()
 {
     mState.scene.ResetScriptFile();
-    SetValue(mUI.scriptFile, -1);
+    SetValue(mUI.cmbScripts, -1);
 }
 void SceneWidget::on_btnAddScript_clicked()
 {
@@ -1062,7 +1067,7 @@ void SceneWidget::on_btnAddScript_clicked()
     ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
 
-    SetValue(mUI.scriptFile, ListItemId(script.GetId()));
+    SetValue(mUI.cmbScripts, ListItemId(script.GetId()));
 }
 
 void SceneWidget::on_btnNewScriptVar_clicked()
@@ -1688,7 +1693,7 @@ void SceneWidget::DisplaySceneProperties()
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     SetValue(mUI.name, mState.scene.GetName());
     SetValue(mUI.ID, mState.scene.GetId());
-    SetValue(mUI.scriptFile, ListItemId(mState.scene.GetScriptFileId()));
+    SetValue(mUI.cmbScripts, ListItemId(mState.scene.GetScriptFileId()));
     SetValue(mUI.spRectX, rect.GetX());
     SetValue(mUI.spRectY, rect.GetY());
     SetValue(mUI.spRectW, rect.GetWidth());
@@ -1760,7 +1765,7 @@ void SceneWidget::RebuildMenus()
 void SceneWidget::RebuildCombos()
 {
     SetList(mUI.nodeEntity, mState.workspace->ListUserDefinedEntities());
-    SetList(mUI.scriptFile, mState.workspace->ListUserDefinedScripts());
+    SetList(mUI.cmbScripts, mState.workspace->ListUserDefinedScripts());
 }
 
 void SceneWidget::UpdateResourceReferences()
