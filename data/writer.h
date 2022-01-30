@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <variant>
+#include <optional>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -83,6 +84,14 @@ namespace data
                 chunk->Write(flag_name.c_str(), bitflag.test(flag));
             }
             Write(name, *chunk);
+        }
+
+        template<typename T>
+        void Write(const char* name, const std::optional<T>& value)
+        {
+            if (!value.has_value())
+                return;
+            Write(name, value.value());
         }
     private:
     };

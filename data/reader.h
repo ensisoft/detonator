@@ -26,6 +26,7 @@
 #include <memory>
 #include <tuple>
 #include <variant>
+#include <optional>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -116,6 +117,24 @@ namespace data
                 return std::make_tuple(false, default_value);
             return std::make_tuple(true, value);
         }
+
+        template<typename T>
+        bool Read(const char* name, std::optional<T>* value) const
+        {
+            // the return value indicates success/failure to read the
+            // actual value. so in case of an optional that doesn't
+            // exist we have conceptually succeeded to read a value which
+            // doesn't need to be read.
+            if (!HasValue(name))
+                return true;
+
+            T val;
+            if (!Read(name, &val))
+                return false;
+            *value = val;
+            return true;
+        }
+
     private:
         template<size_t index, typename... T>
         bool ReadVariantAlternative(const char* key, std::variant<T...>* out) const
