@@ -749,7 +749,6 @@ private:
     void OnAction(const engine::PlayAction& action)
     {
         mScene = game::CreateSceneInstance(action.klass);
-        mScene->UpdateSpatialIndex();
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
         mScripting->BeginPlay(mScene.get());
@@ -881,22 +880,24 @@ private:
             }
             TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, game_time, dt));
             TRACE_CALL("Scripting::Update", mScripting->Update(game_time, dt));
-            // make sure the various "updates" that might change entity/entity node
-            // position/transformations in the scene happen *before* spatial index is
-            // updated so that the index in-fact reflects the latest changes when
-            // PostUpdate is called. The important updates are:
-            // * physics
-            // * animations/scene
-            // * scripting
-            TRACE_CALL("Scene::UpdateSpatialIndex", mScene->UpdateSpatialIndex());
         }
 
         TRACE_CALL("Game::Update", mGame->Update(game_time, dt));
 
         if (mScene)
         {
+            // make sure the various "updates" that might change entity/entity node
+            // position/transformations in the scene happen *before* spatial index is
+            // updated so that the index in-fact reflects the latest changes when
+            // PostUpdate is called. The important updates are: physics, animations/scene
+            // and scripting
+            TRACE_CALL("Scene::PostUpdate", mScene->PostUpdate());
+
             TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(game_time));
         }
+
+        // todo: add mGame->PostUpdate here if needed
+        // TRACE_CALL("Game::PostUpdate", mGame->PostUpdate(game_time))
 
         std::vector<engine::AudioEvent> audio_events;
         TRACE_CALL("Audio::Update",mAudio->Update(&audio_events));

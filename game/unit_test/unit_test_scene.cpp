@@ -852,7 +852,7 @@ void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
     TEST_REQUIRE(scene->HasSpatialIndex());
     //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 0);
 
-    scene->UpdateSpatialIndex();
+    scene->PostUpdate();
     //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 3);
 
     // find all
@@ -936,7 +936,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->UpdateSpatialIndex();
+            scene->PostUpdate();
             // post update step, the entity nodes should now
             // be queryable from the index.
             std::set<game::EntityNode*> result;
@@ -951,7 +951,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->UpdateSpatialIndex();
+            scene->PostUpdate();
 
             for (size_t i = 0; i < scene->GetNumEntities(); ++i)
             {
@@ -987,7 +987,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
                 auto& entity = scene->GetEntity(i);
                 scene->KillEntity(&entity);
             }
-            scene->UpdateSpatialIndex();
+            scene->PostUpdate();
             scene->EndLoop();
         }
 
@@ -995,7 +995,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->UpdateSpatialIndex();
+            scene->PostUpdate();
 
             std::set<game::EntityNode*> result;
             scene->QuerySpatialNodes(rect, &result);
@@ -1008,7 +1008,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->UpdateSpatialIndex();
+            scene->PostUpdate();
 
             std::set<game::EntityNode*> result;
             scene->QuerySpatialNodes(rect, &result);

@@ -600,7 +600,7 @@ namespace game
 
         void Update(float dt);
 
-        void UpdateSpatialIndex();
+        void PostUpdate();
 
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<EntityNode*>* result)
         { query_spatial_nodes(area_of_interest, result); }
