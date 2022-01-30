@@ -1149,6 +1149,9 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
 }
 void ScriptEngine::OnGameEvent(const GameEvent& event)
 {
+    if (mSceneEnv)
+        CallLua((*mSceneEnv)["OnGameEvent"], mScene, event);
+
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
