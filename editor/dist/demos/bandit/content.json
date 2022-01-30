@@ -2,6 +2,7 @@
   "entities": [
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -86,6 +87,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -170,6 +172,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -254,6 +257,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -338,6 +342,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -422,6 +427,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -489,6 +495,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -573,6 +580,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -657,6 +665,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -741,6 +750,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -825,6 +835,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -909,6 +920,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -993,6 +1005,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1077,6 +1090,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1161,6 +1175,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1245,6 +1260,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1329,6 +1345,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1413,6 +1430,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1480,6 +1498,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1564,6 +1583,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1631,6 +1651,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1698,6 +1719,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1765,6 +1787,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -1832,6 +1855,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -2620,6 +2644,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -2925,6 +2950,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -3299,6 +3325,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -3383,6 +3410,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -3699,6 +3727,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -3766,6 +3795,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -3833,6 +3863,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -4518,6 +4549,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -4585,6 +4617,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -4652,6 +4685,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -4826,6 +4860,7 @@
     },
     {
       "flags": {
+        "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -7831,6 +7866,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7841,6 +7877,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7868,6 +7905,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7878,6 +7916,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7905,6 +7944,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7915,6 +7955,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7942,6 +7983,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7952,6 +7994,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7979,6 +8022,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -7989,6 +8033,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8016,6 +8061,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8026,6 +8072,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8053,6 +8100,7 @@
         {
           "entity": "FNUUxWSBTe",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8063,6 +8111,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8090,6 +8139,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8100,6 +8150,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8127,6 +8178,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8137,6 +8189,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8164,6 +8217,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8174,6 +8228,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8201,6 +8256,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8211,6 +8267,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8238,6 +8295,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8248,6 +8306,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8275,6 +8334,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8285,6 +8345,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8312,6 +8373,7 @@
         {
           "entity": "HFSA8Yezdr",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8322,6 +8384,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8349,6 +8412,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8359,6 +8423,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8386,6 +8451,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8396,6 +8462,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8423,6 +8490,7 @@
         {
           "entity": "y7bWvFuoie",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8433,6 +8501,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8460,6 +8529,7 @@
         {
           "entity": "y7bWvFuoie",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8470,6 +8540,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8497,6 +8568,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8507,6 +8579,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8534,6 +8607,7 @@
         {
           "entity": "HpAo2l11sT",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8544,6 +8618,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8571,6 +8646,7 @@
         {
           "entity": "HpAo2l11sT",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8581,6 +8657,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8608,6 +8685,7 @@
         {
           "entity": "y7bWvFuoie",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8618,6 +8696,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8645,6 +8724,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8655,6 +8735,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8682,6 +8763,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8692,6 +8774,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8719,6 +8802,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8729,6 +8813,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8756,6 +8841,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8766,6 +8852,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8793,6 +8880,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8803,6 +8891,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8830,6 +8919,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8840,6 +8930,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8867,6 +8958,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8877,6 +8969,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8904,6 +8997,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8914,6 +9008,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8941,6 +9036,7 @@
         {
           "entity": "2Q2vkLGDEg",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8951,6 +9047,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8978,6 +9075,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -8988,6 +9086,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9015,6 +9114,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9025,6 +9125,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9052,6 +9153,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9062,6 +9164,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9089,6 +9192,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9099,6 +9203,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9126,6 +9231,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9136,6 +9242,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9163,6 +9270,7 @@
         {
           "entity": "ZNaUsmn31R",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9173,6 +9281,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9200,6 +9309,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9210,6 +9320,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9237,6 +9348,7 @@
         {
           "entity": "Y3nvZp6DaX",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9247,6 +9359,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9274,6 +9387,7 @@
         {
           "entity": "y7bWvFuoie",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9284,6 +9398,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9311,6 +9426,7 @@
         {
           "entity": "HpAo2l11sT",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9321,6 +9437,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9348,6 +9465,7 @@
         {
           "entity": "HpAo2l11sT",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9358,6 +9476,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9385,6 +9504,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9395,6 +9515,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9422,6 +9543,7 @@
         {
           "entity": "z3qBPdpAGa",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9432,6 +9554,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9459,6 +9582,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9469,6 +9593,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9496,6 +9621,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9506,6 +9632,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9533,6 +9660,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9543,6 +9671,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9570,6 +9699,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9580,6 +9710,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9607,6 +9738,7 @@
         {
           "entity": "WtCkGlPDwf",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9617,6 +9749,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9644,6 +9777,7 @@
         {
           "entity": "tqF7brLL08",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9654,6 +9788,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9681,6 +9816,7 @@
         {
           "entity": "tqF7brLL08",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9691,6 +9827,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9718,6 +9855,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9728,6 +9866,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9755,6 +9894,7 @@
         {
           "entity": "O5QefURbEM",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9765,6 +9905,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9792,6 +9933,7 @@
         {
           "entity": "y7bWvFuoie",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9802,6 +9944,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9829,6 +9972,7 @@
         {
           "entity": "bEAIWd3ESl",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9839,6 +9983,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9866,6 +10011,7 @@
         {
           "entity": "Jn0SpbgGSY",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9876,6 +10022,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9903,6 +10050,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9913,6 +10061,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9940,6 +10089,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9950,6 +10100,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9977,6 +10128,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -9987,6 +10139,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10014,6 +10167,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10024,6 +10178,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10051,6 +10206,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10061,6 +10217,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10088,6 +10245,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10098,6 +10256,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10125,6 +10284,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10135,6 +10295,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10162,6 +10323,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10172,6 +10334,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10199,6 +10362,7 @@
         {
           "entity": "dfb84OzuRo",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10209,6 +10373,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10236,6 +10401,7 @@
         {
           "entity": "gwm3bTflRn",
           "flag_set_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
@@ -10246,6 +10412,7 @@
             "WantsMouseEvents": false
           },
           "flag_val_bits": {
+            "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
             "TickEntity": false,
