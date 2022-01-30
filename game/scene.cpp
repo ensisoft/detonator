@@ -1215,21 +1215,23 @@ void Scene::Update(float dt)
     }
 }
 
-void Scene::UpdateSpatialIndex()
+void Scene::PostUpdate()
 {
+    using SpatialIndex = Scene::SpatialIndex;
+
     if (!mSpatialIndex)
         return;
 
-    using SpatialIndex = Scene::SpatialIndex;
+    if (mSpatialIndex)
+        mSpatialIndex->BeginInsert();
 
-    mSpatialIndex->BeginInsert();
     // iterate over the render tree and look for
     // entity nodes that have SpatialNode attachment.
     // for the nodes with spatial node compute the nodes
     // AABB and place the node into the spatial index.
     class Visitor : public RenderTree::Visitor {
     public:
-        Visitor(SpatialIndex& index) : mIndex(index)
+        Visitor(SpatialIndex* index) : mIndex(index)
         {}
 
         virtual void EnterNode(Entity* entity) override
@@ -1254,7 +1256,7 @@ void Scene::UpdateSpatialIndex()
                     if (spatial->GetShape() == SpatialNode::Shape::AABB)
                     {
                         const auto aabb = ComputeBoundingRect(mTransform.GetAsMatrix());
-                        mIndex.Insert(aabb, &node);
+                        mIndex->Insert(aabb, &node);
                     } else BUG("Unimplemented spatial shape insertion.");
                     mTransform.Pop();
                 }
@@ -1278,13 +1280,14 @@ void Scene::UpdateSpatialIndex()
     private:
         std::stack<Entity*> mParents;
         Transform mTransform;
-        SpatialIndex& mIndex;
+        SpatialIndex* mIndex = nullptr;
     };
 
-    Visitor visitor(*mSpatialIndex);
+    Visitor visitor(mSpatialIndex.get());
     mRenderTree.PreOrderTraverse(visitor);
 
-    mSpatialIndex->EndInsert();
+    if (mSpatialIndex)
+        mSpatialIndex->EndInsert();
 }
 
 std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass)
