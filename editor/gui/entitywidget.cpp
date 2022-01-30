@@ -1151,6 +1151,10 @@ void EntityWidget::on_chkKillAtLifetime_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::KillAtLifetime, GetValue(mUI.chkKillAtLifetime));
 }
+void EntityWidget::on_chkKillAtBoundary_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::KillAtBoundary, GetValue(mUI.chkKillAtBoundary));
+}
 
 void EntityWidget::on_chkTickEntity_stateChanged(int)
 {
@@ -2327,6 +2331,7 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.entityLifetime, mState.entity->TestFlag(game::EntityClass::Flags::LimitLifetime)
                                  ? mState.entity->GetLifetime() : 0.0f);
     SetValue(mUI.chkKillAtLifetime, mState.entity->TestFlag(game::EntityClass::Flags::KillAtLifetime));
+    SetValue(mUI.chkKillAtBoundary, mState.entity->TestFlag(game::EntityClass::Flags::KillAtBoundary));
     SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));

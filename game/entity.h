@@ -1081,8 +1081,11 @@ namespace game
             // after which the entity is killed.
             LimitLifetime,
             // Whether to automatically kill entity when it reaches
-            // it's end of lifetime.
+            // its end of lifetime.
             KillAtLifetime,
+            // Whether to automatically kill entity when it reaches (goes past)
+            // the border of the scene
+            KillAtBoundary,
             // Invoke the tick function on the entity
             TickEntity,
             // Invoke the update function on the entity

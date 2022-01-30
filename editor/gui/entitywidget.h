@@ -101,6 +101,7 @@ namespace gui
         void on_entityName_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
         void on_chkKillAtLifetime_stateChanged(int);
+        void on_chkKillAtBoundary_stateChanged(int);
         void on_chkTickEntity_stateChanged(int);
         void on_chkUpdateEntity_stateChanged(int);
         void on_chkKeyEvents_stateChanged(int);

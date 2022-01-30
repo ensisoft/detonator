@@ -32,17 +32,10 @@
         <string>Base  properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_40">
+        <item row="10" column="1">
+         <widget class="QCheckBox" name="chkKeyEvents">
           <property name="text">
-           <string>Lifetime</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_39">
-          <property name="text">
-           <string>Script</string>
+           <string>Receive key events</string>
           </property>
          </widget>
         </item>
@@ -97,73 +90,17 @@
           </item>
          </layout>
         </item>
-        <item row="10" column="1">
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_39">
+          <property name="text">
+           <string>Script</string>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="1">
          <widget class="QCheckBox" name="chkMouseEvents">
           <property name="text">
            <string>Receive mouse events</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QCheckBox" name="chkUpdateEntity">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Update entity</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="entityID">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>ID</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QCheckBox" name="chkKillAtLifetime">
-          <property name="text">
-           <string>Kill at lifetime</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QCheckBox" name="chkTickEntity">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Tick entity</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="entityName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
           </property>
          </widget>
         </item>
@@ -180,10 +117,20 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_7">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="entityName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Idle track</string>
+           <string>ID</string>
           </property>
          </widget>
         </item>
@@ -239,10 +186,36 @@
           </item>
          </layout>
         </item>
-        <item row="9" column="1">
-         <widget class="QCheckBox" name="chkKeyEvents">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>Receive key events</string>
+           <string>Idle track</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QCheckBox" name="chkUpdateEntity">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Update entity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="entityID">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -299,6 +272,40 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="7" column="1">
+         <widget class="QCheckBox" name="chkKillAtBoundary">
+          <property name="text">
+           <string>Kill at scene boundary</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_40">
+          <property name="text">
+           <string>Lifetime</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QCheckBox" name="chkKillAtLifetime">
+          <property name="text">
+           <string>Kill at lifetime</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QCheckBox" name="chkTickEntity">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Tick entity</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -504,7 +511,7 @@
        </widget>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
-         <string>Physics</string>
+         <string>Physics Joints</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_23">
          <item>
@@ -2584,6 +2591,7 @@
   <tabstop>entityLifetime</tabstop>
   <tabstop>btnResetLifetime</tabstop>
   <tabstop>chkKillAtLifetime</tabstop>
+  <tabstop>chkKillAtBoundary</tabstop>
   <tabstop>chkTickEntity</tabstop>
   <tabstop>chkUpdateEntity</tabstop>
   <tabstop>chkKeyEvents</tabstop>
