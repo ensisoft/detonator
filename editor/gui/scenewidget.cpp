@@ -374,6 +374,14 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
+    GetUserProperty(resource, "spatial_rect_xpos", mUI.spRectX);
+    GetUserProperty(resource, "spatial_rect_ypos", mUI.spRectY);
+    GetUserProperty(resource, "spatial_rect_width", mUI.spRectW);
+    GetUserProperty(resource, "spatial_rect_height", mUI.spRectH);
+    GetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
+    GetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
+    GetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
+    GetUserProperty(resource, "densegrid_num_cols", mUI.spDenseGridCols);
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -796,65 +804,45 @@ void SceneWidget::on_cmbScripts_currentIndexChanged(const QString)
 
 void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(const QString&)
 {
-    mState.scene.SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
-    if (mState.scene.IsDynamicSpatialIndexEnabled())
-        SetEnabled(mUI.spatialIndex, true);
-    else SetEnabled(mUI.spatialIndex, false);
+    // Set the values based on what is currently in UI
+    SetSpatialIndexParams();
+    // then display appropriately (enable/disable the right stuff)
+    DisplaySceneProperties();
 }
 
 void SceneWidget::on_spRectX_valueChanged(double value)
 {
-    auto rect = mState.scene.GetDynamicSpatialRect();
-    rect.SetX(GetValue(mUI.spRectX));
-    mState.scene.SetDynamicSpatialRect(rect);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_spRectY_valueChanged(double value)
 {
-    auto rect = mState.scene.GetDynamicSpatialRect();
-    rect.SetY(GetValue(mUI.spRectY));
-    mState.scene.SetDynamicSpatialRect(rect);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_spRectW_valueChanged(double value)
 {
-    auto rect = mState.scene.GetDynamicSpatialRect();
-    rect.SetWidth(GetValue(mUI.spRectW));
-    mState.scene.SetDynamicSpatialRect(rect);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_spRectH_valueChanged(double value)
 {
-    auto rect = mState.scene.GetDynamicSpatialRect();
-    rect.SetHeight(GetValue(mUI.spRectH));
-    mState.scene.SetDynamicSpatialRect(rect);
+    SetSpatialIndexParams();
 }
 
 void SceneWidget::on_spQuadMaxLevels_valueChanged(int)
 {
-    game::SceneClass::QuadTreeArgs args;
-    args.max_levels = GetValue(mUI.spQuadMaxLevels);
-    args.max_items  = GetValue(mUI.spQuadMaxItems);
-    mState.scene.SetDynamicSpatialIndexArgs(args);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_spQuadMaxItems_valueChanged(int)
 {
-    game::SceneClass::QuadTreeArgs args;
-    args.max_levels = GetValue(mUI.spQuadMaxLevels);
-    args.max_items  = GetValue(mUI.spQuadMaxItems);
-    mState.scene.SetDynamicSpatialIndexArgs(args);
+    SetSpatialIndexParams();
 }
 
 void SceneWidget::on_spDenseGridRows_valueChanged(int)
 {
-    game::SceneClass::DenseGridArgs args;
-    args.num_rows = GetValue(mUI.spDenseGridRows);
-    args.num_cols = GetValue(mUI.spDenseGridCols);
-    mState.scene.SetDynamicSpatialIndexArgs(args);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_spDenseGridCols_valueChanged(int)
 {
-    game::SceneClass::DenseGridArgs args;
-    args.num_rows = GetValue(mUI.spDenseGridRows);
-    args.num_cols = GetValue(mUI.spDenseGridCols);
-    mState.scene.SetDynamicSpatialIndexArgs(args);
+    SetSpatialIndexParams();
 }
 void SceneWidget::on_actionPlay_triggered()
 {
@@ -897,6 +885,14 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
     SetUserProperty(resource, "widget", mUI.widget);
+    SetUserProperty(resource, "spatial_rect_xpos", mUI.spRectX);
+    SetUserProperty(resource, "spatial_rect_ypos", mUI.spRectY);
+    SetUserProperty(resource, "spatial_rect_width", mUI.spRectW);
+    SetUserProperty(resource, "spatial_rect_height", mUI.spRectH);
+    SetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
+    SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
+    SetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
+    SetUserProperty(resource, "densegrid_num_cols", mUI.spDenseGridCols);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene.GetHash();
@@ -1688,26 +1684,54 @@ void SceneWidget::DisplayCurrentNodeProperties()
 void SceneWidget::DisplaySceneProperties()
 {
     const auto vars = mState.scene.GetNumScriptVars();
-    const auto& rect = mState.scene.GetDynamicSpatialRect();
-    const auto& quadtree_args = mState.scene.GetQuadTreeArgs();
-    const auto& densegrid_args = mState.scene.GetDenseGridArgs();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
     SetValue(mUI.name, mState.scene.GetName());
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.cmbScripts, ListItemId(mState.scene.GetScriptFileId()));
-    SetValue(mUI.spRectX, rect.GetX());
-    SetValue(mUI.spRectY, rect.GetY());
-    SetValue(mUI.spRectW, rect.GetWidth());
-    SetValue(mUI.spRectH, rect.GetHeight());
-    SetValue(mUI.spQuadMaxLevels, quadtree_args.max_levels);
-    SetValue(mUI.spQuadMaxItems, quadtree_args.max_items);
-    SetValue(mUI.spDenseGridRows, densegrid_args.num_rows);
-    SetValue(mUI.spDenseGridCols, densegrid_args.num_cols);
     SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
-    if (mState.scene.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::Disabled)
+
+    const auto index = mState.scene.GetDynamicSpatialIndex();
+    if (index == game::SceneClass::SpatialIndex::Disabled)
+    {
         SetEnabled(mUI.spatialIndex, false);
-    else SetEnabled(mUI.spatialIndex, true);
+    }
+    else if (index == game::SceneClass::SpatialIndex::QuadTree)
+    {
+        SetEnabled(mUI.spatialIndex, true);
+        SetEnabled(mUI.spQuadMaxLevels, true);
+        SetEnabled(mUI.spQuadMaxItems,  true);
+        SetEnabled(mUI.spDenseGridCols, false);
+        SetEnabled(mUI.spDenseGridRows, false);
+    }
+    else if (index == game::SceneClass::SpatialIndex::DenseGrid)
+    {
+        SetEnabled(mUI.spatialIndex, true);
+        SetEnabled(mUI.spQuadMaxLevels, false);
+        SetEnabled(mUI.spQuadMaxItems,  false);
+        SetEnabled(mUI.spDenseGridCols, true);
+        SetEnabled(mUI.spDenseGridRows, true);
+    }
+
+    if (const auto* rect = mState.scene.GetDynamicSpatialRect())
+    {
+        SetValue(mUI.spRectX, rect->GetX());
+        SetValue(mUI.spRectY, rect->GetY());
+        SetValue(mUI.spRectW, rect->GetWidth());
+        SetValue(mUI.spRectH, rect->GetHeight());
+    }
+
+    if (const auto* ptr = mState.scene.GetQuadTreeArgs())
+    {
+        SetValue(mUI.spQuadMaxLevels, ptr->max_levels);
+        SetValue(mUI.spQuadMaxItems, ptr->max_items);
+    }
+
+    if (const auto* ptr = mState.scene.GetDenseGridArgs())
+    {
+        SetValue(mUI.spDenseGridRows, ptr->num_rows);
+        SetValue(mUI.spDenseGridCols, ptr->num_cols);
+    }
 
     setWindowTitle(GetValue(mUI.name));
 }
@@ -1797,6 +1821,35 @@ void SceneWidget::UpdateResourceReferences()
             WARN("Scene '%1' script is no longer available.", mState.scene.GetName());
             mState.scene.ResetScriptFile();
         }
+    }
+}
+
+void SceneWidget::SetSpatialIndexParams()
+{
+    mState.scene.SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
+
+    if (const auto* ptr = mState.scene.GetDynamicSpatialRect())
+    {
+        auto rect = *ptr;
+        rect.SetX(GetValue(mUI.spRectX));
+        rect.SetY(GetValue(mUI.spRectY));
+        rect.SetWidth(GetValue(mUI.spRectW));
+        rect.SetHeight(GetValue(mUI.spRectH));
+        mState.scene.SetDynamicSpatialRect(rect);
+    }
+    if (const auto* ptr = mState.scene.GetQuadTreeArgs())
+    {
+        auto args = *ptr;
+        args.max_levels = GetValue(mUI.spQuadMaxLevels);
+        args.max_items  = GetValue(mUI.spQuadMaxItems);
+        mState.scene.SetDynamicSpatialIndexArgs(args);
+    }
+    if (const auto* ptr = mState.scene.GetDenseGridArgs())
+    {
+        auto args = *ptr;
+        args.num_cols = GetValue(mUI.spDenseGridCols);
+        args.num_rows = GetValue(mUI.spDenseGridRows);
+        mState.scene.SetDynamicSpatialIndexArgs(args);
     }
 }
 

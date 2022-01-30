@@ -124,16 +124,11 @@ void unit_test_scene_class()
     quadtree.max_levels = 8;
     quadtree.max_items = 10;
 
-    game::SceneClass::DenseGridArgs densegrid;
-    densegrid.num_cols = 7;
-    densegrid.num_rows = 5;
-
     game::SceneClass klass;
     klass.SetName("my scene");
     klass.SetScriptFileId("script.lua");
-    klass.SetDynamicSpatialIndexArgs(quadtree);
-    klass.SetDynamicSpatialIndexArgs(densegrid);
     klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
+    klass.SetDynamicSpatialIndexArgs(quadtree);
     klass.SetDynamicSpatialRect(game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
@@ -177,12 +172,10 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetNumScriptVars() == 2);
     TEST_REQUIRE(klass.GetScriptVar(0).GetName() == "foo");
     TEST_REQUIRE(klass.GetScriptVar(1).GetName() == "bar");
-    TEST_REQUIRE(klass.GetQuadTreeArgs().max_items == 10);
-    TEST_REQUIRE(klass.GetQuadTreeArgs().max_levels == 8);
-    TEST_REQUIRE(klass.GetDenseGridArgs().num_cols == 7);
-    TEST_REQUIRE(klass.GetDenseGridArgs().num_rows == 5);
+    TEST_REQUIRE(klass.GetQuadTreeArgs()->max_items == 10);
+    TEST_REQUIRE(klass.GetQuadTreeArgs()->max_levels == 8);
     TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
-    TEST_REQUIRE(klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+    TEST_REQUIRE(*klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
 
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
@@ -207,12 +200,10 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "foo");
         TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "bar");
-        TEST_REQUIRE(ret->GetQuadTreeArgs().max_items == 10);
-        TEST_REQUIRE(ret->GetQuadTreeArgs().max_levels == 8);
-        TEST_REQUIRE(ret->GetDenseGridArgs().num_cols == 7);
-        TEST_REQUIRE(ret->GetDenseGridArgs().num_rows == 5);
+        TEST_REQUIRE(ret->GetQuadTreeArgs()->max_items == 10);
+        TEST_REQUIRE(ret->GetQuadTreeArgs()->max_levels == 8);
         TEST_REQUIRE(ret->GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
-        TEST_REQUIRE(ret->GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+        TEST_REQUIRE(*ret->GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 

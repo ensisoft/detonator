@@ -146,6 +146,7 @@ namespace gui
         void RebuildMenus();
         void RebuildCombos();
         void UpdateResourceReferences();
+        void SetSpatialIndexParams();
         game::SceneNodeClass* SelectNode(const QPoint& click_point, glm::vec2* hitpos);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;

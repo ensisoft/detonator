@@ -4465,8 +4465,6 @@
   ],
   "scenes": [
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "QuadTree",
       "dynamic_spatial_rect": {
         "h": 800.0,
@@ -4718,15 +4716,7 @@
       ]
     },
     {
-      "dense_grid_cols": 1,
-      "dense_grid_rows": 1,
       "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
       "id": "Z2zrRug3HP",
       "name": "Menu",
       "nodes": [
@@ -4809,8 +4799,6 @@
           }
         }
       ],
-      "quadtree_max_items": 4,
-      "quadtree_max_levels": 3,
       "render_tree": {
         "children": [
           {

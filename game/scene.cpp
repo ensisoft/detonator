@@ -257,8 +257,7 @@ SceneClass::SceneClass(const SceneClass& other)
     mScriptVars = other.mScriptVars;
     mDynamicSpatialIndex = other.mDynamicSpatialIndex;
     mDynamicSpatialRect  = other.mDynamicSpatialRect;
-    mQuadTreeArgs = other.mQuadTreeArgs;
-    mDenseGridArgs = other.mDenseGridArgs;
+    mDynamicSpatialIndexArgs = other.mDynamicSpatialIndexArgs;
     for (const auto& node : other.mNodes)
     {
         auto copy = std::make_unique<SceneNodeClass>(*node);
@@ -661,11 +660,23 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mDynamicSpatialIndex);
-    hash = base::hash_combine(hash, mDynamicSpatialRect);
-    hash = base::hash_combine(hash, mQuadTreeArgs.max_items);
-    hash = base::hash_combine(hash, mQuadTreeArgs.max_levels);
-    hash = base::hash_combine(hash, mDenseGridArgs.num_rows);
-    hash = base::hash_combine(hash, mDenseGridArgs.num_cols);
+    hash = base::hash_combine(hash, mDynamicSpatialRect.has_value());
+    hash = base::hash_combine(hash, mDynamicSpatialIndexArgs.has_value());
+    if (const auto* ptr = GetDynamicSpatialRect())
+    {
+        hash = base::hash_combine(hash, *ptr);
+    }
+    if (const auto* ptr = GetQuadTreeArgs())
+    {
+        hash = base::hash_combine(hash, ptr->max_levels);
+        hash = base::hash_combine(hash, ptr->max_items);
+    }
+    if (const auto* ptr = GetDenseGridArgs())
+    {
+        hash = base::hash_combine(hash, ptr->num_rows);
+        hash = base::hash_combine(hash, ptr->num_cols);
+    }
+
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
     mRenderTree.PreOrderTraverseForEach([&](const SceneNodeClass* node) {
@@ -678,17 +689,90 @@ size_t SceneClass::GetHash() const
     return hash;
 }
 
+const FRect* SceneClass::GetDynamicSpatialRect() const
+{
+    if (!mDynamicSpatialRect.has_value())
+        return nullptr;
+    return &mDynamicSpatialRect.value();
+}
+const SceneClass::QuadTreeArgs* SceneClass::GetQuadTreeArgs() const
+{
+    if (!mDynamicSpatialIndexArgs.has_value())
+        return nullptr;
+    return std::get_if<QuadTreeArgs>(&mDynamicSpatialIndexArgs.value());
+}
+const SceneClass::DenseGridArgs* SceneClass::GetDenseGridArgs() const
+{
+    if (!mDynamicSpatialIndexArgs.has_value())
+        return nullptr;
+    return std::get_if<DenseGridArgs>(&mDynamicSpatialIndexArgs.value());
+}
+
+void SceneClass::SetDynamicSpatialIndex(SpatialIndex index)
+{
+    if (mDynamicSpatialIndex == index)
+        return;
+
+    if (index == SpatialIndex::Disabled)
+    {
+        mDynamicSpatialRect.reset();
+        mDynamicSpatialIndexArgs.reset();
+        mDynamicSpatialIndex = index;
+        return;
+    }
+
+    if (index == SpatialIndex::QuadTree)
+    {
+        if (!GetQuadTreeArgs())
+            mDynamicSpatialIndexArgs = QuadTreeArgs{};
+    }
+    else if (index == SpatialIndex::DenseGrid)
+    {
+        if (!GetDenseGridArgs())
+            mDynamicSpatialIndexArgs = DenseGridArgs{};
+    }
+    if (!GetDynamicSpatialRect())
+        mDynamicSpatialRect = FRect();
+
+    mDynamicSpatialIndex = index;
+}
+void SceneClass::SetDynamicSpatialIndexArgs(const DenseGridArgs& args)
+{
+    ASSERT(mDynamicSpatialIndex == SpatialIndex::DenseGrid);
+    mDynamicSpatialIndexArgs = args;
+}
+void SceneClass::SetDynamicSpatialIndexArgs(const QuadTreeArgs& args)
+{
+    ASSERT(mDynamicSpatialIndex == SpatialIndex::QuadTree);
+    mDynamicSpatialIndexArgs = args;
+}
+void SceneClass::SetDynamicSpatialRect(const FRect& rect)
+{
+    ASSERT(mDynamicSpatialIndex != SpatialIndex::Disabled);
+    mDynamicSpatialRect = rect;
+}
+
 void SceneClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mClassId);
     data.Write("name", mName);
     data.Write("script_file", mScriptFile);
     data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
-    data.Write("dynamic_spatial_rect", mDynamicSpatialRect);
-    data.Write("quadtree_max_items", mQuadTreeArgs.max_items);
-    data.Write("quadtree_max_levels", mQuadTreeArgs.max_levels);
-    data.Write("dense_grid_rows", mDenseGridArgs.num_rows);
-    data.Write("dense_grid_cols", mDenseGridArgs.num_cols);
+    if (const auto* ptr = GetDynamicSpatialRect())
+    {
+        data.Write("dynamic_spatial_rect", *ptr);
+    }
+    if (const auto* ptr = GetQuadTreeArgs())
+    {
+        data.Write("quadtree_max_items", ptr->max_items);
+        data.Write("quadtree_max_levels", ptr->max_levels);
+    }
+    if (const auto* ptr = GetDenseGridArgs())
+    {
+        data.Write("dense_grid_rows", ptr->num_rows);
+        data.Write("dense_grid_cols", ptr->num_cols);
+    }
+
     for (const auto& node : mNodes)
     {
         auto chunk = data.NewWriteChunk();
@@ -713,13 +797,31 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
     if (!data.Read("id", &ret.mClassId) ||
         !data.Read("name", &ret.mName) ||
         !data.Read("script_file", &ret.mScriptFile) ||
-        !data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex) ||
-        !data.Read("dynamic_spatial_rect", &ret.mDynamicSpatialRect) ||
-        !data.Read("quadtree_max_items", &ret.mQuadTreeArgs.max_items) ||
-        !data.Read("quadtree_max_levels", &ret.mQuadTreeArgs.max_levels) ||
-        !data.Read("dense_grid_rows", &ret.mDenseGridArgs.num_rows) ||
-        !data.Read("dense_grid_cols", &ret.mDenseGridArgs.num_cols))
+        !data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex))
         return std::nullopt;
+    if (data.HasValue("dynamic_spatial_rect"))
+    {
+        base::FRect rect;
+        if (!data.Read("dynamic_spatial_rect", &rect))
+            return std::nullopt;
+        ret.mDynamicSpatialRect = rect;
+    }
+    if (ret.mDynamicSpatialIndex == SpatialIndex::QuadTree)
+    {
+        QuadTreeArgs quadtree_args;
+        if (data.Read("quadtree_max_items", &quadtree_args.max_items) &&
+            data.Read("quadtree_max_levels", &quadtree_args.max_levels))
+            ret.mDynamicSpatialIndexArgs = quadtree_args;
+    }
+
+    if (ret.mDynamicSpatialIndex == SpatialIndex::DenseGrid)
+    {
+        DenseGridArgs densegrid_args;
+        if (data.Read("dense_grid_rows", &densegrid_args.num_rows) &&
+            data.Read("dense_grid_cols", &densegrid_args.num_cols))
+            ret.mDynamicSpatialIndexArgs = densegrid_args;
+    }
+
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
         const auto& chunk = data.GetReadChunk("nodes", i);
@@ -727,7 +829,6 @@ std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
         if (!node.has_value())
             return std::nullopt;
         ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
-
     }
     for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
     {
@@ -764,8 +865,7 @@ SceneClass SceneClass::Clone() const
     });
     ret.mDynamicSpatialRect = mDynamicSpatialRect;
     ret.mDynamicSpatialIndex = mDynamicSpatialIndex;
-    ret.mQuadTreeArgs = mQuadTreeArgs;
-    ret.mDenseGridArgs = mDenseGridArgs;
+    ret.mDynamicSpatialIndexArgs = mDynamicSpatialIndexArgs;
     return ret;
 }
 
@@ -783,8 +883,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     mRenderTree = tmp.mRenderTree;
     mDynamicSpatialIndex = tmp.mDynamicSpatialIndex;
     mDynamicSpatialRect  = tmp.mDynamicSpatialRect;
-    mQuadTreeArgs        = tmp.mQuadTreeArgs;
-    mDenseGridArgs       = tmp.mDenseGridArgs;
+    mDynamicSpatialIndexArgs = tmp.mDynamicSpatialIndexArgs;
     return *this;
 }
 
@@ -884,15 +983,21 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
     const auto index = mClass->GetDynamicSpatialIndex();
     if (index == SceneClass::SpatialIndex::QuadTree)
     {
-        const auto& rect = mClass->GetDynamicSpatialRect();
-        const auto& args = mClass->GetQuadTreeArgs();
-        mSpatialIndex.reset(new QuadTreeIndex<EntityNode>(rect, args.max_items, args.max_levels));
+        const auto* rect = mClass->GetDynamicSpatialRect();
+        const auto* args = mClass->GetQuadTreeArgs();
+        ASSERT(args && rect);
+        mSpatialIndex.reset(new QuadTreeIndex<EntityNode>(*rect, args->max_items, args->max_levels));
+        DEBUG("Created scene spatial index. [type=%1, max_items=%2, max_levels=%3]",
+              index, args->max_items, args->max_levels);
     }
     else if (index == SceneClass::SpatialIndex::DenseGrid)
     {
-        const auto& rect = mClass->GetDynamicSpatialRect();
-        const auto& args = mClass->GetDenseGridArgs();
-        mSpatialIndex.reset(new DenseGridIndex<EntityNode>(rect, args.num_rows, args.num_cols));
+        const auto* rect = mClass->GetDynamicSpatialRect();
+        const auto* args = mClass->GetDenseGridArgs();
+        ASSERT(args && rect);
+        mSpatialIndex.reset(new DenseGridIndex<EntityNode>(*rect, args->num_rows, args->num_cols));
+        DEBUG("Created scene spatial index. [type=%1, rows=%2, cols=%3]",
+              index, args->num_rows, args->num_cols);
     }
     if (spatial_nodes && !mSpatialIndex)
     {

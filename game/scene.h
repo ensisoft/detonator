@@ -238,6 +238,7 @@ namespace game
             unsigned num_rows = 1;
             unsigned num_cols = 1;
         };
+        using SpatialIndexArgs = std::variant<QuadTreeArgs, DenseGridArgs>;
 
         SceneClass();
         // Copy construct a deep copy of the scene.
@@ -409,21 +410,15 @@ namespace game
         { return mRenderTree; }
         SpatialIndex GetDynamicSpatialIndex() const
         { return mDynamicSpatialIndex; }
-        FRect GetDynamicSpatialRect() const
-        { return mDynamicSpatialRect; }
-        const QuadTreeArgs& GetQuadTreeArgs() const
-        { return mQuadTreeArgs; }
-        const DenseGridArgs& GetDenseGridArgs() const
-        { return mDenseGridArgs; }
+        const FRect* GetDynamicSpatialRect() const;
+        const QuadTreeArgs* GetQuadTreeArgs() const;
+        const DenseGridArgs* GetDenseGridArgs() const;
 
-        void SetDynamicSpatialIndexArgs(const DenseGridArgs& args)
-        { mDenseGridArgs = args; }
-        void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args)
-        { mQuadTreeArgs = args; }
-        void SetDynamicSpatialIndex(SpatialIndex index)
-        { mDynamicSpatialIndex = index; }
-        void SetDynamicSpatialRect(const FRect& rect)
-        { mDynamicSpatialRect = rect; }
+        void SetDynamicSpatialIndex(SpatialIndex index);
+        void SetDynamicSpatialIndexArgs(const DenseGridArgs& args);
+        void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
+        void SetDynamicSpatialRect(const FRect& rect);
+
         void SetName(const std::string& name)
         { mName = name; }
         void SetScriptFileId(const std::string& file)
@@ -452,7 +447,7 @@ namespace game
     private:
         // the class / resource of this class.
         std::string mClassId;
-        // the human readable name of the class.
+        // the human-readable name of the class.
         std::string mName;
         // the id of the associated script file (if any)
         std::string mScriptFile;
@@ -460,16 +455,19 @@ namespace game
         // given to the render tree don't become invalid
         // when new nodes are added to the scene.
         std::vector<std::unique_ptr<SceneNodeClass>> mNodes;
-        // scenegraph / render tree for hierarchical traversal
-        // and transformation of the animation nodes. the tree defines
+        // scene-graph / render tree for hierarchical traversal
+        // and transformation of the scene nodes. the tree defines
         // the parent-child transformation hierarchy.
         RenderTree mRenderTree;
         // Scripting variables.
         std::vector<ScriptVar> mScriptVars;
+        // Dynamic spatial index (for entity nodes with spatial nodes) setting.
         SpatialIndex mDynamicSpatialIndex = SpatialIndex::Disabled;
-        FRect mDynamicSpatialRect;
-        QuadTreeArgs mQuadTreeArgs;
-        DenseGridArgs mDenseGridArgs;
+        // Optional (only when spatial index is not disabled) rectangle
+        // that covers the scene area that is covered by the spatial index.
+        std::optional<FRect> mDynamicSpatialRect;
+        // Spatial index type specific arguments for the data structure.
+        std::optional<SpatialIndexArgs> mDynamicSpatialIndexArgs;
     };
 
     // Scene is the runtime representation of a scene based on some scene class
