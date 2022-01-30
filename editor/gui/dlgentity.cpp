@@ -140,6 +140,7 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     SetValue(mUI.grpEntity, tr("Entity instance - '%1'").arg(app::FromUtf8(node.GetName())));
     SetValue(mUI.entityLifetime, 0.0f);
     SetValue(mUI.chkKillAtLifetime, Qt::PartiallyChecked);
+    SetValue(mUI.chkKillAtBoundary, Qt::PartiallyChecked);
     SetValue(mUI.chkUpdateEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkTickEntity, Qt::PartiallyChecked);
     SetValue(mUI.chkKeyEvents, Qt::PartiallyChecked);
@@ -162,6 +163,7 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
         SetValue(mUI.entityLifetime, mNodeClass.GetLifetime());
 
     GetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
+    GetFlag(game::SceneNodeClass::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
     GetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
     GetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
     GetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
@@ -190,6 +192,7 @@ void DlgEntity::on_btnAccept_clicked()
     }
 
     SetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
+    SetFlag(game::SceneNodeClass::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
     SetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
     SetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
     SetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);

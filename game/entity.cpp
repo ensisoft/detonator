@@ -627,6 +627,7 @@ EntityClass::EntityClass()
     mFlags.set(Flags::VisibleInGame, true);
     mFlags.set(Flags::LimitLifetime, false);
     mFlags.set(Flags::KillAtLifetime, true);
+    mFlags.set(Flags::KillAtBoundary, true);
     mFlags.set(Flags::TickEntity, true);
     mFlags.set(Flags::UpdateEntity, true);
     mFlags.set(Flags::WantsKeyEvents, false);
