@@ -133,10 +133,52 @@ void unit_test_variant()
     TEST_REQUIRE(std::get<glm::vec3>(out) == glm::vec3(2.0f, 3.0f, 4.0f));
 }
 
+void unit_test_optional()
+{
+    {
+        std::optional<float> opt_f = 123.0f;
+        std::optional<std::string> opt_s = "keke";
+        std::optional<glm::vec3> opt_v = glm::vec3(1.0f, 2.0f, 3.0f);
+
+        data::JsonObject json;
+        json.Write("float", opt_f);
+        json.Write("string", opt_s);
+        json.Write("vec3", opt_v);
+
+        opt_f.reset();
+        opt_s.reset();
+        opt_v.reset();
+        TEST_REQUIRE(json.Read("float", &opt_f));
+        TEST_REQUIRE(json.Read("string", &opt_s));
+        TEST_REQUIRE(json.Read("vec3", &opt_v));
+
+        TEST_REQUIRE(opt_f.has_value());
+        TEST_REQUIRE(opt_s.has_value());
+        TEST_REQUIRE(opt_v.has_value());
+        TEST_REQUIRE(opt_f == real::float32(123.0f));
+        TEST_REQUIRE(opt_s == "keke");
+        TEST_REQUIRE(opt_v == glm::vec3(1.0f, 2.0f, 3.0f));
+    }
+
+    {
+        std::optional<float> opt_f;
+
+        data::JsonObject json;
+        json.Write("float", opt_f);
+
+        opt_f.reset();
+
+        TEST_REQUIRE(json.Read("float", &opt_f));
+        TEST_REQUIRE(!opt_f.has_value());
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_basic();
     unit_test_bitflag();
     unit_test_variant();
+    unit_test_optional();
     return 0;
 }
