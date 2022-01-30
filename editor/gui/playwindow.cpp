@@ -439,6 +439,8 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
     mUI.problem->setVisible(false);
 
+    const auto& settings = mWorkspace.GetProjectSettings();
+
     const auto& resolutions = app::ListResolutions();
     for (unsigned i=0; i<resolutions.size(); ++i)
     {
@@ -450,8 +452,14 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
         action->setData(i);
         connect(action, &QAction::triggered, this, &PlayWindow::SelectResolution);
     }
+    mUI.menuResize->addSeparator();
+    QAction* game_default_res = mUI.menuResize->addAction(QString("%1 (%2x%3)")
+            .arg("Game Default")
+            .arg(settings.window_width)
+            .arg(settings.window_height));
+    game_default_res->setData(-1);
+    connect(game_default_res, &QAction::triggered, this, &PlayWindow::SelectResolution);
 
-    const auto& settings = mWorkspace.GetProjectSettings();
     setWindowTitle(settings.application_name);
     mLogger->SetLogTag(settings.application_name);
 
@@ -928,10 +936,18 @@ void PlayWindow::SelectResolution()
 {
     auto* action = qobject_cast<QAction*>(sender());
 
-    const auto index = action->data().toUInt();
+    const auto index = action->data().toInt();
     const auto& list = app::ListResolutions();
-    const auto& rez  = list[index];
-    ResizeSurface(rez.width, rez.height);
+    if (index == -1)
+    {
+        const auto& settings = mWorkspace.GetProjectSettings();
+        ResizeSurface(settings.window_width, settings.window_height);
+    }
+    else
+    {
+        const auto& rez  = list[index];
+        ResizeSurface(rez.width, rez.height);
+    }
 }
 
 void PlayWindow::on_actionPause_toggled(bool val)
