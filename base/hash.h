@@ -26,6 +26,7 @@
 
 #include <functional>
 #include <variant>
+#include <optional>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -131,6 +132,15 @@ template<typename S, typename Enum> inline
 S hash_combine(S seed, const bitflag<Enum>& bits)
 {
     seed = hash_combine(seed, bits.value());
+    return seed;
+}
+
+template<typename S, typename T>
+S hash_combine(S seed, const std::optional<T>& value)
+{
+    seed = hash_combine(seed, value.has_value());
+    if (value.has_value())
+        seed = hash_combine(seed, value.value());
     return seed;
 }
 
