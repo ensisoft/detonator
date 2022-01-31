@@ -1154,19 +1154,28 @@ private:
         TextureImpl(const OpenGLFunctions& funcs, TextureUnits& units)
            : mGL(funcs)
            , mTextureUnits(units)
-        {
-            GL_CALL(glGenTextures(1, &mHandle));
-            DEBUG("New texture object. [handle=%1]", mHandle);
-        }
+        {}
         ~TextureImpl()
         {
-            GL_CALL(glDeleteTextures(1, &mHandle));
-            DEBUG("Deleted texture object. [name='%1', handle=%2]", mName, mHandle);
+            if (mHandle)
+            {
+                GL_CALL(glDeleteTextures(1, &mHandle));
+                if (!mTransient)
+                    DEBUG("Deleted texture object. [name='%1', handle=%2]", mName, mHandle);
+            }
         }
 
         virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
         {
-            DEBUG("Loading texture. [name='%1', size=%2x%3, handle=%4]", mName, xres, yres, mHandle);
+            if (mHandle == 0)
+            {
+                GL_CALL(glGenTextures(1, &mHandle));
+                if (!mTransient)
+                    DEBUG("New texture object. [name='%1', handle=%2]", mName, mHandle);
+            }
+            if (!mTransient)
+                DEBUG("Loading texture. [name='%1', size=%2x%3, handle=%4]", mName, xres, yres, mHandle);
+
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
             switch (format)

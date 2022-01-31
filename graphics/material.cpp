@@ -2127,9 +2127,9 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         // a simple fast nearest/linear texture filter without mips.
         const bool mips = false;
         texture->SetName("TextMaterial");
+        texture->SetTransient(true);
         texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
         texture->SetContentHash(hash);
-        texture->SetTransient(true);
         texture->SetWrapX(Texture::Wrapping::Clamp);
         texture->SetWrapY(Texture::Wrapping::Clamp);
         // see the comment above about mipmaps. it's relevant regarding
