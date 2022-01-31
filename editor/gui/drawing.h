@@ -30,6 +30,8 @@
 #include "graphics/transform.h"
 #include "graphics/drawable.h"
 
+class QWidget;
+
 namespace gui
 {
 
@@ -64,6 +66,9 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
 
 void ShowMessage(const std::string& msg, gfx::Painter& painter,
                  unsigned widget_width, unsigned widget_height);
+
+void PrintMousePos(const gfx::Transform& view,
+                   gfx::Painter& painter, QWidget* widget);
 
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually

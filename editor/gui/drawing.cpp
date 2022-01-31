@@ -18,11 +18,14 @@
 
 #include "warnpush.h"
 #  include <glm/glm.hpp>
+#  include <QWidget>
 #include "warnpop.h"
 
 #include <algorithm>
+#include <cstdio>
 
 #include "editor/gui/drawing.h"
+#include "editor/gui/utility.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
@@ -188,6 +191,24 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter,
     gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
                       gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+}
+
+void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget)
+{
+    // where's the mouse in the widget
+    const auto& mickey = widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e. QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > widget->width() ||
+        mickey.y() > widget->height())
+        return;
+
+    const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
+    const auto& mouse_in_scene = view_to_scene * ToVec4(mickey);
+    char hallelujah[128] = {};
+    std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", mouse_in_scene.x, mouse_in_scene.y);
+    ShowMessage(hallelujah, painter, widget->width(), widget->height());
 }
 
 } // namespace
