@@ -950,9 +950,22 @@ engine::GameDataHandle Workspace::LoadGameDataFromFile(const std::string& filena
 
 gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
 {
+    // static map of resources that are part of the application, i.e.
+    // app://something. They're not expected to change.
+    static std::unordered_map<std::string,
+            std::shared_ptr<const GraphicsFileBuffer>> application_resources;
+    if (base::StartsWith(URI, "app://")) {
+        auto it = application_resources.find(URI);
+        if (it != application_resources.end())
+            return it->second;
+    }
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
-    return GraphicsFileBuffer::LoadFromFile(file);
+    auto ret = GraphicsFileBuffer::LoadFromFile(file);
+    if (base::StartsWith(URI, "app://")) {
+        application_resources[URI] = ret;
+    }
+    return ret;
 }
 
 std::ifstream Workspace::OpenAudioStream(const std::string& URI) const
