@@ -130,6 +130,11 @@ void unit_test_scene_class()
     klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
     klass.SetDynamicSpatialIndexArgs(quadtree);
     klass.SetDynamicSpatialRect(game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+    klass.SetLeftBoundary(-100.0f);
+    klass.SetRightBoundary(200.0f);
+    klass.SetTopBoundary(300.0f);
+    klass.SetBottomBoundary(-300.0f);
+
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
     {
@@ -176,6 +181,10 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetQuadTreeArgs()->max_levels == 8);
     TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
     TEST_REQUIRE(*klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+    TEST_REQUIRE(*klass.GetLeftBoundary()   == real::float32(-100.0f));
+    TEST_REQUIRE(*klass.GetRightBoundary()  == real::float32(200.0f));
+    TEST_REQUIRE(*klass.GetTopBoundary()    == real::float32(300.0f));
+    TEST_REQUIRE(*klass.GetBottomBoundary() == real::float32(-300.0f));
 
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
@@ -204,6 +213,10 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->GetQuadTreeArgs()->max_levels == 8);
         TEST_REQUIRE(ret->GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
         TEST_REQUIRE(*ret->GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
+        TEST_REQUIRE(*ret->GetLeftBoundary()   == real::float32(-100.0f));
+        TEST_REQUIRE(*ret->GetRightBoundary()  == real::float32(200.0f));
+        TEST_REQUIRE(*ret->GetTopBoundary()    == real::float32(300.0f));
+        TEST_REQUIRE(*ret->GetBottomBoundary() == real::float32(-300.0f));
         TEST_REQUIRE(WalkTree(*ret) == "root child_1 child_2");
     }
 
@@ -787,6 +800,91 @@ void unit_test_scene_instance_transform()
 
 }
 
+void unit_test_scene_instance_kill_at_boundary()
+{
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("entity");
+    {
+        game::EntityNodeClass node;
+        node.SetName("node");
+        node.SetSize(glm::vec2(10.0f, 10.0f));
+        entity->LinkChild(nullptr, entity->AddNode(node));
+    }
+
+    game::SceneNodeClass node;
+    node.SetName("entity");
+    node.SetEntity(entity);
+    node.SetScale(glm::vec2(1.0f, 1.0f));
+    node.SetTranslation(glm::vec2(0.0f, 0.0f));
+    node.SetRotation(0.0f);
+    node.SetEntityId("entity");
+
+    game::SceneClass klass;
+    klass.SetLeftBoundary(-100.0f);
+    klass.SetRightBoundary(100.0f);
+    klass.SetTopBoundary(-100.0f);
+    klass.SetBottomBoundary(100.0f);
+    klass.LinkChild(nullptr, klass.AddNode(node));
+
+    // no killing, inside all boundaries
+    {
+        auto scene = game::CreateSceneInstance(klass);
+        auto& entity = scene->GetEntity(0);
+        scene->Update(0.0f);
+        scene->PostUpdate();
+        TEST_REQUIRE(entity.HasBeenKilled() == false);
+    }
+
+    // test completely outside of the boundaries
+    {
+        const glm::vec2 test_positions[] = {
+            glm::vec2(-200.0f, 0.0f),
+            glm::vec2(200.0f, 0.0f),
+            glm::vec2(0.0f, -200.0f),
+            glm::vec2(0.0f, 200.0f)
+        };
+        for (const auto& test: test_positions)
+        {
+            auto scene = game::CreateSceneInstance(klass);
+            auto& entity = scene->GetEntity(0);
+            scene->BeginLoop();
+                scene->Update(0.0f);
+                auto& node = entity.GetNode(0);
+                node.SetTranslation(test);
+                scene->PostUpdate();
+            scene->EndLoop();
+
+            scene->BeginLoop();
+            TEST_REQUIRE(entity.HasBeenKilled());
+            scene->EndLoop();
+        }
+    }
+
+    // test on the edge of boundary. (not killed)
+    {
+        const glm::vec2 test_positions[] = {
+            glm::vec2(-100.0f, 0.0f),
+            glm::vec2(100.0f, 0.0f),
+            glm::vec2(0.0f, -100.0f),
+            glm::vec2(0.0f, 100.0f)
+        };
+        for (const auto& test: test_positions)
+        {
+            auto scene = game::CreateSceneInstance(klass);
+            auto& entity = scene->GetEntity(0);
+            scene->BeginLoop();
+                scene->Update(0.0f);
+                auto& node = entity.GetNode(0);
+                node.SetTranslation(test);
+                scene->PostUpdate();
+            scene->EndLoop();
+            scene->BeginLoop();
+            TEST_REQUIRE(!entity.HasBeenKilled());
+            scene->EndLoop();
+        }
+    }
+}
+
 void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
 {
     auto entity0 = std::make_shared<game::EntityClass>();
@@ -1020,6 +1118,7 @@ int test_main(int argc, char* argv[])
     unit_test_scene_instance_spawn();
     unit_test_scene_instance_kill();
     unit_test_scene_instance_transform();
+    unit_test_scene_instance_kill_at_boundary();
     unit_test_scene_spatial_query(game::SceneClass::SpatialIndex::QuadTree);
     unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::QuadTree);
     unit_test_scene_spatial_query(game::SceneClass::SpatialIndex::DenseGrid);

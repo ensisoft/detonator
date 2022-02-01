@@ -413,12 +413,24 @@ namespace game
         const FRect* GetDynamicSpatialRect() const;
         const QuadTreeArgs* GetQuadTreeArgs() const;
         const DenseGridArgs* GetDenseGridArgs() const;
+        const float* GetLeftBoundary() const;
+        const float* GetRightBoundary() const;
+        const float* GetTopBoundary() const;
+        const float* GetBottomBoundary() const;
 
         void SetDynamicSpatialIndex(SpatialIndex index);
         void SetDynamicSpatialIndexArgs(const DenseGridArgs& args);
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
         void SetDynamicSpatialRect(const FRect& rect);
 
+        void SetLeftBoundary(float value)
+        { mLeftBoundary = value; }
+        void SetRightBoundary(float value)
+        { mRightBoundary = value; }
+        void SetTopBoundary(float value)
+        { mTopBoundary = value; }
+        void SetBottomBoundary(float value)
+        { mBottomBoundary = value; }
         void SetName(const std::string& name)
         { mName = name; }
         void SetScriptFileId(const std::string& file)
@@ -427,8 +439,24 @@ namespace game
         { return !mScriptFile.empty(); }
         bool IsDynamicSpatialIndexEnabled() const
         { return mDynamicSpatialIndex != SpatialIndex::Disabled; }
+        bool HasLeftBoundary() const
+        { return mLeftBoundary.has_value(); }
+        bool HasRightBoundary() const
+        { return mRightBoundary.has_value(); }
+        bool HasTopBoundary() const
+        { return mTopBoundary.has_value(); }
+        bool HasBottomBoundary() const
+        { return mBottomBoundary.has_value(); }
         void ResetScriptFile()
         { mScriptFile.clear(); }
+        void ResetLeftBoundary()
+        { mLeftBoundary.reset(); }
+        void ResetRightBoundary()
+        { mRightBoundary.reset(); }
+        void ResetTopBoundary()
+        { mTopBoundary.reset(); }
+        void ResetBottomBoundary()
+        { mBottomBoundary.reset(); }
 
         // Serialize the scene into JSON.
         void IntoJson(data::Writer& data) const;
@@ -468,6 +496,11 @@ namespace game
         std::optional<FRect> mDynamicSpatialRect;
         // Spatial index type specific arguments for the data structure.
         std::optional<SpatialIndexArgs> mDynamicSpatialIndexArgs;
+        // Bounds of the scene if any.
+        std::optional<float> mLeftBoundary;
+        std::optional<float> mRightBoundary;
+        std::optional<float> mTopBoundary;
+        std::optional<float> mBottomBoundary;
     };
 
     // Scene is the runtime representation of a scene based on some scene class
