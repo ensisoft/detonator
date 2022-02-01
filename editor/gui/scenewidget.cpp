@@ -382,6 +382,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
     GetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
     GetUserProperty(resource, "densegrid_num_cols", mUI.spDenseGridCols);
+    GetUserProperty(resource, "left_boundary", mUI.spinLeftBoundary);
+    GetUserProperty(resource, "right_boundary", mUI.spinRightBoundary);
+    GetUserProperty(resource, "top_boundary", mUI.spinTopBoundary);
+    GetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -844,6 +848,43 @@ void SceneWidget::on_spDenseGridCols_valueChanged(int)
 {
     SetSpatialIndexParams();
 }
+void SceneWidget::on_chkLeftBoundary_stateChanged(int)
+{
+    SetEnabled(mUI.spinLeftBoundary, GetValue(mUI.chkLeftBoundary));
+    SetSceneBoundary();
+}
+void SceneWidget::on_chkRightBoundary_stateChanged(int)
+{
+    SetEnabled(mUI.spinRightBoundary, GetValue(mUI.chkRightBoundary));
+    SetSceneBoundary();
+}
+void SceneWidget::on_chkTopBoundary_stateChanged(int)
+{
+    SetEnabled(mUI.spinTopBoundary, GetValue(mUI.chkTopBoundary));
+    SetSceneBoundary();
+}
+void SceneWidget::on_chkBottomBoundary_stateChanged(int)
+{
+    SetEnabled(mUI.spinBottomBoundary, GetValue(mUI.chkBottomBoundary));
+    SetSceneBoundary();
+}
+void SceneWidget::on_spinLeftBoundary_valueChanged(double value)
+{
+    SetSceneBoundary();
+}
+void SceneWidget::on_spinRightBoundary_valueChanged(double value)
+{
+    SetSceneBoundary();
+}
+void SceneWidget::on_spinTopBoundary_valueChanged(double value)
+{
+    SetSceneBoundary();
+}
+void SceneWidget::on_spinBottomBoundary_valueChanged(double value)
+{
+    SetSceneBoundary();
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -893,6 +934,10 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
     SetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
     SetUserProperty(resource, "densegrid_num_cols", mUI.spDenseGridCols);
+    SetUserProperty(resource, "left_boundary", mUI.spinLeftBoundary);
+    SetUserProperty(resource, "right_boundary", mUI.spinRightBoundary);
+    SetUserProperty(resource, "top_boundary", mUI.spinTopBoundary);
+    SetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene.GetHash();
@@ -1735,6 +1780,39 @@ void SceneWidget::DisplaySceneProperties()
         SetValue(mUI.spDenseGridCols, ptr->num_cols);
     }
 
+    SetValue(mUI.chkLeftBoundary,   false);
+    SetValue(mUI.chkRightBoundary,  false);
+    SetValue(mUI.chkTopBoundary,    false);
+    SetValue(mUI.chkBottomBoundary, false);
+    SetEnabled(mUI.spinLeftBoundary,   false);
+    SetEnabled(mUI.spinRightBoundary,  false);
+    SetEnabled(mUI.spinTopBoundary,    false);
+    SetEnabled(mUI.spinBottomBoundary, false);
+
+    if (const auto* ptr = mState.scene.GetLeftBoundary())
+    {
+        SetValue(mUI.spinLeftBoundary, *ptr);
+        SetValue(mUI.chkLeftBoundary, true);
+        SetEnabled(mUI.spinLeftBoundary, true);
+    }
+    if (const auto* ptr = mState.scene.GetRightBoundary())
+    {
+        SetValue(mUI.spinRightBoundary, *ptr);
+        SetValue(mUI.chkRightBoundary, true);
+        SetEnabled(mUI.spinRightBoundary, true);
+    }
+    if (const auto* ptr = mState.scene.GetTopBoundary())
+    {
+        SetValue(mUI.spinTopBoundary, *ptr);
+        SetValue(mUI.chkTopBoundary, true);
+        SetEnabled(mUI.spinTopBoundary, true);
+    }
+    if (const auto* ptr = mState.scene.GetBottomBoundary())
+    {
+        SetValue(mUI.spinBottomBoundary, *ptr);
+        SetValue(mUI.chkBottomBoundary, true);
+        SetEnabled(mUI.spinBottomBoundary, true);
+    }
     setWindowTitle(GetValue(mUI.name));
 }
 
@@ -1853,6 +1931,23 @@ void SceneWidget::SetSpatialIndexParams()
         args.num_rows = GetValue(mUI.spDenseGridRows);
         mState.scene.SetDynamicSpatialIndexArgs(args);
     }
+}
+
+void SceneWidget::SetSceneBoundary()
+{
+    mState.scene.ResetLeftBoundary();
+    mState.scene.ResetRightBoundary();
+    mState.scene.ResetTopBoundary();
+    mState.scene.ResetBottomBoundary();
+
+    if (GetValue(mUI.chkLeftBoundary))
+        mState.scene.SetLeftBoundary(GetValue(mUI.spinLeftBoundary));
+    if (GetValue(mUI.chkRightBoundary))
+        mState.scene.SetRightBoundary(GetValue(mUI.spinRightBoundary));
+    if (GetValue(mUI.chkTopBoundary))
+        mState.scene.SetTopBoundary(GetValue(mUI.spinTopBoundary));
+    if (GetValue(mUI.chkBottomBoundary))
+        mState.scene.SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
 }
 
 game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::vec2* hitpos)

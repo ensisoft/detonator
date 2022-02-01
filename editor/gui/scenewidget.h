@@ -88,6 +88,14 @@ namespace gui
         void on_spQuadMaxItems_valueChanged(int);
         void on_spDenseGridRows_valueChanged(int);
         void on_spDenseGridCols_valueChanged(int);
+        void on_chkLeftBoundary_stateChanged(int);
+        void on_chkRightBoundary_stateChanged(int);
+        void on_chkTopBoundary_stateChanged(int);
+        void on_chkBottomBoundary_stateChanged(int);
+        void on_spinLeftBoundary_valueChanged(double value);
+        void on_spinRightBoundary_valueChanged(double value);
+        void on_spinTopBoundary_valueChanged(double value);
+        void on_spinBottomBoundary_valueChanged(double value);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
@@ -147,6 +155,7 @@ namespace gui
         void RebuildCombos();
         void UpdateResourceReferences();
         void SetSpatialIndexParams();
+        void SetSceneBoundary();
         game::SceneNodeClass* SelectNode(const QPoint& click_point, glm::vec2* hitpos);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;
