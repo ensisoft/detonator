@@ -802,7 +802,7 @@
     },
     {
       "flags": {
-        "KillAtBoundary": true,
+        "KillAtBoundary": false,
         "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
@@ -4465,6 +4465,7 @@
   ],
   "scenes": [
     {
+      "bottom_boundary": 500.0,
       "dynamic_spatial_index": "QuadTree",
       "dynamic_spatial_rect": {
         "h": 800.0,
@@ -4706,6 +4707,7 @@
       "resource_id": "UWF4u1fYHa",
       "resource_name": "Game",
       "script_file": "",
+      "top_boundary": -500.0,
       "vars": [
         {
           "id": "7OIIPrIlIQ",
@@ -4716,6 +4718,7 @@
       ]
     },
     {
+      "bottom_boundary": 500.0,
       "dynamic_spatial_index": "Disabled",
       "id": "Z2zrRug3HP",
       "name": "Menu",

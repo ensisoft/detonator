@@ -22,10 +22,6 @@ function Update(bullet, game_time, dt)
     local velocity    = bullet.velocity
     bullet_pos.y =  bullet_pos.y + dt * velocity
     bullet_node:SetTranslation(bullet_pos)
-    if bullet_pos.y < -500 or bullet_pos.y > 500 then
-        Scene:KillEntity(bullet)
-        return
-    end
 end
 
 function PostUpdate(bullet, game_time)   

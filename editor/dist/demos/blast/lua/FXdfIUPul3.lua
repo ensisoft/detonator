@@ -74,66 +74,11 @@ function Update(ship2, game_time, dt)
         ship2:PlayAnimationByName('Turn Exhaust Left')
     end
     ship2.velocity = velocity
-
+    ship_body:SetTranslation(ship_pos)
     -- if it reached the edge of space then kill it.
     if ship_pos.y > 500 then
         Scene:KillEntity(ship2)
     end
-    ship_body:SetTranslation(ship_pos)
-
-
-    -- something like this could be used for "boss battle"
-    -- i.e the enemy is actively seeking out the player and
-    -- also dodging the bullets.
-
-    --local closest_bullet = nil
-    --local closest_bullet_dist = 300
-
-    -- find closest bullet coming at the ship.
-    --local entities = Scene:GetNumEntities()
-    --for i=0, entities-1, 1 do
-    --    local bullet = Scene:GetEntity(i)
-    --    if bullet:GetClassName() == 'RedBullet' then
-    --        local bullet_node = bullet:FindNodeByClassName('Bullet')
-    --        local bullet_pos  = bullet_node:GetTranslation()
-    --        local margin = bullet_pos.x - ship_pos.x
-    --        if margin > -100 and margin < 100 then
-    --            -- vertical distance.
-    --            local bullet_dist = bullet_pos.y - ship_pos.y
-    --            if bullet_dist > 0 and bullet_dist < closest_bullet_dist then
-    --                closest_bullet = bullet
-    --                closest_bullet_dist = bullet_dist
-    --            end
-    --        end
-    --    end
-    --end
-
-    -- see if there's a bullet to dodge
-    --if closest_bullet ~= nil then
-    --    --base.debug(ship2:GetId() .. ' bullet ' .. closest_bullet:GetId())
-    --    local bullet_node = closest_bullet:FindNodeByClassName('Bullet')
-    --    local bullet_pos  = bullet_node:GetTranslation()
-    --    local margin = bullet_pos.x - ship_pos.x
-    --    if margin > 0 then
-    --        ship2.strife = -100
-    --    else
-    --        ship2.strife = 100
-    --    end
-    --    return
-    --end
-
-
-    -- hmm, let's see where the player's mother ship is
-    --local player = Scene:FindEntityByInstanceName('Player')
-    --if player == nil then return end
-    --local player_transform = Scene:FindEntityNodeTransform(player, player:FindNodeByClassName('Body'))
-    --local player_pos = player_transform:GetTranslation()
-    --local horizontal_direction = player_pos.x - ship_pos.x
-    --if horizontal_direction > 0 then
-    --    ship2.strife = 200
-    --else
-    --    ship2.strife = -200
-    --end
 end
 
 -- Called on collision events with other objects.

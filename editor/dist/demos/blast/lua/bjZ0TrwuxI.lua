@@ -22,9 +22,6 @@ function Update(asteroid, game_time, dt)
     local rock_body  = asteroid:FindNodeByClassName('Body')
     local rock_pos   = rock_body:GetTranslation()
     rock_pos.y = rock_pos.y + dt * speed
-    if rock_pos.y > 500 then
-        Scene:KillEntity(asteroid)
-    end
     rock_body:SetTranslation(rock_pos)
 
     -- player's ship can get hurt if hit by an asteroid!
