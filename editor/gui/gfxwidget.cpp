@@ -104,6 +104,8 @@ gfx::Device::MinFilter GfxWindow::DefaultMinFilter =
 // static
 gfx::Device::MagFilter GfxWindow::DefaultMagFilter =
     gfx::Device::MagFilter::Nearest;
+// static
+gfx::Color4f GfxWindow::ClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
 
 GfxWindow::~GfxWindow()
 {
@@ -208,7 +210,7 @@ void GfxWindow::paintGL()
     mContext->makeCurrent(this);
 
     mCustomGraphicsDevice->BeginFrame();
-    mCustomGraphicsDevice->ClearColor(mClearColor);
+    mCustomGraphicsDevice->ClearColor(mClearColor.value_or(GfxWindow::ClearColor));
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMagFilter);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
@@ -235,7 +237,18 @@ void GfxWindow::paintGL()
         if (!material)
         {
             material = std::make_shared<gfx::ColorClass>();
-            material->SetBaseColor(mFocusColor);
+            // okay, so we've got a QWindow which means it doesn't get the normal
+            // QWidget functionality out of the box. For example the Focus rectangle
+            // doesn't simply just work.
+            // It's possible that we draw that ourselves as a visual goodie but figuring out the
+            // color is a little bit too difficult.. The focus rect is drawn by the style
+            // engine and doesn't seem actually use any of the palette colors!
+            // https://github.com/ensisoft/qt-palette-colors is a tool to display palette colors
+            // for all combinations of color group and role.
+            // Testing on Linux with kvantum as the theme the focus rect is blue but there's
+            // no such blue in any of the palette color combinations.
+            // going to use some hardcoded blue here for now.
+            material->SetBaseColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
         }
         gfx::Rectangle rect(gfx::Drawable::Style::Outline, 2.0f);
         gfx::Transform transform;
@@ -451,20 +464,6 @@ void GfxWindow::EndFrame()
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
 {
     mWindow = new GfxWindow();
-
-    // okay, so we've got a QWindow which means it doesn't get the normal
-    // QWidget functionality out of the box. For example the Focus rectangle
-    // doesn't simply just work.
-    // It's possible that we draw that ourselves as a visual goodie but figuring out the
-    // color is a little bit too difficult.. The focus rect is drawn by the style
-    // engine and doesn't seem actually use any of the palette colors!
-    // https://github.com/ensisoft/qt-palette-colors is a tool to display palette colors
-    // for all combinations of color group and role.
-    // Testing on Linux with kvantum as the theme the focus rect is blue but there's
-    // no such blue in any of the palette color combinations.
-    // going to use some hardcoded blue here for now.
-    mWindow->setFocusColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
-
     // the container takes ownership of the window.
     mContainer = QWidget::createWindowContainer(mWindow, this);
     mWindow->onPaintScene = [&] (gfx::Painter& painter, double secs){
@@ -494,8 +493,10 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
         // window then renders on top obscuring the context menu (?)
         // TODO: Ultimately some better UI means are needed for these
         // options.
-        if (key->key() == Qt::Key_F2)
+        if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F2)
             showColorDialog();
+        else if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F3)
+            mWindow->resetClearColor();
         else if (key->key() == Qt::Key_F3)
             toggleVSync();
 
@@ -573,16 +574,23 @@ void GfxWidget::focusOutEvent(QFocusEvent* focus)
 
 void GfxWidget::showColorDialog()
 {
-    const gfx::Color4f current = mWindow->getClearColor();
+    gfx::Color4f clear_color;
+    bool own_color = false;
+    if (const auto* color = mWindow->getClearColor())
+    {
+        clear_color = *color;
+        own_color   = true;
+    }
 
     color_widgets::ColorDialog dlg(this);
-    dlg.setColor(FromGfx(current));
-    connect(&dlg, &color_widgets::ColorDialog::colorChanged,
-            mWindow, &GfxWindow::clearColorChanged);
+    dlg.setColor(FromGfx(own_color ? clear_color : GfxWindow::GetDefaultClearColor()));
+    connect(&dlg, &color_widgets::ColorDialog::colorChanged, mWindow, &GfxWindow::clearColorChanged);
 
     if (dlg.exec() == QDialog::Rejected)
     {
-        mWindow->setClearColor(current);
+        if (own_color)
+            mWindow->setClearColor(clear_color);
+        else mWindow->resetClearColor();
         return;
     }
     mWindow->setClearColor(ToGfx(dlg.color()));

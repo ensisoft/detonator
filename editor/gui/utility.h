@@ -774,7 +774,10 @@ inline void SetUserProperty(Resource& res, const QString& name, const color_widg
 { res.SetUserProperty(name, color->color()); }
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const QString& name, const gui::GfxWidget* widget)
-{ res.SetUserProperty(name + "_clear_color", FromGfx(widget->getClearColor())); }
+{
+    if (const auto* color = widget->getClearColor())
+        res.SetUserProperty(name + "_clear_color", FromGfx(*color));
+}
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const QString& name, const QString& value)
 { res.SetUserProperty(name, value); }
@@ -1006,10 +1009,10 @@ inline bool GetUserProperty(const Resource& res, const QString& name, color_widg
 template<typename Resource>
 inline bool GetUserProperty(const Resource& res, const QString& name, gui::GfxWidget* widget)
 {
-    QSignalBlocker s(widget);
-    QColor color = FromGfx(widget->getClearColor());
+    QColor color;
     if (res.GetUserProperty(name + "_clear_color", &color))
     {
+        QSignalBlocker s(widget);
         widget->setClearColor(ToGfx(color));
         return true;
     }

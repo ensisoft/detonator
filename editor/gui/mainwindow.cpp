@@ -271,6 +271,8 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
     settings.GetValue("Settings", "python_executable", &mSettings.python_executable);
     settings.GetValue("Settings", "emsdk", &mSettings.emsdk);
+    settings.GetValue("Settings", "clear_color", &mSettings.clear_color);
+    GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
 
     TextEditor::Settings editor_settings;
     settings.GetValue("TextEditor", "font", &editor_settings.font_description);
@@ -1421,6 +1423,7 @@ void MainWindow::on_actionSettings_triggered()
         return;
 
     TextEditor::SetDefaultSettings(editor_settings);
+    GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
 
     if (current_style == mSettings.style_name)
         return;
@@ -2225,8 +2228,10 @@ void MainWindow::BuildRecentWorkspacesMenu()
 
 bool MainWindow::SaveState()
 {
-    // persist the properties of the mainwindow itself.
     Settings settings("Ensisoft", "Gamestudio Editor");
+    // QMainWindow::SaveState saves the current state of the mainwindow toolbars
+    // and dockwidgets.
+    settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     settings.SetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
     settings.SetValue("MainWindow", "width", width());
     settings.SetValue("MainWindow", "height", height());
@@ -2236,6 +2241,9 @@ bool MainWindow::SaveState()
     settings.SetValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
     settings.SetValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
     settings.SetValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    settings.SetValue("MainWindow", "current_workspace", (mWorkspace ? mWorkspace->GetDir() : ""));
+    settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
+
     settings.SetValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
     settings.SetValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.SetValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
@@ -2249,9 +2257,7 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
     settings.SetValue("Settings", "python_executable", mSettings.python_executable);
     settings.SetValue("Settings", "emsdk", mSettings.emsdk);
-    settings.SetValue("MainWindow", "current_workspace",
-                      (mWorkspace ? mWorkspace->GetDir() : ""));
-    settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
+    settings.SetValue("Settings", "clear_color", mSettings.clear_color);
 
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
@@ -2263,10 +2269,6 @@ bool MainWindow::SaveState()
     settings.SetValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
     settings.SetValue("TextEditor", "insert_spaces", editor_settings.insert_spaces);
     settings.SetValue("TextEditor", "tab_spaces", editor_settings.tab_spaces);
-
-    // QMainWindow::SaveState saves the current state of the mainwindow toolbars
-    // and dockwidgets.
-    settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     return settings.Save();
 }
 
