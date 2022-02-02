@@ -404,9 +404,11 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
     mParticleSystems->menuAction()->setText("Particles");
+    mParticleSystems->menuAction()->setCheckable(true);
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Shapes");
+    mCustomShapes->menuAction()->setCheckable(true);
 
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
@@ -933,6 +935,20 @@ bool EntityWidget::GetStats(Stats* stats) const
     stats->device.dynamic_vbo_mem_use     = dev_stats.dynamic_vbo_mem_use;
     stats->device.streaming_vbo_mem_use   = dev_stats.streaming_vbo_mem_use;
     stats->device.streaming_vbo_mem_alloc = dev_stats.streaming_vbo_mem_alloc;
+    return true;
+}
+
+bool EntityWidget::OnEscape()
+{
+    if (mCurrentTool)
+    {
+        mCurrentTool.reset();
+        UncheckPlacementActions();
+    }
+    else
+    {
+        mUI.tree->ClearSelection();
+    }
     return true;
 }
 
@@ -1989,6 +2005,7 @@ void EntityWidget::PlaceNewParticleSystem()
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
+    mParticleSystems->menuAction()->setChecked(true);
 }
 void EntityWidget::PlaceNewCustomShape()
 {
@@ -2002,6 +2019,7 @@ void EntityWidget::PlaceNewCustomShape()
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
+    mCustomShapes->menuAction()->setChecked(true);
 }
 
 void EntityWidget::InitScene(unsigned width, unsigned height)
@@ -2292,9 +2310,7 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
             TranslateCurrentNode(0.0f, 20.0f);
             break;
         case Qt::Key_Escape:
-            if (mCurrentTool)
-                mCurrentTool.reset();
-            else mUI.tree->ClearSelection();
+            OnEscape();
             break;
         default:
             return false;
@@ -2506,6 +2522,8 @@ void EntityWidget::UncheckPlacementActions()
     mUI.actionNewParallelogram->setChecked(false);
     mUI.actionNewCapsule->setChecked(false);
     mUI.actionNewSemiCircle->setChecked(false);
+    mParticleSystems->menuAction()->setChecked(false);
+    mCustomShapes->menuAction()->setChecked(false);
 }
 
 void EntityWidget::TranslateCamera(float dx, float dy)

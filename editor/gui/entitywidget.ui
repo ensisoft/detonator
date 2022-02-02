@@ -2338,6 +2338,9 @@
    <property name="toolTip">
     <string>Place new rectangle</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
   </action>
   <action name="actionNodeDelete">
    <property name="icon">
@@ -2401,6 +2404,9 @@
    <property name="toolTip">
     <string>Place new circle</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
   </action>
   <action name="actionNewIsoscelesTriangle">
    <property name="checkable">
@@ -2415,6 +2421,9 @@
    </property>
    <property name="toolTip">
     <string>Place new isosceles triangle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+5</string>
    </property>
   </action>
   <action name="actionSave">
@@ -2446,6 +2455,9 @@
    <property name="toolTip">
     <string>Place new rounded rect</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
   </action>
   <action name="actionNewRightTriangle">
    <property name="checkable">
@@ -2460,6 +2472,9 @@
    </property>
    <property name="toolTip">
     <string>Place new right angled triangle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+6</string>
    </property>
   </action>
   <action name="actionNewTrapezoid">
@@ -2476,6 +2491,9 @@
    <property name="toolTip">
     <string>Place new trapezoid</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+7</string>
+   </property>
   </action>
   <action name="actionNewParallelogram">
    <property name="checkable">
@@ -2491,6 +2509,9 @@
    <property name="toolTip">
     <string>Place new parallelogram</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+8</string>
+   </property>
   </action>
   <action name="actionNewCapsule">
    <property name="checkable">
@@ -2505,6 +2526,9 @@
    </property>
    <property name="toolTip">
     <string>Place new capsule</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+9</string>
    </property>
   </action>
   <action name="actionNodeMoveUpLayer">
@@ -2553,6 +2577,9 @@
    </property>
    <property name="toolTip">
     <string>Place a new semi circle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
    </property>
   </action>
  </widget>
