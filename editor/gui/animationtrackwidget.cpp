@@ -1693,6 +1693,8 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
+    PrintMousePos(view, painter, mUI.widget);
+
     // pop view transformation
     view.Pop();
 }
