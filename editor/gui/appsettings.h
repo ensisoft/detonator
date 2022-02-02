@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QColor>
 #include "warnpop.h"
 
 namespace gui
@@ -73,6 +74,8 @@ namespace gui
         // Whether to save widgets with unsaved changes automatically
         // on play or whether to ask
         bool save_automatically_on_play = false;
+        // default accelerated widget clear color.
+        QColor clear_color = {int(255*0.2f),int(255*0.3f), int(255*0.4f), 255};
     };
 
 } // namespace

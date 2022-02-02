@@ -105,8 +105,11 @@ void Settings::SaveWidget(const QString& module, const QTableView* table)
 }
 void Settings::SaveWidget(const QString& module, const gui::GfxWidget* widget)
 {
-    const auto name = widget->objectName();
-    SetValue(module, name + "_clear_color", FromGfx(widget->getClearColor()));
+    if (const auto* color = widget->getClearColor())
+    {
+        const auto name = widget->objectName();
+        SetValue(module, name + "_clear_color", FromGfx(*color));
+    }
 }
 
 void Settings::SaveWidget(const QString& module, const color_widgets::ColorSelector* color)
@@ -150,9 +153,12 @@ void Settings::SaveWidget(const QString& module, const QSplitter* splitter)
 
 void Settings::LoadWidget(const QString& module, gui::GfxWidget* widget) const
 {
+    QColor clear_color;
     const auto name = widget->objectName();
-    const auto val  = GetValue(module, name + "_clear_color", FromGfx(widget->getClearColor()));
-    widget->setClearColor(ToGfx(val));
+    if (GetValue(module, name + "_clear_color", &clear_color))
+    {
+        widget->setClearColor(ToGfx(clear_color));
+    }
 }
 void Settings::LoadWidget(const QString& module, QSplitter* splitter) const
 {

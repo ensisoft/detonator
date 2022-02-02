@@ -39,7 +39,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Open mode</string>
+               <string>Window mode</string>
               </property>
              </widget>
             </item>
@@ -47,6 +47,13 @@
              <widget class="QLabel" name="label_5">
               <property name="text">
                <string>Application style</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QCheckBox" name="chkSaveAutomatically">
+              <property name="text">
+               <string>Save changes before play</string>
               </property>
              </widget>
             </item>
@@ -67,10 +74,51 @@
             <item row="0" column="1" colspan="2">
              <widget class="QComboBox" name="cmbStyle"/>
             </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="chkSaveAutomatically">
+            <item row="2" column="1" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="color_widgets::ColorSelector" name="clearColor">
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </property>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="btnResetClearColor">
+                <property name="text">
+                 <string>Browse ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_22">
               <property name="text">
-               <string>Save changes before play</string>
+               <string>Window color</string>
               </property>
              </widget>
             </item>
@@ -536,10 +584,25 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>cmbStyle</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
+  <tabstop>clearColor</tabstop>
+  <tabstop>btnResetClearColor</tabstop>
+  <tabstop>chkSaveAutomatically</tabstop>
   <tabstop>edtImageEditorExecutable</tabstop>
   <tabstop>btnSelectImageEditor</tabstop>
   <tabstop>edtImageEditorArguments</tabstop>
@@ -552,6 +615,10 @@
   <tabstop>edtAudioEditorExecutable</tabstop>
   <tabstop>btnSelectAudioEditor</tabstop>
   <tabstop>edtAudioEditorArguments</tabstop>
+  <tabstop>edtPythonExecutable</tabstop>
+  <tabstop>btnSelectPython</tabstop>
+  <tabstop>edtEmscriptenPath</tabstop>
+  <tabstop>btnSelectEmsdk</tabstop>
   <tabstop>editorFont</tabstop>
   <tabstop>editorFontSize</tabstop>
   <tabstop>editorTheme</tabstop>

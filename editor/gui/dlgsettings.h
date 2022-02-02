@@ -43,6 +43,7 @@ namespace gui
         void on_btnSelectAudioEditor_clicked();
         void on_btnSelectPython_clicked();
         void on_btnSelectEmsdk_clicked();
+        void on_btnResetClearColor_clicked();
 
     private:
         Ui::DlgSettings mUI;

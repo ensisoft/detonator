@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <functional>
+#include <optional>
 
 #include "base/assert.h"
 #include "graphics/painter.h"
@@ -72,10 +73,12 @@ namespace gui
 
         bool hasInputFocus() const;
 
-        gfx::Color4f getClearColor() const
-        { return mClearColor; }
-        gfx::Color4f getFocusColor() const
-        { return mFocusColor; }
+        const gfx::Color4f* getClearColor() const
+        {
+            if (!mClearColor.has_value())
+                return nullptr;
+            return &mClearColor.value();
+        }
         gfx::Device& getDevice() const
         { return *mCustomGraphicsDevice; }
         gfx::Painter& getPainter() const
@@ -90,8 +93,8 @@ namespace gui
 
         void setClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
-        void setFocusColor(const gfx::Color4f& color)
-        { mFocusColor = color; }
+        void resetClearColor()
+        { mClearColor.reset(); }
 
         bool haveVSYNC() const;
 
@@ -122,6 +125,10 @@ namespace gui
         { DefaultMinFilter = filter; }
         static void SetDefaultFilter(gfx::Device::MagFilter filter)
         { DefaultMagFilter = filter; }
+        static void SetDefaultClearColor(const gfx::Color4f& color)
+        { ClearColor = color; }
+        static gfx::Color4f& GetDefaultClearColor()
+        { return ClearColor; }
         static void CleanGarbage();
 
         static void BeginFrame();
@@ -147,8 +154,7 @@ namespace gui
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
-        gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
-        gfx::Color4f mFocusColor = {1.0f, 1.0f, 1.0f, 1.0f};
+        std::optional<gfx::Color4f> mClearColor;
     private:
         QElapsedTimer mClock;
         bool mVsync       = false;
@@ -162,6 +168,8 @@ namespace gui
     private:
         static gfx::Device::MinFilter DefaultMinFilter;
         static gfx::Device::MagFilter DefaultMagFilter;
+        static gfx::Color4f ClearColor;
+
     };
 
     // This is now a "widget shim" that internally creates a QOpenGLWindow
@@ -183,7 +191,7 @@ namespace gui
         float getCurrentFPS() const
         { return mWindow->getCurrentFPS(); }
 
-        gfx::Color4f getClearColor() const
+        const gfx::Color4f* getClearColor() const
         { return mWindow->getClearColor(); }
         gfx::Device& getDevice() const
         { return mWindow->getDevice(); }
