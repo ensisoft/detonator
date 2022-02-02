@@ -76,6 +76,7 @@ namespace gui
         virtual bool ConfirmClose() override;
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
+        virtual bool OnEscape() override;
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
