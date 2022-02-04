@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
     bool pcm_8bit_files = false;
     bool pcm_16bit_files = false;
     bool pcm_24bit_files = false;
-    bool sine = false;
-    bool graph = false;
+    bool test_sine = false;
+    bool test_graph = false;
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--ogg"))
@@ -62,9 +62,9 @@ int main(int argc, char* argv[])
         else if (!std::strcmp(argv[i], "--24bit"))
             pcm_24bit_files = true;
         else if (!std::strcmp(argv[i], "--sine"))
-            sine = true;
+            test_sine = true;
         else if (!std::strcmp(argv[i], "--graph"))
-            graph = true;
+            test_graph = true;
         else if (!std::strcmp(argv[i], "--loops"))
             loops = std::stoi(argv[++i]);
         else if (!std::strcmp(argv[i], "--int16"))
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
             file = argv[++i];
     }
 
-    if (!(flac_files || ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || sine || graph) && file.empty())
+    if (!(flac_files || ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || test_sine || test_graph) && file.empty())
     {
         std::printf("You haven't actually opted to play anything.\n"
             "You have the following options:\n"
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     base::EnableDebugLog(true);
 
     audio::Player player(audio::Device::Create("audio_test"));
-    if (sine)
+    if (test_sine)
     {
         INFO("Playing procedural sine audio for 10 seconds.");
         auto source = std::make_unique<audio::SineGenerator>(500, format);
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 #endif
     }
 
-    if (graph)
+    if (test_graph)
     {
         class Buffer : public audio::SourceBuffer {
         public:
@@ -148,21 +148,19 @@ int main(int argc, char* argv[])
         sine_format.sample_type = audio::SampleType::Float32;
         sine_format.channel_count = 1;
         sine_format.sample_rate   = 44100;
-        auto* sine     = (*graph)->AddElement(audio::SineSource("sine", sine_format, 500, 5000));
-        auto* file     = (*graph)->AddElement(audio::FileSource("file", "OGG/testshort.ogg",audio::SampleType::Float32));
-        auto* gain     = (*graph)->AddElement(audio::Gain("gain", 1.0f));
-        auto* mixer    = (*graph)->AddElement(audio::Mixer("mixer", 2));
-        auto* splitter = (*graph)->AddElement(audio::StereoSplitter("split"));
-        auto* null     = (*graph)->AddElement(audio::Null("null"));
-        auto* resamp   = (*graph)->AddElement(audio::Resampler("resamp", 16000));
+        (*graph)->AddElement(audio::SineSource("sine", sine_format, 500, 5000));
+        (*graph)->AddElement(audio::FileSource("file", "OGG/testshort.ogg",audio::SampleType::Float32));
+        (*graph)->AddElement(audio::Gain("gain", 1.0f));
+        (*graph)->AddElement(audio::Mixer("mixer", 2));
+        (*graph)->AddElement(audio::StereoSplitter("split"));
+        (*graph)->AddElement(audio::Null("null"));
 
         ASSERT((*graph)->LinkElements("file", "out", "split", "in"));
         ASSERT((*graph)->LinkElements("split", "left", "mixer", "in0"));
         ASSERT((*graph)->LinkElements("split", "right", "null", "in"));
         ASSERT((*graph)->LinkElements("sine", "out", "mixer", "in1"));
         ASSERT((*graph)->LinkElements("mixer", "out", "gain", "in"));
-        ASSERT((*graph)->LinkElements("gain", "out", "resamp", "in"));
-        ASSERT((*graph)->LinkGraph("resamp", "out"));
+        ASSERT((*graph)->LinkGraph("gain", "out"));
         ASSERT(graph->Prepare(loader));
 
         const auto& desc = (*graph)->Describe();
