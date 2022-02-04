@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1328</width>
-    <height>887</height>
+    <width>1497</width>
+    <height>934</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,12 @@
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
       <widget class="QGroupBox" name="groupBox_2">
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -207,6 +213,12 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Elements</string>
        </property>
@@ -224,7 +236,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>400</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -265,33 +277,39 @@
          <height>0</height>
         </size>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>390</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Element properties</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="gainValue">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="14" column="1">
+           <widget class="QSpinBox" name="loopCount">
+            <property name="specialValueText">
+             <string>Unlimited</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
             </property>
             <property name="maximum">
-             <double>100.000000000000000</double>
+             <number>10000</number>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
             </property>
             <property name="value">
-             <double>1.000000000000000</double>
+             <number>1</number>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QComboBox" name="sampleType">
+           <widget class="QLineEdit" name="elemName">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -300,107 +318,44 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QComboBox" name="channels"/>
           </item>
-          <item row="12" column="1">
-           <widget class="QComboBox" name="effect"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="lblChannels">
-            <property name="text">
-             <string>Channels</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Delay</string>
-            </property>
-           </widget>
-          </item>
           <item row="7" column="0">
+           <widget class="QLabel" name="lblGain">
+            <property name="text">
+             <string>Gain</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QSpinBox" name="frequency">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>22000</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="gui::TimeWidget" name="startTime" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
            <widget class="QLabel" name="lblFrequency">
             <property name="text">
              <string>Frequency (Hz)</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="lblFileSource">
-            <property name="text">
-             <string>File source</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Duration</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Loops</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblSampleType">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Sample type</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="sampleRate">
-            <item>
-             <property name="text">
-              <string>8000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>16000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>44100</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Effect</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
+          <item row="6" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLineEdit" name="fileSource">
@@ -441,47 +396,78 @@
            </layout>
           </item>
           <item row="13" column="1">
-           <widget class="QSpinBox" name="loopCount">
-            <property name="specialValueText">
-             <string>Unlimited</string>
+           <widget class="QComboBox" name="effect"/>
+          </item>
+          <item row="9" column="1">
+           <widget class="gui::TimeWidget" name="duration" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
             </property>
-            <property name="minimum">
-             <number>0</number>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Delay</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="gui::TimeWidget" name="delay" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblChannels">
+            <property name="text">
+             <string>Channels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Duration</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="sampleRate">
+            <item>
+             <property name="text">
+              <string>8000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>44100</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QDoubleSpinBox" name="gainValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="maximum">
-             <number>10000</number>
+             <double>100.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
             </property>
             <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lblSampleRate">
-            <property name="text">
-             <string>Sample rate (Hz)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="elemID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>300</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -498,8 +484,49 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="elemName">
+          <item row="6" column="0">
+           <widget class="QLabel" name="lblFileSource">
+            <property name="text">
+             <string>File source</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblSampleRate">
+            <property name="text">
+             <string>Sample rate (Hz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Effect</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Start time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="sampleType">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -508,51 +535,42 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="lblGain">
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>Gain</string>
+             <string>Loops</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
-           <widget class="QSpinBox" name="frequency">
-            <property name="minimum">
-             <number>1</number>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblSampleType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>22000</number>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Start time</string>
+             <string>Sample type</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
-           <widget class="gui::TimeWidget" name="duration" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="elemID">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="gui::TimeWidget" name="delay" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
             </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="gui::TimeWidget" name="startTime" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -563,16 +581,42 @@
      </item>
      <item>
       <widget class="QGroupBox" name="audioFile">
+       <property name="maximumSize">
+        <size>
+         <width>390</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
-        <string>Audio file</string>
+        <string>Audio file properties</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="afChannels">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_37">
+            <property name="text">
+             <string>Sample rate (Hz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="afFrames">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="afSampleRate">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -589,43 +633,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="afSampleRate">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="afFrames">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_37">
-            <property name="text">
-             <string>Sample rate (Hz)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_38">
-            <property name="text">
-             <string>Duration</string>
+          <item row="3" column="1" colspan="2">
+           <widget class="gui::TimeWidget" name="afDuration" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
             </property>
            </widget>
           </item>
@@ -636,43 +647,56 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="afChannels">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_38">
+            <property name="text">
+             <string>Duration</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" rowspan="3">
+           <widget class="QLabel" name="texturePreview">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="pixmap">
+             <pixmap resource="../resource/resource.qrc">:/music.png</pixmap>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
            <widget class="QPushButton" name="btnEditFile">
             <property name="text">
              <string>Edit Audio File</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="gui::TimeWidget" name="afDuration" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QLabel" name="texturePreview">
-          <property name="minimumSize">
-           <size>
-            <width>128</width>
-            <height>128</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>128</width>
-            <height>128</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="pixmap">
-           <pixmap resource="../resource/resource.qrc">:/music.png</pixmap>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
