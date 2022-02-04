@@ -33,6 +33,7 @@ TimeWidget::TimeWidget(QWidget* parent) : QWidget(parent)
     mUI->setupUi(this);
     PopulateFromEnum<Format>(mUI->format);
     SetValue(mUI->format, Format::Milliseconds);
+    SetSuffix();
 }
 TimeWidget::~TimeWidget()
 {
@@ -42,6 +43,7 @@ TimeWidget::~TimeWidget()
 void TimeWidget::SetFormat(Format format)
 {
     SetValue(mUI->format, format);
+    SetSuffix();
     ShowValue();
 }
 unsigned TimeWidget::GetTime() const
@@ -54,7 +56,7 @@ unsigned TimeWidget::GetTime() const
         return value * 1000.0;
     else if (format == Format::Minutes)
         return value * 1000.0 * 60.0;
-    else BUG("???");
+    else BUG("Unhandled time format.");
     return 0;
 }
 
@@ -72,6 +74,7 @@ void TimeWidget::SetEditable(bool on_off)
 
 void TimeWidget::on_format_currentIndexChanged(int)
 {
+    SetSuffix();
     ShowValue();
 }
 void TimeWidget::on_value_valueChanged(double)
@@ -90,6 +93,18 @@ void TimeWidget::ShowValue()
     else if (format == Format::Minutes)
         gui::SetValue(mUI->value, mMilliseconds / (1000.0 * 60.0));
     else BUG("???");
+}
+
+void TimeWidget::SetSuffix()
+{
+    const auto format = (Format)GetValue(mUI->format);
+    if (format == Format::Milliseconds)
+        mUI->value->setSuffix(" ms");
+    else if (format == Format::Minutes)
+        mUI->value->setSuffix(" min");
+    else if (format == Format::Seconds)
+        mUI->value->setSuffix(" s");
+    else BUG("Unhandled time format.");
 }
 
 } // namespace

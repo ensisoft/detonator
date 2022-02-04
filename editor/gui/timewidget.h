@@ -58,6 +58,7 @@ namespace gui
         void on_value_valueChanged(double);
     private:
         void ShowValue();
+        void SetSuffix();
     private:
         Ui::TimeWidget* mUI = nullptr;
     private:
