@@ -507,6 +507,15 @@ if (CMAKE_COMPILER_IS_GNUCC)
     target_link_options(TestEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
+# engine perf test app
+add_executable(perf-test engine/test/perftest.cpp)
+target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
+target_link_libraries(perf-test PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
+target_link_libraries(perf-test PRIVATE wdk_system)
+target_link_libraries(perf-test PRIVATE Lua)
+install(TARGETS perf-test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
+
 # simple standalone executable to play with lua and sol
 # for testing c++/lua integration strategies.
 add_executable(lua-test engine/test/luatest.cpp)
