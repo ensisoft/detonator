@@ -524,12 +524,13 @@ namespace app
             // make debugging the game app more complicated.
             bool use_gamehost_process = true;
             // physics settings
+            bool enable_physics = true;
             // number of velocity iterations per physics simulation step.
             unsigned num_velocity_iterations = 8;
             // number of position iterations per physics simulation step.
             unsigned num_position_iterations = 3;
             // gravity vector for physics simulation
-            glm::vec2 gravity = {0.0f, 10.0f};
+            glm::vec2 physics_gravity = {0.0f, 10.0f};
             // scaling factor for mapping game world to physics world and back
             glm::vec2 physics_scale = {100.0f, 100.0f};
             // game's logical viewport width. this is *not* the final

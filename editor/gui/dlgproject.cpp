@@ -75,10 +75,11 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.edtWorkingFolder, mSettings.working_folder);
     SetUIValue(mUI.edtArguments, mSettings.command_line_arguments);
     SetUIValue(mUI.chkGameProcess, mSettings.use_gamehost_process);
+    SetUIValue(mUI.grpPhysics, mSettings.enable_physics);
     SetUIValue(mUI.numVeloIterations, mSettings.num_velocity_iterations);
     SetUIValue(mUI.numPosIterations, mSettings.num_position_iterations);
-    SetUIValue(mUI.gravityX, mSettings.gravity.x);
-    SetUIValue(mUI.gravityY, mSettings.gravity.y);
+    SetUIValue(mUI.gravityX, mSettings.physics_gravity.x);
+    SetUIValue(mUI.gravityY, mSettings.physics_gravity.y);
     SetUIValue(mUI.scaleX, mSettings.physics_scale.x);
     SetUIValue(mUI.scaleY, mSettings.physics_scale.y);
     SetUIValue(mUI.viewportWidth, mSettings.viewport_width);
@@ -136,10 +137,11 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
     GetUIValue(mUI.edtArguments, &mSettings.command_line_arguments);
     GetUIValue(mUI.chkGameProcess, &mSettings.use_gamehost_process);
+    GetUIValue(mUI.grpPhysics, &mSettings.enable_physics);
     GetUIValue(mUI.numVeloIterations, &mSettings.num_velocity_iterations);
     GetUIValue(mUI.numPosIterations, &mSettings.num_position_iterations);
-    GetUIValue(mUI.gravityX, &mSettings.gravity.x);
-    GetUIValue(mUI.gravityY, &mSettings.gravity.y);
+    GetUIValue(mUI.gravityX, &mSettings.physics_gravity.x);
+    GetUIValue(mUI.gravityY, &mSettings.physics_gravity.y);
     GetUIValue(mUI.scaleX, &mSettings.physics_scale.x);
     GetUIValue(mUI.scaleY, &mSettings.physics_scale.y);
     GetUIValue(mUI.viewportWidth, &mSettings.viewport_width);

@@ -139,6 +139,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.actionStop->setEnabled(false);
     mUI.timeline->SetModel(mTimelineModel.get());
 
+    const auto& settings = workspace->GetProjectSettings();
     PopulateFromEnum<game::ActuatorClass::Type>(mUI.actuatorType);
     PopulateFromEnum<game::TransformActuatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::SetValueActuatorClass::Interpolation>(mUI.setvalInterpolation);
@@ -148,7 +149,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::SetFlagActuatorClass::FlagAction>(mUI.flagAction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-
+    SetValue(mUI.actionUsePhysics, settings.enable_physics);
     setFocusPolicy(Qt::StrongFocus);
 
     mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&AnimationTrackWidget::ZoomIn, this)); };
@@ -479,7 +480,7 @@ void AnimationTrackWidget::Update(double secs)
         return;
 
     mPlaybackAnimation->Update(secs);
-    if (GetValue(mUI.actionUsePhysics))
+    if (mPhysics.HaveWorld())
     {
         mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
@@ -641,6 +642,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     }
 
     const auto& settings = mWorkspace->GetProjectSettings();
+    const bool use_physics = GetValue(mUI.actionUsePhysics);
 
     // create new animation instance and play the animation track.
     auto track = game::CreateAnimationTrackInstance(mState.track);
@@ -648,11 +650,13 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     mPlaybackAnimation->Play(std::move(track));
     mPhysics.SetClassLibrary(mWorkspace);
     mPhysics.SetScale(settings.physics_scale);
-    mPhysics.SetGravity(settings.gravity);
+    mPhysics.SetGravity(settings.physics_gravity);
     mPhysics.SetNumVelocityIterations(settings.num_velocity_iterations);
     mPhysics.SetNumPositionIterations(settings.num_position_iterations);
     mPhysics.SetTimestep(1.0f / settings.updates_per_second);
-    mPhysics.CreateWorld(*mPlaybackAnimation);
+    if (use_physics)
+        mPhysics.CreateWorld(*mPlaybackAnimation);
+
     mPlayState = PlayState::Playing;
 
     mUI.actionPlay->setEnabled(false);

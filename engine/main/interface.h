@@ -203,6 +203,8 @@ namespace engine
             unsigned ticks_per_second = 1;
             // configuration data for the physics engine.
             struct {
+                // Whether the physics engine/simulation is enabled or not.
+                bool enabled = true;
                 // number of velocity iterations to take per simulation step.
                 unsigned num_velocity_iterations = 8;
                 // number of position iterations to take per simulation step.

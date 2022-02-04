@@ -75,7 +75,7 @@ public:
 
     virtual void Init(const InitParams& init) override
     {
-        DEBUG("Engine initializing. Surface %1x%2", init.surface_width, init.surface_height);
+        DEBUG("Engine initializing. [surface=%1x%2]", init.surface_width, init.surface_height);
         mAudio = std::make_unique<engine::AudioEngine>(init.application_name);
         mAudio->SetClassLibrary(mClasslib);
         mAudio->SetLoader(mAudioLoader);
@@ -142,9 +142,9 @@ public:
 
         // set the unfortunate global gfx loader
         gfx::SetResourceLoader(env.graphics_loader);
-        DEBUG("Install directory '%1'.", env.directory);
-        DEBUG("Game home '%1'.", env.game_home);
-        DEBUG("User home '%1'.", env.user_home);
+        DEBUG("Game install directory: '%1'.", env.directory);
+        DEBUG("Game home: '%1'.", env.game_home);
+        DEBUG("User home: '%1'.", env.user_home);
     }
     virtual void SetEngineConfig(const EngineConfig& conf) override
     {
@@ -154,9 +154,9 @@ public:
         audio_format.sample_type   = conf.audio.sample_type;
         mAudio->SetFormat(audio_format);
         mAudio->SetBufferSize(conf.audio.buffer_size);
-        DEBUG("Audio format set to %1", audio_format);
-        DEBUG("Audio buffer size set to %1ms", conf.audio.buffer_size);
+        DEBUG("Configure audio engine. [format=%1 buff_size=%2ms]", audio_format, conf.audio.buffer_size);
 
+        mEnablePhysics = conf.physics.enabled;
         mPhysics.SetScale(conf.physics.scale);
         mPhysics.SetGravity(conf.physics.gravity);
         mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
@@ -167,23 +167,28 @@ public:
         mClearColor = conf.clear_color;
         mGameTimeStep = 1.0f / conf.updates_per_second;
         mGameTickStep = 1.0f / conf.ticks_per_second;
-        auto mouse_drawble = mClasslib->FindDrawableClassById(conf.mouse_cursor.drawable);
+
+        auto mouse_drawable = mClasslib->FindDrawableClassById(conf.mouse_cursor.drawable);
         DEBUG("Mouse material='%1',drawable='%2'", conf.mouse_cursor.material, conf.mouse_cursor.drawable);
-        if (!mouse_drawble) {
-            WARN("No such mouse cursor drawable found '%1'.", conf.mouse_cursor.drawable);
-            mouse_drawble = std::make_shared<gfx::CursorClass>(gfx::CursorClass::Shape::Arrow);
+        if (!mouse_drawable)
+        {
+            WARN("No such mouse cursor drawable found. [drawable='%1']", conf.mouse_cursor.drawable);
+            mouse_drawable = std::make_shared<gfx::CursorClass>(gfx::CursorClass::Shape::Arrow);
             mCursorSize    = glm::vec2(20.0f, 20.0f);
             mCursorHotspot = glm::vec2(0.0f, 0.0f);
-        } else {
+        }
+        else
+        {
             mCursorSize    = conf.mouse_cursor.size;
             mCursorHotspot = conf.mouse_cursor.hotspot;
         }
         auto mouse_material = mClasslib->FindMaterialClassById(conf.mouse_cursor.material);
-        if (!mouse_material) {
-            WARN("No such mouse cursor drawable found '%1'.", conf.mouse_cursor.material);
+        if (!mouse_material)
+        {
+            WARN("No such mouse cursor material found. [material='%1']", conf.mouse_cursor.material);
             mouse_material = std::make_shared<gfx::ColorClass>(gfx::Color::HotPink);
         }
-        mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawble);
+        mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawable);
         mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
         mShowMouseCursor = conf.mouse_cursor.show;
         mCursorUnits = conf.mouse_cursor.units;
@@ -749,8 +754,11 @@ private:
     void OnAction(const engine::PlayAction& action)
     {
         mScene = game::CreateSceneInstance(action.klass);
-        mPhysics.DeleteAll();
-        mPhysics.CreateWorld(*mScene);
+        if (mEnablePhysics)
+        {
+            mPhysics.DeleteAll();
+            mPhysics.CreateWorld(*mScene);
+        }
         mScripting->BeginPlay(mScene.get());
         mGame->BeginPlay(mScene.get());
     }
@@ -869,7 +877,7 @@ private:
             {
                 std::vector<engine::ContactEvent> contacts;
                 TRACE_CALL("Physics::Step", mPhysics.Step(&contacts));
-                TRACE_CALL("Physics::Update", mPhysics.UpdateScene(*mScene));
+                TRACE_CALL("Physics::UpdateScene", mPhysics.UpdateScene(*mScene));
                 TRACE_BLOCK("Physics::ContactEvents",
                     for (const auto& contact : contacts)
                     {
@@ -1001,6 +1009,8 @@ private:
     bool mShowMouseCursor = true;
     // flag to control the debug string printing.
     bool mShowDebugs = true;
+    // flag to control physics world creation. 
+    bool mEnablePhysics = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
 };

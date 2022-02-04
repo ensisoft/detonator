@@ -225,6 +225,8 @@ namespace engine
         float mTimestep = 1.0/60.0f;
         unsigned mNumVelocityIterations = 8;
         unsigned mNumPositionIterations = 3;
+        // whether the physics simulation is currently enabled or not
+        bool mEnabled = true;
     };
 
 } // namespace

@@ -584,6 +584,7 @@ int main(int argc, char* argv[])
         if (json.contains("physics"))
         {
             const auto& physics_settings = json["physics"];
+            base::JsonReadSafe(physics_settings, "enabled", &config.physics.enabled);
             base::JsonReadSafe(physics_settings, "num_velocity_iterations", &config.physics.num_velocity_iterations);
             base::JsonReadSafe(physics_settings, "num_position_iterations", &config.physics.num_position_iterations);
             base::JsonReadSafe(physics_settings, "gravity", &config.physics.gravity);

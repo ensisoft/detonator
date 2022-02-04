@@ -873,9 +873,10 @@ void PlayWindow::DoAppInit()
         engine::Engine::EngineConfig config;
         config.ticks_per_second   = settings.ticks_per_second;
         config.updates_per_second = settings.updates_per_second;
+        config.physics.enabled    = settings.enable_physics;
         config.physics.num_velocity_iterations = settings.num_velocity_iterations;
         config.physics.num_position_iterations = settings.num_position_iterations;
-        config.physics.gravity       = settings.gravity;
+        config.physics.gravity       = settings.physics_gravity;
         config.physics.scale         = settings.physics_scale;
         config.default_mag_filter    = settings.default_mag_filter;
         config.default_min_filter    = settings.default_min_filter;
