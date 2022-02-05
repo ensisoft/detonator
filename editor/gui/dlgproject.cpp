@@ -97,6 +97,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.audioChannels, mSettings.audio_channels);
     SetUIValue(mUI.audioSampleRate, mSettings.audio_sample_rate);
     SetUIValue(mUI.audioBufferSize, mSettings.audio_buffer_size);
+    SetUIValue(mUI.audioCaching, mSettings.enable_audio_pcm_caching);
     SetUIValue(mUI.cmbCanvasMode, mSettings.canvas_mode);
     SetUIValue(mUI.cmbPowerPref, mSettings.webgl_power_preference);
     SetUIValue(mUI.canvasWidth, mSettings.canvas_width);
@@ -157,6 +158,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.audioChannels, &mSettings.audio_channels);
     GetUIValue(mUI.audioSampleRate, &mSettings.audio_sample_rate);
     GetUIValue(mUI.audioBufferSize, &mSettings.audio_buffer_size);
+    GetUIValue(mUI.audioCaching, &mSettings.enable_audio_pcm_caching);
     GetUIValue(mUI.cmbCanvasMode, &mSettings.canvas_mode);
     GetUIValue(mUI.cmbPowerPref, &mSettings.webgl_power_preference);
     GetUIValue(mUI.canvasWidth, &mSettings.canvas_width);

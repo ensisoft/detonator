@@ -1308,6 +1308,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "audio_sample_rate"       , mSettings.audio_sample_rate);
     JsonWrite(project, "audio_sample_type"       , mSettings.audio_sample_type);
     JsonWrite(project, "audio_buffer_size"       , mSettings.audio_buffer_size);
+    JsonWrite(project, "enable_audio_pcm_caching", mSettings.enable_audio_pcm_caching);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1426,6 +1427,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "audio_sample_rate",        &mSettings.audio_sample_rate);
     JsonReadSafe(project, "audio_sample_type",        &mSettings.audio_sample_type);
     JsonReadSafe(project, "audio_buffer_size",        &mSettings.audio_buffer_size);
+    JsonReadSafe(project, "enable_audio_pcm_caching", &mSettings.enable_audio_pcm_caching);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -2400,6 +2402,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["audio"], "sample_rate", mSettings.audio_sample_rate);
         base::JsonWrite(json["audio"], "sample_type", mSettings.audio_sample_type);
         base::JsonWrite(json["audio"], "buffer_size", mSettings.audio_buffer_size);
+        base::JsonWrite(json["audio"], "pcm_caching", mSettings.enable_audio_pcm_caching);
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
         {

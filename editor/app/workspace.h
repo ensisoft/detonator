@@ -568,6 +568,8 @@ namespace app
             unsigned audio_sample_rate = 44100;
             // Expected approximate audio buffer size in milliseconds.
             unsigned audio_buffer_size = 20;
+            // flag to control PCM caching to avoid duplicate decoding
+            bool enable_audio_pcm_caching = false;
         };
 
         const ProjectSettings& GetProjectSettings() const

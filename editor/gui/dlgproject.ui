@@ -1029,8 +1029,18 @@
           <string>Audio settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_7">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>Channels</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="1">
            <widget class="QSpinBox" name="audioBufferSize">
+            <property name="suffix">
+             <string> ms</string>
+            </property>
             <property name="minimum">
              <number>5</number>
             </property>
@@ -1042,33 +1052,6 @@
             </property>
             <property name="value">
              <number>20</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="audioFormat">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="audioChannels"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_31">
-            <property name="text">
-             <string>Buffer size (ms)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_28">
-            <property name="text">
-             <string>Format</string>
             </property>
            </widget>
           </item>
@@ -1091,10 +1074,10 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_29">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_28">
             <property name="text">
-             <string>Channels</string>
+             <string>Format</string>
             </property>
            </widget>
           </item>
@@ -1104,6 +1087,9 @@
              <string>Sample rate (Hz)</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="audioChannels"/>
           </item>
           <item row="2" column="2">
            <spacer name="horizontalSpacer_5">
@@ -1120,6 +1106,30 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="audioFormat">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_31">
+            <property name="text">
+             <string>Buffer size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="audioCaching">
+            <property name="text">
+             <string>Enable PCM caching</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1599,6 +1609,7 @@
   <tabstop>audioChannels</tabstop>
   <tabstop>audioSampleRate</tabstop>
   <tabstop>audioBufferSize</tabstop>
+  <tabstop>audioCaching</tabstop>
   <tabstop>mouse</tabstop>
   <tabstop>mouseDrawable</tabstop>
   <tabstop>mouseMaterial</tabstop>
@@ -1617,6 +1628,7 @@
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
   <tabstop>tab</tabstop>
+  <tabstop>grpPhysics</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

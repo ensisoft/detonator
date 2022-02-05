@@ -154,6 +154,7 @@ public:
         audio_format.sample_type   = conf.audio.sample_type;
         mAudio->SetFormat(audio_format);
         mAudio->SetBufferSize(conf.audio.buffer_size);
+        mAudio->EnableCaching(conf.audio.enable_pcm_caching);
         DEBUG("Configure audio engine. [format=%1 buff_size=%2ms]", audio_format, conf.audio.buffer_size);
 
         mEnablePhysics = conf.physics.enabled;

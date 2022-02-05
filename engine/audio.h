@@ -61,6 +61,8 @@ namespace engine
 
         AudioEngine(const std::string& name);
        ~AudioEngine();
+        void EnableCaching(bool on_off)
+        { mEnableCaching = on_off; }
         void SetLoader(const audio::Loader* loader)
         { mLoader = loader; }
         void SetFormat(const audio::Format& format)
@@ -141,6 +143,7 @@ namespace engine
         std::size_t mEffectCounter = 0;
         bool mEnableMusic = true;
         bool mEnableEffects = true;
+        bool mEnableCaching = false;
     };
 
 } // namespace

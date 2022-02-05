@@ -243,6 +243,10 @@ namespace engine
                 audio::SampleType sample_type = audio::SampleType::Float32;
                 // Expected approximate audio buffer size in milliseconds.
                 unsigned buffer_size = 20;
+                // Flag to control PCM caching. When this is enabled content
+                // that is flagged for PCM caching will be cached in order to
+                // avoid duplicate audio decoding.
+                bool enable_pcm_caching = false;
             } audio;
             // the default clear color.
             Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};

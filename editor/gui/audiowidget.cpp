@@ -1435,7 +1435,10 @@ void AudioWidget::on_actionPlay_triggered()
 
         audio::Graph graph(std::move(klass));
         auto source = std::make_unique<audio::AudioGraph>(GetValue(mUI.graphName), std::move(graph));
-        if (!source->Prepare(*mWorkspace))
+        audio::AudioGraph::PrepareParams params;
+        params.enable_caching = false;
+
+        if (!source->Prepare(*mWorkspace, params))
         {
             QMessageBox msg(this);
             msg.setStandardButtons(QMessageBox::Ok);
@@ -1506,7 +1509,9 @@ void AudioWidget::on_actionSave_triggered()
         errors << "The audio graph has no output element/port selected.";
 
     audio::Graph graph(std::move(klass));
-    if (!graph.Prepare(*mWorkspace))
+    audio::Graph::PrepareParams p;
+    p.enable_caching = false;
+    if (!graph.Prepare(*mWorkspace, p))
     {
         errors << "The audio graph failed to prepare "
                   "(please see the application log for details).\n";
