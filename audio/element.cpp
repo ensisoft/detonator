@@ -59,19 +59,39 @@ void AdjustFrameGain(Frame<Type, ChannelCount>* frame, float gain)
 }
 
 template<unsigned ChannelCount>
-void MixFrames(Frame<float, ChannelCount>** srcs, unsigned count, float src_gain,
+void MixFrames(Frame<float, ChannelCount>** srcs, unsigned src_count, float src_gain,
                Frame<float, ChannelCount>* out)
 {
+    float channel_values[ChannelCount] = {};
+
+    // profiling with valgrind+callgrind shows that the
+    // loops perform better when performed over all srcs
+    // frames and then over the channels of each frame
+    // as opposed to over channel followed by over srcs.
+    for (unsigned j=0; j<src_count; ++j)
+    {
+        for (unsigned i=0; i<ChannelCount; ++i)
+        {
+            channel_values[i] += (src_gain * srcs[j]->channels[i]);
+        }
+    }
+    for (unsigned i=0; i<ChannelCount; ++i)
+    {
+        out->channels[i] = channel_values[i];
+    }
+
+    /*
     for (unsigned i=0; i<ChannelCount; ++i)
     {
         float channel_value = 0.0f;
 
-        for (unsigned j=0; j<count; ++j)
+        for (unsigned j=0; j<src_count; ++j)
         {
             channel_value += (src_gain * srcs[j]->channels[i]);
         }
         out->channels[i] = channel_value;
     }
+     */
 }
 template<typename Type, unsigned ChannelCount>
 void MixFrames(Frame<Type, ChannelCount>** srcs, unsigned count, float src_gain,
