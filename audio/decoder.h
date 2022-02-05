@@ -31,7 +31,7 @@ namespace audio
         // Get the audio data sampling rate. The value is in Hz
         // for example 44100 for CD quality.
         virtual unsigned GetSampleRate() const = 0;
-        // Get the number of audio channels. Currently supported values
+        // Get the number of audio channels. Currently, supported values
         // are 1 for mono and 2 for stereo. Each audio frame will then
         // contain a sample for each channel.
         virtual unsigned GetNumChannels() const = 0;
@@ -41,12 +41,13 @@ namespace audio
         // encoder/decoder implementation it might not be possible
         // to use any read function arbitrarily. For example when using
         // mpg123 the expected read format is given at the decoder
-        // creation time and cannot be changed. Thus the caller must
+        // creation time and cannot be changed. Thus, the caller must
         // make sure to use the right function to read the PCM frames
         // based on the sample type used when creating the decoder!
         // Each read function returns the number of frames read which
-        // might be 0 if the the end of stream has been reached.
+        // might be 0 if the end of stream has been reached.
         // In case of an unexpected error an exception will be thrown.
+        // The return value should be the number of *frames* read.
         virtual size_t ReadFrames(float* ptr, size_t frames) = 0;
         virtual size_t ReadFrames(short* ptr, size_t frames) = 0;
         virtual size_t ReadFrames(int* ptr, size_t frames) = 0;

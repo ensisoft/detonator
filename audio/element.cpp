@@ -875,6 +875,69 @@ void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milli
     mOut.PushBuffer(out_buffer);
 }
 
+// raw PCM data blob
+struct FileSource::PCMBuffer {
+    bool complete = false;
+    unsigned rate        = 0;
+    unsigned channels    = 0;
+    unsigned frame_count = 0;
+    std::vector<char> pcm;
+    audio::SampleType type = audio::SampleType::Float32;
+};
+
+// A pass through decoder that does no actual decoding
+// but just reads a PCM buffer
+class FileSource::PCMDecoder : public audio::Decoder
+{
+public:
+    PCMDecoder(const std::shared_ptr<const PCMBuffer>& pcm)
+      : mBuffer(pcm)
+    {}
+    virtual unsigned GetSampleRate() const override
+    { return mBuffer->rate; }
+    virtual unsigned GetNumChannels() const override
+    { return mBuffer->channels; }
+    virtual unsigned GetNumFrames() const override
+    { return mBuffer->frame_count; }
+    virtual size_t ReadFrames(float* ptr, size_t frames) override
+    {
+        ASSERT(mBuffer->type == audio::SampleType::Float32);
+        return ReadFrames<float>(ptr, frames);
+    }
+    virtual size_t ReadFrames(short* ptr, size_t frames) override
+    {
+        ASSERT(mBuffer->type == audio::SampleType::Int16);
+        return ReadFrames<short>(ptr, frames);
+    }
+    virtual size_t ReadFrames(int* ptr, size_t frames) override
+    {
+        ASSERT(mBuffer->type == audio::SampleType::Int32);
+        return ReadFrames<int>(ptr, frames);
+    }
+    virtual void Reset() override
+    {
+        mFrame = 0;
+    }
+private:
+    template<typename T>
+    size_t ReadFrames(T* ptr, size_t frames)
+    {
+        const auto frame_size = sizeof(T) * mBuffer->channels;
+        const auto byte_count = frame_size * frames;
+        const auto byte_offset = frame_size * mFrame;
+        ASSERT(byte_offset + byte_count <= mBuffer->pcm.size());
+        std::memcpy(ptr, &mBuffer->pcm[byte_offset], byte_count);
+        mFrame += frames;
+        return frames;
+    }
+private:
+    std::shared_ptr<const PCMBuffer> mBuffer;
+    std::uint64_t mFrame = 0;
+};
+
+// static
+FileSource::PCMCache FileSource::pcm_cache;
+
 FileSource::FileSource(const std::string& name, const std::string& file, SampleType type, unsigned loops)
   : mName(name)
   , mId(base::RandomString(10))
@@ -909,34 +972,67 @@ FileSource::~FileSource() = default;
 
 bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
-    auto buffer = loader.LoadAudioBuffer(mFile);
-    if (!buffer)
-        return false;
-
+    std::shared_ptr<PCMBuffer> cached_pcm_buffer;
     std::unique_ptr<Decoder> decoder;
-    const auto& upper = base::ToUpperUtf8(mFile);
-    if (base::EndsWith(upper, ".MP3"))
+
+    const bool enable_caching = params.enable_caching && mEnableCaching;
+    if (enable_caching)
     {
-        auto io = std::make_unique<Mpg123Buffer>(mFile, buffer);
-        auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(io), mFormat.sample_type))
-            return false;
-        decoder = std::move(dec);
+        auto it = pcm_cache.find(mId);
+        if (it != pcm_cache.end())
+            cached_pcm_buffer = it->second;
     }
-    else if (base::EndsWith(upper, ".OGG") ||
-             base::EndsWith(upper, ".WAV") ||
-             base::EndsWith(upper, ".FLAC"))
+
+    // if there already exists a complete PCM blob for the
+    // contents of this (as identified by ID) FileSource
+    // element's audio file then we can use that data directly
+    // and not perform any duplicate mp3/ogg/flac decoding.
+    if (cached_pcm_buffer && cached_pcm_buffer->complete)
     {
-        auto io = std::make_unique<SndFileBuffer>(mFile, buffer);
-        auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(io)))
-            return false;
-        decoder = std::move(dec);
+        decoder = std::make_unique<PCMDecoder>(cached_pcm_buffer);
+        DEBUG("Using a cached PCM audio buffer. [elem=%1, file='%2', id=%3]", mName, mFile, mId);
     }
     else
     {
-        ERROR("Audio file source file format is unsupported. [elem=%1, file='%2']", mName, mFile);
-        return false;
+        auto buffer = loader.LoadAudioBuffer(mFile);
+        if (!buffer)
+            return false;
+
+        const auto& upper = base::ToUpperUtf8(mFile);
+        if (base::EndsWith(upper, ".MP3"))
+        {
+            auto io = std::make_unique<Mpg123Buffer>(mFile, buffer);
+            auto dec = std::make_unique<Mpg123Decoder>();
+            if (!dec->Open(std::move(io), mFormat.sample_type))
+                return false;
+            decoder = std::move(dec);
+        }
+        else if (base::EndsWith(upper, ".OGG") ||
+                 base::EndsWith(upper, ".WAV") ||
+                 base::EndsWith(upper, ".FLAC"))
+        {
+            auto io = std::make_unique<SndFileBuffer>(mFile, buffer);
+            auto dec = std::make_unique<SndFileDecoder>();
+            if (!dec->Open(std::move(io)))
+                return false;
+            decoder = std::move(dec);
+        }
+        else
+        {
+            ERROR("Audio file source file format is unsupported. [elem=%1, file='%2']", mName, mFile);
+            return false;
+        }
+        if (!cached_pcm_buffer && enable_caching)
+        {
+            cached_pcm_buffer = std::make_shared<PCMBuffer>();
+            cached_pcm_buffer->complete    = false;
+            cached_pcm_buffer->channels    = decoder->GetNumChannels();
+            cached_pcm_buffer->rate        = decoder->GetSampleRate();
+            cached_pcm_buffer->frame_count = decoder->GetNumFrames();
+            cached_pcm_buffer->type        = mFormat.sample_type;
+            pcm_cache[mId] = cached_pcm_buffer;
+            mPCMBuffer = cached_pcm_buffer;
+        }
     }
     Format format;
     format.channel_count = decoder->GetNumChannels();
@@ -970,6 +1066,14 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
     else if (mFormat.sample_type == SampleType::Int16)
         ret = mDecoder->ReadFrames((short*)buff, frames);
 
+    if (mPCMBuffer && !mPCMBuffer->complete)
+    {
+        const auto old_size = mPCMBuffer->pcm.size();
+        const auto new_size = old_size + ret * frame_size;
+        mPCMBuffer->pcm.resize(new_size);
+        std::memcpy(&mPCMBuffer->pcm[old_size], buff, ret * frame_size);
+    }
+
     if (ret != frames)
     {
         WARN("Unexpected number of audio frames decoded. [elem=%1, expected=%2, decoded=%3]", mName, frames, ret);
@@ -978,8 +1082,19 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
     mFramesRead += ret;
     if (mFramesRead == frames_available)
     {
+        if (mPCMBuffer)
+        {
+            const auto size = mPCMBuffer->pcm.size();
+            mPCMBuffer->complete = true;
+            DEBUG("Audio PCM buffer is complete. [elem=%1, file='%2', id=%3, bytes=%4]", mName, mFile, mId, size);
+        }
+
         if (++mPlayCount != mLoopCount)
         {
+            if (mPCMBuffer)
+            {
+                mDecoder = std::make_unique<PCMDecoder>(mPCMBuffer);
+            }
             mDecoder->Reset();
             mFramesRead = 0;
             DEBUG("Audio file source was reset for looped playback. [elem=%1, file='%2', count=%3]", mName, mFile, mPlayCount+1);
@@ -988,6 +1103,7 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
         {
             DEBUG("Audio file source is done. [elem=%1, file='%2']", mName, mFile);
         }
+        mPCMBuffer.reset();
     }
 
     mPort.PushBuffer(buffer);
@@ -1038,6 +1154,11 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
     info->frames      = decoder->GetNumFrames();
     info->seconds     = (float)info->frames / (float)info->sample_rate;
     return true;
+}
+// static
+void FileSource::ClearCache()
+{
+    pcm_cache.clear();
 }
 
 BufferSource::BufferSource(const std::string& name, std::unique_ptr<SourceBuffer> buffer,
@@ -1594,8 +1715,22 @@ const T* GetArg(const std::unordered_map<std::string, ElementArg>& args,
     return nullptr;
 }
 
+template<typename T>
+const T* GetOptionalArg(const std::unordered_map<std::string, ElementArg>& args,
+                        const std::string& arg_name,
+                        const std::string& elem)
+{
+    if (const auto* variant = base::SafeFind(args, arg_name))
+    {
+        if (const auto* value = std::get_if<T>(variant))
+            return value;
+        else WARN("Mismatch in audio element argument type. [elem=%1, arg=%2]", elem, arg_name);
+    }
+    return nullptr;
+}
+
 template<typename Type, typename Arg0> inline
-std::unique_ptr<Element> Construct(const std::string& name,
+std::unique_ptr<Type> Construct(const std::string& name,
                                    const std::string& id,
                                    const Arg0* arg0)
 {
@@ -1603,7 +1738,7 @@ std::unique_ptr<Element> Construct(const std::string& name,
     return std::make_unique<Type>(name, id, *arg0);
 }
 template<typename Type, typename Arg0, typename Arg1> inline
-std::unique_ptr<Element> Construct(const std::string& name,
+std::unique_ptr<Type> Construct(const std::string& name,
                                    const std::string& id,
                                    const Arg0* arg0,
                                    const Arg1* arg1)
@@ -1612,7 +1747,7 @@ std::unique_ptr<Element> Construct(const std::string& name,
     return std::make_unique<Type>(name, id, *arg0, *arg1);
 }
 template<typename Type, typename Arg0, typename Arg1, typename Arg2> inline
-std::unique_ptr<Element> Construct(const std::string& name,
+std::unique_ptr<Type> Construct(const std::string& name,
                                    const std::string& id,
                                    const Arg0* arg0,
                                    const Arg1* arg1,
@@ -1675,6 +1810,7 @@ const ElementDesc* FindElementDesc(const std::string& type)
             file.args["file"]  = std::string();
             file.args["type"]  = audio::SampleType::Float32;
             file.args["loops"] = 1u;
+            file.args["cache"] = false;
             file.output_ports.push_back({"out"});
             map["FileSource"] = file;
         }
@@ -1778,10 +1914,15 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
         return Construct<Resampler>(desc.name, desc.id, 
             GetArg<unsigned>(args, "sample_rate", name));
     else if (desc.type == "FileSource")
-        return Construct<FileSource>(desc.name, desc.id,
+    {
+        auto ret = Construct<FileSource>(desc.name, desc.id,
             GetArg<std::string>(args, "file", name),
             GetArg<SampleType>(args, "type", name),
             GetArg<unsigned>(args, "loops", name));
+        if (const auto* arg = GetOptionalArg<bool>(args, "cache", name))
+            ret->EnableCaching(*arg);
+        return ret;
+    }
     else if (desc.type == "ZeroSource")
         return Construct<ZeroSource>(desc.name, desc.id,
             GetArg<Format>(args, "format", name));
@@ -1794,6 +1935,10 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     return nullptr;
 }
 
+void ClearCaches()
+{
+    FileSource::ClearCache();
+}
 
 } // namespace
 

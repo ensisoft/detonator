@@ -31,6 +31,10 @@
 #include "audio/graph.h"
 
 namespace {
+
+bool enable_pcm_caching=false;
+bool enable_file_caching=false;
+
 class AudioBuffer : public audio::SourceBuffer {
 public:
     AudioBuffer(const std::string& file)
@@ -64,12 +68,13 @@ void audio_test_decode_file(const std::any& arg)
     audio::ElementCreateArgs elem;
     elem.type = "FileSource";
     elem.name = "file";
-    elem.id   = "ahs22323";
+    elem.id   = base::RandomString(10);
     elem.args["file"]  = std::any_cast<std::string>(arg);
     elem.args["type"]  = audio::SampleType::Float32;
     elem.args["loops"] = 1u;
-    laser->AddElement(std::move(elem));
-    laser->SetGraphOutputElementId("ahs22323");
+    elem.args["cache"] = enable_pcm_caching;
+    const auto& e = laser->AddElement(std::move(elem));
+    laser->SetGraphOutputElementId(e.id);
     laser->SetGraphOutputElementPort("out");
 
     std::vector<char> buffer;
@@ -99,12 +104,13 @@ void audio_test_rapid_fire(const std::any& any)
     audio::ElementCreateArgs elem;
     elem.type = "FileSource";
     elem.name = "file";
-    elem.id   = "ahs22323";
+    elem.id   = base::RandomString(10);
     elem.args["file"]  = "assets/sounds/Laser_09.mp3";
     elem.args["type"]  = audio::SampleType::Float32;
     elem.args["loops"] = 1u;
-    laser->AddElement(std::move(elem));
-    laser->SetGraphOutputElementId("ahs22323");
+    elem.args["cache"] = enable_pcm_caching;
+    const auto& e = laser->AddElement(std::move(elem));
+    laser->SetGraphOutputElementId(e.id);
     laser->SetGraphOutputElementPort("out");
 
     AudioLoader loader;
@@ -150,6 +156,8 @@ int test_main(int argc, char* argv[])
     opt.Add("--loops", "Number of test loop iterations.", 1u);
     opt.Add("--help", "Print this help.");
     opt.Add("--timing", "Perform timing on tests.");
+    opt.Add("--pcm-cache", "Enable audio PCM caching.");
+    opt.Add("--enable-file-caching", "Enable file caching.");
     for (const auto& test : tests)
         opt.Add(test.name, "Test case");
 
@@ -164,6 +172,8 @@ int test_main(int argc, char* argv[])
         opt.Print(std::cout);
         return 0;
     }
+    enable_pcm_caching = opt.WasGiven("--pcm-cache");
+    enable_file_caching = opt.WasGiven("--file-cache");
 
     base::EnableDebugLog(opt.WasGiven("--debug-log"));
 
