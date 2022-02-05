@@ -75,10 +75,13 @@ void audio_test_decode_file(const std::any& arg)
     std::vector<char> buffer;
     buffer.resize(1024);
 
+    audio::AudioGraph::PrepareParams p;
+    p.enable_caching = true;
+
     for (unsigned i=0; i<100; ++i)
     {
         audio::AudioGraph graph("graph", audio::Graph("graph", laser));
-        graph.Prepare(loader);
+        graph.Prepare(loader, p);
         std::uint64_t bytes = 0;
         while (graph.HasMore(bytes))
         {

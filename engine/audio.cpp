@@ -56,13 +56,16 @@ void AudioEngine::Start()
     ASSERT(mEffectGraphId == 0);
     ASSERT(mMusicGraphId  == 0);
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
+    audio::AudioGraph::PrepareParams p;
+    p.enable_caching = false;
+
     auto effect_graph  = std::make_unique<audio::AudioGraph>("FX");
     auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
     auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
     effect_mixer->SetNeverDone(true);
     ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*effect_graph)->LinkGraph("gain", "out"));
-    ASSERT(effect_graph->Prepare(*mLoader));
+    ASSERT(effect_graph->Prepare(*mLoader, p));
 
     auto music_graph = std::make_unique<audio::AudioGraph>("Music");
     auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
@@ -70,7 +73,7 @@ void AudioEngine::Start()
     music_mixer->SetNeverDone(true);
     ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
     ASSERT((*music_graph)->LinkGraph("gain", "out"));
-    ASSERT(music_graph->Prepare(*mLoader));
+    ASSERT(music_graph->Prepare(*mLoader, p));
 
     auto device = audio::Device::Create(mName.c_str());
     device->SetBufferSize(mBufferSize);
@@ -103,7 +106,9 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
     ASSERT(graph);
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     auto instance = std::make_unique<audio::Graph>(graph);
-    if (!instance->Prepare(*mLoader))
+    audio::Graph::PrepareParams p;
+    p.enable_caching = mEnableCaching;
+    if (!instance->Prepare(*mLoader, p))
         ERROR_RETURN(false, "Audio engine music graph prepare error. [graph=%1]", graph->GetName());
     const auto& port = instance->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
@@ -208,7 +213,9 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     const auto paused = when != 0;
 
     auto graph = std::make_unique<audio::Graph>(name, handle);
-    if (!graph->Prepare(*mLoader))
+    audio::Graph::PrepareParams p;
+    p.enable_caching = mEnableCaching;
+    if (!graph->Prepare(*mLoader, p))
         ERROR_RETURN(false, "Audio engine sound effect audio graph prepare error. [graph%1]", handle->GetName());
 
     const auto& port = graph->GetOutputPort(0);

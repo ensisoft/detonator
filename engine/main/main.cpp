@@ -617,6 +617,7 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(audio, "sample_rate", &config.audio.sample_rate);
             base::JsonReadSafe(audio, "sample_type", &config.audio.sample_type);
             base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
+            base::JsonReadSafe(audio, "pcm_caching", &config.audio.enable_pcm_caching);
         }
 
         // check whether there's a state file with previous window geometry

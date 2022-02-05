@@ -225,12 +225,12 @@ public:
     { return mName; }
     virtual std::string GetType() const override
     { return "TestElement"; }
-    virtual bool Prepare(const audio::Loader&) override
+    virtual bool Prepare(const Loader&, const PrepareParams&) override
     {
         mState.prepare_list.push_back(this);
         return !mPrepareError;
     }
-    virtual void Process(audio::BufferAllocator& allocator, EventQueue& events, unsigned milliseconds) override
+    virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override
     {
         TEST_REQUIRE(mInputPorts.size() == mOutputPorts.size());
         for (unsigned i=0; i<mInputPorts.size(); ++i)
@@ -365,7 +365,8 @@ void unit_test_prepare_topologies()
 
         graph.AddElementPtr(std::move(elem));
         Link(graph, "foo", "src");
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
         TEST_REQUIRE(graph.GetFormat() == format);
         TEST_REQUIRE(state.prepare_list.size() == 1);
         TEST_REQUIRE(state.prepare_list[0]->GetName() == "foo");
@@ -396,7 +397,8 @@ void unit_test_prepare_topologies()
         Link(graph, "a", "out", "c", "in0");
         Link(graph, "b", "out", "c", "in1");
         Link(graph, "c", "out");
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
 
         std::string topo = state.ConcatPrepareNames();
         TEST_REQUIRE(topo == "abc" || topo == "bac");
@@ -448,7 +450,8 @@ void unit_test_prepare_topologies()
         Link(graph, "c", "out1", "d", "in");
         Link(graph, "d", "out", "e", "in2");
         Link(graph, "e", "out");
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
 
         std::string topo = state.ConcatPrepareNames();
         TEST_REQUIRE(topo == "abcde" || topo == "acbde");
@@ -481,7 +484,8 @@ void unit_test_buffer_flow()
     Link(graph, "s", "out", "a", "in");
     Link(graph, "a", "out", "b", "in");
     Link(graph, "b", "out");
-    TEST_REQUIRE(graph.Prepare(loader));
+    audio::Graph::PrepareParams p;
+    TEST_REQUIRE(graph.Prepare(loader, p));
 
     audio::Element::EventQueue  queue;
     audio::BufferHandle buffer;
@@ -509,7 +513,8 @@ void unit_test_completion()
         auto* src = graph.AddElement(SrcElement("src", "src", 10));
         src->GetOutputPort(0).SetFormat(format);
         TEST_REQUIRE(graph.LinkGraph("src", "out"));
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
 
         audio::Element::EventQueue queue;
         audio::BufferAllocator allocator;
@@ -546,7 +551,8 @@ void unit_test_completion()
         TEST_REQUIRE(graph.LinkElements("src0", "out", "test", "in0"));
         TEST_REQUIRE(graph.LinkElements("src1", "out", "test", "in1"));
         TEST_REQUIRE(graph.LinkGraph("test", "out0"));
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
 
         audio::Element::EventQueue queue;
         audio::BufferHandle buffer;
@@ -610,7 +616,8 @@ void unit_test_graph_in_graph()
 
     Link(graph, "sub-graph", "port", "c", "in");
     Link(graph, "c", "out");
-    TEST_REQUIRE(graph.Prepare(loader));
+    audio::Graph::PrepareParams p;
+    TEST_REQUIRE(graph.Prepare(loader, p));
 
     audio::Element::EventQueue queue;
     audio::BufferHandle buffer;
@@ -684,7 +691,8 @@ void unit_test_graph_class()
         audio::Graph graph(klass);
         TEST_REQUIRE(graph.FindElementById(zero.id)->GetType() == "ZeroSource");
         TEST_REQUIRE(graph.FindElementById(gain.id)->GetType() == "Gain");
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
         const auto& desc = graph.Describe();
         //std::cout << desc[0];
         TEST_REQUIRE(desc[0] == "zero:out -> gain:in gain:out -> graph:port graph:port -> nil");
@@ -715,7 +723,8 @@ void unit_test_graph_class()
         klass.SetGraphOutputElementPort("out");
 
         audio::Graph graph(klass);
-        TEST_REQUIRE(graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(graph.Prepare(loader, p));
     }
 
     {
@@ -731,7 +740,8 @@ void unit_test_graph_class()
         klass.AddElement(zero);
 
         audio::Graph graph(klass);
-        TEST_REQUIRE(!graph.Prepare(loader));
+        audio::Graph::PrepareParams p;
+        TEST_REQUIRE(!graph.Prepare(loader, p));
     }
 }
 
@@ -752,7 +762,7 @@ void unit_test_oversized_buffer()
         { return mDone; }
         virtual bool IsSource() const override
         { return true; }
-        virtual bool Prepare(const audio::Loader& loader) override
+        virtual bool Prepare(const audio::Loader& loader, const PrepareParams&) override
         {
             audio::Format format;
             format.channel_count = 2;
@@ -807,7 +817,8 @@ void unit_test_oversized_buffer()
     Loader loader;
 
     auto source = std::make_unique<audio::AudioGraph>("graph", std::move(graph));
-    TEST_REQUIRE(source->Prepare(loader));
+    audio::AudioGraph::PrepareParams p;
+    TEST_REQUIRE(source->Prepare(loader, p));
 
     audio::Format format;
     format.channel_count = 2;

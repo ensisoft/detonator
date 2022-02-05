@@ -161,7 +161,10 @@ int main(int argc, char* argv[])
         ASSERT((*graph)->LinkElements("sine", "out", "mixer", "in1"));
         ASSERT((*graph)->LinkElements("mixer", "out", "gain", "in"));
         ASSERT((*graph)->LinkGraph("gain", "out"));
-        ASSERT(graph->Prepare(loader));
+
+        audio::AudioGraph::PrepareParams params;
+        params.enable_caching = false;
+        ASSERT(graph->Prepare(loader, params));
 
         const auto& desc = (*graph)->Describe();
         for (const auto& str : desc)

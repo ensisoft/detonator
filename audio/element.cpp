@@ -220,7 +220,7 @@ Playlist::Playlist(const std::string& name, const std::vector<PortDesc>& srcs)
   : Playlist(name, base::RandomString(10), srcs)
 {}
 
-bool Playlist::Prepare(const Loader& loader)
+bool Playlist::Prepare(const Loader& loader, const PrepareParams& params)
 {
     // all input ports should have the same format,
     // otherwise no deal! the user can use a re-sampler
@@ -285,7 +285,7 @@ StereoMaker::StereoMaker(const std::string& name, Channel which)
   : StereoMaker(name, base::RandomString(10), which)
 {}
 
-bool StereoMaker::Prepare(const Loader& loader)
+bool StereoMaker::Prepare(const Loader& loader, const PrepareParams& params)
 {
     auto format = mIn.GetFormat();
     format.channel_count = 2;
@@ -356,7 +356,7 @@ StereoJoiner::StereoJoiner(const std::string& name)
   : StereoJoiner(name, base::RandomString(10))
 {}
 
-bool StereoJoiner::Prepare(const Loader& loader)
+bool StereoJoiner::Prepare(const Loader& loader, const PrepareParams& params)
 {
     const auto left  = mInLeft.GetFormat();
     const auto right = mInRight.GetFormat();
@@ -440,7 +440,7 @@ StereoSplitter::StereoSplitter(const std::string& name)
   : StereoSplitter(name, base::RandomString(10))
 {}
 
-bool StereoSplitter::Prepare(const Loader& loader)
+bool StereoSplitter::Prepare(const Loader& loader, const PrepareParams& params)
 {
     const auto format = mIn.GetFormat();
     if (format.channel_count == 2)
@@ -537,7 +537,7 @@ Mixer::Mixer(const std::string& name, const std::string& id,
     }
 }
 
-bool Mixer::Prepare(const Loader& loader)
+bool Mixer::Prepare(const Loader& loader, const PrepareParams& params)
 {
     // all input ports should have the same format,
     // otherwise no deal! the user can use a re-sampler
@@ -606,7 +606,7 @@ Delay::Delay(const std::string& name, unsigned delay)
   : Delay(name, base::RandomString(10), delay)
 {}
 
-bool Delay::Prepare(const Loader& loader)
+bool Delay::Prepare(const Loader& loader, const PrepareParams& params)
 {
     const auto& format = mIn.GetFormat();
     mOut.SetFormat(format);
@@ -646,7 +646,7 @@ Effect::Effect(const std::string& name)
   , mOut("out")
 {}
 
-bool Effect::Prepare(const Loader& loader)
+bool Effect::Prepare(const Loader& loader, const PrepareParams& params)
 {
     const auto& format = mIn.GetFormat();
     mSampleRate = format.sample_rate;
@@ -725,7 +725,7 @@ Gain::Gain(const std::string& name, const std::string& id, float gain)
   , mGain(gain)
 {}
 
-bool Gain::Prepare(const Loader& loader)
+bool Gain::Prepare(const Loader& loader, const PrepareParams& params)
 {
     mOut.SetFormat(mIn.GetFormat());
     DEBUG("Audio gain element prepared successfully. [name=%1, gain=%2, output=%3]", mName, mGain, mIn.GetFormat());
@@ -799,7 +799,7 @@ Resampler::~Resampler()
         ::src_delete(mState);
 }
 
-bool Resampler::Prepare(const Loader& loader)
+bool Resampler::Prepare(const Loader& loader, const PrepareParams& params)
 {
     const auto& in = mIn.GetFormat();
     if (in.sample_type != SampleType::Float32)
@@ -907,7 +907,7 @@ FileSource::FileSource(FileSource&& other)
 
 FileSource::~FileSource() = default;
 
-bool FileSource::Prepare(const Loader& loader)
+bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     auto buffer = loader.LoadAudioBuffer(mFile);
     if (!buffer)
@@ -1064,7 +1064,7 @@ BufferSource::BufferSource(BufferSource&& other)
 
 BufferSource::~BufferSource() = default;
 
-bool BufferSource::Prepare(const Loader& loader)
+bool BufferSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     std::unique_ptr<Decoder> decoder;
     if (mInputFormat == Format::Mp3)
@@ -1274,7 +1274,7 @@ bool MixerSource::IsSourceDone() const
     return true;
 }
 
-bool MixerSource::Prepare(const Loader& loader)
+bool MixerSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     DEBUG("Audio mixer successfully prepared. [elem=%1, output=%2]", mName, mFormat);
     return true;
@@ -1466,7 +1466,7 @@ ZeroSource::ZeroSource(const std::string& name, const Format& format)
   : ZeroSource(name, base::RandomString(10), format)
 {}
 
-bool ZeroSource::Prepare(const Loader& loader)
+bool ZeroSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     DEBUG("Audio zero source prepared successfully. [elem=%1, output=%2]", mName, mFormat);
     return true;
@@ -1506,7 +1506,7 @@ SineSource::SineSource(const std::string& name,
   : SineSource(name, base::RandomString(10), format, frequency, millisecs)
 {}
 
-bool SineSource::Prepare(const Loader& loader)
+bool SineSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     mPort.SetFormat(mFormat);
     DEBUG("Audio sine source prepared successfully. [elem=%1, output=%2]", mName, mFormat);

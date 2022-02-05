@@ -158,12 +158,17 @@ namespace audio
         using Allocator = audio::BufferAllocator;
         using Command = audio::Command;
         using Event   = audio::Event;
+        using Loader  = audio::Loader;
         using EventQueue = std::queue<std::unique_ptr<Event>>;
+
+        struct PrepareParams {
+            bool enable_caching = false;
+        };
 
         virtual ~Element() = default;
         // Get the machine generated immutable ID of the element.
         virtual std::string GetId() const = 0;
-        // Get the human readable name of the element.
+        // Get the human-readable name of the element.
         virtual std::string GetName() const = 0;
         // Get the dynamic type name of the element.
         virtual std::string GetType() const = 0;
@@ -174,13 +179,13 @@ namespace audio
         virtual bool IsSource() const { return false; }
         // Prepare the element for processing. Returns true if
         // successful or false on error and error details are logged.
-        virtual bool Prepare(const Loader& loader)
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params)
         { return true; }
         // Request the element to process 'milliseconds' worth of
         // audio data. Any non-source input will likely ignore the
         // milliseconds parameter and process data in whole buffers
         // instead. EventQueue is the queue of outgoing events generated
-        // by the element (and it's descendants).
+        // by the element (and its descendants).
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) {}
         // Advance the element time in milliseconds based on the latest
         // duration of the latest audio buffer sent to the audio device.
@@ -266,7 +271,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Playlist"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -303,7 +308,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "StereoMaker"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -344,7 +349,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "StereoJoiner"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -384,7 +389,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "StereoSplitter"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumInputPorts() const override
         { return 1; }
@@ -433,7 +438,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Null"; }
-        virtual bool Prepare(const Loader&) override
+        virtual bool Prepare(const Loader&, const PrepareParams& params) override
         { return true; }
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override
         {
@@ -469,7 +474,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Mixer"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -501,7 +506,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Delay"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Advance(unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -553,7 +558,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Effect"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -606,7 +611,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Gain"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -649,7 +654,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "Resampler"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -695,7 +700,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "FileSource"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual bool IsSourceDone() const override;
@@ -748,7 +753,7 @@ namespace audio
         { return mName; }
         virtual std::string GetType() const override
         { return "BufferSource"; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual bool IsSourceDone() const override;
@@ -920,7 +925,7 @@ namespace audio
         { return "MixerSource"; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override;
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Advance(unsigned int ms) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
@@ -969,7 +974,7 @@ namespace audio
         { return "ZeroSource"; }
         virtual bool IsSource() const override { return true; }
         virtual bool IsSourceDone() const override { return false; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
@@ -1015,7 +1020,7 @@ namespace audio
         { return 1; }
         virtual Port& GetOutputPort(unsigned index) override
         { return mPort; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         void SetSampleType(SampleType type)
         { mFormat.sample_type = type; }

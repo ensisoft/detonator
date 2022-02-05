@@ -264,7 +264,7 @@ namespace audio
         { return true; }
         virtual bool IsSourceDone() const override
         { return mDone; }
-        virtual bool Prepare(const Loader& loader) override;
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
         virtual void Advance(unsigned int ms) override;
@@ -305,13 +305,13 @@ namespace audio
         bool mDone = false;
     };
 
-    // Provide PCM encoded audio device data through the evaluation of
-    // an audio graph that is comprised of audio elements. Each element
-    // can take a stream of data as an input, modify it and then provide
-    // an outgoing stream of data.
+    // Source implementation for an audio graph. Evaluates the
+    // graph and its elements in order to produce PCM audio data.
     class AudioGraph : public Source
     {
     public:
+        using PrepareParams = Graph::PrepareParams;
+
         AudioGraph(const std::string& name);
         AudioGraph(const std::string& name, Graph&& graph);
         AudioGraph(AudioGraph&& other);
@@ -321,10 +321,10 @@ namespace audio
         // after all the elements have been added and linked to the graph
         // and before the graph is given to the audio device for playback.
         // The graph may not contain any cycles.
-        // Returns true on success if all audio elements were prepared
-        // successfully. After this it's possible to send the graph to
-        // the audio device/player for playback.
-        bool Prepare(const Loader& loader);
+        // Returns true when all audio elements were prepared successfully
+        // and false on any error. After successful prepare it's possible
+        // to send the graph to the audio player for playback.
+        bool Prepare(const Loader& loader, const PrepareParams& params);
 
         // Source implementation.
         virtual unsigned GetRateHz() const noexcept override;

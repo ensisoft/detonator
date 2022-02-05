@@ -895,6 +895,7 @@ void PlayWindow::DoAppInit()
         config.audio.sample_rate     = settings.audio_sample_rate;
         config.audio.buffer_size     = settings.audio_buffer_size;
         config.audio.channels        = settings.audio_channels;
+        config.audio.enable_pcm_caching = settings.enable_audio_pcm_caching;
         mEngine->SetEngineConfig(config);
 
         if (!mEngine->Load())
