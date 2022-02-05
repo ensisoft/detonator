@@ -70,11 +70,10 @@ namespace audio
         // into its output ports.
         // Returns false if the port was empty and no buffer was available.
         virtual bool PullBuffer(BufferHandle& buffer) = 0;
-        // Get the human readable name of the port.
+        // Get the human -readable name of the port.
         virtual std::string GetName() const = 0;
-        // Get the ports data format. Typically this is originally undefined
-        // until the whole audio graph is prepared. When the audio graph
-        // is prepared the port format negotiation happens. (See CanAccept)
+        // Get the port's data format. The format is undefined until
+        // the whole audio graph has been prepared.
         virtual Format GetFormat() const = 0;
         // Set the result of the port format negotiation.
         virtual void SetFormat(const Format& format) = 0;
@@ -717,6 +716,8 @@ namespace audio
         { mFile = file; }
         void SetLoopCount(unsigned count)
         { mLoopCount = count; }
+        void EnableCaching(bool on_off)
+        { mEnableCaching = on_off; }
 
         struct FileInfo {
             unsigned channels    = 0;
@@ -725,16 +726,25 @@ namespace audio
             float seconds = 0;
         };
         static bool ProbeFile(const std::string& file, FileInfo* info);
+        static void ClearCache();
+    private:
+        class  PCMDecoder;
+        struct PCMBuffer;
+        using PCMCache = std::unordered_map<std::string,
+            std::shared_ptr<PCMBuffer>>;
+        static PCMCache pcm_cache;
     private:
         const std::string mName;
         const std::string mId;
         std::string mFile;
         std::unique_ptr<Decoder> mDecoder;
+        std::shared_ptr<PCMBuffer> mPCMBuffer;
         SingleSlotPort mPort;
         Format mFormat;
         unsigned mFramesRead = 0;
         unsigned mPlayCount  = 0;
         unsigned mLoopCount  = 1;
+        bool mEnableCaching  = false;
     };
 
     class BufferSource : public Element
@@ -1042,7 +1052,9 @@ namespace audio
         Format mFormat;
     };
 
-    using ElementArg = std::variant<std::string, SampleType, Format, float, unsigned,
+    using ElementArg = std::variant<std::string,
+            float, unsigned, bool,
+            SampleType, Format,
             Effect::Kind, StereoMaker::Channel>;
 
     template<typename T> inline
@@ -1075,5 +1087,7 @@ namespace audio
         std::vector<PortDesc> output_ports;
     };
     std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc);
+
+    void ClearCaches();
 
 } // namespace

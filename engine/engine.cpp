@@ -422,6 +422,8 @@ public:
 
         gfx::SetResourceLoader(nullptr);
         mDevice.reset();
+
+        audio::ClearCaches();
     }
     virtual bool IsRunning() const override
     { return mRunning; }

@@ -51,10 +51,16 @@ namespace audio
         GraphClass(const std::string& name, const std::string& id);
         GraphClass(const std::string& name);
 
-        void AddElement(const Element& element)
-        { mElements.push_back(element); }
-        void AddElement(Element&& element)
-        { mElements.push_back(std::move(element)); }
+        const Element& AddElement(const Element& element)
+        {
+            mElements.push_back(element);
+            return mElements.back();
+        }
+        const Element& AddElement(Element&& element)
+        {
+            mElements.push_back(std::move(element));
+            return mElements.back();
+        }
         void AddLink(const Link& edge)
         { mLinks.push_back(edge); }
         void AddLink(Link&& edge)

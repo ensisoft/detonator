@@ -553,7 +553,7 @@ bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
     if (!edges.empty())
         ERROR_RETURN(false, "Audio graph cycle detected. [graph=%1]", mName);
 
-    DEBUG("Audio graph element prepare. [graph=%1]", mName);
+    DEBUG("Preparing audio graph. [graph=%1]", mName);
 
     for (size_t i=0; i < order.size(); ++i)
     {
@@ -604,7 +604,7 @@ bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
         ERROR("Audio graph output format is not valid. [graph=%1, format=%2]", mName, mFormat);
         return false;
     }
-    DEBUG("Audio graph prepared successfully. [graph=%1 output=%2]", mName, mFormat);
+    DEBUG("Audio graph prepared successfully. [graph=%1, output=%2]", mName, mFormat);
     return true;
 }
 

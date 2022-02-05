@@ -1766,6 +1766,11 @@ void AudioWidget::on_loopCount_valueChanged(int)
     SetSelectedElementProperties();
 }
 
+void AudioWidget::on_caching_stateChanged(int)
+{
+    SetSelectedElementProperties();
+}
+
 void AudioWidget::SceneSelectionChanged()
 {
     GetSelectedElementProperties();
@@ -1866,6 +1871,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.afFrames,     QString(""));
     SetValue(mUI.afDuration,   0);
     SetValue(mUI.loopCount, 1);
+    SetValue(mUI.caching, false);
 
     SetEnabled(mUI.sampleType, false);
     SetEnabled(mUI.sampleRate, false);
@@ -1881,6 +1887,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetEnabled(mUI.audioFile, false);
     SetEnabled(mUI.actionDelete, false);
     SetEnabled(mUI.loopCount, false);
+    SetEnabled(mUI.caching, false);
 
     /*
     SetVisible(mUI.sampleType, false);
@@ -1955,6 +1962,12 @@ void AudioWidget::GetSelectedElementProperties()
         SetVisible(mUI.loopCount, true);
         SetValue(mUI.loopCount, *val);
     }
+    if (const auto* val = item->GetArgValue<bool>("cache"))
+    {
+        SetEnabled(mUI.caching, true);
+        SetVisible(mUI.caching, true);
+        SetValue(mUI.caching, *val);
+    }
 
     if (const auto* val = item->GetArgValue<float>("gain"))
     {
@@ -2013,7 +2026,7 @@ void AudioWidget::GetSelectedElementProperties()
             SetValue(mUI.afFrames,     info.frames);
             SetValue(mUI.afDuration, unsigned(info.seconds * 1000));
         }
-        else ERROR("Failed to probe audio file '%1'.", file);
+        else ERROR("Failed to probe audio file. [file='%1']", file);
     }
 }
 
@@ -2051,6 +2064,8 @@ void AudioWidget::SetSelectedElementProperties()
         *val = GetValue(mUI.effect);
     if (auto* val = item->GetArgValue<unsigned>("loops"))
         *val = GetValue(mUI.loopCount);
+    if (auto* val = item->GetArgValue<bool>("cache"))
+        *val = GetValue(mUI.caching);
 
     mScene->invalidate();
 }
@@ -2096,7 +2111,7 @@ void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEvent& event)
 
 void AudioWidget::keyPressEvent(QKeyEvent* key)
 {
-    // QAction doesn't trrigger unless it's been added
+    // QAction doesn't trigger unless it's been added
     // to some widget (toolbar/menu)
     if (key->key() == Qt::Key_Delete)
     {

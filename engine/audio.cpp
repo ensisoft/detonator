@@ -216,7 +216,7 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     audio::Graph::PrepareParams p;
     p.enable_caching = mEnableCaching;
     if (!graph->Prepare(*mLoader, p))
-        ERROR_RETURN(false, "Audio engine sound effect audio graph prepare error. [graph%1]", handle->GetName());
+        ERROR_RETURN(false, "Audio engine sound effect audio graph prepare error. [graph=%1]", handle->GetName());
 
     const auto& port = graph->GetOutputPort(0);
     if (port.GetFormat() != mFormat)
