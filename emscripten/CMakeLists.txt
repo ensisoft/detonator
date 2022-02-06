@@ -27,6 +27,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 
 add_executable(GameEngine
     main.cpp
+    ../audio/loader.cpp
     ../audio/player.cpp
     ../audio/element.cpp
     ../audio/format.cpp

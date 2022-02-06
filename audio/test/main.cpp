@@ -118,30 +118,7 @@ int main(int argc, char* argv[])
 
     if (test_graph)
     {
-        class Buffer : public audio::SourceBuffer {
-        public:
-            Buffer(const std::string& file)
-              : mBuffer(base::LoadBinaryFile(file))
-            {}
-            // Get the read pointer for the contents of the buffer.
-            virtual const void* GetData() const override
-            { return (const void*)mBuffer.data(); }
-            // Get the size of the buffer's contents in bytes.
-            virtual size_t GetSize() const override
-            { return mBuffer.size(); }
-        private:
-            std::vector<char> mBuffer;
-        };
-
-        class Loader : public audio::Loader {
-        public:
-            virtual std::ifstream OpenAudioStream(const std::string& file) const override
-            { return base::OpenBinaryInputStream(file); }
-            virtual std::shared_ptr<const audio::SourceBuffer> LoadAudioBuffer(const std::string& file) const override
-            { return std::make_shared<Buffer>(file); }
-        private:
-        };
-        Loader loader;
+        audio::Loader loader;
 
         auto graph = std::make_unique<audio::AudioGraph>("graph");
         audio::Format sine_format;

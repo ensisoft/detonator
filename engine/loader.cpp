@@ -145,15 +145,9 @@ public:
         return buff;
     }
     // audio::Loader impl
-    virtual std::ifstream OpenAudioStream(const std::string& uri) const override
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
     {
-        const auto& filename = ResolveURI(uri);
-        auto stream = base::OpenBinaryInputStream(filename);
-        if (!stream.is_open())
-        {
-            ERROR("Failed to open audio stream. [file='%1']", filename);
-        }
-        return stream;
+        return audio::OpenFileStream(ResolveURI(uri));
     }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
     {

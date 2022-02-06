@@ -20,6 +20,7 @@
 
 #include <fstream>
 #include <memory>
+#include <cstdint>
 
 namespace audio
 {
@@ -36,20 +37,60 @@ namespace audio
     private:
     };
 
-    using SourceBufferHandle = std::shared_ptr<const SourceBuffer>;
+    class SourceStream
+    {
+    public:
+        // How to seek in the stream.
+        enum class Whence {
+            // Perform seek from the start of the stream towards the end.
+            FromStart,
+            // Perform seek relative to the current stream position.
+            // The seek can happen in either direction, i.e. towards
+            // the start or the end of the stream.
+            FromCurrent,
+            // Seek from th end towards the start of the stream.
+            FromEnd
+        };
+        virtual ~SourceStream() = default;
+        // Read bytes from the current stream position into ptr.
+        // Return the number of bytes read.
+        virtual std::int64_t Read(void* ptr, std::int64_t bytes) = 0;
+        // Tell the current stream position.
+        virtual std::int64_t Tell() const = 0;
+        // Seek in the stream to an offset relative to whence.
+        // Return the current stream position after the seek.
+        virtual std::int64_t Seek(std::int64_t offset, Whence whence) = 0;
+        // Get the stream content size in bytes.
+        virtual std::int64_t GetSize() const = 0;
+    private:
+    };
 
-    // Interface for accessing the audio data.
+    // the buffers are immutable objects and can thus be shared
+    // between multiple audio objects simultaneously decoding/sourcing
+    // PCM data from them.
+    using SourceBufferHandle = std::shared_ptr<const SourceBuffer>;
+    // the stream is a stateful object which means that it cannot be shared
+    // and must be unique to each audio object.
+    using SourceStreamHandle = std::unique_ptr<SourceStream>;
+
+    // default/convenience implementations for accessing audio data.
+    SourceStreamHandle OpenFileStream(const std::string& file);
+    SourceBufferHandle LoadFileBuffer(const std::string& file);
+
+    // Interface for accessing the encoded source audio data
+    // such as .mp3, .ogg etc. files.
     class Loader
     {
     public:
         virtual ~Loader() = default;
-        // TODO: consider getting rid of the std::ifstream and providing
-        // some other abstraction.
-        // Open a stream to the given audio file. Should return a valid
-        // open stream object when successful.
-        virtual std::ifstream OpenAudioStream(const std::string& file) const = 0;
-
-        virtual SourceBufferHandle LoadAudioBuffer(const std::string& file) const = 0;
+        // Open an audio stream to the given file. Returns nullptr (null stream handle)
+        // if the stream could not be opened.
+        virtual SourceStreamHandle OpenAudioStream(const std::string& file) const
+        { return audio::OpenFileStream(file); }
+        // Load the contents of the given file into an audio buffer object.
+        // Returns nullptr (null stream handle) if the file could not be loaded.
+        virtual SourceBufferHandle LoadAudioBuffer(const std::string& file) const
+        { return audio::LoadFileBuffer(file); }
     private:
     };
 
