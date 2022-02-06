@@ -29,30 +29,17 @@
 
 namespace audio
 {
-    // Compressed source data buffer containing for example
-    // OGG, MP3 or flac encoded PCM data.
-    class SourceBuffer
-    {
-    public:
-        virtual ~SourceBuffer() = default;
-        // Get the read pointer for the contents of the buffer.
-        virtual const void* GetData() const = 0;
-        // Get the size of the buffer's contents in bytes.
-        virtual size_t GetSize() const = 0;
-    private:
-    };
-
     // Interface for accessing and dealing with buffers of PCM audio data.
-    // Each buffer contains the actual PCM data and also carries some
-    // meta information related to the contents of the buffer, i.e it's
-    // expected current PCM format details and also information about
-    // the audio elements that have produced/modified the buffer data.
+    // Each buffer contains the actual PCM data and some meta information
+    // related to the contents of the buffer, such as the PCM format
+    // and also information about the audio elements that have produced
+    // or processed the buffer data.
     class Buffer
     {
     public:
         using Format = audio::Format;
         // Collection of information regarding the element
-        // that has touched/produced the buffer and it's contents.
+        // that has touched/produced the buffer and its contents.
         struct InfoTag {
             // Details of the element.
             struct Element {
@@ -71,7 +58,7 @@ namespace audio
         virtual Format GetFormat() const = 0;
         // Get the read pointer for the contents of the buffer.
         virtual const void* GetPtr() const = 0;
-        // Get the write pointer for the buffer contents. It's possible
+        // Get the pointer for writing the buffer contents. It's possible
         // that this would be a nullptr when the buffer doesn't support
         // writing into.
         virtual void* GetPtr() = 0;

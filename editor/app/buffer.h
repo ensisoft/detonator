@@ -27,7 +27,7 @@
 
 #include "editor/app/utility.h"
 #include "graphics/resource.h"
-#include "audio/buffer.h"
+#include "audio/loader.h"
 #include "engine/data.h"
 
 namespace app

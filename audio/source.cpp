@@ -26,6 +26,7 @@
 #include "audio/source.h"
 #include "audio/sndfile.h"
 #include "audio/mpg123.h"
+#include "audio/loader.h"
 
 namespace audio
 {

@@ -23,7 +23,19 @@
 
 namespace audio
 {
-    class SourceBuffer;
+    // Compressed source data buffer containing for example
+    // OGG, MP3 or flac encoded PCM data.
+    class SourceBuffer
+    {
+    public:
+        virtual ~SourceBuffer() = default;
+        // Get the read pointer for the contents of the buffer.
+        virtual const void* GetData() const = 0;
+        // Get the size of the buffer's contents in bytes.
+        virtual size_t GetSize() const = 0;
+    private:
+    };
+
     using SourceBufferHandle = std::shared_ptr<const SourceBuffer>;
 
     // Interface for accessing the audio data.
