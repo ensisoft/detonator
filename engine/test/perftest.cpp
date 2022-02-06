@@ -31,38 +31,13 @@
 #include "audio/graph.h"
 
 namespace {
-
 bool enable_pcm_caching=false;
 bool enable_file_caching=false;
-
-class AudioBuffer : public audio::SourceBuffer {
-public:
-    AudioBuffer(const std::string& file)
-        : mBuffer(base::LoadBinaryFile(file))
-    {}
-    // Get the read pointer for the contents of the buffer.
-    virtual const void* GetData() const override
-    { return (const void*)mBuffer.data(); }
-    // Get the size of the buffer's contents in bytes.
-    virtual size_t GetSize() const override
-    { return mBuffer.size(); }
-private:
-    std::vector<char> mBuffer;
-};
-
-class AudioLoader : public audio::Loader {
-public:
-    virtual std::ifstream OpenAudioStream(const std::string& file) const override
-    { return base::OpenBinaryInputStream(file); }
-    virtual std::shared_ptr<const audio::SourceBuffer> LoadAudioBuffer(const std::string& file) const override
-    { return std::make_shared<AudioBuffer>(file); }
-private:
-};
 } // namespace
 
 void audio_test_decode_file(const std::any& arg)
 {
-    AudioLoader loader;
+    audio::Loader loader;
 
     auto laser = std::make_shared<audio::GraphClass>("laser", "21828282");
     audio::ElementCreateArgs elem;
@@ -113,7 +88,7 @@ void audio_test_rapid_fire(const std::any& any)
     laser->SetGraphOutputElementId(e.id);
     laser->SetGraphOutputElementPort("out");
 
-    AudioLoader loader;
+    audio::Loader loader;
     audio::Format format;
     format.channel_count = 2;
     format.sample_rate   = 44100;

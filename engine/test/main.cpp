@@ -157,26 +157,10 @@ public:
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->ResumeMusic(name);
     }
-    virtual std::ifstream OpenAudioStream(const std::string& file) const override
-    { return base::OpenBinaryInputStream(file); }
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
+    { return audio::OpenFileStream(uri); }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
-    {
-        class Buffer : public audio::SourceBuffer {
-        public:
-            Buffer(const std::string& file)
-              : mBuffer(base::LoadBinaryFile(file))
-            {}
-            // Get the read pointer for the contents of the buffer.
-            virtual const void* GetData() const override
-            { return (const void*)mBuffer.data(); }
-            // Get the size of the buffer's contents in bytes.
-            virtual size_t GetSize() const override
-            { return mBuffer.size(); }
-        private:
-            std::vector<char> mBuffer;
-        };
-        return std::make_shared<Buffer>(uri);
-    }
+    { return audio::LoadFileBuffer(uri); }
 private:
     engine::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
     {
@@ -287,26 +271,10 @@ public:
             mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
-    virtual std::ifstream OpenAudioStream(const std::string& file) const override
-    { return base::OpenBinaryInputStream(file); }
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
+    { return audio::OpenFileStream(uri); }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
-    {
-        class Buffer : public audio::SourceBuffer {
-        public:
-            Buffer(const std::string& file)
-                : mBuffer(base::LoadBinaryFile(file))
-            {}
-            // Get the read pointer for the contents of the buffer.
-            virtual const void* GetData() const override
-            { return (const void*)mBuffer.data(); }
-            // Get the size of the buffer's contents in bytes.
-            virtual size_t GetSize() const override
-            { return mBuffer.size(); }
-        private:
-            std::vector<char> mBuffer;
-        };
-        return std::make_shared<Buffer>(uri);
-    }
+    { return audio::LoadFileBuffer(uri); }
 private:
     engine::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)
     {

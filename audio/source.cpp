@@ -104,7 +104,12 @@ void AudioFile::Shutdown() noexcept
 
 bool AudioFile::Open()
 {
+    auto stream = audio::OpenFileStream(mFilename);
+    if (!stream)
+        return false;
+
     std::unique_ptr<Decoder> decoder;
+
     const auto& upper = base::ToUpperUtf8(mFilename);
     if (base::EndsWith(upper, ".MP3"))
     {
@@ -116,11 +121,9 @@ bool AudioFile::Open()
         else if (mFormat == Format::Int16)
             type = SampleType::Int16;
         else BUG("Unsupported format.");
-        auto stream = std::make_unique<Mpg123FileInputStream>();
-        if (!stream->OpenFile(mFilename))
-            return false;
+        auto io = std::make_unique<Mpg123FileInputStream>(mFilename, std::move(stream));
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(stream), type))
+        if (!dec->Open(std::move(io), type))
             return false;
         decoder = std::move(dec);
     }
@@ -128,17 +131,15 @@ bool AudioFile::Open()
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto stream = std::make_unique<SndFileInputStream>();
-        if (!stream->OpenFile(mFilename))
-            return false;
+        auto io = std::make_unique<SndFileInputStream>(mFilename, std::move(stream));
         auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(stream)))
+        if (!dec->Open(std::move(io)))
             return false;
         decoder = std::move(dec);
     }
     else
     {
-        ERROR("Unsupported audio file '%1'", mFilename);
+        ERROR("Unsupported audio file format. [file='%1']", mFilename);
         return false;
     }
     mDecoder = std::move(decoder);

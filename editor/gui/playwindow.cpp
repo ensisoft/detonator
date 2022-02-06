@@ -267,14 +267,11 @@ public:
 
         return app::GameDataFileBuffer::LoadFromFile(file);
     }
-    virtual std::ifstream OpenAudioStream(const std::string& URI) const override
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI) const override
     {
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        auto stream = app::OpenBinaryIStream(file);
-        if (!stream.is_open())
-            ERROR("Failed to open '%1'.", file);
-        return stream;
+        return audio::OpenFileStream(app::ToUtf8(file));
     }
     virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& URI) const override
     {

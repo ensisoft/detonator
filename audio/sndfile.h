@@ -31,6 +31,7 @@ typedef	struct SNDFILE_tag	SNDFILE ;
 namespace audio
 {
     class SourceBuffer;
+    class SourceStream;
 
     class SndFileIODevice
     {
@@ -75,24 +76,24 @@ namespace audio
     class SndFileInputStream : public SndFileIODevice
     {
     public:
-        SndFileInputStream(const std::string& filename);
+        SndFileInputStream(const std::string& name, std::unique_ptr<SourceStream> stream)
+          : mName(name)
+          , mStream(std::move(stream))
+        {}
+        SndFileInputStream(const std::string& name, std::shared_ptr<SourceStream> stream)
+          : mName(name)
+          , mStream(stream)
+        {}
         SndFileInputStream() = default;
         virtual std::int64_t GetLength() const override;
         virtual std::int64_t Seek(std::int64_t offset, int whence) override;
         virtual std::int64_t Read(void* ptr, std::int64_t count) override;
         virtual std::int64_t Tell() const override;
         virtual std::string GetName() const override
-        { return mFilename; }
-
-        // Try to open the given file for input audio streaming.
-        // Returns true if successful. Errors are logged.
-        bool OpenFile(const std::string& filename);
-
-        void UseStream(const std::string& name, std::ifstream&& stream);
+        { return mName; }
     private:
-        mutable std::ifstream mStream;
-        std::string mFilename;
-        std::int64_t mStreamSize = 0;
+        const std::string mName;
+        std::shared_ptr<SourceStream> mStream;
     };
 
     // A named immutable audio buffer.

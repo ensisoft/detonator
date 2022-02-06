@@ -27,31 +27,6 @@
 #include "audio/graph.h"
 #include "audio/loader.h"
 
-class TestSourceBuffer : public audio::SourceBuffer
-{
-public:
-    TestSourceBuffer(const std::string& file)
-        : mBuffer(base::LoadBinaryFile(file))
-    {}
-    // Get the read pointer for the contents of the buffer.
-    virtual const void* GetData() const override
-    { return (const void*)mBuffer.data(); }
-    // Get the size of the buffer's contents in bytes.
-    virtual size_t GetSize() const override
-    { return mBuffer.size(); }
-private:
-    std::vector<char> mBuffer;
-};
-
-class Loader : public audio::Loader
-{
-public:
-    virtual std::ifstream OpenAudioStream(const std::string& file) const override
-    { return base::OpenBinaryInputStream(file); }
-    virtual std::shared_ptr<const audio::SourceBuffer> LoadAudioBuffer(const std::string& file) const override
-    { return std::make_shared<TestSourceBuffer>(file); }
-};
-
 class TestBuffer : public audio::Buffer
 {
 public:
@@ -347,7 +322,7 @@ void unit_test_basic()
 
 void unit_test_prepare_topologies()
 {
-    Loader loader;
+    audio::Loader loader;
 
     // single audio element
     {
@@ -460,7 +435,7 @@ void unit_test_prepare_topologies()
 
 void unit_test_buffer_flow()
 {
-    Loader loader;
+    audio::Loader loader;
 
     TestState state;
 
@@ -500,7 +475,7 @@ void unit_test_buffer_flow()
 
 void unit_test_completion()
 {
-    Loader loader;
+    audio::Loader loader;
 
     // test completion with just a source element
     {
@@ -581,7 +556,7 @@ void unit_test_completion()
 
 void unit_test_graph_in_graph()
 {
-    Loader loader;
+    audio::Loader loader;
 
     TestState state;
 
@@ -635,7 +610,7 @@ void unit_test_graph_class()
     class Dummy : public audio::Loader
     {
     public:
-        virtual std::ifstream OpenAudioStream(const std::string& file) const override
+        virtual audio::SourceStreamHandle OpenAudioStream(const std::string& file) const override
         { BUG("Not used"); }
         virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& file) const override
         { BUG("Not used"); }
@@ -814,7 +789,7 @@ void unit_test_oversized_buffer()
     graph.AddElement(SrcElement());
     TEST_REQUIRE(graph.LinkGraph("foobar", "out"));
 
-    Loader loader;
+    audio::Loader loader;
 
     auto source = std::make_unique<audio::AudioGraph>("graph", std::move(graph));
     audio::AudioGraph::PrepareParams p;

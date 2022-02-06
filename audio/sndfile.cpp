@@ -94,66 +94,40 @@ bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
     mChannels   = info.channels;
     mFrames     = info.frames;
     mDevice     = std::move(io);
-    DEBUG("SndFileDecoder successfully opened. [name='%1' frames=%2, channels=%3, rate=%4]",
+    DEBUG("SndFileDecoder is open. [name='%1' frames=%2, channels=%3, rate=%4]",
           mDevice->GetName(), mFrames, mChannels, mSampleRate);
     return true;
 }
 
-SndFileInputStream::SndFileInputStream(const std::string& filename)
-{
-    if (!OpenFile(filename))
-        throw std::runtime_error("Failed to open: " + filename);
-}
-
-bool SndFileInputStream::OpenFile(const std::string& filename)
-{
-    auto stream = base::OpenBinaryInputStream(filename);
-    if (!stream.is_open()) ERROR_RETURN(false, "SndFileInputStream failed to open. [file='%1']", filename);
-
-    UseStream(filename, std::move(stream));
-    return true;
-}
-
-void SndFileInputStream::UseStream(const std::string& name, std::ifstream&& stream)
-{
-    ASSERT(stream.is_open());
-    mFilename = name;
-    mStream   = std::move(stream);
-
-    mStream.seekg(0, mStream.end);
-    mStreamSize = mStream.tellg();
-    mStream.seekg(0, mStream.beg);
-    DEBUG("SndFileInputStream using ifstream. [name='%1', bytes=%2]", name, mStreamSize);
-}
-
 std::int64_t SndFileInputStream::GetLength() const
-{ return mStreamSize; }
+{ return mStream->GetSize(); }
 std::int64_t SndFileInputStream::Seek(sf_count_t offset, int whence)
 {
     if (whence == SEEK_CUR)
-        mStream.seekg(offset, mStream.cur);
+        mStream->Seek(offset, SourceStream::Whence::FromCurrent);
     else if (whence == SEEK_SET)
-        mStream.seekg(offset, mStream.beg);
+        mStream->Seek(offset, SourceStream::Whence::FromStart);
     else if (whence == SEEK_END)
-        mStream.seekg(offset, mStream.end);
+        mStream->Seek(offset, SourceStream::Whence::FromEnd);
     else BUG("Unknown seek position.");
-    return mStream.tellg();
+    return mStream->Tell();
 }
 std::int64_t SndFileInputStream::Read(void* ptr, sf_count_t count)
 {
-    const auto offset = mStream.tellg();
-    const auto available = mStreamSize - offset;
+    const auto size   = mStream->GetSize();
+    const auto offset = mStream->Tell();
+    const auto available = size - offset;
     const auto bytes_to_read = std::min(available, count);
     if (bytes_to_read == 0)
         return 0;
 
-    mStream.read((char*)ptr, bytes_to_read);
-    if (mStream.gcount() != bytes_to_read)
-        WARN("SndFileInputStream stream read failed. [request=%1, returned=%2]", bytes_to_read, mStream.gcount());
-    return mStream.gcount();
+    const auto ret = mStream->Read((char*)ptr, bytes_to_read);
+    if (ret != bytes_to_read)
+        WARN("SndFileInputStream stream read failed. [request=%1, returned=%2]", bytes_to_read, ret);
+    return ret;
 }
 std::int64_t SndFileInputStream::Tell() const
-{ return (sf_count_t)mStream.tellg(); }
+{ return (sf_count_t)mStream->Tell(); }
 
 std::int64_t SndFileBuffer::GetLength() const
 { return mBuffer->GetSize(); }

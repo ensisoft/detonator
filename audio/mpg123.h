@@ -31,6 +31,7 @@ typedef struct mpg123_handle_struct mpg123_handle;
 namespace audio
 {
     class SourceBuffer;
+    class SourceStream;
 
     class Mpg123IODevice
     {
@@ -47,21 +48,23 @@ namespace audio
     class Mpg123FileInputStream : public Mpg123IODevice
     {
     public:
-        Mpg123FileInputStream(const std::string& filename);
+        Mpg123FileInputStream(const std::string& name, std::unique_ptr<SourceStream> stream)
+          : mName(name)
+          , mStream(std::move(stream))
+        {}
+        Mpg123FileInputStream(const std::string& name, std::shared_ptr<SourceStream> stream)
+          : mName(name)
+          , mStream(stream)
+        {}
         Mpg123FileInputStream() = default;
-
-        bool OpenFile(const std::string& filename);
-
-        void UseStream(const std::string& name, std::ifstream&& stream);
 
         virtual long Read(void* buffer,  size_t bytes) override;
         virtual off_t Seek(off_t where, int whence) override;
         virtual std::string GetName() const override
-        { return mFilename; }
+        { return mName; }
     private:
-        mutable std::ifstream mStream;
-        std::string mFilename;
-        std::int64_t mStreamSize;
+        const std::string mName;
+        std::shared_ptr<SourceStream> mStream;
     };
 
     class Mpg123Buffer : public Mpg123IODevice

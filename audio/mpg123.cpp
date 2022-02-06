@@ -53,58 +53,31 @@ struct Mpg123Decoder::Library {
     }
 };
 
-Mpg123FileInputStream::Mpg123FileInputStream(const std::string& filename)
-{
-    if (!OpenFile(filename))
-        throw std::runtime_error("Failed to open: " + filename);
-}
-
-bool Mpg123FileInputStream::OpenFile(const std::string& filename)
-{
-    auto stream = base::OpenBinaryInputStream(filename);
-    if (!stream.is_open()) ERROR_RETURN(false, "Mpg123FileInputStream failed to open. [file='%1']", filename);
-
-    UseStream(filename, std::move(stream));
-    return true;
-}
-
-void Mpg123FileInputStream::UseStream(const std::string& name, std::ifstream&& stream)
-{
-    ASSERT(stream.is_open());
-    stream.seekg(0, mStream.end);
-    auto size = stream.tellg();
-    stream.seekg(0, stream.beg);
-
-    mStream     = std::move(stream);
-    mStreamSize = size;
-    mFilename   = name;
-    DEBUG("Mpg123FileInputStream using ifstream. [name='%1', bytes=%2]", name, mStreamSize);
-}
-
 long Mpg123FileInputStream::Read(void* buffer,  size_t bytes)
 {
-    const auto offset = mStream.tellg();
-    const auto available = mStreamSize - offset;
+    const auto size = mStream->GetSize();
+    const auto offset = mStream->Tell();
+    const auto available = size - offset;
     const auto bytes_to_read = std::min((size_t)available, bytes);
     if (bytes_to_read == 0)
         return 0;
 
-    mStream.read((char*)buffer, bytes_to_read);
-    if (mStream.gcount() != bytes_to_read)
-        WARN("Mpg123FileInputStream stream read failed. [requested=%1, returned=%2]", bytes_to_read, mStream.gcount());
-    return mStream.gcount();
+    const auto ret = mStream->Read((char*)buffer, bytes_to_read);
+    if (ret != bytes_to_read)
+        WARN("Mpg123FileInputStream stream read failed. [requested=%1, returned=%2]", bytes_to_read, ret);
+    return ret;
 }
 
 off_t Mpg123FileInputStream::Seek(off_t offset, int whence)
 {
     if (whence == SEEK_CUR)
-        mStream.seekg(offset, mStream.cur);
+        mStream->Seek(offset, SourceStream::Whence::FromCurrent);
     else if (whence == SEEK_SET)
-        mStream.seekg(offset, mStream.beg);
+        mStream->Seek(offset, SourceStream::Whence::FromStart);
     else if (whence == SEEK_END)
-        mStream.seekg(offset, mStream.end);
+        mStream->Seek(offset, SourceStream::Whence::FromEnd);
     else BUG("Unknown seek position.");
-    return mStream.tellg();
+    return mStream->Tell();
 }
 
 long Mpg123Buffer::Read(void* buffer, size_t bytes)
@@ -136,7 +109,7 @@ off_t Mpg123Buffer::Seek(off_t offset, int whence)
 Mpg123Decoder::Mpg123Decoder()
 {
     // according to the latest docs (as of July 2021 this should no longer
-    // be needed. However when using 1.26.4 (through Conan) mgp123_new will
+    // be needed. However, when using 1.26.4 (through Conan) mgp123_new will
     // actually fail with an error saying that "you didn't initialize the library!"
     static std::weak_ptr<Library> global_library;
     mLibrary = global_library.lock();
@@ -270,7 +243,7 @@ bool Mpg123Decoder::Open(std::unique_ptr<Mpg123IODevice> io, SampleType format)
     mFrameCount = frames;
     mOutFormat  = mpg123_data_format;
     mDevice     = std::move(io);
-    DEBUG("Mpg123Decoder successfully opened. [name='%1', frames=%2, channels=%3, rate=%4]", mDevice->GetName(), mFrameCount, 2, mSampleRate);
+    DEBUG("Mpg123Decoder is open. [name='%1', frames=%2, channels=%3, rate=%4]", mDevice->GetName(), mFrameCount, 2, mSampleRate);
     return true;
 }
 

@@ -1122,16 +1122,15 @@ bool FileSource::IsSourceDone() const
 // static
 bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
 {
-    auto stream = base::OpenBinaryInputStream(file);
-    if (!stream.is_open())
+    auto stream = audio::OpenFileStream(file);
+    if (!stream)
         return false;
 
     std::unique_ptr<Decoder> decoder;
     const auto& upper = base::ToUpperUtf8(file);
     if (base::EndsWith(upper, ".MP3"))
     {
-        auto io = std::make_unique<Mpg123FileInputStream>();
-        io->UseStream(file, std::move(stream));
+        auto io = std::make_unique<Mpg123FileInputStream>(file, std::move(stream));
         auto dec = std::make_unique<Mpg123Decoder>();
         if (!dec->Open(std::move(io), SampleType::Float32))
             return false;
@@ -1141,8 +1140,7 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto io = std::make_unique<SndFileInputStream>();
-        io->UseStream(file, std::move(stream));
+        auto io = std::make_unique<SndFileInputStream>(file, std::move(stream));
         auto dec = std::make_unique<SndFileDecoder>();
         if (!dec->Open(std::move(io)))
             return false;
