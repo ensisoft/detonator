@@ -24,6 +24,7 @@
 #include "base/utility.h"
 #include "base/logging.h"
 #include "audio/sndfile.h"
+#include "audio/loader.h"
 
 namespace {
 using namespace audio;

@@ -37,6 +37,7 @@ namespace audio
 {
     class Decoder;
     class Loader;
+    class SourceBuffer;
 
     struct PortDesc {
         std::string name;

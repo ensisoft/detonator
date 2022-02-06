@@ -23,7 +23,6 @@
 #include <fstream>
 
 #include "audio/decoder.h"
-#include "audio/buffer.h"
 
 // todo: maybe move these wrappers out of the audio namespace?
 
@@ -31,6 +30,8 @@ typedef	struct SNDFILE_tag	SNDFILE ;
 
 namespace audio
 {
+    class SourceBuffer;
+
     class SndFileIODevice
     {
     public:

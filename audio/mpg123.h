@@ -25,12 +25,13 @@
 
 #include "audio/decoder.h"
 #include "audio/format.h"
-#include "audio/buffer.h"
 
 typedef struct mpg123_handle_struct mpg123_handle;
 
 namespace audio
 {
+    class SourceBuffer;
+
     class Mpg123IODevice
     {
     public:
