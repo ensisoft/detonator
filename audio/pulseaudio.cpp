@@ -327,37 +327,46 @@ private:
         static void state_callback(pa_stream* stream, void* user)
         {
             auto* this_ = static_cast<PlaybackStream*>(user);
-
-            DEBUG("Pulseaudio stream state callback. [name='%1']", this_->source_->GetName());
-
-            switch (pa_stream_get_state(stream))
+            const auto state = pa_stream_get_state(stream);
+            switch (state)
             {
                 case PA_STREAM_CREATING:
-                    DEBUG("PA_STREAM_CREATING");
                     break;
-
                 case PA_STREAM_UNCONNECTED:
-                    DEBUG("PA_STREAM_UNCONNECTED");
                     break;
 
                 // stream finished cleanly, but this state transition
                 // only is dispatched when the pa_stream_disconnect is connected.
                 case PA_STREAM_TERMINATED:
-                    DEBUG("PA_STREAM_TERMINATED");
                     //this_->state_ = AudioStream::State::complete;
                     break;
 
                 case PA_STREAM_FAILED:
-                   DEBUG("PA_STREAM_FAILED");
                    this_->state_ = Stream::State::Error;
                    break;
 
                 case PA_STREAM_READY:
-                    DEBUG("PA_STREAM_READY");
                     this_->state_ = Stream::State::Ready;
                     break;
             }
+            DEBUG("Pulseaudio stream state callback. [name='%1', state=%2]", this_->source_->GetName(),
+                  ToString(state));
         }
+        static const char* ToString(pa_stream_state pa_state)
+        {
+            #define CASE(x) case x: return #x
+            switch (pa_state)
+            {
+                CASE(PA_STREAM_CREATING);
+                CASE(PA_STREAM_UNCONNECTED);
+                CASE(PA_STREAM_TERMINATED);
+                CASE(PA_STREAM_FAILED);
+                CASE(PA_STREAM_READY);
+            }
+            #undef CASE
+            return "???";
+        }
+
     private:
         std::unique_ptr<Source> source_;
         pa_stream*  stream_  = nullptr;
