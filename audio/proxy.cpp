@@ -123,7 +123,7 @@ std::unique_ptr<Event> SourceThreadProxy::GetEvent() noexcept
 }
 void SourceThreadProxy::ThreadLoop()
 {
-    DEBUG("Hello from audio source thread.");
+    DEBUG("Hello from audio source proxy thread.");
     std::uint64_t bytes_read = 0;
     try
     {
@@ -174,7 +174,7 @@ void SourceThreadProxy::ThreadLoop()
                     break;
                 }
             }
-        }https://en.wikipedia.org/wiki/Alpha_compositing
+        }
         DEBUG("Audio source thread exiting...");
     }
     catch (const std::exception& e)
