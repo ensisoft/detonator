@@ -162,7 +162,7 @@ namespace audio
         using EventQueue = std::queue<std::unique_ptr<Event>>;
 
         struct PrepareParams {
-            bool enable_caching = false;
+            bool enable_pcm_caching = false;
         };
 
         virtual ~Element() = default;
@@ -717,8 +717,8 @@ namespace audio
         { mFile = file; }
         void SetLoopCount(unsigned count)
         { mLoopCount = count; }
-        void EnableCaching(bool on_off)
-        { mEnableCaching = on_off; }
+        void EnablePcmCaching(bool on_off)
+        { mEnablePcmCaching = on_off; }
 
         struct FileInfo {
             unsigned channels    = 0;
@@ -745,7 +745,7 @@ namespace audio
         unsigned mFramesRead = 0;
         unsigned mPlayCount  = 0;
         unsigned mLoopCount  = 1;
-        bool mEnableCaching  = false;
+        bool mEnablePcmCaching  = false;
     };
 
     class BufferSource : public Element
