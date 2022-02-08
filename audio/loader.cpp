@@ -26,49 +26,27 @@
 #include "audio/loader.h"
 
 namespace {
-class FileStreamImpl : public audio::SourceStream
+class FileBufferImpl : public audio::SourceStream
 {
 public:
-    FileStreamImpl(std::ifstream&& stream) : mStream(std::move(stream))
-    {
-        mStream.seekg(0, mStream.end);
-        mStreamSize = mStream.tellg();
-        mStream.seekg(0, mStream.beg);
-    }
-    virtual std::int64_t Read(void* ptr, std::int64_t bytes) override
-    {
-        mStream.read((char*)ptr, bytes);
-        return mStream.gcount();
-    }
-    virtual std::int64_t Tell() const override
-    { return const_cast<std::ifstream&>(mStream).tellg(); }
-    virtual std::int64_t Seek(std::int64_t offset, Whence whence) override
-    {
-        if (whence == Whence::FromCurrent)
-            mStream.seekg(offset, mStream.cur);
-        else if (whence == Whence::FromStart)
-            mStream.seekg(offset, mStream.beg);
-        else if (whence == Whence::FromEnd)
-            mStream.seekg(offset, mStream.end);
-        else BUG("Unknown whence in seek.");
-        return mStream.tellg();
-    }
-    virtual std::int64_t GetSize() const override
-    { return mStreamSize; }
-private:
-    std::ifstream mStream;
-    std::int64_t mStreamSize = 0;
-};
-class FileBufferImpl : public audio::SourceBuffer
-{
-public:
-    FileBufferImpl(std::vector<char>&& buffer) : mBuffer(std::move(buffer))
+    FileBufferImpl(const std::string& name, std::vector<char>&& buffer)
+      : mName(name)
+      , mBuffer(std::move(buffer))
     {}
-    virtual const void* GetData() const override
-    { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-    virtual size_t GetSize() const override
+    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    {
+        ASSERT(offset + bytes <= mBuffer.size());
+        
+        const auto size = mBuffer.size();
+        bytes = std::min(size - offset, bytes);
+        memcpy(ptr, &mBuffer[offset], bytes);
+    }
+    virtual std::uint64_t GetSize() const override
     { return mBuffer.size(); }
+    virtual std::string GetName() const override
+    { return mName; }
 private:
+    const std::string mName;
     const std::vector<char> mBuffer;
 };
 
@@ -76,19 +54,7 @@ private:
 
 namespace audio
 {
-
 SourceStreamHandle OpenFileStream(const std::string& file)
-{
-    auto stream = base::OpenBinaryInputStream(file);
-    if (!stream.is_open())
-    {
-        ERROR("Failed to open audio file. [file='%1']", file);
-        return nullptr;
-    }
-    DEBUG("Opened audio stream successfully. [file='%1']", file);
-    return std::make_unique<FileStreamImpl>(std::move(stream));
-}
-SourceBufferHandle LoadFileBuffer(const std::string& file)
 {
     auto stream = base::OpenBinaryInputStream(file);
     if (!stream.is_open())
@@ -109,7 +75,7 @@ SourceBufferHandle LoadFileBuffer(const std::string& file)
         return nullptr;
     }
     DEBUG("Loaded audio file successfully. [file='%1', size=%2]", file, size);
-    return std::make_shared<FileBufferImpl>(std::move(buffer));
+    return std::make_shared<FileBufferImpl>(file, std::move(buffer));
 }
 
 } // namespace

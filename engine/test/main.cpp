@@ -159,8 +159,6 @@ public:
     }
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
     { return audio::OpenFileStream(uri); }
-    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
-    { return audio::LoadFileBuffer(uri); }
 private:
     engine::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
     {
@@ -273,8 +271,6 @@ public:
     }
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
     { return audio::OpenFileStream(uri); }
-    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
-    { return audio::LoadFileBuffer(uri); }
 private:
     engine::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)
     {

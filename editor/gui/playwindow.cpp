@@ -273,23 +273,9 @@ public:
         DEBUG("URI '%1' => '%2'", URI, file);
         return audio::OpenFileStream(app::ToUtf8(file));
     }
-    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& URI) const override
-    {
-        auto it = mAudioBuffers.find(URI);
-        if (it != mAudioBuffers.end())
-            return it->second;
-
-        const auto& file = ResolveURI(URI);
-        DEBUG("URI '%1' => '%2'", URI, file);
-        auto buffer = app::AudioFileBuffer::LoadFromFile(file);
-        mAudioBuffers[URI] = buffer;
-        return buffer;
-    }
     std::size_t GetBufferCacheSize() const
     {
         size_t ret = 0;
-        for (const auto& pair : mAudioBuffers)
-            ret += pair.second->GetSize();
         for (const auto& pair : mGameDataBuffers)
             ret += pair.second->GetSize();
         for (const auto& pair : mGraphicsBuffers)
@@ -330,7 +316,6 @@ private:
     const QString mGameDir;
     const QString mHostDir;
     mutable std::unordered_map<std::string, QString> mFileMaps;
-    mutable std::unordered_map<std::string, audio::SourceBufferHandle> mAudioBuffers;
     mutable std::unordered_map<std::string, engine::GameDataHandle> mGameDataBuffers;
     mutable std::unordered_map<std::string, gfx::ResourceHandle> mGraphicsBuffers;
 };

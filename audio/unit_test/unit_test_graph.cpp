@@ -607,14 +607,7 @@ void unit_test_graph_in_graph()
 
 void unit_test_graph_class()
 {
-    class Dummy : public audio::Loader
-    {
-    public:
-        virtual audio::SourceStreamHandle OpenAudioStream(const std::string& file) const override
-        { BUG("Not used"); }
-        virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& file) const override
-        { BUG("Not used"); }
-    } loader;
+    audio::Loader loader;
 
     {
         const auto test_format = audio::Format {audio::SampleType::Int16, 16000,  1};

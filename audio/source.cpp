@@ -121,9 +121,8 @@ bool AudioFile::Open()
         else if (mFormat == Format::Int16)
             type = SampleType::Int16;
         else BUG("Unsupported format.");
-        auto io = std::make_unique<Mpg123FileInputStream>(mFilename, std::move(stream));
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(io), type))
+        if (!dec->Open(stream, type))
             return false;
         decoder = std::move(dec);
     }
@@ -131,9 +130,8 @@ bool AudioFile::Open()
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto io = std::make_unique<SndFileInputStream>(mFilename, std::move(stream));
         auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(io)))
+        if (!dec->Open(stream))
             return false;
         decoder = std::move(dec);
     }

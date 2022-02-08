@@ -994,16 +994,15 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
     }
     else
     {
-        auto buffer = loader.LoadAudioBuffer(mFile);
-        if (!buffer)
+        auto source = loader.OpenAudioStream(mFile);
+        if (!source)
             return false;
 
         const auto& upper = base::ToUpperUtf8(mFile);
         if (base::EndsWith(upper, ".MP3"))
         {
-            auto io = std::make_unique<Mpg123Buffer>(mFile, buffer);
             auto dec = std::make_unique<Mpg123Decoder>();
-            if (!dec->Open(std::move(io), mFormat.sample_type))
+            if (!dec->Open(source, mFormat.sample_type))
                 return false;
             decoder = std::move(dec);
         }
@@ -1011,9 +1010,8 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
                  base::EndsWith(upper, ".WAV") ||
                  base::EndsWith(upper, ".FLAC"))
         {
-            auto io = std::make_unique<SndFileBuffer>(mFile, buffer);
             auto dec = std::make_unique<SndFileDecoder>();
-            if (!dec->Open(std::move(io)))
+            if (!dec->Open(source))
                 return false;
             decoder = std::move(dec);
         }
@@ -1130,9 +1128,8 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
     const auto& upper = base::ToUpperUtf8(file);
     if (base::EndsWith(upper, ".MP3"))
     {
-        auto io = std::make_unique<Mpg123FileInputStream>(file, std::move(stream));
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(io), SampleType::Float32))
+        if (!dec->Open(stream, SampleType::Float32))
             return false;
         decoder = std::move(dec);
     }
@@ -1140,9 +1137,8 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
              base::EndsWith(upper, ".WAV") ||
              base::EndsWith(upper, ".FLAC"))
     {
-        auto io = std::make_unique<SndFileInputStream>(file, std::move(stream));
         auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(io)))
+        if (!dec->Open(stream))
             return false;
         decoder = std::move(dec);
     }
@@ -1159,8 +1155,8 @@ void FileSource::ClearCache()
     pcm_cache.clear();
 }
 
-BufferSource::BufferSource(const std::string& name, std::unique_ptr<SourceBuffer> buffer,
-                 Format format, SampleType type)
+StreamSource::StreamSource(const std::string& name, std::shared_ptr<const SourceStream> buffer,
+                           Format format, SampleType type)
   : mName(name)
   , mId(base::RandomString(10))
   , mInputFormat(format)
@@ -1170,7 +1166,7 @@ BufferSource::BufferSource(const std::string& name, std::unique_ptr<SourceBuffer
     mOutputFormat.sample_type = type;
 }
 
-BufferSource::BufferSource(BufferSource&& other)
+StreamSource::StreamSource(StreamSource&& other)
   : mName(other.mName)
   , mId(other.mId)
   , mInputFormat(other.mInputFormat)
@@ -1181,24 +1177,22 @@ BufferSource::BufferSource(BufferSource&& other)
   , mFramesRead(other.mFramesRead)
 {}
 
-BufferSource::~BufferSource() = default;
+StreamSource::~StreamSource() = default;
 
-bool BufferSource::Prepare(const Loader& loader, const PrepareParams& params)
+bool StreamSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     std::unique_ptr<Decoder> decoder;
     if (mInputFormat == Format::Mp3)
     {
-        auto stream = std::make_unique<Mpg123Buffer>(mName, std::move(mBuffer));
         auto dec = std::make_unique<Mpg123Decoder>();
-        if (!dec->Open(std::move(stream), mOutputFormat.sample_type))
+        if (!dec->Open(mBuffer, mOutputFormat.sample_type))
             return false;
         decoder = std::move(dec);
     }
     else
     {
-        auto stream = std::make_unique<SndFileBuffer>(mName, std::move(mBuffer));
         auto dec = std::make_unique<SndFileDecoder>();
-        if (!dec->Open(std::move(stream)))
+        if (!dec->Open(mBuffer))
             return false;
         decoder = std::move(dec);
     }
@@ -1212,7 +1206,7 @@ bool BufferSource::Prepare(const Loader& loader, const PrepareParams& params)
     mOutputFormat = format;
     return true;
 }
-void BufferSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
+void StreamSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
     const auto frame_size = GetFrameSizeInBytes(mOutputFormat);
     const auto frames_per_ms = mOutputFormat.sample_rate / 1000;
@@ -1247,12 +1241,12 @@ void BufferSource::Process(Allocator& allocator, EventQueue& events, unsigned mi
     mPort.PushBuffer(buffer);
 }
 
-void BufferSource::Shutdown()
+void StreamSource::Shutdown()
 {
     mDecoder.reset();
 }
 
-bool BufferSource::IsSourceDone() const
+bool StreamSource::IsSourceDone() const
 {
     return mFramesRead == mDecoder->GetNumFrames();
 }

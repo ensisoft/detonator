@@ -78,7 +78,7 @@ public:
     }
     virtual std::size_t GetSize() const override
     { return mFileData.size(); }
-    virtual std::string GetName() const /*override*/
+    virtual std::string GetName() const override
     { return mFileName; }
 private:
     const std::string mFileName;
@@ -87,7 +87,6 @@ private:
 
 using GameDataFileBuffer = FileBuffer<GameData>;
 using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
-using AudioFileBuffer    = FileBuffer<audio::SourceBuffer>;
 
 class FileResourceLoaderImpl : public FileResourceLoader
 {
@@ -147,22 +146,17 @@ public:
     // audio::Loader impl
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
     {
-        return audio::OpenFileStream(ResolveURI(uri));
-    }
-    virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& uri) const override
-    {
         const auto& filename = ResolveURI(uri);
-        auto it = mAudioFileBufferCache.find(filename);
-        if (it != mAudioFileBufferCache.end())
+        auto it = mAudioStreamCache.find(filename);
+        if (it != mAudioStreamCache.end())
             return it->second;
 
-        std::vector<char> buffer;
-        if (!LoadFileBuffer(filename, &buffer))
+        auto ret = audio::OpenFileStream(filename);
+        if (ret == nullptr)
             return nullptr;
 
-        auto buff = std::make_shared<AudioFileBuffer>(uri, std::move(buffer));
-        mAudioFileBufferCache[filename] = buff;
-        return buff;
+        mAudioStreamCache[filename] = ret;
+        return ret;
     }
 
     // FileResourceLoader impl
@@ -174,7 +168,7 @@ public:
     {
         DEBUG("Preloading file buffers.");
         const char* dirs[] = {
-          "audio", "fonts", "lua", "textures", "ui", "shaders/es2"
+          "fonts", "lua", "textures", "ui", "shaders/es2"
         };
         size_t bytes_loaded = 0;
         for (size_t i=0; i<base::ArraySize(dirs); ++i)
@@ -254,7 +248,7 @@ private:
     mutable std::unordered_map<std::string,
         std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
     mutable std::unordered_map<std::string,
-        std::shared_ptr<const AudioFileBuffer>> mAudioFileBufferCache;
+            std::shared_ptr<const audio::SourceStream>> mAudioStreamCache;
     // the root of the resource dir against which to resolve the resource URIs.
     std::string mContentPath;
     std::string mApplicationPath;
