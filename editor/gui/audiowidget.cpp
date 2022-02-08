@@ -1436,7 +1436,7 @@ void AudioWidget::on_actionPlay_triggered()
         audio::Graph graph(std::move(klass));
         auto source = std::make_unique<audio::AudioGraph>(GetValue(mUI.graphName), std::move(graph));
         audio::AudioGraph::PrepareParams params;
-        params.enable_caching = false;
+        params.enable_pcm_caching = false;
 
         if (!source->Prepare(*mWorkspace, params))
         {
@@ -1510,7 +1510,7 @@ void AudioWidget::on_actionSave_triggered()
 
     audio::Graph graph(std::move(klass));
     audio::Graph::PrepareParams p;
-    p.enable_caching = false;
+    p.enable_pcm_caching = false;
     if (!graph.Prepare(*mWorkspace, p))
     {
         errors << "The audio graph failed to prepare "

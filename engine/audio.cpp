@@ -57,7 +57,7 @@ void AudioEngine::Start()
     ASSERT(mMusicGraphId  == 0);
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::AudioGraph::PrepareParams p;
-    p.enable_caching = false;
+    p.enable_pcm_caching = false;
 
     auto effect_graph  = std::make_unique<audio::AudioGraph>("FX");
     auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
@@ -107,7 +107,7 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     auto instance = std::make_unique<audio::Graph>(graph);
     audio::Graph::PrepareParams p;
-    p.enable_caching = mEnableCaching;
+    p.enable_pcm_caching = mEnableCaching;
     if (!instance->Prepare(*mLoader, p))
         ERROR_RETURN(false, "Audio engine music graph prepare error. [graph=%1]", graph->GetName());
     const auto& port = instance->GetOutputPort(0);
@@ -214,7 +214,7 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 
     auto graph = std::make_unique<audio::Graph>(name, handle);
     audio::Graph::PrepareParams p;
-    p.enable_caching = mEnableCaching;
+    p.enable_pcm_caching = mEnableCaching;
     if (!graph->Prepare(*mLoader, p))
         ERROR_RETURN(false, "Audio engine sound effect audio graph prepare error. [graph=%1]", handle->GetName());
 

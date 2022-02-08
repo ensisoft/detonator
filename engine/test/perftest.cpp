@@ -56,7 +56,7 @@ void audio_test_decode_file(const std::any& arg)
     buffer.resize(1024);
 
     audio::AudioGraph::PrepareParams p;
-    p.enable_caching = true;
+    p.enable_pcm_caching = true;
 
     for (unsigned i=0; i<100; ++i)
     {

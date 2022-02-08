@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
         ASSERT((*graph)->LinkGraph("gain", "out"));
 
         audio::AudioGraph::PrepareParams params;
-        params.enable_caching = false;
+        params.enable_pcm_caching = false;
         ASSERT(graph->Prepare(loader, params));
 
         const auto& desc = (*graph)->Describe();

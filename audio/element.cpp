@@ -975,8 +975,8 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
     std::shared_ptr<PCMBuffer> cached_pcm_buffer;
     std::unique_ptr<Decoder> decoder;
 
-    const bool enable_caching = params.enable_caching && mEnableCaching;
-    if (enable_caching)
+    const bool enable_pcm_caching = params.enable_pcm_caching && mEnablePcmCaching;
+    if (enable_pcm_caching)
     {
         auto it = pcm_cache.find(mId);
         if (it != pcm_cache.end())
@@ -1022,7 +1022,7 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             ERROR("Audio file source file format is unsupported. [elem=%1, file='%2']", mName, mFile);
             return false;
         }
-        if (!cached_pcm_buffer && enable_caching)
+        if (!cached_pcm_buffer && enable_pcm_caching)
         {
             cached_pcm_buffer = std::make_shared<PCMBuffer>();
             cached_pcm_buffer->complete    = false;
@@ -1918,7 +1918,7 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
             GetArg<SampleType>(args, "type", name),
             GetArg<unsigned>(args, "loops", name));
         if (const auto* arg = GetOptionalArg<bool>(args, "cache", name))
-            ret->EnableCaching(*arg);
+            ret->EnablePcmCaching(*arg);
         return ret;
     }
     else if (desc.type == "ZeroSource")
