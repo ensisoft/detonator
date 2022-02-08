@@ -975,13 +975,6 @@ audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI) con
     return audio::OpenFileStream(app::ToUtf8(file));
 }
 
-audio::SourceBufferHandle Workspace::LoadAudioBuffer(const std::string& URI) const
-{
-    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
-    DEBUG("URI '%1' => '%2'", URI, file);
-    return AudioFileBuffer::LoadFromFile(file);
-}
-
 bool Workspace::LoadWorkspace()
 {
     if (!LoadContent(JoinPath(mWorkspaceDir, "content.json")) ||

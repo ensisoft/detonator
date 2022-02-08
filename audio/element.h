@@ -37,7 +37,7 @@ namespace audio
 {
     class Decoder;
     class Loader;
-    class SourceBuffer;
+    class SourceStream;
 
     struct PortDesc {
         std::string name;
@@ -748,22 +748,22 @@ namespace audio
         bool mEnablePcmCaching  = false;
     };
 
-    class BufferSource : public Element
+    class StreamSource : public Element
     {
     public:
         enum class Format {
             Mp3, Ogg, Flac, Wav
         };
-        BufferSource(const std::string& name, std::unique_ptr<SourceBuffer> buffer,
+        StreamSource(const std::string& name, std::shared_ptr<const SourceStream> buffer,
                      Format format, SampleType type = SampleType::Int16);
-        BufferSource(BufferSource&& other);
-       ~BufferSource();
+        StreamSource(StreamSource&& other);
+       ~StreamSource();
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetName() const override
         { return mName; }
         virtual std::string GetType() const override
-        { return "BufferSource"; }
+        { return "StreamSource"; }
         virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
         virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         virtual void Shutdown() override;
@@ -781,7 +781,7 @@ namespace audio
         const std::string mName;
         const std::string mId;
         const Format mInputFormat;
-        std::unique_ptr<SourceBuffer> mBuffer;
+        std::shared_ptr<const SourceStream> mBuffer;
         std::unique_ptr<Decoder> mDecoder;
         SingleSlotPort mPort;
         audio::Format mOutputFormat;

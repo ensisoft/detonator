@@ -26,26 +26,9 @@
 #include "audio/sndfile.h"
 #include "audio/loader.h"
 
-namespace {
-using namespace audio;
-// trampoline functions to convert C style callbacks into
-// c++ this calls.
-struct Trampoline {
-    static sf_count_t GetLength(void* user)
-    { return static_cast<SndFileIODevice*>(user)->GetLength(); }
-    static sf_count_t Seek(sf_count_t offset, int whence, void* user)
-    { return static_cast<SndFileIODevice*>(user)->Seek(offset, whence); }
-    static sf_count_t Read(void* ptr, sf_count_t count, void* user)
-    { return static_cast<SndFileIODevice*>(user)->Read(ptr, count); }
-    static sf_count_t Tell(void* user)
-    { return static_cast<SndFileIODevice*>(user)->Tell(); }
-};
-} // namespace
-
 namespace audio
 {
-
-SndFileDecoder::SndFileDecoder(std::unique_ptr<SndFileIODevice> io)
+SndFileDecoder::SndFileDecoder(std::shared_ptr<const SourceStream> io)
 {
     if (!Open(std::move(io)))
         throw std::runtime_error("SndFileDecoder open failed.");
@@ -67,10 +50,21 @@ size_t SndFileDecoder::ReadFrames(int* ptr, size_t frames)
 void SndFileDecoder::Reset()
 { sf_seek(mFile, 0, SEEK_SET); }
 
-bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
+bool SndFileDecoder::Open(std::shared_ptr<const SourceStream> source)
 {
-    ASSERT(mDevice == nullptr);
+    ASSERT(mSource == nullptr);
     ASSERT(mFile   == nullptr);
+    struct Trampoline {
+        static sf_count_t GetLength(void* user)
+        { return static_cast<SndFileDecoder*>(user)->GetLength(); }
+        static sf_count_t Seek(sf_count_t offset, int whence, void* user)
+        { return static_cast<SndFileDecoder*>(user)->Seek(offset, whence); }
+        static sf_count_t Read(void* ptr, sf_count_t count, void* user)
+        { return static_cast<SndFileDecoder*>(user)->Read(ptr, count); }
+        static sf_count_t Tell(void* user)
+        { return static_cast<SndFileDecoder*>(user)->Tell(); }
+    };
+    mSource = source;
 
     SF_VIRTUAL_IO virtual_io = {};
     virtual_io.get_filelen = &Trampoline::GetLength;
@@ -78,10 +72,10 @@ bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
     virtual_io.read        = &Trampoline::Read;
     virtual_io.tell        = &Trampoline::Tell;
     SF_INFO info = {};
-    mFile = sf_open_virtual(&virtual_io, SFM_READ, &info, (void*)io.get());
+    mFile = sf_open_virtual(&virtual_io, SFM_READ, &info, (void*)this);
     if (!mFile)
     {
-        ERROR("SndFile decoder open failed. [name='%1']", io->GetName());
+        ERROR("SndFile decoder open failed. [name='%1']", mSource->GetName());
         return false;
     }
     // When reading floating point wavs with the integer read functions
@@ -93,70 +87,38 @@ bool SndFileDecoder::Open(std::unique_ptr<SndFileIODevice> io)
     mSampleRate = info.samplerate;
     mChannels   = info.channels;
     mFrames     = info.frames;
-    mDevice     = std::move(io);
     DEBUG("SndFileDecoder is open. [name='%1' frames=%2, channels=%3, rate=%4]",
-          mDevice->GetName(), mFrames, mChannels, mSampleRate);
+          mSource->GetName(), mFrames, mChannels, mSampleRate);
     return true;
 }
 
-std::int64_t SndFileInputStream::GetLength() const
-{ return mStream->GetSize(); }
-std::int64_t SndFileInputStream::Seek(sf_count_t offset, int whence)
-{
-    if (whence == SEEK_CUR)
-        mStream->Seek(offset, SourceStream::Whence::FromCurrent);
-    else if (whence == SEEK_SET)
-        mStream->Seek(offset, SourceStream::Whence::FromStart);
-    else if (whence == SEEK_END)
-        mStream->Seek(offset, SourceStream::Whence::FromEnd);
-    else BUG("Unknown seek position.");
-    return mStream->Tell();
-}
-std::int64_t SndFileInputStream::Read(void* ptr, sf_count_t count)
-{
-    const auto size   = mStream->GetSize();
-    const auto offset = mStream->Tell();
-    const auto available = size - offset;
-    const auto bytes_to_read = std::min(available, count);
-    if (bytes_to_read == 0)
-        return 0;
+std::int64_t SndFileDecoder::GetLength() const
+{ return mSource->GetSize(); }
 
-    const auto ret = mStream->Read((char*)ptr, bytes_to_read);
-    if (ret != bytes_to_read)
-        WARN("SndFileInputStream stream read failed. [request=%1, returned=%2]", bytes_to_read, ret);
-    return ret;
-}
-std::int64_t SndFileInputStream::Tell() const
-{ return (sf_count_t)mStream->Tell(); }
-
-std::int64_t SndFileBuffer::GetLength() const
-{ return mBuffer->GetSize(); }
-
-std::int64_t SndFileBuffer::Seek(std::int64_t offset, int whence)
+std::int64_t SndFileDecoder::Seek(std::int64_t offset, int whence)
 {
     if (whence == SEEK_CUR)
         mOffset += offset;
     else if (whence == SEEK_SET)
         mOffset = offset;
     else if (whence == SEEK_END)
-        mOffset = mBuffer->GetSize() + offset;
+        mOffset = mSource->GetSize() + offset;
     else BUG("Unknown seek position");
-    mOffset = math::clamp(int64_t(0), int64_t(mBuffer->GetSize()), mOffset);
+    mOffset = math::clamp(int64_t(0), int64_t(mSource->GetSize()), mOffset);
     return mOffset;
 }
-std::int64_t SndFileBuffer::Read(void* ptr, std::int64_t count)
+std::int64_t SndFileDecoder::Read(void* ptr, std::int64_t count)
 {
-    const auto num_bytes = mBuffer->GetSize();
+    const auto num_bytes = mSource->GetSize();
     const auto num_avail = mOffset >= num_bytes ? 0 : num_bytes - mOffset;
     const auto num_bytes_to_read = std::min((std::int64_t)num_avail, count);
     if (num_bytes_to_read == 0)
         return 0;
-    const auto* src = static_cast<const std::uint8_t*>(mBuffer->GetData());
-    std::memcpy(ptr, &src[mOffset], num_bytes_to_read);
+    mSource->Read(ptr, mOffset, num_bytes_to_read);
     mOffset += num_bytes_to_read;
     return num_bytes_to_read;
 }
-std::int64_t SndFileBuffer::Tell() const
+std::int64_t SndFileDecoder::Tell() const
 { return mOffset; }
 
 } // namespace

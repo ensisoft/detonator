@@ -98,7 +98,6 @@ namespace app
         virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
         // audio::Loader implementation
         virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI) const override;
-        virtual audio::SourceBufferHandle LoadAudioBuffer(const std::string& URI) const override;
 
         template<typename T>
         engine::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
