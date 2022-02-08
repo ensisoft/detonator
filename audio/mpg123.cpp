@@ -23,6 +23,7 @@
 #include "base/format.h"
 #include "base/utility.h"
 #include "base/logging.h"
+#include "base/math.h"
 #include "audio/mpg123.h"
 #include "audio/loader.h"
 
@@ -109,7 +110,7 @@ off_t Mpg123FileInputStream::Seek(off_t offset, int whence)
 long Mpg123Buffer::Read(void* buffer, size_t bytes)
 {
     const auto num_bytes = mBuffer->GetSize();
-    const auto num_avail = num_bytes - mOffset;
+    const auto num_avail = mOffset >= num_bytes ? 0 : num_bytes - mOffset;
     const auto num_bytes_to_read = std::min(size_t(num_avail), bytes);
     if (num_bytes_to_read == 0)
         return 0;
@@ -126,8 +127,9 @@ off_t Mpg123Buffer::Seek(off_t offset, int whence)
     else if (whence == SEEK_SET)
         mOffset = offset;
     else if (whence == SEEK_END)
-        mOffset = mBuffer->GetSize() - offset;
+        mOffset = mBuffer->GetSize() + offset;
     else BUG("Unknown seek position");
+    mOffset = math::clamp(off_t(0), off_t(mBuffer->GetSize()), mOffset);
     return mOffset;
 }
 
