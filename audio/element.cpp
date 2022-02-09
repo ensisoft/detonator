@@ -1802,7 +1802,7 @@ const ElementDesc* FindElementDesc(const std::string& type)
             file.args["file"]  = std::string();
             file.args["type"]  = audio::SampleType::Float32;
             file.args["loops"] = 1u;
-            file.args["cache"] = false;
+            file.args["pcm_caching"] = false;
             file.output_ports.push_back({"out"});
             map["FileSource"] = file;
         }
@@ -1911,7 +1911,7 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
             GetArg<std::string>(args, "file", name),
             GetArg<SampleType>(args, "type", name),
             GetArg<unsigned>(args, "loops", name));
-        if (const auto* arg = GetOptionalArg<bool>(args, "cache", name))
+        if (const auto* arg = GetOptionalArg<bool>(args, "pcm_caching", name))
             ret->EnablePcmCaching(*arg);
         return ret;
     }

@@ -1962,7 +1962,7 @@ void AudioWidget::GetSelectedElementProperties()
         SetVisible(mUI.loopCount, true);
         SetValue(mUI.loopCount, *val);
     }
-    if (const auto* val = item->GetArgValue<bool>("cache"))
+    if (const auto* val = item->GetArgValue<bool>("pcm_caching"))
     {
         SetEnabled(mUI.caching, true);
         SetVisible(mUI.caching, true);
@@ -2064,7 +2064,7 @@ void AudioWidget::SetSelectedElementProperties()
         *val = GetValue(mUI.effect);
     if (auto* val = item->GetArgValue<unsigned>("loops"))
         *val = GetValue(mUI.loopCount);
-    if (auto* val = item->GetArgValue<bool>("cache"))
+    if (auto* val = item->GetArgValue<bool>("pcm_caching"))
         *val = GetValue(mUI.caching);
 
     mScene->invalidate();

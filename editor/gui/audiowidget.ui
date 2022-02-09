@@ -577,7 +577,7 @@
           <item row="15" column="1">
            <widget class="QCheckBox" name="caching">
             <property name="text">
-             <string>Enable caching</string>
+             <string>Enable PCM caching</string>
             </property>
            </widget>
           </item>
