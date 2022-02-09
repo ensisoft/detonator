@@ -3,9 +3,9 @@
     {
       "elements": [
         {
-          "arg_cache": true,
           "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Laser/Laser_09.mp3",
           "arg_loops": 1,
+          "arg_pcm_caching": true,
           "arg_type": "Float32",
           "id": "XUF0N9uLfD",
           "name": "FileSource",
@@ -22,9 +22,9 @@
     {
       "elements": [
         {
-          "arg_cache": false,
           "arg_file": "ws://sounds/Sci-Fi Sound Library/Mp3/Menu_Select_00.mp3",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "AruPmKN2WY",
           "name": "FileSource",
@@ -47,9 +47,9 @@
           "type": "StereoMaker"
         },
         {
-          "arg_cache": false,
           "arg_file": "ws://sounds/retro-action-sounds/missile_launch_2.ogg",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "pmax6QpW2W",
           "name": "FileSource",
@@ -75,9 +75,9 @@
     {
       "elements": [
         {
-          "arg_cache": false,
           "arg_file": "ws://sounds/retro-action-sounds/bombexplosion.ogg",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "AjbLvZAh2J",
           "name": "bombexplosion",
@@ -109,9 +109,9 @@
     {
       "elements": [
         {
-          "arg_cache": false,
           "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Title Screen.ogg",
           "arg_loops": 0,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "D79A5NORKR",
           "name": "FileSource",
@@ -144,27 +144,27 @@
           "type": "Playlist"
         },
         {
-          "arg_cache": false,
           "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 1.ogg",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "LoG45mUAF4",
           "name": "FileSource",
           "type": "FileSource"
         },
         {
-          "arg_cache": false,
           "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 2.ogg",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "EEfBsJfH7U",
           "name": "FileSource_1",
           "type": "FileSource"
         },
         {
-          "arg_cache": false,
           "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Level 3.ogg",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "KUf8FAknrd",
           "name": "FileSource_2",
@@ -225,9 +225,9 @@
     {
       "elements": [
         {
-          "arg_cache": false,
           "arg_file": "ws://music/junkala/Juhani Junkala [Retro Game Music Pack] Ending.ogg",
           "arg_loops": 0,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "BpdAYwxrEY",
           "name": "FileSource",
@@ -244,9 +244,9 @@
     {
       "elements": [
         {
-          "arg_cache": false,
           "arg_file": "ws://sounds/UI Sound Library/Click_Electronic_14.mp3",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "7ET20Y11sb",
           "name": "FileSource",
@@ -269,9 +269,9 @@
           "type": "Gain"
         },
         {
-          "arg_cache": false,
           "arg_file": "ws://sounds/Victory.mp3",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "qERaxJoKYx",
           "name": "Victory",
