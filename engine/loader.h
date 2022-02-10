@@ -60,6 +60,12 @@ namespace engine
                                public audio::Loader
     {
     public:
+        enum class DefaultAudioIOStrategy {
+            Automatic, Memmap, Stream, Buffer
+        };
+
+        // Set the default IO strategy for loading audio data.
+        virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) = 0;
         // Set the filesystem path of the current running binary on the file system.
         // Used for resolving data references relative to the application binary.
         virtual void SetApplicationPath(const std::string& path) = 0;

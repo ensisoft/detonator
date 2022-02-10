@@ -484,6 +484,10 @@ int main(int argc, char* argv[])
             DEBUG("Content file: '%1']", content_file);
             if (!loaders.ContentLoader->LoadFromFile(content_file))
                 return EXIT_FAILURE;
+            engine::FileResourceLoader::DefaultAudioIOStrategy audio_io_strategy;
+            if (base::JsonReadSafe(json["desktop"], "audio_io_strategy", &audio_io_strategy))
+                loaders.ResourceLoader->SetDefaultAudioIOStrategy(audio_io_strategy);
+
             loaders.ResourceLoader->SetApplicationPath(application_path);
             loaders.ResourceLoader->SetContentPath(content_path);
             loaders.ResourceLoader->PreloadFiles();

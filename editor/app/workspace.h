@@ -570,6 +570,9 @@ namespace app
             unsigned audio_buffer_size = 20;
             // flag to control PCM caching to avoid duplicate decoding
             bool enable_audio_pcm_caching = false;
+            using DefaultAudioIOStrategy = engine::FileResourceLoader::DefaultAudioIOStrategy;
+            DefaultAudioIOStrategy desktop_audio_io_strategy = DefaultAudioIOStrategy::Automatic;
+            DefaultAudioIOStrategy wasm_audio_io_strategy = DefaultAudioIOStrategy::Automatic;
         };
 
         const ProjectSettings& GetProjectSettings() const

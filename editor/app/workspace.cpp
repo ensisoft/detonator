@@ -1300,6 +1300,8 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "audio_sample_type"       , mSettings.audio_sample_type);
     JsonWrite(project, "audio_buffer_size"       , mSettings.audio_buffer_size);
     JsonWrite(project, "enable_audio_pcm_caching", mSettings.enable_audio_pcm_caching);
+    JsonWrite(project, "desktop_audio_io_strategy", mSettings.desktop_audio_io_strategy);
+    JsonWrite(project, "wasm_audio_io_strategy"  , mSettings.wasm_audio_io_strategy);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1419,6 +1421,8 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "audio_sample_type",        &mSettings.audio_sample_type);
     JsonReadSafe(project, "audio_buffer_size",        &mSettings.audio_buffer_size);
     JsonReadSafe(project, "enable_audio_pcm_caching", &mSettings.enable_audio_pcm_caching);
+    JsonReadSafe(project, "desktop_audio_io_strategy", &mSettings.desktop_audio_io_strategy);
+    JsonReadSafe(project, "wasm_audio_io_strategy"  , &mSettings.wasm_audio_io_strategy);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
@@ -2358,6 +2362,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
+        base::JsonWrite(json["desktop"], "audio_io_strategy", mSettings.desktop_audio_io_strategy);
         base::JsonWrite(json["debug"], "font", ToUtf8(mSettings.debug_font));
         base::JsonWrite(json["debug"], "show_msg", mSettings.debug_show_msg);
         base::JsonWrite(json["debug"], "show_fps", mSettings.debug_show_fps);
@@ -2373,6 +2378,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["html5"], "webgl_power_pref", mSettings.webgl_power_preference);
         base::JsonWrite(json["html5"], "webgl_antialias", mSettings.webgl_antialias);
         base::JsonWrite(json["html5"], "developer_ui", mSettings.html5_developer_ui);
+        base::JsonWrite(json["wasm"], "audio_io_strategy", mSettings.wasm_audio_io_strategy);
         base::JsonWrite(json["engine"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["engine"], "default_mag_filter", mSettings.default_mag_filter);
         base::JsonWrite(json["engine"], "ticks_per_second",   (float)mSettings.ticks_per_second);

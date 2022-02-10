@@ -256,6 +256,11 @@ public:
         mContentLoader  = engine::JsonFileClassLoader::Create();
         mResourceLoader = engine::FileResourceLoader::Create();
         mContentLoader->LoadFromFile("/" + content + "/content.json");
+
+        engine::FileResourceLoader::DefaultAudioIOStrategy audio_io_strategy;
+        if (base::JsonReadSafe(json["wasm"], "audio_io_strategy", &audio_io_strategy))
+            mResourceLoader->SetDefaultAudioIOStrategy(audio_io_strategy);
+
         mResourceLoader->SetApplicationPath("/");
         mResourceLoader->SetContentPath("/" + content);
 

@@ -47,6 +47,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<app::Workspace::ProjectSettings::CanvasMode>(mUI.cmbCanvasMode);
     PopulateFromEnum<app::Workspace::ProjectSettings::PowerPreference>(mUI.cmbPowerPref);
     PopulateFromEnum<app::Workspace::ProjectSettings::MousePointerUnits>(mUI.mouseUnits);
+    PopulateFromEnum<app::Workspace::ProjectSettings::DefaultAudioIOStrategy>(mUI.cmbDesktopAudioIO);
+    PopulateFromEnum<app::Workspace::ProjectSettings::DefaultAudioIOStrategy>(mUI.cmbWasmAudioIO);
     PopulateFromEnum<audio::SampleType>(mUI.audioFormat);
     PopulateFromEnum<audio::Channels>(mUI.audioChannels);
     PopulateFontNames(mUI.cmbDebugFont);
@@ -59,6 +61,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.cmbWindowMode, mSettings.window_mode);
     SetUIValue(mUI.wndWidth, mSettings.window_width);
     SetUIValue(mUI.wndHeight, mSettings.window_height);
+    SetUIValue(mUI.cmbDesktopAudioIO, mSettings.desktop_audio_io_strategy);
     SetUIValue(mUI.chkWndCanResize, mSettings.window_can_resize);
     SetUIValue(mUI.chkWndHasBorder, mSettings.window_has_border);
     SetUIValue(mUI.chkSrgb, mSettings.config_srgb);
@@ -102,6 +105,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.cmbPowerPref, mSettings.webgl_power_preference);
     SetUIValue(mUI.canvasWidth, mSettings.canvas_width);
     SetUIValue(mUI.canvasHeight, mSettings.canvas_height);
+    SetUIValue(mUI.cmbWasmAudioIO, mSettings.wasm_audio_io_strategy);
     SetUIValue(mUI.chkAntialias, mSettings.webgl_antialias);
     SetUIValue(mUI.chkLogDebug, mSettings.log_debug);
     SetUIValue(mUI.chkLogInfo, mSettings.log_info);
@@ -122,6 +126,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.cmbMagFilter, &mSettings.default_mag_filter);
     GetUIValue(mUI.wndWidth, &mSettings.window_width);
     GetUIValue(mUI.wndHeight, &mSettings.window_height);
+    GetUIValue(mUI.cmbDesktopAudioIO, &mSettings.desktop_audio_io_strategy);
     GetUIValue(mUI.cmbWindowMode, &mSettings.window_mode);
     GetUIValue(mUI.chkWndCanResize, &mSettings.window_can_resize);
     GetUIValue(mUI.chkWndHasBorder, &mSettings.window_has_border);
@@ -163,6 +168,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.cmbPowerPref, &mSettings.webgl_power_preference);
     GetUIValue(mUI.canvasWidth, &mSettings.canvas_width);
     GetUIValue(mUI.canvasHeight, &mSettings.canvas_height);
+    GetUIValue(mUI.cmbWasmAudioIO, &mSettings.wasm_audio_io_strategy);
     GetUIValue(mUI.chkAntialias, &mSettings.webgl_antialias);
     GetUIValue(mUI.chkLogDebug, &mSettings.log_debug);
     GetUIValue(mUI.chkLogInfo, &mSettings.log_info);
