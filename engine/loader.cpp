@@ -34,6 +34,16 @@
 #  include <fcntl.h>
 #  include <cerrno>
 #  include <cstring> // for memcpy
+#elif defined(WINDOWS_OS)
+#  include <Windows.h>
+#  include <Shlobj.h>
+#  include <cstring>
+#  undef MIN
+#  undef MAX
+#  undef min
+#  undef max
+#  undef ERROR
+#  undef DEBUG
 #endif
 
 #include "base/logging.h"
@@ -148,6 +158,113 @@ public:
 private:
     const std::string mFileName;
     int mFile = 0;
+    void* mBase = nullptr;
+    std::uint64_t mSize = 0;
+};
+#elif defined(WINDOWS_OS)
+std::string FormatError(DWORD error)
+{
+    LPSTR buffer = nullptr;
+    const auto flags = FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS;
+    const auto lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+    size_t size = FormatMessageA(flags, NULL, error, lang, (LPSTR)&buffer, 0, NULL);
+    std::string ret(buffer, size);
+    LocalFree(buffer);
+    if (ret.back() == '\n')
+        ret.pop_back();
+    if (ret.back() == '\r')
+        ret.pop_back();
+    return ret;
+}
+
+std::string ErrorString()
+{
+    return FormatError(GetLastError());
+}
+
+class AudioFileMap : public audio::SourceStream
+{
+public:
+    AudioFileMap(const std::string& filename)
+        : mFileName(filename)
+    {}
+    ~AudioFileMap()
+    {
+        if (mBase != nullptr)
+            ASSERT(UnmapViewOfFile(mBase) == TRUE);
+        if (mMap != NULL)
+            ASSERT(CloseHandle(mMap) == TRUE);
+        if (mFile != INVALID_HANDLE_VALUE)
+            ASSERT(CloseHandle(mFile) == TRUE);
+    }
+    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    {
+        ASSERT(offset + bytes <= mSize);
+        bytes = std::min(mSize - offset, bytes);
+        const auto* base = static_cast<const char*>(mBase);
+        std::memcpy(ptr, &base[offset], bytes);
+    }
+    virtual std::uint64_t GetSize() const override 
+    {
+        return mSize; 
+    }
+    virtual std::string GetName() const override
+    {
+        return mFileName;
+    }
+    bool Map()
+    {
+        const auto& str = base::FromUtf8(mFileName);
+        mFile = CreateFile(
+            str.c_str(),
+            GENERIC_READ,
+            FILE_SHARE_READ,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+        if (mFile == INVALID_HANDLE_VALUE)
+        {
+            ERROR("Failed to open file. [file='%1', error='%2']", str, ErrorString());
+            return false;
+        }
+
+        LARGE_INTEGER size;
+        if (!GetFileSizeEx(mFile, &size))
+        {
+            ERROR("Failed to get file size. [file='%1', error='%2']", str, ErrorString());
+            return false;
+        }
+        mSize = size.QuadPart;
+
+        mMap = CreateFileMapping(
+            mFile,
+            NULL, // default security
+            PAGE_READONLY,
+            size.HighPart,
+            size.LowPart,
+            NULL);
+        if (mMap == NULL)
+        {
+            ERROR("Failed to create file map. [file='%1', error='%2']", str, ErrorString());
+            return false;
+        }
+
+        mBase = MapViewOfFile(mMap, FILE_MAP_READ, 0, 0, mSize);
+        if (mBase == NULL)
+        {
+            ERROR("Failed to map view of file. [file='%1', error='%2']", str, ErrorString());
+            return false;
+        }
+        DEBUG("Mapped audio file successfully. [file='%1', size=%2]", str, mSize);
+        return true;
+    }
+private:
+    const std::string mFileName;
+    HANDLE mFile = INVALID_HANDLE_VALUE;
+    HANDLE mMap = NULL;
     void* mBase = nullptr;
     std::uint64_t mSize = 0;
 };
@@ -299,7 +416,6 @@ public:
       }
 #endif
 
-#if defined(POSIX_OS)
         if (strategy == AudioIOStrategy::Memmap)
         {
             auto map = std::make_shared<AudioFileMap>(filename);
@@ -309,7 +425,7 @@ public:
                 mAudioStreamCache[filename] = map;
             return map;
         }
-#endif
+
         // open using ifstream. since the stream is stateful (read position)
         // sharing cannot be done right now.
         if (strategy == AudioIOStrategy::Stream)
