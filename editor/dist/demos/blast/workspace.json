@@ -1,6 +1,9 @@
 {
     "0tJOf84hBU": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "elem_D79A5NORKR_pos_x": 0,
+        "elem_D79A5NORKR_pos_y": 0,
+        "mapping_count": 0
     },
     "1lANs9A0yJ": {
         "checked_for_packing": 1
@@ -42,18 +45,18 @@
         "link_vyM6kwP8Rq_dst_y": -3.0927164534638226e-35,
         "link_vyM6kwP8Rq_src_x": -6.579140010565254e-12,
         "link_vyM6kwP8Rq_src_y": 2.136305638733423e+37,
-        "mapping_0_link": "tSktfotxUl",
-        "mapping_0_port": "R4vRj4xxUb:in0",
-        "mapping_1_link": "tSktfotxUl",
-        "mapping_1_port": "LoG45mUAF4:out",
+        "mapping_0_link": "qjI5N9KnZ6",
+        "mapping_0_port": "R4vRj4xxUb:in1",
+        "mapping_1_link": "qjI5N9KnZ6",
+        "mapping_1_port": "EEfBsJfH7U:out",
         "mapping_2_link": "Ibzl3DkAwY",
-        "mapping_2_port": "R4vRj4xxUb:in2",
+        "mapping_2_port": "KUf8FAknrd:out",
         "mapping_3_link": "Ibzl3DkAwY",
-        "mapping_3_port": "KUf8FAknrd:out",
-        "mapping_4_link": "qjI5N9KnZ6",
-        "mapping_4_port": "EEfBsJfH7U:out",
-        "mapping_5_link": "qjI5N9KnZ6",
-        "mapping_5_port": "R4vRj4xxUb:in1",
+        "mapping_3_port": "R4vRj4xxUb:in2",
+        "mapping_4_link": "tSktfotxUl",
+        "mapping_4_port": "LoG45mUAF4:out",
+        "mapping_5_link": "tSktfotxUl",
+        "mapping_5_port": "R4vRj4xxUb:in0",
         "mapping_count": 6
     },
     "2a488SIQsU": {
@@ -379,6 +382,7 @@
         "debug_show_msg": false,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
+        "desktop_audio_io_strategy": "Automatic",
         "enable_audio_pcm_caching": true,
         "enable_physics": false,
         "game_script": "game.lua",
@@ -413,6 +417,7 @@
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
+        "wasm_audio_io_strategy": "Automatic",
         "webgl_antialias": true,
         "webgl_power_preference": "HighPerf",
         "window_can_resize": true,
