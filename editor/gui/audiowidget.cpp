@@ -1070,6 +1070,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     PopulateFromEnum<audio::SampleType>(mUI.sampleType);
     PopulateFromEnum<audio::Channels>(mUI.channels);
     PopulateFromEnum<audio::Effect::Kind>(mUI.effect);
+    PopulateFromEnum<audio::IOStrategy>(mUI.ioStrategy);
     SetValue(mUI.graphName, QString("My Graph"));
     SetValue(mUI.graphID, base::RandomString(10));
     SetEnabled(mUI.actionPause, false);
@@ -1731,7 +1732,10 @@ void AudioWidget::on_channels_currentIndexChanged(int)
 {
     SetSelectedElementProperties();
 }
-
+void AudioWidget::on_ioStrategy_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
 void AudioWidget::on_gainValue_valueChanged(double)
 {
     SetSelectedElementProperties();
@@ -1766,7 +1770,11 @@ void AudioWidget::on_loopCount_valueChanged(int)
     SetSelectedElementProperties();
 }
 
-void AudioWidget::on_caching_stateChanged(int)
+void AudioWidget::on_pcmCaching_stateChanged(int)
+{
+    SetSelectedElementProperties();
+}
+void AudioWidget::on_fileCaching_stateChanged(int)
 {
     SetSelectedElementProperties();
 }
@@ -1860,6 +1868,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.sampleType, audio::SampleType::Float32);
     SetValue(mUI.channels, audio::Channels::Stereo);
     SetValue(mUI.sampleRate,   QString("44100"));
+    SetValue(mUI.ioStrategy, audio::FileSource::IOStrategy::Default);
     SetValue(mUI.fileSource, QString(""));
     SetValue(mUI.gainValue,    1.0f);
     SetValue(mUI.frequency, 0);
@@ -1871,10 +1880,12 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.afFrames,     QString(""));
     SetValue(mUI.afDuration,   0);
     SetValue(mUI.loopCount, 1);
-    SetValue(mUI.caching, false);
+    SetValue(mUI.pcmCaching, false);
+    SetValue(mUI.fileCaching, false);
 
     SetEnabled(mUI.sampleType, false);
     SetEnabled(mUI.sampleRate, false);
+    SetEnabled(mUI.ioStrategy, false);
     SetEnabled(mUI.channels, false);
     SetEnabled(mUI.fileSource, false);
     SetEnabled(mUI.btnSelectFile, false);
@@ -1887,7 +1898,8 @@ void AudioWidget::GetSelectedElementProperties()
     SetEnabled(mUI.audioFile, false);
     SetEnabled(mUI.actionDelete, false);
     SetEnabled(mUI.loopCount, false);
-    SetEnabled(mUI.caching, false);
+    SetEnabled(mUI.pcmCaching, false);
+    SetEnabled(mUI.fileCaching, false);
 
     /*
     SetVisible(mUI.sampleType, false);
@@ -1956,6 +1968,13 @@ void AudioWidget::GetSelectedElementProperties()
         SetEnabled(mUI.loopCount, true);
         SetValue(mUI.fileSource, *val);
     }
+    if (const auto* val = item->GetArgValue<audio::FileSource::IOStrategy>("io_strategy"))
+    {
+        SetEnabled(mUI.ioStrategy, true);
+        SetVisible(mUI.ioStrategy, true);
+        SetValue(mUI.ioStrategy, *val);
+    }
+
     if (const auto* val = item->GetArgValue<unsigned>("loops"))
     {
         SetEnabled(mUI.loopCount, true);
@@ -1964,9 +1983,15 @@ void AudioWidget::GetSelectedElementProperties()
     }
     if (const auto* val = item->GetArgValue<bool>("pcm_caching"))
     {
-        SetEnabled(mUI.caching, true);
-        SetVisible(mUI.caching, true);
-        SetValue(mUI.caching, *val);
+        SetEnabled(mUI.pcmCaching, true);
+        SetVisible(mUI.pcmCaching, true);
+        SetValue(mUI.pcmCaching, *val);
+    }
+    if (const auto* val = item->GetArgValue<bool>("file_caching"))
+    {
+        SetEnabled(mUI.fileCaching, true);
+        SetVisible(mUI.fileCaching, true);
+        SetValue(mUI.fileCaching, *val);
     }
 
     if (const auto* val = item->GetArgValue<float>("gain"))
@@ -2065,7 +2090,11 @@ void AudioWidget::SetSelectedElementProperties()
     if (auto* val = item->GetArgValue<unsigned>("loops"))
         *val = GetValue(mUI.loopCount);
     if (auto* val = item->GetArgValue<bool>("pcm_caching"))
-        *val = GetValue(mUI.caching);
+        *val = GetValue(mUI.pcmCaching);
+    if (auto* val = item->GetArgValue<bool>("file_caching"))
+        *val = GetValue(mUI.fileCaching);
+    if (auto* val = item->GetArgValue<audio::FileSource::IOStrategy>("io_strategy"))
+        *val = GetValue(mUI.ioStrategy);
 
     mScene->invalidate();
 }

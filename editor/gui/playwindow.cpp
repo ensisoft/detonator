@@ -267,11 +267,12 @@ public:
 
         return app::GameDataFileBuffer::LoadFromFile(file);
     }
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI) const override
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
+        AudioIOStrategy strategy, bool enable_file_caching) const override
     {
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        return audio::OpenFileStream(app::ToUtf8(file));
+        return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
     }
     std::size_t GetBufferCacheSize() const
     {

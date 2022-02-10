@@ -30,14 +30,13 @@
 #include "audio/buffer.h"
 #include "audio/format.h"
 #include "audio/command.h"
+#include "audio/loader.h"
 
 typedef struct SRC_STATE_tag SRC_STATE;
 
 namespace audio
 {
     class Decoder;
-    class Loader;
-    class SourceStream;
 
     struct PortDesc {
         std::string name;
@@ -683,6 +682,8 @@ namespace audio
     class FileSource : public Element
     {
     public:
+        using IOStrategy = audio::IOStrategy;
+
         FileSource(const std::string& name,
                    const std::string& file,
                    SampleType type = SampleType::Int16,
@@ -719,7 +720,10 @@ namespace audio
         { mLoopCount = count; }
         void EnablePcmCaching(bool on_off)
         { mEnablePcmCaching = on_off; }
-
+        void EnableFileCaching(bool on_off)
+        { mEnableFileCaching = on_off; }
+        void SetIOStrategy(IOStrategy strategy)
+        { mIOStrategy = strategy; }
         struct FileInfo {
             unsigned channels    = 0;
             unsigned frames      = 0;
@@ -746,6 +750,8 @@ namespace audio
         unsigned mPlayCount  = 0;
         unsigned mLoopCount  = 1;
         bool mEnablePcmCaching  = false;
+        bool mEnableFileCaching = false;
+        IOStrategy mIOStrategy = IOStrategy::Default;
     };
 
     class StreamSource : public Element
@@ -1055,8 +1061,11 @@ namespace audio
 
     using ElementArg = std::variant<std::string,
             float, unsigned, bool,
-            SampleType, Format,
-            Effect::Kind, StereoMaker::Channel>;
+            SampleType,
+            Format,
+            FileSource::IOStrategy,
+            StereoMaker::Channel,
+            Effect::Kind>;
 
     template<typename T> inline
     const T* FindElementArg(const std::unordered_map<std::string, ElementArg>& args,

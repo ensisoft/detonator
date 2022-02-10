@@ -131,6 +131,7 @@ namespace gui
         void on_sampleType_currentIndexChanged(int);
         void on_sampleRate_currentIndexChanged(int);
         void on_channels_currentIndexChanged(int);
+        void on_ioStrategy_currentIndexChanged(int);
         void on_gainValue_valueChanged(double);
         void on_frequency_valueChanged(int);
         void on_duration_valueChanged(int);
@@ -138,7 +139,8 @@ namespace gui
         void on_startTime_valueChanged(int);
         void on_effect_currentIndexChanged(int);
         void on_loopCount_valueChanged(int);
-        void on_caching_stateChanged(int);
+        void on_pcmCaching_stateChanged(int);
+        void on_fileCaching_stateChanged(int);
 
         void SceneSelectionChanged();
         void AddElementAction();

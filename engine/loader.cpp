@@ -26,6 +26,16 @@
 #include <unordered_map>
 #include <memory>
 
+#if defined(POSIX_OS)
+#  include <sys/types.h>
+#  include <sys/stat.h>
+#  include <sys/mman.h>
+#  include <unistd.h>
+#  include <fcntl.h>
+#  include <cerrno>
+#  include <cstring> // for memcpy
+#endif
+
 #include "base/logging.h"
 #include "base/utility.h"
 #include "data/json.h"
@@ -83,6 +93,99 @@ public:
 private:
     const std::string mFileName;
     const std::vector<char> mFileData;
+};
+#if defined(POSIX_OS)
+class AudioFileMap : public audio::SourceStream
+{
+public:
+    AudioFileMap(const std::string& filename)
+      : mFileName(filename)
+    {}
+    ~AudioFileMap()
+    {
+        if (mBase)
+            ASSERT(::munmap(mBase, mSize) == 0);
+        if (mFile)
+            ASSERT(::close(mFile) == 0);
+    }
+    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    {
+        ASSERT(offset + bytes <= mSize);
+        bytes = std::min(mSize - offset, bytes);
+        const auto* base = static_cast<const char*>(mBase);
+        std::memcpy(ptr, &base[offset], bytes);
+    }
+    virtual std::uint64_t GetSize() const override
+    { return mSize; }
+    virtual std::string GetName() const override
+    { return mFileName; }
+
+    bool Map()
+    {
+        ASSERT(mFile == 0);
+        mFile = ::open(mFileName.c_str(), O_RDONLY);
+        if (mFile == -1)
+        {
+            ERROR("Failed to open file. [file='%1', error='%2']", mFileName, strerror(errno));
+            return false;
+        }
+        struct stat64 stat;
+        if (fstat64(mFile, &stat))
+        {
+            ERROR("Failed to fstat64 file. [file='%1', error='%2']", mFileName, strerror(errno));
+            return false;
+        }
+        mSize = stat.st_size;
+        mBase = ::mmap(0, mSize, PROT_READ, MAP_SHARED, mFile, off_t(0));
+        if (mBase == MAP_FAILED)
+        {
+            ERROR("Failed to mmap file. [file='%1', error='%2']", mFileName, strerror(errno));
+            return false;
+        }
+        DEBUG("Mapped audio file successfully. [file='%1', size='%2']", mFileName, mSize);
+        return true;
+    }
+private:
+    const std::string mFileName;
+    int mFile = 0;
+    void* mBase = nullptr;
+    std::uint64_t mSize = 0;
+};
+#endif
+
+class AudioStream : public audio::SourceStream
+{
+public:
+    AudioStream(const std::string& filename) : mFileName(filename)
+    {}
+    bool Open()
+    {
+        mStream = base::OpenBinaryInputStream(mFileName);
+        if (!mStream.is_open())
+        {
+            ERROR("Failed to open file stream. [file='%1']", mFileName);
+            return false;
+        }
+        mStream.seekg(0, std::ios::end);
+        mSize = (std::uint64_t)mStream.tellg();
+        mStream.seekg(0, std::ios::beg);
+        DEBUG("Opened audio file stream. [file='%1' bytes=%2]", mFileName, mSize);
+        return true;
+    }
+    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    {
+        auto* stream = const_cast<std::ifstream*>(&mStream);
+        stream->seekg(offset, std::ios::beg);
+        stream->read((char*)ptr, bytes);
+    }
+    virtual std::uint64_t GetSize() const override
+    { return mSize; }
+    virtual std::string GetName() const override
+    { return mFileName; }
+private:
+    const std::string mFileName;
+    std::ifstream mStream;
+    std::uint64_t mSize = 0;
 };
 
 using GameDataFileBuffer = FileBuffer<GameData>;
@@ -144,18 +247,41 @@ public:
         return buff;
     }
     // audio::Loader impl
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+        AudioIOStrategy strategy, bool enable_file_caching) const override
     {
         const auto& filename = ResolveURI(uri);
-        auto it = mAudioStreamCache.find(filename);
-        if (it != mAudioStreamCache.end())
-            return it->second;
+        if (enable_file_caching)
+        {
+            auto it = mAudioStreamCache.find(filename);
+            if (it != mAudioStreamCache.end())
+                return it->second;
+        }
+#if defined(POSIX_OS)
+        if (strategy == AudioIOStrategy::Memmap)
+        {
+            auto map = std::make_shared<AudioFileMap>(filename);
+            if (!map->Map())
+                return nullptr;
+            if (enable_file_caching)
+                mAudioStreamCache[filename] = map;
+            return map;
+        }
+#endif
+        // open using ifstream. since the stream is stateful (read position)
+        // sharing cannot be done right now.
+        if (strategy == AudioIOStrategy::Stream)
+        {
+            auto stream = std::make_shared<AudioStream>(filename);
+            if (!stream->Open())
+                return nullptr;
+            return stream;
+        }
 
+        // default implementation
         auto ret = audio::OpenFileStream(filename);
-        if (ret == nullptr)
-            return nullptr;
-
-        mAudioStreamCache[filename] = ret;
+        if (ret && enable_file_caching)
+            mAudioStreamCache[filename] = ret;
         return ret;
     }
 
