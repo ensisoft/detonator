@@ -994,7 +994,7 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
     }
     else
     {
-        auto source = loader.OpenAudioStream(mFile);
+        auto source = loader.OpenAudioStream(mFile, mIOStrategy, mEnableFileCaching);
         if (!source)
             return false;
 
@@ -1803,6 +1803,8 @@ const ElementDesc* FindElementDesc(const std::string& type)
             file.args["type"]  = audio::SampleType::Float32;
             file.args["loops"] = 1u;
             file.args["pcm_caching"] = false;
+            file.args["file_caching"] = false;
+            file.args["io_strategy"] = FileSource::IOStrategy::Default;
             file.output_ports.push_back({"out"});
             map["FileSource"] = file;
         }
@@ -1913,6 +1915,10 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
             GetArg<unsigned>(args, "loops", name));
         if (const auto* arg = GetOptionalArg<bool>(args, "pcm_caching", name))
             ret->EnablePcmCaching(*arg);
+        if (const auto* arg = GetOptionalArg<bool>(args, "file_caching", name))
+            ret->EnableFileCaching(*arg);
+        if (const auto* arg = GetOptionalArg<FileSource::IOStrategy>(args, "io_strategy", name))
+            ret->SetIOStrategy(*arg);
         return ret;
     }
     else if (desc.type == "ZeroSource")

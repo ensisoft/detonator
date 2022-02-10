@@ -968,11 +968,12 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
     return ret;
 }
 
-audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI) const
+audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI,
+    AudioIOStrategy strategy, bool enable_file_caching) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
-    return audio::OpenFileStream(app::ToUtf8(file));
+    return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
 }
 
 bool Workspace::LoadWorkspace()

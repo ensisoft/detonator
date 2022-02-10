@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1497</width>
-    <height>934</height>
+    <width>1503</width>
+    <height>931</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -289,21 +289,82 @@
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="4" column="0">
-           <widget class="QLabel" name="lblSampleRate">
+          <item row="17" column="1">
+           <widget class="QCheckBox" name="pcmCaching">
             <property name="text">
-             <string>Sample rate (Hz)</string>
+             <string>Enable PCM caching</string>
             </property>
            </widget>
           </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Loops</string>
+          <item row="14" column="1">
+           <widget class="gui::TimeWidget" name="startTime" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="13" column="1">
+           <widget class="gui::TimeWidget" name="delay" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="lblGain">
+            <property name="text">
+             <string>Gain</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblSampleType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Sample type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lblChannels">
+            <property name="text">
+             <string>Channels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="channels"/>
+          </item>
+          <item row="15" column="1">
+           <widget class="QComboBox" name="effect"/>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="lblFrequency">
+            <property name="text">
+             <string>Frequency (Hz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Duration</string>
+            </property>
+           </widget>
+          </item>
+          <item row="15" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Effect</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
            <widget class="QDoubleSpinBox" name="gainValue">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -322,41 +383,8 @@
             </property>
            </widget>
           </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Effect</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="sampleRate">
-            <item>
-             <property name="text">
-              <string>8000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>16000</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>44100</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Delay</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="gui::TimeWidget" name="startTime" native="true">
+          <item row="11" column="1">
+           <widget class="gui::TimeWidget" name="duration" native="true">
             <property name="focusPolicy">
              <enum>Qt::TabFocus</enum>
             </property>
@@ -372,20 +400,38 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="elemName">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblSampleRate">
             <property name="text">
-             <string>Name</string>
+             <string>Sample rate (Hz)</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
+          <item row="16" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Loops</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="lblFileSource">
+            <property name="text">
+             <string>File source</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
            <widget class="QSpinBox" name="frequency">
             <property name="minimum">
              <number>1</number>
@@ -395,6 +441,13 @@
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Start time</string>
             </property>
            </widget>
           </item>
@@ -408,39 +461,6 @@
             </property>
             <property name="text">
              <string>ID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="1">
-           <widget class="QSpinBox" name="loopCount">
-            <property name="specialValueText">
-             <string>Unlimited</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>10000</number>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="lblFrequency">
-            <property name="text">
-             <string>Frequency (Hz)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Duration</string>
             </property>
            </widget>
           </item>
@@ -463,75 +483,53 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
-           <widget class="gui::TimeWidget" name="duration" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="QComboBox" name="effect"/>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="lblChannels">
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Channels</string>
+             <string>Delay</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="elemName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="18" column="1">
+           <widget class="QCheckBox" name="fileCaching">
+            <property name="text">
+             <string>Enable file caching</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lblSampleType">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Sample type</string>
+             <string>Name</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="1">
-           <widget class="gui::TimeWidget" name="delay" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
+          <item row="16" column="1">
+           <widget class="QSpinBox" name="loopCount">
+            <property name="specialValueText">
+             <string>Unlimited</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <number>1</number>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="lblFileSource">
-            <property name="text">
-             <string>File source</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="lblGain">
-            <property name="text">
-             <string>Gain</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Start time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLineEdit" name="fileSource">
@@ -571,13 +569,32 @@
             </item>
            </layout>
           </item>
-          <item row="5" column="1">
-           <widget class="QComboBox" name="channels"/>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="sampleRate">
+            <item>
+             <property name="text">
+              <string>8000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>44100</string>
+             </property>
+            </item>
+           </widget>
           </item>
-          <item row="15" column="1">
-           <widget class="QCheckBox" name="caching">
+          <item row="6" column="1">
+           <widget class="QComboBox" name="ioStrategy"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>Enable PCM caching</string>
+             <string>IO Strategy</string>
             </property>
            </widget>
           </item>
@@ -853,6 +870,7 @@
   <tabstop>sampleType</tabstop>
   <tabstop>sampleRate</tabstop>
   <tabstop>channels</tabstop>
+  <tabstop>ioStrategy</tabstop>
   <tabstop>fileSource</tabstop>
   <tabstop>btnSelectFile</tabstop>
   <tabstop>gainValue</tabstop>
@@ -862,7 +880,8 @@
   <tabstop>startTime</tabstop>
   <tabstop>effect</tabstop>
   <tabstop>loopCount</tabstop>
-  <tabstop>caching</tabstop>
+  <tabstop>pcmCaching</tabstop>
+  <tabstop>fileCaching</tabstop>
   <tabstop>afChannels</tabstop>
   <tabstop>afSampleRate</tabstop>
   <tabstop>afFrames</tabstop>

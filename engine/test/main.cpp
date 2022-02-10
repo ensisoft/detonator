@@ -157,8 +157,9 @@ public:
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->ResumeMusic(name);
     }
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
-    { return audio::OpenFileStream(uri); }
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+        AudioIOStrategy strategy, bool enable_file_caching) const override
+    { return audio::OpenFileStream(uri, strategy, enable_file_caching); }
 private:
     engine::AudioEngine::GraphHandle BuildMusicGraph(const std::string& name, const std::string& audio_file)
     {
@@ -269,7 +270,8 @@ public:
             mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri) const override
+    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+        AudioIOStrategy strategy, bool enable_file_caching) const override
     { return audio::OpenFileStream(uri); }
 private:
     engine::AudioEngine::GraphHandle BuildEffectGraph(const std::string& name, const std::string& audio_file)

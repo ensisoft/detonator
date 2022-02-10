@@ -54,7 +54,7 @@ private:
 
 namespace audio
 {
-SourceStreamHandle OpenFileStream(const std::string& file)
+SourceStreamHandle OpenFileStream(const std::string& file, IOStrategy strategy, bool enable_file_caching)
 {
     auto stream = base::OpenBinaryInputStream(file);
     if (!stream.is_open())

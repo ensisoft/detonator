@@ -44,18 +44,38 @@ namespace audio
     // PCM data from them.
     using SourceStreamHandle = std::shared_ptr<const SourceStream>;
 
-    SourceStreamHandle OpenFileStream(const std::string& file);
+    // Different potential ways to perform IO and load/stream
+    // the audio data from a file.
+    enum class IOStrategy {
+        // Do whatever is the default.
+        Default,
+        // Try to be smart and automatically decide what is
+        // a good way with the given file on the given platform.
+        Automatic,
+        // Use memory mapped file.
+        Memmap,
+        // Use a file stream.
+        Stream,
+        // Load the data to a regular buffer.
+        Buffer
+    };
+
+    SourceStreamHandle OpenFileStream(const std::string& file,
+        IOStrategy strategy = IOStrategy::Default, bool enable_file_caching = false);
 
     // Interface for accessing the encoded source audio data
     // such as .mp3, .ogg etc. files.
     class Loader
     {
     public:
+        using AudioIOStrategy = audio::IOStrategy;
         virtual ~Loader() = default;
         // Load the contents of the given file into an audio buffer object.
         // Returns nullptr (null stream handle) if the file could not be loaded.
-        virtual SourceStreamHandle OpenAudioStream(const std::string& file) const
-        { return audio::OpenFileStream(file); }
+        virtual SourceStreamHandle OpenAudioStream(const std::string& file,
+            AudioIOStrategy strategy = AudioIOStrategy::Default,
+            bool enable_file_caching= false)  const
+        { return audio::OpenFileStream(file, strategy, enable_file_caching); }
     private:
     };
 
