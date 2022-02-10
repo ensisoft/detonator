@@ -257,6 +257,48 @@ public:
             if (it != mAudioStreamCache.end())
                 return it->second;
         }
+        // if the requested IO strategy is default then see what
+        // default actually means based on the configured setting.
+        if (strategy == AudioIOStrategy::Default)
+        {
+            if (mDefaultAudioIO == DefaultAudioIOStrategy::Automatic)
+                strategy = AudioIOStrategy::Automatic;
+            else if (mDefaultAudioIO == DefaultAudioIOStrategy::Memmap)
+                strategy = AudioIOStrategy::Memmap;
+            else if (mDefaultAudioIO == DefaultAudioIOStrategy::Buffer)
+                strategy = AudioIOStrategy::Buffer;
+            else if (mDefaultAudioIO == DefaultAudioIOStrategy::Stream)
+                strategy = AudioIOStrategy ::Stream;
+            else BUG("Unhandled default audio IO strategy.");
+        }
+#if defined(WEBASSEMBLY)
+        if (strategy == AudioIOStrategy::Automatic)
+        {
+            auto map = std::make_shared<AudioFileMap>(filename);
+            if (!map->Map())
+                return nullptr;
+            if (enable_file_caching)
+                mAudioStreamCache[filename] = map;
+            return map;
+        }
+#elif defined(POSIX_OS)
+      if (strategy == AudioIOStrategy::Automatic)
+      {
+          auto stream = std::make_shared<AudioStream>(filename);
+          if (!stream->Open())
+              return nullptr;
+          return stream;
+      }
+#elif defined(WINDOWS_OS)
+      if (strategy == AudioIOStrategy::Automatic)
+      {
+          auto stream = std::make_shared<AudioStream>(filename);
+          if (!stream->Open())
+              return nullptr;
+          return stream;
+      }
+#endif
+
 #if defined(POSIX_OS)
         if (strategy == AudioIOStrategy::Memmap)
         {
@@ -286,6 +328,8 @@ public:
     }
 
     // FileResourceLoader impl
+    virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) override
+    { mDefaultAudioIO = strategy; }
     virtual void SetApplicationPath(const std::string& path) override
     { mApplicationPath = path; }
     virtual void SetContentPath(const std::string& path) override
@@ -375,6 +419,7 @@ private:
         std::shared_ptr<const GameDataFileBuffer>> mGameDataBufferCache;
     mutable std::unordered_map<std::string,
             std::shared_ptr<const audio::SourceStream>> mAudioStreamCache;
+    DefaultAudioIOStrategy mDefaultAudioIO = DefaultAudioIOStrategy::Automatic;
     // the root of the resource dir against which to resolve the resource URIs.
     std::string mContentPath;
     std::string mApplicationPath;
