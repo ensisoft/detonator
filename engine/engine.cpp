@@ -355,10 +355,13 @@ public:
         // do simulation/animation update steps.
         while (mTimeAccum >= mGameTimeStep)
         {
+            // Call UpdateGame with the *current* time. I.e. the game
+            // is advancing one time step from current mGameTimeTotal.
+            // this is consistent with the tick time accumulation below.
+            TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
             mGameTimeTotal += mGameTimeStep;
             mTimeAccum -= mGameTimeStep;
             mTickAccum += mGameTimeStep;
-            TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
 
             // put some accumulated time towards ticking game.
             auto tick_time = mGameTimeTotal;
