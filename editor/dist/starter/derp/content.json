@@ -4,7 +4,10 @@
       "elements": [
         {
           "arg_file": "ws://music/jump and run - tropics.ogg",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "NwwdP8ZHwL",
           "name": "FileSource",
@@ -28,7 +31,10 @@
         },
         {
           "arg_file": "ws://sounds/click.wav",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "qZy6ISYxl7",
           "name": "FileSource",
@@ -67,7 +73,10 @@
         },
         {
           "arg_file": "ws://sounds/qubodup-cfork-ccby3-jump.ogg",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "WK3PiWWhSR",
           "name": "FileSource",
@@ -1292,7 +1301,7 @@
               "id": "UkMw7aHvW5",
               "name": "Form",
               "position": {
-                "x": 0.0,
+                "x": -0.0,
                 "y": 0.0
               },
               "size": {
@@ -1340,7 +1349,7 @@
                     "h": 200.0,
                     "w": 900.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36}]}",
                   "text": "Press ' Space' to fly the derpo bird\nbut watch out for the spike!",
                   "type": "Label"
                 },
@@ -1360,7 +1369,7 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-size\",\"value\":36}]}",
+                  "style": "{\"properties\":[{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}}]}",
                   "text": "Play",
                   "type": "PushButton"
                 },
@@ -1380,9 +1389,51 @@
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"pressed/border\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":1.0}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.01600671373307705,\"g\":1.0,\"r\":0.0}}]}",
+                  "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-size\",\"value\":36}]}",
                   "text": "Quit",
                   "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "Oy9zzoz0pr",
+                  "line_height": 1.0,
+                  "name": "Label_1",
+                  "position": {
+                    "x": 250.0,
+                    "y": 350.0
+                  },
+                  "size": {
+                    "h": 148.0,
+                    "w": 148.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+                  "text": "",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "eYiYjezoQx",
+                  "line_height": 1.0,
+                  "name": "Label_1",
+                  "position": {
+                    "x": 150.0,
+                    "y": 450.0
+                  },
+                  "size": {
+                    "h": 105.0,
+                    "w": 102.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+                  "text": "",
+                  "type": "Label"
                 }
               ]
             }
