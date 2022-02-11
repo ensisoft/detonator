@@ -180,6 +180,7 @@ namespace gui
         void on_tiStatic_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
         void on_btnSelectFont_clicked();
+        void on_btnSelectFontFile_clicked();
         void on_btnResetTextRasterWidth_clicked();
         void on_btnResetTextRasterHeight_clicked();
 

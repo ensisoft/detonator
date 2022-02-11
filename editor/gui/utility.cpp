@@ -30,10 +30,9 @@
 
 namespace gui {
 
-void PopulateFontNames(QComboBox* cmb)
+std::vector<QString> ListAppFonts()
 {
-    QSignalBlocker s(cmb);
-    cmb->clear();
+    std::vector<QString> ret;
 
     QStringList filters;
     filters << "*.ttf" << "*.otf";
@@ -46,7 +45,18 @@ void PopulateFontNames(QComboBox* cmb)
     for (const auto& font_file : font_files)
     {
         const QFileInfo info(font_file);
-        cmb->addItem("app://fonts/" + info.fileName());
+        ret.push_back(QString("app://fonts/" + info.fileName()));
+    }
+    return ret;
+}
+
+void PopulateFontNames(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+    for (const auto& font : ListAppFonts())
+    {
+        cmb->addItem(font);
     }
 }
 

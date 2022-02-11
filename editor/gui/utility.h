@@ -33,6 +33,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 
 #include "base/assert.h"
 #include "graphics/color4f.h"
@@ -1063,6 +1064,10 @@ inline bool MustHaveNumber(QComboBox* box)
     str.toInt(&ok);
     return ok;
 }
+
+// List the font's installed with the application.
+// returns a list of font uris, i.e. app://fonts/foo.otf
+std::vector<QString> ListAppFonts();
 
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);

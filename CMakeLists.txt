@@ -244,6 +244,9 @@ add_executable(GSEditor
     editor/gui/dlgtext.h
     editor/gui/dlgtext.cpp
     editor/gui/dlgtext.ui
+    editor/gui/dlgfont.h
+    editor/gui/dlgfont.ui
+    editor/gui/dlgfont.cpp
     editor/gui/dlgtexturerect.h
     editor/gui/dlgtexturerect.ui
     editor/gui/dlgtexturerect.cpp

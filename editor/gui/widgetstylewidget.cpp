@@ -31,6 +31,7 @@
 #include "editor/app/workspace.h"
 #include "editor/gui/widgetstylewidget.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgfont.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -106,7 +107,51 @@ void WidgetStyleWidget::on_btnResetWidgetTextColor_clicked()
     UpdateCurrentWidgetProperties();
 }
 
-void WidgetStyleWidget::on_btnSelectWidgetFont_clicked()
+void WidgetStyleWidget::on_btnSelectAppFont_clicked()
+{
+    if (!mWidget)
+        return;
+
+    const auto& id = mWidget->GetId();
+
+    QString font = GetValue(mUI.widgetFontName);
+    if (font.isEmpty())
+    {
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-font"))
+            font = app::FromUtf8(prop.GetValue<std::string>());
+    }
+    DlgFont::DisplaySettings disp;
+    disp.font_size = 18;
+    disp.underline = false;
+    disp.blinking  = false;
+    disp.text_color = Qt::darkGray;
+    if (mUI.widgetFontSize->currentIndex() == -1) {
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-size"))
+            disp.font_size = prop.GetValue<int>();
+    } else disp.font_size = GetValue(mUI.widgetFontSize);
+
+    const auto underline_state = mUI.widgetTextUnderline->checkState();
+    if (underline_state == Qt::PartiallyChecked) {
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-underline"))
+            disp.underline = prop.GetValue<bool>();
+    } else if (underline_state == Qt::Checked)
+        disp.underline = true;
+    else disp.underline = false;
+
+    if (!mUI.widgetTextColor->hasColor()) {
+        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
+            disp.text_color = FromGfx(prop.GetValue<engine::Color4f>());
+    } else  disp.text_color = GetValue(mUI.widgetTextColor);
+
+    DlgFont dlg(this, mWorkspace, font, disp);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    SetValue(mUI.widgetFontName, dlg.GetSelectedFontURI());
+    UpdateCurrentWidgetProperties();
+}
+
+void WidgetStyleWidget::on_btnSelectCustomFont_clicked()
 {
     if (!mWidget)
         return;

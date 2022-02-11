@@ -49,6 +49,7 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgfont.h"
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/dlgjoint.h"
 #include "editor/gui/clipboard.h"
@@ -1773,6 +1774,26 @@ void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
 }
 
 void EntityWidget::on_btnSelectFont_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* text = node->GetTextItem())
+        {
+            DlgFont::DisplaySettings disp;
+            disp.font_size  = text->GetFontSize();
+            disp.text_color = FromGfx(text->GetTextColor());
+            disp.underline  = text->TestFlag(game::TextItemClass::Flags::UnderlineText);
+            disp.blinking   = text->TestFlag(game::TextItemClass::Flags::BlinkText);
+            DlgFont dlg(this, mState.workspace, app::FromUtf8(text->GetFontName()), disp);
+            if (dlg.exec() == QDialog::Rejected)
+                return;
+            SetValue(mUI.tiFontName, dlg.GetSelectedFontURI());
+            text->SetFontName(app::ToUtf8(dlg.GetSelectedFontURI()));
+        }
+    }
+}
+
+void EntityWidget::on_btnSelectFontFile_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
