@@ -1950,8 +1950,29 @@
                     </item>
                     <item>
                      <widget class="QToolButton" name="btnSelectFont">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="text">
                        <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/font.png</normaloff>:/16x16_ico_png/font.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="btnSelectFontFile">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
                       </property>
                       <property name="arrowType">
                        <enum>Qt::NoArrow</enum>
@@ -2697,6 +2718,7 @@
   <tabstop>textItem</tabstop>
   <tabstop>tiFontName</tabstop>
   <tabstop>btnSelectFont</tabstop>
+  <tabstop>btnSelectFontFile</tabstop>
   <tabstop>tiFontSize</tabstop>
   <tabstop>tiVAlign</tabstop>
   <tabstop>tiHAlign</tabstop>
