@@ -1190,15 +1190,16 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
 
     mUI.setupUi(this);
     mUI.actionFindText->setShortcut(QKeySequence::Find);
-    //mUI.actionReplace->setShortcut(QKeySequence::Replace);
+
+    mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
     mUI.tableView->setModel(mTableModelProxy.get());
     mUI.tableView->setColumnWidth(0, 100);
     mUI.tableView->setColumnWidth(2, 200);
+
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
-
     connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ScriptWidget::FileWasChanged);
 
     std::map<std::string, std::set<std::string>> table_methods;
@@ -1707,6 +1708,23 @@ void ScriptWidget::on_btnNavForward_clicked()
 {
     mUI.textBrowser->forward();
 }
+void ScriptWidget::on_btnRejectReload_clicked()
+{
+    SetEnabled(mUI.code, true);
+    SetEnabled(mUI.actionFindText, true);
+    SetEnabled(mUI.actionReplaceText, true);
+    SetEnabled(mUI.actionSave, true);
+    SetVisible(mUI.modified, false);
+}
+void ScriptWidget::on_btnAcceptReload_clicked()
+{
+    LoadDocument(mFilename);
+    SetEnabled(mUI.code, true);
+    SetEnabled(mUI.actionFindText, true);
+    SetEnabled(mUI.actionReplaceText, true);
+    SetEnabled(mUI.actionSave, true);
+    SetVisible(mUI.modified, false);
+}
 
 void ScriptWidget::on_filter_textChanged(const QString& text)
 {
@@ -1726,7 +1744,17 @@ void ScriptWidget::FileWasChanged()
 {
     DEBUG("File change was detected. [file='%1']", mFilename);
 
+    // watch for further modifications
     mWatcher.addPath(mFilename);
+
+    // if already notifying then ignore.
+    if (mUI.modified->isVisible())
+        return;
+
+    // block recursive signals from happening, i.e.
+    // if we've already reacted to this signal and opened the dialog
+    // then don't open yet another dialog.
+    QSignalBlocker blocker(&mWatcher);
 
     // our hash is computed on save and load. if the hash of the
     // file contents is now something else then someone else has
@@ -1746,14 +1774,12 @@ void ScriptWidget::FileWasChanged()
     if (hash == mFileHash)
         return;
 
-    QMessageBox msg(this);
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msg.setIcon(QMessageBox::Question);
-    msg.setText(tr("The file has been modified. Reload file?"));
-    if (msg.exec() == QMessageBox::No)
-        return;
-
-    LoadDocument(mFilename);
+    // Disable code editing until the reload request has been dismissed
+    SetEnabled(mUI.code, false);
+    SetEnabled(mUI.actionFindText, false);
+    SetEnabled(mUI.actionReplaceText, false);
+    SetEnabled(mUI.actionSave, false);
+    SetVisible(mUI.modified, true);
 }
 
 void ScriptWidget::keyPressEvent(QKeyEvent *key)

@@ -73,6 +73,8 @@ namespace gui
         void on_btnReplaceAll_clicked();
         void on_btnNavBack_clicked();
         void on_btnNavForward_clicked();
+        void on_btnRejectReload_clicked();
+        void on_btnAcceptReload_clicked();
         void on_filter_textChanged(const QString& text);
         void on_textBrowser_backwardAvailable(bool available);
         void on_textBrowser_forwardAvailable(bool available);
