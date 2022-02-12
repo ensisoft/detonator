@@ -244,7 +244,7 @@
         <item>
          <widget class="QLineEdit" name="filter">
           <property name="placeholderText">
-           <string>Find in Help (Ctrl+Shift+H)</string>
+           <string>Find in Help (Alt+H)</string>
           </property>
          </widget>
         </item>
@@ -255,6 +255,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
           </property>
           <property name="selectionBehavior">
            <enum>QAbstractItemView::SelectRows</enum>
@@ -420,13 +423,13 @@ p, li { white-space: pre-wrap; }
      <normaloff>:/16x16_ico_png/help.png</normaloff>:/16x16_ico_png/help.png</iconset>
    </property>
    <property name="text">
-    <string>Find Help</string>
+    <string>Find in Help</string>
    </property>
    <property name="toolTip">
     <string>Find help in API documentation</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+H</string>
+    <string>Alt+H</string>
    </property>
   </action>
  </widget>

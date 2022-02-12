@@ -1197,6 +1197,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.tableView->setModel(mTableModelProxy.get());
     mUI.tableView->setColumnWidth(0, 100);
     mUI.tableView->setColumnWidth(2, 200);
+    // capture some special key presses in order to move the
+    // selection (current item) in the list widget more conveniently.
+    mUI.filter->installEventFilter(this);
 
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
@@ -1585,6 +1588,14 @@ void ScriptWidget::on_actionOpen_triggered()
 void ScriptWidget::on_actionFindHelp_triggered()
 {
     mUI.filter->setFocus();
+    auto sizes = mUI.mainSplitter->sizes();
+    ASSERT(sizes.size() == 2);
+    if (sizes[1] == 0 && sizes[0] > 500)
+    {
+        sizes[0] = sizes[0] - 500;
+        sizes[1] = 500;
+        mUI.mainSplitter->setSizes(sizes);
+    }
 }
 
 void ScriptWidget::on_actionFindText_triggered()
@@ -1730,6 +1741,10 @@ void ScriptWidget::on_filter_textChanged(const QString& text)
 {
     mTableModelProxy->SetFilterString(text);
     mTableModelProxy->invalidate();
+
+    const auto count = mTableModelProxy->rowCount();
+    auto* model = mUI.tableView->selectionModel();
+    model->reset();
 }
 void ScriptWidget::on_textBrowser_backwardAvailable(bool available)
 {
@@ -1793,6 +1808,48 @@ void ScriptWidget::keyPressEvent(QKeyEvent *key)
     }
     QWidget::keyPressEvent(key);
 }
+bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
+{
+    const auto count = mTableModelProxy->rowCount();
+
+    // returning true will eat the event and stop from
+    // other event handlers ever seeing the event.
+    if (destination != mUI.filter)
+        return false;
+    else if (event->type() != QEvent::KeyPress)
+        return false;
+    if (count == 0)
+        return false;
+
+    const auto* key = static_cast<QKeyEvent*>(event);
+    const bool ctrl = key->modifiers() & Qt::ControlModifier;
+    const bool shift = key->modifiers() & Qt::ShiftModifier;
+    const bool alt   = key->modifiers() & Qt::AltModifier;
+
+    int current = 0;
+    auto* model = mUI.tableView->selectionModel();
+    const auto& selection = model->selectedRows();
+    if (!selection.isEmpty())
+        current = selection[0].row();
+
+    // Ctrl+N, Ctrl+P (similar to DlgOpen) don't work here reliable
+    // since they are global hot keys which take precedence.
+
+    if (alt && key->key() == Qt::Key_N)
+        current = math::wrap(0, count-1, current+1);
+    else if (alt && key->key() == Qt::Key_P)
+        current = math::wrap(0, count-1, current-1);
+    else if (key->key() == Qt::Key_Up)
+        current = math::wrap(0, count-1, current-1);
+    else if (key->key() == Qt::Key_Down)
+        current = math::wrap(0, count-1, current+1);
+    else return false;
+
+    model->setCurrentIndex(mTableModel->index(current, 0),
+                           QItemSelectionModel::SelectionFlag::ClearAndSelect |
+                           QItemSelectionModel::SelectionFlag::Rows);
+    return true;
+}
 
 bool ScriptWidget::LoadDocument(const QString& file)
 {
@@ -1823,9 +1880,8 @@ void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelect
         const auto& m = mTableModelProxy->mapToSource(i);
         const auto& method = g_method_docs[m.row()];
         const auto& name = QString("%1_%2").arg(app::FromUtf8(method.table)).arg(app::FromUtf8(method.name));
-        //mUI.textEdit->scrollToAnchor(name);
         mUI.textBrowser->scrollToAnchor(name);
-        DEBUG("Scroll to anchor. [anchor='%1']", name);
+        //DEBUG("Scroll to anchor. [anchor='%1']", name);
     }
 }
 

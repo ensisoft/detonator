@@ -83,6 +83,7 @@ namespace gui
         void TableSelectionChanged(const QItemSelection, const QItemSelection&);
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;
+        virtual bool eventFilter(QObject* destination, QEvent* event) override;
         bool LoadDocument(const QString& file);
     private:
         Ui::ScriptWidget mUI;
