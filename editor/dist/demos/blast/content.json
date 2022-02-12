@@ -748,6 +748,38 @@
           "id": "B1wwJqB1NE",
           "looping": false,
           "name": "Bank"
+        },
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "duration": 1.0,
+                "id": "UAGlQqyfHA",
+                "method": "Cosine",
+                "node": "MThUBoKUmu",
+                "position": {
+                  "x": 0.0,
+                  "y": 313.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 77.8499984741211,
+                  "y": 78.4800033569336
+                },
+                "starttime": 0.0
+              },
+              "type": "Transform"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 2.0,
+          "id": "W9Z7gxDYEZ",
+          "looping": false,
+          "name": "Fly In"
         }
       ]
     },
@@ -1663,8 +1695,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 45.20549774169922,
-            "y": 45.20549774169922
+            "x": 40.0,
+            "y": 40.0
           }
         }
       ],
@@ -2723,9 +2755,9 @@
     {
       "color": {
         "a": 1.0,
-        "b": 0.35686275362968445,
-        "g": 0.35686275362968445,
-        "r": 0.3686274588108063
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
       "gamma": 1.0,
       "id": "lOfMr3YBtI",
@@ -4539,8 +4571,8 @@
           "name": "Player",
           "parent_render_tree_node": "",
           "position": {
-            "x": -2.0,
-            "y": 320.0
+            "x": -700.0,
+            "y": 250.0
           },
           "rotation": 0.0,
           "scale": {
@@ -4691,7 +4723,7 @@
           },
           "id": "RHO6B0Pdke",
           "idle_animation_id": "",
-          "layer": 0,
+          "layer": -1,
           "name": "Stars_0",
           "parent_render_tree_node": "",
           "position": {
@@ -4739,7 +4771,7 @@
       },
       "resource_id": "UWF4u1fYHa",
       "resource_name": "Game",
-      "script_file": "",
+      "script_file": "OiyvAkqpIL",
       "top_boundary": -500.0,
       "vars": [
         {
@@ -4897,6 +4929,12 @@
       "resource_id": "AA5C8qjoDb",
       "resource_name": "common",
       "uri": "ws://lua/common.lua"
+    },
+    {
+      "id": "OiyvAkqpIL",
+      "resource_id": "OiyvAkqpIL",
+      "resource_name": "Game",
+      "uri": "ws://lua/OiyvAkqpIL.lua"
     }
   ],
   "shapes": [
