@@ -181,7 +181,7 @@
        <item>
         <widget class="QLineEdit" name="filter">
          <property name="placeholderText">
-          <string>Filter</string>
+          <string>Find help</string>
          </property>
         </widget>
        </item>
@@ -271,34 +271,49 @@ p, li { white-space: pre-wrap; }
     <string>Open in an external application</string>
    </property>
   </action>
-  <action name="actionFind">
+  <action name="actionFindText">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/find.png</normaloff>:/32x32_ico_png/find.png</iconset>
    </property>
    <property name="text">
-    <string>Find</string>
+    <string>Find Text</string>
    </property>
    <property name="toolTip">
-    <string>Find in document</string>
+    <string>Find text in document</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionReplace">
+  <action name="actionReplaceText">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/text_replace.png</normaloff>:/32x32_ico_png/text_replace.png</iconset>
    </property>
    <property name="text">
-    <string>Replace</string>
+    <string>Replace Text</string>
    </property>
    <property name="toolTip">
-    <string>Replace text</string>
+    <string>Replace text in document</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionFindHelp">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/help.png</normaloff>:/16x16_ico_png/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Find help in API documentation</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+H</string>
    </property>
   </action>
  </widget>
