@@ -59,12 +59,14 @@ namespace gui
         virtual bool LoadState(const Settings& settings) override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool ConfirmClose() override;
+        virtual bool OnEscape() override;
 
     private slots:
         void on_actionSave_triggered();
         void on_actionOpen_triggered();
-        void on_actionFind_triggered();
-        void on_actionReplace_triggered();
+        void on_actionFindHelp_triggered();
+        void on_actionFindText_triggered();
+        void on_actionReplaceText_triggered();
         void on_btnFindNext_clicked();
         void on_btnFindClose_clicked();
         void on_btnReplaceNext_clicked();

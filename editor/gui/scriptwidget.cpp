@@ -1189,7 +1189,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     DEBUG("Create ScriptWidget");
 
     mUI.setupUi(this);
-    mUI.actionFind->setShortcut(QKeySequence::Find);
+    mUI.actionFindText->setShortcut(QKeySequence::Find);
     //mUI.actionReplace->setShortcut(QKeySequence::Replace);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
@@ -1383,14 +1383,20 @@ bool ScriptWidget::CanTakeAction(Actions action, const Clipboard*) const
 void ScriptWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionSave);
-    bar.addAction(mUI.actionFind);
-    bar.addAction(mUI.actionReplace);
+    bar.addSeparator();
+    bar.addAction(mUI.actionFindText);
+    bar.addAction(mUI.actionReplaceText);
+    bar.addSeparator();
+    bar.addAction(mUI.actionFindHelp);
 }
 void ScriptWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionSave);
-    menu.addAction(mUI.actionFind);
-    menu.addAction(mUI.actionReplace);
+    menu.addSeparator();
+    menu.addAction(mUI.actionFindText);
+    menu.addAction(mUI.actionReplaceText);
+    menu.addSeparator();
+    menu.addAction(mUI.actionFindHelp);
     menu.addSeparator();
     menu.addAction(mUI.actionOpen);
 }
@@ -1488,6 +1494,13 @@ bool ScriptWidget::ConfirmClose()
     return true;
 }
 
+bool ScriptWidget::OnEscape()
+{
+    mUI.find->setVisible(false);
+    mUI.code->setFocus();
+    return true;
+}
+
 void ScriptWidget::on_actionSave_triggered()
 {
     QString filename = mFilename;
@@ -1564,7 +1577,12 @@ void ScriptWidget::on_actionOpen_triggered()
     emit OpenExternalScript(mFilename);
 }
 
-void ScriptWidget::on_actionFind_triggered()
+void ScriptWidget::on_actionFindHelp_triggered()
+{
+    mUI.filter->setFocus();
+}
+
+void ScriptWidget::on_actionFindText_triggered()
 {
     mUI.find->setVisible(true);
     mUI.findText->setFocus();
@@ -1575,7 +1593,7 @@ void ScriptWidget::on_actionFind_triggered()
     SetEnabled(mUI.replaceText, false);
 }
 
-void ScriptWidget::on_actionReplace_triggered()
+void ScriptWidget::on_actionReplaceText_triggered()
 {
     mUI.find->setVisible(true);
     mUI.findText->setFocus();
@@ -1723,6 +1741,7 @@ void ScriptWidget::keyPressEvent(QKeyEvent *key)
        (key->key() == Qt::Key_G && key->modifiers() & Qt::ControlModifier))
     {
         mUI.find->setVisible(false);
+        mUI.code->setFocus();
         return;
     }
     QWidget::keyPressEvent(key);
