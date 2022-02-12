@@ -1695,10 +1695,27 @@ void ScriptWidget::on_btnReplaceAll_clicked()
     SetValue(mUI.findResult, QString("Replaced %1 occurrences.").arg(count));
 }
 
+void ScriptWidget::on_btnNavBack_clicked()
+{
+    mUI.textBrowser->backward();
+}
+void ScriptWidget::on_btnNavForward_clicked()
+{
+    mUI.textBrowser->forward();
+}
+
 void ScriptWidget::on_filter_textChanged(const QString& text)
 {
     mTableModelProxy->SetFilterString(text);
     mTableModelProxy->invalidate();
+}
+void ScriptWidget::on_textBrowser_backwardAvailable(bool available)
+{
+    mUI.btnNavBack->setEnabled(available);
+}
+void ScriptWidget::on_textBrowser_forwardAvailable(bool available)
+{
+    mUI.btnNavForward->setEnabled(available);
 }
 
 void ScriptWidget::FileWasChanged()
