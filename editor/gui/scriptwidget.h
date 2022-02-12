@@ -71,7 +71,11 @@ namespace gui
         void on_btnFindClose_clicked();
         void on_btnReplaceNext_clicked();
         void on_btnReplaceAll_clicked();
+        void on_btnNavBack_clicked();
+        void on_btnNavForward_clicked();
         void on_filter_textChanged(const QString& text);
+        void on_textBrowser_backwardAvailable(bool available);
+        void on_textBrowser_forwardAvailable(bool available);
 
         void FileWasChanged();
         void TableSelectionChanged(const QItemSelection, const QItemSelection&);
