@@ -1119,9 +1119,7 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& doc = GetLuaMethodDoc(index.row());
-        if (role == Qt::SizeHintRole)
-            return QSize(0, 16);
-        else if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole) {
             if (index.column() == 0) return app::FromUtf8(doc.table);
             else if (index.column() == 1) return app::toString(doc.type);
             else if (index.column() == 2) return app::FromUtf8(doc.name);
@@ -1196,6 +1194,8 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
     mUI.tableView->setModel(mTableModelProxy.get());
+    mUI.tableView->setColumnWidth(0, 100);
+    mUI.tableView->setColumnWidth(2, 200);
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
 
@@ -1443,6 +1443,7 @@ bool ScriptWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Script", mUI.findWholeWords);
     settings.SaveWidget("Script", mUI.mainSplitter);
     settings.SaveWidget("Script", mUI.helpSplitter);
+    settings.SaveWidget("Script", mUI.tableView);
     return true;
 }
 bool ScriptWidget::LoadState(const Settings& settings)
@@ -1457,6 +1458,7 @@ bool ScriptWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Script", mUI.findWholeWords);
     settings.LoadWidget("Script", mUI.mainSplitter);
     settings.LoadWidget("Script", mUI.helpSplitter);
+    settings.LoadWidget("Script", mUI.tableView);
     if (!mResourceName.isEmpty())
         setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
