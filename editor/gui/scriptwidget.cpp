@@ -1156,16 +1156,18 @@ public:
     void SetTableModel(TableModel* model)
     { mModel = model; }
     void SetFilterString(const QString& text)
-    { mFilter=app::ToUtf8(text); }
+    {
+        mFilter = base::ToUpperUtf8(app::ToUtf8(text));
+    }
 protected:
     virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override
     {
         if (mFilter.empty())
             return true;
         const auto& doc = GetLuaMethodDoc(row);
-        if (base::Contains(doc.name, mFilter))
+        if (base::Contains(base::ToUpperUtf8(doc.name), mFilter))
             return true;
-        else if (base::Contains(doc.desc, mFilter))
+        else if (base::Contains(base::ToUpperUtf8(doc.desc), mFilter))
             return true;
         return false;
     }
