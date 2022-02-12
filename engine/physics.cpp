@@ -326,6 +326,12 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
     AddEntity(transform.GetAsMatrix(), entity);
 }
 
+void PhysicsEngine::DestroyWorld()
+{
+    DeleteAll();
+    mWorld.reset();
+}
+
 std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const game::EntityNode& node) const
 {
     return FindCurrentLinearVelocity(node.GetId());

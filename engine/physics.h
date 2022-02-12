@@ -168,6 +168,8 @@ namespace engine
         // before calling this.
         void CreateWorld(const game::Entity& entity);
 
+        void DestroyWorld();
+
         std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const game::EntityNode& node) const;
         std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const std::string& node) const;
         std::tuple<bool, float> FindCurrentAngularVelocity(const game::EntityNode& node) const;
@@ -225,8 +227,6 @@ namespace engine
         float mTimestep = 1.0/60.0f;
         unsigned mNumVelocityIterations = 8;
         unsigned mNumPositionIterations = 3;
-        // whether the physics simulation is currently enabled or not
-        bool mEnabled = true;
     };
 
 } // namespace
