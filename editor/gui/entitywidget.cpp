@@ -2261,6 +2261,7 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
     {
         mCurrentTool.reset();
         UncheckPlacementActions();
+        DisplayCurrentNodeProperties();
     }
 }
 

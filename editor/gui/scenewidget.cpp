@@ -1566,6 +1566,7 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     {
         mCurrentTool.reset();
         UncheckPlacementActions();
+        DisplayCurrentNodeProperties();
     }
 }
 
