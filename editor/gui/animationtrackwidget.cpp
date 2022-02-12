@@ -490,6 +490,7 @@ void AnimationTrackWidget::Update(double secs)
     if (!mPlaybackAnimation->IsPlaying())
     {
         mPhysics.DeleteAll();
+        mPhysics.DestroyWorld();
         mPlaybackAnimation.reset();
         mUI.timeline->SetCurrentTime(0.0f);
         mUI.timeline->Update();
@@ -654,6 +655,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     mPhysics.SetNumVelocityIterations(settings.num_velocity_iterations);
     mPhysics.SetNumPositionIterations(settings.num_position_iterations);
     mPhysics.SetTimestep(1.0f / settings.updates_per_second);
+    mPhysics.DestroyWorld();
     if (use_physics)
         mPhysics.CreateWorld(*mPlaybackAnimation);
 
