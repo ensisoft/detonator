@@ -724,6 +724,8 @@ void AnimationTrackWidget::on_actionSave_triggered()
     }
 
     parent->SaveAnimationTrack(*mState.track, properties);
+
+    setWindowTitle(GetValue(mUI.trackName));
 }
 
 void AnimationTrackWidget::on_actionReset_triggered()
