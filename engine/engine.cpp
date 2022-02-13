@@ -315,7 +315,7 @@ public:
 
         if (mShowMouseCursor)
         {
-            // scale the cursor size depending on the units of of the cursor size.
+            // scale the cursor size based on the requested units of the cursor size.
             const auto& size   = mCursorUnits == EngineConfig::MouseCursorUnits::Units
                                  ? mCursorSize * game_scale
                                  : mCursorSize;
@@ -334,17 +334,22 @@ public:
 
     virtual void BeginMainLoop() override
     {
-        if (mScene)
+        // service the audio system once.
+        std::vector<engine::AudioEvent> audio_events;
+        TRACE_CALL("Audio::Update", mAudio->Update(&audio_events));
+        for (const auto& event : audio_events)
         {
-            TRACE_CALL("Scene::BeginLoop",mScene->BeginLoop());
-            TRACE_CALL("Scripting:BeginLoop",mScripting->BeginLoop());
+            mGame->OnAudioEvent(event);
         }
     }
 
     virtual void Update(double dt) override
     {
+        // Game play update. NOT the place for any kind of
+        // real time/wall time subsystem (such as audio) service
+
         if (mDebug.debug_pause)
-            dt = 0.0;
+            return;
 
         // there's plenty of information about different ways to write a basic
         // game rendering loop. here are some suggested references:
@@ -355,6 +360,16 @@ public:
         // do simulation/animation update steps.
         while (mTimeAccum >= mGameTimeStep)
         {
+            // current game time from which we step forward
+            // in ticks later on.
+            auto tick_time = mGameTimeTotal;
+
+            if (mScene)
+            {
+                TRACE_CALL("Scene::BeginLoop", mScene->BeginLoop());
+                TRACE_CALL("Scripting:BeginLoop", mScripting->BeginLoop());
+            }
+
             // Call UpdateGame with the *current* time. I.e. the game
             // is advancing one time step from current mGameTimeTotal.
             // this is consistent with the tick time accumulation below.
@@ -363,50 +378,58 @@ public:
             mTimeAccum -= mGameTimeStep;
             mTickAccum += mGameTimeStep;
 
-            // put some accumulated time towards ticking game.
-            auto tick_time = mGameTimeTotal;
+            // PostUpdate allows the game to perform activities with consistent
+            // world state after everything has settled down. It might be tempting
+            // to bake the functionality of "PostUpdate" in the scene in the loop
+            // end functionality and let the game perform the "PostUpdate" actions in
+            // the Update function. But this has the problem that during the call
+            // to Update (on each entity instance) the world doesn't yet have
+            // consistent state because not every object that needs to move has
+            // moved. This might lead to incorrect conclusions when for exampling
+            // trying to detect whether things are colling/overlapping. For example
+            // if entity A's Update function updates A's position and checks whether
+            // A is hitting some other object those other objects may or may not have
+            // been moved already. To resolve this issue the game should move entity A
+            // in the Update function and then check for the collisions/overlap/whatever
+            // in the PostUpdate with consistent world state.
+            if (mScene)
+            {
+                // make sure to do this first in order to allow the scene to rebuild
+                // the spatial indices etc. before the game's PostUpdate runs.
+                TRACE_CALL("Scene::PostUpdate", mScene->PostUpdate());
+                // using the time we've arrived to now after having taken the previous
+                // delta step forward in game time.
+                TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(mGameTimeTotal));
+            }
 
+            // todo: add mGame->PostUpdate here if needed
+            // TRACE_CALL("Game::PostUpdate", mGame->PostUpdate(mGameTimeTotal))
+
+            // It might be tempting to use the tick functionality to perform
+            // some type of movement in some types of games. For example
+            // a tetris-clone could move the pieces on tick steps instead of
+            // continuous updates. But to keep things simple the engine is only
+            // promising consistent world state to exist during the call to
+            // PostUpdate. In order to support a simple use case such as
+            // "move on tick" the game should set a flag on the Tick, perform
+            // move on update when the flag is set and then clear the flag.
             while (mTickAccum >= mGameTickStep)
             {
                 TRACE_CALL("TickGame", TickGame(tick_time, mGameTickStep));
                 mTickAccum -= mGameTickStep;
                 tick_time += mGameTickStep;
             }
-        }
 
-        if (auto* ui = GetUI())
-        {
-            TRACE_CALL("UI::Update",mUIPainter.Update(mGameTimeTotal, dt));
-            const auto& action = ui->PollAction(mUIState, mGameTickStep, dt);
-            if (action.type != uik::WidgetActionType::None)
-                mGame->OnUIAction(ui, action);
+            if (mScene)
+            {
+                TRACE_CALL("Scripting::EndLoop", mScripting->EndLoop());
+                TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
+            }
         }
-
-        mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - (float)dt);
+        TRACE_CALL("GameActions", PerformGameActions(dt));
     }
     virtual void EndMainLoop() override
-    {
-        if (mScene)
-        {
-            TRACE_CALL("Scripting::EndLoop",mScripting->EndLoop());
-            TRACE_CALL("Scene::EndLoop",mScene->EndLoop());
-        }
-
-        if (mActionDelay > 0.0f)
-            return;
-
-        TRACE_BLOCK("Actions",
-            engine::Action action;
-            while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
-            {
-                std::visit([this](const auto& variant_value) {
-                    this->OnAction(variant_value);
-                }, action);
-                if (mActionDelay > 0.0f)
-                    break;
-            }
-        );
-    }
+    {}
 
     virtual void Stop() override
     {
@@ -882,8 +905,12 @@ private:
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
+                // Step the simulation forward.
                 TRACE_CALL("Physics::Step", mPhysics.Step(&contacts));
+                // Update the result of the physics simulation from the
+                // physics world to the scene and its entities.
                 TRACE_CALL("Physics::UpdateScene", mPhysics.UpdateScene(*mScene));
+                // dispatch the contact events (if any).
                 TRACE_BLOCK("Physics::ContactEvents",
                     for (const auto& contact : contacts)
                     {
@@ -895,33 +922,43 @@ private:
             TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, game_time, dt));
             TRACE_CALL("Scripting::Update", mScripting->Update(game_time, dt));
         }
-
         TRACE_CALL("Game::Update", mGame->Update(game_time, dt));
 
-        if (mScene)
+        if (auto* ui = GetUI())
         {
-            // make sure the various "updates" that might change entity/entity node
-            // position/transformations in the scene happen *before* spatial index is
-            // updated so that the index in-fact reflects the latest changes when
-            // PostUpdate is called. The important updates are: physics, animations/scene
-            // and scripting
-            TRACE_CALL("Scene::PostUpdate", mScene->PostUpdate());
-
-            TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(game_time));
-        }
-
-        // todo: add mGame->PostUpdate here if needed
-        // TRACE_CALL("Game::PostUpdate", mGame->PostUpdate(game_time))
-
-        std::vector<engine::AudioEvent> audio_events;
-        TRACE_CALL("Audio::Update",mAudio->Update(&audio_events));
-        for (const auto& event : audio_events)
-        {
-            mGame->OnAudioEvent(event);
+            // the Game UI runs in "game time". this is in contrast to
+            // any possible "in game debug/system menu" that would be
+            // running in real wall time.
+            TRACE_CALL("UI::Update", mUIPainter.Update(game_time, dt));
+            const auto& action = ui->PollAction(mUIState, game_time, dt);
+            if (action.type != uik::WidgetActionType::None)
+                mGame->OnUIAction(ui, action);
         }
 
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(dt);
+    }
+    void PerformGameActions(float dt)
+    {
+        // todo: the action processing probably needs to be split
+        // into game-actions and non-game actions. For example the
+        // game might insert an additional delay in order to transition
+        // from one game state to another but likely want to transition
+        // to full screen mode in real time. (non game action)
+        mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - dt);
+        if (mActionDelay > 0.0f)
+            return;
+
+        engine::Action action;
+        while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
+        {
+            std::visit([this](const auto& variant_value) {
+                this->OnAction(variant_value);
+            }, action);
+            // action delay can be changed by the delay action.
+            if (mActionDelay > 0.0f)
+                break;
+        }
     }
 
 private:
