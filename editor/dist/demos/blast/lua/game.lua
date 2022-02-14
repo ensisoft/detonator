@@ -128,7 +128,7 @@ end
 
 function EnterMenu()
     Game:DebugPrint('Enter Menu')
-    Game:Stop(0)
+    Game:EndPlay()
     Game:CloseUI(0)
     Game:Play('Menu')
     Game:OpenUI('MainMenu')
@@ -171,10 +171,6 @@ function StartGame()
     Game:DebugPrint('StartGame')
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
     EnterMenu()
-end
-
-function StopGame()
-    Game:DebugPrint('StopGame')
 end
 
 function SaveGame()
@@ -346,7 +342,7 @@ function OnGameEvent(event)
     if event.from == 'player' and event.message == 'dead' then
         Game:DebugPrint('Game Over!')
         Game:Delay(1.0)
-        Game:Stop(0)
+        Game:EndPlay()
         Game:Play('Menu')
         Audio:KillMusic('Game Music')
         local play_music = State:GetValue('play_music', false)

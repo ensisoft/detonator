@@ -55,7 +55,7 @@ namespace engine
     // Play, Suspend, Resume, Stop, Quit
     struct SuspendAction {};
     struct ResumeAction {};
-    struct StopAction {};
+    struct EndPlayAction {};
     struct QuitAction {
         int exit_code = 0;
     };
@@ -102,7 +102,7 @@ namespace engine
     using Action = std::variant<PlayAction,
             SuspendAction,
             ResumeAction,
-            StopAction,
+            EndPlayAction,
             QuitAction,
             OpenUIAction,
             CloseUIAction,

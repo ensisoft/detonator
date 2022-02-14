@@ -160,9 +160,9 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         SuspendAction suspend;
         self.PushAction(suspend);
     };
-    engine["Stop"] = [](LuaGame& self) {
-        StopAction stop;
-        self.PushAction(stop);
+    engine["EndPlay"] = [](LuaGame& self) {
+        EndPlayAction end;
+        self.PushAction(end);
     };
     engine["Resume"] = [](LuaGame& self) {
         ResumeAction resume;

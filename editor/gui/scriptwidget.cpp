@@ -672,9 +672,8 @@ void InitDoc()
     DOC_METHOD_1("void", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.",
                  "game.SceneClass|string", "klass|name");
     // todo: resume/suspend
-    DOC_METHOD_0("void", "Stop", "Stop play of the current scene. Will invoke EndPlay callbacks and game play cleanly.");
-    DOC_METHOD_1("void", "Quit", "Quit the game by asking the host application to exit.",
-                                 "int", "exit_code");
+    DOC_METHOD_0("void", "EndPlay", "End the play of the current scene. Will invoke EndPlay callbacks and end game play cleanly.");
+    DOC_METHOD_1("void", "Quit", "Quit the game by asking the host application to exit.", "int", "exit_code");
     DOC_METHOD_1("void", "Delay", "Insert a time delay into the engine request queue. <br>"
                                   "All the functions in the game.Engine interface are pushed into a queue and<br>"
                                   "adding a delay will postpone the processing of all subsequent engine requests.<br>"

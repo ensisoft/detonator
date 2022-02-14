@@ -36,7 +36,7 @@ function BeginPlay(scene)
 end
 
 
--- Called as a response to Game:Stop when the game play ends.
+-- Called as a response to Game:EndPlay when the game play ends.
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
 end

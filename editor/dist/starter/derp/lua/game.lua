@@ -21,7 +21,7 @@ function BeginPlay(scene)
 end
 
 
--- Called as a response to Game:Stop when the game play ends.
+-- Called as a response to Game:EndPlay when the game play ends.
 function EndPlay(scene)
     Game:DebugPrint('EndPlay called.')
     Game:OpenUI('MainMenu')
@@ -61,7 +61,7 @@ end
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         if State == States.Play then
-            Game:Stop()
+            Game:EndPlay()
         elseif State == States.Menu then
             Game:Quit(0)
         end
