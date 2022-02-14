@@ -100,6 +100,7 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionNodeEdit_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeBreakLink_triggered();
         void on_actionNodePlace_triggered();

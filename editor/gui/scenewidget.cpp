@@ -947,6 +947,21 @@ void SceneWidget::on_actionSave_triggered()
     setWindowTitle(name);
 }
 
+void SceneWidget::on_actionNodeEdit_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        auto klass = node->GetEntityClass();
+        if (!klass)
+        {
+            NOTE("Node has no entity klass set.");
+            return;
+        }
+        DlgEntity dlg(this, *klass, *node);
+        dlg.exec();
+    }
+}
+
 void SceneWidget::on_actionNodeDelete_triggered()
 {
     if (auto* node = GetCurrentNode())
@@ -1329,12 +1344,15 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     mUI.actionNodeMoveDownLayer->setEnabled(node != nullptr);
     mUI.actionNodeMoveUpLayer->setEnabled(node != nullptr);
     mUI.actionNodeBreakLink->setEnabled(node != nullptr && tree.GetParent(node));
+    mUI.actionNodeEdit->setEnabled(node != nullptr);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
     menu.addAction(mUI.actionNodeMoveDownLayer);
     menu.addAction(mUI.actionNodeDuplicate);
     menu.addAction(mUI.actionNodeBreakLink);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeEdit);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
     menu.exec(QCursor::pos());
@@ -1572,9 +1590,9 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
 
 void SceneWidget::MouseDoubleClick(QMouseEvent* mickey)
 {
-    // double click is preceded by a regular click event and quick
+    // double-click is preceded by a regular click event and quick
     // googling suggests that there's really no way to filter out
-    // single click when trying to react only to double click other
+    // single click when trying to react only to double-click other
     // than to set a timer (which adds latency).
     // Going to simply discard any tool selection here on double click.
     mCurrentTool.reset();
