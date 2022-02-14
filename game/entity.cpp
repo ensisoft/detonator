@@ -1655,6 +1655,14 @@ bool Entity::HasBeenKilled() const
 bool Entity::HasBeenSpawned() const
 { return TestFlag(ControlFlags::Spawned); }
 
+bool Entity::HasRigidBodies() const
+{
+    for (auto& node : mNodes)
+        if (node->HasRigidBody())
+            return true;
+    return false;
+}
+
 const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
 {
     return base::SafeIndex(mJoints, index);
