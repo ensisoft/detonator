@@ -52,7 +52,7 @@ function OnEndContact(brick, node, other, other_node)
         local velocity   = rigid_body:GetLinearVelocity()
         local direction  = velocity:normalize()
         local speed = velocity:length()
-        if direction.y < 0.0 and speed < 15.0 then 
+        if direction.y < 0.0 and speed < other.speed then 
             Physics:ApplyImpulseToCenter(other_node, direction * 0.1)
         end
     end

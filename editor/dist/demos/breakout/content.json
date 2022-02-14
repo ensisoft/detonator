@@ -4,7 +4,10 @@
       "elements": [
         {
           "arg_file": "ws://music/ctr_title.mp3",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "HWXOWk3B4g",
           "name": "ctr_title",
@@ -22,7 +25,10 @@
       "elements": [
         {
           "arg_file": "ws://sounds/coin/Picked Coin Echo 2.wav",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": true,
           "arg_type": "Float32",
           "id": "lI3HDnTgut",
           "name": "Picked Coin Echo",
@@ -40,7 +46,10 @@
       "elements": [
         {
           "arg_file": "ws://sounds/win/winfretless.ogg",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "2Qlif27snN",
           "name": "winfretless",
@@ -58,7 +67,10 @@
       "elements": [
         {
           "arg_file": "ws://sounds/falling/Falling.mp3",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
           "arg_loops": 1,
+          "arg_pcm_caching": false,
           "arg_type": "Float32",
           "id": "hsNS566ktU",
           "name": "Falling",
@@ -470,6 +482,18 @@
           "name": "demo_ball",
           "readonly": false,
           "value": false
+        },
+        {
+          "id": "rmaviKxieZ",
+          "name": "contact",
+          "readonly": false,
+          "value": false
+        },
+        {
+          "id": "w2uXtk4g4Z",
+          "name": "speed",
+          "readonly": true,
+          "value": 10.0
         }
       ]
     },
@@ -513,7 +537,7 @@
           },
           "name": "Node 0",
           "position": {
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rigid_body": {
@@ -619,7 +643,7 @@
               "Enabled": true,
               "Sensor": false
             },
-            "friction": 0.30000001192092896,
+            "friction": 0.0,
             "linear_damping": 0.5,
             "polygon": "",
             "restitution": 0.5,
@@ -705,7 +729,7 @@
           },
           "name": "Node 0",
           "position": {
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rigid_body": {
@@ -804,7 +828,7 @@
           },
           "name": "Node 0",
           "position": {
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rigid_body": {
@@ -903,7 +927,7 @@
           },
           "name": "Node 0",
           "position": {
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rigid_body": {
@@ -1002,7 +1026,7 @@
           },
           "name": "Node 0",
           "position": {
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0
           },
           "rigid_body": {
@@ -17381,7 +17405,7 @@
           "name": "Ball_1",
           "parent_render_tree_node": "",
           "position": {
-            "x": -40.0,
+            "x": -160.0,
             "y": -200.0
           },
           "rotation": 0.0,

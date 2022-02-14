@@ -4,6 +4,7 @@
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 
+
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(ball, scene)
     if ball.demo_ball then 
@@ -24,18 +25,21 @@ end
 
 -- Called on every iteration of game loop.
 function Update(ball, game_time, dt)
+    if ball.contact then return end
     -- clip the ball's maximum velocity to something more reasonable
     local node = ball:FindNodeByClassName('Ball')
     local body = node:GetRigidBody()
-    local velo = glm.length(body:GetLinearVelocity())
-    if velo > 15 then
+    local speed = glm.length(body:GetLinearVelocity())
+    if speed > ball.speed then
         local vec = glm.normalize(body:GetLinearVelocity())
-        Physics:SetLinearVelocity(node, vec * 15.0)
+        Physics:SetLinearVelocity(node, vec * ball.speed)
     end
 end
 
 -- Called on collision events with other objects.
 function OnBeginContact(ball, node, other, other_node)
+    ball.contact = true
+
     if other:GetClassName() == 'Floor' then 
         Scene:KillEntity(ball)
         Audio:PlaySoundEffect('Fail')
@@ -49,6 +53,7 @@ end
 
 -- Called on collision events with other objects.
 function OnEndContact(ball, node, other, other_node)
+    ball.contact = false
 end
 
 -- Called on key down events.
@@ -61,9 +66,13 @@ end
 
 -- Called on mouse button press events.
 function OnMousePress(ball, mouse)
+    if ball.demo_ball then return end
+    
     local node = ball:FindNodeByClassName('Ball')
     local body = node:GetRigidBody()
+    if body:IsEnabled() then return end
     body:SetFlag('Enabled', true)
+    Physics:ApplyImpulseToCenter(node, glm.vec2:new(0.0, -2.0))
 end
 
 -- Called on mouse button release events.
