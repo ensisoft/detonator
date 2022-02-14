@@ -799,7 +799,7 @@ private:
     {
 
     }
-    void OnAction(const engine::StopAction& action)
+    void OnAction(const engine::EndPlayAction& action)
     {
         if (!mScene)
             return;
