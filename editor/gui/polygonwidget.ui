@@ -216,13 +216,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Grid</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QComboBox" name="cmbGrid"/>
           </item>
           <item>
