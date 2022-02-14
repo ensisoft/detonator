@@ -482,6 +482,7 @@ void AnimationTrackWidget::Update(double secs)
     mPlaybackAnimation->Update(secs);
     if (mPhysics.HaveWorld())
     {
+        mPhysics.UpdateWorld(*mPlaybackAnimation);
         mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
     }

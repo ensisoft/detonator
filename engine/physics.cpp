@@ -63,13 +63,53 @@ float PhysicsEngine::MapLengthToGame(float meters) const
     return glm::length(MapVectorToGame(dir * meters));
 }
 
+void PhysicsEngine::UpdateWorld(const game::Scene& scene)
+{
+    // apply any pending state changes from *previous* game loop
+    // iteration to the current state. this includes things such as
+    // - velocity adjustments
+    // - body flag state changes
+    // - static body position changes
+    // - culling killed entities
+    // - creating new physics nodes for spawned entities
+
+    Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
+
+    const auto& nodes = scene.CollectNodes();
+    for (const auto& node : nodes)
+    {
+        const auto* entity = node.entity_object;
+        if (!entity->HasRigidBodies())
+            continue;
+        if (entity->HasBeenKilled())
+        {
+            KillEntity(*entity);
+        }
+        else if (entity->HasBeenSpawned())
+        {
+            transform.Push(node.node_to_scene);
+                AddEntity(transform.GetAsMatrix(), *entity);
+            transform.Pop();
+        }
+        else
+        {
+            transform.Push(node.node_to_scene);
+                UpdateWorld(transform.GetAsMatrix(), *entity);
+            transform.Pop();
+        }
+    }
+}
+
+void PhysicsEngine::UpdateWorld(const game::Entity& entity)
+{
+    Transform transform;
+    transform.Scale(glm::vec2(1.0f, 1.0f) / mScale);
+    UpdateWorld(transform.GetAsMatrix(), entity);
+}
+
 void PhysicsEngine::UpdateScene(game::Scene& scene)
 {
-    using RenderTree = game::Scene::RenderTree ;
-
-    for (auto& pair : mNodes)
-        pair.second.alive = false;
-
     // two options here for updating entity nodes based on the
     // physics simulation.
     // 1. traverse the whole scene and look which entity nodes
@@ -79,9 +119,9 @@ void PhysicsEngine::UpdateScene(game::Scene& scene)
     //       see which entity's nodes have physics nodes.
     // 2. iterate over the physics nodes and find them in the scene
     //    and then update.
-    // Currently i'm not sure which strategy is more efficient. It'd seem
+    // Currently, i'm not sure which strategy is more efficient. It'd seem
     // that if a lot of the entity nodes in the scene have physics bodies
-    // then traversing the whole scene is a viable alternative. However if
+    // then traversing the whole scene is a viable alternative. However, if
     // only a few nodes have physics bodies then likely only iterating over
     // the physics bodies and then looking up their transforms in the scene
     // is more efficient.
@@ -91,29 +131,12 @@ void PhysicsEngine::UpdateScene(game::Scene& scene)
     const auto& nodes = scene.CollectNodes();
     for (const auto& node : nodes)
     {
-        transform.Push(node.node_to_scene);
-          UpdateEntity(transform.GetAsMatrix(), *node.entity_object);
-        transform.Pop();
-    }
-    // cull physics nodes that were not touched.
-    for (auto it = mNodes.begin(); it != mNodes.end();)
-    {
-        auto& node = it->second;
-        if (node.alive)
-        {
-            ++it;
+        auto* entity = node.entity_object;
+        if (entity->HasBeenKilled() || !entity->HasRigidBodies())
             continue;
-        }
-        DEBUG("Deleting physics node '%1'", node.debug_name);
-
-        b2Fixture* fixture_list_head = node.world_body->GetFixtureList();
-        while (fixture_list_head) {
-            mFixtures.erase(fixture_list_head);
-            fixture_list_head = fixture_list_head->GetNext();
-        }
-        mWorld->DestroyBody(node.world_body);
-
-        it = mNodes.erase(it);
+        transform.Push(node.node_to_scene);
+          UpdateEntity(transform.GetAsMatrix(), *entity);
+        transform.Pop();
     }
 }
 
@@ -307,6 +330,10 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
     const auto& nodes = scene.CollectNodes();
     for (const auto& node : nodes)
     {
+        const auto* entity = node.entity_object;
+        if (!entity->HasRigidBodies())
+            continue;
+
         transform.Push(node.node_to_scene);
           AddEntity(transform.GetAsMatrix(), *node.entity_object);
         transform.Pop();
@@ -460,12 +487,90 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
 }
 #endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 
+void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::Entity& entity)
+{
+    using RenderTree = Entity::RenderTree;
+    class Visitor : public RenderTree::ConstVisitor {
+    public:
+        Visitor(const glm::mat4& mat, const Entity& entity, PhysicsEngine& engine)
+          : mEntity(entity)
+          , mEngine(engine)
+          , mTransform(mat)
+        {}
+        virtual void EnterNode(const EntityNode* node) override
+        {
+            if (!node)
+                return;
+
+            mTransform.Push(node->GetNodeTransform());
+            if (!node->HasRigidBody())
+                return;
+
+            auto* phys_node  = base::SafeFind(mEngine.mNodes, node->GetId());
+            auto* rigid_body = node->GetRigidBody();
+            auto* world_body = phys_node->world_body;
+
+            if (phys_node->flags != rigid_body->GetFlags().value())
+            {
+                world_body->SetEnabled(rigid_body->TestFlag(RigidBodyItem::Flags::Enabled));
+                world_body->SetBullet(rigid_body->TestFlag(RigidBodyItem::Flags::Bullet));
+                world_body->SetFixedRotation(rigid_body->TestFlag(RigidBodyItem::Flags::DiscardRotation));
+                world_body->SetSleepingAllowed(rigid_body->TestFlag(RigidBodyItem::Flags::CanSleep));
+                b2Fixture* fixture_list_head = world_body->GetFixtureList();
+                while (fixture_list_head) {
+                    fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
+                    fixture_list_head = fixture_list_head->GetNext();
+                }
+            }
+            phys_node->flags = rigid_body->GetFlags().value();
+
+            if (world_body->GetType() == b2BodyType::b2_staticBody)
+            {
+                // static bodies are not moved by the physics engine.
+                // they may be moved by the user.
+                // update the world transform from the scene to the physics world.
+                mTransform.Push(node->GetModelTransform());
+                    const FBox box(mTransform.GetAsMatrix());
+                    const auto& node_pos_in_world   = box.GetCenter();
+                    world_body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
+                mTransform.Pop();
+
+                if (rigid_body->HasAngularVelocityAdjustment())
+                    WARN("Angular velocity adjustment on static body will not work. [node='%1']", phys_node->debug_name);
+                if (rigid_body->HasLinearVelocityAdjustment())
+                    WARN("Linear velocity adjustment on static body will not work. [node='%1']", phys_node->debug_name);
+            }
+            else
+            {
+                // apply any adjustment done by the animation/game to the physics body.
+                if (rigid_body->HasAngularVelocityAdjustment())
+                    world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());
+                if (rigid_body->HasLinearVelocityAdjustment())
+                    world_body->SetLinearVelocity(ToBox2D(rigid_body->GetLinearVelocityAdjustment()));
+                rigid_body->ClearVelocityAdjustments();
+            }
+        }
+        virtual void LeaveNode(const EntityNode* node) override
+        {
+            if (!node)
+                return;
+            mTransform.Pop();
+        }
+    private:
+        const Entity& mEntity;
+        PhysicsEngine& mEngine;
+        Transform mTransform;
+    };
+    Visitor visitor(entity_to_world, entity, *this);
+
+    const auto& tree = entity.GetRenderTree();
+    tree.PreOrderTraverse(visitor);
+}
+
 void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity)
 {
     using RenderTree = Entity::RenderTree;
-
-    class Visitor : public RenderTree::Visitor
-    {
+    class Visitor : public RenderTree::Visitor {
     public:
         Visitor(const glm::mat4& model_to_world, const Entity& entity, PhysicsEngine& engine)
           : mEntity(entity)
@@ -481,100 +586,47 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
             const auto node_to_world = mTransform.GetAsMatrix();
 
             mTransform.Push(node->GetNodeTransform());
+            if (!node->HasRigidBody())
+                return;
 
-            // look if we have a physics node for this entity node.
-            auto it = mEngine.mNodes.find(node->GetId());
-            if (it == mEngine.mNodes.end())
-            {
-                // no node, no rigid body, nothing to do.
-                if (!node->HasRigidBody())
-                    return;
-                // add a new rigid body based on this node.
-                mTransform.Push(node->GetModelTransform());
-                    mEngine.AddEntityNode(mTransform.GetAsMatrix(), mEntity, *node);
-                mTransform.Pop();
-                it = mEngine.mNodes.find(node->GetId());
-            }
-            else
-            {
-                // physics node has been created before but the rigid body
-                // was removed from the node. erase the physics node.
-                if (!node->HasRigidBody())
-                {
-                    mEngine.mWorld->DestroyBody(it->second.world_body);
-                    mEngine.mNodes.erase(it);
-                    return;
-                }
-            }
+            auto* phys_node  = base::SafeFind(mEngine.mNodes, node->GetId());
+            // could have been killed.
+            if (phys_node == nullptr)
+                return;
+            auto* rigid_body = node->GetRigidBody();
+            auto* world_body = phys_node->world_body;
+            if (world_body->GetType() == b2BodyType::b2_staticBody)
+                return;
 
-            auto* rigid_body   = node->GetRigidBody();
-            auto& physics_node = it->second;
-            if (physics_node.flags != rigid_body->GetFlags().value())
-            {
-                auto* body = physics_node.world_body;
-                body->SetEnabled(rigid_body->TestFlag(RigidBodyItem::Flags::Enabled));
-                body->SetBullet(rigid_body->TestFlag(RigidBodyItem::Flags::Bullet));
-                body->SetFixedRotation(rigid_body->TestFlag(RigidBodyItem::Flags::DiscardRotation));
-                body->SetSleepingAllowed(rigid_body->TestFlag(RigidBodyItem::Flags::CanSleep));
-                b2Fixture* fixture_list_head = body->GetFixtureList();
-                while (fixture_list_head) {
-                    fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
-                    fixture_list_head = fixture_list_head->GetNext();
-                }
-            }
-            physics_node.alive = true;
-            physics_node.flags = rigid_body->GetFlags().value();
+            // get the object's transform properties in the physics world.
+            const auto physics_world_pos   = world_body->GetPosition();
+            const auto physics_world_angle = world_body->GetAngle();
 
-            if (physics_node.world_body->GetType() == b2BodyType::b2_staticBody)
-            {
-                auto* body = physics_node.world_body;
-                // static bodies are not moved by the physics engine but they
-                // may be moved by the user.
-                // update the world transform from the scene to the physics world.
-                mTransform.Push(node->GetModelTransform());
-                    const FBox box(mTransform.GetAsMatrix());
-                    const auto& node_pos_in_world   = box.GetCenter();
-                    body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
-                mTransform.Pop();
-            }
-            else
-            {
-                // apply any adjustment done by the animation/game to the physics body.
-                if (rigid_body->HasAngularVelocityAdjustment())
-                    physics_node.world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());
-                if (rigid_body->HasLinearVelocityAdjustment())
-                    physics_node.world_body->SetLinearVelocity(ToBox2D(rigid_body->GetLinearVelocityAdjustment()));
+            // transform back into scene relative to the node's parent.
+            // i.e. the world transform of the node is expressed as a transform
+            // relative to its parent node.
+            glm::mat4 mat;
+            Transform transform;
+            transform.Rotate(physics_world_angle);
+            transform.Translate(physics_world_pos.x, physics_world_pos.y);
+            transform.Push();
+                transform.Scale(phys_node->world_extents);
+                transform.Translate(phys_node->world_extents * -0.5f);
+                mat = transform.GetAsMatrix();
+            transform.Pop();
 
-                rigid_body->ClearVelocityAdjustments();
+            FBox box(mat);
+            box.Transform(glm::inverse(node_to_world));
+            node->SetTranslation(box.GetCenter());
+            node->SetRotation(box.GetRotation());
 
-                // get the object's transform properties in the physics world.
-                const auto physics_world_pos = physics_node.world_body->GetPosition();
-                const auto physics_world_angle = physics_node.world_body->GetAngle();
-
-                // transform back into scene relative to the node's parent.
-                // i.e. the world transform of the node is expressed as a transform
-                // relative to its parent node.
-                glm::mat4 mat;
-                Transform transform;
-                transform.Rotate(physics_world_angle);
-                transform.Translate(physics_world_pos.x, physics_world_pos.y);
-                transform.Push();
-                    transform.Scale(physics_node.world_extents);
-                    transform.Translate(physics_node.world_extents * -0.5f);
-                    mat = transform.GetAsMatrix();
-                transform.Pop();
-
-                FBox box(mat);
-                box.Transform(glm::inverse(node_to_world));
-                node->SetTranslation(box.GetCenter());
-                node->SetRotation(box.GetRotation());
-
-                const auto& linear_velocity = physics_node.world_body->GetLinearVelocity();
-                const auto angular_velocity = physics_node.world_body->GetAngularVelocity();
-                // update current instantaneous velocities for other subsystems/game to read
-                rigid_body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
-                rigid_body->SetAngularVelocity(angular_velocity);
-            }
+            const auto linear_velocity  = world_body->GetLinearVelocity();
+            const auto angular_velocity = world_body->GetAngularVelocity();
+            // update current instantaneous velocities for other subsystems/game to read
+            // the velocities are in world space. i.e. not relative to the node parent
+            // (except when the parent is the scene root)
+            rigid_body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
+            rigid_body->SetAngularVelocity(angular_velocity);
         }
         virtual void LeaveNode(EntityNode* node) override
         {
@@ -594,13 +646,32 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
     tree.PreOrderTraverse(visitor);
 }
 
+void PhysicsEngine::KillEntity(const game::Entity& entity)
+{
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& entity_node = entity.GetNode(i);
+        auto it = mNodes.find(entity_node.GetId());
+        if (it == mNodes.end())
+            continue;
+        auto& physics_node = it->second;
+
+        DEBUG("Deleting physics body. [node='%1']", physics_node.debug_name);
+        b2Fixture* fixture_list_head = physics_node.world_body->GetFixtureList();
+        while (fixture_list_head) {
+            mFixtures.erase(fixture_list_head);
+            fixture_list_head = fixture_list_head->GetNext();
+        }
+        mWorld->DestroyBody(physics_node.world_body);
+        mNodes.erase(it);
+    }
+}
 
 void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& entity)
 {
     using RenderTree = Entity::RenderTree;
 
-    class Visitor : public RenderTree::ConstVisitor
-    {
+    class Visitor : public RenderTree::ConstVisitor {
     public:
         Visitor(const glm::mat4& mat, const Entity& entity, PhysicsEngine& engine)
           : mEntity(entity)
@@ -615,9 +686,6 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
             mTransform.Push(node->GetNodeTransform());
 
-            auto it = mEngine.mNodes.find(node->GetId());
-            if (it != mEngine.mNodes.end())
-                return;
             if (!node->HasRigidBody())
                 return;
 
@@ -816,12 +884,12 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     {
         polygonId = body->GetPolygonShapeId();
         if (polygonId.empty()) {
-            WARN("Rigid body '%1' has no polygon shape id set.", debug_name);
+            WARN("Rigid body has no polygon shape id set. [node='%1']", debug_name);
             return;
         }
         const auto& drawable = mClassLib->FindDrawableClassById(polygonId);
         if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
-            WARN("No polygon class found for rigid body '%1'.", debug_name);
+            WARN("No polygon class found for rigid body. [node='%1']", debug_name);
             return;
         }
         const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
@@ -857,7 +925,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         // still too many?
         if (verts.size() > b2_maxPolygonVertices) {
             // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
-            WARN("The convex hull for rigid body '%1' has too many vertices.", debug_name);
+            WARN("The convex hull for rigid body has too many vertices. [node='%1']", debug_name);
         }
 
         auto poly = std::make_unique<b2PolygonShape>();
@@ -884,10 +952,10 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     physics_node.polygonId     = polygonId;
     physics_node.shape         = (unsigned)body->GetCollisionShape();
     physics_node.flags         = body->GetFlags().value();
-
+    ASSERT(mNodes.find(node.GetId()) == mNodes.end());
     mNodes[node.GetId()]   = physics_node;
     mFixtures[fixture_ptr] = node.GetId();
-    DEBUG("Created new physics body '%1'", debug_name);
+    DEBUG("Created new physics body. [node='%1']", debug_name);
 }
 
 PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id)

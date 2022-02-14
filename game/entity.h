@@ -599,7 +599,7 @@ namespace game
         { return mAngularVelocityAdjustment.value(); }
         const glm::vec2& GetLinearVelocityAdjustment() const
         { return mLinearVelocityAdjustment.value(); }
-        void ClearVelocityAdjustments()
+        void ClearVelocityAdjustments() const
         {
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
@@ -637,10 +637,10 @@ namespace game
         base::bitflag<Flags> mInstanceFlags;
         // current adjustment to be made to the body's linear
         // velocity.
-        std::optional<glm::vec2> mLinearVelocityAdjustment;
+        mutable std::optional<glm::vec2> mLinearVelocityAdjustment;
         // current adjustment to be made to the body's angular
         // velocity.
-        std::optional<float> mAngularVelocityAdjustment;
+        mutable std::optional<float> mAngularVelocityAdjustment;
     };
 
     class TextItem
@@ -1590,6 +1590,8 @@ namespace game
         bool HasBeenKilled() const;
         // Returns true the spawn control flag has been set.
         bool HasBeenSpawned() const;
+        // Returns true if entity contains entity nodes that have rigid bodies.
+        bool HasRigidBodies() const;
 
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;

@@ -905,6 +905,10 @@ private:
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
+                // apply any pending changes such as velocity updates
+                // rigid body flag state changes, static body position
+                // changes to the physics world.
+                TRACE_CALL("Physics::UpdateWorld", mPhysics.UpdateWorld(*mScene));
                 // Step the simulation forward.
                 TRACE_CALL("Physics::Step", mPhysics.Step(&contacts));
                 // Update the result of the physics simulation from the

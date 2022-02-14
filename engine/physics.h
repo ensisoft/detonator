@@ -119,12 +119,16 @@ namespace engine
         bool HaveWorld() const
         { return !!mWorld; }
 
+        // Update the physics world based on the changes in the scene.
+        void UpdateWorld(const game::Scene& scene);
+        // Update the physics world based on the changes in the entity.
+        void UpdateWorld(const game::Entity& entity);
+
         // Update the scene with the changes from the physics simulation.
         void UpdateScene(game::Scene& scene);
-
         // Update a single entity with the changes from the physics simulation.
-        // This is intended to be used when the world is created with a
-        // single entity instance.
+        // This is intended to be used when the world is created with a single
+        // entity instance for simulating the entity only.
         void UpdateEntity(game::Entity& entity);
 
         // Step the physics simulation forward by one time step.
@@ -183,7 +187,10 @@ namespace engine
 #endif
     private:
         struct PhysicsNode;
+
         void UpdateEntity(const glm::mat4& model_to_world, game::Entity& scene);
+        void KillEntity(const game::Entity& entity);
+        void UpdateWorld(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntity(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntityNode(const glm::mat4& model_to_world, const game::Entity& entity, const game::EntityNode& node);
         PhysicsNode* FindPhysicsNode(const std::string& id);
@@ -202,9 +209,6 @@ namespace engine
             glm::vec2 world_extents;
             // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
-            // flag for culling physics nodes that are no longer
-            // alive in the scene.
-            bool alive = true;
             // the polygon shape id if any. empty string
             // if the shape is a box or a circle.
             std::string polygonId;
