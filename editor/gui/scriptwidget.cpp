@@ -689,7 +689,7 @@ void InitDoc()
                                           "Note that this does not block low level keyboard polling such as wdk.TestKeyDown from working,<br>"
                                           "but only *event* based keyboard processing is affected.",
                  "bool", "block");
-    DOC_METHOD_1("void", "BlockMouse", "Toggle blocking mouse events on/off.<br>"
+    DOC_METHOD_1("void", "BlockMouse", "Turn mouse blocking on or off.<br>"
                                        "When mouse block is enabled the mouse events coming from the OS are not processed<br>"
                                        "and none of the entity/scene mouse event handlers are called.",
                  "bool", "block");
@@ -702,7 +702,7 @@ void InitDoc()
                  "uik.Window|string", "window|name");
     DOC_METHOD_0("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
-    DOC_METHOD_1("void", "ShowDeveloperUI", "Toggle developer UI visibility (when supported by the host app/platform.", "bool", "show");
+    DOC_METHOD_1("void", "ShowDeveloperUI", "Show or hide the developer UI when supported by the host app/platform.", "bool", "show");
     DOC_METHOD_1("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
                                         "This method is only available in the game main script.<br>"
                                         "The initial viewport is a viewport without any dimensions.",
@@ -860,9 +860,9 @@ void InitDoc()
                                                            "For example a script variable named 'score' would be accessible as object.score.<br>"
                                                            "Note that you cannot write to the variable if it is marked as 'Read Only'");
     DOC_METHOD_0("string", "GetName", "Get the entity's human readable name.");
-    DOC_METHOD_0("string", "GetId", "Get the entity's instance ID.");
-    DOC_METHOD_0("string", "GetClassName", "Get the name of the entity's class type.");
-    DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity's class type.");
+    DOC_METHOD_0("string", "GetId", "Get entity instance ID.");
+    DOC_METHOD_0("string", "GetClassName", "Get entity class type name.");
+    DOC_METHOD_0("string", "GetClassId", "Get entity class type ID.");
     DOC_METHOD_0("int", "GetNumNodes", "Get the number of entity nodes in this entity.");
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
@@ -878,10 +878,10 @@ void InitDoc()
                                                            "If multiple nodes have the same class name it's unspecified which one is returned.<br>"
                                                            "Returns nil if no such node could be found.",
                  "string", "class_name");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by it's class ID.<br>"
+    DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by its class ID.<br>"
                                                          "Returns nil if no such node could be found.",
                  "string", "class_id");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by it's instance ID.<br>"
+    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by its instance ID.<br>"
                                                             "If multiple nodes have the same ID it's unspecified which one is returned.<br>"
                                                             "Returns nil if no such node could be found.",
                  "string", "id");
@@ -1006,9 +1006,8 @@ void InitDoc()
                                                               "Returns true and the current velocity if the body was found, otherwise false and 0 velocity.<br>"
                                                               "Radians per second in world space.",
                  "string|game.EntityNode", "id|node");
-    DOC_METHOD_1("bool, float", "FindMass", "Find the mass of a physics body based on size and density.<br>"
-                                            "Returns true and mass if the body was found, otherwise false and 0 mass.<br>"
-                                            "Kilograms",
+    DOC_METHOD_1("bool, float", "FindMass", "Find the mass (Kg) of a physics body based on size and density.<br>"
+                                            "Returns true and mass if the body was found, otherwise false and 0 mass.",
                  "string|game.EntityNode", "id|node");
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the current scaling coefficient for scaling game units to physics world.");
     DOC_METHOD_0("glm.vec2", "GetGravity", "Get the current physics world gravity vector.");
