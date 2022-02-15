@@ -76,6 +76,7 @@ public:
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) {}
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) {}
     virtual void SetSurfaceSize(unsigned width, unsigned height)  {}
+    virtual std::string GetName() const = 0;
 private:
 };
 
@@ -99,6 +100,8 @@ public:
            "assets/fonts/orbitron-medium.otf", 18u,
            rect, gfx::Color::HotPink);
     }
+    virtual std::string GetName() const override
+    { return "HelloWasmTest"; }
 private:
 
 };
@@ -157,6 +160,9 @@ public:
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->ResumeMusic(name);
     }
+    virtual std::string GetName() const override
+    { return "AudioMusicTest"; }
+
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     { return audio::OpenFileStream(uri, strategy, enable_file_caching); }
@@ -270,6 +276,8 @@ public:
             mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
+    virtual std::string GetName() const override
+    { return "AudioEffectTest"; }
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     { return audio::OpenFileStream(uri); }
@@ -399,6 +407,8 @@ public:
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
     }
+    virtual std::string GetName() const override
+    { return "PhysicsTest"; }
 private:
     std::unique_ptr<game::Scene>  mScene;
     engine::Renderer mRenderer;
@@ -511,6 +521,8 @@ public:
 
         DEBUG("viewport: %1", mViewport);
     }
+    virtual std::string GetName() const override
+    { return "ViewportTest"; }
 private:
     std::unique_ptr<game::Scene> mScene;
     engine::Renderer mRenderer;
@@ -562,6 +574,8 @@ public:
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
     }
+    virtual std::string GetName() const override
+    { return "SceneTest"; }
 private:
     std::unique_ptr<game::Scene> mScene;
     engine::Renderer mRenderer;
@@ -618,6 +632,8 @@ public:
         else if (key.symbol == wdk::Keysym::Key2)
             mDrawBoundingRects = !mDrawBoundingRects;
     }
+    virtual std::string GetName() const override
+    { return "EntityTest"; }
 private:
     std::unique_ptr<game::Entity> mEntity;
     engine::Renderer mRenderer;
@@ -850,6 +866,8 @@ public:
             }
         }
     }
+    virtual std::string GetName() const override
+    { return "UITest"; }
 private:
     uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const
     {
@@ -910,6 +928,7 @@ public:
         mTestList.emplace_back(new UITest);
         mTestList.emplace_back(new HelloWasmTest);
         mTestList[mTestIndex]->Start(this);
+        INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
 
     virtual void Init(const InitParams& init) override
@@ -990,6 +1009,7 @@ public:
         {
             mTestList[current_test_index]->End();
             mTestList[mTestIndex]->Start(this);
+            INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
         }
         mTestList[mTestIndex]->OnKeydown(key);
     }
