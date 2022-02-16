@@ -411,10 +411,7 @@ FRect FindBoundingRect(const RenderTree<Node>& tree)
             mTransform.Push(node->GetModelTransform());
 
             const auto box = ComputeBoundingRect(mTransform.GetAsMatrix());
-            if (mResult.IsEmpty())
-                mResult = box;
-            else mResult = Union(mResult, box);
-
+            mResult = Union(mResult, box);
             mTransform.Pop();
         }
         virtual void LeaveNode(const Node* node) override
