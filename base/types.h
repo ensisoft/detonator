@@ -432,6 +432,10 @@ namespace base
     Rect<T> Union(const Rect<T>& lhs, const Rect<T>& rhs)
     {
         using R = Rect<T>;
+        if (lhs.IsEmpty())
+            return rhs;
+        else if (rhs.IsEmpty())
+            return lhs;
 
         const auto lhs_top    = lhs.GetY();
         const auto lhs_left   = lhs.GetX();

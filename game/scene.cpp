@@ -1290,11 +1290,9 @@ FRect Scene::FindEntityBoundingRect(const Entity* entity) const
     {
         const auto& node = entity->GetNode(i);
         transform.Push(entity->FindNodeTransform(&node));
-        transform.Push(node->GetModelTransform());
-        if (ret.IsEmpty())
-            ret = ComputeBoundingRect(transform.GetAsMatrix());
-        else ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
-        transform.Pop();
+          transform.Push(node->GetModelTransform());
+          ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
+          transform.Pop();
         transform.Pop();
     }
     return ret;
@@ -1431,9 +1429,7 @@ void Scene::PostUpdate()
                             mIndex->Insert(aabb, const_cast<EntityNode*>(&node));
                     } else BUG("Unimplemented spatial shape insertion.");
                 }
-                if (rect.IsEmpty())
-                    rect = aabb;
-                else rect = base::Union(rect, aabb);
+                rect = base::Union(rect, aabb);
                 mTransform.Pop();
             }
             // if the entity has already been killed there's no point
