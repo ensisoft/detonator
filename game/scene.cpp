@@ -1291,7 +1291,9 @@ FRect Scene::FindEntityBoundingRect(const Entity* entity) const
         const auto& node = entity->GetNode(i);
         transform.Push(entity->FindNodeTransform(&node));
         transform.Push(node->GetModelTransform());
-        ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
+        if (ret.IsEmpty())
+            ret = ComputeBoundingRect(transform.GetAsMatrix());
+        else ret = Union(ret, ComputeBoundingRect(transform.GetAsMatrix()));
         transform.Pop();
         transform.Pop();
     }
