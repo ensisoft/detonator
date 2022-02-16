@@ -131,25 +131,25 @@ void unit_test_rect_intersect()
         {
             R(0, 0, 10, 10),
             R(10, 0, 10, 10),
-            R()
+            R(10, 0, 0, 10)
         },
         // no overlap on x axis
         {
             R(0, 0, 10, 10),
             R(-10, 0, 10, 10),
-            R()
+            R(0, 0, 0, 10)
         },
         // no overlap on y axis
         {
             R(0, 0, 10, 10),
             R(0, 10, 10, 10),
-            R()
+            R(0, 10, 10, 0)
         },
         // no overlap on y axis
         {
             R(0, 0, 10, 10),
             R(0, -10, 10, 10),
-            R()
+            R(0, 0, 10, 0)
         },
         // overlaps itself
         {
@@ -245,10 +245,14 @@ void unit_test_rect_test_point()
 
     const R rect(10, 10, 15, 7);
     TEST_REQUIRE(!rect.TestPoint(0, 0));
-    TEST_REQUIRE(!rect.TestPoint(10, 10));
     TEST_REQUIRE(!rect.TestPoint(11, 8));
     TEST_REQUIRE(!rect.TestPoint(11, 30));
+
     TEST_REQUIRE(rect.TestPoint(11, 11));
+
+    // border values.
+    TEST_REQUIRE(rect.TestPoint(10, 10));
+    TEST_REQUIRE(rect.TestPoint(25, 17));
 }
 
 void bar()
