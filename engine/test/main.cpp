@@ -539,11 +539,44 @@ public:
         gfx::Transform transform;
         transform.Translate(300.0f, 400.0f);
         mRenderer.Draw(*mScene, painter, transform);
+
+        for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+        {
+            const auto& entity = mScene->GetEntity(i);
+            if (mDrawEntityBoundingRects)
+            {
+                auto rect = mScene->FindEntityBoundingRect(&entity);
+                rect.Translate(300.0f, 400.0f);
+                gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
+            }
+
+            for (size_t i=0; i<entity.GetNumNodes(); ++i)
+            {
+                const auto& node = entity.GetNode(i);
+                if (mDrawEntityNodeBoundingRects)
+                {
+                    auto rect = mScene->FindEntityNodeBoundingRect(&entity, &node);
+                    rect.Translate(300.0f, 400.0f);
+                    gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
+                }
+                if (mDrawEntityNodeBoundingBoxes)
+                {
+                    auto box = mScene->FindEntityNodeBoundingBox(&entity, &node);
+                    box.Transform(transform.GetAsMatrix());
+                    gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
+                    gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
+                    gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
+                    gfx::DrawLine(painter, ToPoint(box.GetBotLeft()), ToPoint(box.GetTopLeft()), gfx::Color::HotPink);
+                }
+            }
+        }
     }
     virtual void Update(float dt) override
     {
         if (mScene)
+        {
             mScene->Update(dt);
+        }
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
@@ -574,11 +607,25 @@ public:
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
     }
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Key1)
+            mDrawEntityBoundingRects = !mDrawEntityBoundingRects;
+        else if (key.symbol == wdk::Keysym::Key2)
+            mDrawEntityNodeBoundingRects = !mDrawEntityNodeBoundingRects;
+        else if (key.symbol == wdk::Keysym::Key3)
+            mDrawEntityNodeBoundingBoxes = !mDrawEntityNodeBoundingBoxes;
+    }
+
     virtual std::string GetName() const override
     { return "SceneTest"; }
 private:
     std::unique_ptr<game::Scene> mScene;
     engine::Renderer mRenderer;
+    bool mDrawEntityBoundingRects = true;
+    bool mDrawEntityNodeBoundingRects = true;
+    bool mDrawEntityNodeBoundingBoxes = true;
+
 };
 
 class EntityTest : public TestCase
