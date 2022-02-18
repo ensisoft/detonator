@@ -160,6 +160,24 @@ add_library(UiLib
     uikit/widget.cpp
     uikit/window.cpp)
 
+add_library(GfxLibTesting
+    graphics/bitmap.cpp
+    graphics/drawing.cpp
+    graphics/drawable.cpp
+    graphics/material.cpp
+    graphics/image.cpp
+    graphics/opengl_es2_device.cpp
+    graphics/painter.cpp
+    graphics/text.cpp
+    graphics/loader.cpp
+    third_party/stb/stb_image.c
+    third_party/stb/stb_image_write.c
+    third_party/base64/base64.cpp)
+target_include_directories(GfxLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
+if (UNIX)
+    target_compile_options(GfxLibTesting PRIVATE -fPIC)
+endif()
+
 target_include_directories(AudioLib  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(DataLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
@@ -515,7 +533,7 @@ endif()
 # engine perf test app
 add_executable(perf-test engine/test/perftest.cpp)
 target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(perf-test PRIVATE GfxLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE GfxLibTesting EngineLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
 target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
 target_link_libraries(perf-test PRIVATE wdk_system wdk_desktop_gl)
 target_link_libraries(perf-test PRIVATE Lua)
@@ -701,24 +719,6 @@ add_test(NAME unit_test_mem     COMMAND unit_test_mem)
 add_test(NAME unit_test_math    COMMAND unit_test_math)
 add_test(NAME unit_test_cmdline COMMAND unit_test_cmdline)
 add_test(NAME unit_test_logging COMMAND unit_test_logging)
-
-add_library(GfxLibTesting
-        graphics/bitmap.cpp
-        graphics/drawing.cpp
-        graphics/drawable.cpp
-        graphics/material.cpp
-        graphics/image.cpp
-        graphics/opengl_es2_device.cpp
-        graphics/painter.cpp
-        graphics/text.cpp
-        graphics/loader.cpp
-        third_party/stb/stb_image.c
-        third_party/stb/stb_image_write.c
-        third_party/base64/base64.cpp)
-target_include_directories(GfxLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-if (UNIX)
-    target_compile_options(GfxLibTesting PRIVATE -fPIC)
-endif()
 
 # gfx tests
 add_executable(unit_test_bitmap   graphics/unit_test/unit_test_bitmap.cpp)

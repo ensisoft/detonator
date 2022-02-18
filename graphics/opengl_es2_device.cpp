@@ -16,6 +16,12 @@
 
 #include "config.h"
 
+#if defined(GFX_ENABLE_DEVICE_TRACING)
+#  define BASE_TRACING_ENABLE_TRACING
+# else
+#  undef BASE_TRACING_ENABLE_TRACING
+#endif
+
 #include <GLES2/gl2.h>
 
 #include <cstdio>
@@ -30,6 +36,7 @@
 #include "base/logging.h"
 #include "base/hash.h"
 #include "base/utility.h"
+#include "base/trace.h"
 #include "graphics/resource.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
@@ -462,6 +469,8 @@ public:
         // Easiest fix for this right now is to simply do the uniform setting first (and always)
         // even if the geometry is "empty", (i.e. no vertex data/draw commands).
 
+        TRACE_ENTER(SetUniforms);
+
         // set program uniforms
         size_t num_uniforms = myprog->GetNumUniformsSet();
         for (size_t i=0; i<num_uniforms; ++i)
@@ -492,6 +501,8 @@ public:
             else BUG("Unhandled shader program uniform type.");
         }
 
+        TRACE_LEAVE(SetUniforms);
+
         const auto buffer_byte_size = mygeom->GetByteSize();
         if (buffer_byte_size == 0)
             return;
@@ -501,6 +512,7 @@ public:
 
         const auto buffer_vertex_count = buffer_byte_size / vertex_layout.vertex_struct_size;
 
+        TRACE_ENTER(SetState);
         GL_CALL(glLineWidth(state.line_width));
         GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
                            state.viewport.GetWidth(), state.viewport.GetHeight()));
@@ -559,6 +571,7 @@ public:
         } else {
             GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         }
+        TRACE_LEAVE(SetState);
 
         GLenum default_texture_min_filter = GL_NONE;
         GLenum default_texture_mag_filter = GL_NONE;
@@ -591,6 +604,7 @@ public:
         // this texture.
         size_t unit = 0;
 
+        TRACE_ENTER(BindTextures);
         for (size_t i=0; i<num_textures; ++i)
         {
             const auto& sampler = myprog->GetSamplerSetting(i);
@@ -764,6 +778,7 @@ public:
             mTextureUnits[unit].wrap_x     = texture_wrap_x;
             mTextureUnits[unit].wrap_y     = texture_wrap_y;
         }
+        TRACE_LEAVE(BindTextures);
 
         // start drawing geometry.
 
@@ -774,6 +789,7 @@ public:
 
         const auto& buffer = mBuffers[mygeom->GetBufferIndex()];
 
+        TRACE_ENTER(BindBuffers);
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
 
         // first enable the vertex attributes.
@@ -788,7 +804,9 @@ public:
             GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
             GL_CALL(glEnableVertexAttribArray(location));
         }
+        TRACE_LEAVE(BindBuffers);
 
+        TRACE_ENTER(DrawGeometry);
         // go through the draw commands and submit the calls
         const auto& cmds = mygeom->GetNumDrawCmds();
         for (size_t i=0; i<cmds; ++i)
@@ -810,6 +828,7 @@ public:
                 GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
             else BUG("Unknown draw primitive type.");
         }
+        TRACE_LEAVE(DrawGeometry);
     }
 
     virtual Type GetDeviceType() const override
