@@ -25,6 +25,7 @@
 #include "base/cmdline.h"
 #include "base/logging.h"
 #include "base/test_help.h"
+#include "base/trace.h"
 #include "audio/format.h"
 #include "audio/loader.h"
 #include "audio/graph.h"
@@ -93,6 +94,8 @@ private:
 };
 
 struct Engine {
+    base::TraceLog* trace_logger      = nullptr;
+    base::TraceWriter* trace_writer   = nullptr;
     gfx::Device* graphics_device      = nullptr;
     gfx::Painter* graphics_painter    = nullptr;
     audio::Device* audio_device       = nullptr;
@@ -214,12 +217,18 @@ public:
     }
     virtual void Execute(Engine& engine) override
     {
+        TRACE_START();
+
         gfx::Transform transform;
         transform.Translate(50.0f, 50.0f);
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
         engine.renderer->Draw(*mScene, *engine.graphics_painter, transform);
         engine.graphics_device->EndFrame();
+
+        if (engine.trace_logger)
+            engine.trace_logger->Write(*engine.trace_writer);
+
     }
 private:
     std::unique_ptr<game::Scene> mScene;
@@ -254,6 +263,7 @@ int test_main(int argc, char* argv[])
     opt.Add("--pcm-cache", "Enable audio PCM caching.");
     opt.Add("--enable-file-caching", "Enable file caching.");
     opt.Add("--screenshot", "Take screenshot of test cases with visual output.");
+    opt.Add("--trace", "Trace file to write.", std::string());
     for (const auto& test : tests)
         opt.Add(test.name, "Test case");
 
@@ -271,6 +281,18 @@ int test_main(int argc, char* argv[])
     enable_pcm_caching  = opt.WasGiven("--pcm-cache");
     enable_file_caching = opt.WasGiven("--file-cache");
     base::EnableDebugLog(opt.WasGiven("--debug-log"));
+
+    std::unique_ptr<base::TraceWriter> trace_writer;
+    std::unique_ptr<base::TraceLog> trace_logger;
+    if (opt.WasGiven("--trace"))
+    {
+        const auto& trace_file = opt.GetValue<std::string>("--trace");
+        if (base::EndsWith(trace_file, ".json"))
+            trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
+        else trace_writer.reset(new base::TextFileTraceWriter(trace_file));
+        trace_logger.reset(new base::TraceLog(1000));
+        base::SetThreadTrace(trace_logger.get());
+    }
 
     TestClassLib classlib;
 
@@ -303,8 +325,10 @@ int test_main(int argc, char* argv[])
     renderer.SetClassLibrary(&classlib);
 
     Engine engine;
-    engine.audio_loader = &audio_loader;
-    engine.audio_engine = &audio_engine;
+    engine.trace_logger     = trace_logger.get();
+    engine.trace_writer     = trace_writer.get();
+    engine.audio_loader     = &audio_loader;
+    engine.audio_engine     = &audio_engine;
     engine.graphics_device  = graphics_device.get();
     engine.graphics_painter = graphics_painter.get();
     engine.renderer = &renderer;
