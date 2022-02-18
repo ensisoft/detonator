@@ -1592,6 +1592,11 @@ namespace game
         bool HasBeenSpawned() const;
         // Returns true if entity contains entity nodes that have rigid bodies.
         bool HasRigidBodies() const;
+        // Returns true if the entity contains entity nodes that have spatial nodes.
+        bool HasSpatialNodes() const;
+        // Returns true if the entity should be killed at the scene boundary.
+        bool KillAtBoundary() const
+        { return TestFlag(Flags::KillAtBoundary); }
 
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;

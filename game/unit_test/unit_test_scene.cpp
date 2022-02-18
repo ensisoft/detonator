@@ -831,7 +831,7 @@ void unit_test_scene_instance_kill_at_boundary()
         auto scene = game::CreateSceneInstance(klass);
         auto& entity = scene->GetEntity(0);
         scene->Update(0.0f);
-        scene->PostUpdate();
+        scene->Rebuild();
         TEST_REQUIRE(entity.HasBeenKilled() == false);
     }
 
@@ -851,7 +851,7 @@ void unit_test_scene_instance_kill_at_boundary()
                 scene->Update(0.0f);
                 auto& node = entity.GetNode(0);
                 node.SetTranslation(test);
-                scene->PostUpdate();
+            scene->Rebuild();
             scene->EndLoop();
 
             scene->BeginLoop();
@@ -876,7 +876,7 @@ void unit_test_scene_instance_kill_at_boundary()
                 scene->Update(0.0f);
                 auto& node = entity.GetNode(0);
                 node.SetTranslation(test);
-                scene->PostUpdate();
+            scene->Rebuild();
             scene->EndLoop();
             scene->BeginLoop();
             TEST_REQUIRE(!entity.HasBeenKilled());
@@ -941,7 +941,7 @@ void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
     TEST_REQUIRE(scene->HasSpatialIndex());
     //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 0);
 
-    scene->PostUpdate();
+    scene->Rebuild();
     //TEST_REQUIRE(scene->GetSpatialIndex()->GetNumItems() == 3);
 
     // find all
@@ -1025,7 +1025,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->PostUpdate();
+            scene->Rebuild();
             // post update step, the entity nodes should now
             // be queryable from the index.
             std::set<game::EntityNode*> result;
@@ -1040,7 +1040,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->PostUpdate();
+            scene->Rebuild();
 
             for (size_t i = 0; i < scene->GetNumEntities(); ++i)
             {
@@ -1076,7 +1076,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
                 auto& entity = scene->GetEntity(i);
                 scene->KillEntity(&entity);
             }
-            scene->PostUpdate();
+            scene->Rebuild();
             scene->EndLoop();
         }
 
@@ -1084,7 +1084,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->PostUpdate();
+            scene->Rebuild();
 
             std::set<game::EntityNode*> result;
             scene->QuerySpatialNodes(rect, &result);
@@ -1097,7 +1097,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         {
             scene->BeginLoop();
             scene->Update(1.0f/60.0f);
-            scene->PostUpdate();
+            scene->Rebuild();
 
             std::set<game::EntityNode*> result;
             scene->QuerySpatialNodes(rect, &result);

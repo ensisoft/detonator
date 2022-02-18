@@ -214,7 +214,7 @@ public:
 
         if (mScene)
         {
-            TRACE_SCOPE("Scene");
+            TRACE_SCOPE("DrawScene");
             // low level draw packet filter for culling draw packets
             // that fall outside of the current viewport.
             class Culler : public engine::EntityInstanceDrawHook {
@@ -254,7 +254,7 @@ public:
 
         if (auto* ui = GetUI())
         {
-            TRACE_SCOPE("UI");
+            TRACE_SCOPE("DrawUI");
 
             const auto& rect   = ui->GetBoundingRect();
             const float width  = rect.GetWidth();
@@ -380,7 +380,7 @@ public:
 
             // PostUpdate allows the game to perform activities with consistent
             // world state after everything has settled down. It might be tempting
-            // to bake the functionality of "PostUpdate" in the scene in the loop
+            // to bake the functionality of "Rebuild" in the scene in the loop
             // end functionality and let the game perform the "PostUpdate" actions in
             // the Update function. But this has the problem that during the call
             // to Update (on each entity instance) the world doesn't yet have
@@ -396,7 +396,7 @@ public:
             {
                 // make sure to do this first in order to allow the scene to rebuild
                 // the spatial indices etc. before the game's PostUpdate runs.
-                TRACE_CALL("Scene::PostUpdate", mScene->PostUpdate());
+                TRACE_CALL("Scene::Rebuild", mScene->Rebuild());
                 // using the time we've arrived to now after having taken the previous
                 // delta step forward in game time.
                 TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(mGameTimeTotal));

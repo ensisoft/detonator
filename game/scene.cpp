@@ -1382,7 +1382,7 @@ void Scene::Update(float dt)
     }
 }
 
-void Scene::PostUpdate()
+void Scene::Rebuild()
 {
     using SpatialIndex = Scene::SpatialIndex;
 
@@ -1418,15 +1418,22 @@ void Scene::PostUpdate()
         {
             if (!entity)
                 return;
-            // parent node to scene transform.
-            glm::mat4 parent_node_transform(1.0f);
-            if (const auto* parent_entity = GetParent())
+
+            if (const auto* parent = GetParent())
             {
-                const auto* parent_node = parent_entity->FindNodeByClassId(entity->GetParentNodeClassId());
-                parent_node_transform   = parent_entity->FindNodeTransform(parent_node);
+                const auto* parent_node = parent->FindNodeByClassId(entity->GetParentNodeClassId());
+                mTransform.Push(parent->FindNodeTransform(parent_node));
             }
+
             mParents.push(entity);
-            mTransform.Push(parent_node_transform);
+
+            // if the entity has no spatial nodes and is not expected
+            // to be killed at the scene boundary then the rest of the
+            // work can be skipped.
+            if (!entity->HasSpatialNodes() &&
+                (!entity->KillAtBoundary() || entity->HasBeenKilled()))
+                return;
+
             FRect rect;
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
@@ -1450,7 +1457,7 @@ void Scene::PostUpdate()
             if (entity->HasBeenKilled())
                 return;
             // if the entity doesn't enable boundary killing skip boundary testing.
-            if (!entity->TestFlag(Entity::Flags::KillAtBoundary))
+            if (!entity->KillAtBoundary())
                 return;
 
             // check against the scene's boundary values.
@@ -1461,17 +1468,16 @@ void Scene::PostUpdate()
             if ((left > mRightBound) || (right < mLeftBound) ||
                 (top > mBottomBound) || (bottom < mTopBound))
             {
-                // slightly dangerous.. recursing
-                mScene->KillEntity(entity);
+                mScene->mKillSet.insert(entity);
             }
         }
         virtual void LeaveNode(Entity* entity) override
         {
             if (!entity)
                 return;
-
-            mTransform.Pop();
             mParents.pop();
+            if (const auto* parent = GetParent())
+                mTransform.Pop();
         }
     private:
         Entity* GetParent() const
