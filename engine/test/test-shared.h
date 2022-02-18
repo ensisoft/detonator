@@ -58,6 +58,12 @@ public:
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Gold));
         else if (name == "ground")
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
+        else if (name == "M-6") {
+            auto klass =std::make_shared<gfx::TextureMap2DClass>(
+                    gfx::CreateMaterialClassFromTexture("assets/textures/M-6_preview.png"));
+            klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            return klass;
+        }
         BUG("No such material class.");
         return nullptr;
     }
@@ -74,6 +80,20 @@ public:
     }
     virtual std::shared_ptr<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
+        if (name == "M-6")
+        {
+            auto klass = std::make_shared<game::EntityClass>();
+            game::EntityNodeClass base;
+            base.SetSize(30, 42);
+            base.SetName("base");
+            game::DrawableItemClass draw;
+            draw.SetDrawableId("rectangle");
+            draw.SetMaterialId("M-6");
+            base.SetDrawable(draw);
+            klass->LinkChild(nullptr, klass->AddNode(std::move(base)));
+            return klass;
+        }
+
         if (name == "unit_box")
         {
             auto klass = std::make_shared<game::EntityClass>();

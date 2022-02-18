@@ -515,9 +515,9 @@ endif()
 # engine perf test app
 add_executable(perf-test engine/test/perftest.cpp)
 target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(perf-test PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE GfxLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
-target_link_libraries(perf-test PRIVATE wdk_system)
+target_link_libraries(perf-test PRIVATE wdk_system wdk_desktop_gl)
 target_link_libraries(perf-test PRIVATE Lua)
 install(TARGETS perf-test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 
