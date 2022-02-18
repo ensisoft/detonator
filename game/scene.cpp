@@ -1202,16 +1202,28 @@ void Scene::EndLoop()
 
 std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
 {
-    SceneEntityCollector<Scene::ConstSceneNode, Entity, const Entity> visitor;
-    mRenderTree.PreOrderTraverse(visitor);
-    return std::move(visitor).GetResult();
+    std::vector<ConstSceneNode> ret;
+    for (auto& entity : mEntities)
+    {
+        ConstSceneNode node;
+        node.node_to_scene = FindEntityTransform(entity.get());
+        node.visual_entity = entity.get();
+        ret.push_back(std::move(node));
+    }
+    return ret;
 }
 
 std::vector<Scene::SceneNode> Scene::CollectNodes()
 {
-    SceneEntityCollector<Scene::SceneNode, Entity, Entity> visitor;
-    mRenderTree.PreOrderTraverse(visitor);
-    return std::move(visitor).GetResult();
+    std::vector<SceneNode> ret;
+    for (auto& entity : mEntities)
+    {
+        SceneNode node;
+        node.node_to_scene = FindEntityTransform(entity.get());
+        node.visual_entity = entity.get();
+        ret.push_back(std::move(node));
+    }
+    return ret;
 }
 
 glm::mat4 Scene::FindEntityTransform(const Entity* entity) const
