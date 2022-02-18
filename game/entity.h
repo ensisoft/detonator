@@ -781,16 +781,22 @@ namespace game
         // are in the tree under this node.
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
+        void SetScale(float sx, float sy)
+        { mScale = glm::vec2(sx, sy); }
         // Set the node's translation relative to the parent
         // of this node.
         void SetTranslation(const glm::vec2& vec)
         { mPosition = vec; }
+        void SetTranslation(float x, float y)
+        { mPosition = glm::vec2(x, y); }
         // Set the node's containing box size.
         // The size is used to for example to figure out
         // the dimensions of rigid body collision shape (if any)
         // and to resize the drawable object.
         void SetSize(const glm::vec2& size)
         { mSize = size; }
+        void SetSize(float width, float height)
+        { mSize = glm::vec2(width, height); }
         // Set the starting rotation in radians around the z axis.
         void SetRotation(float angle)
         { mRotation = angle;}
@@ -943,10 +949,16 @@ namespace game
         // instance setters.
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
+        void SetScale(float sx, float sy)
+        { mScale = glm::vec2(sx, sy); }
         void SetSize(const glm::vec2& size)
         { mSize = size; }
+        void SetSize(float width, float height)
+        { mSize = glm::vec2(width, height); }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
+        void SetTranslation(float x, float y)
+        { mPosition = glm::vec2(x, y); }
         void SetRotation(float rotation)
         { mRotation = rotation; }
         void SetName(const std::string& name)

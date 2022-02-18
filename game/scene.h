@@ -73,8 +73,12 @@ namespace game
         }
         void SetTranslation(const glm::vec2& pos)
         { mPosition = pos; }
+        void SetTranslation(float x, float y)
+        { mPosition = glm::vec2(x, y); }
         void SetScale(const glm::vec2& scale)
         { mScale = scale; }
+        void SetScale(float sx, float sy)
+        { mScale = glm::vec2(sx, sy); }
         void SetRotation(float rotation)
         { mRotation = rotation; }
         void SetEntityId(const std::string& id)
