@@ -47,7 +47,8 @@ void audio_test_decode_file(const std::any& arg)
     elem.args["file"]  = std::any_cast<std::string>(arg);
     elem.args["type"]  = audio::SampleType::Float32;
     elem.args["loops"] = 1u;
-    elem.args["cache"] = enable_pcm_caching;
+    elem.args["pcm_caching"] = enable_pcm_caching;
+    elem.args["file_caching"] = enable_file_caching;
     const auto& e = laser->AddElement(std::move(elem));
     laser->SetGraphOutputElementId(e.id);
     laser->SetGraphOutputElementPort("out");
@@ -83,7 +84,8 @@ void audio_test_rapid_fire(const std::any& any)
     elem.args["file"]  = "assets/sounds/Laser_09.mp3";
     elem.args["type"]  = audio::SampleType::Float32;
     elem.args["loops"] = 1u;
-    elem.args["cache"] = enable_pcm_caching;
+    elem.args["pcm_caching"]  = enable_pcm_caching;
+    elem.args["file_caching"] = enable_file_caching;
     const auto& e = laser->AddElement(std::move(elem));
     laser->SetGraphOutputElementId(e.id);
     laser->SetGraphOutputElementPort("out");
