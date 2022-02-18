@@ -569,9 +569,11 @@ namespace game
             // entity into the scene.
             glm::mat4 node_to_scene;
             // Visual representation object of the entity in the scene.
-            const Entity* visual_entity = nullptr;
-            // The entity object in the scene.x
-            const Entity* entity_object = nullptr;
+            union {
+                const Entity* visual_entity = nullptr;
+                // The entity object in the scene.x
+                const Entity* entity_object; // = nullptr;
+            };
         };
         // Collect the entities in the scene into a flat list.
         std::vector<ConstSceneNode> CollectNodes() const;
@@ -585,9 +587,11 @@ namespace game
             // entity into the scene.
             glm::mat4 node_to_scene;
             // Visual representation object of the entity in the scene.
-            Entity* visual_entity = nullptr;
-            // The entity object in the scene.
-            Entity* entity_object = nullptr;
+            union {
+                Entity* visual_entity = nullptr;
+                // The entity object in the scene.
+                Entity* entity_object; // = nullptr;
+            };
         };
         // Collect the entities in the scene into a flat list.
         std::vector<SceneNode> CollectNodes();
@@ -631,7 +635,7 @@ namespace game
 
         void Update(float dt);
 
-        void PostUpdate();
+        void Rebuild();
 
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<EntityNode*>* result)
         { query_spatial_nodes(area_of_interest, result); }
