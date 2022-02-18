@@ -836,10 +836,14 @@ void InitDoc()
     DOC_METHOD_0("game.SpatialNode", "GetSpatialNode", "Get the node's spatial node if any. Returns nil if node has no spatial node.");
     DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity that owns this entity node.");
     DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
+    DOC_METHOD_2("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "float", "sx", "float", "sy");
     DOC_METHOD_1("void", "SetSize", "Set the size that applies to this node.", "glm.vec2", "size");
+    DOC_METHOD_2("void", "SetSize", "Set the size that applies to this node.", "float", "width", "float", "height");
     DOC_METHOD_1("void", "SetTranslation", "Set the node's translation relative to its parent.", "glm.vec2", "translation");
+    DOC_METHOD_2("void", "SetTranslation", "Set the node's translation relative to its parent.", "float", "x", "float", "y");
     DOC_METHOD_1("void", "SetName", "Set the node's instance name.", "string", "name");
-    DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "translation");
+    DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "delta");
+    DOC_METHOD_2("void", "Translate", "Translate the node relative to its current translation.", "float", "dx", "float", "dy");
     DOC_METHOD_1("void", "Rotate", "Rotate the node relative to its current rotation.", "float", "rotation");
 
     DOC_TABLE("game.EntityClass");

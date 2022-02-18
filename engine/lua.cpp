@@ -1934,12 +1934,20 @@ void BindGameLib(sol::state& L)
     entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
     entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
     entity_node["GetEntity"]      = (Entity*(EntityNode::*)(void))&EntityNode::GetEntity;
-    entity_node["SetScale"]       = &EntityNode::SetScale;
-    entity_node["SetSize"]        = &EntityNode::SetSize;
-    entity_node["SetTranslation"] = &EntityNode::SetTranslation;
     entity_node["SetName"]        = &EntityNode::SetName;
-    entity_node["Translate"]      = (void(EntityNode::*)(const glm::vec2&))&EntityNode::Translate;
-    entity_node["Rotate"]         = (void(EntityNode::*)(float))&EntityNode::Rotate;
+    entity_node["SetScale"] = sol::overload(
+        [](EntityNode& node, const glm::vec2& scale) { node.SetScale(scale); },
+        [](EntityNode& node, float sx, float sy) { node.SetScale(sx, sy); });
+    entity_node["SetSize"] = sol::overload(
+        [](EntityNode& node, const glm::vec2& size) { node.SetSize(size); },
+        [](EntityNode& node, float width, float height) { node.SetSize(width, height); });
+    entity_node["SetTranslation"] = sol::overload(
+        [](EntityNode& node, const glm::vec2& position) { node.SetTranslation(position); },
+        [](EntityNode& node, float x, float y) { node.SetTranslation(x, y); });
+    entity_node["Translate"] = sol::overload(
+        [](EntityNode& node, const glm::vec2& delta) { node.Translate(delta); },
+        [](EntityNode& node, float dx, float dy) { node.Translate(dx, dy); });
+    entity_node["Rotate"] = &EntityNode::Rotate;
 
     auto entity_class = table.new_usertype<EntityClass>("EntityClass",
        sol::meta_function::index, &GetScriptVar<EntityClass>);
