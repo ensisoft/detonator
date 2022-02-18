@@ -467,7 +467,7 @@ void Renderer::DrawEntity(const EntityType& entity,
     Visitor visitor(entity, packets, *this, transform, hook);
     TRACE_CALL("Tree::Traverse", tree.PreOrderTraverse(visitor));
 
-    TRACE_SCOPE("Renderer::DrawPackets");
+    TRACE_SCOPE("Renderer::DrawPackets", "packets=%u", packets.size());
 
     // the layer value is negative but for the indexing below
     // we must have positive values only.

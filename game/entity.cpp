@@ -1663,6 +1663,14 @@ bool Entity::HasRigidBodies() const
     return false;
 }
 
+bool Entity::HasSpatialNodes() const
+{
+    for (auto& node : mNodes)
+        if (node->HasSpatialNode())
+            return true;
+    return false;
+}
+
 const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
 {
     return base::SafeIndex(mJoints, index);
