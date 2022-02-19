@@ -6,5 +6,6 @@
       <file>dist/demos/breakout/screenshot.png</file>
       <file>dist/demos/playground/screenshot.png</file>
       <file>dist/demos/ui/screenshot.png</file>
+      <file>dist/starter/derp/screenshot.png</file>
    </qresource>
 </RCC>

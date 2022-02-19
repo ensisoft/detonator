@@ -1810,6 +1810,10 @@ void MainWindow::on_btnUIDemos_clicked()
 {
     LoadDemoWorkspace("demos/ui");
 }
+void MainWindow::on_btnDerp_clicked()
+{
+    LoadDemoWorkspace("starter/derp");
+}
 
 void MainWindow::on_btnMaterial_clicked()
 {

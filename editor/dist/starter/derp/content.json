@@ -589,6 +589,7 @@
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -766,6 +767,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -801,6 +803,7 @@
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -882,6 +885,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0

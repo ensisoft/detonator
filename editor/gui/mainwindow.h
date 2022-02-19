@@ -146,6 +146,7 @@ namespace gui
         void on_btnBreak_clicked();
         void on_btnPlayground_clicked();
         void on_btnUIDemos_clicked();
+        void on_btnDerp_clicked();
         void on_btnMaterial_clicked();
         void on_btnParticle_clicked();
         void on_btnShape_clicked();
