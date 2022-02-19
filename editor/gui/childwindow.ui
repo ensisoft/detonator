@@ -299,7 +299,7 @@
     <string>Pop In</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+I</string>
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
   <action name="actionCut">
