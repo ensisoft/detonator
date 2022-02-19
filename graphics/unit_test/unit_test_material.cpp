@@ -248,6 +248,7 @@ void unit_test_texture()
     klass.SetTextureVelocityX(4.0f);
     klass.SetTextureVelocityY(5.0f);
     klass.SetTextureVelocityZ(-1.0f);
+    klass.SetTextureRotation(2.5f);
     klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
 
     {
@@ -276,6 +277,7 @@ void unit_test_texture()
         TEST_REQUIRE(ret->AsTexture()->GetTextureVelocityX() == real::float32(4.0f));
         TEST_REQUIRE(ret->AsTexture()->GetTextureVelocityY() == real::float32(5.0f));
         TEST_REQUIRE(ret->AsTexture()->GetTextureVelocityZ() == real::float32(-1.0f));
+        TEST_REQUIRE(ret->AsTexture()->GetTextureRotation() == real::float32(2.5f));
         TEST_REQUIRE(ret->AsTexture()->GetParticleAction() == gfx::BuiltInMaterialClass::ParticleAction::Rotate);
     }
 
@@ -331,6 +333,7 @@ void unit_test_sprite()
     klass.SetTextureVelocityX(4.0f);
     klass.SetTextureVelocityY(5.0f);
     klass.SetTextureVelocityZ(-1.0f);
+    klass.SetTextureRotation(2.5f);
     klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
 
     gfx::detail::TextureFileSource texture;
@@ -393,6 +396,7 @@ void unit_test_sprite()
         TEST_REQUIRE(ret->AsSprite()->GetTextureVelocityX() == real::float32(4.0f));
         TEST_REQUIRE(ret->AsSprite()->GetTextureVelocityY() == real::float32(5.0f));
         TEST_REQUIRE(ret->AsSprite()->GetTextureVelocityZ() == real::float32(-1.0f));
+        TEST_REQUIRE(ret->AsSprite()->GetTextureRotation() == real::float32(2.5f));
         TEST_REQUIRE(ret->AsSprite()->GetParticleAction() == gfx::BuiltInMaterialClass::ParticleAction::Rotate);
 
         TEST_REQUIRE(ret->AsSprite()->GetTextureSource(0)->GetSourceType() == gfx::TextureSource::Source::Filesystem);

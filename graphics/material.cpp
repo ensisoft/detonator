@@ -56,6 +56,7 @@ namespace {
 
     struct ShaderData {
         float gamma = 0.0f;
+        float texture_rotation = 0;
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
         gfx::Color4f base_color;
@@ -82,6 +83,8 @@ namespace {
                     line = base::FormatString("const vec2 kTextureVelocityXY = %1;", ToConst(glm::vec2(data.texture_velocity)));
                 else if (base::Contains(line, "kTextureVelocityZ"))
                     line = base::FormatString("const float kTextureVelocityZ = %1;", ToConst(data.texture_velocity.z));
+                else if (base::Contains(line, "kTextureRotation"))
+                    line = base::FormatString("const float kTextureRotation = %1;", ToConst(data.texture_rotation));
                 else if (base::Contains(line, "kColor0"))
                     line = base::FormatString("const vec4 kColor0 = %1;", ToConst(data.color_map[0]));
                 else if (base::Contains(line, "kColor1"))
@@ -935,6 +938,7 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
     mBaseColor       = other.mBaseColor;
     mTextureScale    = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
+    mTextureRotation = other.mTextureRotation;
     mMinFilter       = other.mMinFilter;
     mMagFilter       = other.mMagFilter;
     mWrapX           = other.mWrapX;
@@ -966,6 +970,7 @@ uniform float kApplyRandomParticleRotation;
 uniform vec2 kTextureScale;
 uniform vec2 kTextureVelocityXY;
 uniform float kTextureVelocityZ;
+uniform float kTextureRotation;
 uniform ivec2 kTextureWrap;
 uniform vec2 kAlphaMask;
 
@@ -1001,7 +1006,7 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 vec2 RotateCoords(vec2 coords)
 {
     float random_angle = mix(0.0, vRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
+    float angle = kTextureRotation + kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -1053,9 +1058,10 @@ void main()
 )";
     auto* shader = device.MakeShader(GetProgramId());
     ShaderData data;
-    data.gamma = mGamma;
-    data.texture_scale = mTextureScale;
+    data.gamma            = mGamma;
+    data.texture_scale    = mTextureScale;
     data.texture_velocity = mTextureVelocity;
+    data.texture_rotation = mTextureRotation;
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -1071,6 +1077,7 @@ std::size_t SpriteClass::GetHash() const
     hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mTextureScale);
     hash = base::hash_combine(hash, mTextureVelocity);
+    hash = base::hash_combine(hash, mTextureRotation);
     hash = base::hash_combine(hash, mMinFilter);
     hash = base::hash_combine(hash, mMagFilter);
     hash = base::hash_combine(hash, mWrapX);
@@ -1090,6 +1097,7 @@ std::string SpriteClass::GetProgramId() const
         hash = base::hash_combine(hash, mBaseColor);
         hash = base::hash_combine(hash, mTextureScale);
         hash = base::hash_combine(hash, mTextureVelocity);
+        hash = base::hash_combine(hash, mTextureRotation);
     }
     return std::to_string(hash);
 }
@@ -1179,6 +1187,7 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
         SetUniform("kTextureScale",      state.uniforms, glm::vec2(mTextureScale.x, mTextureScale.y), program);
         SetUniform("kTextureVelocityXY", state.uniforms, glm::vec2(mTextureVelocity.x, mTextureVelocity.y), program);
         SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
+        SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
 }
 
@@ -1189,6 +1198,7 @@ void SpriteClass::ApplyStaticState(Device& device, Program& prog) const
     prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
     prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
+    prog.SetUniform("kTextureRotation", mTextureRotation);
 }
 
 void SpriteClass::IntoJson(data::Writer& data) const
@@ -1206,6 +1216,7 @@ void SpriteClass::IntoJson(data::Writer& data) const
     data.Write("texture_wrap_y", mWrapY);
     data.Write("texture_scale",  mTextureScale);
     data.Write("texture_velocity", mTextureVelocity);
+    data.Write("texture_rotation", mTextureRotation);
     data.Write("particle_action", mParticleAction);
     mSprite.IntoJson(data);
 }
@@ -1224,6 +1235,7 @@ bool SpriteClass::FromJson2(const data::Reader& data)
     data.Read("texture_wrap_y", &mWrapY);
     data.Read("texture_scale",  &mTextureScale);
     data.Read("texture_velocity", &mTextureVelocity);
+    data.Read("texture_rotation", &mTextureRotation);
     data.Read("particle_action", &mParticleAction);
     mSprite.FromJson(data);
     return true;
@@ -1318,6 +1330,7 @@ SpriteClass& SpriteClass::operator=(const SpriteClass& other)
     std::swap(mBaseColor      , tmp.mBaseColor);
     std::swap(mTextureScale   , tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
+    std::swap(mTextureRotation, tmp.mTextureRotation);
     std::swap(mMinFilter      , tmp.mMinFilter);
     std::swap(mMagFilter      , tmp.mMagFilter);
     std::swap(mWrapX          , tmp.mWrapX);
@@ -1338,6 +1351,7 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
     mBaseColor       = other.mBaseColor;
     mTextureScale    = other.mTextureScale;
     mTextureVelocity = other.mTextureVelocity;
+    mTextureRotation = other.mTextureRotation;
     mMinFilter       = other.mMinFilter;
     mMagFilter       = other.mMagFilter;
     mWrapX           = other.mWrapX;
@@ -1365,6 +1379,7 @@ uniform float kRuntime;
 uniform vec2 kTextureScale;
 uniform vec2 kTextureVelocityXY;
 uniform float kTextureVelocityZ;
+uniform float kTextureRotation;
 uniform vec4 kBaseColor;
 // 0 disabled, 1 clamp, 2 wrap
 uniform ivec2 kTextureWrap;
@@ -1401,7 +1416,7 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 vec2 RotateCoords(vec2 coords)
 {
     float random_angle = mix(0.0, vRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
+    float angle = kTextureRotation + kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -1452,6 +1467,7 @@ void main()
     data.base_color       = mBaseColor;
     data.texture_scale    = mTextureScale;
     data.texture_velocity = mTextureVelocity;
+    data.texture_rotation = mTextureRotation;
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -1465,6 +1481,7 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mBaseColor);
     hash = base::hash_combine(hash, mTextureScale);
     hash = base::hash_combine(hash, mTextureVelocity);
+    hash = base::hash_combine(hash, mTextureRotation);
     hash = base::hash_combine(hash, mMinFilter);
     hash = base::hash_combine(hash, mMagFilter);
     hash = base::hash_combine(hash, mWrapX);
@@ -1483,6 +1500,7 @@ std::string TextureMap2DClass::GetProgramId() const
         hash = base::hash_combine(hash, mBaseColor);
         hash = base::hash_combine(hash, mTextureScale);
         hash = base::hash_combine(hash, mTextureVelocity);
+        hash = base::hash_combine(hash, mTextureRotation);
     }
     return std::to_string(hash);
 }
@@ -1561,6 +1579,7 @@ void TextureMap2DClass::ApplyDynamicState(State& state, Device& device, Program&
         SetUniform("kTextureScale",      state.uniforms, glm::vec2(mTextureScale.x, mTextureScale.y), program);
         SetUniform("kTextureVelocityXY", state.uniforms, glm::vec2(mTextureVelocity.x, mTextureVelocity.y), program);
         SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
+        SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
 }
 
@@ -1571,6 +1590,7 @@ void TextureMap2DClass::ApplyStaticState(Device& device, Program& prog) const
     prog.SetUniform("kTextureScale",      mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
     prog.SetUniform("kTextureVelocityZ",  mTextureVelocity.z);
+    prog.SetUniform("kTextureRotation",   mTextureRotation);
 }
 
 void TextureMap2DClass::IntoJson(data::Writer& data) const
@@ -1587,6 +1607,7 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
     data.Write("texture_wrap_y", mWrapY);
     data.Write("texture_scale",  mTextureScale);
     data.Write("texture_velocity", mTextureVelocity);
+    data.Write("texture_rotation", mTextureRotation);
     data.Write("particle_action", mParticleAction);
     mTexture.IntoJson(data);
 }
@@ -1604,6 +1625,7 @@ bool TextureMap2DClass::FromJson2(const data::Reader& data)
     data.Read("texture_wrap_y", &mWrapY);
     data.Read("texture_scale",  &mTextureScale);
     data.Read("texture_velocity", &mTextureVelocity);
+    data.Read("texture_rotation", &mTextureRotation);
     data.Read("particle_action", &mParticleAction);
     mTexture.FromJson(data);
     return true;
@@ -1689,6 +1711,7 @@ TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
     std::swap(mBaseColor      , tmp.mBaseColor);
     std::swap(mTextureScale   , tmp.mTextureScale);
     std::swap(mTextureVelocity, tmp.mTextureVelocity);
+    std::swap(mTextureRotation, tmp.mTextureRotation);
     std::swap(mMinFilter      , tmp.mMinFilter);
     std::swap(mMagFilter      , tmp.mMagFilter);
     std::swap(mWrapX          , tmp.mWrapX);
