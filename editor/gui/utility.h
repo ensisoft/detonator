@@ -466,6 +466,15 @@ inline float GetNormalizedValue(QSlider* slider)
     return (val - min) / range;
 }
 
+inline float GetAngle(const QDoubleSpinBox* spin)
+{
+    return qDegreesToRadians((float)spin->value());
+}
+inline void SetAngle(QDoubleSpinBox* spin, float value)
+{
+    SetValue(spin, qRadiansToDegrees(value));
+}
+
 template<typename Widget, typename Value> inline
 void SetUIValue(Widget* widget, const Value& value)
 {

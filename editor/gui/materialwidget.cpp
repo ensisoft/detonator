@@ -680,6 +680,8 @@ void MaterialWidget::on_scaleX_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_scaleY_valueChanged(double)
 { SetMaterialProperties(); }
+void MaterialWidget::on_rotation_valueChanged(double)
+{ SetMaterialProperties(); }
 void MaterialWidget::on_velocityX_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_velocityY_valueChanged(double)
@@ -1189,6 +1191,7 @@ void MaterialWidget::SetMaterialProperties()
         ptr->SetTextureMagFilter(GetValue(mUI.magFilter));
         ptr->SetTextureScaleX(GetValue(mUI.scaleX));
         ptr->SetTextureScaleY(GetValue(mUI.scaleY));
+        ptr->SetTextureRotation(GetAngle(mUI.rotation));
         ptr->SetTextureWrapX(GetValue(mUI.wrapX));
         ptr->SetTextureWrapY(GetValue(mUI.wrapY));
         ptr->SetTextureVelocityX(GetValue(mUI.velocityX));
@@ -1203,6 +1206,7 @@ void MaterialWidget::SetMaterialProperties()
         ptr->SetTextureMagFilter(GetValue(mUI.magFilter));
         ptr->SetTextureScaleX(GetValue(mUI.scaleX));
         ptr->SetTextureScaleY(GetValue(mUI.scaleY));
+        ptr->SetTextureRotation(GetAngle(mUI.rotation));
         ptr->SetTextureWrapX(GetValue(mUI.wrapX));
         ptr->SetTextureWrapY(GetValue(mUI.wrapY));
         ptr->SetTextureVelocityX(GetValue(mUI.velocityX));
@@ -1267,9 +1271,10 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.gradientOffsetY, NormalizedFloat(0.5f));
     SetValue(mUI.scaleX,    1.0f);
     SetValue(mUI.scaleY,    1.0f);
-    SetValue(mUI.velocityX, 1.0f);
-    SetValue(mUI.velocityY, 1.0f);
-    SetValue(mUI.velocityZ, 1.0f);
+    SetValue(mUI.rotation,       0.0f);
+    SetValue(mUI.velocityX, 0.0f);
+    SetValue(mUI.velocityY, 0.0f);
+    SetValue(mUI.velocityZ, 0.0f);
     SetValue(mUI.minFilter, gfx::MaterialClass::MinTextureFilter::Default);
     SetValue(mUI.magFilter, gfx::MaterialClass::MagTextureFilter::Default);
     SetValue(mUI.wrapX,     gfx::MaterialClass::TextureWrapping::Clamp);
@@ -1428,6 +1433,7 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.magFilter, ptr->GetTextureMagFilter());
         SetValue(mUI.scaleX,    ptr->GetTextureScaleX());
         SetValue(mUI.scaleY,    ptr->GetTextureScaleY());
+        SetAngle(mUI.rotation,  ptr->GetTextureRotation());
         SetValue(mUI.wrapX,     ptr->GetTextureWrapX());
         SetValue(mUI.wrapY,     ptr->GetTextureWrapY());
         SetValue(mUI.velocityX, ptr->GetTextureVelocityX());
@@ -1478,6 +1484,7 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.magFilter, ptr->GetTextureMagFilter());
         SetValue(mUI.scaleX,    ptr->GetTextureScaleX());
         SetValue(mUI.scaleY,    ptr->GetTextureScaleY());
+        SetAngle(mUI.rotation,  ptr->GetTextureRotation());
         SetValue(mUI.wrapX,     ptr->GetTextureWrapX());
         SetValue(mUI.wrapY,     ptr->GetTextureWrapY());
         SetValue(mUI.velocityX, ptr->GetTextureVelocityX());
