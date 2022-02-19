@@ -805,7 +805,7 @@
      <item>
       <widget class="QLabel" name="label_11">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to maintain aspect ratio when resizing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to maintain aspect ratio when&lt;br/&gt;resizing a node.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;&lt;br/&gt;Hold Control key to toggle &amp;quot;Snap to grid&amp;quot; when &lt;br/&gt;moving a node.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
@@ -815,6 +815,9 @@
        </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+       <property name="margin">
+        <number>10</number>
        </property>
       </widget>
      </item>
