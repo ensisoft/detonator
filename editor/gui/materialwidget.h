@@ -99,6 +99,7 @@ namespace gui
         void on_gradientOffsetY_valueChanged(int value);
         void on_scaleX_valueChanged(double);
         void on_scaleY_valueChanged(double);
+        void on_rotation_valueChanged(double);
         void on_velocityX_valueChanged(double);
         void on_velocityY_valueChanged(double);
         void on_velocityZ_valueChanged(double);
