@@ -1126,6 +1126,11 @@ void MainWindow::on_actionExportJSON_triggered()
         return;
     }
     NOTE("Exported %1 resource(s) into '%2'", indices.size(), filename);
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Information);
+    msg.setStandardButtons(QMessageBox::Ok);
+    msg.setText(tr("Exported %1 resource(s) into '%2'").arg(indices.size()).arg(filename));
+    msg.exec();
 }
 
 void MainWindow::on_actionImportJSON_triggered()
@@ -1168,7 +1173,14 @@ void MainWindow::on_actionImportJSON_triggered()
         ++import_count;
     }
     if (import_count)
+    {
         NOTE("Imported %1 resources into workspace.", import_count);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Information);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Iimported %1 resources into workspace.").arg(import_count));
+        msg.exec();
+    }
 }
 
 void MainWindow::on_actionEditResource_triggered()
