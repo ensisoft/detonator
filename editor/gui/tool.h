@@ -70,48 +70,33 @@ namespace gui
     {
     public:
         explicit
-        MoveCameraTool(CameraState& state) : mState(state)
+        MoveCameraTool(CameraState& state)
+          : mState(state)
         {}
         virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
         {}
         virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
         {
-            if (mEngaged)
-            {
-                const auto& pos = mickey->pos();
-                const auto& delta = pos - mMousePos;
-                const float x = delta.x();
-                const float y = delta.y();
-                mState.camera_offset_x += x;
-                mState.camera_offset_y += y;
-                //DEBUG("Camera offset %1, %2", mState.camera_offset_x, mState.camera_offset_y);
-                mMousePos = pos;
-            }
+            const auto& pos = mickey->pos();
+            const auto& delta = pos - mMousePos;
+            const float x = delta.x();
+            const float y = delta.y();
+            mState.camera_offset_x += x;
+            mState.camera_offset_y += y;
+            mMousePos = pos;
         }
         virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
         {
-            const auto button = mickey->button();
-            if (button == Qt::LeftButton)
-            {
-                mMousePos = mickey->pos();
-                mEngaged = true;
-            }
+            mMousePos = mickey->pos();
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
         {
-            const auto button = mickey->button();
-            if (button == Qt::LeftButton)
-            {
-                mEngaged = false;
-                return true;
-            }
-            return false;
+            // done on mouse release
+            return true;
         }
     private:
         CameraState& mState;
-    private:
         QPoint mMousePos;
-        bool mEngaged = false;
     };
 
     template<typename TreeModel, typename TreeNode>

@@ -1527,7 +1527,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
     view.Rotate((float)qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    if (!mCurrentTool)
+    if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
         glm::vec2 scene_node_hitpos;
         auto scene_node = SelectNode(mickey->pos(), &scene_node_hitpos);
@@ -1562,8 +1562,12 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
         else
         {
             mUI.tree->ClearSelection();
-            mCurrentTool.reset(new MoveCameraTool(mState));
+
         }
+    }
+    else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
+    {
+        mCurrentTool.reset(new MoveCameraTool(mState));
     }
 
     if (mCurrentTool)

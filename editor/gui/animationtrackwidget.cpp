@@ -1774,7 +1774,9 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
     view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    if (!mCurrentTool && mPlayState == PlayState::Stopped)
+    if (!mCurrentTool &&
+        (mPlayState == PlayState::Stopped) &&
+        (mickey->button() == Qt::LeftButton))
     {
         auto* current = GetCurrentNode();
         auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mEntity, current);
@@ -1820,10 +1822,13 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
             SetActuatorUIEnabled(false);
         }
     }
-    if (!mCurrentTool)
+    else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
+    {
         mCurrentTool.reset(new MoveCameraTool(mState));
+    }
 
-    mCurrentTool->MousePress(mickey, view);
+    if (mCurrentTool)
+        mCurrentTool->MousePress(mickey, view);
 }
 void AnimationTrackWidget::MouseRelease(QMouseEvent* mickey)
 {

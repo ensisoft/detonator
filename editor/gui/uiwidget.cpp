@@ -1412,7 +1412,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
         if (action.type != uik::WidgetActionType::None)
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
     }
-    else if (!mCurrentTool)
+    else if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
         const auto snap = (bool)GetValue(mUI.chkSnap);
         const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
@@ -1440,9 +1440,13 @@ void UIWidget::MousePress(QMouseEvent* mickey)
         else
         {
             mUI.tree->ClearSelection();
-            mCurrentTool.reset(new MoveCameraTool(mState));
         }
     }
+    else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
+    {
+        mCurrentTool.reset(new MoveCameraTool(mState));
+    }
+
     if (mCurrentTool)
         mCurrentTool->MousePress(mickey, view);
 }
