@@ -1806,6 +1806,10 @@ void MainWindow::on_btnPlayground_clicked()
 {
     LoadDemoWorkspace("demos/playground");
 }
+void MainWindow::on_btnUIDemos_clicked()
+{
+    LoadDemoWorkspace("demos/ui");
+}
 
 void MainWindow::on_btnMaterial_clicked()
 {
