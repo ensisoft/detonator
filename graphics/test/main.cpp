@@ -543,7 +543,7 @@ public:
             gfx::FillRect(painter, gfx::FRect(750, 300, 128, 128), gfx::MaterialClassInst(material));
         }
 
-        // texture velocity
+        // texture velocity + rotation
         {
             gfx::TextureMap2DClass material;
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
@@ -576,6 +576,15 @@ public:
             material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), gfx::MaterialClassInst(material, mTime));
+
+            material.SetTextureVelocityX(0.0f);
+            material.SetTextureVelocityY(0.0f);
+            material.SetTextureVelocityZ(0.0f);
+            material.SetTextureRotation(0.25f * math::Pi);
+            material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            gfx::FillRect(painter, gfx::FRect(750, 450, 128, 128), gfx::MaterialClassInst(material, mTime));
         }
     }
     virtual void Update(float dt)
@@ -717,7 +726,7 @@ public:
             gfx::FillRect(painter, gfx::FRect(750, 300, 128, 128), material);
         }
 
-        // texture velocity
+        // texture velocity + rotation
         {
             mMaterial->SetTextureScaleX(1.0f);
             mMaterial->SetTextureScaleY(1.0f);
@@ -738,7 +747,6 @@ public:
             mMaterial->SetTextureVelocityY(0.2);
             gfx::FillRect(painter, gfx::FRect(300, 450, 128, 128), material);
 
-
             SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             mMaterial->SetTextureVelocityX(0.0f);
             mMaterial->SetTextureVelocityY(0.0f);
@@ -747,7 +755,6 @@ public:
             mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(450, 450, 128, 128), material);
 
-
             SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             mMaterial->SetTextureVelocityX(0.0f);
             mMaterial->SetTextureVelocityY(0.0f);
@@ -755,6 +762,15 @@ public:
             mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
             mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(600, 450, 128, 128), material);
+
+            SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureVelocityX(0.0f);
+            mMaterial->SetTextureVelocityY(0.0f);
+            mMaterial->SetTextureVelocityZ(0.0f);
+            mMaterial->SetTextureRotation(0.25 * math::Pi);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(750, 450, 128, 128), material);
         }
 
         mMaterial->SetTextureVelocityX(0.0f);
@@ -762,6 +778,7 @@ public:
         mMaterial->SetTextureVelocityZ(0.0f);
         mMaterial->SetTextureScaleX(1.0f);
         mMaterial->SetTextureScaleY(1.0f);
+        mMaterial->SetTextureRotation(0.0f);
         SetRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
 
     }

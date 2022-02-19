@@ -1094,6 +1094,8 @@ namespace gfx
         { mTextureVelocity.y = y; }
         void SetTextureVelocityZ(float angle_radians)
         { mTextureVelocity.z = angle_radians; }
+        void SetTextureRotation(float angle_radians)
+        { mTextureRotation = angle_radians; }
         void SetTextureVelocity(const glm::vec2 linear, float radial)
         { mTextureVelocity = glm::vec3(linear, radial); }
         void SetFps(float fps)
@@ -1122,6 +1124,8 @@ namespace gfx
         { return mTextureVelocity.y; }
         float GetTextureVelocityZ() const
         { return mTextureVelocity.z; }
+        float GetTextureRotation() const
+        { return mTextureRotation; }
         MinTextureFilter GetTextureMinFilter() const
         { return mMinFilter; }
         MagTextureFilter GetTextureMagFilter() const
@@ -1151,6 +1155,7 @@ namespace gfx
         gfx::Color4f mBaseColor = gfx::Color::White;
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+        float mTextureRotation = 0.0f;
         MinTextureFilter mMinFilter = MinTextureFilter::Default;
         MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
@@ -1198,6 +1203,8 @@ namespace gfx
         { mTextureVelocity.y = y; }
         void SetTextureVelocityZ(float angle_radians)
         { mTextureVelocity.z = angle_radians; }
+        void SetTextureRotation(float angle_radians)
+        { mTextureRotation = angle_radians; }
         void SetTextureVelocity(const glm::vec2 linear, float radial)
         { mTextureVelocity = glm::vec3(linear, radial); }
         void SetBaseColor(const Color4f& color)
@@ -1222,6 +1229,8 @@ namespace gfx
         { return mTextureVelocity.y; }
         float GetTextureVelocityZ() const
         { return mTextureVelocity.z; }
+        float GetTextureRotation() const
+        { return mTextureRotation; }
         MinTextureFilter GetTextureMinFilter() const
         { return mMinFilter; }
         MagTextureFilter GetTextureMagFilter() const
@@ -1251,6 +1260,7 @@ namespace gfx
         gfx::Color4f mBaseColor;
         glm::vec2 mTextureScale = {1.0f, 1.0f};
         glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+        float mTextureRotation = 0.0f;
         MinTextureFilter mMinFilter = MinTextureFilter::Default;
         MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
