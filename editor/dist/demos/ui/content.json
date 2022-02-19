@@ -1,0 +1,927 @@
+{
+  "materials": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 0.10824750363826752,
+        "g": 0.1902189701795578,
+        "r": 0.7007858157157898
+      },
+      "gamma": 1.0,
+      "id": "yTsaLXKonJ",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "yTsaLXKonJ",
+      "resource_name": "Top Secret",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "buffer": {
+          "height": 512,
+          "horizontal_alignment": "AlignCenter",
+          "texts": [
+            {
+              "font_file": "app://fonts/Top_Secret.ttf",
+              "font_size": 78,
+              "line_height": 1.0,
+              "string": "top\nsecret",
+              "underline": false
+            }
+          ],
+          "vertical_alignment": "AlignCenter",
+          "width": 512
+        },
+        "id": "Kni3liNI6b",
+        "name": "TextBuffer",
+        "type": "TextBuffer"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_rotation": -0.593411922454834,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    }
+  ],
+  "scripts": [
+    {
+      "id": "Xg0GdRiaQU",
+      "resource_id": "Xg0GdRiaQU",
+      "resource_name": "game",
+      "uri": "ws://lua/game.lua"
+    }
+  ],
+  "uis": [
+    {
+      "id": "GUqwuv4TMH",
+      "name": "Label Demo",
+      "resource_id": "GUqwuv4TMH",
+      "resource_name": "Label Demo",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "WmgHfUqwon",
+              "name": "Form",
+              "position": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "size": {
+                "h": 768.0,
+                "w": 1024.0
+              },
+              "style": "null",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "UvPKwyPCkt",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 50.0,
+                    "y": 50.0
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "sW3r6E9Meb",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 250.5,
+                    "y": 50.5
+                  },
+                  "size": {
+                    "h": 119.0,
+                    "w": 262.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "0sIf0r2AED",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 500.5,
+                    "y": 0.5
+                  },
+                  "size": {
+                    "h": 248.0,
+                    "w": 483.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-size\",\"value\":48},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-size\",\"value\":48}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "d4U2qdAOSE",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 50.5,
+                    "y": 300.5
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "KkKp6CtDRz",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 250.5,
+                    "y": 300.5
+                  },
+                  "size": {
+                    "h": 119.0,
+                    "w": 262.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "7OJYfurZko",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 500.5,
+                    "y": 250.5
+                  },
+                  "size": {
+                    "h": 248.0,
+                    "w": 483.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"edit-text-size\",\"value\":48},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-size\",\"value\":48}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "tux1DqOI3s",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 90.5,
+                    "y": 467.5
+                  },
+                  "size": {
+                    "h": 262.0,
+                    "w": 840.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":72},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/orbitron-black.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/orbitron-black.otf\"},{\"key\":\"edit-text-size\",\"value\":72},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "x8itAE59QO",
+      "name": "All Widgets",
+      "resource_id": "x8itAE59QO",
+      "resource_name": "All Widgets",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "WmgHfUqwon",
+              "name": "Form",
+              "position": {
+                "x": -0.0,
+                "y": -0.0
+              },
+              "size": {
+                "h": 768.0,
+                "w": 1024.0
+              },
+              "style": "null",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "66ymsb3U6X",
+                  "name": "PushButton_1",
+                  "position": {
+                    "x": 100.0,
+                    "y": 300.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "null",
+                  "text": "PushButton",
+                  "type": "PushButton"
+                },
+                {
+                  "check": "Left",
+                  "checked": false,
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "aGOLGxuqQn",
+                  "name": "CheckBox_1",
+                  "position": {
+                    "x": 500.5,
+                    "y": 150.5
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "null",
+                  "text": "Check",
+                  "type": "CheckBox"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "pSxuFIIhFT",
+                  "name": "GroupBox_1",
+                  "position": {
+                    "x": 700.0,
+                    "y": 200.0
+                  },
+                  "size": {
+                    "h": 194.0,
+                    "w": 238.0
+                  },
+                  "style": "null",
+                  "text": "GroupBox",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "l8le8jPFHI",
+                      "max": 100,
+                      "min": 0,
+                      "name": "SpinBox_1",
+                      "position": {
+                        "x": 100.5,
+                        "y": 50.5
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "null",
+                      "type": "SpinBox",
+                      "value": 0
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "Ms1hvM5ALL",
+                      "line_height": 1.0,
+                      "name": "Label_2",
+                      "position": {
+                        "x": 0.5,
+                        "y": 50.5
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "null",
+                      "text": "X\n",
+                      "type": "Label"
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "ad09aCsoyL",
+                      "max": 100,
+                      "min": 0,
+                      "name": "SpinBox_2",
+                      "position": {
+                        "x": 100.5,
+                        "y": 100.5
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "null",
+                      "type": "SpinBox",
+                      "value": 4
+                    },
+                    {
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "KpjJGdXTxL",
+                      "line_height": 1.0,
+                      "name": "Label_2",
+                      "position": {
+                        "x": 0.5,
+                        "y": 100.5
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "null",
+                      "text": "Y\n",
+                      "type": "Label"
+                    }
+                  ]
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "hmTDuy1gSj",
+                  "name": "Slider_1",
+                  "position": {
+                    "x": 100.0,
+                    "y": 150.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 300.0
+                  },
+                  "style": "null",
+                  "type": "Slider",
+                  "value": 0.5
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "Lj0IasPSu1",
+                  "name": "ProgressBar_1",
+                  "position": {
+                    "x": 100.0,
+                    "y": 100.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 300.0
+                  },
+                  "style": "null",
+                  "text": "%1%",
+                  "type": "ProgressBar",
+                  "value": 0.5
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "6imPiOHwzS",
+                  "name": "PushButton_1",
+                  "position": {
+                    "x": 100.5,
+                    "y": 400.5
+                  },
+                  "size": {
+                    "h": 81.0,
+                    "w": 103.0
+                  },
+                  "style": "null",
+                  "text": "PushButton",
+                  "type": "PushButton"
+                },
+                {
+                  "check": "Left",
+                  "checked": true,
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "2LZwOrLBxG",
+                  "name": "CheckBox_1",
+                  "position": {
+                    "x": 500.5,
+                    "y": 200.5
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "null",
+                  "text": "Check",
+                  "type": "CheckBox"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "LIBjFIJF8y",
+                  "line_height": 1.0,
+                  "name": "Label_4",
+                  "position": {
+                    "x": 400.0,
+                    "y": 50.0
+                  },
+                  "size": {
+                    "h": 33.0,
+                    "w": 243.0
+                  },
+                  "style": "null",
+                  "text": "app://ui/default.json\n",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "jWI4vMkr99",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 150.0,
+                    "y": 500.0
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "JILHgLkuHI",
+                  "name": "ProgressBar_2",
+                  "position": {
+                    "x": 100.0,
+                    "y": 200.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 300.0
+                  },
+                  "style": "null",
+                  "text": "Loading...",
+                  "type": "ProgressBar"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "svzhtEnG1T",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 450.5,
+                    "y": 500.5
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "xCoomK6GXS",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 750.5,
+                    "y": 500.5
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/After_Shok.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/After_Shok.ttf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "uHHkIspz3i",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 150.5,
+                    "y": 600.5
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lY3kN6XYDn",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 425.5,
+                    "y": 602.5
+                  },
+                  "size": {
+                    "h": 114.0,
+                    "w": 248.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "0Bsai1r6As",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 750.5,
+                    "y": 600.5
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 200.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/OpenSans-BoldItalic.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/OpenSans-BoldItalic.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "text": "Quick brown fox\njumps over\nthe lazy dog",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "dojpmPKkG3",
+                  "name": "PushButton_1",
+                  "position": {
+                    "x": 250.5,
+                    "y": 300.5
+                  },
+                  "size": {
+                    "h": 175.0,
+                    "w": 184.0
+                  },
+                  "style": "null",
+                  "text": "PushButton",
+                  "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "87Mqak5WUO",
+                  "name": "PushButton_1",
+                  "position": {
+                    "x": 100.0,
+                    "y": 350.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "null",
+                  "text": "PushButton",
+                  "type": "PushButton"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C34ZUG5Ums",
+      "name": "Top Secret",
+      "resource_id": "C34ZUG5Ums",
+      "resource_name": "Top Secret",
+      "style": "app://ui/default.json",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "uEBttlDlEj",
+              "name": "Form",
+              "position": {
+                "x": -0.0,
+                "y": -0.0
+              },
+              "size": {
+                "h": 768.0,
+                "w": 1024.0
+              },
+              "style": "",
+              "type": "Form",
+              "widgets": [
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "XmrGxDIWNM",
+                  "line_height": 1.0,
+                  "name": "Label_1",
+                  "position": {
+                    "x": 300.0,
+                    "y": 150.0
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":26},{\"key\":\"edit-text-size\",\"value\":26}]}",
+                  "text": "OPERATION GAMESTUDIO",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "1RjCE3th7x",
+                  "line_height": 1.2000000476837158,
+                  "name": "Label_2",
+                  "position": {
+                    "x": 300.0,
+                    "y": 240.0
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.10783550888299942,\"r\":1.0}},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.10783550888299942,\"r\":1.0}}]}",
+                  "text": "WARNING\n!This document will self destruct!",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "FtFW88bKo3",
+                  "line_height": 1.0,
+                  "name": "Label_3",
+                  "position": {
+                    "x": 0.0,
+                    "y": 240.0
+                  },
+                  "size": {
+                    "h": 512.0,
+                    "w": 512.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"yTsaLXKonJ\",\"type\":\"Reference\"}]}",
+                  "text": "\n",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "nO1NLlpjQf",
+                  "name": "PushButton_1",
+                  "position": {
+                    "x": 380.0,
+                    "y": 400.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.9754177331924438}},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.9754177331924438}}]}",
+                  "text": "PLAY",
+                  "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "UiuggTSauD",
+                  "name": "PushButton_2",
+                  "position": {
+                    "x": 520.0,
+                    "y": 400.0
+                  },
+                  "size": {
+                    "h": 30.0,
+                    "w": 100.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.23942930996418,\"g\":0.42349889874458313,\"r\":0.23526360094547272}},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.23942930996418,\"g\":0.42349889874458313,\"r\":0.23526360094547272}}]}",
+                  "text": "QUIT",
+                  "type": "PushButton"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "akNMvtk5zT",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 600.0,
+                    "y": 600.0
+                  },
+                  "size": {
+                    "h": 40.0,
+                    "w": 361.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+                  "text": "Press Left or Right arrow to navigate\n",
+                  "type": "Label"
+                },
+                {
+                  "flags": {
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gThYkqaJrm",
+                  "line_height": 1.0,
+                  "name": "Label_5",
+                  "position": {
+                    "x": 600.0,
+                    "y": 640.0
+                  },
+                  "size": {
+                    "h": 40.0,
+                    "w": 361.0
+                  },
+                  "style": "{\"properties\":[{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+                  "text": "Press Esc to exit\n",
+                  "type": "Label"
+                }
+              ]
+            },
+            {
+              "flags": {
+                "Enabled": true,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "idsJaP5L18",
+              "line_height": 1.2999999523162842,
+              "name": "Label_1",
+              "position": {
+                "x": 50.0,
+                "y": 50.0
+              },
+              "size": {
+                "h": 128.0,
+                "w": 382.0
+              },
+              "style": "{\"properties\":[{\"key\":\"text-vertical-align\",\"value\":\"Top\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+              "text": "Location: Undisclosed\nDate and Time: Undisclosed\nAgent: Undisclosed\nContact: samiv@ensisoft.com\n\n\n\n\n",
+              "type": "Label"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
