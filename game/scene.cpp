@@ -1174,9 +1174,16 @@ void Scene::EndLoop()
     {
         // turn off spawn flags.
         entity->SetFlag(Entity::ControlFlags::Spawned, false);
+        // if the entity needs to be killed (i.e. Entity::Die was called instead
+        // of Scene::KillEntity then we put the entity in the killset now
+        // for killing it on next loop iteration
+        if (entity->TestFlag(Entity::ControlFlags::WantsToDie) &&
+            !entity->TestFlag(Entity::ControlFlags::Killed))
+            mKillSet.insert(entity.get());
 
         if (!entity->TestFlag(Entity::ControlFlags::Killed))
             continue;
+
         if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
             DEBUG("Entity '%1/%2' was deleted.", entity->GetClassName(), entity->GetName());
         mRenderTree.DeleteNode(entity.get());

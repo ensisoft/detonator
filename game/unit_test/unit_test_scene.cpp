@@ -611,7 +611,7 @@ void unit_test_scene_instance_kill()
     // duplicate kill while already killed
     {
         game::Scene scene(klass);
-            scene.BeginLoop();
+        scene.BeginLoop();
             game::EntityArgs args;
             args.klass = entity;
             args.name  = "0";
@@ -631,6 +631,35 @@ void unit_test_scene_instance_kill()
             TEST_REQUIRE(scene.GetNumEntities() == 1);
             TEST_REQUIRE(scene.GetEntity(0).HasBeenKilled());
             scene.KillEntity(&scene.GetEntity(0));
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 0);
+        scene.EndLoop();
+    }
+
+    // Entity wants to die.
+    {
+        game::Scene scene(klass);
+        scene.BeginLoop();
+            game::EntityArgs args;
+            args.klass = entity;
+            args.name  = "0";
+            args.id    = "0";
+            scene.SpawnEntity(args);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 1);
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            scene.GetEntity(0).Die();
+        scene.EndLoop();
+
+        scene.BeginLoop();
+            TEST_REQUIRE(scene.GetNumEntities() == 1);
+            TEST_REQUIRE(scene.GetEntity(0).HasBeenKilled());
         scene.EndLoop();
 
         scene.BeginLoop();
