@@ -1697,7 +1697,8 @@ namespace game
         // Get the previously completed animation track (if any).
         // This is a transient state that only exists for one
         // iteration of the game loop after the animation is done.
-        const Animation* GetFinishedAnimation() const;
+        const Animation* GetFinishedAnimation() const
+        { return mFinishedAnimation.get(); }
 
         double GetLifetime() const
         { return mLifetime; }

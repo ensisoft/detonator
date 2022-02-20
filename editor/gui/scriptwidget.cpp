@@ -856,6 +856,23 @@ void InitDoc()
                  "The entity class's script variables are accessible as properties of the entity class object.<br>"
                  "For example a script variable named 'score' would be accessible as object.score.<br>");
 
+    DOC_TABLE("game.AnimationClass");
+    DOC_METHOD_0("string", "GetName", "Get the animation class name.");
+    DOC_METHOD_0("string", "GetId", "Get the animation class ID.");
+    DOC_METHOD_0("float", "GetDuration", "Get the duration of the animation in seconds.");
+    DOC_METHOD_0("float", "GetDelay", "Get the animation delay in seconds.");
+    DOC_METHOD_0("bool", "IsLooping", "Check whether the animation is looping or not.");
+
+    DOC_TABLE("game.Animation");
+    DOC_METHOD_0("string", "GetClassName", "Get the animation class name.");
+    DOC_METHOD_0("string", "GetClassId", "Get the animation class ID.");
+    DOC_METHOD_0("bool", "IsComplete", "Check whether the animation has finished or not.");
+    DOC_METHOD_0("bool", "IsLooping", "Check whether the animation is looping or not.");
+    DOC_METHOD_1("void", "SetDelay", "Set the animation delay in seconds.", "float", "delay");
+    DOC_METHOD_0("float", "GetDelay", "Get the animation delay in seconds.");
+    DOC_METHOD_0("float", "GetCurrentTime", "Get the current animation time in seconds.");
+    DOC_METHOD_0("game.AnimationClass", "GetClass", "Get the class object.");
+
     DOC_TABLE("game.Entity");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The entity's script variables are accessible as properties of the entity object.<br>"
@@ -890,9 +907,14 @@ void InitDoc()
                                                             "If multiple nodes have the same ID it's unspecified which one is returned.<br>"
                                                             "Returns nil if no such node could be found.",
                  "string", "id");
-    DOC_METHOD_0("void", "PlayIdle", "Play the entity's idle animation (if any).");
-    DOC_METHOD_0("void", "PlayAnimationByName", "Play an animation track by the given name.");
-    DOC_METHOD_0("void", "PlayAnimationById", "Play an animation track by the given ID.");
+    DOC_METHOD_0("game.Animation", "PlayIdle", "Play the entity's idle animation (if any).<br>"
+                                               "Returns nil if the entity doesn't have any idle animation or is already playing an animation.");
+    DOC_METHOD_0("game.Animation", "PlayAnimationByName", "Play an animation by the given name if found.<br>"
+                                                          "Any current animation is replaced by this new animation.<br>"
+                                                          "Returns the animation instance or nil if no such animation could be found.");
+    DOC_METHOD_0("game.Animation", "PlayAnimationById", "Play an animation by the given ID.<br>"
+                                                        "Any current animation is replaced by this new animation.<br>"
+                                                        "Returns the animation instance or nil if no such animation could be found.");
     DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
 
     DOC_TABLE("game.EntityArgs");
