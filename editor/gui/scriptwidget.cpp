@@ -773,6 +773,7 @@ void InitDoc()
     DOC_METHOD_0("string", "GetPolygonShapeId", "Get the ID of the polygonal shape for the physics body.");
     DOC_METHOD_0("glm.vec2", "GetLinearVelocity", "Get the current linear velocity (m/s) of the rigid body.");
     DOC_METHOD_0("float", "GetAngularVelocity", "Get the current angular (rotational) velocity (rad/s) of the rigid body.");
+    DOC_METHOD_1("void", "Enable", "Enable or disable the body in physics simulation.", "bool", "enabled");
     DOC_METHOD_1("void", "AdjustLinearVelocity", "Set a value (m/s) to adjust the linear velocity of the the rigid body.<br>"
                                                  "The adjustment will be applied on the next iteration of the physics update",
                  "glm.vec2", "velocity");
