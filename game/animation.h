@@ -723,10 +723,10 @@ namespace game
         { mLooping = looping; }
 
         // Get the human-readable name of the animation track.
-        std::string GetName() const
+        const std::string& GetName() const
         { return mName; }
         // Get the id of this animation class object.
-        std::string GetId() const
+        const std::string& GetId() const
         { return mId; }
         // Get the normalized duration of the animation track.
         float GetDuration() const
@@ -841,8 +841,10 @@ namespace game
         bool IsLooping() const
         { return mClass->IsLooping(); }
         // Get the human-readable name of the animation track.
-        std::string GetName() const
+        const std::string& GetClassName() const
         { return mClass->GetName(); }
+        const std::string& GetClassId() const
+        { return mClass->GetId(); }
         // get the current time.
         float GetCurrentTime() const
         { return mCurrentTime; }
