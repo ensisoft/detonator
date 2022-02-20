@@ -37,6 +37,9 @@
 #include "data/fwd.h"
 #include "game/types.h"
 
+// possible windows.h pollution
+#undef GetCurrentTime
+
 namespace game
 {
     class EntityNode;

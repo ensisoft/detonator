@@ -1039,11 +1039,14 @@ void ScriptEngine::Update(double game_time, double dt)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::UpdateEntity))
-            continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["Update"], entity, game_time, dt);
+            if (const auto* anim = entity->GetFinishedAnimation()) {
+                CallLua((*env)["OnAnimationFinished"], entity, anim);
+            }
+            if (entity->TestFlag(Entity::Flags::UpdateEntity)) {
+                CallLua((*env)["Update"], entity, game_time, dt);
+            }
         }
     }
 }
@@ -1956,6 +1959,23 @@ void BindGameLib(sol::state& L)
     entity_class["GetId"]   = &EntityClass::GetId;
     entity_class["GetName"] = &EntityClass::GetName;
     entity_class["GetLifetime"] = &EntityClass::GetLifetime;
+
+    auto anim_class = table.new_usertype<AnimationClass>("AnimationClass");
+    anim_class["GetName"]     = &AnimationClass::GetName;
+    anim_class["GetId"]       = &AnimationClass::GetId;
+    anim_class["GetDuration"] = &AnimationClass::GetDuration;
+    anim_class["GetDelay"]    = &AnimationClass::GetDelay;
+    anim_class["IsLooping"]   = &AnimationClass::IsLooping;
+
+    auto anim = table.new_usertype<Animation>("Animation");
+    anim["GetClassName"]   = &Animation::GetClassName;
+    anim["GetClassId"]     = &Animation::GetClassId;
+    anim["IsComplete"]     = &Animation::IsComplete;
+    anim["IsLooping"]      = &Animation::IsLooping;
+    anim["SetDelay"]       = &Animation::SetDelay;
+    anim["GetDelay"]       = &Animation::GetDelay;
+    anim["GetCurrentTime"] = &Animation::GetCurrentTime;
+    anim["GetClass"]       = &Animation::GetClass;
 
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index,     &GetScriptVar<Entity>,
