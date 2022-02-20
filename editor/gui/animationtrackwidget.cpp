@@ -488,7 +488,7 @@ void AnimationTrackWidget::Update(double secs)
     }
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
-    if (!mPlaybackAnimation->IsPlaying())
+    if (!mPlaybackAnimation->IsAnimating())
     {
         mPhysics.DeleteAll();
         mPhysics.DestroyWorld();

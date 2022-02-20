@@ -1375,7 +1375,7 @@ void Scene::Update(float dt)
                 entity->SetFlag(Entity::ControlFlags::Killed , true);
             continue;
         }
-        if (entity->IsPlaying())
+        if (entity->IsAnimating())
             continue;
         if (entity->HasIdleTrack())
             entity->PlayIdle();

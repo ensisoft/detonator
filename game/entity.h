@@ -1597,7 +1597,7 @@ namespace game
         // Play the designated idle track if any and if there's no current animation.
         bool PlayIdle();
         // Returns true if an animation track is still playing.
-        bool IsPlaying() const;
+        bool IsAnimating() const;
         // Returns true if the lifetime has been exceeded.
         bool HasExpired() const;
         // Returns true if the kill control flag has been set.
@@ -1683,7 +1683,7 @@ namespace game
         void SetLifetime(double lifetime)
         { mLifetime = lifetime; }
 
-        // Get the current track if any. (when IsPlaying is true)
+        // Get the current track if any. (when IsAnimating is true)
         AnimationTrack* GetCurrentTrack()
         { return mAnimationTrack.get(); }
         const AnimationTrack* GetCurrentTrack() const

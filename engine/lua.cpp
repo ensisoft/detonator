@@ -1969,7 +1969,7 @@ void BindGameLib(sol::state& L)
     entity["GetTime"]              = &Entity::GetTime;
     entity["GetLayer"]             = &Entity::GetLayer;
     entity["SetLayer"]             = &Entity::SetLayer;
-    entity["IsPlaying"]            = &Entity::IsPlaying;
+    entity["IsAnimating"]          = &Entity::IsAnimating;
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
