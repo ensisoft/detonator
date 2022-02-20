@@ -700,7 +700,50 @@ void unit_test_animation_track()
         TEST_REQUIRE(node.GetRotation() == real::float32(1.5f));
     }
 }
+void unit_test_animation_complete()
+{
+    game::EntityNodeClass node0;
+    node0.SetName("node0");
+    node0.SetTranslation(glm::vec2(5.0f, 5.0f));
+    node0.SetSize(glm::vec2(1.0f, 1.0f));
+    node0.SetRotation(0.0f);
+    node0.SetScale(glm::vec2(1.0f, 1.0f));
 
+    game::AnimationClass anim;
+    anim.SetName("test");
+    anim.SetLooping(false);
+    anim.SetDuration(1.0f);
+    anim.SetDelay(0.0f);
+    game::TransformActuatorClass transform;
+    transform.SetNodeId(node0.GetId());
+    anim.AddActuator(transform);
+
+    game::EntityClass klass;
+    klass.SetName("entity");
+    klass.AddAnimation(anim);
+    klass.LinkChild(nullptr, klass.AddNode(node0));
+
+    auto entity = game::CreateEntityInstance(klass);
+    TEST_REQUIRE(entity->PlayAnimationByName("test"));
+    TEST_REQUIRE(entity->IsAnimating());
+    TEST_REQUIRE(entity->GetCurrentAnimation());
+    TEST_REQUIRE(entity->GetCurrentAnimation()->GetClassName() == "test");
+
+    entity->Update(0.5f);
+    TEST_REQUIRE(entity->IsAnimating());
+    TEST_REQUIRE(entity->GetCurrentAnimation());
+    TEST_REQUIRE(entity->GetCurrentAnimation()->GetClassName() == "test");
+    entity->Update(0.6f);
+    TEST_REQUIRE(!entity->IsAnimating());
+    TEST_REQUIRE(!entity->GetCurrentAnimation());
+    TEST_REQUIRE(entity->GetFinishedAnimation());
+    TEST_REQUIRE(entity->GetFinishedAnimation()->GetClassName() == "test");
+
+    entity->Update(0.1f);
+    TEST_REQUIRE(!entity->IsAnimating());
+    TEST_REQUIRE(!entity->GetCurrentAnimation());
+    TEST_REQUIRE(!entity->GetFinishedAnimation());
+}
 
 int test_main(int argc, char* argv[])
 {
@@ -710,5 +753,6 @@ int test_main(int argc, char* argv[])
     unit_test_kinematic_actuator();
     unit_test_material_actuator();
     unit_test_animation_track();
+    unit_test_animation_complete();
     return 0;
 }

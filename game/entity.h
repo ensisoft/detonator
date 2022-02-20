@@ -1613,8 +1613,9 @@ namespace game
         // Returns true if the entity contains entity nodes that have spatial nodes.
         bool HasSpatialNodes() const;
         // Returns true if the entity should be killed at the scene boundary.
-        bool KillAtBoundary() const
-        { return TestFlag(Flags::KillAtBoundary); }
+        bool KillAtBoundary() const;
+        // Returns true if the entity did just finish an animation.
+        bool DidFinishAnimation() const;
 
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;
@@ -1690,8 +1691,13 @@ namespace game
         // Get the current track if any. (when IsAnimating is true)
         Animation* GetCurrentAnimation()
         { return mCurrentAnimation.get(); }
+        // Get the current track if any. (when IsAnimating is true)
         const Animation* GetCurrentAnimation() const
         { return mCurrentAnimation.get(); }
+        // Get the previously completed animation track (if any).
+        // This is a transient state that only exists for one
+        // iteration of the game loop after the animation is done.
+        const Animation* GetFinishedAnimation() const;
 
         double GetLifetime() const
         { return mLifetime; }
@@ -1766,6 +1772,8 @@ namespace game
         std::string mIdleTrackId;
         // control flags for the engine itself
         base::bitflag<ControlFlags> mControlFlags;
+        // the previously finished animation track (if any)
+        std::unique_ptr<Animation> mFinishedAnimation;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

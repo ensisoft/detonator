@@ -1549,11 +1549,15 @@ FBox Entity::FindNodeBoundingBox(const EntityNode* node) const
 void Entity::Update(float dt)
 {
     mCurrentTime += dt;
+    mFinishedAnimation.reset();
 
     if (!mCurrentAnimation)
         return;
 
+    // Update the animation state.
     mCurrentAnimation->Update(dt);
+
+    // Apply animation state transforms/actions on the entity nodes.
     for (auto& node : mNodes)
     {
         mCurrentAnimation->Apply(*node);
@@ -1561,9 +1565,6 @@ void Entity::Update(float dt)
 
     if (!mCurrentAnimation->IsComplete())
         return;
-
-    // spams the log.
-    //DEBUG("Animation '%1' completed.", mCurrentAnimation->GetName());
 
     if (mCurrentAnimation->IsLooping())
     {
@@ -1586,6 +1587,10 @@ void Entity::Update(float dt)
         }
         return;
     }
+    // spams the log
+    //DEBUG("Entity animation is complete. [entity='%1/%2', animation='%3']",
+    //      mClass->GetName(), mInstanceName, mCurrentAnimation->GetName());
+    std::swap(mCurrentAnimation, mFinishedAnimation);
     mCurrentAnimation.reset();
 }
 
@@ -1679,6 +1684,12 @@ bool Entity::HasSpatialNodes() const
             return true;
     return false;
 }
+
+bool Entity::KillAtBoundary() const
+{ return TestFlag(Flags::KillAtBoundary); }
+
+bool Entity::DidFinishAnimation() const
+{ return !!mFinishedAnimation; }
 
 const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
 {
