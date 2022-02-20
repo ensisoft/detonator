@@ -1546,6 +1546,11 @@ FBox Entity::FindNodeBoundingBox(const EntityNode* node) const
     return game::FindBoundingBox(mRenderTree, node);
 }
 
+void Entity::Die()
+{
+    SetFlag(ControlFlags::WantsToDie, true);
+}
+
 void Entity::Update(float dt)
 {
     mCurrentTime += dt;

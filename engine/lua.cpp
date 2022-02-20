@@ -2001,6 +2001,7 @@ void BindGameLib(sol::state& L)
     entity["PlayIdle"]             = &Entity::PlayIdle;
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
+    entity["Die"]                  = &Entity::Die;
     entity["TestFlag"]             = &TestFlag<Entity>;
 
     auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());

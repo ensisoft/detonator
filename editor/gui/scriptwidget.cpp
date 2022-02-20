@@ -917,6 +917,7 @@ void InitDoc()
                                                         "Any current animation is replaced by this new animation.<br>"
                                                         "Returns the animation instance or nil if no such animation could be found.");
     DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
+    DOC_METHOD_0("void", "Die", "Let the entity die and be removed from the scene.");
 
     DOC_TABLE("game.EntityArgs");
     DOC_OBJECT_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");

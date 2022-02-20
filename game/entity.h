@@ -1503,7 +1503,10 @@ namespace game
             // Turning off logging is useful when spawning a large
             // number of entities continuously and doing that would
             // create excessive logging.
-            EnableLogging
+            EnableLogging,
+            // The entity wants to die and be killed and removed
+            // from the scene.
+            WantsToDie
         };
         using Flags = EntityClass::Flags;
         using RenderTree      = game::RenderTree<EntityNode>;
@@ -1579,6 +1582,8 @@ namespace game
         // todo:
         glm::mat4 FindNodeTransform(const EntityNode* node) const;
         glm::mat4 FindNodeModelTransform(const EntityNode* node) const;
+
+        void Die();
 
         void Update(float dt);
 
