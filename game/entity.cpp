@@ -654,9 +654,9 @@ EntityClass::EntityClass(const EntityClass& other)
     }
 
     // make a deep copy of the animation tracks
-    for (const auto& track : other.mAnimationTracks)
+    for (const auto& track : other.mAnimations)
     {
-        mAnimationTracks.push_back(std::make_unique<AnimationTrackClass>(*track));
+        mAnimations.push_back(std::make_unique<AnimationClass>(*track));
     }
 
     // make a deep copy of the script variables
@@ -846,72 +846,72 @@ const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
     return nullptr;
 }
 
-AnimationTrackClass* EntityClass::AddAnimationTrack(AnimationTrackClass&& track)
+AnimationClass* EntityClass::AddAnimation(AnimationClass&& track)
 {
-    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track)));
-    return mAnimationTracks.back().get();
+    mAnimations.push_back(std::make_shared<AnimationClass>(std::move(track)));
+    return mAnimations.back().get();
 }
-AnimationTrackClass* EntityClass::AddAnimationTrack(const AnimationTrackClass& track)
+AnimationClass* EntityClass::AddAnimation(const AnimationClass& track)
 {
-    mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(track));
-    return mAnimationTracks.back().get();
+    mAnimations.push_back(std::make_shared<AnimationClass>(track));
+    return mAnimations.back().get();
 }
-AnimationTrackClass* EntityClass::AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track)
+AnimationClass* EntityClass::AddAnimation(std::unique_ptr<AnimationClass> track)
 {
-    mAnimationTracks.push_back(std::move(track));
-    return mAnimationTracks.back().get();
+    mAnimations.push_back(std::move(track));
+    return mAnimations.back().get();
 }
-void EntityClass::DeleteAnimationTrack(size_t i)
+void EntityClass::DeleteAnimation(size_t i)
 {
-    ASSERT(i < mAnimationTracks.size());
-    auto it = mAnimationTracks.begin();
+    ASSERT(i < mAnimations.size());
+    auto it = mAnimations.begin();
     std::advance(it, i);
-    mAnimationTracks.erase(it);
+    mAnimations.erase(it);
 }
-bool EntityClass::DeleteAnimationTrackByName(const std::string& name)
+bool EntityClass::DeleteAnimationByName(const std::string& name)
 {
-    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    for (auto it = mAnimations.begin(); it != mAnimations.end(); ++it)
     {
         if ((*it)->GetName() == name) {
-            mAnimationTracks.erase(it);
+            mAnimations.erase(it);
             return true;
         }
     }
     return false;
 }
-bool EntityClass::DeleteAnimationTrackById(const std::string& id)
+bool EntityClass::DeleteAnimationById(const std::string& id)
 {
-    for (auto it = mAnimationTracks.begin(); it != mAnimationTracks.end(); ++it)
+    for (auto it = mAnimations.begin(); it != mAnimations.end(); ++it)
     {
         if ((*it)->GetId() == id) {
-            mAnimationTracks.erase(it);
+            mAnimations.erase(it);
             return true;
         }
     }
     return false;
 }
-AnimationTrackClass& EntityClass::GetAnimationTrack(size_t i)
+AnimationClass& EntityClass::GetAnimation(size_t i)
 {
-    ASSERT(i < mAnimationTracks.size());
-    return *mAnimationTracks[i].get();
+    ASSERT(i < mAnimations.size());
+    return *mAnimations[i].get();
 }
-AnimationTrackClass* EntityClass::FindAnimationTrackByName(const std::string& name)
+AnimationClass* EntityClass::FindAnimationByName(const std::string& name)
 {
-    for (const auto& klass : mAnimationTracks)
+    for (const auto& klass : mAnimations)
     {
         if (klass->GetName() == name)
             return klass.get();
     }
     return nullptr;
 }
-const AnimationTrackClass& EntityClass::GetAnimationTrack(size_t i) const
+const AnimationClass& EntityClass::GetAnimation(size_t i) const
 {
-    ASSERT(i < mAnimationTracks.size());
-    return *mAnimationTracks[i].get();
+    ASSERT(i < mAnimations.size());
+    return *mAnimations[i].get();
 }
-const AnimationTrackClass* EntityClass::FindAnimationTrackByName(const std::string& name) const
+const AnimationClass* EntityClass::FindAnimationByName(const std::string& name) const
 {
-    for (const auto& klass : mAnimationTracks)
+    for (const auto& klass : mAnimations)
     {
         if (klass->GetName() == name)
             return klass.get();
@@ -1095,7 +1095,7 @@ std::size_t EntityClass::GetHash() const
         hash = base::hash_combine(hash, node->GetHash());
     });
 
-    for (const auto& track : mAnimationTracks)
+    for (const auto& track : mAnimations)
         hash = base::hash_combine(hash, track->GetHash());
 
     for (const auto& var : mScriptVars)
@@ -1140,7 +1140,7 @@ void EntityClass::IntoJson(data::Writer& data) const
         data.AppendChunk("nodes", std::move(chunk));
     }
 
-    for (const auto& track : mAnimationTracks)
+    for (const auto& track : mAnimations)
     {
         auto chunk = data.NewWriteChunk();
         track->IntoJson(*chunk);
@@ -1204,10 +1204,10 @@ std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
     for (unsigned i=0; i<data.GetNumChunks("tracks"); ++i)
     {
         const auto& chunk = data.GetReadChunk("tracks", i);
-        std::optional<AnimationTrackClass> track = AnimationTrackClass::FromJson(*chunk);
+        std::optional<AnimationClass> track = AnimationClass::FromJson(*chunk);
         if (!track.has_value())
             return std::nullopt;
-        ret.mAnimationTracks.push_back(std::make_shared<AnimationTrackClass>(std::move(track.value())));
+        ret.mAnimations.push_back(std::make_shared<AnimationClass>(std::move(track.value())));
     }
     for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
     {
@@ -1272,15 +1272,15 @@ EntityClass EntityClass::Clone() const
     }
 
     // make a deep clone of the animation tracks
-    for (const auto& track : mAnimationTracks)
+    for (const auto& track : mAnimations)
     {
-        auto clone = std::make_unique<AnimationTrackClass>(track->Clone());
+        auto clone = std::make_unique<AnimationClass>(track->Clone());
         if (track->GetId() == mIdleTrackId)
             ret.mIdleTrackId = clone->GetId();
-        ret.mAnimationTracks.push_back(std::move(clone));
+        ret.mAnimations.push_back(std::move(clone));
     }
     // remap the actuator node ids.
-    for (auto& track : ret.mAnimationTracks)
+    for (auto& track : ret.mAnimations)
     {
         for (size_t i=0; i<track->GetNumActuators(); ++i)
         {
@@ -1334,7 +1334,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     mFlags           = std::move(tmp.mFlags);
     mLifetime        = std::move(tmp.mLifetime);
     mRenderTree      = std::move(tmp.mRenderTree);
-    mAnimationTracks = std::move(tmp.mAnimationTracks);
+    mAnimations = std::move(tmp.mAnimations);
     return *this;
 }
 
@@ -1550,24 +1550,24 @@ void Entity::Update(float dt)
 {
     mCurrentTime += dt;
 
-    if (!mAnimationTrack)
+    if (!mCurrentAnimation)
         return;
 
-    mAnimationTrack->Update(dt);
+    mCurrentAnimation->Update(dt);
     for (auto& node : mNodes)
     {
-        mAnimationTrack->Apply(*node);
+        mCurrentAnimation->Apply(*node);
     }
 
-    if (!mAnimationTrack->IsComplete())
+    if (!mCurrentAnimation->IsComplete())
         return;
 
     // spams the log.
-    //DEBUG("AnimationTrack '%1' completed.", mAnimationTrack->GetName());
+    //DEBUG("Animation '%1' completed.", mCurrentAnimation->GetName());
 
-    if (mAnimationTrack->IsLooping())
+    if (mCurrentAnimation->IsLooping())
     {
-        mAnimationTrack->Restart();
+        mCurrentAnimation->Restart();
         for (auto& node : mNodes)
         {
             if (!mRenderTree.GetParent(node.get()))
@@ -1586,58 +1586,67 @@ void Entity::Update(float dt)
         }
         return;
     }
-    mAnimationTrack.reset();
+    mCurrentAnimation.reset();
 }
 
-void Entity::Play(std::unique_ptr<AnimationTrack> track)
+Animation* Entity::PlayAnimation(std::unique_ptr<Animation> animation)
 {
     // todo: what to do if there's a previous track ?
     // possibilities: reset or queue?
-    mAnimationTrack = std::move(track);
+    mCurrentAnimation = std::move(animation);
+    return mCurrentAnimation.get();
 }
-bool Entity::PlayAnimationByName(const std::string& name)
+Animation* Entity::PlayAnimation(const Animation& animation)
 {
-    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
-    {
-        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
-        if (klass->GetName() != name)
-            continue;
-        auto track = std::make_unique<AnimationTrack>(klass);
-        Play(std::move(track));
-        return true;
-    }
-    return false;
-}
-bool Entity::PlayAnimationById(const std::string& id)
-{
-    for (size_t i=0; i<mClass->GetNumTracks(); ++i)
-    {
-        const auto& klass = mClass->GetSharedAnimationTrackClass(i);
-        if (klass->GetId() != id)
-            continue;
-        auto track = std::make_unique<AnimationTrack>(klass);
-        Play(std::move(track));
-        return true;
-    }
-    return false;
+    return PlayAnimation(std::make_unique<Animation>(animation));
 }
 
-bool Entity::PlayIdle()
+Animation* Entity::PlayAnimation(Animation&& animation)
 {
-    if (mAnimationTrack)
-        return false;
+    return PlayAnimation(std::make_unique<Animation>(std::move(animation)));
+}
+
+Animation* Entity::PlayAnimationByName(const std::string& name)
+{
+    for (size_t i=0; i< mClass->GetNumAnimations(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationClass(i);
+        if (klass->GetName() != name)
+            continue;
+        auto track = std::make_unique<Animation>(klass);
+        return PlayAnimation(std::move(track));
+    }
+    return nullptr;
+}
+Animation* Entity::PlayAnimationById(const std::string& id)
+{
+    for (size_t i=0; i< mClass->GetNumAnimations(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationClass(i);
+        if (klass->GetId() != id)
+            continue;
+        auto track = std::make_unique<Animation>(klass);
+        return PlayAnimation(std::move(track));
+    }
+    return nullptr;
+}
+
+Animation* Entity::PlayIdle()
+{
+    if (mCurrentAnimation)
+        return nullptr;
 
     if (!mIdleTrackId.empty())
         return PlayAnimationById(mIdleTrackId);
     else if(mClass->HasIdleTrack())
         return PlayAnimationById(mClass->GetIdleTrackId());
 
-    return false;
+    return nullptr;
 }
 
 bool Entity::IsAnimating() const
 {
-    return !!mAnimationTrack;
+    return !!mCurrentAnimation;
 }
 
 bool Entity::HasExpired() const

@@ -177,7 +177,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
 {
     // create a new animation track for the given entity.
     mState.entity = entity;
-    mState.track  = std::make_shared<game::AnimationTrackClass>();
+    mState.track  = std::make_shared<game::AnimationClass>();
     mState.track->SetDuration(10.0f);
     mState.track->SetName("My Track");
     mState.track->SetLooping(false);
@@ -197,13 +197,13 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
 
 AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         const std::shared_ptr<game::EntityClass>& entity,
-        const game::AnimationTrackClass& track,
+        const game::AnimationClass& track,
         const QVariantMap& properties)
         : AnimationTrackWidget(workspace)
 {
     // Edit an existing animation track for the given animation.
     mState.entity = entity;
-    mState.track  = std::make_shared<game::AnimationTrackClass>(track); // edit a copy.
+    mState.track  = std::make_shared<game::AnimationClass>(track); // edit a copy.
     mOriginalHash = mState.track->GetHash();
     mEntity = game::CreateEntityInstance(mState.entity);
 
@@ -384,14 +384,14 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
             ERROR("Failed to parse content JSON. '%1'", error);
             return false;
         }
-        auto ret = game::AnimationTrackClass::FromJson(json);
+        auto ret = game::AnimationClass::FromJson(json);
         if (!ret.has_value())
         {
             ERROR("Failed to load animation track state.");
             return false;
         }
         auto klass    = std::move(ret.value());
-        mState.track  = std::make_shared<game::AnimationTrackClass>(std::move(klass));
+        mState.track  = std::make_shared<game::AnimationClass>(std::move(klass));
         mOriginalHash = mState.track->GetHash();
     }
 
@@ -508,7 +508,7 @@ void AnimationTrackWidget::Update(double secs)
     }
     else
     {
-        const auto* track = mPlaybackAnimation->GetCurrentTrack();
+        const auto* track = mPlaybackAnimation->GetCurrentAnimation();
         const auto time = track->GetCurrentTime();
         if (time >= 0)
         {
@@ -554,7 +554,7 @@ bool AnimationTrackWidget::GetStats(Stats* stats) const
 {
     if (mPlaybackAnimation)
     {
-        const auto* track = mPlaybackAnimation->GetCurrentTrack();
+        const auto* track = mPlaybackAnimation->GetCurrentAnimation();
         stats->time = track->GetCurrentTime();
     }
     stats->graphics.valid = true;
@@ -647,9 +647,9 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     const bool use_physics = GetValue(mUI.actionUsePhysics);
 
     // create new animation instance and play the animation track.
-    auto track = game::CreateAnimationTrackInstance(mState.track);
+    auto track = game::CreateAnimationInstance(mState.track);
     mPlaybackAnimation = game::CreateEntityInstance(mState.entity);
-    mPlaybackAnimation->Play(std::move(track));
+    mPlaybackAnimation->PlayAnimation(std::move(track));
     mPhysics.SetClassLibrary(mWorkspace);
     mPhysics.SetScale(settings.physics_scale);
     mPhysics.SetGravity(settings.physics_gravity);

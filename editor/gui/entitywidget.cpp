@@ -469,9 +469,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     mOriginalHash = mState.entity->GetHash();
 
     // load per track resource properties.
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
-        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& track = mState.entity->GetAnimation(i);
         const auto& Id = track.GetId();
         QVariantMap properties;
         GetProperty(resource, "track_" + app::FromUtf8(Id), &properties);
@@ -619,9 +619,9 @@ bool EntityWidget::LoadState(const Settings& settings)
 
     mOriginalHash = mState.entity->GetHash();
 
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
-        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& track = mState.entity->GetAnimation(i);
         QVariantMap properties;
         settings.GetValue("Entity", app::FromUtf8(track.GetId()), &properties);
         mTrackProperties[track.GetId()] = properties;
@@ -953,16 +953,16 @@ bool EntityWidget::OnEscape()
     return true;
 }
 
-void EntityWidget::SaveAnimationTrack(const game::AnimationTrackClass& track, const QVariantMap& properties)
+void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties)
 {
     // keep track of the associated track properties 
     // separately. these only pertain to the UI and are not
     // used by the track/animation system itself.
     mTrackProperties[track.GetId()] = properties;
 
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
-        auto& other = mState.entity->GetAnimationTrack(i);
+        auto& other = mState.entity->GetAnimation(i);
         if (other.GetId() != track.GetId())
             continue;
 
@@ -973,7 +973,7 @@ void EntityWidget::SaveAnimationTrack(const game::AnimationTrackClass& track, co
         return;
     }
     // add a copy
-    mState.entity->AddAnimationTrack(track);
+    mState.entity->AddAnimation(track);
     INFO("Saved animation track '%1'", track.GetName());
     NOTE("Saved animation track '%1'", track.GetName());
 
@@ -1348,9 +1348,9 @@ void EntityWidget::on_btnEditTrack_clicked()
     QListWidgetItem* item = items[0];
     QString id = item->data(Qt::UserRole).toString();
 
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
-        const auto& klass = mState.entity->GetAnimationTrack(i);
+        const auto& klass = mState.entity->GetAnimation(i);
         if (klass.GetId() != app::ToUtf8(id))
             continue;
         auto it = mTrackProperties.find(klass.GetId());
@@ -1388,7 +1388,7 @@ void EntityWidget::on_btnDeleteTrack_clicked()
             SetValue(mUI.idleTrack, -1);
         }
     }
-    mState.entity->DeleteAnimationTrackById(trackId);
+    mState.entity->DeleteAnimationById(trackId);
     // this will remove it from the widget.
     delete item;
     // delete the associated properties.
@@ -2346,9 +2346,9 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
 void EntityWidget::DisplayEntityProperties()
 {
     std::vector<ListItem> tracks;
-    for (size_t i=0; i<mState.entity->GetNumTracks(); ++i)
+    for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
-        const auto& track = mState.entity->GetAnimationTrack(i);
+        const auto& track = mState.entity->GetAnimation(i);
         ListItem item;
         item.name = app::FromUtf8(track.GetName());
         item.id   = app::FromUtf8(track.GetId());

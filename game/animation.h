@@ -32,8 +32,8 @@
 #include <variant>
 #include <optional>
 
-#include "base/utility.h"
 #include "base/math.h"
+#include "base/utility.h"
 #include "data/fwd.h"
 #include "game/types.h"
 
@@ -692,27 +692,24 @@ namespace game
         MaterialParam mStartValue;
     };
 
-    // AnimationTrackClass defines a new type of animation track that includes
-    // the static state of the animation such as the modified ending results
+    // AnimationClass defines a new type of animation that includes the
+    // static state of the animation such as the modified ending results
     // of the nodes involved.
-    class AnimationTrackClass
+    class AnimationClass
     {
     public:
-        AnimationTrackClass()
-        { mId = base::RandomString(10); }
+        AnimationClass();
         // Create a deep copy of the class object.
-        AnimationTrackClass(const AnimationTrackClass& other);
-        AnimationTrackClass(AnimationTrackClass&& other);
+        AnimationClass(const AnimationClass& other);
+        AnimationClass(AnimationClass&& other);
 
-        // Set the human readable name for the animation track.
+        // Set the human-readable name for the animation track.
         void SetName(const std::string& name)
         { mName = name; }
-        // Set the duration for the animation track. These could be seconds
-        // but ultimately it's up to the application to define what is the
-        // real world meaning of the units in question.
+        // Set the animation duration in seconds.
         void SetDuration(float duration)
         { mDuration = duration; }
-        // Set one time delay that takes place at the start of the animation.
+        // Set animation delay in seconds.
         void SetDelay(float delay)
         { mDelay = delay; }
         // Enable/disable looping flag. A looping animation will never end
@@ -725,7 +722,7 @@ namespace game
         void SetLooping(bool looping)
         { mLooping = looping; }
 
-        // Get the human readable name of the animation track.
+        // Get the human-readable name of the animation track.
         std::string GetName() const
         { return mName; }
         // Get the id of this animation class object.
@@ -785,19 +782,19 @@ namespace game
         // Serialize into JSON.
         void IntoJson(data::Writer& json) const;
 
-        // Try to create new instance of AnimationTrackClass based on the data
+        // Try to create new instance of AnimationClass based on the data
         // loaded from JSON. On failure returns std::nullopt otherwise returns
         // an instance of the class object.
-        static std::optional<AnimationTrackClass> FromJson(const data::Reader& data);
+        static std::optional<AnimationClass> FromJson(const data::Reader& data);
 
-        AnimationTrackClass Clone() const;
+        AnimationClass Clone() const;
         // Do a deep copy on the assignment of a new object.
-        AnimationTrackClass& operator=(const AnimationTrackClass& other);
+        AnimationClass& operator=(const AnimationClass& other);
     private:
         std::string mId;
         // The list of animation actuators that apply transforms
         std::vector<std::shared_ptr<ActuatorClass>> mActuators;
-        // Human readable name of the track.
+        // Human-readable name of the animation.
         std::string mName;
         // One time delay before starting the playback.
         float mDelay = 0.0f;
@@ -808,26 +805,27 @@ namespace game
     };
 
 
-    // AnimationTrack is an instance of some type of AnimationTrackClass.
+    // Animation is an instance of some type of AnimationClass.
     // It contains the per instance data of the animation track which is
     // modified over time through updates to the track and its actuators states.
-    class AnimationTrack
+    class Animation
     {
     public:
+        // Create a new animation instance based on the given class object.
+        Animation(const std::shared_ptr<const AnimationClass>& klass);
+        // Create a new animation based on the given class object.
+        // Makes a copy of the klass object.
+        Animation(const AnimationClass& klass);
         // Create a new animation track based on the given class object.
-        AnimationTrack(const std::shared_ptr<const AnimationTrackClass>& klass);
-        // Create a new animation track based on the given class object
-        // which will be copied.
-        AnimationTrack(const AnimationTrackClass& klass);
-        // Create a new animation track based on the given class object.
-        AnimationTrack(const AnimationTrack& other);
+        // Makes a copy of the klass object.
+        Animation(const Animation& other);
         // Move ctor.
-        AnimationTrack(AnimationTrack&& other);
+        Animation(Animation&& other);
 
         // Update the animation track state.
         void Update(float dt);
-        // Apply state/transition updates/interpolated intermediate states (if any)
-        // onto the given node.
+        // Apply animation actions, such as transformations or material changes
+        // onto the given entity node.
         void Apply(EntityNode& node) const;
         // Prepare the animation track to restart.
         void Restart();
@@ -842,7 +840,7 @@ namespace game
         // Returns whether the animation is looping or not.
         bool IsLooping() const
         { return mClass->IsLooping(); }
-        // Get the human readable name of the animation track.
+        // Get the human-readable name of the animation track.
         std::string GetName() const
         { return mClass->GetName(); }
         // get the current time.
@@ -851,14 +849,14 @@ namespace game
         float GetDelay() const
         { return mDelay; }
         // Access for the tracks class object.
-        const AnimationTrackClass& GetClass() const
+        const AnimationClass& GetClass() const
         { return *mClass; }
         // Shortcut operator for accessing the members of the track's class object.
-        const AnimationTrackClass* operator->() const
+        const AnimationClass* operator->() const
         { return mClass.get(); }
     private:
         // the class object
-        std::shared_ptr<const AnimationTrackClass> mClass;
+        std::shared_ptr<const AnimationClass> mClass;
         // For each node we keep a list of actions that are to be performed
         // at specific times.
         struct NodeTrack {
@@ -874,6 +872,6 @@ namespace game
         float mCurrentTime = 0.0f;
     };
 
-    std::unique_ptr<AnimationTrack> CreateAnimationTrackInstance(std::shared_ptr<const AnimationTrackClass> klass);
+    std::unique_ptr<Animation> CreateAnimationInstance(std::shared_ptr<const AnimationClass> klass);
 
 } // namespace
