@@ -1993,6 +1993,7 @@ void BindGameLib(sol::state& L)
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
+    entity["GetScene"]             = (Scene*(Entity::*)(void))&Entity::GetScene;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;

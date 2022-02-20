@@ -46,6 +46,8 @@
 
 namespace game
 {
+    class Scene;
+
     class SpatialNodeClass
     {
     public:
@@ -1687,6 +1689,8 @@ namespace game
         { mLayer = layer; }
         void SetLifetime(double lifetime)
         { mLifetime = lifetime; }
+        void SetScene(Scene* scene)
+        { mScene = scene; }
 
         // Get the current track if any. (when IsAnimating is true)
         Animation* GetCurrentAnimation()
@@ -1699,7 +1703,11 @@ namespace game
         // iteration of the game loop after the animation is done.
         const Animation* GetFinishedAnimation() const
         { return mFinishedAnimation.get(); }
-
+        // Get the current scene.
+        const Scene* GetScene() const
+        { return mScene; }
+        Scene* GetScene()
+        { return mScene; }
         double GetLifetime() const
         { return mLifetime; }
         double GetTime() const
@@ -1775,6 +1783,8 @@ namespace game
         base::bitflag<ControlFlags> mControlFlags;
         // the previously finished animation track (if any)
         std::unique_ptr<Animation> mFinishedAnimation;
+        // the current scene.
+        Scene* mScene = nullptr;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

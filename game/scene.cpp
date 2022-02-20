@@ -970,6 +970,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         // placement node.
         entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
         entity->SetLayer(node.GetLayer());
+        entity->SetScene(this);
 
         // optionally set instance settings, if these are not set then
         // entity class defaults apply.
@@ -1122,6 +1123,7 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
     // the invariant that must hold is that entity IDs are
     // always going to be unique.
     auto instance = CreateEntityInstance(args);
+    instance->SetScene(this);
 
     ASSERT(mIdMap.find(instance->GetId()) == mIdMap.end());
 
