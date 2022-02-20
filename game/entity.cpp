@@ -1635,7 +1635,7 @@ bool Entity::PlayIdle()
     return false;
 }
 
-bool Entity::IsPlaying() const
+bool Entity::IsAnimating() const
 {
     return !!mAnimationTrack;
 }

@@ -872,7 +872,7 @@ void InitDoc()
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
-    DOC_METHOD_0("bool", "IsPlaying", "Checks whether the entity is currently playing an animation or not.");
+    DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
     DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
     DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"
                                           "Entities that have been killed will be deleted from the scene at the end of this game loop.");

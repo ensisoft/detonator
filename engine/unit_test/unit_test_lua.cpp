@@ -639,7 +639,7 @@ function test(scene)
    test_str(entity:GetClassName(), 'test_entity')
    test_int(entity:GetNumNodes(), 1)
    test_int(entity:GetLayer(), 4)
-   test_bool(entity:IsPlaying(), false)
+   test_bool(entity:IsAnimating(), false)
    test_bool(entity:HasExpired(), false)
    if entity:FindNodeByClassId('sjsjsjs') ~= nil then
      error('fail')
