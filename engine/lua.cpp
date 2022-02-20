@@ -1883,6 +1883,7 @@ void BindGameLib(sol::state& L)
     body["GetPolygonShapeId"]     = &RigidBodyItem::GetPolygonShapeId;
     body["GetLinearVelocity"]     = &RigidBodyItem::GetLinearVelocity;
     body["GetAngularVelocity"]    = &RigidBodyItem::GetAngularVelocity;
+    body["Enable"]                = &RigidBodyItem::Enable;
     body["AdjustLinearVelocity"]  = sol::overload(
             [](RigidBodyItem& body, const glm::vec2& velocity) {
                 body.AdjustLinearVelocity(velocity);
@@ -1899,6 +1900,7 @@ void BindGameLib(sol::state& L)
     body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetCollisionShape());
     };
+
 
     auto text = table.new_usertype<TextItem>("TextItem");
     text["GetText"]       = &TextItem::GetText;

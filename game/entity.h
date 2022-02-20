@@ -604,6 +604,8 @@ namespace game
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
         }
+        void Enable(bool value)
+        { SetFlag(Flags::Enabled, value); }
         bool IsEnabled() const
         { return TestFlag(Flags::Enabled); }
         bool IsSensor() const
