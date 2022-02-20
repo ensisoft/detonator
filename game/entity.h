@@ -1228,34 +1228,35 @@ namespace game
         // no such node could be found.
         const EntityNodeClass* FindNodeById(const std::string& id) const;
 
-        // Add a new animation track class object. Returns a pointer to the node that
-        // was added to the animation.
-        AnimationTrackClass* AddAnimationTrack(AnimationTrackClass&& track);
-        // Add a new animation track class object. Returns a pointer to the node that
-        // was added to the animation.
-        AnimationTrackClass* AddAnimationTrack(const AnimationTrackClass& track);
-        // Add a new animation track class object. Returns a pointer to the node that
-        // was added to the animation.
-        AnimationTrackClass* AddAnimationTrack(std::unique_ptr<AnimationTrackClass> track);
-        // Delete an animation track by the given index.
-        void DeleteAnimationTrack(size_t i);
-        // Delete an animation track by the given name.
-        bool DeleteAnimationTrackByName(const std::string& name);
-        // Delete an animation track by the given id.
-        bool DeleteAnimationTrackById(const std::string& id);
-        // Get the animation track class object by index.
-        // The index must be valid.
-        AnimationTrackClass& GetAnimationTrack(size_t i);
-        // Find animation track class object by name. Returns nullptr if no such
-        // track could be found.
-        AnimationTrackClass* FindAnimationTrackByName(const std::string& name);
-        // Get the animation track class object by index.
-        // The index must be valid.
-        const AnimationTrackClass& GetAnimationTrack(size_t i) const;
-        // Find animation track class object by name. Returns nullptr if no such
-        // track could be found.
-        const AnimationTrackClass* FindAnimationTrackByName(const std::string& name) const;
-
+        // Add a new animation class object. Returns a pointer to the animation
+        // that was added to the entity class.
+        AnimationClass* AddAnimation(AnimationClass&& track);
+        // Add a new animation class object. Returns a pointer to the animation
+        // that was added to the entity class.
+        AnimationClass* AddAnimation(const AnimationClass& track);
+        // Add a new animation class object. Returns a pointer to the animation
+        // that was added to the entity class.
+        AnimationClass* AddAnimation(std::unique_ptr<AnimationClass> track);
+        // Delete an animation by the given index. The index must be valid.
+        void DeleteAnimation(size_t index);
+        // Delete an animation by the given name.
+        // Returns true if a track was deleted, otherwise false.
+        bool DeleteAnimationByName(const std::string& name);
+        // Delete an animation by the given id.
+        // Returns true if a track was deleted, otherwise false.
+        bool DeleteAnimationById(const std::string& id);
+        // Get the animation class object by index. The index must be valid.
+        AnimationClass& GetAnimation(size_t index);
+        // Find an animation class object by name.
+        // Returns nullptr if no such animation could be found.
+        // Returns the first animation object with a matching name.
+        AnimationClass* FindAnimationByName(const std::string& name);
+        // Get the animation class object by index. The index must be valid.
+        const AnimationClass& GetAnimation(size_t index) const;
+        // Find an animation class object by name.
+        // Returns nullptr if no such animation could be found.
+        // Returns the first animation object with a matching name.
+        const AnimationClass* FindAnimationByName(const std::string& name) const;
 
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
@@ -1387,8 +1388,8 @@ namespace game
         std::size_t GetHash() const;
         std::size_t GetNumNodes() const
         { return mNodes.size(); }
-        std::size_t GetNumTracks() const
-        { return mAnimationTracks.size(); }
+        std::size_t GetNumAnimations() const
+        { return mAnimations.size(); }
         std::size_t GetNumScriptVars() const
         { return mScriptVars.size(); }
         std::size_t GetNumJoints() const
@@ -1408,8 +1409,8 @@ namespace game
 
         std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
         { return mNodes[index]; }
-        std::shared_ptr<const AnimationTrackClass> GetSharedAnimationTrackClass(size_t index) const
-        { return mAnimationTracks[index]; }
+        std::shared_ptr<const AnimationClass> GetSharedAnimationClass(size_t index) const
+        { return mAnimations[index]; }
         std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const
         { return mScriptVars[index]; }
         std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const
@@ -1433,7 +1434,7 @@ namespace game
         std::string mIdleTrackId;
         // the list of animation tracks that are pre-defined with this
         // type of animation.
-        std::vector<std::shared_ptr<AnimationTrackClass>> mAnimationTracks;
+        std::vector<std::shared_ptr<AnimationClass>> mAnimations;
         // the list of nodes that belong to this entity.
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // the list of joints that belong to this entity.
@@ -1579,26 +1580,29 @@ namespace game
 
         void Update(float dt);
 
-        // Play the given animation track.
-        void Play(std::unique_ptr<AnimationTrack> track);
-        void Play(const AnimationTrack& track)
-        { Play(std::make_unique<AnimationTrack>(track)); }
-        void Play(AnimationTrack&& track)
-        { Play(std::make_unique<AnimationTrack>(std::move(track))); }
-        // Play a previously recorded (stored in the animation class object)
-        // animation track identified by name. Note that there could be
-        // ambiguity between the names, i.e. multiple tracks with the same name.
-        // Returns true if playback started or false when there's no such track.
-        bool PlayAnimationByName(const std::string& name);
-        // Play a previously recorded (stored in the animation class object)
-        // animation track identified by its track id.
-        // Returns true if playback started or false when there's no such track.
-        bool PlayAnimationById(const std::string& id);
-        // Play the designated idle track if any and if there's no current animation.
-        bool PlayIdle();
-        // Returns true if an animation track is still playing.
+        // Play the given animation immediately. If there's any
+        // current animation it is replaced.
+        Animation* PlayAnimation(std::unique_ptr<Animation> animation);
+        // Create a copy of the given animation and play it immediately.
+        Animation* PlayAnimation(const Animation& animation);
+        // Create a copy of the given animation and play it immediately.
+        Animation* PlayAnimation(Animation&& animation);
+        // Play a previously recorded animation identified by name.
+        // Returns a pointer to the animation instance or nullptr if
+        // no such animation could be found.
+        Animation* PlayAnimationByName(const std::string& name);
+        // Play a previously recorded animation identified by its ID.
+        // Returns a pointer to the animation instance or nullptr if
+        // no such animation could be found.
+        Animation* PlayAnimationById(const std::string& id);
+        // Play the designated idle animation if there is a designated
+        // idle animation and if no other animation is currently playing.
+        // Returns a pointer to the animation instance or nullptr if
+        // idle animation was started.
+        Animation* PlayIdle();
+        // Returns true if an animation is currently playing.
         bool IsAnimating() const;
-        // Returns true if the lifetime has been exceeded.
+        // Returns true if the entity lifetime has been exceeded.
         bool HasExpired() const;
         // Returns true if the kill control flag has been set.
         bool HasBeenKilled() const;
@@ -1684,10 +1688,10 @@ namespace game
         { mLifetime = lifetime; }
 
         // Get the current track if any. (when IsAnimating is true)
-        AnimationTrack* GetCurrentTrack()
-        { return mAnimationTrack.get(); }
-        const AnimationTrack* GetCurrentTrack() const
-        { return mAnimationTrack.get(); }
+        Animation* GetCurrentAnimation()
+        { return mCurrentAnimation.get(); }
+        const Animation* GetCurrentAnimation() const
+        { return mCurrentAnimation.get(); }
 
         double GetLifetime() const
         { return mLifetime; }
@@ -1738,8 +1742,8 @@ namespace game
         // entity's render tree that is to be used as the parent
         // of this entity's nodes.
         std::string mParentNodeId;
-        // The current animation track if any.
-        std::unique_ptr<AnimationTrack> mAnimationTrack;
+        // The current animation if any.
+        std::unique_ptr<Animation> mCurrentAnimation;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
         // the list of script variables. read-only ones can

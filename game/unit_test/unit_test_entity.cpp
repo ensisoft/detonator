@@ -299,14 +299,14 @@ void unit_test_entity_class()
     }
 
     {
-        game::AnimationTrackClass track;
+        game::AnimationClass track;
         track.SetName("test1");
-        entity.AddAnimationTrack(track);
+        entity.AddAnimation(track);
     }
     {
-        game::AnimationTrackClass track;
+        game::AnimationClass track;
         track.SetName("test2");
-        entity.AddAnimationTrack(track);
+        entity.AddAnimation(track);
     }
 
     {
@@ -346,9 +346,9 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetId()));
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetId()));
     TEST_REQUIRE(entity.FindNodeById("asg") == nullptr);
-    TEST_REQUIRE(entity.GetNumTracks() == 2);
-    TEST_REQUIRE(entity.FindAnimationTrackByName("test1"));
-    TEST_REQUIRE(entity.FindAnimationTrackByName("sdgasg") == nullptr);
+    TEST_REQUIRE(entity.GetNumAnimations() == 2);
+    TEST_REQUIRE(entity.FindAnimationByName("test1"));
+    TEST_REQUIRE(entity.FindAnimationByName("sdgasg") == nullptr);
     TEST_REQUIRE(entity.GetNumScriptVars() == 2);
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
     TEST_REQUIRE(entity.FindScriptVarByName("foobar") == nullptr);
@@ -377,8 +377,8 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(ret->GetId() == entity.GetId());
         TEST_REQUIRE(ret->GetHash() == entity.GetHash());
-        TEST_REQUIRE(ret->GetNumTracks() == 2);
-        TEST_REQUIRE(ret->FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(ret->GetNumAnimations() == 2);
+        TEST_REQUIRE(ret->FindAnimationByName("test1"));
         TEST_REQUIRE(ret->GetNumScriptVars() == 2);
         TEST_REQUIRE(ret->GetNumJoints() == 1);
         TEST_REQUIRE(entity.GetJoint(0).name == "test");
@@ -402,16 +402,16 @@ void unit_test_entity_class()
         auto copy(entity);
         TEST_REQUIRE(copy.GetId() == entity.GetId());
         TEST_REQUIRE(copy.GetHash() == entity.GetHash());
-        TEST_REQUIRE(copy.GetNumTracks() == 2);
-        TEST_REQUIRE(copy.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(copy.GetNumAnimations() == 2);
+        TEST_REQUIRE(copy.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
 
         game::EntityClass temp;
         temp = entity;
         TEST_REQUIRE(temp.GetId() == entity.GetId());
         TEST_REQUIRE(temp.GetHash() == entity.GetHash());
-        TEST_REQUIRE(temp.GetNumTracks() == 2);
-        TEST_REQUIRE(temp.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(temp.GetNumAnimations() == 2);
+        TEST_REQUIRE(temp.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(temp) == "root child_1 child_2");
     }
 
@@ -424,8 +424,8 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(clone.GetId() != entity.GetId());
         TEST_REQUIRE(clone.GetHash() != entity.GetHash());
-        TEST_REQUIRE(clone.GetNumTracks() == 2);
-        TEST_REQUIRE(clone.FindAnimationTrackByName("test1"));
+        TEST_REQUIRE(clone.GetNumAnimations() == 2);
+        TEST_REQUIRE(clone.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
     }
 
@@ -612,18 +612,18 @@ void unit_test_entity_clone_track_bug()
     game::TransformActuatorClass actuator;
     actuator.SetNodeId(node.GetId());
 
-    game::AnimationTrackClass track;
+    game::AnimationClass track;
     track.SetName("test1");
     track.AddActuator(actuator);
 
     game::EntityClass klass;
     klass.AddNode(std::move(node));
-    klass.AddAnimationTrack(track);
+    klass.AddAnimation(track);
 
     {
         auto clone = klass.Clone();
         const auto& cloned_node = clone.GetNode(0);
-        const auto& cloned_track = clone.GetAnimationTrack(0);
+        const auto& cloned_track = clone.GetAnimation(0);
         TEST_REQUIRE(cloned_track.GetActuatorClass(0).GetNodeId() == cloned_node.GetId());
     }
 }

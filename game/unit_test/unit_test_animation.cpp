@@ -624,7 +624,7 @@ void unit_test_animation_track()
     // create node instance
     game::EntityNode node(klass);
 
-    game::AnimationTrackClass track;
+    game::AnimationClass track;
     track.SetName("test");
     track.SetLooping(true);
     track.SetDuration(10.0f);
@@ -651,7 +651,7 @@ void unit_test_animation_track()
         data::JsonObject json;
         track.IntoJson(json);
 
-        auto ret = game::AnimationTrackClass::FromJson(json);
+        auto ret = game::AnimationClass::FromJson(json);
         TEST_REQUIRE(ret.has_value());
         TEST_REQUIRE(ret->GetNumActuators() == 1);
         TEST_REQUIRE(ret->IsLooping()       == true);
@@ -684,7 +684,7 @@ void unit_test_animation_track()
 
     // instance
     {
-        game::AnimationTrack instance(track);
+        game::Animation instance(track);
         TEST_REQUIRE(!instance.IsComplete());
 
         instance.Update(5.0f);

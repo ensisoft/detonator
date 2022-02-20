@@ -249,13 +249,13 @@ public:
             right_arm_down.SetEndSize(klass->FindNodeByName("shoulder joint R")->GetSize());
             right_arm_down.SetNodeId(klass->FindNodeByName("shoulder joint R")->GetId());
 
-            auto track = std::make_unique<game::AnimationTrackClass>();
+            auto track = std::make_unique<game::AnimationClass>();
             track->SetDuration(2.0f);
             track->SetName("idle");
             track->SetLooping(true);
             track->AddActuator(std::move(right_arm_up));
             track->AddActuator(std::move(right_arm_down));
-            klass->AddAnimationTrack(std::move(track));
+            klass->AddAnimation(std::move(track));
             return klass;
         }
 

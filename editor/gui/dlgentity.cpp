@@ -149,9 +149,9 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     SetEnabled(mUI.btnEditVar, false);
 
     std::vector<ListItem> tracks;
-    for (size_t i=0; i<klass.GetNumTracks(); ++i)
+    for (size_t i=0; i< klass.GetNumAnimations(); ++i)
     {
-        const auto& track = klass.GetAnimationTrack(i);
+        const auto& track = klass.GetAnimation(i);
         ListItem item;
         item.name = app::FromUtf8(track.GetName());
         item.id   = app::FromUtf8(track.GetId());

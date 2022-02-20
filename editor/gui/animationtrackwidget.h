@@ -55,7 +55,7 @@ namespace gui
         AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::EntityClass>& entity);
         AnimationTrackWidget(app::Workspace* workspace,
                 const std::shared_ptr<game::EntityClass>& entity,
-                const game::AnimationTrackClass& track,
+                const game::AnimationClass& track,
                 const QVariantMap& properties);
        ~AnimationTrackWidget();
 
@@ -177,7 +177,7 @@ namespace gui
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
             std::shared_ptr<game::EntityClass> entity;
-            std::shared_ptr<game::AnimationTrackClass> track;
+            std::shared_ptr<game::AnimationClass> track;
             base::bitflag<game::ActuatorClass::Type> show_flags = {~0u};
             std::vector<Timeline> timelines;
             std::unordered_map<std::string, std::string> actuator_to_timeline;

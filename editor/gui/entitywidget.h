@@ -80,7 +80,7 @@ namespace gui
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
-        void SaveAnimationTrack(const game::AnimationTrackClass& track, const QVariantMap& properties);
+        void SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties);
     private slots:
         void on_actionPlay_triggered();
         void on_actionPause_triggered();

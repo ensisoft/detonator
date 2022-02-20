@@ -25,6 +25,7 @@
 #include "base/logging.h"
 #include "base/assert.h"
 #include "base/hash.h"
+#include "base/utility.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "game/animation.h"
@@ -613,7 +614,12 @@ void MaterialActuator::Finish(EntityNode& node)
     }
 }
 
-AnimationTrackClass::AnimationTrackClass(const AnimationTrackClass& other)
+AnimationClass::AnimationClass()
+{
+    mId = base::RandomString(10);
+}
+
+AnimationClass::AnimationClass(const AnimationClass& other)
 {
     for (const auto& a : other.mActuators)
     {
@@ -625,7 +631,7 @@ AnimationTrackClass::AnimationTrackClass(const AnimationTrackClass& other)
     mLooping  = other.mLooping;
     mDelay    = other.mDelay;
 }
-AnimationTrackClass::AnimationTrackClass(AnimationTrackClass&& other)
+AnimationClass::AnimationClass(AnimationClass&& other)
 {
     mId        = std::move(other.mId);
     mActuators = std::move(other.mActuators);
@@ -635,7 +641,7 @@ AnimationTrackClass::AnimationTrackClass(AnimationTrackClass&& other)
     mDelay     = other.mDelay;
 }
 
-void AnimationTrackClass::DeleteActuator(size_t index)
+void AnimationClass::DeleteActuator(size_t index)
 {
     ASSERT(index < mActuators.size());
     auto it = mActuators.begin();
@@ -643,7 +649,7 @@ void AnimationTrackClass::DeleteActuator(size_t index)
     mActuators.erase(it);
 }
 
-bool AnimationTrackClass::DeleteActuatorById(const std::string& id)
+bool AnimationClass::DeleteActuatorById(const std::string& id)
 {
     for (auto it = mActuators.begin(); it != mActuators.end(); ++it)
     {
@@ -654,7 +660,7 @@ bool AnimationTrackClass::DeleteActuatorById(const std::string& id)
     }
     return false;
 }
-ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id)
+ActuatorClass* AnimationClass::FindActuatorById(const std::string& id)
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -662,7 +668,7 @@ ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id)
     }
     return nullptr;
 }
-const ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id) const
+const ActuatorClass* AnimationClass::FindActuatorById(const std::string& id) const
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -671,7 +677,7 @@ const ActuatorClass* AnimationTrackClass::FindActuatorById(const std::string& id
     return nullptr;
 }
 
-std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) const
+std::unique_ptr<Actuator> AnimationClass::CreateActuatorInstance(size_t i) const
 {
     const auto& klass = mActuators[i];
     if (klass->GetType() == ActuatorClass::Type::Transform)
@@ -688,7 +694,7 @@ std::unique_ptr<Actuator> AnimationTrackClass::CreateActuatorInstance(size_t i) 
     return {};
 }
 
-std::size_t AnimationTrackClass::GetHash() const
+std::size_t AnimationClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -701,7 +707,7 @@ std::size_t AnimationTrackClass::GetHash() const
     return hash;
 }
 
-void AnimationTrackClass::IntoJson(data::Writer& data) const
+void AnimationClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
     data.Write("name", mName);
@@ -720,9 +726,9 @@ void AnimationTrackClass::IntoJson(data::Writer& data) const
 }
 
 // static
-std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const data::Reader& data)
+std::optional<AnimationClass> AnimationClass::FromJson(const data::Reader& data)
 {
-    AnimationTrackClass ret;
+    AnimationClass ret;
     if (!data.Read("id", &ret.mId) ||
         !data.Read("name", &ret.mName) ||
         !data.Read("duration", &ret.mDuration) ||
@@ -757,9 +763,9 @@ std::optional<AnimationTrackClass> AnimationTrackClass::FromJson(const data::Rea
     return ret;
 }
 
-AnimationTrackClass AnimationTrackClass::Clone() const
+AnimationClass AnimationClass::Clone() const
 {
-    AnimationTrackClass ret;
+    AnimationClass ret;
     ret.mName     = mName;
     ret.mDuration = mDuration;
     ret.mLooping  = mLooping;
@@ -769,11 +775,11 @@ AnimationTrackClass AnimationTrackClass::Clone() const
     return ret;
 }
 
-AnimationTrackClass& AnimationTrackClass::operator=(const AnimationTrackClass& other)
+AnimationClass& AnimationClass::operator=(const AnimationClass& other)
 {
     if (this == &other)
         return *this;
-    AnimationTrackClass copy(other);
+    AnimationClass copy(other);
     std::swap(mId, copy.mId);
     std::swap(mActuators, copy.mActuators);
     std::swap(mName, copy.mName);
@@ -783,7 +789,7 @@ AnimationTrackClass& AnimationTrackClass::operator=(const AnimationTrackClass& o
     return *this;
 }
 
-AnimationTrack::AnimationTrack(const std::shared_ptr<const AnimationTrackClass>& klass)
+Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
     : mClass(klass)
 {
     for (size_t i=0; i<mClass->GetNumActuators(); ++i)
@@ -801,11 +807,11 @@ AnimationTrack::AnimationTrack(const std::shared_ptr<const AnimationTrackClass>&
     // has been "consumed".
     mCurrentTime = -mDelay;
 }
-AnimationTrack::AnimationTrack(const AnimationTrackClass& klass)
-    : AnimationTrack(std::make_shared<AnimationTrackClass>(klass))
+Animation::Animation(const AnimationClass& klass)
+    : Animation(std::make_shared<AnimationClass>(klass))
     {}
 
-AnimationTrack::AnimationTrack(const AnimationTrack& other) : mClass(other.mClass)
+Animation::Animation(const Animation& other) : mClass(other.mClass)
 {
     for (size_t i=0; i<other.mTracks.size(); ++i)
     {
@@ -820,7 +826,7 @@ AnimationTrack::AnimationTrack(const AnimationTrack& other) : mClass(other.mClas
     mDelay       = other.mDelay;
 }
     // Move ctor.
-AnimationTrack::AnimationTrack(AnimationTrack&& other)
+Animation::Animation(Animation&& other)
 {
     mClass       = other.mClass;
     mCurrentTime = other.mCurrentTime;
@@ -828,14 +834,14 @@ AnimationTrack::AnimationTrack(AnimationTrack&& other)
     mTracks      = std::move(other.mTracks);
 }
 
-void AnimationTrack::Update(float dt)
+void Animation::Update(float dt)
 {
     const auto duration = mClass->GetDuration();
 
     mCurrentTime = math::clamp(-mDelay, duration, mCurrentTime + dt);
 }
 
-void AnimationTrack::Apply(EntityNode& node) const
+void Animation::Apply(EntityNode& node) const
 {
     // if we're delaying then skip until delay is consumed.
     if (mCurrentTime < 0)
@@ -874,7 +880,7 @@ void AnimationTrack::Apply(EntityNode& node) const
     }
 }
 
-void AnimationTrack::Restart()
+void Animation::Restart()
 {
     for (auto& track : mTracks)
     {
@@ -886,7 +892,7 @@ void AnimationTrack::Restart()
     mCurrentTime = -mDelay;
 }
 
-bool AnimationTrack::IsComplete() const
+bool Animation::IsComplete() const
 {
     for (const auto& track : mTracks)
     {
@@ -898,9 +904,9 @@ bool AnimationTrack::IsComplete() const
     return false;
 }
 
-std::unique_ptr<AnimationTrack> CreateAnimationTrackInstance(std::shared_ptr<const AnimationTrackClass> klass)
+std::unique_ptr<Animation> CreateAnimationInstance(std::shared_ptr<const AnimationClass> klass)
 {
-    return std::make_unique<AnimationTrack>(klass);
+    return std::make_unique<Animation>(klass);
 }
 
 } // namespace
