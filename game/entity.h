@@ -480,6 +480,10 @@ namespace game
         { return mClass->GetRenderStyle(); }
         bool TestFlag(Flags flag) const
         { return mInstanceFlags.test(flag); }
+        bool IsVisible() const
+        { return mInstanceFlags.test(Flags::VisibleInGame); }
+        void SetVisible(bool visible)
+        { mInstanceFlags.set(Flags::VisibleInGame, visible); }
         float GetTimeScale() const
         { return mInstanceTimeScale; }
         void SetFlag(Flags flag, bool on_off)

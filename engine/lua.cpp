@@ -1848,6 +1848,8 @@ void BindGameLib(sol::state& L)
     drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
     drawable["TestFlag"]      = &TestFlag<DrawableItem>;
     drawable["SetFlag"]       = &SetFlag<DrawableItem>;
+    drawable["IsVisible"]     = &DrawableItem::IsVisible;
+    drawable["SetVisible"]    = &DrawableItem::SetVisible;
     drawable["SetUniform"]    = [](DrawableItem& item, const char* name, sol::object value) {
         if (value.is<float>())
             item.SetMaterialParam(name, value.as<float>());
