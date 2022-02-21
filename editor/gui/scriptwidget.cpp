@@ -747,6 +747,8 @@ void InitDoc()
     DOC_METHOD_1("void", "SetTimeScale", "Set the scaler value for scaling the drawable item time.", "float", "scaler");
     DOC_METHOD_1("bool", "TestFlag", "Test the drawable for a set flag.", "string", "flag");
     DOC_METHOD_2("void", "SetFlag", "Set a drawable flag.", "string", "flag", "bool", "on_off");
+    DOC_METHOD_0("bool", "IsVisible", "Check whether the drawable is currently visible or not.");
+    DOC_METHOD_1("void", "SetVisible", "Hide or show the drawable.", "bool", "visible");
     DOC_METHOD_2("void", "SetUniform", "Set a material parameter (shader uniform) value.<br>"
                                        "The parameter is identified by it's uniform name in the material shader.<br>"
                                        "Supported values are float, int, base.Color4f, glm.vec2, glm.vec3, glm.vec4",
