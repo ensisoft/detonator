@@ -986,11 +986,13 @@ void InitDoc()
                                        "for one more iteration of the game loop until it's deleted at the end of this *next* iteration.<br>"
                                        "This two step design allows any engine subsystems (or game) to realize and react to entities being killed by looking at the kill flag state.",
                                        "game.Entity", "carcass");
-    DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene. Spawning an entity doesn't immediately place it in the scene "
+    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene. Spawning an entity doesn't immediately place it in the scene "
                                                "but will only add it to the list of objects to be spawned at the start of the next iteration of game loop."
                                                "At the start of the next game loop each entity that was spawned will have their spawn flag set.<br>"
-                                               "This two step design allows any engine subsystem to realize and react to entities being spawned.",
-                 "game.EntityArgs", "args");
+                                               "This two step design allows any engine subsystem to realize and react to entities being spawned.<br>"
+                                               "If link_to_root is true the entity is linked to the root of the scene's entity hierarchy.<br>"
+                                               "If link_to_root is false the entity is not linked to the scene hierarchy at all and you should manually call LinkChild later.",
+                 "game.EntityArgs", "args", "bool", "link_to_root = true");
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",
                  "game.Entity", "entity");
     DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
