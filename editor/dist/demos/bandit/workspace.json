@@ -12,6 +12,9 @@
     "2ynNMbWOK3": {
         "checked_for_packing": 1
     },
+    "4NMFT9hs0Y": {
+        "checked_for_packing": 1
+    },
     "4rBCnTGuXK": {
         "checked_for_packing": 1,
         "material": "90E8gRgYDP"
@@ -21,6 +24,11 @@
     },
     "7WjAKJb7hY": {
         "checked_for_packing": 1
+    },
+    "7lSTOyhTqF": {
+        "checked_for_packing": 1
+    },
+    "7qhE9P3Lno": {
     },
     "7uTDp9S0mt": {
         "checked_for_packing": 1
@@ -48,6 +56,9 @@
         "checked_for_packing": 1
     },
     "DOzd15fNMX": {
+        "checked_for_packing": 1
+    },
+    "Dm9UM2yky9": {
         "checked_for_packing": 1
     },
     "EXQWh9Zz2B": {
@@ -177,7 +188,7 @@
             "N2JkMyiHk9": "I65aFfXBZo",
             "OYeWJs9j6z": "NziIwkN9k4",
             "SvC7JwLtel": "m252BKj7px",
-            "num_timelines": 7,
+            "num_timelines": 8,
             "timeline_0_node_id": "xEXRxAU680",
             "timeline_0_self_id": "2Yt9XJQUv3",
             "timeline_1_node_id": "E5g8vRsJGU",
@@ -192,6 +203,8 @@
             "timeline_5_self_id": "BkWSg5SIO8",
             "timeline_6_node_id": "uEzZkNIIJv",
             "timeline_6_self_id": "KWgD8XfDgz",
+            "timeline_7_node_id": "9XUMPiAHt2",
+            "timeline_7_self_id": "5J9W8tYpkW",
             "yuYiHj1dJx": "BkWSg5SIO8"
         }
     },
@@ -209,7 +222,13 @@
         "checked_for_packing": 1
     },
     "HFSA8Yezdr": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "track_Kyi3Hzs1Lr": {
+            "hJ7fkd0GBS": "tNpxGZm4ET",
+            "num_timelines": 1,
+            "timeline_0_node_id": "WyKYhKjCKB",
+            "timeline_0_self_id": "tNpxGZm4ET"
+        }
     },
     "HpAo2l11sT": {
         "checked_for_packing": 1
@@ -267,6 +286,8 @@
             "timeline_4_self_id": "xJSGCq83Ua",
             "utTEXjQ3Dk": "ErF84WpHe4"
         }
+    },
+    "M3GBwLlWRp": {
     },
     "MBEoxQ9SGX": {
         "checked_for_packing": 1
@@ -357,16 +378,21 @@
     "X6Q2aN3uWm": {
         "checked_for_packing": 1
     },
+    "XJz8lK4sSZ": {
+        "checked_for_packing": 1,
+        "material": "nLUoQRjXrg"
+    },
     "Y3nvZp6DaX": {
         "checked_for_packing": 1
     },
     "YFMYNa7lU4": {
-        "checked_for_packing": 1,
-        "material": "Bandit Idle"
+        "checked_for_packing": 1
     },
     "YkK6SEnX2R": {
         "checked_for_packing": 1,
         "material": "xrUzM3pdBZ"
+    },
+    "Yq50Y5iaj6": {
     },
     "ZNaUsmn31R": {
         "checked_for_packing": 1
@@ -397,7 +423,15 @@
         "material": "Ca4GgRWjP2"
     },
     "dfb84OzuRo": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "track_dYWb7lvShr": {
+            "num_timelines": 2,
+            "timeline_0_node_id": "w7ahuB3YZx",
+            "timeline_0_self_id": "aHFFEJ2vfJ",
+            "timeline_1_node_id": "desnKEiwJL",
+            "timeline_1_self_id": "ZTpn4vsQx9",
+            "wmG9QbLrmF": "aHFFEJ2vfJ"
+        }
     },
     "ezvBTHxrAX": {
         "checked_for_packing": 1
@@ -425,6 +459,9 @@
     "gzjp7PwMQd": {
         "checked_for_packing": 1
     },
+    "iFATbhg5NM": {
+        "checked_for_packing": 1
+    },
     "jqIuU0kASH": {
         "checked_for_packing": 1
     },
@@ -438,11 +475,28 @@
         "checked_for_packing": 1,
         "material": "IPqp1SooOX"
     },
+    "loHDpIgprb": {
+    },
     "mgo2XI2toK": {
+        "checked_for_packing": 1
+    },
+    "nLUoQRjXrg": {
         "checked_for_packing": 1
     },
     "nR73zKx341": {
         "checked_for_packing": 1
+    },
+    "nnXiuEEnwL": {
+        "checked_for_packing": 1,
+        "material": "2ynNMbWOK3",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "use_alpha_derivatives": 0,
+        "use_direction_sector": 1,
+        "use_init_rect": 1,
+        "use_lifetime": 1,
+        "use_size_derivatives": 0
     },
     "oDE09YOPk9": {
         "checked_for_packing": 1,
@@ -451,6 +505,12 @@
     "oNJA4jNZF9": {
         "checked_for_packing": 1,
         "material": "pQ2O7Ekypd"
+    },
+    "oQBZA8Ud3W": {
+        "checked_for_packing": 1
+    },
+    "oTLKJxJ07d": {
+        "checked_for_packing": 1
     },
     "pQ2O7Ekypd": {
         "checked_for_packing": 1
@@ -465,9 +525,9 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
-        "canvas_height": 768,
+        "canvas_height": 800,
         "canvas_mode": "Default",
-        "canvas_width": 1024,
+        "canvas_width": 1200,
         "clear_color": "4278190080",
         "command_line_arguments": "",
         "config_srgb": true,
@@ -478,6 +538,9 @@
         "debug_show_msg": false,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
+        "desktop_audio_io_strategy": "Automatic",
+        "enable_audio_pcm_caching": false,
+        "enable_physics": true,
         "game_script": "game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
@@ -510,15 +573,16 @@
         "ticks_per_second": 1,
         "updates_per_second": 60,
         "use_gamehost_process": true,
+        "wasm_audio_io_strategy": "Automatic",
         "webgl_antialias": true,
         "webgl_power_preference": "HighPerf",
         "window_can_resize": true,
-        "window_cursor": false,
+        "window_cursor": true,
         "window_has_border": true,
-        "window_height": 768,
+        "window_height": 800,
         "window_mode": "Windowed",
         "window_vsync": false,
-        "window_width": 1024,
+        "window_width": 1200,
         "working_folder": "${workspace}"
     },
     "sX94tG9WhR": {
@@ -537,7 +601,6 @@
         "checked_for_packing": 1
     },
     "vWm1hXNdOD": {
-        "checked_for_packing": 1
     },
     "vYm7CMPRrJ": {
         "checked_for_packing": 1
@@ -555,8 +618,8 @@
         "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
-        "packing_param_max_tex_height": "128",
-        "packing_param_max_tex_width": "128",
+        "packing_param_max_tex_height": "256",
+        "packing_param_max_tex_width": "256",
         "packing_param_output_dir": "ws://dist",
         "packing_param_pack_height": "2048",
         "packing_param_pack_name": "dist",
