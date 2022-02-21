@@ -2044,10 +2044,9 @@ void BindGameLib(sol::state& L)
     scene["GetClass"]                   = &Scene::GetClass;
     scene["GetNumEntities"]             = &Scene::GetNumEntities;
     scene["GetEntity"]                  = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
-    scene["KillEntity"]                 = &Scene::KillEntity;
-    scene["SpawnEntity"]                = &Scene::SpawnEntity;
     scene["FindEntityByInstanceId"]     = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
+    scene["KillEntity"]                 = &Scene::KillEntity;
     scene["FindEntityTransform"]        = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]    = &Scene::FindEntityNodeTransform;
     scene["FindEntityBoundingRect"]     = &Scene::FindEntityBoundingRect;
@@ -2055,6 +2054,9 @@ void BindGameLib(sol::state& L)
     scene["FindEntityNodeBoundingBox"]  = &Scene::FindEntityNodeBoundingBox;
     scene["MapVectorFromEntityNode"]    = &Scene::MapVectorFromEntityNode;
     scene["MapPointFromEntityNode"]     = &Scene::MapPointFromEntityNode;
+    scene["SpawnEntity"]                = sol::overload(
+        [](Scene& scene, const EntityArgs& args) { return scene.SpawnEntity(args, true); },
+        [](Scene& scene, const EntityArgs& args, bool link) { return scene.SpawnEntity(args, link); });
     scene["QuerySpatialNodes"]          = sol::overload(
         [](Scene& scene, const base::FPoint& point) {
             std::set<EntityNode*> result;
