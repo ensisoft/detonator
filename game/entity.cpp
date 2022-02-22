@@ -118,7 +118,7 @@ DrawableItemClass::DrawableItemClass()
     mBitFlags.set(Flags::UpdateDrawable, true);
     mBitFlags.set(Flags::UpdateMaterial, true);
     mBitFlags.set(Flags::RestartDrawable, true);
-    mBitFlags.set(Flags::FlipVertically, false);
+    mBitFlags.set(Flags::FlipHorizontally, false);
 }
 
 std::size_t DrawableItemClass::GetHash() const

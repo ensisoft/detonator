@@ -407,7 +407,7 @@ void Renderer::DrawEntity(const EntityType& entity,
 
                     paint_node.drawable->SetStyle(style);
                     paint_node.drawable->SetLineWidth(item->GetLineWidth());
-                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
                         paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
                     else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
                 }
@@ -416,7 +416,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                 if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
                 {
                     mTransform.Push(node->GetModelTransform());
-                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
                     {
                         mTransform.Push();
                         mTransform.Scale(-1.0f , 1.0f);
@@ -432,7 +432,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                     if (!mHook || (mHook && mHook->InspectPacket(node , packet)))
                         mPackets.push_back(std::move(packet));
 
-                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
                         mTransform.Pop();
 
                     // pop the model transform

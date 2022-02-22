@@ -136,7 +136,7 @@ void unit_test_setflag_actuator()
         draw_class.SetFlag(game::DrawableItemClass::Flags::UpdateMaterial, true);
         draw_class.SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, true);
         draw_class.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, true);
-        draw_class.SetFlag(game::DrawableItemClass::Flags::FlipVertically, true);
+        draw_class.SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         node_klass.SetDrawable(draw_class);
 
         game::RigidBodyItemClass rigid_body_class;
@@ -166,14 +166,14 @@ void unit_test_setflag_actuator()
                    game::SetFlagActuatorClass::FlagAction::Off, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateMaterial,
                    game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipVertically,
+        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipHorizontally,
                    game::SetFlagActuatorClass::FlagAction::Off, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_Restart,
                    game::SetFlagActuatorClass::FlagAction::Off, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateMaterial) == false);
-        TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipVertically) == false);
+        TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipHorizontally) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == false);
 
         apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame,
@@ -182,14 +182,14 @@ void unit_test_setflag_actuator()
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateMaterial,
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipVertically,
+        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipHorizontally,
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_Restart,
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame)   == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable)  == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateMaterial)  == true);
-        TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipVertically)  == true);
+        TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipHorizontally) == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == true);
 
         // ridig body flags.

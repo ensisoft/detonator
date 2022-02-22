@@ -270,8 +270,8 @@ void SetFlagActuator::Start(EntityNode& node)
         mStartState = draw->TestFlag(DrawableItem::Flags::UpdateDrawable);
     else if (flag == FlagName::Drawable_Restart)
         mStartState = draw->TestFlag(DrawableItem::Flags::RestartDrawable);
-    else if (flag == FlagName::Drawable_FlipVertically)
-        mStartState = draw->TestFlag(DrawableItem::Flags::FlipVertically);
+    else if (flag == FlagName::Drawable_FlipHorizontally)
+        mStartState = draw->TestFlag(DrawableItem::Flags::FlipHorizontally);
     else if (flag == FlagName::RigidBody_Bullet)
         mStartState = body->TestFlag(RigidBodyItem::Flags::Bullet);
     else if (flag == FlagName::RigidBody_Sensor)
@@ -323,8 +323,8 @@ void SetFlagActuator::Finish(EntityNode& node)
         draw->SetFlag(DrawableItem::Flags::UpdateDrawable, next_value);
     else if (flag == FlagName::Drawable_Restart)
         draw->SetFlag(DrawableItem::Flags::RestartDrawable, next_value);
-    else if (flag == FlagName::Drawable_FlipVertically)
-        draw->SetFlag(DrawableItem::Flags::FlipVertically, next_value);
+    else if (flag == FlagName::Drawable_FlipHorizontally)
+        draw->SetFlag(DrawableItem::Flags::FlipHorizontally, next_value);
     else if (flag == FlagName::RigidBody_Bullet)
         body->SetFlag(RigidBodyItem::Flags::Bullet, next_value);
     else if (flag == FlagName::RigidBody_Sensor)
@@ -360,7 +360,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
         flag == FlagName::Drawable_UpdateMaterial ||
         flag == FlagName::Drawable_UpdateDrawable ||
         flag == FlagName::Drawable_Restart ||
-        flag == FlagName::Drawable_FlipVertically)
+        flag == FlagName::Drawable_FlipHorizontally)
     {
         if (!draw && verbose)
         {

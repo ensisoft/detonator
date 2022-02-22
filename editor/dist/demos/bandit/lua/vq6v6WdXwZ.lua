@@ -13,7 +13,7 @@ function TurnPlayerLeft(player)
         local node = player:GetNode(i)
         local draw = node:GetDrawable()
         if draw ~= nil then
-           draw:SetFlag('FlipVertically', true)
+           draw:SetFlag('FlipHorizontally', true)
         end
     end
 end
@@ -24,7 +24,7 @@ function TurnPlayerRight(player)
         local node = player:GetNode(i)
         local draw = node:GetDrawable()
         if draw ~= nil then
-            draw:SetFlag('FlipVertically', false)
+            draw:SetFlag('FlipHorizontally', false)
         end
     end
 end
