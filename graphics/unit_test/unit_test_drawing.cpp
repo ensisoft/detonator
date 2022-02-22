@@ -883,8 +883,8 @@ void unit_test_material_textures()
     }
 
     // test cycling through sprite textures.
-    // one texture, both texture bindings are using the
-    // same texture.
+
+    // one texture, both texture bindings are using the same texture.
     {
         gfx::SpriteClass test;
         test.SetFps(1.0f); // 1 frame per second.
@@ -1023,6 +1023,68 @@ void unit_test_material_textures()
             TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex2);
             TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
             TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex0);
+        }
+    }
+
+    // turn off looping.
+    {
+        gfx::SpriteClass test;
+        test.SetFps(1.0f); // 1 frame per second.
+        test.SetLooping(false);
+
+        gfx::RgbBitmap one;
+        one.Resize(10, 10);
+        one.Fill(gfx::Color::Red);
+        gfx::RgbBitmap two;
+        two.Resize(10, 10);
+        two.Fill(gfx::Color::Green);
+        gfx::RgbBitmap three;
+        two.Resize(10, 10);
+        two.Fill(gfx::Color::Yellow);
+
+        test.AddTexture(gfx::CreateTextureFromBitmap(one));
+        test.AddTexture(gfx::CreateTextureFromBitmap(two));
+        test.AddTexture(gfx::CreateTextureFromBitmap(three));
+
+        TestDevice device;
+        TestProgram program;
+        {
+            gfx::MaterialClass::State env;
+            env.material_time = 0.0f;
+            test.ApplyDynamicState(env, device, program);
+            const auto& tex0 = device.GetTexture(0);
+            const auto& tex1 = device.GetTexture(1);
+            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
+            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex0);
+            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
+            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex1);
+        }
+
+        program.Clear();
+        {
+            gfx::MaterialClass::State env;
+            env.material_time = 1.0f;
+            test.ApplyDynamicState(env, device, program);
+            const auto& tex0 = device.GetTexture(0);
+            const auto& tex1 = device.GetTexture(1);
+            const auto& tex2 = device.GetTexture(2);
+            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
+            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex1);
+            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
+            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex2);
+        }
+        program.Clear();
+        {
+            gfx::MaterialClass::State env;
+            env.material_time = 2.5f;
+            test.ApplyDynamicState(env, device, program);
+            const auto& tex0 = device.GetTexture(0);
+            const auto& tex1 = device.GetTexture(1);
+            const auto& tex2 = device.GetTexture(2);
+            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
+            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex2);
+            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
+            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex2);
         }
     }
 }
@@ -1332,6 +1394,7 @@ void unit_test_static_poly()
     TEST_REQUIRE(geom->mUploaded == false);
     TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
 }
+
 
 // multiple materials with textures should only load the
 // same texture object once onto the device.

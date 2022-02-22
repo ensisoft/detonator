@@ -192,21 +192,54 @@
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="gamma">
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="chkStaticInstance">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
+            <property name="text">
+             <string>Static instance</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Gamma</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblParticleEffect">
+            <property name="text">
+             <string>Particle effect</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblBaseColor">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Base color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="particleAction"/>
           </item>
           <item row="1" column="1">
            <widget class="color_widgets::ColorSelector" name="baseColor">
@@ -240,19 +273,17 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
-           <widget class="QCheckBox" name="chkBlendFrames">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblSpriteFps">
             <property name="text">
-             <string>Blend frames</string>
+             <string>Sprite FPS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lblTexture">
+            <property name="text">
+             <string>Texture(s)</string>
             </property>
            </widget>
           </item>
@@ -325,42 +356,21 @@
             </item>
            </layout>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="lblTexture">
-            <property name="text">
-             <string>Texture(s)</string>
+          <item row="7" column="1">
+           <widget class="QCheckBox" name="chkBlendFrames">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblParticleEffect">
-            <property name="text">
-             <string>Particle effect</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lblSpriteFps">
-            <property name="text">
-             <string>Sprite FPS</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblBaseColor">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Base color</string>
+             <string>Blend frames</string>
             </property>
            </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="particleAction"/>
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="spriteFps">
@@ -372,6 +382,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string/>
             </property>
             <property name="maximum">
              <double>100.000000000000000</double>
@@ -387,29 +400,29 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_26">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Gamma</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QCheckBox" name="chkStaticInstance">
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="gamma">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QCheckBox" name="chkLooping">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Static instance</string>
+             <string>Looping</string>
             </property>
            </widget>
           </item>
@@ -1498,6 +1511,7 @@
   <tabstop>btnAddTextureMap</tabstop>
   <tabstop>chkStaticInstance</tabstop>
   <tabstop>chkBlendFrames</tabstop>
+  <tabstop>chkLooping</tabstop>
   <tabstop>gradientOffsetY</tabstop>
   <tabstop>colorMap0</tabstop>
   <tabstop>colorMap1</tabstop>
