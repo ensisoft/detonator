@@ -218,6 +218,7 @@ private:
         {
             pa_stream_set_state_callback(stream_, nullptr, nullptr);
             pa_stream_set_write_callback(stream_, nullptr, nullptr);
+            pa_stream_set_underflow_callback(stream_, nullptr, nullptr);
             pa_stream_disconnect(stream_);
             pa_stream_unref(stream_);
             stream_ = nullptr;
@@ -241,7 +242,8 @@ private:
         static void underflow_callback(pa_stream* stream, void* user)
         {
             auto* this_ = static_cast<PlaybackStream*>(user);
-
+            if (!this_->source_)
+                return;
             WARN("PulseAudio stream underflow callback. [name='%1']", this_->source_->GetName());
         }
 
