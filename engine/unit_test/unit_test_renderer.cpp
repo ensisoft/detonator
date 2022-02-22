@@ -252,7 +252,7 @@ void unit_test_drawable_item()
     // updating makes a visual difference.
     klass->GetNode(0).GetDrawable()->SetMaterialId("red-green");
 
-    // test vertical flip
+    // test horizontal flip
     {
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, true);
         device->BeginFrame();
@@ -266,7 +266,7 @@ void unit_test_drawable_item()
         TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 100, 100), gfx::Color::Red));
         TEST_REQUIRE(bmp.Compare(gfx::URect(100, 0, 100, 100), gfx::Color::Green));
 
-        entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipVertically, true);
+        entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipHorizontally, true);
         device->BeginFrame();
         device->ClearColor(gfx::Color::Blue);
         renderer.BeginFrame();
@@ -288,7 +288,7 @@ void unit_test_drawable_item()
     {
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::UpdateMaterial, false);
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, true);
-        entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipVertically, false);
+        entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipHorizontally, false);
 
         device->BeginFrame();
         device->ClearColor(gfx::Color::Blue);

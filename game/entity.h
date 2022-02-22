@@ -232,8 +232,9 @@ namespace game
             // Whether the item should restart drawables that have
             // finished, for example particle engines.
             RestartDrawable,
-            // Whether to flip (mirror) the item about Y axis
-            FlipVertically,
+            // Whether to flip (mirror) the item about the central vertical axis.
+            // This changes the rendering on the direction from left to right.
+            FlipHorizontally,
         };
         DrawableItemClass();
 

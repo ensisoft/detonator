@@ -1420,9 +1420,9 @@
                    </widget>
                   </item>
                   <item row="11" column="1">
-                   <widget class="QCheckBox" name="dsFlipVertically">
+                   <widget class="QCheckBox" name="dsFlipHorizontally">
                     <property name="text">
-                     <string>Flip vertically</string>
+                     <string>Flip horizontally</string>
                     </property>
                    </widget>
                   </item>
@@ -2702,7 +2702,7 @@
   <tabstop>dsUpdateDrawable</tabstop>
   <tabstop>dsUpdateMaterial</tabstop>
   <tabstop>dsRestartDrawable</tabstop>
-  <tabstop>dsFlipVertically</tabstop>
+  <tabstop>dsFlipHorizontally</tabstop>
   <tabstop>rigidBodyItem</tabstop>
   <tabstop>rbSimulation</tabstop>
   <tabstop>rbShape</tabstop>

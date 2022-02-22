@@ -109,7 +109,7 @@ namespace game
             Drawable_UpdateMaterial,
             Drawable_UpdateDrawable,
             Drawable_Restart,
-            Drawable_FlipVertically,
+            Drawable_FlipHorizontally,
             RigidBody_Bullet,
             RigidBody_Sensor,
             RigidBody_Enabled,
@@ -174,7 +174,7 @@ namespace game
         // Normalized duration.
         float mDuration = 1.0f;
         FlagAction mFlagAction = FlagAction::Off;
-        FlagName   mFlagName   = FlagName::Drawable_FlipVertically;
+        FlagName   mFlagName   = FlagName::Drawable_FlipHorizontally;
     };
 
     // Modify the kinematic physics body properties, i.e.

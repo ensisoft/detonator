@@ -497,7 +497,7 @@ void unit_test_scene_interface()
         draw.SetLayer(5);
         draw.SetLineWidth(2.0f);
         draw.SetTimeScale(3.0f);
-        draw.SetFlag(game::DrawableItemClass::Flags::FlipVertically, true);
+        draw.SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
 
         game::RigidBodyItemClass body;
