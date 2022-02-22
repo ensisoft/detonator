@@ -268,6 +268,7 @@ SpriteMap::SpriteMap(const SpriteMap& other, bool copy)
     mRectUniformName[1] = other.mRectUniformName[1];
     mSamplerName[0] = other.mSamplerName[0];
     mSamplerName[1] = other.mSamplerName[1];
+    mLooping = other.mLooping;
     for (const auto& sprite : other.mSprites)
     {
         Sprite s;
@@ -376,6 +377,7 @@ std::size_t SpriteMap::GetHash() const
     hash = base::hash_combine(hash, mSamplerName[1]);
     hash = base::hash_combine(hash, mRectUniformName[0]);
     hash = base::hash_combine(hash, mRectUniformName[1]);
+    hash = base::hash_combine(hash, mLooping);
     for (const auto& sprite : mSprites)
     {
         const auto* source = sprite.source.get();
@@ -394,10 +396,16 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
     const auto blend_coeff = frame_fraction/frame_interval;
     const auto first_index = (unsigned)(state.current_time/frame_interval);
     const auto frame_count = (unsigned)mSprites.size();
+    const auto max_index = frame_count - 1;
     const auto texture_count = std::min(frame_count, 2u);
+    const auto first_frame  = mLooping
+            ? ((first_index + 0) % frame_count)
+            : math::clamp(0u, max_index, first_index+0);
+    const auto second_frame = mLooping
+            ? ((first_index + 1) % frame_count)
+            : math::clamp(0u, max_index, first_index+1);
     const unsigned frame_index[2] = {
-            (first_index + 0) % frame_count,
-            (first_index + 1) % frame_count
+        first_frame, second_frame
     };
     for (unsigned i=0; i<2; ++i)
     {
@@ -447,6 +455,7 @@ void SpriteMap::IntoJson(data::Writer& data) const
     data.Write("sampler_name1", mSamplerName[1]);
     data.Write("rect_name0", mRectUniformName[0]);
     data.Write("rect_name1", mRectUniformName[1]);
+    data.Write("looping", mLooping);
 
     for (const auto& sprite : mSprites)
     {
@@ -467,6 +476,7 @@ bool SpriteMap::FromJson(const data::Reader& data)
     data.Read("sampler_name1", &mSamplerName[1]);
     data.Read("rect_name0", &mRectUniformName[0]);
     data.Read("rect_name1", &mRectUniformName[1]);
+    data.Read("looping", &mLooping);
 
     for (unsigned i=0; i<data.GetNumChunks("textures"); ++i)
     {
@@ -507,6 +517,7 @@ SpriteMap& SpriteMap::operator=(const SpriteMap& other)
     std::swap(mSamplerName[1], tmp.mSamplerName[1]);
     std::swap(mRectUniformName[0], tmp.mRectUniformName[0]);
     std::swap(mRectUniformName[1], tmp.mRectUniformName[1]);
+    std::swap(mLooping, tmp.mLooping);
     return *this;
 }
 

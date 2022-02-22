@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>205</width>
-    <height>75</height>
+    <width>274</width>
+    <height>90</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -103,6 +103,9 @@
      <property name="accelerated">
       <bool>false</bool>
      </property>
+     <property name="suffix">
+      <string> FPS</string>
+     </property>
      <property name="maximum">
       <double>100.000000000000000</double>
      </property>
@@ -118,14 +121,21 @@
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="QLabel" name="lblFps">
+    <widget class="QCheckBox" name="chkLooping">
      <property name="text">
-      <string>FPS</string>
+      <string>Looping</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>textureName</tabstop>
+  <tabstop>btnDelTextureMap</tabstop>
+  <tabstop>btnAddTextureMap</tabstop>
+  <tabstop>spriteFps</tabstop>
+  <tabstop>chkLooping</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>

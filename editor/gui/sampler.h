@@ -51,7 +51,10 @@ namespace gui
         void ShowFps(bool on_off)
         {
             SetVisible(mUI.spriteFps, on_off);
-            SetVisible(mUI.lblFps, on_off);
+        }
+        void ShowLooping(bool on_off)
+        {
+            SetVisible(mUI.chkLooping, on_off);
         }
         void SetText(QString text)
         { SetValue(mUI.textureName, text); }
@@ -63,6 +66,10 @@ namespace gui
         { return GetValue(mUI.spriteFps); }
         void SetSpriteFps(float fps)
         { SetValue(mUI.spriteFps, fps); }
+        void SetLooping(bool looping)
+        { SetValue(mUI.chkLooping, looping); }
+        bool IsLooping() const
+        { return GetValue(mUI.chkLooping); }
     signals:
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();

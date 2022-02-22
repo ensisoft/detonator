@@ -554,7 +554,7 @@ namespace gfx
         virtual bool SetTextureRect(const TextureSource* source, const FRect& rect) = 0;
         // Delete the ive texture source. Returns true if source was found and deleted.
         virtual bool DeleteTexture(const TextureSource* source) = 0;
-        // Reset all texture objecs. After this the texture map contains no textures.
+        // Reset all texture objects. After this the texture map contains no textures.
         virtual void ResetTextures() = 0;
 
         // down cast helpers.
@@ -601,16 +601,22 @@ namespace gfx
         { base::SafeIndex(mSprites, index).rect = rect; }
         void SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
         { base::SafeIndex(mSprites, index).source = std::move(source); }
-        void SetFps(float fps) { mFps = fps; }
+        void SetFps(float fps)
+        { mFps = fps; }
+        void SetLooping(bool looping)
+        { mLooping = looping; }
         std::string GetSamplerName(size_t index) const
         { return mSamplerName[index]; }
         std::string GetRectUniformName(size_t index) const
         { return mRectUniformName[index]; }
-        float GetFps() const   { return mFps; }
+        float GetFps() const
+        { return mFps; }
         FRect GetTextureRect(size_t index) const
         { return base::SafeIndex(mSprites, index).rect; }
         size_t GetNumTextures() const
         { return mSprites.size(); }
+        bool IsLooping() const
+        { return mLooping; }
         // TextureMap implementation.
         virtual Type GetType() const override
         { return Type::Sprite; }
@@ -641,6 +647,7 @@ namespace gfx
         std::vector<Sprite> mSprites;
         std::string mSamplerName[2];
         std::string mRectUniformName[2];
+        bool mLooping = true;
     };
 
     // Implements texture mapping by always mapping a single 2D texture object
@@ -1102,6 +1109,8 @@ namespace gfx
         { mSprite.SetFps(fps); }
         void SetBlendFrames(float on_off)
         { mBlendFrames = on_off; }
+        void SetLooping(bool on_off)
+        { mSprite.SetLooping(on_off); }
         void SetParticleAction(ParticleAction action)
         { mParticleAction = action; }
         gfx::Color4f GetBaseColor() const
@@ -1112,6 +1121,8 @@ namespace gfx
         { return mSprite.GetNumTextures(); }
         bool GetBlendFrames() const
         { return mBlendFrames; }
+        bool IsLooping() const
+        { return mSprite.IsLooping(); }
         float GetFps() const
         { return mSprite.GetFps(); }
         float GetTextureScaleX() const

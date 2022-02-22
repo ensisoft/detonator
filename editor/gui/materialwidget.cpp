@@ -664,6 +664,8 @@ void MaterialWidget::on_chkStaticInstance_stateChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_chkBlendFrames_stateChanged(int)
 { SetMaterialProperties(); }
+void MaterialWidget::on_chkLooping_stateChanged(int)
+{ SetMaterialProperties(); }
 void MaterialWidget::on_colorMap0_colorChanged(QColor)
 { SetMaterialProperties(); }
 void MaterialWidget::on_colorMap1_colorChanged(QColor)
@@ -1013,9 +1015,15 @@ void MaterialWidget::ApplyShaderDescription()
             connect(widget, &Sampler::SpriteFpsValueChanged, this, &MaterialWidget::on_spriteFps_valueChanged);
             widget->SetName(app::FromUtf8(name));
             if (type == gfx::TextureMap::Type::Texture2D)
+            {
                 widget->ShowFps(false);
+                widget->ShowLooping(false);
+            }
             else if (type == gfx::TextureMap::Type::Sprite)
+            {
                 widget->ShowFps(true);
+                widget->ShowLooping(true);
+            }
             else BUG("???");
             layout->addWidget(widget, widget_row, 1);
             mSamplers.push_back(widget);
@@ -1164,7 +1172,10 @@ void MaterialWidget::SetMaterialProperties()
             if (auto* map = ptr->FindTextureMap(name))
             {
                 if (auto* sprite = map->AsSpriteMap())
+                {
                     sprite->SetFps(widget->GetSpriteFps());
+                    sprite->SetLooping(widget->IsLooping());
+                }
             }
         }
     }
@@ -1214,6 +1225,7 @@ void MaterialWidget::SetMaterialProperties()
         ptr->SetTextureVelocityZ(GetValue(mUI.velocityZ));
         ptr->SetFps(GetValue(mUI.spriteFps));
         ptr->SetBlendFrames(GetValue(mUI.chkBlendFrames));
+        ptr->SetLooping(GetValue(mUI.chkLooping));
     }
 }
 
@@ -1228,6 +1240,7 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.btnDelTextureMap,  false);
     SetEnabled(mUI.chkStaticInstance, false);
     SetEnabled(mUI.chkBlendFrames,    false);
+    SetEnabled(mUI.chkLooping, false);
     SetEnabled(mUI.gradientMap,       false);
     SetEnabled(mUI.textureCoords,     false);
     SetEnabled(mUI.textureFilters,    false);
@@ -1362,7 +1375,9 @@ void MaterialWidget::GetMaterialProperties()
                 }
                 if (sprite->GetNumTextures())
                     widget->SetText(QString("%1 texture(s)").arg(sprite->GetNumTextures()));
+
                 widget->SetSpriteFps(sprite->GetFps());
+                widget->SetLooping(sprite->IsLooping());
             }
             else if (const auto* texture = map->AsTextureMap2D())
             {
@@ -1470,6 +1485,7 @@ void MaterialWidget::GetMaterialProperties()
         SetVisible(mUI.textureCoords,     true);
         SetVisible(mUI.textureFilters,    true);
         SetVisible(mUI.chkBlendFrames,    true);
+        SetVisible(mUI.chkLooping, true);
         SetEnabled(mUI.baseColor,        true);
         SetEnabled(mUI.spriteFps,        true);
         SetEnabled(mUI.particleAction,   true);
@@ -1477,6 +1493,7 @@ void MaterialWidget::GetMaterialProperties()
         SetEnabled(mUI.textureFilters,   true);
         SetEnabled(mUI.textureMaps,      true);
         SetEnabled(mUI.chkBlendFrames,   true);
+        SetEnabled(mUI.chkLooping, true);
         SetEnabled(mUI.btnAddTextureMap, true);
 
         SetValue(mUI.baseColor, ptr->GetBaseColor());
@@ -1492,6 +1509,7 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.velocityZ, ptr->GetTextureVelocityZ());
         SetValue(mUI.spriteFps, ptr->GetFps());
         SetValue(mUI.chkBlendFrames, ptr->GetBlendFrames());
+        SetValue(mUI.chkLooping, ptr->IsLooping());
 
         std::vector<ListItem> textures;
         for (size_t i=0; i<ptr->GetNumTextures(); ++i)

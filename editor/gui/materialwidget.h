@@ -91,6 +91,7 @@ namespace gui
         void on_spriteFps_valueChanged(double);
         void on_chkStaticInstance_stateChanged(int);
         void on_chkBlendFrames_stateChanged(int);
+        void on_chkLooping_stateChanged(int);
         void on_colorMap0_colorChanged(QColor);
         void on_colorMap1_colorChanged(QColor);
         void on_colorMap2_colorChanged(QColor);
