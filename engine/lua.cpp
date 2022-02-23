@@ -1695,6 +1695,59 @@ void BindWDK(sol::state& L)
         const std::string btn_name(magic_enum::enum_name(btn));
         table[sol::create_if_nil]["Buttons"][btn_name] = magic_enum::enum_integer(btn);
     }
+
+    using KeyBitSet = wdk::bitflag<wdk::Keysym>;
+
+    auto key_bit_string = table.new_usertype<KeyBitSet>("KeyBitSet",
+        sol::constructors<KeyBitSet()>());
+
+    key_bit_string["Set"] = [](KeyBitSet& bits, int key, bool on_off) {
+        const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
+        if (!sym.has_value())
+            throw std::runtime_error("No such keysym: "  + std::to_string(key));
+        bits.set(sym.value(), on_off);
+    };
+    key_bit_string["Test"] = [](KeyBitSet& bits, int key) {
+        const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
+        if (!sym.has_value())
+            throw std::runtime_error("No such keysym: " + std::to_string(key));
+        return bits.test(sym.value());
+    };
+    key_bit_string["AnyBit"] = &KeyBitSet::any_bit;
+    key_bit_string["Value"] = &KeyBitSet::value;
+    key_bit_string["Clear"] = &KeyBitSet::clear;
+    // todo: fix the issues in the wdk bitset.
+    // somehow the lack of explicit copy constructor seems to cause issues here?
+    key_bit_string[sol::meta_function::bitwise_and] = sol::overload(
+        [](const KeyBitSet& a, const KeyBitSet& b) {
+            KeyBitSet ret;
+            ret.set_from_value(a.value() & b.value());
+            return ret;
+        },
+        [](const KeyBitSet& bits, int key) {
+            const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
+            if (!sym.has_value())
+                throw std::runtime_error("No such keysym: " + std::to_string(key));
+            const KeyBitSet tmp(sym.value());
+            KeyBitSet ret;
+            ret.set_from_value(bits.value() & tmp.value());
+            return ret;
+        });
+    key_bit_string[sol::meta_function::bitwise_or] = sol::overload(
+        [](const KeyBitSet& a,const KeyBitSet& b) {
+            KeyBitSet ret;
+            ret.set_from_value(a.value() | b.value());
+            return ret;
+        },
+        [](const KeyBitSet& bits, int key) {
+            const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
+            if (!sym.has_value())
+                throw std::runtime_error("No such keysym: " + std::to_string(key));
+            const KeyBitSet tmp(sym.value());
+            KeyBitSet ret;
+            ret.set_from_value(bits.value() | tmp.value());
+            return ret;
+        });
 }
 
 void BindUIK(sol::state& L)
