@@ -577,6 +577,17 @@ void InitDoc()
         const std::string name(magic_enum::enum_name(btn));
         DOC_TABLE_PROPERTY("int", name, base::FormatString("Mouse button value for '%1'.", name));
     }
+    DOC_TABLE("wdk.KeyBitSet");
+    DOC_METHOD_0("wdk.KeyBitSet", "new", "Construct new key symbol bit set.");
+    DOC_METHOD_2("void", "Set", "Set a key symbol bit on or off.", "int", "key", "bool", "on");
+    DOC_METHOD_1("bool", "Test", "Test whether a key symbol bit is on or off.", "int", "key");
+    DOC_METHOD_0("bool", "AnyBit", "Check whether any bit is set.");
+    DOC_METHOD_0("unsigned", "Value", "Get the underlying integer value.");
+    DOC_METHOD_0("void", "Clear", "Clear all bits.");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "lhs", "wdk.KeyBitSet", "rhs");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "bits", "int", "key");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "lhs", "wdk.KeyBitSet", "rhs");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "bits", "int", "key");
 
     DOC_TABLE("uik");
     DOC_FUNCTION_2("uik.Widget", "WidgetCast", "Downcast a Widget object to concrete widget type.<br>"
