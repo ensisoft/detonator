@@ -1993,11 +1993,11 @@ void BindGameLib(sol::state& L)
             item.SetMaterialParam(name, value.as<glm::vec4>());
         else throw GameError("Unsupported material uniform type.");
     };
-    drawable["GetUniform"] = [](const DrawableItem& item, const char* name, sol::this_state state) {
+    drawable["FindUniform"] = [](const DrawableItem& item, const char* name, sol::this_state state) {
         sol::state_view L(state);
         if (const auto* value = item.FindMaterialParam(name))
             return sol::make_object(L, *value);
-        throw GameError("No such material uniform: " + std::string(name));
+        return sol::make_object(L, sol::nil);
     };
     drawable["HasUniform"] = &DrawableItem::HasMaterialParam;
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
