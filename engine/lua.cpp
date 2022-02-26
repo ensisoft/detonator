@@ -69,48 +69,119 @@
 
 using namespace game;
 
-// About Lua error handling. The binding code here must be careful
-// to understand what is a BUG, a logical error condition and an
-// exceptional condition. Normally in the engine code BUG is an
-// error made by the programmer of the engine and results in a
-// stack strace and a core dump. Logical error conditions are
-// conditions that the code needs to be prepared to deal with, e.g.
-// failed/mangled data in various content files, missing data files
-// etc. Finally, exceptional conditions are conditions that happen
-// as some unexpected failure (most typically an underlying OS
-// resource allocation has failed). Exceptions are normally not
-// used for logical error conditions (oops, this texture file could
-// not be read etc.)
+// About engine and Lua game error handling.
+
+// Normally in the engine there are 3 types of possible "error"
+// conditions all of which use different strategy to deal with:
+// a) Engine bugs created by the engine programmer. these are dealt
+//    with the BUG and ASSERT macros which when triggered dump core
+//    and abort the program.
+// b) Logical "error" conditions that the engine must be prepared
+//    to deal with such as junk data, or not being able to open a
+//    a file/resource etc. these are best deal with error codes/flags
+//    error strings and messages. the important thing to note here is
+//    that from the engine perspective these are not errors at all.
+//    they're only errors from the *user* perspective.
+// c) Unexpected failures such as OS resource allocation failures,
+//    create socket, create mutex allocate memory etc. these are
+//    handled by throwing exceptions for convenient propagation of
+//    this failure information up the stack without having to muddle
+//    the rest of the engine code with this type of information and
+//    (irrelevant) failure propagation.
 //
-// However, here when dealing with calls coming from the running game
-// what could normally be considered a BUG in other parts of the
-// engine code may not be so here since the code here needs to be
-// prepared to deal with mistakes in the Lua code. (That being said
-// it's still possible that *this* code contains BUGS too)
-// For example: If an OOB array access is attempted it's normally a bug
-// in the calling code and triggers an ASSERT. However, when coming from
-// a Lua it must be an expected condition. I.e. we must expect that the
-// Lua code will call us wrong and be prepared to deal with such situations.
+// When dealing with arbitrary Lua code the engine must be ready to
+// handle failures in Lua in some way. That means that *BUGS* in the
+// Lua game code are logical error conditions from the engine perspective
+// and the engine must be ready to deal with those. So essentially what
+// is a type (a) BUG condition in Lua game code is a type (b) logical
+// error condition in the engine.
+
+// When dealing with the Lua game code errors we can expect the following:
 //
-// So what strategies are there for dealing with this?
-// 1. simply ignore incorrect/buggy calls
-//    - if return value is needed return some "default" value.
-//    - possibly log a warning/error
-// 2. device API semantics that return some "status" OK (boolean)
-//    value to indicate that the call was OK.
-// 3. raise a Lua error and let the caller either fail or use pcall
+// 1. Syntax errors. In C++ these would be build-time (compiler) errors and
+//    the program would never even be built. These could simply not happen
+//    in a running program. However, since Lua is a dynamic language these
+//    will happen at runtime instead.
 //
-// It seems that the option number 3 is the most reasonable of these
-// i.e. in case of any buggy calls coming from lua a lua error is raised,
-// and then it's the caller's responsibility to deal with that somehow
-// by for example wrapping the call inside pcall.
-// And for better or for worse a std exception can be used to indicate
-// to sol that Lua error should be raised. (Quickly looking didn't see
-// another way of raising Lua errors, maybe it does exist but sol2 docs
-// are such an awful mess...)
-// The problem with the exceptions though is that when this code has
-// BUGS i.e. calls the sol2 API incorrectly for example sol2 will then
-// throw an exception. So that muddles the waters a bit, unfortunately...
+//    Some more examples of these types of errors.
+//    - trying to call a function which doesn't exist
+//    - trying to access a property which doesn't exist
+//    - trying to access a variable which doesn't exist
+//    - calling a function wrong
+//     - incorrect number of arguments
+//     - incorrect argument types
+//     - incorrect arguments for operators such as trying to sum a string
+//       and an int
+//
+// 2. Logical game bugs. These happen when the game code is correct in terms
+//    of its syntax but is wrong in terms of its semantics. For example, it
+//    might be calling  a function with arguments that are not  part of the
+//    function's domain.
+//
+//
+// So what to do about these?
+//
+// For type (1) errors, i.e. syntax errors the game tries to do something
+// that makes no sense. The best strategy that I can think of right now is
+// to produce an error with a stack trace (if possible) and stop executing
+// any Lua code from that point on. The error message should at minimum show
+// the offending Lua code line. Most of these should already be handled by
+// the Lua interpreter itself. The only case that we might have to consider
+// here is maybe the Lua index and new_index meta methods.
+//
+// Type (2) errors raises the question whether the engine should be validating
+// the inputs coming from the game or not. In other words whether to check that
+// the arguments coming to a function are part the function's domain etc.
+// If no validation is done then any bug such as OOB access on some underlying
+// data structure can silently create corruption or (most likely) hit a BUG in
+// the engine thus taking the whole game process down. For the Lua game developer
+// this strategy might be a little difficult for understanding that a bug in the
+// Lua game code caused an abort and a stack trace inside the engine. Especially
+// if the stack trace is the C++ stack trace (with all the native Lua binding stuff)
+// instead of the *Lua* stack trace. Seems that a better strategy would be to
+// take down the Lua game only and show produce a Lua only error message + stack trace.
+//
+// Therefore, right now I'm inclined to think that the Lua engine API binding
+// should perform input validation and make sure that the called functionality
+// is called right. That opens the next question what to do when bugs are detected?
+// Some possible API semantical alternatives (any logging is an addition to any of these
+// and is not a API strategy or semantical solution by itself).
+// a) Simply ignore the buggy/incorrect calls, return "default" or nil values and objects.
+// b) Change API semantics so that each engine Lua API would return some "status"
+//   value to indicate success or error + any actual return value.
+// c) Raise a Lua error
+//
+//
+// I really don't like the option (a). It's far too easy to simply ignore
+// (either accidentally  or on purpose) the issue and continue with incorrect state.
+// Option (b) has the same problem  as (a). Adding status error checking is an
+// improvement but would make for some really tedious client side (game) programming.
+// Who wants to check explicitly check every function call for success or for failure?
+// This isn't Go after all! Therefore, it seems to me that the option (c) is the most
+// reasonable of these. I.e. in case of a buggy Lua game call a Lua error is raised.
+// Then the question of "return values" also disappear. We simply don't need to write
+// any code to deal with bugs.
+//
+// The important thing to note here is that the C++ mechanism most readily available
+// by Sol3 for creating a Lua error is to throw a C++ exception. Unless the game Lua
+// code used a pcall the top level Sol3 protected_function will propagate the Lua
+// error back to the C++ code which can then propagate it further up the stack and
+// eventually show it to the user.
+//
+// One thing to be careful about though is that calling Sol3 wrong will also throw
+// exceptions. So unless we're very careful we end up having BUGS in the Lua binding
+// code turned into "Lua game errors" which is not what we should want to do!!
+
+class GameError : public std::exception {
+public:
+    GameError(std::string&& message)
+      : mMessage(std::move(message))
+    {}
+    virtual const char* what() noexcept
+    { return mMessage.c_str(); }
+private:
+    std::string mMessage;
+};
 
 namespace {
 template<typename... Args>
@@ -120,19 +191,23 @@ void CallLua(const sol::protected_function& func, const Args&... args)
         return;
     const auto& result = func(args...);
     // All the calls into Lua begin by the engine calling into Lua.
-    // That means that if any error is raised by:
-    // - Lua code calls error(....) to raise an error
-    // - Lua code calls into the binding code below buggily and and exception
-    //   gets thrown which sol2 will catch and convert into Lua error
-    // - The binding code itself is buggy and calls into sol2 wrong which throws an
-    //   exception...
-    // - There's some other c++ exception 
-    // regardless of the source of the error/exception will then obtain
-    // an invalid object here.
+    // The protected_function will create a new protected scope and
+    //   a) realize Lua errors raised by error(...)
+    //   b) catch c++ exceptions
+    // then return validity status and any error message through the
+    // result object.
+    // However, we must take care inside the Binding code since any
+    // *BUGS* there i.e. calling sol3 wrong will also have sol3 throw
+    // an exception. This would turn an engine (binding code) BUG
+    // into a Lua game bug which is not what we want!
     if (result.valid())
         return;
     const sol::error err = result;
-    ERROR(err.what());
+
+    // todo: Lua code has failed. This information should likely be
+    // propagated in a logical Lua error object rather than by
+    // throwing an exception.
+    throw std::runtime_error(err.what());
 }
 
 template<typename LuaGame>
@@ -142,7 +217,7 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
     engine["Play"] = sol::overload(
         [](LuaGame& self, ClassHandle<SceneClass> klass) {
             if (!klass)
-                throw std::runtime_error("Nil scene class");
+                throw GameError("Nil scene class");
             PlayAction play;
             play.klass = klass;
             self.PushAction(play);
@@ -150,7 +225,7 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         [](LuaGame& self, std::string name) {
             auto handle = self.GetClassLib()->FindSceneClassByName(name);
             if (!handle)
-                throw std::runtime_error("No such scene class: " + name);
+                throw GameError("No such scene class: " + name);
             PlayAction play;
             play.klass = handle;
             self.PushAction(play);
@@ -220,7 +295,7 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
     engine["OpenUI"] = sol::overload(
         [](LuaGame& self, ClassHandle<uik::Window> model) {
             if (!model)
-                throw std::runtime_error("Nil UI window object.");
+                throw GameError("Nil UI window object.");
             // there's no "class" object for the UI system so we're just
             // going to create a mutable copy and put that on the UI stack.
             OpenUIAction action;
@@ -231,7 +306,7 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         [](LuaGame& self, std::string name) {
             auto handle = self.GetClassLib()->FindUIByName(name);
             if (!handle)
-                throw std::runtime_error("No such UI: " + name);
+                throw GameError("No such UI: " + name);
             OpenUIAction action;
             action.ui = std::make_shared<uik::Window>(*handle);
             self.PushAction(action);
@@ -259,7 +334,7 @@ bool TestFlag(const Type& object, const std::string& name)
     using Flags = typename Type::Flags;
     const auto enum_val = magic_enum::enum_cast<Flags>(name);
     if (!enum_val.has_value())
-        throw std::runtime_error("No such flag: " + name);
+        throw GameError("No such flag: " + name);
     return object.TestFlag(enum_val.value());
 }
 template<typename Type>
@@ -268,7 +343,7 @@ void SetFlag(Type& object, const std::string& name, bool on_off)
     using Flags = typename Type::Flags;
     const auto enum_val = magic_enum::enum_cast<Flags>(name);
     if (!enum_val.has_value())
-        throw std::runtime_error("No such flag: " + name);
+        throw GameError("No such flag: " + name);
     object.SetFlag(enum_val.value(), on_off);
 }
 
@@ -296,7 +371,7 @@ sol::object GetScriptVar(const Type& object, const char* key, sol::this_state st
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (!var)
-        throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+        throw GameError(base::FormatString("No such variable: '%1'", key));
     return ObjectFromScriptVarValue(*var, state);
 }
 template<typename Type>
@@ -305,9 +380,9 @@ void SetScriptVar(Type& object, const char* key, sol::object value)
     using namespace engine;
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (var == nullptr)
-        throw std::runtime_error(base::FormatString("No such variable: '%1'", key));
+        throw GameError(base::FormatString("No such variable: '%1'", key));
     else if (var->IsReadOnly())
-        throw std::runtime_error(base::FormatString("Trying to write to a read only variable: '%1'", key));
+        throw GameError(base::FormatString("Trying to write to a read only variable: '%1'", key));
 
     if (value.is<int>() && var->HasType<int>())
         var->SetValue(value.as<int>());
@@ -319,7 +394,7 @@ void SetScriptVar(Type& object, const char* key, sol::object value)
         var->SetValue(value.as<std::string>());
     else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
         var->SetValue(value.as<glm::vec2>());
-    else throw std::runtime_error(base::FormatString("Variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
+    else throw GameError(base::FormatString("Variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
 }
 
 void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
@@ -346,7 +421,7 @@ void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
         kv.SetValue(key, value.as<base::FRect>());
     else if (value.is<base::FPoint>())
         kv.SetValue(key, value.as<base::FPoint>());
-    else throw std::runtime_error("Unsupported key value store type.");
+    else throw GameError("Unsupported key value store type.");
 }
 
 // WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
@@ -366,7 +441,7 @@ sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget, const s
     sol::state_view lua(state);
     const auto type_value = magic_enum::enum_cast<uik::Widget::Type>(type_string);
     if (!type_value.has_value())
-        throw std::runtime_error("No such widget type: " + type_string);
+        throw GameError("No such widget type: " + type_string);
 
     const auto type = type_value.value();
     if (type == uik::Widget::Type::Form)
@@ -494,7 +569,7 @@ void BindDataReaderInterface(sol::usertype<Reader>& reader)
     reader["GetReadChunk"] = [](const Reader& reader, const char* name, unsigned index) {
         const auto chunks = reader.GetNumChunks(name);
         if (index >= chunks)
-            throw std::runtime_error("data reader chunk index out of bounds.");
+            throw GameError("data reader chunk index out of bounds.");
         return reader.GetReadChunk(name, index);
     };
 }
@@ -553,7 +628,7 @@ public:
     T GetCurrent() const
     {
         if (mBegin == mResult.end())
-            throw std::runtime_error("SpatialQueryResultSet iteration error.");
+            throw GameError("SpatialQueryResultSet iteration error.");
         return *mBegin;
     }
     void BeginIteration()
@@ -1345,7 +1420,7 @@ void BindUtil(sol::state& L)
                 str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec3>());
             else if (arg.is<glm::vec4>())
                 str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec4>());
-            else throw std::runtime_error("Unsupported string format value type.");
+            else throw GameError("Unsupported string format value type.");
         }
         return str;
     };
@@ -1454,26 +1529,26 @@ void BindBase(sol::state& L)
         [](base::Color4f& color, int value) {
             const auto color_value = magic_enum::enum_cast<base::Color>(value);
             if (!color_value.has_value())
-                throw std::runtime_error("No such color value:" + std::to_string(value));
+                throw GameError("No such color value:" + std::to_string(value));
             color = base::Color4f(color_value.value());
         },
         [](base::Color4f& color, const std::string& name) {
             const auto color_value = magic_enum::enum_cast<base::Color>(name);
             if (!color_value.has_value())
-                throw std::runtime_error("No such color name: " + name);
+                throw GameError("No such color name: " + name);
             color = base::Color4f(color_value.value());
         });
     color["FromEnum"] = sol::overload(
         [](int value) {
             const auto color_value = magic_enum::enum_cast<base::Color>(value);
             if (!color_value.has_value())
-                throw std::runtime_error("No such color value:" + std::to_string(value));
+                throw GameError("No such color value:" + std::to_string(value));
             return base::Color4f(color_value.value());
         },
         [](const std::string& name) {
             const auto color_value = magic_enum::enum_cast<base::Color>(name);
             if (!color_value.has_value())
-                throw std::runtime_error("No such color name: " + name);
+                throw GameError("No such color name: " + name);
             return base::Color4f(color_value.value());
         });
     color.set_function(sol::meta_function::to_string, [](const base::Color4f& color) { return base::ToString(color); });
@@ -1554,7 +1629,7 @@ void BindGLM(sol::state& L)
         sol::constructors<glm::vec2(), glm::vec2(float, float)>(),
         sol::meta_function::index, [](const glm::vec2& vec, int index) {
             if (index >= 2)
-                throw std::runtime_error("glm.vec2 access out of bounds");
+                throw GameError("glm.vec2 access out of bounds");
             return vec[index];
             }
     );
@@ -1566,7 +1641,7 @@ void BindGLM(sol::state& L)
         sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(),
         sol::meta_function::index, [](const glm::vec3& vec, int index) {
                 if (index >= 3)
-                    throw std::runtime_error("glm.vec3 access out of bounds");
+                    throw GameError("glm.vec3 access out of bounds");
                 return vec[index];
             }
     );
@@ -1579,7 +1654,7 @@ void BindGLM(sol::state& L)
         sol::constructors<glm::vec4(), glm::vec4(float, float, float, float)>(),
         sol::meta_function::index, [](const glm::vec4& vec, int index) {
                 if (index >= 4)
-                    throw std::runtime_error("glm.vec4 access out of bounds");
+                    throw GameError("glm.vec4 access out of bounds");
                 return vec[index];
             }
     );
@@ -1627,19 +1702,19 @@ void BindWDK(sol::state& L)
     table["KeyStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
         if (!key.has_value())
-            throw std::runtime_error("No such keysym value:" + std::to_string(value));
+            throw GameError("No such keysym value:" + std::to_string(value));
         return std::string(magic_enum::enum_name(key.value()));
     };
     table["BtnStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::MouseButton>(value);
         if (!key.has_value())
-            throw std::runtime_error("No such mouse button value: " + std::to_string(value));
+            throw GameError("No such mouse button value: " + std::to_string(value));
         return std::string(magic_enum::enum_name(key.value()));
     };
     table["ModStr"] = [](int value) {
         const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
         if (!mod.has_value())
-            throw std::runtime_error("No such keymod value: " + std::to_string(value));
+            throw GameError("No such keymod value: " + std::to_string(value));
         return std::string(magic_enum::enum_name(mod.value()));
     };
     table["ModBitStr"] = [](int bits) {
@@ -1659,9 +1734,9 @@ void BindWDK(sol::state& L)
     table["TestKeyDown"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
         if (!key.has_value())
-            throw std::runtime_error("No such key symbol: " + std::to_string(value));
+            throw GameError("No such key symbol: " + std::to_string(value));
 #if defined(WEBASSEMBLY)
-        throw std::runtime_error("TestKeyDown is not available in WASM.");
+        throw GameError("TestKeyDown is not available in WASM.");
 #else
         return wdk::TestKeyDown(key.value());
 #endif
@@ -1669,7 +1744,7 @@ void BindWDK(sol::state& L)
     table["TestMod"] = [](int bits, int value) {
         const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
         if (!mod.has_value())
-            throw std::runtime_error("No such modifier: " + std::to_string(value));
+            throw GameError("No such modifier: " + std::to_string(value));
         wdk::bitflag<wdk::Keymod> mods;
         mods.set_from_value(bits);
         return mods.test(mod.value());
@@ -1704,13 +1779,13 @@ void BindWDK(sol::state& L)
     key_bit_string["Set"] = [](KeyBitSet& bits, int key, bool on_off) {
         const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
         if (!sym.has_value())
-            throw std::runtime_error("No such keysym: "  + std::to_string(key));
+            throw GameError("No such keysym: " + std::to_string(key));
         bits.set(sym.value(), on_off);
     };
     key_bit_string["Test"] = [](KeyBitSet& bits, int key) {
         const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
         if (!sym.has_value())
-            throw std::runtime_error("No such keysym: " + std::to_string(key));
+            throw GameError("No such keysym: " + std::to_string(key));
         return bits.test(sym.value());
     };
     key_bit_string["AnyBit"] = &KeyBitSet::any_bit;
@@ -1727,7 +1802,7 @@ void BindWDK(sol::state& L)
         [](const KeyBitSet& bits, int key) {
             const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
             if (!sym.has_value())
-                throw std::runtime_error("No such keysym: " + std::to_string(key));
+                throw GameError("No such keysym: " + std::to_string(key));
             const KeyBitSet tmp(sym.value());
             KeyBitSet ret;
             ret.set_from_value(bits.value() & tmp.value());
@@ -1742,7 +1817,7 @@ void BindWDK(sol::state& L)
         [](const KeyBitSet& bits, int key) {
             const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
             if (!sym.has_value())
-                throw std::runtime_error("No such keysym: " + std::to_string(key));
+                throw GameError("No such keysym: " + std::to_string(key));
             const KeyBitSet tmp(sym.value());
             KeyBitSet ret;
             ret.set_from_value(bits.value() | tmp.value());
@@ -1848,7 +1923,7 @@ void BindUIK(sol::state& L)
     window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
     window["GetWidget"]        = [](uik::Window* window, unsigned index) {
         if (index >= window->GetNumWidgets())
-            throw std::runtime_error(base::FormatString("Widget index %1 is out of bounds", index));
+            throw GameError(base::FormatString("Widget index %1 is out of bounds", index));
         return &window->GetWidget(index);
     };
 
@@ -1872,7 +1947,7 @@ void BindUIK(sol::state& L)
                 return sol::make_object(lua, std::get<std::string>(action->value));
             else BUG("???");
         }
-        throw std::runtime_error(base::FormatString("No such ui action index: %1", key));
+        throw GameError(base::FormatString("No such ui action index: %1", key));
     });
 }
 
@@ -1916,13 +1991,13 @@ void BindGameLib(sol::state& L)
             item.SetMaterialParam(name, value.as<glm::vec3>());
         else if (value.is<glm::vec4>())
             item.SetMaterialParam(name, value.as<glm::vec4>());
-        else throw std::runtime_error("Unsupported material uniform type.");
+        else throw GameError("Unsupported material uniform type.");
     };
     drawable["GetUniform"] = [](const DrawableItem& item, const char* name, sol::this_state state) {
         sol::state_view L(state);
         if (const auto* value = item.FindMaterialParam(name))
             return sol::make_object(L, *value);
-        throw std::runtime_error("No such material uniform: " + std::string(name));
+        throw GameError("No such material uniform: " + std::string(name));
     };
     drawable["HasUniform"] = &DrawableItem::HasMaterialParam;
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
@@ -2192,39 +2267,39 @@ void BindGameLib(sol::state& L)
     audio["PrepareMusicGraph"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw std::runtime_error("Nil audio graph class.");
+                    throw GameError("Nil audio graph class.");
                 return engine.PrepareMusicGraph(klass);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw std::runtime_error("No such audio graph: " + name);
+                    throw GameError("No such audio graph: " + name);
                 return engine.PrepareMusicGraph(klass);
             });
     audio["PlayMusic"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw std::runtime_error("Nil audio graph class.");
+                    throw GameError("Nil audio graph class.");
                 return engine.PlayMusic(klass);
             },
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
                 if (!klass)
-                    throw std::runtime_error("Nil audio graph class.");
+                    throw GameError("Nil audio graph class.");
                 return engine.PlayMusic(klass, when);
             },
             [](AudioEngine& engine, const std::string& name, unsigned when) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw std::runtime_error("No such audio graph: " + name);
+                    throw GameError("No such audio graph: " + name);
                 return engine.PlayMusic(klass, when);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw std::runtime_error("No such audio graph: " + name);
+                    throw GameError("No such audio graph: " + name);
                 return engine.PlayMusic(klass);
             });
 
@@ -2258,32 +2333,32 @@ void BindGameLib(sol::state& L)
                                  unsigned duration) {
         const auto effect_value = magic_enum::enum_cast<AudioEngine::Effect>(effect);
         if (!effect_value.has_value())
-            throw std::runtime_error("No such audio effect:" + effect);
+            throw GameError("No such audio effect:" + effect);
         engine.SetMusicEffect(track, duration, effect_value.value());
     };
     audio["PlaySoundEffect"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
                 if (!klass)
-                    throw std::runtime_error("Nil audio effect graph class.");
+                    throw GameError("Nil audio effect graph class.");
                 return engine.PlaySoundEffect(klass, when);
             },
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw std::runtime_error("Nil audio effect graph class.");
+                    throw GameError("Nil audio effect graph class.");
                 return engine.PlaySoundEffect(klass, 0);
             },
             [](AudioEngine& engine, const std::string& name, unsigned when) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw std::runtime_error("No such audio effect graph:" + name);
+                    throw GameError("No such audio effect graph:" + name);
                 return engine.PlaySoundEffect(klass, when);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw std::runtime_error("No such audio effect graph:" + name);
+                    throw GameError("No such audio effect graph:" + name);
                 return engine.PlaySoundEffect(klass, 0);
             });
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
@@ -2297,7 +2372,7 @@ void BindGameLib(sol::state& L)
                     return sol::make_object(lua, event.track);
                 else if (!std::strcmp(key, "source"))
                     return sol::make_object(lua, event.source);
-                throw std::runtime_error(base::FormatString("No such audio event index: %1", key));
+                throw GameError(base::FormatString("No such audio event index: %1", key));
             }
     );
 
@@ -2314,7 +2389,7 @@ void BindGameLib(sol::state& L)
                     return sol::make_object(lua, event.mods.value());
                 else if (!std::strcmp(key, "over_scene"))
                     return sol::make_object(lua, event.over_scene);
-                throw std::runtime_error(base::FormatString("No such mouse event index: %1", key));
+                throw GameError(base::FormatString("No such mouse event index: %1", key));
             }
     );
 
@@ -2329,7 +2404,7 @@ void BindGameLib(sol::state& L)
                 return sol::make_object(lua, event.message);
             else if (!std::strcmp(key, "value"))
                 return sol::make_object(lua, event.value);
-            throw std::runtime_error(base::FormatString("No such game event index: %1", key));
+            throw GameError(base::FormatString("No such game event index: %1", key));
         },
         sol::meta_function::new_index, [&L](GameEvent& event, const char* key, sol::object value) {
             if (!std::strcmp(key, "from"))
@@ -2361,8 +2436,8 @@ void BindGameLib(sol::state& L)
                     event.value = key, value.as<base::FRect>();
                 else if (value.is<base::FPoint>())
                     event.value = value.as<base::FPoint>();
-                else throw std::runtime_error("Unsupported game event value type.");
-            }
+                else throw GameError("Unsupported game event value type.");
+            } else throw GameError(base::FormatString("No such game event index: %1", key));
         });
 
     auto kvstore = table.new_usertype<KeyValueStore>("KeyValueStore", sol::constructors<KeyValueStore()>(),
@@ -2370,7 +2445,7 @@ void BindGameLib(sol::state& L)
             sol::state_view lua(state);
             KeyValueStore::Value value;
             if (!kv.GetValue(key, &value))
-                throw std::runtime_error("No such key value store index: " + std::string(key));
+                throw GameError("No such key value store index: " + std::string(key));
             return sol::make_object(lua, value);
         },
         sol::meta_function::new_index, [&L](KeyValueStore& kv, const char* key, sol::object value) {
@@ -2400,7 +2475,7 @@ void BindGameLib(sol::state& L)
             sol::state_view lua(state);
             KeyValueStore::Value value;
             if (!kv.GetValue(key, &value))
-                throw std::runtime_error("No such key value key: " + std::string(key));
+                throw GameError("No such key value key: " + std::string(key));
             return sol::make_object(lua, value);
         },
         [](KeyValueStore& kv, const char* key, sol::this_state state, sol::object value) {
