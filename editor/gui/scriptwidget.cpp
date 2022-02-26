@@ -764,9 +764,10 @@ void InitDoc()
                                        "The parameter is identified by it's uniform name in the material shader.<br>"
                                        "Supported values are float, int, base.Color4f, glm.vec2, glm.vec3, glm.vec4",
                  "string", "name", "float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "value");
-    DOC_METHOD_1("float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "GetUniform",
-                 "Get a material parameter (shader uniform) value.<br>"
-                 "The parameter is identified by its uniform name in the material shader.",
+    DOC_METHOD_1("float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "FindUniform",
+                 "Find a material parameter (shader uniform) value by name.<br>"
+                 "The parameter is identified by its uniform name in the material shader.<br>"
+                 "Returns nil if no such uniform exists.",
                  "string", "name");
     DOC_METHOD_1("bool", "HasUniform", "Returns whether the given material parameter (shader uniform) exists.", "string", "name");
     DOC_METHOD_1("void", "DeleteUniform", "Delete the given material parameter (shader uniform) value.<br>"
