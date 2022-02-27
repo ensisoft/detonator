@@ -843,10 +843,10 @@ void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& actio
 
 void LuaGame::OnContactEvent(const ContactEvent& contact)
 {
-    auto* entityA = contact.entityA;
-    auto* entityB = contact.entityB;
     auto* nodeA = contact.nodeA;
     auto* nodeB = contact.nodeB;
+    auto* entityA = nodeA->GetEntity();
+    auto* entityB = nodeB->GetEntity();
 
     if (contact.type == ContactEvent::Type::BeginContact)
     {
@@ -1186,10 +1186,10 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
     const auto* function = contact.type == ContactEvent::Type::BeginContact
             ? "OnBeginContact" : "OnEndContact";
 
-    auto* entityA = contact.entityA;
-    auto* entityB = contact.entityB;
     auto* nodeA = contact.nodeA;
     auto* nodeB = contact.nodeB;
+    auto* entityA = nodeA->GetEntity();
+    auto* entityB = nodeB->GetEntity();
 
     const auto& klassA = entityA->GetClass();
     const auto& klassB = entityB->GetClass();

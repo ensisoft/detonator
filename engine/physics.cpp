@@ -171,8 +171,6 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             event.type = ContactEvent::Type::BeginContact;
             event.nodeA = mEngine.mNodes[*IdA].node;
             event.nodeB = mEngine.mNodes[*IdB].node;
-            event.entityA = mEngine.mNodes[*IdA].entity;
-            event.entityB = mEngine.mNodes[*IdB].entity;
             mContacts->push_back(std::move(event));
         }
 
@@ -192,8 +190,6 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             event.type = ContactEvent::Type::EndContact;
             event.nodeA = mEngine.mNodes[*IdA].node;
             event.nodeB = mEngine.mNodes[*IdB].node;
-            event.entityA = mEngine.mNodes[*IdA].entity;
-            event.entityB = mEngine.mNodes[*IdB].entity;
             mContacts->push_back(std::move(event));
         }
 
@@ -950,7 +946,6 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     PhysicsNode physics_node;
     physics_node.debug_name    = debug_name;
     physics_node.world_body    = world_body;
-    physics_node.entity        = const_cast<game::Entity*>(&entity); 
     physics_node.node          = const_cast<game::EntityNode*>(&node);
     physics_node.world_extents = node_size_in_world;
     physics_node.polygonId     = polygonId;

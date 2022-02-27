@@ -44,8 +44,6 @@ namespace engine
             EndContact
         };
         Type type = Type::BeginContact;
-        game::Entity* entityA = nullptr;
-        game::Entity* entityB = nullptr;
         game::EntityNode* nodeA = nullptr;
         game::EntityNode* nodeB = nullptr;
     };
@@ -201,9 +199,7 @@ namespace engine
         // Physics node.
         struct PhysicsNode {
             std::string debug_name;
-            // the entity instance associated with this physics node
-            game::Entity* entity = nullptr;
-            // The entity instance associated with this physics node
+            // The entity node instance associated with this physics node
             game::EntityNode* node = nullptr;
             // the extents (box) of the scene node.
             glm::vec2 world_extents;
