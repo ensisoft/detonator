@@ -44,10 +44,10 @@ namespace engine
             EndContact
         };
         Type type = Type::BeginContact;
-        std::string entityA;
-        std::string entityB;
-        std::string nodeA;
-        std::string nodeB;
+        game::Entity* entityA = nullptr;
+        game::Entity* entityB = nullptr;
+        game::EntityNode* nodeA = nullptr;
+        game::EntityNode* nodeB = nullptr;
     };
 
     class PhysicsEngine
@@ -201,10 +201,10 @@ namespace engine
         // Physics node.
         struct PhysicsNode {
             std::string debug_name;
-            // the instance id of the entity that owns the node.
-            std::string entity;
-            // The instance id of the entity node in the scene.
-            std::string node;
+            // the entity instance associated with this physics node
+            game::Entity* entity = nullptr;
+            // The entity instance associated with this physics node
+            game::EntityNode* node = nullptr;
             // the extents (box) of the scene node.
             glm::vec2 world_extents;
             // the corresponding box2d physics body for this node.

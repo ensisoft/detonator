@@ -164,14 +164,15 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             //DEBUG("BeginContact");
             auto* A = contact->GetFixtureA();
             auto* B = contact->GetFixtureB();
-            ASSERT(mEngine.mFixtures.find(A) != mEngine.mFixtures.end());
-            ASSERT(mEngine.mFixtures.find(B) != mEngine.mFixtures.end());
+            const auto* IdA = base::SafeFind(mEngine.mFixtures, A);
+            const auto* IdB = base::SafeFind(mEngine.mFixtures, B);
+            ASSERT(IdA && IdB);
             ContactEvent event;
             event.type = ContactEvent::Type::BeginContact;
-            event.nodeA = mEngine.mFixtures[A];
-            event.nodeB = mEngine.mFixtures[B];
-            event.entityA = mEngine.mNodes[event.nodeA].entity;
-            event.entityB = mEngine.mNodes[event.nodeB].entity;
+            event.nodeA = mEngine.mNodes[*IdA].node;
+            event.nodeB = mEngine.mNodes[*IdB].node;
+            event.entityA = mEngine.mNodes[*IdA].entity;
+            event.entityB = mEngine.mNodes[*IdB].entity;
             mContacts->push_back(std::move(event));
         }
 
@@ -184,14 +185,15 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             //DEBUG("EndContact");
             auto* A = contact->GetFixtureA();
             auto* B = contact->GetFixtureB();
-            ASSERT(mEngine.mFixtures.find(A) != mEngine.mFixtures.end());
-            ASSERT(mEngine.mFixtures.find(B) != mEngine.mFixtures.end());
+            const auto* IdA = base::SafeFind(mEngine.mFixtures, A);
+            const auto* IdB = base::SafeFind(mEngine.mFixtures, B);
+            ASSERT(IdA && IdB);
             ContactEvent event;
             event.type = ContactEvent::Type::EndContact;
-            event.nodeA = mEngine.mFixtures[A];
-            event.nodeB = mEngine.mFixtures[B];
-            event.entityA = mEngine.mNodes[event.nodeA].entity;
-            event.entityB = mEngine.mNodes[event.nodeB].entity;
+            event.nodeA = mEngine.mNodes[*IdA].node;
+            event.nodeB = mEngine.mNodes[*IdB].node;
+            event.entityA = mEngine.mNodes[*IdA].entity;
+            event.entityB = mEngine.mNodes[*IdB].entity;
             mContacts->push_back(std::move(event));
         }
 
@@ -946,8 +948,8 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     PhysicsNode physics_node;
     physics_node.debug_name    = debug_name;
     physics_node.world_body    = world_body;
-    physics_node.entity        = entity.GetId();
-    physics_node.node          = node.GetId();
+    physics_node.entity        = const_cast<game::Entity*>(&entity); 
+    physics_node.node          = const_cast<game::EntityNode*>(&node);
     physics_node.world_extents = node_size_in_world;
     physics_node.polygonId     = polygonId;
     physics_node.shape         = (unsigned)body->GetCollisionShape();
