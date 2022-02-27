@@ -843,18 +843,10 @@ void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& actio
 
 void LuaGame::OnContactEvent(const ContactEvent& contact)
 {
-    Entity* entityA = mScene->FindEntityByInstanceId(contact.entityA);
-    Entity* entityB = mScene->FindEntityByInstanceId(contact.entityB);
-    if (entityA == nullptr || entityB == nullptr)  {
-        WARN("Contact event ignored, entity was not found.");
-        return;
-    }
-    EntityNode* nodeA = entityA->FindNodeByInstanceId(contact.nodeA);
-    EntityNode* nodeB = entityB->FindNodeByInstanceId(contact.nodeB);
-    if (nodeA == nullptr || nodeB == nullptr) {
-        WARN("Contact event ignored, entity node was not found.");
-        return;
-    }
+    auto* entityA = contact.entityA;
+    auto* entityB = contact.entityB;
+    auto* nodeA = contact.nodeA;
+    auto* nodeB = contact.nodeB;
 
     if (contact.type == ContactEvent::Type::BeginContact)
     {
@@ -1191,25 +1183,14 @@ bool ScriptEngine::GetNextAction(Action* out)
 
 void ScriptEngine::OnContactEvent(const ContactEvent& contact)
 {
-    Entity* entityA = mScene->FindEntityByInstanceId(contact.entityA);
-    Entity* entityB = mScene->FindEntityByInstanceId(contact.entityB);
-    if (entityA == nullptr || entityB == nullptr)  {
-        WARN("Contact event ignored, entity was not found.");
-        return;
-    }
-    EntityNode* nodeA = entityA->FindNodeByInstanceId(contact.nodeA);
-    EntityNode* nodeB = entityB->FindNodeByInstanceId(contact.nodeB);
-    if (nodeA == nullptr || nodeB == nullptr) {
-        WARN("Contact event ignored, entity node was not found.");
-        return;
-    }
     const auto* function = contact.type == ContactEvent::Type::BeginContact
             ? "OnBeginContact" : "OnEndContact";
 
-    // there's a little problem here that needs to be fixed regarding the
-    // lifetimes of objects. calling into the script may choose to for
-    // example delete the object from the scene which would invalidate
-    // the pointers above. This needs to be fixed somehow.
+    auto* entityA = contact.entityA;
+    auto* entityB = contact.entityB;
+    auto* nodeA = contact.nodeA;
+    auto* nodeB = contact.nodeB;
+
     const auto& klassA = entityA->GetClass();
     const auto& klassB = entityB->GetClass();
 
