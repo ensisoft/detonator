@@ -434,22 +434,24 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
         view.Push();
         view.Scale(physics_node.world_extents);
         view.Translate(physics_node.world_extents * -0.5f);
+        const auto* body = physics_node.node->GetRigidBody();
+        const auto shape = body->GetCollisionShape();
 
-        if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Box)
+        if (shape == RigidBodyItemClass::CollisionShape::Box)
             painter.Draw(gfx::Rectangle(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Circle)
+        else if (shape == RigidBodyItemClass::CollisionShape::Circle)
             painter.Draw(gfx::Circle(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::SemiCircle)
+        else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
             painter.Draw(gfx::SemiCircle(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::RightTriangle)
+        else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
             painter.Draw(gfx::RightTriangle(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+        else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
             painter.Draw(gfx::IsoscelesTriangle(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Trapezoid)
+        else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
             painter.Draw(gfx::Trapezoid(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Parallelogram)
+        else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
             painter.Draw(gfx::Parallelogram(), view, mat);
-        else if (physics_node.shape == (unsigned)RigidBodyItemClass::CollisionShape::Polygon) {
+        else if (shape == RigidBodyItemClass::CollisionShape::Polygon) {
             const auto& klass = mClassLib->FindDrawableClassById(physics_node.polygonId);
             if (klass == nullptr) {
                 WARN("No polygon class found for node '%1'", physics_node.debug_name);
@@ -952,7 +954,6 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
     physics_node.node          = const_cast<game::EntityNode*>(&node);
     physics_node.world_extents = node_size_in_world;
     physics_node.polygonId     = polygonId;
-    physics_node.shape         = (unsigned)body->GetCollisionShape();
     physics_node.flags         = body->GetFlags().value();
     ASSERT(mNodes.find(node.GetId()) == mNodes.end());
     mNodes[node.GetId()]   = physics_node;
