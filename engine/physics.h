@@ -212,8 +212,7 @@ namespace engine
             // the polygon shape id if any. empty string
             // if the shape is a box or a circle.
             std::string polygonId;
-            // RigidBodyItemClass::Collision shape
-            unsigned shape = 0;
+            // cached rigid body flags
             unsigned flags = 0;
         };
         // The nodes represented in the physics simulation.
