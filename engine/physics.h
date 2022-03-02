@@ -151,6 +151,37 @@ namespace engine
         bool SetLinearVelocity(const game::EntityNode& node, const glm::vec2& velocity);
         bool SetLinearVelocity(const std::string& node, const glm::vec2& velocity);
 
+        // The ray cast mode is used to determine which objects to look for
+        // and to consider when casting the ray in the physics world.
+        enum class RayCastMode {
+            // Find the closest object.
+            // Should return a single result only or nothing if nothing was
+            // hit in that direction of the ray.
+            Closest,
+            // Return the first object hit. not necessarily the closest!
+            First,
+            // Return all objects hit by the ray.
+            All
+        };
+        // An aggregate result of the ray casting with information per
+        // each object that was hit by the ray.
+        struct RayCastResult {
+            // the entity node (with a rigid body) that intersected with the ray.
+            game::EntityNode* node = nullptr;
+            // the point of intersection in physics world space.
+            glm::vec2 point;
+            // the rigid body surface normal at the point of ray/body intersection
+            glm::vec2 normal;
+            // the normalized fractional distance along the ray from ray start until the hit point.
+            float fraction = 0.0f;
+        };
+        // Perform ray casting by looking up and finding physics objects that
+        // intersect with the ray. The ray's starting and ending position are
+        // vectors in the physics world space. To convert from game space to
+        // physics space use the MapVectorFromGame function.
+        void RayCast(const glm::vec2& start, const glm::vec2& end, std::vector<RayCastResult>* results,
+                     RayCastMode mode = RayCastMode::All) const;
+
         // Initialize the physics world based on the scene.
         // The scene is traversed and then for each rigid body
         // a physics body is created.

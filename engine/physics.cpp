@@ -314,6 +314,68 @@ bool PhysicsEngine::SetLinearVelocity(const std::string& id, const glm::vec2& ve
     return false;
 }
 
+void PhysicsEngine::RayCast(const glm::vec2& start, const glm::vec2& end,
+    std::vector<RayCastResult>* result, RayCastMode mode) const
+{
+    class RayCastCallback : public b2RayCastCallback {
+    public:
+        RayCastCallback(const PhysicsEngine& engine, RayCastMode mode,
+            std::vector<RayCastResult>& result)
+                : mEngine(engine)
+                , mMode(mode)
+                , mResult(result)
+        {}
+        virtual float ReportFixture(b2Fixture* fixture,
+                                    const b2Vec2& point,
+                                    const b2Vec2& normal, float fraction) override
+        {
+            const auto* id = base::SafeFind(mEngine.mFixtures, fixture);
+            const auto it = mEngine.mNodes.find(*id);
+            ASSERT(it != mEngine.mNodes.end());
+            const auto& physics_node = it->second;
+
+            RayCastResult result;
+            result.node = const_cast<game::EntityNode*>(physics_node.node);
+            result.point = ToGlm(point);
+            result.normal = ToGlm(normal);
+            result.fraction = fraction;
+
+            // ffs, the Box2D documentation on the semantics of the return value
+            // are f*n garbage.
+
+            // this document here https://www.iforce2d.net/b2dtut/world-querying says that
+            // To find only the closest intersection:
+            // - return the fraction value from the callback
+            // - use the most recent intersection as the result
+            // To find all intersections along the ray:
+            // - return 1 from the callback
+            // - store the intersections in a list
+            // To simply find if the ray hits anything:
+            // - if you get a callback, something was hit (but it may not be the closest)
+            // - return 0 from the callback for efficiency
+            if (mMode == RayCastMode::Closest)
+            {
+                mResult.clear();
+                mResult.push_back(result);
+                return fraction;
+            }
+            else if (mMode == RayCastMode::All)
+            {
+                mResult.push_back(result);
+                return 1.0;
+            }
+            mResult.push_back(result);
+            return 0.0f;
+        }
+    private:
+        const PhysicsEngine& mEngine;
+        const RayCastMode mMode = RayCastMode::All;
+        std::vector<RayCastResult>& mResult;
+    };
+    RayCastCallback cb(*this, mode, *result);
+    mWorld->RayCast(&cb, ToBox2D(start), ToBox2D(end));
+}
+
 void PhysicsEngine::CreateWorld(const Scene& scene)
 {
     const b2Vec2 gravity(mGravity.x, mGravity.y);
