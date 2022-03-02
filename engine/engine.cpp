@@ -250,6 +250,16 @@ public:
                 TRACE_CALL("Physics::DebugDraw", mPhysics.DebugDrawObjects(*mPainter , transform));
             }
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
+
+            TRACE_BLOCK("DebugDraw",
+                for (const auto& draw : mDebugDraws)
+                {
+                    if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw)) {
+                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                    }
+                }
+            );
+            mDebugDraws.clear();
         }
 
         if (auto* ui = GetUI())
@@ -875,6 +885,10 @@ private:
         mRequests.ShowDeveloperUI(action.show);
         DEBUG("Requesting developer UI. [show=%1]", action.show);
     }
+    void OnAction(const engine::DebugDrawLine& draw)
+    {
+        mDebugDraws.push_back(draw);
+    }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
     {
@@ -1060,6 +1074,12 @@ private:
     bool mEnablePhysics = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
+    // Debug draw actions.
+    using DebugDraw = std::variant<engine::DebugDrawLine>;
+    // Current debug draw actions that are queued for the
+    // next draw. next call to draw will draw them and clear
+    // the vector.
+    std::vector<DebugDraw> mDebugDraws;
 };
 
 } //namespace
