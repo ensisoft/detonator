@@ -23,6 +23,8 @@
 
 #include "engine/classlib.h"
 #include "engine/event.h"
+#include "engine/types.h"
+#include "engine/color.h"
 
 namespace engine
 {
@@ -96,6 +98,12 @@ namespace engine
     struct ShowDeveloperUIAction {
         bool show = true;
     };
+    struct DebugDrawLine {
+        FPoint a;
+        FPoint b;
+        Color4f color;
+        float width = 1.0f;
+    };
 
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
@@ -108,6 +116,7 @@ namespace engine
             CloseUIAction,
             DebugPrintAction,
             DebugClearAction,
+            DebugDrawLine,
             DelayAction,
             ShowDebugAction,
             ShowMouseAction,

@@ -288,6 +288,31 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
         action.message = std::move(message);
         self.PushAction(std::move(action));
     };
+    engine["DebugDrawLine"] = sol::overload(
+        [](LuaGame& self, const glm::vec2&  a, const glm::vec2& b, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = FPoint(a.x, a.y);
+            draw.b = FPoint(b.x, b.y);
+            draw.color = color;
+            draw.width = width;
+            self.PushAction(std::move(draw));
+        },
+        [](LuaGame& self, const base::FPoint& a, const FPoint& b, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = a;
+            draw.b = b;
+            draw.color = color;
+            draw.width = width;
+            self.PushAction(std::move(draw));
+        },
+        [](LuaGame& self, float x0, float y0, float x1, float y1, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = base::FPoint(x0, y0);
+            draw.b = base::FPoint(x1, y1);
+            draw.color = color;
+            draw.width = width;
+            self.PushAction(std::move(draw));
+        });
     engine["DebugClear"] = [](LuaGame& self) {
         DebugClearAction action;
         self.PushAction(action);

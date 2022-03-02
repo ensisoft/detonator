@@ -147,6 +147,48 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     doc.args.push_back({arg3_name,  arg3_type});
     g_method_docs.push_back(std::move(doc));
 }
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
+               const std::string& arg0_type, const std::string& arg0_name,
+               const std::string& arg1_type, const std::string& arg1_name,
+               const std::string& arg2_type, const std::string& arg2_name,
+               const std::string& arg3_type, const std::string& arg3_name,
+               const std::string& arg4_type, const std::string& arg4_name)
+{
+    LuaMemberDoc doc;
+    doc.type  = type;
+    doc.table = table_name;
+    doc.ret   = ret;
+    doc.name  = name;
+    doc.desc  = desc;
+    doc.args.push_back({arg0_name,  arg0_type});
+    doc.args.push_back({arg1_name,  arg1_type});
+    doc.args.push_back({arg2_name,  arg2_type});
+    doc.args.push_back({arg3_name,  arg3_type});
+    doc.args.push_back({arg4_name,  arg4_type});
+    g_method_docs.push_back(std::move(doc));
+}
+void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
+               const std::string& arg0_type, const std::string& arg0_name,
+               const std::string& arg1_type, const std::string& arg1_name,
+               const std::string& arg2_type, const std::string& arg2_name,
+               const std::string& arg3_type, const std::string& arg3_name,
+               const std::string& arg4_type, const std::string& arg4_name,
+               const std::string& arg5_type, const std::string& arg5_name)
+{
+    LuaMemberDoc doc;
+    doc.type  = type;
+    doc.table = table_name;
+    doc.ret   = ret;
+    doc.name  = name;
+    doc.desc  = desc;
+    doc.args.push_back({arg0_name,  arg0_type});
+    doc.args.push_back({arg1_name,  arg1_type});
+    doc.args.push_back({arg2_name,  arg2_type});
+    doc.args.push_back({arg3_name,  arg3_type});
+    doc.args.push_back({arg4_name,  arg4_type});
+    doc.args.push_back({arg5_name,  arg5_type});
+    g_method_docs.push_back(std::move(doc));
+}
 
 void AddProperty(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc)
 {
@@ -170,6 +212,8 @@ const LuaMemberDoc& GetLuaMethodDoc(size_t index)
 #define DOC_METHOD_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name)
 #define DOC_METHOD_3(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name)
 #define DOC_METHOD_4(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name)
+#define DOC_METHOD_5(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name, a4type, a4name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name, a4type, a4name)
+#define DOC_METHOD_6(ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name, a4type, a4name, a5type, a5name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name, a2type, a2name, a3type, a3name, a4type, a4name, a5type, a5name)
 
 #define DOC_META_METHOD_0(ret, name, desc) AddMethod(LuaMemberType::MetaMethod, ret, name, desc)
 #define DOC_META_METHOD_1(ret, name, desc, a0type, a0name) AddMethod(LuaMemberType::MetaMethod, ret, name, desc, a0type, a0name)
@@ -706,6 +750,10 @@ void InitDoc()
                                        "and none of the entity/scene mouse event handlers are called.",
                  "bool", "block");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
+    DOC_METHOD_4("void", "DebugDrawLine", "Draw a debug line from point A to point B.",
+                 "glm.vec2|base.FPoint", "a", "glm.vec2|base.FPoint", "b", "base.Color4f", "color", "float", "line_width");
+    DOC_METHOD_6("void", "DebugDrawLine", "Draw a debug line from point x0,y0 to x1,y1.",
+                 "float", "x0", "float", "y0", "float", "x1", "float", "y1", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_0("void", "DebugClear", "Clear all previous debug prints from the game window.");
     DOC_METHOD_1("uik.Window", "OpenUI", "Open a new uik.Window and place it on the top of the UI Window stack.<br>"
                                          "The window will remain open until CloseUI is called.<br>"
