@@ -1,7 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
 
-local _num_scenes = 5
+local _num_scenes = 6
 local _cur_scene  = 0
 
 local TestTable = {}
@@ -15,6 +15,7 @@ function LoadGame()
     TestTable[2] = 'Phys Test 2'
     TestTable[3] = 'Phys Test 3'
     TestTable[4] = 'Phys Test 4'
+    TestTable[5] = 'Phys Test 5'
 
     Game:DebugPrint('LoadGame called.')
     Game:SetViewport(-500.0, -400.0, 1000.0, 800.0)
@@ -98,7 +99,11 @@ function OnKeyDown(symbol, modifier_bits)
         if _cur_scene < 0 then 
             _cur_scene = _num_scenes -1
         end
+    else
+        return
     end
+
+
     local name  = TestTable[_cur_scene]
     local scene = ClassLib:FindSceneClassByName(name)
     local gravity = glm.vec2:new(0.0, 0.0)

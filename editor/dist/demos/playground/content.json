@@ -22,7 +22,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -107,7 +107,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -192,7 +192,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -335,7 +335,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -420,7 +420,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -526,7 +526,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -579,7 +579,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -719,7 +719,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -804,7 +804,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -908,7 +908,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -961,7 +961,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1027,6 +1027,74 @@
       },
       "resource_id": "lCSj0gMTqU",
       "resource_name": "Wrecking Ball",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "pK3rRC7a5h",
+      "idle_track": "",
+      "lifetime": 2.0,
+      "name": "Marker",
+      "nodes": [
+        {
+          "class": "dqzf0vCHTn",
+          "drawable_item": {
+            "drawable": "_isosceles_triangle",
+            "flags": {
+              "FlipHorizontally": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Red",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 10.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 20.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "dqzf0vCHTn"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "pK3rRC7a5h",
+      "resource_name": "Marker",
       "script_file": ""
     }
   ],
@@ -4237,6 +4305,549 @@
           }
         }
       ]
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "2rSIWqteXS",
+      "name": "Phys Test 5",
+      "nodes": [
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "WkyysXOl5f",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "7yXMBoyDDL",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": 400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "A6PeCfpBiJ",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -500.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "Nkv4yigXP0",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 500.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "TToHt0AXEN",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Block_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -200.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "2u2dLwRR2C",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Block_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "SweyqAEqG6",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Block_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "GTxNIKvAmo",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Block_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -100.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "LCgHZXmejC",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Block_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 350.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "XP1tqOPdQy",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -300.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "K1jK4f9Ino",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -350.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "1dTdmb3YiW",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 50.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "WkyysXOl5f"
+            }
+          },
+          {
+            "node": {
+              "id": "7yXMBoyDDL"
+            }
+          },
+          {
+            "node": {
+              "id": "A6PeCfpBiJ"
+            }
+          },
+          {
+            "node": {
+              "id": "Nkv4yigXP0"
+            }
+          },
+          {
+            "node": {
+              "id": "TToHt0AXEN"
+            }
+          },
+          {
+            "node": {
+              "id": "2u2dLwRR2C"
+            }
+          },
+          {
+            "node": {
+              "id": "SweyqAEqG6"
+            }
+          },
+          {
+            "node": {
+              "id": "GTxNIKvAmo"
+            }
+          },
+          {
+            "node": {
+              "id": "LCgHZXmejC"
+            }
+          },
+          {
+            "node": {
+              "id": "XP1tqOPdQy"
+            }
+          },
+          {
+            "node": {
+              "id": "K1jK4f9Ino"
+            }
+          },
+          {
+            "node": {
+              "id": "1dTdmb3YiW"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "2rSIWqteXS",
+      "resource_name": "Phys Test 5",
+      "script_file": "k4Stm2rLJJ"
     }
   ],
   "scripts": [
@@ -4263,6 +4874,12 @@
       "resource_id": "QCSIpWak63",
       "resource_name": "Static Block",
       "uri": "ws://lua/QCSIpWak63.lua"
+    },
+    {
+      "id": "k4Stm2rLJJ",
+      "resource_id": "k4Stm2rLJJ",
+      "resource_name": "Phys Test 5",
+      "uri": "ws://lua/k4Stm2rLJJ.lua"
     }
   ]
 }
