@@ -1033,7 +1033,34 @@ void InitDoc()
                                                                     "whose spatial nodes intersect with the given point.",
                  "base.FPoint|glm.vec2", "point");
 
+    DOC_TABLE("game.RayCastResult");
+    DOC_OBJECT_PROPERTY("game.EntityNode", "node", "The entity node (with rigid body) that intersected with the ray.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "point", "The point of intersection in physics world space.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "normal", "The normal of the rigid body surface at the point of the ray/body intersection.");
+    DOC_OBJECT_PROPERTY("float", "fraction", "The normalized fraction distance along the ray from the start of the ray until the hit point.");
+
+    DOC_TABLE("game.RayCastResultVector");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the result vector is an empty vector or not.");
+    DOC_METHOD_0("bool", "HasNext", "Check whether the result vector has a next item or not.");
+    DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the result vector. <br>"
+                                 "Returns true if there is a next item or false when there are no more items.");
+    DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the result vector. <br>"
+                                  "The iteration is already started automatically when the result vector is created,<br>"
+                                  "so this only needs to be called if restarting.");
+    DOC_METHOD_0("game.RayCastResult", "Get", "Get the current item at this point of iteration over the result vector.");
+    DOC_METHOD_1("game.RayCastResult", "GetAt", "Get a result at a given index.", "size_t", "index");
+    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the ray cast result vector.");
+
     DOC_TABLE("game.Physics");
+    DOC_METHOD_3("game.RayCastResultVector", "RayCast", "Perform ray cast to find entity nodes with rigid bodies that intersect with the bounded ray between start and end points.<br"
+                                                        "The casting is performed in the physics world coordinate space.<br>"
+                                                        "You can use MapVectorFromGame to transform points from game world space to physics world space.<br>"
+                                                        "Possible modes, 'Closest', 'First', 'All'<br>"
+                                                        "Closest = finds the entity node closest to the starting point of the ray.<br>"
+                                                        "First   = finds the node that happened to intersect when tested first.<br>"
+                                                        "All     = find all nodes that intersect with the ray.",
+                 "glm.vec2", "start", "glm.vec2", "end", "string", "mode = 'All'");
+
     DOC_METHOD_2("bool", "ApplyImpulseToCenter", "Apply an impulse in Newtons per second to the center of the given physics node.<br>"
                                                 "Returns true if impulse was applied otherwise false.",
                 "string|game.EntityNode", "id|node", "glm.vec2", "impulse");

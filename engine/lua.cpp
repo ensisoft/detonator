@@ -613,22 +613,22 @@ void BindGlmVectorOp(sol::usertype<Vector>& vec)
 }
 
 template<typename T>
-class SpatialQueryResultSet
+class ResultSet
 {
 public:
     using Set = std::set<T>;
-    SpatialQueryResultSet(Set&& result)
+    ResultSet(Set&& result)
       : mResult(std::move(result))
     { mBegin = mResult.begin(); }
-    SpatialQueryResultSet(const Set& result)
+    ResultSet(const Set& result)
       : mResult(result)
     { mBegin = mResult.begin(); }
-    SpatialQueryResultSet()
+    ResultSet()
     { mBegin = mResult.begin(); }
     T GetCurrent() const
     {
         if (mBegin == mResult.end())
-            throw GameError("SpatialQueryResultSet iteration error.");
+            throw GameError("ResultSet iteration error.");
         return *mBegin;
     }
     void BeginIteration()
@@ -645,6 +645,46 @@ public:
 private:
     Set mResult;
     typename Set::iterator mBegin;
+};
+
+template<typename T>
+class ResultVector
+{
+public:
+    using Vector = std::vector<T>;
+    ResultVector(Vector&& result)
+      : mResult(std::move(result))
+    { mBegin = mResult.begin(); }
+    ResultVector(const Vector& result)
+      : mResult(result)
+    { mBegin = mResult.begin(); }
+    ResultVector()
+    { mBegin = mResult.begin(); }
+    void BeginIteration()
+    { mBegin = mResult.begin(); }
+    bool HasNext() const
+    { return mBegin != mResult.end(); }
+    bool IsEmpty() const
+    { return mResult.empty(); }
+    bool Next()
+    {  return ++mBegin != mResult.end(); }
+    const T& GetCurrent() const
+    {
+        if (mBegin == mResult.end())
+            throw GameError("ResultSet iteration error.");
+        return *mBegin;
+    }
+    const T& GetAt(size_t index) const
+    {
+        if (index >= mResult.size())
+            throw GameError("ResultVector index out of bounds.");
+        return mResult[index];
+    }
+    size_t GetSize() const
+    { return mResult.size(); }
+private:
+    Vector mResult;
+    typename Vector::iterator mBegin;
 };
 
 } // namespace
@@ -2124,7 +2164,7 @@ void BindGameLib(sol::state& L)
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
     entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
 
-    using DynamicSpatialQueryResultSet = SpatialQueryResultSet<EntityNode*>;
+    using DynamicSpatialQueryResultSet = ResultSet<EntityNode*>;
     auto query_result_set = table.new_usertype<DynamicSpatialQueryResultSet>("SpatialQueryResultSet");
     query_result_set["IsEmpty"] = &DynamicSpatialQueryResultSet::IsEmpty;
     query_result_set["HasNext"] = &DynamicSpatialQueryResultSet::HasNext;
@@ -2232,6 +2272,38 @@ void BindGameLib(sol::state& L)
             return self.FindMass(node);
         }
     );
+
+    auto ray_cast_result = table.new_usertype<PhysicsEngine::RayCastResult>("RayCastResult");
+    ray_cast_result["node"]     = &PhysicsEngine::RayCastResult::node;
+    ray_cast_result["point"]    = &PhysicsEngine::RayCastResult::point;
+    ray_cast_result["normal"]   = &PhysicsEngine::RayCastResult::normal;
+    ray_cast_result["fraction"] = &PhysicsEngine::RayCastResult::fraction;
+
+    using RayCastResultVector = ResultVector<PhysicsEngine::RayCastResult>;
+    auto ray_cast_result_vector = table.new_usertype<RayCastResultVector>("RayCastResultVector");
+    ray_cast_result_vector["IsEmpty"] = &RayCastResultVector::IsEmpty;
+    ray_cast_result_vector["HasNext"] = &RayCastResultVector::HasNext;
+    ray_cast_result_vector["Next"]    = &RayCastResultVector::Next;
+    ray_cast_result_vector["Begin"]   = &RayCastResultVector::BeginIteration;
+    ray_cast_result_vector["Get"]     = &RayCastResultVector::GetCurrent;
+    ray_cast_result_vector["GetAt"]   = &RayCastResultVector::GetAt;
+    ray_cast_result_vector["Size"]    = &RayCastResultVector::GetSize;
+
+    physics["RayCast"] = sol::overload(
+        [](PhysicsEngine& self, const glm::vec2& start, const glm::vec2& end, const std::string& mode) {
+            const auto enum_val = magic_enum::enum_cast<PhysicsEngine::RayCastMode>(mode);
+            if (!enum_val.has_value())
+                throw GameError("No such ray cast mode: " + mode);
+            std::vector<PhysicsEngine::RayCastResult> result;
+            self.RayCast(start, end, &result, enum_val.value());
+            return std::make_unique<RayCastResultVector>(std::move(result));
+        },
+        [](PhysicsEngine& self, const glm::vec2& start, const glm::vec2& end) {
+            std::vector<PhysicsEngine::RayCastResult> result;
+            self.RayCast(start, end, &result, PhysicsEngine::RayCastMode::All);
+            return std::make_unique<RayCastResultVector>(std::move(result));
+        });
+
     physics["GetScale"]   = &PhysicsEngine::GetScale;
     physics["GetGravity"] = &PhysicsEngine::GetGravity;
     physics["GetTimeStep"] = &PhysicsEngine::GetTimeStep;
