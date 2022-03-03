@@ -44,6 +44,154 @@ inline b2Vec2 ToBox2D(const glm::vec2& vector)
 inline glm::vec2 ToGlm(const b2Vec2& vector)
 { return glm::vec2 { vector.x, vector.y }; }
 
+namespace {
+std::unique_ptr<b2Shape> CreateCollisionShape(const glm::vec2& node_size_in_world,
+                                              const std::string& polygon_shape_id,
+                                              const std::string& debug_name,
+                                              const engine::ClassLibrary& classlib,
+                                              game::detail::CollisionShape shape)
+{
+    // collision shape used for collision resolver for the body.
+    std::unique_ptr<b2Shape> collision_shape;
+    std::string polygonId;
+    if (shape == game::detail::CollisionShape::Box)
+    {
+        auto box = std::make_unique<b2PolygonShape>();
+        box->SetAsBox(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
+        collision_shape = std::move(box);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::Circle)
+    {
+        auto circle = std::make_unique<b2CircleShape>();
+        circle->m_radius = std::max(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
+        collision_shape = std::move(circle);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
+    {
+        const float width  = node_size_in_world.x;
+        const float height = node_size_in_world.y;
+        b2Vec2 verts[7];
+        verts[0] = b2Vec2(0.0, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5*0.50, -height*0.5*0.86);
+        verts[2] = b2Vec2(-width*0.5*0.86, -height*0.5*0.50);
+        verts[3] = b2Vec2(-width*0.5*1.00, -height*0.5*0.00);
+        verts[4] = b2Vec2( width*0.5*1.00, -height*0.5*0.00);
+        verts[5] = b2Vec2( width*0.5*0.86, -height*0.5*0.50);
+        verts[6] = b2Vec2( width*0.5*0.50, -height*0.5*0.86);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 7);
+        collision_shape = std::move(poly);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[3];
+        verts[0] = b2Vec2(-width*0.5, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5f, height*0.5);
+        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 3);
+        collision_shape = std::move(poly);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[3];
+        verts[0] = b2Vec2( 0.0f, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5f, height*0.5);
+        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 3);
+        collision_shape = std::move(poly);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[4];
+        verts[0] = b2Vec2(-width*0.3, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5, height*0.5);
+        verts[2] = b2Vec2( width*0.5, height*0.5);
+        verts[3] = b2Vec2( width*0.3, -height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 4);
+        collision_shape = std::move(poly);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
+    {
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        b2Vec2 verts[4];
+        verts[0] = b2Vec2(-width*0.3, -height*0.5);
+        verts[1] = b2Vec2(-width*0.5, height*0.5);
+        verts[2] = b2Vec2( width*0.3, height*0.5);
+        verts[3] = b2Vec2( width*0.5, -height*0.5);
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(verts, 4);
+        collision_shape = std::move(poly);
+    }
+    else if (shape == RigidBodyItemClass::CollisionShape::Polygon)
+    {
+        if (polygon_shape_id.empty())
+        {
+            WARN("Rigid body has no polygon shape id set. [node='%1']", debug_name);
+            return collision_shape;
+        }
+        const auto& drawable = classlib.FindDrawableClassById(polygon_shape_id);
+        if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon)
+        {
+            WARN("No polygon class found for rigid body. [node='%1']", debug_name);
+            return collision_shape;
+        }
+        const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
+        const float width   = node_size_in_world.x;
+        const float height  = node_size_in_world.y;
+        std::vector<b2Vec2> verts;
+        for (size_t i=0; i<polygon->GetNumVertices(); ++i)
+        {
+            const auto& vertex = polygon->GetVertex(i);
+            // polygon vertices are in normalized coordinate space in the lower
+            // right quadrant, i.e. x = [0, 1] and y = [0, -1], flip about x axis
+            const auto x = vertex.aPosition.x * width;
+            const auto y = vertex.aPosition.y * height * -1.0;
+            b2Vec2 v2;
+            // offset the vertices to be around origin.
+            // the vertices must be relative to the body when the shape
+            // is attached to a body.
+            v2.x = x - width * 0.5f;
+            v2.y = y - height * 0.5f;
+            verts.push_back(v2);
+        }
+        // invert the order of polygons in order to invert the winding
+        // oder. This is done because of the flip around axis inverts
+        // the winding order
+        std::reverse(verts.begin(), verts.end());
+
+        // it's possible that the set of vertices for a convex hull has
+        // less vertices than the polygon itself. I'm not sure how Box2D
+        // will behave when the number of vertices exceeds b2_maxPolygonVertices.
+        // Finding the convex hull here can at least help us discard some
+        // irrelevant vertices already.
+        verts = math::FindConvexHull(verts);
+        // still too many?
+        if (verts.size() > b2_maxPolygonVertices)
+        {
+            // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
+            WARN("The convex hull for rigid body has too many vertices. [node='%1']", debug_name);
+        }
+        auto poly = std::make_unique<b2PolygonShape>();
+        poly->Set(&verts[0], verts.size());
+        // todo: radius??
+        collision_shape = std::move(poly);
+    }
+    return collision_shape;
+}
+
+} // namespace
+
+
 namespace engine
 {
 
@@ -836,186 +984,62 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node)
 {
     const FBox box(model_to_world);
-    const auto* body = node.GetRigidBody();
     const auto& node_pos_in_world   = box.GetCenter();
     const auto& node_size_in_world  = box.GetSize();
-    const auto& rigid_body_class    = body->GetClass();
     const auto& debug_name          = entity.GetName() + "/" + node.GetName();
 
-    // body def is used to define a new physics body in the world.
-    b2BodyDef body_def;
-    if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Static)
-        body_def.type = b2_staticBody;
-    else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Dynamic)
-        body_def.type = b2_dynamicBody;
-    else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Kinematic)
-        body_def.type = b2_kinematicBody;
-
-    body_def.position.Set(node_pos_in_world.x, node_pos_in_world.y);
-    body_def.angle          = box.GetRotation();
-    body_def.angularDamping = body->GetAngularDamping();
-    body_def.linearDamping  = body->GetLinearDamping();
-    body_def.enabled        = body->TestFlag(RigidBodyItem::Flags::Enabled);
-    body_def.bullet         = body->TestFlag(RigidBodyItem::Flags::Bullet);
-    body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
-    body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
-    b2Body* world_body = mWorld->CreateBody(&body_def);
-
-    // collision shape used for collision resolver for the body.
-    std::unique_ptr<b2Shape> collision_shape;
-    std::string polygonId;
-    if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Box)
+    if (const auto* body = node.GetRigidBody())
     {
-        auto box = std::make_unique<b2PolygonShape>();
-        box->SetAsBox(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
-        collision_shape = std::move(box);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Circle)
-    {
-        auto circle = std::make_unique<b2CircleShape>();
-        circle->m_radius = std::max(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
-        collision_shape = std::move(circle);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::SemiCircle)
-    {
-        const float width  = node_size_in_world.x;
-        const float height = node_size_in_world.y;
-        b2Vec2 verts[7];
-        verts[0] = b2Vec2(0.0, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5*0.50, -height*0.5*0.86);
-        verts[2] = b2Vec2(-width*0.5*0.86, -height*0.5*0.50);
-        verts[3] = b2Vec2(-width*0.5*1.00, -height*0.5*0.00);
-        verts[4] = b2Vec2( width*0.5*1.00, -height*0.5*0.00);
-        verts[5] = b2Vec2( width*0.5*0.86, -height*0.5*0.50);
-        verts[6] = b2Vec2( width*0.5*0.50, -height*0.5*0.86);
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(verts, 7);
-        collision_shape = std::move(poly);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::RightTriangle)
-    {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
-        b2Vec2 verts[3];
-        verts[0] = b2Vec2(-width*0.5, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5f, height*0.5);
-        verts[2] = b2Vec2( width*0.5,  height*0.5);
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(verts, 3);
-        collision_shape = std::move(poly);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
-    {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
-        b2Vec2 verts[3];
-        verts[0] = b2Vec2( 0.0f, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5f, height*0.5);
-        verts[2] = b2Vec2( width*0.5,  height*0.5);
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(verts, 3);
-        collision_shape = std::move(poly);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Trapezoid)
-    {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
-        b2Vec2 verts[4];
-        verts[0] = b2Vec2(-width*0.3, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5, height*0.5);
-        verts[2] = b2Vec2( width*0.5, height*0.5);
-        verts[3] = b2Vec2( width*0.3, -height*0.5);
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(verts, 4);
-        collision_shape = std::move(poly);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Parallelogram)
-    {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
-        b2Vec2 verts[4];
-        verts[0] = b2Vec2(-width*0.3, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5, height*0.5);
-        verts[2] = b2Vec2( width*0.3, height*0.5);
-        verts[3] = b2Vec2( width*0.5, -height*0.5);
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(verts, 4);
-        collision_shape = std::move(poly);
-    }
-    else if (body->GetCollisionShape() == RigidBodyItemClass::CollisionShape::Polygon)
-    {
-        polygonId = body->GetPolygonShapeId();
-        if (polygonId.empty()) {
-            WARN("Rigid body has no polygon shape id set. [node='%1']", debug_name);
-            return;
-        }
-        const auto& drawable = mClassLib->FindDrawableClassById(polygonId);
-        if (!drawable || drawable->GetType() != gfx::DrawableClass::Type::Polygon) {
-            WARN("No polygon class found for rigid body. [node='%1']", debug_name);
-            return;
-        }
-        const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
-        std::vector<b2Vec2> verts;
-        for (size_t i=0; i<polygon->GetNumVertices(); ++i)
+        const auto& rigid_body_class = body->GetClass();
+        const auto& polygon_shape_id = rigid_body_class.GetPolygonShapeId();
+        auto collision_shape = CreateCollisionShape(node_size_in_world,
+            polygon_shape_id, debug_name, *mClassLib, body->GetCollisionShape());
+        if (!collision_shape)
         {
-            const auto& vertex = polygon->GetVertex(i);
-            // polygon vertices are in normalized coordinate space in the lower
-            // right quadrant, i.e. x = [0, 1] and y = [0, -1], flip about x axis
-            const auto x = vertex.aPosition.x * width;
-            const auto y = vertex.aPosition.y * height * -1.0;
-            b2Vec2 v2;
-            // offset the vertices to be around origin.
-            // the vertices must be relative to the body when the shape
-            // is attached to a body.
-            v2.x = x - width * 0.5f;
-            v2.y = y - height * 0.5f;
-            verts.push_back(v2);
-        }
-        // invert the order of polygons in order to invert the winding
-        // oder. This is done because of the flip around axis inverts
-        // the winding order
-        std::reverse(verts.begin(), verts.end());
-
-        // it's possible that the set of vertices for a convex hull has
-        // less vertices than the polygon itself. I'm not sure how Box2D
-        // will behave when the number of vertices exceeds b2_maxPolygonVertices.
-        // Finding the convex hull here can at least help us discard some
-        // irrelevant vertices already.
-        verts = math::FindConvexHull(verts);
-        // still too many?
-        if (verts.size() > b2_maxPolygonVertices) {
-            // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
-            WARN("The convex hull for rigid body has too many vertices. [node='%1']", debug_name);
+            WARN("Skipping physics body creation. [node='%1']", debug_name);
+            return;
         }
 
-        auto poly = std::make_unique<b2PolygonShape>();
-        poly->Set(&verts[0], verts.size());
-        // todo: radius??
-        collision_shape = std::move(poly);
+        // body def is used to define a new physics body in the world.
+        b2BodyDef body_def;
+        if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Static)
+            body_def.type = b2_staticBody;
+        else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Dynamic)
+            body_def.type = b2_dynamicBody;
+        else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Kinematic)
+            body_def.type = b2_kinematicBody;
+
+        body_def.position.Set(node_pos_in_world.x, node_pos_in_world.y);
+        body_def.angle          = box.GetRotation();
+        body_def.angularDamping = body->GetAngularDamping();
+        body_def.linearDamping  = body->GetLinearDamping();
+        body_def.enabled        = body->TestFlag(RigidBodyItem::Flags::Enabled);
+        body_def.bullet         = body->TestFlag(RigidBodyItem::Flags::Bullet);
+        body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
+        body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
+        b2Body* world_body = mWorld->CreateBody(&body_def);
+
+        // fixture attaches a collision shape to the body.
+        b2FixtureDef fixture;
+        fixture.shape       = collision_shape.get(); // cloned!?
+        fixture.density     = body->GetDensity();
+        fixture.friction    = body->GetFriction();
+        fixture.restitution = body->GetRestitution();
+        fixture.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
+        b2Fixture* fixture_ptr = world_body->CreateFixture(&fixture);
+
+        PhysicsNode physics_node;
+        physics_node.debug_name    = debug_name;
+        physics_node.world_body    = world_body;
+        physics_node.node          = const_cast<game::EntityNode*>(&node);
+        physics_node.world_extents = node_size_in_world;
+        physics_node.polygonId     = polygon_shape_id;
+        physics_node.flags         = body->GetFlags().value();
+        ASSERT(mNodes.find(node.GetId()) == mNodes.end());
+        mNodes[node.GetId()]   = physics_node;
+        mFixtures[fixture_ptr] = node.GetId();
+        DEBUG("Created new physics body. [node='%1']", debug_name);
     }
-
-    // fixture attaches a collision shape to the body.
-    b2FixtureDef fixture;
-    fixture.shape       = collision_shape.get();
-    fixture.density     = body->GetDensity();
-    fixture.friction    = body->GetFriction();
-    fixture.restitution = body->GetRestitution();
-    fixture.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
-    b2Fixture* fixture_ptr = world_body->CreateFixture(&fixture);
-
-    PhysicsNode physics_node;
-    physics_node.debug_name    = debug_name;
-    physics_node.world_body    = world_body;
-    physics_node.node          = const_cast<game::EntityNode*>(&node);
-    physics_node.world_extents = node_size_in_world;
-    physics_node.polygonId     = polygonId;
-    physics_node.flags         = body->GetFlags().value();
-    ASSERT(mNodes.find(node.GetId()) == mNodes.end());
-    mNodes[node.GetId()]   = physics_node;
-    mFixtures[fixture_ptr] = node.GetId();
-    DEBUG("Created new physics body. [node='%1']", debug_name);
 }
 
 PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id)
