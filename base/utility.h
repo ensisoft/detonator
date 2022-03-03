@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <optional>
 
 #include "base/assert.h"
 #include "base/platform.h"
@@ -41,6 +42,21 @@ size_t ArraySize(const T (&array)[N])
 inline bool IsPowerOfTwo(unsigned i)
 {
     return (i & (i-1)) == 0;
+}
+
+template<typename T> inline
+const T* GetOpt(const std::optional<T>& opt)
+{
+    if (opt.has_value())
+        return &opt.value();
+    return nullptr;
+}
+template<typename T> inline
+T* GetOpt(std::optional<T>& opt)
+{
+    if (opt.has_value())
+        return &opt.value();
+    return nullptr;
 }
 
 template<typename Key> inline

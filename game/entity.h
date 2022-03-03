@@ -48,6 +48,34 @@ namespace game
 {
     class Scene;
 
+    namespace detail {
+        // Selection for collision shapes when the collision shape detection
+        // is set to manual.
+        enum class CollisionShape {
+            // The collision shape is a box based on the size of node's box.
+            Box,
+            // The collision shape is a circle based on the largest extent of
+            // the node's box.
+            Circle,
+            // The collision shape is a right-angled triangle where the
+            // height of the triangle is the height of the box and the
+            // width is the width of the node's box
+            RightTriangle,
+            // Isosceles triangle
+            IsoscelesTriangle,
+            // Trapezoid
+            Trapezoid,
+            //
+            Parallelogram,
+            // The collision shape is the upper half of a circle.
+            SemiCircle,
+            // The collision shape is a convex polygon. The polygon shape id
+            // must then be selected in order to be able to extract the
+            // polygon's convex hull.
+            Polygon
+        };
+    } // namespace
+
     class SpatialNodeClass
     {
     public:
@@ -78,10 +106,100 @@ namespace game
         base::bitflag<Flags> mFlags;
     };
 
+    class FixtureClass
+    {
+    public:
+        using CollisionShape = detail::CollisionShape;
+
+        enum class Flags {
+            // Sensor only flag enables this fixture to only be
+            // used as a sensor, i.e. it doesn't affect the body's
+            // simulation under forces etc.
+            Sensor
+        };
+        FixtureClass()
+        {
+            mBitFlags.set(Flags::Sensor, true);
+        }
+        void SetPolygonShapeId(const std::string& id)
+        { mPolygonShapeId = id; }
+        void SetRigidBodyNodeId(const std::string& id)
+        { mRigidBodyNodeId = id; }
+        void SetCollisionShape(CollisionShape shape)
+        { mCollisionShape = shape; }
+        void SetFlag(Flags flag, bool on_off)
+        { mBitFlags.set(flag, on_off); }
+        void SetFriction(float value)
+        { mFriction = value; }
+        void SetDensity(float value)
+        { mDensity = value; }
+        void SetRestitution(float value)
+        { mRestitution = value; }
+        bool TestFlag(Flags flag) const
+        { return mBitFlags.test(flag); }
+        bool HasFriction() const
+        { return mFriction.has_value(); }
+        bool HasDensity() const
+        { return mDensity.has_value(); }
+        bool HasRestitution() const
+        { return mRestitution.has_value(); }
+        bool HasPolygonShapeId() const
+        { return !mPolygonShapeId.empty(); }
+        const float* GetFriction() const
+        { return base::GetOpt(mFriction); }
+        const float* GetDensity() const
+        { return base::GetOpt(mDensity); }
+        const float* GetRestitution() const
+        { return base::GetOpt(mRestitution); }
+        const base::bitflag<Flags>& GetFlags() const
+        { return mBitFlags; }
+        CollisionShape GetCollisionShape() const
+        { return mCollisionShape; }
+        const std::string& GetPolygonShapeId() const
+        { return mPolygonShapeId; }
+        const std::string& GetRigidBodyNodeId() const
+        {return mRigidBodyNodeId; }
+        void ResetRigidBodyId()
+        { mRigidBodyNodeId.clear(); }
+        void ResetPolygonShapeId()
+        { mPolygonShapeId.clear(); }
+        void ResetFriction()
+        { mFriction.reset(); }
+        void ResetDensity()
+        { mDensity.reset(); }
+        void ResetRestitution()
+        { mRestitution.reset(); }
+
+        std::size_t GetHash() const;
+
+        void IntoJson(data::Writer& data) const;
+
+        static std::optional<FixtureClass> FromJson(const data::Reader& data);
+    private:
+        CollisionShape  mCollisionShape = CollisionShape::Box;
+        base::bitflag<Flags> mBitFlags;
+        // The ID of the custom polygon shape id. Only used when the
+        // collision shape is set to Polygon.
+        std::string mPolygonShapeId;
+        // The ID of the node that has the rigid body to which this
+        // fixture is attached to. If
+        std::string mRigidBodyNodeId;
+        // Fixture specific friction parameter. if not set then
+        // the friction from the associated rigid body is used.
+        std::optional<float> mFriction;
+        // Fixture specific density parameter. if not set then
+        // the density from the associated rigid body is used.
+        std::optional<float> mDensity;
+        // Fixture specific restitution parameter. If not set then
+        // the restitution from the associated rigid body is used.
+        std::optional<float> mRestitution;
+    };
+
 
     class RigidBodyItemClass
     {
     public:
+        using CollisionShape = detail::CollisionShape;
         // Simulation parameter determines the type of physics
         // simulation (or the lack of simulation) applied to the
         // rigid body by the physics engine.
@@ -96,32 +214,6 @@ namespace game
             // Dynamic body is completely driven by the physics simulation.
             // I.e.the body is moved by the physical forces being applied to it.
             Dynamic
-        };
-
-        // Selection for collision shapes when the collision shape detection
-        // is set to manual.
-        enum class CollisionShape {
-            // The collision shape is a box based on the size of node's box.
-            Box,
-            // The collision shape is a circle based on the largest extent of
-            // the node's box.
-            Circle,
-            // The collision shape is a right-angled triangle where the
-            // height of the triangle is the height of the box and the
-            // width is the width of the node's box
-            RightTriangle,
-            // Isosceles triangle
-            IsoscelesTriangle,
-            // Trapezoid
-            Trapezoid,
-            //
-            Parallelogram,
-            // The collision shape is the upper half of a circle.
-            SemiCircle,
-            // The collision shape is a convex polygon. The polygon shape id
-            // must then be selected in order to be able to extract the
-            // polygon's convex hull.
-            Polygon
         };
 
         enum class Flags {
@@ -531,6 +623,36 @@ namespace game
         MaterialParamMap mMaterialParams;
     };
 
+    class Fixture
+    {
+    public:
+        using Flags = FixtureClass::Flags;
+        using CollisionShape = FixtureClass::CollisionShape;
+        Fixture(std::shared_ptr<const FixtureClass> klass)
+          : mClass(klass)
+        {}
+
+        const float* GetFriction() const
+        { return mClass->GetFriction(); }
+        const float* GetDensity() const
+        { return mClass->GetDensity(); }
+        const float* GetRestitution() const
+        { return mClass->GetRestitution(); }
+        const base::bitflag<Flags>& GetFlags() const
+        { return mClass->GetFlags(); }
+        CollisionShape GetCollisionShape() const
+        { return mClass->GetCollisionShape(); }
+        bool TestFlag(Flags flag) const
+        { return mClass->TestFlag(flag); }
+        const FixtureClass& GetClass() const
+        { return *mClass; }
+        const FixtureClass* operator->() const
+        { return mClass.get(); }
+    private:
+        std::shared_ptr<const FixtureClass> mClass;
+
+    };
+
     class RigidBodyItem
     {
     public:
@@ -822,6 +944,8 @@ namespace game
         void SetTextItem(const TextItemClass& text);
         // Attach a spatial index node to this node class.
         void SetSpatialNode(const SpatialNodeClass& node);
+        // Attach a rigid body fixture to this node class.
+        void SetFixture(const FixtureClass& fixture);
         // Create and attach a rigid body with default settings.
         void CreateRigidBody();
         // Create and attach a drawable with default settings.
@@ -830,6 +954,8 @@ namespace game
         void CreateTextItem();
         // Create and attach spatial index  node with default settings.
         void CreateSpatialNode();
+        // Create and attach a fixture with default settings.
+        void CreateFixture();
 
         void RemoveDrawable()
         { mDrawable.reset(); }
@@ -839,6 +965,8 @@ namespace game
         { mTextItem.reset(); }
         void RemoveSpatialNode()
         { mSpatialNode.reset(); }
+        void RemoveFixture()
+        { mFixture.reset(); }
 
         // Get the rigid body shared class object if any.
         std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const
@@ -852,6 +980,9 @@ namespace game
         // Get the spatial index node if any.
         std::shared_ptr<const SpatialNodeClass> GetSharedSpatialNode() const
         { return mSpatialNode; }
+        // Get the fixture class if any
+        std::shared_ptr<const FixtureClass> GetSharedFixture() const
+        { return mFixture; }
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const
@@ -863,6 +994,8 @@ namespace game
         { return !!mTextItem; }
         bool HasSpatialNode() const
         { return !!mSpatialNode; }
+        bool HasFixture() const
+        { return !!mFixture; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -880,6 +1013,10 @@ namespace game
         // has been set then returns nullptr.
         SpatialNodeClass* GetSpatialNode()
         { return mSpatialNode.get(); }
+        // Get the fixture class object if any. If no fixture has been attached
+        // then returns nullptr.
+        FixtureClass* GetFixture()
+        { return mFixture.get(); }
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
         const RigidBodyItemClass* GetRigidBody() const
@@ -896,6 +1033,10 @@ namespace game
         // has been set then returns nullptr.
         const SpatialNodeClass* GetSpatialNode() const
         { return mSpatialNode.get(); }
+        // Get the fixture class object if any. If no fixture has been attached
+        // then returns nullptr.
+        const FixtureClass* GetFixture() const
+        { return mFixture.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -939,6 +1080,8 @@ namespace game
         std::shared_ptr<TextItemClass> mTextItem;
         // spatial node if any.
         std::shared_ptr<SpatialNodeClass> mSpatialNode;
+        // fixture if any.
+        std::shared_ptr<FixtureClass> mFixture;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -1010,6 +1153,9 @@ namespace game
         // Get the node's text item if any. If no text item
         // is set then returns nullptr.
         TextItem* GetTextItem();
+        // Get the node's fixture if any. If no fixture is et
+        // then returns nullptr.
+        Fixture* GetFixture();
         // Get the node's drawable item if any. If now drawable
         // item is set then returns nullptr.
         const DrawableItem* GetDrawable() const;
@@ -1022,6 +1168,9 @@ namespace game
         // Get the node's spatial node if any. If no spatial node
         // is set then returns nullptr.
         const SpatialNode* GetSpatialNode() const;
+        // Get the node's fixture if any. If no fixture is et
+        // then returns nullptr.
+        const Fixture* GetFixture() const;
 
         bool HasRigidBody() const
         { return !!mRigidBody; }
@@ -1031,6 +1180,8 @@ namespace game
         { return !!mTextItem; }
         bool HasSpatialNode() const
         { return !!mSpatialNode; }
+        bool HasFixture() const
+        { return !!mFixture; }
 
         // shortcut for class getters.
         const std::string& GetClassId() const
@@ -1079,6 +1230,8 @@ namespace game
         std::unique_ptr<TextItem> mTextItem;
         // spatial node if any
         std::unique_ptr<SpatialNode> mSpatialNode;
+        // fixture if any
+        std::unique_ptr<Fixture> mFixture;
         // The entity that owns this node.
         Entity* mEntity = nullptr;
     };
@@ -1217,6 +1370,8 @@ namespace game
         void DeleteInvalidJoints();
         // todo:
         void FindInvalidJoints(std::vector<PhysicsJoint*>* invalid);
+        // todo:
+        void DeleteInvalidFixtures();
 
         // Get the node by index. The index must be valid.
         EntityNodeClass& GetNode(size_t index);

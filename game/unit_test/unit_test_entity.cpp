@@ -104,6 +104,14 @@ void unit_test_entity_node()
     spatial.SetShape(game::SpatialNodeClass::Shape::AABB);
     spatial.SetFlag(game::SpatialNodeClass::Flags::ReportOverlap, true);
 
+    game::FixtureClass fix;
+    fix.SetCollisionShape(game::FixtureClass::CollisionShape::Circle);
+    fix.SetDensity(2.0f);
+    fix.SetFriction(3.0f);
+    fix.SetRestitution(4.0f);
+    fix.SetPolygonShapeId("123232ddd");
+    fix.SetRigidBodyNodeId("81288");
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetSize(glm::vec2(100.0f, 100.0f));
@@ -114,11 +122,13 @@ void unit_test_entity_node()
     node.SetRigidBody(body);
     node.SetTextItem(text);
     node.SetSpatialNode(spatial);
+    node.SetFixture(fix);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
     TEST_REQUIRE(node.HasTextItem());
     TEST_REQUIRE(node.HasSpatialNode());
+    TEST_REQUIRE(node.HasFixture());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -150,6 +160,12 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
     TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
     TEST_REQUIRE(node.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
+    TEST_REQUIRE(node.GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
+    TEST_REQUIRE(*node.GetFixture()->GetDensity() == real::float32(2.0f));
+    TEST_REQUIRE(*node.GetFixture()->GetFriction() == real::float32(3.0f));
+    TEST_REQUIRE(*node.GetFixture()->GetRestitution() == real::float32(4.0f));
+    TEST_REQUIRE(node.GetFixture()->GetPolygonShapeId() == "123232ddd");
+    TEST_REQUIRE(node.GetFixture()->GetRigidBodyNodeId() == "81288");
 
     // to/from json
     {
@@ -188,6 +204,12 @@ void unit_test_entity_node()
         TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
         TEST_REQUIRE(node.GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
         TEST_REQUIRE(node.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
+        TEST_REQUIRE(ret->GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
+        TEST_REQUIRE(*ret->GetFixture()->GetDensity() == real::float32(2.0f));
+        TEST_REQUIRE(*ret->GetFixture()->GetFriction() == real::float32(3.0f));
+        TEST_REQUIRE(*ret->GetFixture()->GetRestitution() == real::float32(4.0f));
+        TEST_REQUIRE(ret->GetFixture()->GetPolygonShapeId() == "123232ddd");
+        TEST_REQUIRE(ret->GetFixture()->GetRigidBodyNodeId() == "81288");
         TEST_REQUIRE(ret->GetHash() == node.GetHash());
     }
 
@@ -225,6 +247,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetTextItem()->GetRasterHeight() == 200);
         TEST_REQUIRE(clone.GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
         TEST_REQUIRE(clone.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
+        TEST_REQUIRE(clone.GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
     }
 
     // test instance state.
@@ -252,6 +275,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance->GetTextItem()->GetRasterHeight() == 200);
         TEST_REQUIRE(instance->GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
         TEST_REQUIRE(instance->GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
+        TEST_REQUIRE(instance->GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
 
         instance.SetName("foobar");
         instance.SetSize(glm::vec2(200.0f, 200.0f));

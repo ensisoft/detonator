@@ -179,6 +179,16 @@ namespace gui
         void on_tiBlink_stateChanged(int);
         void on_tiStatic_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
+        void on_fxShape_currentIndexChanged(const QString&);
+        void on_fxBody_currentIndexChanged(const QString&);
+        void on_fxPolygon_currentIndexChanged(const QString&);
+        void on_fxFriction_valueChanged(double);
+        void on_fxDensity_valueChanged(double);
+        void on_fxBounciness_valueChanged(double);
+        void on_fxIsSensor_stateChanged(int);
+        void on_btnResetFxFriction_clicked();
+        void on_btnResetFxDensity_clicked();
+        void on_btnResetFxBounciness_clicked();
         void on_btnSelectFont_clicked();
         void on_btnSelectFontFile_clicked();
         void on_btnResetTextRasterWidth_clicked();
@@ -188,6 +198,7 @@ namespace gui
         void on_rigidBodyItem_toggled(bool on);
         void on_textItem_toggled(bool on);
         void on_spatialNode_toggled(bool on);
+        void on_fixture_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
 
         void TreeCurrentNodeChangedEvent();
@@ -216,6 +227,7 @@ namespace gui
         void UpdateCurrentNodeProperties();
         void RebuildMenus();
         void RebuildCombos();
+        void RebuildCombosInternal();
         void UpdateDeletedResourceReferences();
         game::EntityNodeClass* GetCurrentNode();
         const game::EntityNodeClass* GetCurrentNode() const;

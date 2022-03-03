@@ -433,6 +433,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
+    PopulateFromEnum<game::FixtureClass::CollisionShape>(mUI.fxShape);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -479,7 +480,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     }
 
     UpdateDeletedResourceReferences();
-
+    RebuildCombosInternal();
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
@@ -1558,6 +1559,7 @@ void EntityWidget::on_nodeName_textChanged(const QString& text)
     node->SetName(app::ToUtf8(text));
     item->SetText(text);
     mUI.tree->Update();
+    RebuildCombosInternal();
 }
 
 void EntityWidget::on_nodeSizeX_valueChanged(double value)
@@ -1775,6 +1777,53 @@ void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_fxShape_currentIndexChanged(const QString&)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_fxBody_currentIndexChanged(const QString&)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_fxPolygon_currentIndexChanged(const QString&)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_fxFriction_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_fxDensity_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_fxBounciness_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_fxIsSensor_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_btnResetFxFriction_clicked()
+{
+    SetValue(mUI.fxFriction,  mUI.fxFriction->minimum());
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_btnResetFxDensity_clicked()
+{
+    SetValue(mUI.fxDensity, mUI.fxDensity->minimum());
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_btnResetFxBounciness_clicked()
+{
+    SetValue(mUI.fxBounciness, mUI.fxBounciness->minimum());
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnSelectFont_clicked()
 {
     if (auto* node = GetCurrentNode())
@@ -1890,9 +1939,11 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
     }
 
     mState.entity->DeleteInvalidJoints();
+    mState.entity->DeleteInvalidFixtures();
     mJointModel->Reset();
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
+    RebuildCombosInternal();
 }
 
 void EntityWidget::on_textItem_toggled(bool on)
@@ -1941,6 +1992,54 @@ void EntityWidget::on_spatialNode_toggled(bool on)
         {
             node->RemoveSpatialNode();
             DEBUG("Removed spatial node from '%1'.", node->GetName());
+        }
+    }
+    DisplayCurrentNodeProperties();
+}
+
+void EntityWidget::on_fixture_toggled(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on && !node->HasFixture())
+        {
+            game::FixtureClass fixture;
+            // try to see if we can figure out the right collision
+            // box for this rigid body based on the drawable.
+            if (auto* item = node->GetDrawable())
+            {
+                const auto& drawableId = item->GetDrawableId();
+                if (drawableId == "_circle")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::Circle);
+                else if (drawableId == "_parallelogram")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::Parallelogram);
+                else if (drawableId == "_rect" || drawableId == "_round_rect")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::Box);
+                else if (drawableId == "_isosceles_triangle")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::IsoscelesTriangle);
+                else if (drawableId == "_right_triangle")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::RightTriangle);
+                else if (drawableId == "_trapezoid")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::Trapezoid);
+                else if (drawableId == "_semi_circle")
+                    fixture.SetCollisionShape(game::FixtureClass::CollisionShape::SemiCircle);
+                else if (auto klass = mState.workspace->FindDrawableClassById(drawableId)) {
+                    if (klass->GetType() == gfx::DrawableClass::Type::Polygon)
+                    {
+                        fixture.SetPolygonShapeId(drawableId);
+                        fixture.SetCollisionShape(game::FixtureClass::CollisionShape::Polygon);
+                    }
+                }
+            }
+
+
+            node->SetFixture(fixture);
+            DEBUG("Added fixture to '%1'.", node->GetName());
+        }
+        else if (!on && node->HasFixture())
+        {
+            node->RemoveFixture();
+            DEBUG("Removed fixture from '%1'.", node->GetName());
         }
     }
     DisplayCurrentNodeProperties();
@@ -2413,6 +2512,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsRenderStyle, game::DrawableItemClass::RenderStyle::Solid);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
+    SetValue(mUI.rbShape, game::RigidBodyItemClass::CollisionShape::Box);
     SetValue(mUI.rbFriction, 0.0f);
     SetValue(mUI.rbRestitution, 0.0f);
     SetValue(mUI.rbAngularDamping, 0.0f);
@@ -2438,6 +2538,14 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiBlink, false);
     SetValue(mUI.tiStatic, false);
     SetValue(mUI.spnShape, game::SpatialNodeClass::Shape::AABB);
+    SetValue(mUI.fixture, false);
+    SetValue(mUI.fxBody, QString(""));
+    SetValue(mUI.fxShape, game::FixtureClass::CollisionShape::Box);
+    SetValue(mUI.fxPolygon, QString(""));
+    SetValue(mUI.fxFriction, mUI.fxFriction->minimum());
+    SetValue(mUI.fxBounciness, mUI.fxBounciness->minimum());
+    SetValue(mUI.fxDensity, mUI.fxDensity->minimum());
+    SetValue(mUI.fxIsSensor, false);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
@@ -2524,6 +2632,30 @@ void EntityWidget::DisplayCurrentNodeProperties()
         {
             SetValue(mUI.spatialNode, true);
             SetValue(mUI.spnShape, sp->GetShape());
+        }
+        if (const auto* fixture = node->GetFixture())
+        {
+            SetValue(mUI.fixture, true);
+            SetValue(mUI.fxBody, ListItemId(fixture->GetRigidBodyNodeId()));
+            SetValue(mUI.fxShape, fixture->GetCollisionShape());
+            if (fixture->GetCollisionShape() == game::FixtureClass::CollisionShape::Polygon)
+            {
+                SetEnabled(mUI.fxPolygon, true);
+                SetValue(mUI.fxPolygon, ListItemId(fixture->GetPolygonShapeId()));
+            }
+            else
+            {
+                SetEnabled(mUI.fxPolygon, false);
+                SetValue(mUI.fxPolygon, -1);
+            }
+            if (const auto* val = fixture->GetFriction())
+                SetValue(mUI.fxFriction, *val);
+            if (const auto* val = fixture->GetRestitution())
+                SetValue(mUI.fxBounciness, *val);
+            if (const auto* val = fixture->GetDensity())
+                SetValue(mUI.fxDensity, *val);
+
+            SetValue(mUI.fxIsSensor, fixture->TestFlag(game::FixtureClass::Flags::Sensor));
         }
     }
 }
@@ -2645,6 +2777,28 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::BlinkText, GetValue(mUI.tiBlink));
         text->SetFlag(game::TextItemClass::Flags::StaticContent, GetValue(mUI.tiStatic));
     }
+    if (auto* fixture = node->GetFixture())
+    {
+        fixture->SetRigidBodyNodeId(GetItemId(mUI.fxBody));
+        fixture->SetPolygonShapeId(GetItemId(mUI.fxPolygon));
+        fixture->SetCollisionShape(GetValue(mUI.fxShape));
+        const float friction = GetValue(mUI.fxFriction);
+        const float density  = GetValue(mUI.fxDensity);
+        const float bounciness = GetValue(mUI.fxBounciness);
+        if (friction != mUI.fxFriction->minimum())
+            fixture->SetFriction(friction);
+        else fixture->ResetFriction();
+
+        if (density != mUI.fxDensity->minimum())
+            fixture->SetDensity(density);
+        else fixture->ResetDensity();
+
+        if (bounciness != mUI.fxBounciness->minimum())
+            fixture->SetRestitution(bounciness);
+        else fixture->ResetRestitution();
+
+        fixture->SetFlag(game::FixtureClass::Flags::Sensor, GetValue(mUI.fxIsSensor));
+    }
 
     if (auto* sp = node->GetSpatialNode())
     {
@@ -2701,7 +2855,26 @@ void EntityWidget::RebuildCombos()
         }
     }
     SetList(mUI.rbPolygon, polygons);
+    SetList(mUI.fxPolygon, polygons);
     SetList(mUI.scriptFile, scripts);
+}
+
+void EntityWidget::RebuildCombosInternal()
+{
+    std::vector<ListItem> bodies;
+
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        auto& node = mState.entity->GetNode(i);
+        if (auto* body = node.GetRigidBody())
+        {
+            ListItem pair;
+            pair.name = app::FromUtf8(node.GetName());
+            pair.id   = app::FromUtf8(node.GetId());
+            bodies.push_back(pair);
+        }
+    }
+    SetList(mUI.fxBody, bodies);
 }
 
 void EntityWidget::UpdateDeletedResourceReferences()
@@ -2715,26 +2888,37 @@ void EntityWidget::UpdateDeletedResourceReferences()
             const auto material = draw->GetMaterialId();
             if (!mState.workspace->IsValidMaterial(material))
             {
-                WARN("Entity node '%1' uses material that is no longer available." , node.GetName());
+                WARN("Entity node '%1' uses material which is no longer available." , node.GetName());
                 draw->ResetMaterial();
                 draw->SetMaterialId("_checkerboard");
             }
             if (!mState.workspace->IsValidDrawable(drawable))
             {
-                WARN("Entity node '%1' uses drawable that is no longer available." , node.GetName());
+                WARN("Entity node '%1' uses drawable which is no longer available." , node.GetName());
                 draw->ResetDrawable();
                 draw->SetDrawableId("_rect");
             }
         }
         if (auto* body = node.GetRigidBody())
         {
-            if (body->GetCollisionShape() != game::RigidBodyItemClass::CollisionShape::Polygon)
-                continue;
-            const auto& polygon = body->GetPolygonShapeId();
-            if (!mState.workspace->IsValidDrawable(polygon))
+            if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
             {
-                WARN("Entity node '%1' uses rigid body shape that is no longer available.", node.GetName());
-                body->ResetPolygonShapeId();
+                if (!mState.workspace->IsValidDrawable(body->GetPolygonShapeId()))
+                {
+                    WARN("Entity node '%1' uses rigid body shape which is no longer available.", node.GetName());
+                    body->ResetPolygonShapeId();
+                }
+            }
+        }
+        if (auto* fixture = node.GetFixture())
+        {
+            if (fixture->GetCollisionShape() == game::FixtureClass::CollisionShape::Polygon)
+            {
+                if (!mState.workspace->IsValidDrawable(fixture->GetPolygonShapeId()))
+                {
+                    WARN("Entity node '%1' fixture uses rigid body shape which is no longer available.", node.GetName());
+                    fixture->ResetPolygonShapeId();
+                }
             }
         }
     }
