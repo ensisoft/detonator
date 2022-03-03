@@ -626,7 +626,6 @@ void InitDoc()
     DOC_METHOD_2("void", "Set", "Set a key symbol bit on or off.", "int", "key", "bool", "on");
     DOC_METHOD_1("bool", "Test", "Test whether a key symbol bit is on or off.", "int", "key");
     DOC_METHOD_0("bool", "AnyBit", "Check whether any bit is set.");
-    DOC_METHOD_0("unsigned", "Value", "Get the underlying integer value.");
     DOC_METHOD_0("void", "Clear", "Clear all bits.");
     DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "lhs", "wdk.KeyBitSet", "rhs");
     DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "bits", "int", "key");
