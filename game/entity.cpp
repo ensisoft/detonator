@@ -68,6 +68,44 @@ std::optional<SpatialNodeClass> SpatialNodeClass::FromJson(const data::Reader& d
     return ret;
 }
 
+std::size_t FixtureClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mCollisionShape);
+    hash = base::hash_combine(hash, mBitFlags);
+    hash = base::hash_combine(hash, mPolygonShapeId);
+    hash = base::hash_combine(hash, mRigidBodyNodeId);
+    hash = base::hash_combine(hash, mFriction);
+    hash = base::hash_combine(hash, mDensity);
+    hash = base::hash_combine(hash, mRestitution);
+    return hash;
+}
+
+void FixtureClass::IntoJson(data::Writer& data) const
+{
+    data.Write("shape",       mCollisionShape);
+    data.Write("flags",       mBitFlags);
+    data.Write("polygon",     mPolygonShapeId);
+    data.Write("rigid_body",  mRigidBodyNodeId);
+    data.Write("friction",    mFriction);
+    data.Write("density",     mDensity);
+    data.Write("restitution", mRestitution);
+}
+
+// static
+std::optional<FixtureClass> FixtureClass::FromJson(const data::Reader& data)
+{
+    FixtureClass ret;
+    data.Read("shape",       &ret.mCollisionShape);
+    data.Read("flags",       &ret.mBitFlags);
+    data.Read("polygon",     &ret.mPolygonShapeId);
+    data.Read("rigid_body",  &ret.mRigidBodyNodeId);
+    data.Read("friction",    &ret.mFriction);
+    data.Read("density",     &ret.mDensity);
+    data.Read("restitution", &ret.mRestitution);
+    return ret;
+}
+
 std::size_t RigidBodyItemClass::GetHash() const
 {
     size_t hash = 0;
@@ -312,6 +350,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mTextItem = std::make_shared<TextItemClass>(*other.mTextItem);
     if (other.mSpatialNode)
         mSpatialNode = std::make_shared<SpatialNodeClass>(*other.mSpatialNode);
+    if (other.mFixture)
+        mFixture = std::make_shared<FixtureClass>(*other.mFixture);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
@@ -327,6 +367,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mTextItem  = std::move(other.mTextItem);
     mBitFlags  = std::move(other.mBitFlags);
     mSpatialNode = std::move(other.mSpatialNode);
+    mFixture = std::move(other.mFixture);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -338,7 +379,7 @@ std::size_t EntityNodeClass::GetHash() const
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mRotation);
-    hash = base::hash_combine(hash, mBitFlags.value());
+    hash = base::hash_combine(hash, mBitFlags);
     if (mRigidBody)
         hash = base::hash_combine(hash, mRigidBody->GetHash());
     if (mDrawable)
@@ -347,6 +388,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mTextItem->GetHash());
     if (mSpatialNode)
         hash = base::hash_combine(hash, mSpatialNode->GetHash());
+    if (mFixture)
+        hash = base::hash_combine(hash, mFixture->GetHash());
     return hash;
 }
 
@@ -370,6 +413,11 @@ void EntityNodeClass::SetSpatialNode(const SpatialNodeClass& node)
     mSpatialNode = std::make_shared<SpatialNodeClass>(node);
 }
 
+void EntityNodeClass::SetFixture(const FixtureClass& fixture)
+{
+    mFixture = std::make_shared<FixtureClass>(fixture);
+}
+
 void EntityNodeClass::CreateRigidBody()
 {
     mRigidBody = std::make_shared<RigidBodyItemClass>();
@@ -388,6 +436,11 @@ void EntityNodeClass::CreateTextItem()
 void EntityNodeClass::CreateSpatialNode()
 {
     mSpatialNode = std::make_shared<SpatialNodeClass>();
+}
+
+void EntityNodeClass::CreateFixture()
+{
+    mFixture = std::make_shared<FixtureClass>();
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -445,6 +498,12 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mSpatialNode->IntoJson(*chunk);
         data.Write("spatial_node", std::move(chunk));
     }
+    if (mFixture)
+    {
+        auto chunk = data.NewWriteChunk();
+        mFixture->IntoJson(*chunk);
+        data.Write("fixture", std::move(chunk));
+    }
 }
 
 // static
@@ -490,6 +549,13 @@ std::optional<EntityNodeClass> EntityNodeClass::FromJson(const data::Reader& dat
             return std::nullopt;
         ret.mSpatialNode = std::make_shared<SpatialNodeClass>(std::move(node.value()));
     }
+    if (const auto& chunk = data.GetReadChunk("fixture"))
+    {
+        auto node = FixtureClass::FromJson(*chunk);
+        if (!node.has_value())
+            return std::nullopt;
+        ret.mFixture = std::make_shared<FixtureClass>(std::move(node.value()));
+    }
     return ret;
 }
 
@@ -515,6 +581,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mDrawable  = std::move(tmp.mDrawable);
     mTextItem  = std::move(tmp.mTextItem);
     mSpatialNode = std::move(tmp.mSpatialNode);
+    mFixture = std::move(tmp.mFixture);
     mBitFlags  = std::move(tmp.mBitFlags);
     return *this;
 }
@@ -544,6 +611,8 @@ EntityNode::EntityNode(const EntityNode& other)
         mTextItem = std::make_unique<TextItem>(*other.GetTextItem());
     if (other.HasSpatialNode())
         mSpatialNode = std::make_unique<SpatialNode>(*other.GetSpatialNode());
+    if (other->HasFixture())
+        mFixture = std::make_unique<Fixture>(*other.GetFixture());
 }
 
 EntityNode::EntityNode(EntityNode&& other)
@@ -559,6 +628,7 @@ EntityNode::EntityNode(EntityNode&& other)
     mDrawable  = std::move(other.mDrawable);
     mTextItem  = std::move(other.mTextItem);
     mSpatialNode = std::move(other.mSpatialNode);
+    mFixture     = std::move(other.mFixture);
 }
 
 EntityNode::EntityNode(const EntityNodeClass& klass) : EntityNode(std::make_shared<EntityNodeClass>(klass))
@@ -573,6 +643,9 @@ RigidBodyItem* EntityNode::GetRigidBody()
 TextItem* EntityNode::GetTextItem()
 { return mTextItem.get(); }
 
+Fixture* EntityNode::GetFixture()
+{ return mFixture.get(); }
+
 const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
@@ -584,6 +657,9 @@ const TextItem* EntityNode::GetTextItem() const
 
 const SpatialNode* EntityNode::GetSpatialNode() const
 { return mSpatialNode.get(); }
+
+const Fixture* EntityNode::GetFixture() const
+{ return mFixture.get(); }
 
 void EntityNode::Reset()
 {
@@ -599,6 +675,8 @@ void EntityNode::Reset()
         mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
     if (mClass->HasSpatialNode())
         mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
+    if (mClass->HasFixture())
+        mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
 }
 
 glm::mat4 EntityNode::GetNodeTransform() const
@@ -803,6 +881,18 @@ void EntityClass::FindInvalidJoints(std::vector<PhysicsJoint*>* invalid)
             !src_node->HasRigidBody())
         {
             invalid->push_back(joint.get());
+        }
+    }
+}
+
+void EntityClass::DeleteInvalidFixtures()
+{
+    for (auto& node : mNodes)
+    {
+        if (auto* fixture = node->GetFixture())
+        {
+            if (!FindNodeById(fixture->GetRigidBodyNodeId()))
+                node->RemoveFixture();
         }
     }
 }
