@@ -215,20 +215,19 @@ namespace engine
         void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view);
 #endif
     private:
-        struct PhysicsNode;
+        struct RigidBodyData;
+        struct FixtureData;
 
         void UpdateEntity(const glm::mat4& model_to_world, game::Entity& scene);
         void KillEntity(const game::Entity& entity);
         void UpdateWorld(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntity(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntityNode(const glm::mat4& model_to_world, const game::Entity& entity, const game::EntityNode& node);
-        PhysicsNode* FindPhysicsNode(const std::string& id);
-        const PhysicsNode* FindPhysicsNode(const std::string& id) const;
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mClassLib = nullptr;
         // Physics node.
-        struct PhysicsNode {
+        struct RigidBodyData {
             std::string debug_name;
             // The entity node instance associated with this physics node
             game::EntityNode* node = nullptr;
@@ -236,16 +235,20 @@ namespace engine
             glm::vec2 world_extents;
             // the corresponding box2d physics body for this node.
             b2Body* world_body = nullptr;
-            // the polygon shape id if any. empty string
-            // if the shape is a box or a circle.
-            std::string polygonId;
             // cached rigid body flags
             unsigned flags = 0;
         };
+        struct FixtureData {
+            std::string debug_name;
+            game::EntityNode* node = nullptr;
+            glm::vec2 shape_size;
+            glm::vec2 shape_offset;
+            float shape_rotation = 0.0f;
+        };
         // The nodes represented in the physics simulation.
-        std::unordered_map<std::string, PhysicsNode> mNodes;
+        std::unordered_map<std::string, RigidBodyData> mNodes;
         // the fixtures in the physics world that map to nodes.
-        std::unordered_map<b2Fixture*, std::string> mFixtures;
+        std::unordered_map<b2Fixture*, FixtureData> mFixtures;
         // The current physics world if any.
         std::unique_ptr<b2World> mWorld;
         // Gravity vector of the world.

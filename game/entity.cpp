@@ -1621,6 +1621,14 @@ glm::mat4 Entity::FindNodeModelTransform(const EntityNode* node) const
     return game::FindNodeModelTransform(mRenderTree, node);
 }
 
+glm::mat4 Entity::FindRelativeTransform(const EntityNode* parent, const EntityNode* child) const
+{
+    const auto& parent_to_world = game::FindNodeTransform(mRenderTree, parent);
+    const auto& child_to_world  = game::FindNodeTransform(mRenderTree, child);
+    const auto& world_to_parent = glm::inverse(parent_to_world);
+    return world_to_parent * child_to_world;
+}
+
 FRect Entity::FindNodeBoundingRect(const EntityNode* node) const
 {
     return game::FindBoundingRect(mRenderTree, node);

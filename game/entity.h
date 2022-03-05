@@ -631,7 +631,10 @@ namespace game
         Fixture(std::shared_ptr<const FixtureClass> klass)
           : mClass(klass)
         {}
-
+        const std::string& GetPolygonShapeId() const
+        { return mClass->GetPolygonShapeId(); }
+        const std::string& GetRigidBodyNodeId() const
+        { return mClass->GetRigidBodyNodeId(); }
         const float* GetFriction() const
         { return mClass->GetFriction(); }
         const float* GetDensity() const
@@ -1742,6 +1745,7 @@ namespace game
         // todo:
         glm::mat4 FindNodeTransform(const EntityNode* node) const;
         glm::mat4 FindNodeModelTransform(const EntityNode* node) const;
+        glm::mat4 FindRelativeTransform(const EntityNode* parent, const EntityNode* child) const;
 
         void Die();
 
