@@ -2782,18 +2782,18 @@ void EntityWidget::UpdateCurrentNodeProperties()
         fixture->SetRigidBodyNodeId(GetItemId(mUI.fxBody));
         fixture->SetPolygonShapeId(GetItemId(mUI.fxPolygon));
         fixture->SetCollisionShape(GetValue(mUI.fxShape));
-        const float friction = GetValue(mUI.fxFriction);
-        const float density  = GetValue(mUI.fxDensity);
+        const float friction   = GetValue(mUI.fxFriction);
+        const float density    = GetValue(mUI.fxDensity);
         const float bounciness = GetValue(mUI.fxBounciness);
-        if (friction != mUI.fxFriction->minimum())
+        if (friction >= 0.0f)
             fixture->SetFriction(friction);
         else fixture->ResetFriction();
 
-        if (density != mUI.fxDensity->minimum())
+        if (density >= 0.0f)
             fixture->SetDensity(density);
         else fixture->ResetDensity();
 
-        if (bounciness != mUI.fxBounciness->minimum())
+        if (bounciness >= 0.0f)
             fixture->SetRestitution(bounciness);
         else fixture->ResetRestitution();
 
