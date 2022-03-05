@@ -629,7 +629,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     }
 
     UpdateDeletedResourceReferences();
-
+    RebuildCombosInternal();
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
