@@ -45,89 +45,117 @@ inline glm::vec2 ToGlm(const b2Vec2& vector)
 { return glm::vec2 { vector.x, vector.y }; }
 
 namespace {
-std::unique_ptr<b2Shape> CreateCollisionShape(const glm::vec2& node_size_in_world,
+void TransformVertices(const glm::vec2& shape_size,
+                       const glm::vec2& shape_offset,
+                       float shape_rotation,
+                       b2Vec2* vertices, unsigned count)
+{
+    const auto t = shape_rotation;
+    const auto& rot = glm::mat2(glm::vec2( std::cos(t), std::sin(t)),
+                                glm::vec2(-std::sin(t), std::cos(t)));
+    const auto& scale = glm::mat2(glm::vec2(shape_size.x, 0.0f),
+                                  glm::vec2(0.0f, shape_size.y));
+    for (unsigned i=0; i<count; ++i)
+    {
+        const auto& vec = ToGlm(vertices[i]);
+        const auto& ret = (rot * scale * vec) + shape_offset;
+        vertices[i] = ToBox2D(ret);
+    }
+}
+
+std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classlib,
                                               const std::string& polygon_shape_id,
                                               const std::string& debug_name,
-                                              const engine::ClassLibrary& classlib,
+                                              const glm::vec2& shape_size,
+                                              const glm::vec2& shape_offset,
+                                              float shape_rotation,
                                               game::detail::CollisionShape shape)
 {
     // collision shape used for collision resolver for the body.
     std::unique_ptr<b2Shape> collision_shape;
-    std::string polygonId;
     if (shape == game::detail::CollisionShape::Box)
     {
+        b2Vec2 verts[4];
+        verts[0] = b2Vec2(-0.5, -0.5);
+        verts[1] = b2Vec2(-0.5,  0.5);
+        verts[2] = b2Vec2( 0.5,  0.5);
+        verts[3] = b2Vec2( 0.5, -0.5);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 4);
+
         auto box = std::make_unique<b2PolygonShape>();
-        box->SetAsBox(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
+        //box->SetAsBox(shape_size.x*0.5, shape_size.y*0.5, ToBox2D(shape_offset), shape_rotation);
+        box->Set(verts, 4);
         collision_shape = std::move(box);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::Circle)
     {
         auto circle = std::make_unique<b2CircleShape>();
-        circle->m_radius = std::max(node_size_in_world.x * 0.5, node_size_in_world.y * 0.5);
+        circle->m_radius = std::max(shape_size.x * 0.5, shape_size.y * 0.5);
+        circle->m_p = ToBox2D(shape_offset);
         collision_shape = std::move(circle);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
     {
-        const float width  = node_size_in_world.x;
-        const float height = node_size_in_world.y;
         b2Vec2 verts[7];
-        verts[0] = b2Vec2(0.0, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5*0.50, -height*0.5*0.86);
-        verts[2] = b2Vec2(-width*0.5*0.86, -height*0.5*0.50);
-        verts[3] = b2Vec2(-width*0.5*1.00, -height*0.5*0.00);
-        verts[4] = b2Vec2( width*0.5*1.00, -height*0.5*0.00);
-        verts[5] = b2Vec2( width*0.5*0.86, -height*0.5*0.50);
-        verts[6] = b2Vec2( width*0.5*0.50, -height*0.5*0.86);
+        verts[0] = b2Vec2( 0.0,      -0.5);
+        verts[1] = b2Vec2(-0.5*0.50, -0.5*0.86);
+        verts[2] = b2Vec2(-0.5*0.86, -0.5*0.50);
+        verts[3] = b2Vec2(-0.5*1.00, -0.5*0.00);
+        verts[4] = b2Vec2( 0.5*1.00, -0.5*0.00);
+        verts[5] = b2Vec2( 0.5*0.86, -0.5*0.50);
+        verts[6] = b2Vec2( 0.5*0.50, -0.5*0.86);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 7);
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(verts, 7);
         collision_shape = std::move(poly);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
     {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
         b2Vec2 verts[3];
-        verts[0] = b2Vec2(-width*0.5, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5f, height*0.5);
-        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        verts[0] = b2Vec2(-0.5, -0.5);
+        verts[1] = b2Vec2(-0.5,  0.5);
+        verts[2] = b2Vec2( 0.5,  0.5);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 3);
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(verts, 3);
         collision_shape = std::move(poly);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
     {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
         b2Vec2 verts[3];
-        verts[0] = b2Vec2( 0.0f, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5f, height*0.5);
-        verts[2] = b2Vec2( width*0.5,  height*0.5);
+        verts[0] = b2Vec2( 0.0, -0.5);
+        verts[1] = b2Vec2(-0.5,  0.5);
+        verts[2] = b2Vec2( 0.5,  0.5);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 3);
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(verts, 3);
         collision_shape = std::move(poly);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
     {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
         b2Vec2 verts[4];
-        verts[0] = b2Vec2(-width*0.3, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5, height*0.5);
-        verts[2] = b2Vec2( width*0.5, height*0.5);
-        verts[3] = b2Vec2( width*0.3, -height*0.5);
+        verts[0] = b2Vec2(-0.3, -0.5);
+        verts[1] = b2Vec2(-0.5,  0.5);
+        verts[2] = b2Vec2( 0.5,  0.5);
+        verts[3] = b2Vec2( 0.3, -0.5);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 4);
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(verts, 4);
         collision_shape = std::move(poly);
     }
     else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
     {
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
         b2Vec2 verts[4];
-        verts[0] = b2Vec2(-width*0.3, -height*0.5);
-        verts[1] = b2Vec2(-width*0.5, height*0.5);
-        verts[2] = b2Vec2( width*0.3, height*0.5);
-        verts[3] = b2Vec2( width*0.5, -height*0.5);
+        verts[0] = b2Vec2(-0.3, -0.5);
+        verts[1] = b2Vec2(-0.5, 0.5);
+        verts[2] = b2Vec2( 0.3, 0.5);
+        verts[3] = b2Vec2( 0.5, -0.5);
+        TransformVertices(shape_size, shape_offset, shape_rotation, verts, 4);
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(verts, 4);
         collision_shape = std::move(poly);
@@ -146,24 +174,24 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const glm::vec2& node_size_in_worl
             return collision_shape;
         }
         const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
-        const float width   = node_size_in_world.x;
-        const float height  = node_size_in_world.y;
+
         std::vector<b2Vec2> verts;
         for (size_t i=0; i<polygon->GetNumVertices(); ++i)
         {
             const auto& vertex = polygon->GetVertex(i);
             // polygon vertices are in normalized coordinate space in the lower
             // right quadrant, i.e. x = [0, 1] and y = [0, -1], flip about x axis
-            const auto x = vertex.aPosition.x * width;
-            const auto y = vertex.aPosition.y * height * -1.0;
-            b2Vec2 v2;
+            const auto x = vertex.aPosition.x *  1.0;
+            const auto y = vertex.aPosition.y * -1.0;
+            b2Vec2 vert;
             // offset the vertices to be around origin.
             // the vertices must be relative to the body when the shape
             // is attached to a body.
-            v2.x = x - width * 0.5f;
-            v2.y = y - height * 0.5f;
-            verts.push_back(v2);
+            vert.x = x - 0.5f;
+            vert.y = y - 0.5f;
+            verts.push_back(vert);
         }
+        TransformVertices(shape_size, shape_offset, shape_rotation, &verts[0], verts.size());
         // invert the order of polygons in order to invert the winding
         // oder. This is done because of the flip around axis inverts
         // the winding order
@@ -181,6 +209,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const glm::vec2& node_size_in_worl
             // todo: deal with situation when we have more than b2_maxPolygonVertices (8?)
             WARN("The convex hull for rigid body has too many vertices. [node='%1']", debug_name);
         }
+
         auto poly = std::make_unique<b2PolygonShape>();
         poly->Set(&verts[0], verts.size());
         // todo: radius??
@@ -312,13 +341,13 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             //DEBUG("BeginContact");
             auto* A = contact->GetFixtureA();
             auto* B = contact->GetFixtureB();
-            const auto* IdA = base::SafeFind(mEngine.mFixtures, A);
-            const auto* IdB = base::SafeFind(mEngine.mFixtures, B);
-            ASSERT(IdA && IdB);
+            const auto* fixtureA = base::SafeFind(mEngine.mFixtures, A);
+            const auto* fixtureB = base::SafeFind(mEngine.mFixtures, B);
+            ASSERT(fixtureA && fixtureB);
             ContactEvent event;
             event.type = ContactEvent::Type::BeginContact;
-            event.nodeA = mEngine.mNodes[*IdA].node;
-            event.nodeB = mEngine.mNodes[*IdB].node;
+            event.nodeA = fixtureA->node;
+            event.nodeB = fixtureB->node;
             mContacts->push_back(std::move(event));
         }
 
@@ -331,13 +360,13 @@ void PhysicsEngine::Step(std::vector<ContactEvent>* contacts)
             //DEBUG("EndContact");
             auto* A = contact->GetFixtureA();
             auto* B = contact->GetFixtureB();
-            const auto* IdA = base::SafeFind(mEngine.mFixtures, A);
-            const auto* IdB = base::SafeFind(mEngine.mFixtures, B);
-            ASSERT(IdA && IdB);
+            const auto* fixtureA = base::SafeFind(mEngine.mFixtures, A);
+            const auto* fixtureB = base::SafeFind(mEngine.mFixtures, B);
+            ASSERT(fixtureA && fixtureB);
             ContactEvent event;
             event.type = ContactEvent::Type::EndContact;
-            event.nodeA = mEngine.mNodes[*IdA].node;
-            event.nodeB = mEngine.mNodes[*IdB].node;
+            event.nodeA = fixtureA->node;
+            event.nodeB = fixtureB->node;
             mContacts->push_back(std::move(event));
         }
 
@@ -400,7 +429,7 @@ void PhysicsEngine::DeleteBody(const EntityNode& node)
 
 bool PhysicsEngine::ApplyImpulseToCenter(const std::string& id, const glm::vec2& impulse)
 {
-    if (auto* ptr = FindPhysicsNode(id))
+    if (auto* ptr = base::SafeFind(mNodes, id))
     {
         auto* body = ptr->world_body;
         if (body->GetType() != b2_dynamicBody)
@@ -426,7 +455,7 @@ bool PhysicsEngine::ApplyForceToCenter(const game::EntityNode& node, const glm::
 }
 bool PhysicsEngine::ApplyForceToCenter(const std::string& node, const glm::vec2& force)
 {
-    if (auto* ptr = FindPhysicsNode(node))
+    if (auto* ptr = base::SafeFind(mNodes, node))
     {
         auto* body = ptr->world_body;
         if (body->GetType() != b2_dynamicBody)
@@ -447,7 +476,7 @@ bool PhysicsEngine::SetLinearVelocity(const EntityNode& node, const glm::vec2& v
 }
 bool PhysicsEngine::SetLinearVelocity(const std::string& id, const glm::vec2& velocity)
 {
-    if (auto* ptr = FindPhysicsNode(id))
+    if (auto* ptr = base::SafeFind(mNodes, id))
     {
         auto* body = ptr->world_body;
         if (body->GetType() == b2_staticBody)
@@ -477,15 +506,11 @@ void PhysicsEngine::RayCast(const glm::vec2& start, const glm::vec2& end,
                                     const b2Vec2& point,
                                     const b2Vec2& normal, float fraction) override
         {
-            const auto* id = base::SafeFind(mEngine.mFixtures, fixture);
-            const auto it = mEngine.mNodes.find(*id);
-            ASSERT(it != mEngine.mNodes.end());
-            const auto& physics_node = it->second;
-
+            const auto* fixture_data = base::SafeFind(mEngine.mFixtures, fixture);
             RayCastResult result;
-            result.node = const_cast<game::EntityNode*>(physics_node.node);
-            result.point = ToGlm(point);
-            result.normal = ToGlm(normal);
+            result.node     = fixture_data->node;
+            result.point    = ToGlm(point);
+            result.normal   = ToGlm(normal);
             result.fraction = fraction;
 
             // ffs, the Box2D documentation on the semantics of the return value
@@ -528,6 +553,7 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
 {
     const b2Vec2 gravity(mGravity.x, mGravity.y);
 
+    mFixtures.clear();
     mNodes.clear();
     mWorld.reset();
     mWorld = std::make_unique<b2World>(gravity);
@@ -552,6 +578,7 @@ void PhysicsEngine::CreateWorld(const Entity& entity)
 {
     const b2Vec2 gravity(mGravity.x, mGravity.y);
 
+    mFixtures.clear();
     mNodes.clear();
     mWorld.reset();
     mWorld = std::make_unique<b2World>(gravity);
@@ -573,12 +600,11 @@ std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const game:
 }
 std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const std::string& node) const
 {
-    if (const auto* ptr = FindPhysicsNode(node))
+    if (const auto* ptr = base::SafeFind(mNodes, node))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, ToGlm(body->GetLinearVelocity()));
     }
-    WARN("No such physics node. [node='%1']", node);
     return std::make_tuple(false, glm::vec2(0.0f, 0.0f));
 }
 std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const game::EntityNode& node) const
@@ -587,12 +613,11 @@ std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const game::En
 }
 std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const std::string& node) const
 {
-    if (const auto* ptr = FindPhysicsNode(node))
+    if (const auto* ptr = base::SafeFind(mNodes, node))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, body->GetAngularVelocity());
     }
-    WARN("No such physics node. [node='%1']", node);
     return std::make_tuple(false, 0.0f);
 }
 std::tuple<bool, float> PhysicsEngine::FindMass(const game::EntityNode& node) const
@@ -601,12 +626,11 @@ std::tuple<bool, float> PhysicsEngine::FindMass(const game::EntityNode& node) co
 }
 std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
 {
-    if (const auto* ptr = FindPhysicsNode(node))
+    if (const auto* ptr = base::SafeFind(mNodes, node))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, body->GetMass());
     }
-    WARN("No such physics node. [node='%1']", node);
     return std::make_tuple(false, 0.0f);
 }
 
@@ -629,45 +653,66 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
     // than using the b2Draw way of visualizing the physics world.
     for (const auto& p : mNodes)
     {
-        const auto& physics_node = p.second;
-        const float angle = physics_node.world_body->GetAngle();
-        const b2Vec2& pos = physics_node.world_body->GetPosition();
+        const auto& rigid_body_data = p.second;
+        const auto* world_body = rigid_body_data.world_body;
+        const float angle = world_body->GetAngle();
+        const b2Vec2& pos = world_body->GetPosition();
 
         view.Push();
         view.Rotate(angle);
         view.Translate(pos.x, pos.y);
 
-        view.Push();
-        view.Scale(physics_node.world_extents);
-        view.Translate(physics_node.world_extents * -0.5f);
-        const auto* body = physics_node.node->GetRigidBody();
-        const auto shape = body->GetCollisionShape();
+        // visualize each fixture attached to the body.
+        const b2Fixture* fixture = world_body->GetFixtureList();
+        while (fixture)
+        {
+            const auto* fixture_data = base::SafeFind(mFixtures, (b2Fixture*)fixture);
+            game::detail::CollisionShape shape;
+            std::string polygon;
+            if (const auto* ptr = fixture_data->node->GetRigidBody()) {
+                shape   = ptr->GetCollisionShape();
+                polygon = ptr->GetPolygonShapeId();
+            } else if (const auto* ptr = fixture_data->node->GetFixture()) {
+                shape   = ptr->GetCollisionShape();
+                polygon = ptr->GetPolygonShapeId();
+            } else BUG("Unexpected fixture without node attachment.");
 
-        if (shape == RigidBodyItemClass::CollisionShape::Box)
-            painter.Draw(gfx::Rectangle(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::Circle)
-            painter.Draw(gfx::Circle(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
-            painter.Draw(gfx::SemiCircle(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
-            painter.Draw(gfx::RightTriangle(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
-            painter.Draw(gfx::IsoscelesTriangle(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
-            painter.Draw(gfx::Trapezoid(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
-            painter.Draw(gfx::Parallelogram(), view, mat);
-        else if (shape == RigidBodyItemClass::CollisionShape::Polygon) {
-            const auto& klass = mClassLib->FindDrawableClassById(physics_node.polygonId);
-            if (klass == nullptr) {
-                WARN("No polygon class found for node '%1'", physics_node.debug_name);
-            } else {
-                auto poly = gfx::CreateDrawableInstance(klass);
-                painter.Draw(*poly, view, mat);
-            }
-        } else BUG("!unhandled collision shape for debug drawing.");
+            view.Push();
+            view.Scale(fixture_data->shape_size);
+            view.Translate(fixture_data->shape_size * -0.5f);
+            view.Rotate(fixture_data->shape_rotation);
+            view.Translate(fixture_data->shape_offset);
 
-        b2JointEdge* joint_list = physics_node.world_body->GetJointList();
+            if (shape == RigidBodyItemClass::CollisionShape::Box)
+                painter.Draw(gfx::Rectangle(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::Circle)
+                painter.Draw(gfx::Circle(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
+                painter.Draw(gfx::SemiCircle(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
+                painter.Draw(gfx::RightTriangle(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+                painter.Draw(gfx::IsoscelesTriangle(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
+                painter.Draw(gfx::Trapezoid(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
+                painter.Draw(gfx::Parallelogram(), view, mat);
+            else if (shape == RigidBodyItemClass::CollisionShape::Polygon)
+            {
+                const auto& klass = mClassLib->FindDrawableClassById(polygon);
+                if (klass == nullptr) {
+                    WARN("No polygon class found for node '%1'", fixture_data->debug_name);
+                } else {
+                    auto poly = gfx::CreateDrawableInstance(klass);
+                    painter.Draw(*poly, view, mat);
+                }
+            } else BUG("Unhandled collision shape for debug drawing.");
+
+            view.Pop();
+            fixture = fixture->GetNext();
+        }
+
+        const b2JointEdge* joint_list = world_body->GetJointList();
         while (joint_list)
         {
             b2Joint* joint = joint_list->joint;
@@ -690,7 +735,6 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             joint_list = joint_list->next;
         }
 
-        view.Pop();
         view.Pop();
     }
     view.Pop();
@@ -727,8 +771,12 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                 world_body->SetFixedRotation(rigid_body->TestFlag(RigidBodyItem::Flags::DiscardRotation));
                 world_body->SetSleepingAllowed(rigid_body->TestFlag(RigidBodyItem::Flags::CanSleep));
                 b2Fixture* fixture_list_head = world_body->GetFixtureList();
-                while (fixture_list_head) {
-                    fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
+                while (fixture_list_head)
+                {
+                    auto* fixture_data = base::SafeFind(mEngine.mFixtures, fixture_list_head);
+                    if (auto* ptr = fixture_data->node->GetRigidBody())
+                        fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
+
                     fixture_list_head = fixture_list_head->GetNext();
                 }
             }
@@ -896,7 +944,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
             mTransform.Push(node->GetNodeTransform());
 
-            if (!node->HasRigidBody())
+            if (!node->HasRigidBody() && !node->HasFixture())
                 return;
 
             mTransform.Push(node->GetModelTransform());
@@ -915,12 +963,10 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
         Transform mTransform;
     };
     Visitor visitor(entity_to_world, entity, *this);
-
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 
-    Transform trans(entity_to_world);
-
+    Transform transform(entity_to_world);
     // create joints between physics bodies based on the
     // entity joint definitions
     for (size_t i=0; i<entity.GetNumJoints(); ++i)
@@ -928,8 +974,8 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
         const auto& joint = entity.GetJoint(i);
         const auto* src_node = joint.GetSrcNode();
         const auto* dst_node = joint.GetDstNode();
-        PhysicsNode* src_physics_node = FindPhysicsNode(src_node->GetId());
-        PhysicsNode* dst_physics_node = FindPhysicsNode(dst_node->GetId());
+        RigidBodyData* src_physics_node = base::SafeFind(mNodes, src_node->GetId());
+        RigidBodyData* dst_physics_node = base::SafeFind(mNodes, dst_node->GetId());
         ASSERT(src_physics_node && dst_physics_node);
 
         // the local anchor points are relative to the node itself.
@@ -937,12 +983,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
         const auto& dst_local_anchor = joint.GetDstAnchorPoint();
 
         // transform the anchor points into the physics world.
-        trans.Push(entity.FindNodeTransform(src_node));
-            const auto& src_world_anchor = trans.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
-        trans.Pop();
-        trans.Push(entity.FindNodeTransform(dst_node));
-            const auto& dst_world_anchor = trans.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
-        trans.Pop();
+        transform.Push(entity.FindNodeTransform(src_node));
+            const auto& src_world_anchor = transform.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+        transform.Pop();
+        transform.Push(entity.FindNodeTransform(dst_node));
+            const auto& dst_world_anchor = transform.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
+        transform.Pop();
         // distance between the anchor points is the same as the distance
         // between the anchor points in the physics world.
         const auto distance = glm::length(dst_world_anchor - src_world_anchor);
@@ -983,34 +1029,46 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
 void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity& entity, const EntityNode& node)
 {
-    const FBox box(model_to_world);
-    const auto& node_pos_in_world   = box.GetCenter();
-    const auto& node_size_in_world  = box.GetSize();
-    const auto& debug_name          = entity.GetName() + "/" + node.GetName();
+    FBox box(model_to_world);
+
+    const auto& debug_name = entity.GetName() + "/" + node.GetName();
 
     if (const auto* body = node.GetRigidBody())
     {
-        const auto& rigid_body_class = body->GetClass();
-        const auto& polygon_shape_id = rigid_body_class.GetPolygonShapeId();
-        auto collision_shape = CreateCollisionShape(node_size_in_world,
-            polygon_shape_id, debug_name, *mClassLib, body->GetCollisionShape());
+        const auto& node_world_position = box.GetCenter();
+        const auto& node_world_size     = box.GetSize();
+        const auto  node_world_rotation = box.GetRotation();
+        // this is the offset of the collision shape (fixture)
+        // relative to the center of the physics body. I.e. there's
+        // no offset and the collision shape is centered around the
+        // physics body.
+        const auto& shape_size   = node_world_size;
+        const auto& shape_offset = glm::vec2(0.0f, 0.0f);
+
+        auto collision_shape = CreateCollisionShape(*mClassLib,
+            body->GetPolygonShapeId(),
+            debug_name,
+            shape_size,
+            shape_offset,
+            0.0f,
+            body->GetCollisionShape());
         if (!collision_shape)
         {
-            WARN("Skipping physics body creation. [node='%1']", debug_name);
+            WARN("No collision shape. Skipping physics body creation. [node='%1']", debug_name);
             return;
         }
 
         // body def is used to define a new physics body in the world.
         b2BodyDef body_def;
-        if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Static)
+        if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
             body_def.type = b2_staticBody;
-        else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Dynamic)
+        else if (body->GetSimulation() == RigidBodyItemClass::Simulation::Dynamic)
             body_def.type = b2_dynamicBody;
-        else if (rigid_body_class.GetSimulation() == RigidBodyItemClass::Simulation::Kinematic)
+        else if (body->GetSimulation() == RigidBodyItemClass::Simulation::Kinematic)
             body_def.type = b2_kinematicBody;
 
-        body_def.position.Set(node_pos_in_world.x, node_pos_in_world.y);
-        body_def.angle          = box.GetRotation();
+        body_def.position.Set(node_world_position.x, node_world_position.y);
+        body_def.angle          = node_world_rotation;
         body_def.angularDamping = body->GetAngularDamping();
         body_def.linearDamping  = body->GetLinearDamping();
         body_def.enabled        = body->TestFlag(RigidBodyItem::Flags::Enabled);
@@ -1020,42 +1078,108 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         b2Body* world_body = mWorld->CreateBody(&body_def);
 
         // fixture attaches a collision shape to the body.
-        b2FixtureDef fixture;
-        fixture.shape       = collision_shape.get(); // cloned!?
-        fixture.density     = body->GetDensity();
-        fixture.friction    = body->GetFriction();
-        fixture.restitution = body->GetRestitution();
-        fixture.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
-        b2Fixture* fixture_ptr = world_body->CreateFixture(&fixture);
+        b2FixtureDef fixture_def = {};
+        fixture_def.shape       = collision_shape.get(); // cloned!?
+        fixture_def.density     = body->GetDensity();
+        fixture_def.friction    = body->GetFriction();
+        fixture_def.restitution = body->GetRestitution();
+        fixture_def.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
+        b2Fixture* fixture = world_body->CreateFixture(&fixture_def);
 
-        PhysicsNode physics_node;
-        physics_node.debug_name    = debug_name;
-        physics_node.world_body    = world_body;
-        physics_node.node          = const_cast<game::EntityNode*>(&node);
-        physics_node.world_extents = node_size_in_world;
-        physics_node.polygonId     = polygon_shape_id;
-        physics_node.flags         = body->GetFlags().value();
-        ASSERT(mNodes.find(node.GetId()) == mNodes.end());
-        mNodes[node.GetId()]   = physics_node;
-        mFixtures[fixture_ptr] = node.GetId();
+        FixtureData fixture_data;
+        fixture_data.node           = const_cast<game::EntityNode*>(&node);
+        fixture_data.debug_name     = debug_name;
+        fixture_data.shape_size     = shape_size;
+        fixture_data.shape_offset   = shape_offset;
+        fixture_data.shape_rotation = 0.0f;
+        mFixtures[fixture] = fixture_data;
+
+        RigidBodyData body_data;
+        body_data.debug_name    = debug_name;
+        body_data.world_body    = world_body;
+        body_data.node          = const_cast<game::EntityNode*>(&node);
+        body_data.world_extents = node_world_size;
+        body_data.flags         = body->GetFlags().value();
+        mNodes[node.GetId()]    = body_data;
         DEBUG("Created new physics body. [node='%1']", debug_name);
     }
-}
+    else if (const auto* fixture = node.GetFixture())
+    {
+        const auto* rigid_body_node = entity.FindNodeByClassId(fixture->GetRigidBodyNodeId());
 
-PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id)
-{
-    auto it = mNodes.find(id);
-    if (it == mNodes.end())
-        return nullptr;
-    return &it->second;
-}
+        // the fixture attaches to the rigid body of another  entity node.
+        if (auto* rigid_body_data = base::SafeFind(mNodes, rigid_body_node->GetId()))
+        {
+            b2Body* world_body = rigid_body_data->world_body;
+            const auto world_body_rotation = world_body->GetAngle();
+            const auto world_body_position = ToGlm(world_body->GetPosition());
 
-const PhysicsEngine::PhysicsNode* PhysicsEngine::FindPhysicsNode(const std::string& id) const
-{
-    auto it = mNodes.find(id);
-    if (it == mNodes.end())
-        return nullptr;
-    return &it->second;
+            // The incoming transformation matrix transforms vertices
+            // relative to entity node's local basis relative to the
+            // physics world basis. That means that the FBox represents
+            // the current node's box in the physics world. However,
+            // the fixture (collision shape) needs to be expressed
+            // relative to the physics rigid body.
+            Transform transform;
+            transform.Rotate(world_body_rotation);
+            transform.Translate(world_body_position);
+            // transformation for transforming vertices from the physics
+            // world to the rigid body.
+            const auto& world_to_body = glm::inverse(transform.GetAsMatrix());
+            // Transform the box (its vertices) from world to rigid body.
+            box.Transform(world_to_body);
+            // collision shape parameters relative the rigid body
+            const auto shape_size     = box.GetSize();
+            const auto shape_offset   = box.GetCenter();
+            const auto shape_rotation = box.GetRotation();
+
+            auto collision_shape = CreateCollisionShape(*mClassLib,
+                fixture->GetPolygonShapeId(),
+                debug_name,
+                shape_size,
+                shape_offset,
+                shape_rotation,
+                fixture->GetCollisionShape());
+            if (!collision_shape)
+            {
+                WARN("No Collision shape. Skipping fixture creation. [node='%1']", debug_name);
+                return;
+            }
+
+            const auto* rigid_body  = rigid_body_data->node->GetRigidBody();
+            const auto* density     = fixture->GetDensity();
+            const auto* restitution = fixture->GetRestitution();
+            const auto* friction    = fixture->GetFriction();
+
+            b2FixtureDef fixture_def {};
+            fixture_def.shape       = collision_shape.get();
+            fixture_def.density     = density     ? *density     : rigid_body->GetDensity();
+            fixture_def.friction    = friction    ? *friction    : rigid_body->GetFriction();
+            fixture_def.restitution = restitution ? *restitution : rigid_body->GetRestitution();
+            fixture_def.isSensor    = fixture->TestFlag(game::Fixture::Flags::Sensor);
+            b2Fixture* fixture_ptr  = world_body->CreateFixture(&fixture_def);
+
+            FixtureData fixture_data;
+            fixture_data.node           = const_cast<game::EntityNode*>(&node);
+            fixture_data.debug_name     = debug_name;
+            fixture_data.shape_size     = shape_size;
+            fixture_data.shape_offset   = shape_offset;
+            fixture_data.shape_rotation = shape_rotation;
+            mFixtures[fixture_ptr]      = fixture_data;
+            DEBUG("Attached new fixture to a rigid body. [body='%1', fixture='%2']",
+                  rigid_body_data->debug_name, node.GetName());
+        }
+        else
+        {
+            // todo: it's possible that we're visiting the nodes in the
+            // wrong order, i.e. visiting the fixture node first before
+            // visiting the rigid body node. in this case the rigid body
+            // would not yet exist. This needs to be fixed later.
+            WARN("Fixture refers to a physics body which isn't created yet. [entity='%1', body='%2', fixture='%3]",
+                entity.GetName(), rigid_body_node->GetName(), node.GetName());
+            return;
+        }
+    }
 }
 
 } // namespace
