@@ -135,6 +135,9 @@ namespace gfx
         // Set a (human-readable) name for the texture object.
         // Used for improved debug/log messages.
         virtual void SetName(const std::string& name) = 0;
+        // Set the group id used to identify a set of textures that
+        // conceptually belong together, for example to a sprite batch.
+        virtual void SetGroup(const std::string& name) = 0;
     protected:
     private:
     };

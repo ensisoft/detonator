@@ -102,6 +102,8 @@ public:
     { mTransient = on_off; }
     virtual void SetName(const std::string&) override
     {}
+    virtual void SetGroup(const std::string&) override
+    {}
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
