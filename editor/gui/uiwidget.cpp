@@ -27,6 +27,7 @@
 #  include <QStringList>
 #  include <base64/base64.h>
 #  include <nlohmann/json.hpp>
+#  include <boost/algorithm/string/erase.hpp>
 #include "warnpop.h"
 
 #include <cmath>
@@ -600,8 +601,25 @@ void UIWidget::Paste(const Clipboard& clipboard)
         return;
     }
 
+    // generate new IDs for the widgets and copy and
+    // update the style information if any.
     for (auto& w : nodes)
-        w->SetId(base::RandomString(10));
+    {
+        const auto old_id = w->GetId();
+        const auto new_id = base::RandomString(10);
+        w->SetId(new_id);
+
+        // gather the style information
+        auto style = mState.style->MakeStyleString(old_id);
+        if (style.empty())
+            continue;
+        // replace previous (old) widget ID with the new ID
+        boost::erase_all(style, old_id + "/");
+        // update widget with new style information
+        w->SetStyleString(style);
+        // update the styling
+        mState.style->ParseStyleString(new_id, style);
+    }
 
     auto* paste_root = nodes[0].get();
 
