@@ -39,7 +39,7 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgMaterial(QWidget* parent, const app::Workspace* workspace,
+        DlgMaterial(QWidget* parent, app::Workspace* workspace,
                     const QString& material);
         QString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
@@ -58,7 +58,7 @@ namespace gui
     private:
         QTimer mTimer;
         QElapsedTimer mElapsedTimer;
-        const app::Workspace* mWorkspace = nullptr;
+        app::Workspace* mWorkspace = nullptr;
         unsigned mScrollOffsetRow = 0;
         unsigned mNumVisibleRows = 0;
         std::vector<QString> mMaterialIds;
