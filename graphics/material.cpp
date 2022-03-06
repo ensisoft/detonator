@@ -434,7 +434,9 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
             const auto height = bitmap->GetHeight();
             const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
             texture->SetName(source->GetName());
+            texture->SetGroup(state.group_tag);
             texture->Upload(bitmap->GetDataPtr(), width, height, format);
+
             if (!content_hash)
                 content_hash = source->GetContentHash();
             texture->SetContentHash(content_hash);
@@ -1131,6 +1133,7 @@ void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& progr
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !mStatic;
     ts.current_time    = state.material_time;
+    ts.group_tag       = mClassId;
 
     TextureMap::BoundState binds;
     if (!mSprite.BindTextures(ts, device,  binds))
@@ -1929,6 +1932,7 @@ void CustomMaterialClass::ApplyDynamicState(State& state, Device& device, Progra
         TextureMap::BindingState ts;
         ts.dynamic_content = true; // todo: need static flag. for now use dynamic (which is slower) but always correct
         ts.current_time    = state.material_time;
+        ts.group_tag       = mClassId;
         TextureMap::BoundState binds;
         if (!map.second->BindTextures(ts, device, binds))
             return;

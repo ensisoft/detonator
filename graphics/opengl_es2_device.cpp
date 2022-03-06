@@ -850,11 +850,32 @@ public:
 
         if (flags & GCFlags::Textures)
         {
+            // use texture grouping to clean up (or not) groups of
+            // textures and not just individual textures.
+            // this is done because a sprite cycle could have any number
+            // of textures and not all of them are used all the time.
+            // yet all of them will be used and needed  to render the whole cycle
+            // and we should not clean away textures mid cycle.
+            std::unordered_map<std::string, size_t> group_last_use;
+            for (auto& pair : mTextures)
+            {
+                const auto& texture = pair.second;
+                const auto* impl  = static_cast<TextureImpl*>(texture.get());
+                const auto& group = impl->GetGroup();
+                if (group.empty())
+                    continue;
+                const auto last_used  = impl->GetLastUsedFrameNumber();
+                group_last_use[group] = std::max(group_last_use[group], last_used);
+            }
+
             for (auto it = mTextures.begin(); it != mTextures.end();)
             {
-                auto* impl = static_cast<TextureImpl*>(it->second.get());
-                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
-                const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
+                const auto* impl = static_cast<TextureImpl*>(it->second.get());
+                const auto& group = impl->GetGroup();
+                const auto group_last_used = group_last_use[group];
+                const auto this_last_used  = impl->GetLastUsedFrameNumber();
+                const auto last_used = std::max(group_last_used, this_last_used);
+                const auto is_expired = mFrameNumber - last_used >= max_num_idle_frames;
                 if (is_expired)
                 {
                     size_t unit = 0;
@@ -1296,6 +1317,8 @@ private:
         { mHash = hash; }
         virtual void SetName(const std::string& name) override
         { mName = name; }
+        virtual void SetGroup(const std::string& group) override
+        { mGroup = group; }
         virtual size_t GetContentHash() const override
         { return mHash; }
         virtual void SetTransient(bool on_off) override
@@ -1314,6 +1337,8 @@ private:
         { return mFrameNumber; }
         const std::string& GetName() const
         { return mName; }
+        const std::string& GetGroup() const
+        { return mGroup; }
     private:
         const OpenGLFunctions& mGL;
         TextureUnits& mTextureUnits;
@@ -1330,6 +1355,7 @@ private:
         mutable std::size_t mFrameNumber = 0;
         std::size_t mHash = 0;
         std::string mName;
+        std::string mGroup;
         bool mTransient = false;
         bool mHasMips   = false;
     };

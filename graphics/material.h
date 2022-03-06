@@ -491,6 +491,7 @@ namespace gfx
         struct BindingState {
             bool dynamic_content = false;
             double current_time  = 0.0f;
+            std::string group_tag;
         };
         // The result of binding textures.
         struct BoundState {
