@@ -1096,6 +1096,142 @@
       "resource_id": "pK3rRC7a5h",
       "resource_name": "Marker",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "TfojPSWQmJ",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Fixture Widget",
+      "nodes": [
+        {
+          "class": "mh4szTs1tr",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_DarkGreen",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 1.0822919607162476,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          }
+        },
+        {
+          "class": "SGHkKNqZ8G",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_DarkYellow",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "fixture": {
+            "flags": {
+              "Sensor": false
+            },
+            "polygon": "",
+            "rigid_body": "mh4szTs1tr",
+            "shape": "Box"
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Wing",
+          "position": {
+            "x": 250.0,
+            "y": 0.0
+          },
+          "rotation": -1.0521597862243652,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 23.940000534057617
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "SGHkKNqZ8G"
+                }
+              }
+            ],
+            "node": {
+              "id": "mh4szTs1tr"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "TfojPSWQmJ",
+      "resource_name": "Fixture Widget",
+      "script_file": ""
     }
   ],
   "scenes": [
@@ -4848,6 +4984,285 @@
       "resource_id": "2rSIWqteXS",
       "resource_name": "Phys Test 5",
       "script_file": "k4Stm2rLJJ"
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "f7S1HTDAgE",
+      "name": "Phys Test 6",
+      "nodes": [
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "EwbQBu1Og7",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "L3yLevzUNx",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "kjnp5yIhid",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 500.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "fg5TfY6Jpf",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -500.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "TfojPSWQmJ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "MRW3DfKmZY",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Thingy_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dgq5ss7Iy9",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "1E0kq7eiDR",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "User Ball_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -350.0,
+            "y": 150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "EwbQBu1Og7"
+            }
+          },
+          {
+            "node": {
+              "id": "L3yLevzUNx"
+            }
+          },
+          {
+            "node": {
+              "id": "kjnp5yIhid"
+            }
+          },
+          {
+            "node": {
+              "id": "fg5TfY6Jpf"
+            }
+          },
+          {
+            "node": {
+              "id": "MRW3DfKmZY"
+            }
+          },
+          {
+            "node": {
+              "id": "1E0kq7eiDR"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "f7S1HTDAgE",
+      "resource_name": "Phys Test 6",
+      "script_file": ""
     }
   ],
   "scripts": [
@@ -4880,6 +5295,47 @@
       "resource_id": "k4Stm2rLJJ",
       "resource_name": "Phys Test 5",
       "uri": "ws://lua/k4Stm2rLJJ.lua"
+    }
+  ],
+  "shapes": [
+    {
+      "draws": [
+        {
+          "count": 4,
+          "offset": 0,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "Kv8Ml9IlfK",
+      "resource_id": "Kv8Ml9IlfK",
+      "resource_name": "My Shape",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.34939759969711304,
+          "t": 0.24946846067905426,
+          "x": 0.34939759969711304,
+          "y": -0.24946846067905426
+        },
+        {
+          "s": 0.14953933656215668,
+          "t": 0.4493267238140106,
+          "x": 0.14953933656215668,
+          "y": -0.4493267238140106
+        },
+        {
+          "s": 0.14953933656215668,
+          "t": 0.6995038986206055,
+          "x": 0.14953933656215668,
+          "y": -0.6995038986206055
+        },
+        {
+          "s": 0.3997165262699127,
+          "t": 0.6995038986206055,
+          "x": 0.3997165262699127,
+          "y": -0.6995038986206055
+        }
+      ]
     }
   ]
 }
