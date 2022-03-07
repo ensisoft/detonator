@@ -979,6 +979,12 @@ void MainWindow::on_actionWindowPopOut_triggered()
     widget->show();
     widget->updateGeometry();
     window->updateGeometry();
+
+    QByteArray geometry;
+    if (mWorkspace->GetUserProperty(widget->GetId(), &geometry)) {
+        window->restoreGeometry(geometry);
+    }
+
     // seems that we need some delay (presumably to allow some
     // event processing to take place) on Windows before
     // calling the update geometry. Without this the window is  
@@ -1909,6 +1915,9 @@ void MainWindow::RefreshUI()
         if (child->ShouldPopIn())
         {
             MainWidget* widget = child->TakeWidget();
+            // save the child window geometry for later "pop out"
+            mWorkspace->SetUserProperty(widget->GetId(), child->saveGeometry());
+
             child->close();
             // careful about not fucking up the iteration of this loop
             // however we're going to add as a tab so the widget will
