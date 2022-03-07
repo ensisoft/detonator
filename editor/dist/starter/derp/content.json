@@ -167,7 +167,7 @@
           "drawable_item": {
             "drawable": "e1zlPY8HTm",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -203,7 +203,7 @@
           "drawable_item": {
             "drawable": "e1zlPY8HTm",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -338,7 +338,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -450,7 +450,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -578,6 +578,7 @@
       "fps": 10.0,
       "gamma": 1.0,
       "id": "Fj66N4PDUG",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -792,6 +793,7 @@
       "fps": 2.0,
       "gamma": 1.0,
       "id": "sUAHqYkAPp",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
