@@ -724,7 +724,8 @@ void InitDoc()
     DOC_TABLE_PROPERTY("string", "OS", "Name of the underlying operating system.<br>"
                                        "One of 'LINUX', 'WIN32' or 'WASM'");
     DOC_TABLE("game.Engine");
-    DOC_METHOD_1("void", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.",
+    DOC_METHOD_1("game.Scene", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.<br>"
+                                       "Returns a reference to the new scene for convenience.",
                  "game.SceneClass|string", "klass|name");
     // todo: resume/suspend
     DOC_METHOD_0("void", "EndPlay", "End the play of the current scene. Will invoke EndPlay callbacks and end game play cleanly.");
