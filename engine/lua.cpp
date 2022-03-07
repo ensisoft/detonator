@@ -502,22 +502,34 @@ void BindWidgetInterface(sol::usertype<Widget>& widget)
     widget["GetHash"]        = &Widget::GetHash;
     widget["GetSize"]        = &Widget::GetSize;
     widget["GetPosition"]    = &Widget::GetPosition;
-    widget["GetType"]        = [](const uik::Widget* widget) { return base::ToString(widget->GetType()); };
-    widget["SetName"]        = &uik::Widget::SetName;
-    widget["SetSize"]        = (void(Widget::*)(const uik::FSize&))&Widget::SetSize;
-    widget["SetPosition"]    = (void(Widget::*)(const uik::FPoint&))&Widget::SetPosition;
-    widget["TestFlag"]       = &TestFlag<uik::Widget>;
-    widget["SetFlag"]        = &SetFlag<uik::Widget>;
+    widget["GetType"]        = [](const Widget* widget) { return base::ToString(widget->GetType()); };
+    widget["SetName"]        = &Widget::SetName;
+    widget["TestFlag"]       = &TestFlag<Widget>;
+    widget["SetFlag"]        = &SetFlag<Widget>;
     widget["IsEnabled"]      = &Widget::IsEnabled;
     widget["IsVisible"]      = &Widget::IsVisible;
     widget["Grow"]           = &Widget::Grow;
     widget["Translate"]      = &Widget::Translate;
-    widget["SetVisible"]     = [](uik::Widget& widget, bool on_off) {
-        widget.SetFlag(uik::Widget::Flags::VisibleInGame, on_off);
+    widget["SetVisible"]     = [](Widget& widget, bool on_off) {
+        widget.SetFlag(Widget::Flags::VisibleInGame, on_off);
     };
-    widget["Enable"] = [](uik::Widget& widget, bool on_off) {
-        widget.SetFlag(uik::Widget::Flags::Enabled, on_off);
+    widget["Enable"] = [](Widget& widget, bool on_off) {
+        widget.SetFlag(Widget::Flags::Enabled, on_off);
     };
+    widget["SetSize"]        = sol::overload(
+        [](Widget& widget, const uik::FSize& size)  {
+            widget.SetSize(size);
+        },
+        [](Widget& widget, float width, float height) {
+            widget.SetSize(width, height);
+        });
+    widget["SetPosition"] = sol::overload(
+        [](Widget& widget, const uik::FPoint& point) {
+            widget.SetPosition(point);
+        },
+        [](Widget& widget, float x, float y) {
+            widget.SetPosition(x, y);
+        });
 }
 
 // the problem with using a std random number generation is that
