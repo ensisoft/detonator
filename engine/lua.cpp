@@ -220,16 +220,20 @@ void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
             if (!klass)
                 throw GameError("Nil scene class");
             PlayAction play;
-            play.klass = klass;
-            self.PushAction(play);
+            play.scene = game::CreateSceneInstance(klass);
+            auto* ret = play.scene.get();
+            self.PushAction(std::move(play));
+            return ret;
         },
         [](LuaGame& self, std::string name) {
-            auto handle = self.GetClassLib()->FindSceneClassByName(name);
-            if (!handle)
+            auto klass = self.GetClassLib()->FindSceneClassByName(name);
+            if (!klass)
                 throw GameError("No such scene class: " + name);
             PlayAction play;
-            play.klass = handle;
-            self.PushAction(play);
+            play.scene = game::CreateSceneInstance(klass);
+            auto* ret = play.scene.get();
+            self.PushAction(std::move(play));
+            return ret;
         });
 
     engine["Suspend"] = [](LuaGame& self) {
@@ -883,7 +887,7 @@ bool LuaGame::GetNextAction(Action* out)
 {
     if (mActionQueue.empty())
         return false;
-    *out = mActionQueue.front();
+    *out = std::move(mActionQueue.front());
     mActionQueue.pop();
     return true;
 }
@@ -1242,7 +1246,7 @@ bool ScriptEngine::GetNextAction(Action* out)
 {
     if (mActionQueue.empty())
         return false;
-    *out = mActionQueue.front();
+    *out = std::move(mActionQueue.front());
     mActionQueue.pop();
     return true;
 }

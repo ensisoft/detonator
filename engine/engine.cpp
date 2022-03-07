@@ -790,9 +790,9 @@ private:
             ui->Style(mUIPainter);
         }
     }
-    void OnAction(const engine::PlayAction& action)
+    void OnAction(engine::PlayAction& action)
     {
-        mScene = game::CreateSceneInstance(action.klass);
+        mScene = std::move(action.scene);
         if (mEnablePhysics)
         {
             mPhysics.DeleteAll();
@@ -970,7 +970,7 @@ private:
         engine::Action action;
         while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
         {
-            std::visit([this](const auto& variant_value) {
+            std::visit([this](auto& variant_value) {
                 this->OnAction(variant_value);
             }, action);
             // action delay can be changed by the delay action.

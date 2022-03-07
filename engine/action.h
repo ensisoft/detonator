@@ -49,7 +49,7 @@ namespace engine
     struct PlayAction {
         // handle of the scene class object for the scene instance
         // creation. This may not be nullptr.
-        ClassHandle<game::SceneClass> klass;
+        std::unique_ptr<game::Scene> scene;
     };
 
     // Suspend the game play. Suspending keeps the current scene
