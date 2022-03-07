@@ -759,7 +759,7 @@ void InitDoc()
                                          "Returns a reference to the window that was opened so it's possible to use the<br>"
                                          "returned window object to query for widgets etc. and set their initial values conveniently.",
                  "uik.Window|string", "window|name");
-    DOC_METHOD_0("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.");
+    DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.", "int", "exit_code");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
     DOC_METHOD_1("void", "ShowDeveloperUI", "Show or hide the developer UI when supported by the host app/platform.", "bool", "show");
     DOC_METHOD_1("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
