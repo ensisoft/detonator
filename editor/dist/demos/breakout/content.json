@@ -108,7 +108,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -414,7 +414,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -519,7 +519,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -612,7 +612,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -711,7 +711,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -810,7 +810,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -909,7 +909,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1008,7 +1008,7 @@
           "drawable_item": {
             "drawable": "_round_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1107,7 +1107,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1143,7 +1143,7 @@
           "drawable_item": {
             "drawable": "_isosceles_triangle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1219,7 +1219,7 @@
           "drawable_item": {
             "drawable": "_isosceles_triangle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1255,7 +1255,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1648,6 +1648,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1695,6 +1696,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1742,6 +1744,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1789,6 +1792,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1836,6 +1840,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1883,6 +1888,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1930,6 +1936,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -1977,6 +1984,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -2024,6 +2032,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -2081,6 +2090,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -2138,6 +2148,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0
@@ -2195,6 +2206,7 @@
       },
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
       "texture_scale": {
         "x": 1.0,
         "y": 1.0

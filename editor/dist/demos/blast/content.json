@@ -380,7 +380,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -416,7 +416,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -452,7 +452,7 @@
           "drawable_item": {
             "drawable": "_trapezoid",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -488,7 +488,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -805,7 +805,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -887,7 +887,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -943,7 +943,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -979,7 +979,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1015,7 +1015,7 @@
           "drawable_item": {
             "drawable": "_capsule",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1051,7 +1051,7 @@
           "drawable_item": {
             "drawable": "_capsule",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1087,7 +1087,7 @@
           "drawable_item": {
             "drawable": "pWeN1jfBre",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1123,7 +1123,7 @@
           "drawable_item": {
             "drawable": "hzaCI0I5sF",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1355,7 +1355,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1423,7 +1423,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1532,7 +1532,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1600,7 +1600,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1668,7 +1668,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1750,7 +1750,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1841,7 +1841,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1877,7 +1877,7 @@
           "drawable_item": {
             "drawable": "8exJylNDfi",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": false,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2241,7 +2241,7 @@
           "drawable_item": {
             "drawable": "XKQ1uRt5ij",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2309,7 +2309,7 @@
           "drawable_item": {
             "drawable": "_circle",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2425,7 +2425,7 @@
           "drawable_item": {
             "drawable": "9o7zbhlIlp",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2493,7 +2493,7 @@
           "drawable_item": {
             "drawable": "_rect",
             "flags": {
-              "FlipVertically": false,
+              "FlipHorizontally": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2552,6 +2552,7 @@
       "fps": 5.0,
       "gamma": 1.0,
       "id": "rrmZfWe97e",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -2814,6 +2815,7 @@
       "fps": 30.0,
       "gamma": 1.0,
       "id": "TNyQSW6bB6",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -3124,6 +3126,7 @@
       "fps": 30.0,
       "gamma": 1.0,
       "id": "1lANs9A0yJ",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -3482,6 +3485,7 @@
       "fps": 1.0,
       "gamma": 1.0,
       "id": "vg5yQskPIv",
+      "looping": true,
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
