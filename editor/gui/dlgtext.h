@@ -26,6 +26,7 @@
 #include "graphics/text.h"
 #include "graphics/painter.h"
 #include "graphics/text.h"
+#include "graphics/material.h"
 
 namespace gui
 {
@@ -48,6 +49,8 @@ namespace gui
         gfx::TextBuffer& mText;
         QTimer mTimer;
         bool mAdjustOnce = false;
+        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::unique_ptr<gfx::Material> mMaterial;
     };
 
 } // namespace
