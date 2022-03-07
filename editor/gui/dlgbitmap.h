@@ -55,6 +55,8 @@ namespace gui
     private:
         QTimer mTimer;
         std::unique_ptr<gfx::IBitmapGenerator> mGenerator;
+        std::unique_ptr<gfx::Material> mMaterial;
+        std::shared_ptr<gfx::TextureMap2DClass> mClass;
         gfx::NoiseBitmapGenerator* mNoise = nullptr;
     };
 } // namespace

@@ -134,12 +134,17 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         SetValue(mUI.bufferHeight, buffer_height);
         mText.SetBufferSize(buffer_width, buffer_height);
     }
-
-    static gfx::TextureMap2DClass klass;
-    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    klass.SetBaseColor(gfx::Color::White);
-    klass.SetTexture(gfx::CreateTextureFromText(mText));
-    gfx::MaterialClassInst material(klass);
+    if (mMaterial == nullptr)
+    {
+        mClass = std::make_shared<gfx::TextureMap2DClass>();
+        mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        mClass->SetBaseColor(gfx::Color::White);
+        mClass->SetTexture(gfx::CreateTextureFromText(mText));
+        mMaterial = gfx::CreateMaterialInstance(mClass);
+    }
+    auto* source = mClass->AsTexture()->GetTextureSource();
+    auto* bitmap = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source);
+    bitmap->SetTextBuffer(mText);
 
     if ((bool)GetValue(mUI.chkScale))
     {
@@ -149,7 +154,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         const auto render_height = buffer_height * scale;
         const auto x = (widget_width - render_width) / 2.0f;
         const auto y = (widget_height - render_height) / 2.0f;
-        gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), material);
+        gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), *mMaterial);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
                              gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }
@@ -157,7 +162,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     {
         const auto x = (widget_width - buffer_width) / 2;
         const auto y = (widget_height - buffer_height) / 2;
-        gfx::FillRect(painter, gfx::FRect(x, y, buffer_width, buffer_height), material);
+        gfx::FillRect(painter, gfx::FRect(x, y, buffer_width, buffer_height), *mMaterial);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, buffer_width, buffer_height),
                              gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }

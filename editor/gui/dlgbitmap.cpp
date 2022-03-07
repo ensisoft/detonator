@@ -185,11 +185,17 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
     mNoise->SetWidth(bmp_width);
     mNoise->SetHeight(bmp_height);
 
-    gfx::TextureMap2DClass klass;
-    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    klass.SetBaseColor(gfx::Color::White);
-    klass.SetTexture(gfx::GenerateNoiseTexture(*mNoise));
-    auto material = gfx::CreateMaterialInstance(std::move(klass));
+    if (mMaterial == nullptr)
+    {
+        mClass = std::make_shared<gfx::TextureMap2DClass>();
+        mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        mClass->SetBaseColor(gfx::Color::White);
+        mClass->SetTexture(gfx::GenerateNoiseTexture(*mNoise));
+        mMaterial = gfx::CreateMaterialInstance(mClass);
+    }
+    auto* source = mClass->AsTexture()->GetTextureSource();
+    auto* bitmap = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source);
+    bitmap->SetGenerator(mGenerator->Clone());
 
     if ((bool)GetValue(mUI.chkScale))
     {
@@ -199,7 +205,7 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
         const auto render_height = bmp_height * scale;
         const auto x = (widget_width - render_width) / 2.0f;
         const auto y = (widget_height - render_height) / 2.0f;
-        gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), *material);
+        gfx::FillRect(painter, gfx::FRect(x, y, render_width, render_height), *mMaterial);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, render_width, render_height),
                              gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
     }
@@ -207,7 +213,7 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
     {
         const auto x = (widget_width - bmp_width) / 2;
         const auto y = (widget_height - bmp_height) / 2;
-        gfx::FillRect(painter, gfx::FRect(x, y, bmp_width, bmp_height), *material);
+        gfx::FillRect(painter, gfx::FRect(x, y, bmp_width, bmp_height), *mMaterial);
     }
 
 }
