@@ -646,8 +646,16 @@ void InitDoc()
     DOC_METHOD_0("string", "GetType", "Get the dynamic name of the widget object type.");
     DOC_METHOD_1("void", "SetName", "Set the widget name.", "string", "name");
     DOC_METHOD_1("void", "SetSize", "Set the widget size.", "base.FSize", "size");
+    DOC_METHOD_2("void", "SetSize", "Set the widget size.", "float", "width", "float", "height");
     DOC_METHOD_1("void", "SetPosition", "Set the widget position relative to its parent.", "base.FPoint", "position");
+    DOC_METHOD_2("void", "SetPosition", "Set the widget position relative to its parent.", "float", "x", "float", "y");
     DOC_METHOD_1("bool", "TestFlag", "Test for a widget flag.", "string", "flag_name");
+    DOC_METHOD_0("bool", "IsEnabled", "Check whether the widget is enabled or not.");
+    DOC_METHOD_0("bool", "IsVisible", "Check whether the widget is visible or not.");
+    DOC_METHOD_2("void", "Grow", "Grow the widget in size.", "float", "dw", "float", "dh");
+    DOC_METHOD_2("void", "Translate", "Translate the widget relative to it's current position.", "float", "dx", "float", "dy");
+    DOC_METHOD_1("void", "SetVisible", "Change widget visibility.", "bool", "visible");
+    DOC_METHOD_1("void", "Enable", "Enable widget.", "bool", "enable");
     DOC_METHOD_0("uik.Label", "AsLabel", "Cast the widget to Label.");
     DOC_METHOD_0("uik.PushButton", "AsPushButton", "Cast the widget to PushButton.");
     DOC_METHOD_0("uik.CheckBox", "AsCheckBox", "Cast the widget to CheckBox.");
