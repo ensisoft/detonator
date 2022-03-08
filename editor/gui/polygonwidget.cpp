@@ -139,6 +139,13 @@ ShapeWidget::~ShapeWidget()
     DEBUG("Destroy PolygonWidget");
 }
 
+void ShapeWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.cmbGrid,     settings.grid);
+    SetValue(mUI.chkSnap,     settings.snap_to_grid);
+    SetValue(mUI.chkShowGrid, settings.show_grid);
+}
+
 void ShapeWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

@@ -35,12 +35,17 @@
 namespace gui
 {
 
-DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Settings& editor)
+DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
+    TextEditor::Settings& editor,
+    MainWidget::UISettings& widget)
     : QDialog(parent)
     , mSettings(settings)
     , mEditorSettings(editor)
+    , mWidgetSettings(widget)
 {
     mUI.setupUi(this);
+    PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
+
     SetUIValue(mUI.edtImageEditorExecutable, settings.image_editor_executable);
     SetUIValue(mUI.edtImageEditorArguments, settings.image_editor_arguments);
     SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
@@ -54,6 +59,13 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Set
     SetUIValue(mUI.edtPythonExecutable, settings.python_executable);
     SetUIValue(mUI.edtEmscriptenPath, settings.emsdk);
     SetUIValue(mUI.clearColor, settings.clear_color);
+
+    SetUIValue(mUI.cmbGrid,         widget.grid);
+    SetUIValue(mUI.zoom,            widget.zoom);
+    SetUIValue(mUI.chkShowGrid,     widget.show_grid);
+    SetUIValue(mUI.chkShowOrigin,   widget.show_origin);
+    SetUIValue(mUI.chkShowViewport, widget.show_viewport);
+    SetUIValue(mUI.chkSnapToGrid,   widget.snap_to_grid);
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -107,6 +119,14 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
     GetUIValue(mUI.editorFontSize,              &mEditorSettings.font_size);
     mEditorSettings.font_description = mUI.editorFont->currentFont().toString();
+
+    GetUIValue(mUI.cmbGrid,         &mWidgetSettings.grid);
+    GetUIValue(mUI.zoom,            &mWidgetSettings.zoom);
+    GetUIValue(mUI.chkShowGrid,     &mWidgetSettings.show_grid);
+    GetUIValue(mUI.chkShowOrigin,   &mWidgetSettings.show_origin);
+    GetUIValue(mUI.chkShowViewport, &mWidgetSettings.show_viewport);
+    GetUIValue(mUI.chkSnapToGrid,   &mWidgetSettings.snap_to_grid);
+
     accept();
 }
 void DlgSettings::on_btnCancel_clicked()

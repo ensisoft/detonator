@@ -55,6 +55,7 @@ namespace gui
         EntityWidget(app::Workspace* workspace, const app::Resource& resource);
        ~EntityWidget();
 
+        virtual void Initialize(const UISettings& settings) override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;

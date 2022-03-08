@@ -36,6 +36,7 @@
 #include "editor/app/ipc.h"
 #include "editor/gui/appsettings.h"
 #include "editor/gui/clipboard.h"
+#include "editor/gui/mainwidget.h"
 
 namespace gui
 {
@@ -176,10 +177,11 @@ namespace gui
         void CloseWorkspace();
         void EditResources(bool open_new_window);
         bool FocusWidget(const QString& id);
-        ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         void ShowHelpWidget();
         void ImportFiles(const QStringList& files);
         void UpdateStats();
+        ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
+        MainWidget* MakeWidget(app::Resource::Type type, const app::Resource* resource = nullptr);
 
     private:
         virtual bool event(QEvent* event)  override;
@@ -230,6 +232,8 @@ namespace gui
         app::EventLogProxy mEventLog;
         // the application's main clipboard.
         Clipboard mClipboard;
+
+        MainWidget::UISettings mUISettings;
     };
 
 } // namespace
