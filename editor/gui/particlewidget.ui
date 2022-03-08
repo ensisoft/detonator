@@ -406,19 +406,12 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_23">
           <property name="text">
-           <string>Gravity</string>
+           <string>Gravity (x,y)</string>
           </property>
          </widget>
         </item>
         <item row="4" column="1" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_31">
-            <property name="text">
-             <string>X</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QDoubleSpinBox" name="gravityX">
             <property name="minimum">
@@ -435,13 +428,6 @@
             </property>
             <property name="value">
              <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_32">
-            <property name="text">
-             <string>Y</string>
             </property>
            </widget>
           </item>
@@ -497,7 +483,7 @@
           <item>
            <widget class="QDoubleSpinBox" name="numParticles">
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>10000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -660,6 +646,9 @@
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="minVelocity">
+            <property name="suffix">
+             <string> u/s</string>
+            </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
             </property>
@@ -670,6 +659,9 @@
           </item>
           <item row="0" column="2">
            <widget class="QDoubleSpinBox" name="maxVelocity">
+            <property name="suffix">
+             <string> u/s</string>
+            </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
             </property>
@@ -683,6 +675,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="minLifetime">
+            <property name="suffix">
+             <string> s</string>
+            </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
             </property>
@@ -696,6 +691,9 @@
           </item>
           <item row="1" column="2">
            <widget class="QDoubleSpinBox" name="maxLifetime">
+            <property name="suffix">
+             <string> s</string>
+            </property>
             <property name="maximum">
              <double>10000.000000000000000</double>
             </property>
@@ -709,6 +707,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QSpinBox" name="minPointsize">
+            <property name="suffix">
+             <string> u</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -720,12 +721,15 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Velocity (u/s)</string>
+             <string>Velocity</string>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
            <widget class="QSpinBox" name="maxPointsize">
+            <property name="suffix">
+             <string> u</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -740,19 +744,22 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Lifetime (s)</string>
+             <string>Lifetime</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Pointsize (px)</string>
+             <string>Pointsize</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="minAlpha">
+            <property name="suffix">
+             <string> %</string>
+            </property>
             <property name="maximum">
              <double>1.000000000000000</double>
             </property>
@@ -770,12 +777,15 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_24">
             <property name="text">
-             <string>Alpha (%)</string>
+             <string>Alpha</string>
             </property>
            </widget>
           </item>
           <item row="3" column="2">
            <widget class="QDoubleSpinBox" name="maxAlpha">
+            <property name="suffix">
+             <string> %</string>
+            </property>
             <property name="maximum">
              <double>1.000000000000000</double>
             </property>

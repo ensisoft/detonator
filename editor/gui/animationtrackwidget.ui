@@ -230,6 +230,12 @@
             </item>
             <item row="2" column="2">
              <widget class="QPushButton" name="btnViewPlus90">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>+ 90°</string>
               </property>
@@ -237,6 +243,12 @@
             </item>
             <item row="2" column="3">
              <widget class="QPushButton" name="btnViewMinus90">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>- 90°</string>
               </property>
@@ -251,10 +263,10 @@
                </sizepolicy>
               </property>
               <property name="minimum">
-               <double>-1000.000000000000000</double>
+               <double>-10000.000000000000000</double>
               </property>
               <property name="maximum">
-               <double>1000.000000000000000</double>
+               <double>10000.000000000000000</double>
               </property>
               <property name="stepType">
                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -289,10 +301,10 @@
                </sizepolicy>
               </property>
               <property name="minimum">
-               <double>-1000.000000000000000</double>
+               <double>-10000.000000000000000</double>
               </property>
               <property name="maximum">
-               <double>1000.000000000000000</double>
+               <double>10000.000000000000000</double>
               </property>
               <property name="stepType">
                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -1053,6 +1065,9 @@
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="2" column="1">
              <widget class="QDoubleSpinBox" name="kinematicEndVeloZ">
+              <property name="suffix">
+               <string> rad/s</string>
+              </property>
               <property name="minimum">
                <double>-1000.000000000000000</double>
               </property>
@@ -1084,6 +1099,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QDoubleSpinBox" name="kinematicEndVeloX">
+                <property name="suffix">
+                 <string> m/s</string>
+                </property>
                 <property name="minimum">
                  <double>-1000.000000000000000</double>
                 </property>
@@ -1103,6 +1121,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="kinematicEndVeloY">
+                <property name="suffix">
+                 <string> m/s</string>
+                </property>
                 <property name="minimum">
                  <double>-1000.000000000000000</double>
                 </property>
@@ -1125,14 +1146,14 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_7">
               <property name="text">
-               <string>Linear velocity (m/2)</string>
+               <string>Linear velocity</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Angular velocity (rad/s)</string>
+               <string>Angular velocity</string>
               </property>
              </widget>
             </item>

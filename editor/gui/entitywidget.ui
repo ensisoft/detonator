@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1441</width>
+    <width>1466</width>
     <height>1056</height>
    </rect>
   </property>
@@ -319,7 +319,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="tabBarAutoHide">
         <bool>true</bool>
@@ -704,6 +704,12 @@
           </item>
           <item row="2" column="2">
            <widget class="QPushButton" name="btnViewPlus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>+ 90°</string>
             </property>
@@ -711,6 +717,12 @@
           </item>
           <item row="2" column="3">
            <widget class="QPushButton" name="btnViewMinus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>- 90°</string>
             </property>
@@ -725,10 +737,10 @@
              </sizepolicy>
             </property>
             <property name="minimum">
-             <double>-1000.000000000000000</double>
+             <double>-10000.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>10000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -763,10 +775,10 @@
              </sizepolicy>
             </property>
             <property name="minimum">
-             <double>-1000.000000000000000</double>
+             <double>-10000.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>10000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
