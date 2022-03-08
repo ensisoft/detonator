@@ -179,7 +179,7 @@
                <bool>false</bool>
               </attribute>
               <attribute name="verticalHeaderDefaultSectionSize">
-               <number>21</number>
+               <number>24</number>
               </attribute>
              </widget>
             </item>
@@ -284,8 +284,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>309</width>
-                 <height>66</height>
+                 <width>306</width>
+                 <height>70</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -466,8 +466,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>144</width>
-                 <height>66</height>
+                 <width>143</width>
+                 <height>70</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -533,7 +533,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>332</width>
+                 <width>335</width>
                  <height>72</height>
                 </rect>
                </property>
@@ -907,6 +907,12 @@
           </item>
           <item row="2" column="2">
            <widget class="QPushButton" name="btnViewPlus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>+ 90°</string>
             </property>
@@ -914,6 +920,12 @@
           </item>
           <item row="2" column="3">
            <widget class="QPushButton" name="btnViewMinus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>- 90°</string>
             </property>
@@ -927,11 +939,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
             <property name="minimum">
-             <double>-1000.000000000000000</double>
+             <double>-100000.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>100000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -965,11 +980,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
             <property name="minimum">
-             <double>-1000.000000000000000</double>
+             <double>-100000.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>100000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
