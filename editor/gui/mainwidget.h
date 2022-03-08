@@ -22,6 +22,8 @@
 #  include <QtWidgets>
 #include "warnpop.h"
 
+#include "editor/gui/drawing.h"
+
 namespace gui
 {
     class Settings;
@@ -51,6 +53,22 @@ namespace gui
             CanReloadTextures = 0x40,
             CanReloadShaders  = 0x80
         };
+
+        using GridDensity = gui::GridDensity;
+
+        // Initial widget settings.
+        struct UISettings {
+            bool snap_to_grid  = true;
+            bool show_viewport = true;
+            bool show_origin   = true;
+            bool show_grid     = true;
+            GridDensity grid   = GridDensity::Grid50x50;
+            float zoom = 1.0f;
+        };
+
+        // Initialize the widget default UI settings.
+        virtual void Initialize(const UISettings& settings)
+        {}
 
         // Returns whether the widget does accelerated rendering and needs to
         // run in an accelerated "game style" loop.

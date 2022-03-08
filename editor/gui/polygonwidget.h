@@ -41,6 +41,7 @@ namespace gui
         ShapeWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ShapeWidget();
 
+        virtual void Initialize(const UISettings& settings) override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;

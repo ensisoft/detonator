@@ -157,6 +157,13 @@ ParticleEditorWidget::~ParticleEditorWidget()
     DEBUG("Destroy ParticleEdtiorWidget");
 }
 
+void ParticleEditorWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.zoom,        settings.zoom);
+    SetValue(mUI.cmbGrid,     settings.grid);
+    SetValue(mUI.chkShowGrid, settings.show_grid);
+}
+
 void ParticleEditorWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

@@ -500,6 +500,16 @@ EntityWidget::~EntityWidget()
     DeleteEntityWidget(this);
 }
 
+void EntityWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.chkSnap,         settings.snap_to_grid);
+    SetValue(mUI.chkShowViewport, settings.show_viewport);
+    SetValue(mUI.chkShowOrigin,   settings.show_origin);
+    SetValue(mUI.chkShowGrid,     settings.show_grid);
+    SetValue(mUI.cmbGrid,         settings.grid);
+    SetValue(mUI.zoom,            settings.zoom);
+}
+
 void EntityWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

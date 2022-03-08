@@ -25,6 +25,7 @@
 
 #include "editor/gui/appsettings.h"
 #include "editor/gui/codewidget.h"
+#include "editor/gui/mainwidget.h"
 
 namespace gui
 {
@@ -32,8 +33,9 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgSettings(QWidget* parent, AppSettings& settings, TextEditor::Settings& editor);
-
+        DlgSettings(QWidget* parent, AppSettings& settings,
+                    TextEditor::Settings& editor,
+                    MainWidget::UISettings& widget);
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
@@ -50,6 +52,7 @@ namespace gui
     private:
         AppSettings& mSettings;
         TextEditor::Settings& mEditorSettings;
+        MainWidget::UISettings& mWidgetSettings;
     };
 } // namespace
 

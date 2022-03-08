@@ -54,6 +54,7 @@ namespace gui
         SceneWidget(app::Workspace* workspace, const app::Resource& resource);
        ~SceneWidget();
 
+        virtual void Initialize(const UISettings& settings);
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;

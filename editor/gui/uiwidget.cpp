@@ -383,6 +383,15 @@ UIWidget::~UIWidget()
     DEBUG("Destroy UIWidget");
 }
 
+void UIWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.zoom,          settings.zoom);
+    SetValue(mUI.cmbGrid,       settings.grid);
+    SetValue(mUI.chkSnap,       settings.snap_to_grid);
+    SetValue(mUI.chkShowOrigin, settings.show_origin);
+    SetValue(mUI.chkShowGrid,   settings.show_grid);
+}
+
 void UIWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

@@ -135,14 +135,6 @@ gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspac
     return nullptr;
 }
 
-gui::MainWidget* MakeWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
-{
-    auto* widget = CreateWidget(type, workspace, resource);
-    if (resource)
-        widget->SetId(resource->GetId());
-    return widget;
-}
-
 struct ExternalApplicationArgs {
     QString executable_binary;
     QString executable_args;
@@ -272,6 +264,12 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "python_executable", &mSettings.python_executable);
     settings.GetValue("Settings", "emsdk", &mSettings.emsdk);
     settings.GetValue("Settings", "clear_color", &mSettings.clear_color);
+    settings.GetValue("Settings", "default_grid", (unsigned*)&mUISettings.grid);
+    settings.GetValue("Settings", "default_zoom", &mUISettings.zoom);
+    settings.GetValue("Settings", "snap_to_grid", &mUISettings.snap_to_grid);
+    settings.GetValue("Settings", "show_viewport", &mUISettings.show_viewport);
+    settings.GetValue("Settings", "show_origin", &mUISettings.show_origin);
+    settings.GetValue("Settings", "show_grid", &mUISettings.show_grid);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
 
     TextEditor::Settings editor_settings;
@@ -1436,7 +1434,7 @@ void MainWindow::on_actionSettings_triggered()
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
 
-    DlgSettings dlg(this, mSettings, editor_settings);
+    DlgSettings dlg(this, mSettings, editor_settings, mUISettings);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1616,7 +1614,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     if (!FocusWidget(resource->GetId()))
     {
         const auto new_window = mSettings.default_open_win_or_tab == "Window";
-        ShowWidget(MakeWidget(resource->GetType(), mWorkspace.get(), resource), new_window);
+        ShowWidget(MakeWidget(resource->GetType(), resource), new_window);
     }
 }
 
@@ -1630,7 +1628,7 @@ void MainWindow::on_actionNewResource_triggered()
         return;
 
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(dlg.GetType(), mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(dlg.GetType() ), new_window);
 }
 
 void MainWindow::on_actionProjectSettings_triggered()
@@ -1824,43 +1822,43 @@ void MainWindow::on_btnDerp_clicked()
 void MainWindow::on_btnMaterial_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Material, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::Material), new_window);
 }
 void MainWindow::on_btnParticle_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::ParticleSystem, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::ParticleSystem), new_window);
 }
 void MainWindow::on_btnShape_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Shape, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::Shape), new_window);
 }
 void MainWindow::on_btnEntity_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Entity, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::Entity), new_window);
 }
 void MainWindow::on_btnScene_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Scene, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::Scene), new_window);
 }
 void MainWindow::on_btnScript_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Script, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::Script), new_window);
 }
 void MainWindow::on_btnUI_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::UI, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::UI), new_window);
 }
 
 void MainWindow::on_btnAudio_clicked()
 {
     const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::AudioGraph, mWorkspace.get()), new_window);
+    ShowWidget(MakeWidget(app::Resource::Type::AudioGraph), new_window);
 }
 
 void MainWindow::RefreshUI()
@@ -2287,6 +2285,12 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "python_executable", mSettings.python_executable);
     settings.SetValue("Settings", "emsdk", mSettings.emsdk);
     settings.SetValue("Settings", "clear_color", mSettings.clear_color);
+    settings.SetValue("Settings", "default_grid", (unsigned)mUISettings.grid);
+    settings.SetValue("Settings", "default_zoom", mUISettings.zoom);
+    settings.SetValue("Settings", "snap_to_grid", mUISettings.snap_to_grid);
+    settings.SetValue("Settings", "show_viewport", mUISettings.show_viewport);
+    settings.SetValue("Settings", "show_origin", mUISettings.show_origin);
+    settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
 
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
@@ -2366,6 +2370,20 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     return nullptr;
 }
 
+MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource* resource)
+{
+    auto* widget = CreateWidget(type, mWorkspace.get(), resource);
+    if (resource)
+    {
+        widget->SetId(resource->GetId());
+    }
+    else
+    {
+        widget->Initialize(mUISettings);
+    }
+    return widget;
+}
+
 void MainWindow::ShowHelpWidget()
 {
     // todo: could build the demo setup here dynamically.
@@ -2422,7 +2440,7 @@ void MainWindow::EditResources(bool open_new_window)
         }
 
         if (!FocusWidget(resource.GetId()))
-            ShowWidget(MakeWidget(resource.GetType() , mWorkspace.get() , &resource) , open_new_window);
+            ShowWidget(MakeWidget(resource.GetType(), &resource) , open_new_window);
     }
 }
 

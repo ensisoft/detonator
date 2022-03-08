@@ -404,6 +404,16 @@ SceneWidget::~SceneWidget()
     DEBUG("Destroy SceneWidget");
 }
 
+void SceneWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.chkSnap,         settings.snap_to_grid);
+    SetValue(mUI.chkShowViewport, settings.show_viewport);
+    SetValue(mUI.chkShowOrigin,   settings.show_origin);
+    SetValue(mUI.chkShowGrid,     settings.show_grid);
+    SetValue(mUI.cmbGrid,         settings.grid);
+    SetValue(mUI.zoom,            settings.zoom);
+}
+
 void SceneWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

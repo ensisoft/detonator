@@ -194,6 +194,11 @@ MaterialWidget::~MaterialWidget()
     DEBUG("Destroy MaterialWidget");
 }
 
+void MaterialWidget::Initialize(const UISettings& settings)
+{
+    SetValue(mUI.zoom, settings.zoom);
+}
+
 void MaterialWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
