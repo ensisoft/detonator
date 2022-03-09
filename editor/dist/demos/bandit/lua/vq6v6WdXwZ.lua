@@ -8,6 +8,8 @@ WorldRight = glm.vec2:new(1.0, 0.0)
 local _time_to_jump = 0
 local _time_to_run  = 0
 
+local _play_coin_sound_ticks = 2
+
 local _Keys        = wdk.KeyBitSet:new()
 local _KeyJump     = wdk.Keys.ArrowUp
 local _KeyRunLeft  = wdk.Keys.ArrowLeft
@@ -41,6 +43,9 @@ function BeginPlay(player, scene)
 end
 
 function Tick(player, game_time, dt)
+    if _play_coin_sound_ticks > 0 then 
+        _play_coin_sound_ticks = _play_coin_sound_ticks -1
+    end
 end
 
 function Update(player, game_time, dt)
@@ -123,6 +128,10 @@ function OnBeginContact(player, node, other, other_node)
             spawn.class = ClassLib:FindEntityClassByName('Coins Particles')
             spawn.position = coin:GetTranslation()
             scene:SpawnEntity(spawn, true)
+            if _play_coin_sound_ticks == 0 then 
+                Audio:PlaySoundEffect('Rise04')    
+                _play_coin_sound_ticks = 2
+            end
         elseif object == 'Violet Diamond' then 
             Game:DebugPrint('Big ass diamond Collected!')
             local finish = game.GameEvent:new()
@@ -130,6 +139,8 @@ function OnBeginContact(player, node, other, other_node)
             finish.to   = 'game'
             finish.message = 'level-complete'
             Game:PostEvent(finish)
+
+            Audio:PlaySoundEffect('Rise07')
         end
     end
 
