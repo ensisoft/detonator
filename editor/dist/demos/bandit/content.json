@@ -1,4 +1,48 @@
 {
+  "audio_graphs": [
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/sound_pack/Rise04.ogg",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
+          "arg_loops": 1,
+          "arg_pcm_caching": true,
+          "arg_type": "Float32",
+          "id": "Q7EeMBu72q",
+          "name": "Rise04",
+          "type": "FileSource"
+        }
+      ],
+      "id": "124YMG3023",
+      "name": "Rise04",
+      "resource_id": "124YMG3023",
+      "resource_name": "Rise04",
+      "src_elem_id": "Q7EeMBu72q",
+      "src_elem_port": "out"
+    },
+    {
+      "elements": [
+        {
+          "arg_file": "ws://sounds/sound_pack/Rise07.ogg",
+          "arg_file_caching": false,
+          "arg_io_strategy": "Default",
+          "arg_loops": 1,
+          "arg_pcm_caching": false,
+          "arg_type": "Float32",
+          "id": "ndvxN7xpG1",
+          "name": "Rise07",
+          "type": "FileSource"
+        }
+      ],
+      "id": "Yyg2eMPHlt",
+      "name": "Rise07",
+      "resource_id": "Yyg2eMPHlt",
+      "resource_name": "Rise07",
+      "src_elem_id": "ndvxN7xpG1",
+      "src_elem_port": "out"
+    }
+  ],
   "entities": [
     {
       "flags": {
@@ -4796,7 +4840,7 @@
       "id": "gwm3bTflRn",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Background",
+      "name": "Parallax Background",
       "nodes": [
         {
           "class": "Y0gBBtChIX",
@@ -4953,7 +4997,7 @@
         "node": null
       },
       "resource_id": "gwm3bTflRn",
-      "resource_name": "Background",
+      "resource_name": "Parallax Background",
       "script_file": ""
     },
     {
@@ -8263,7 +8307,7 @@
         "name": "BG_layer_2",
         "type": "Filesystem"
       },
-      "texture_mag_filter": "Linear",
+      "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -8509,43 +8553,6 @@
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
-    },
-    {
-      "color_map0": {
-        "a": 1.0,
-        "b": 0.9960784316062927,
-        "g": 0.8666819334030151,
-        "r": 0.7333333492279053
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 0.9960784316062927,
-        "g": 0.8666819334030151,
-        "r": 0.7333333492279053
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 0.16078431904315948,
-        "g": 0.6274662613868713,
-        "r": 0.8980392217636108
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 0.16078431904315948,
-        "g": 0.6274662613868713,
-        "r": 0.8980392217636108
-      },
-      "gamma": 1.0,
-      "id": "oQBZA8Ud3W",
-      "offset": {
-        "x": 0.5,
-        "y": 0.5
-      },
-      "resource_id": "oQBZA8Ud3W",
-      "resource_name": "Menu Background",
-      "static": false,
-      "surface": "Opaque",
-      "type": "Gradient"
     }
   ],
   "particles": [
@@ -16736,7 +16743,7 @@
       "name": "Menu UI",
       "resource_id": "M3GBwLlWRp",
       "resource_name": "Menu UI",
-      "style": "app://ui/default.json",
+      "style": "ws://ui/style.json",
       "widgets": [
         {
           "widgets": [
@@ -16810,14 +16817,14 @@
                   "id": "8skbydgie9",
                   "name": "quit",
                   "position": {
-                    "x": 967.0,
-                    "y": 487.0
+                    "x": 806.0,
+                    "y": 492.0
                   },
                   "size": {
-                    "h": 58.0,
-                    "w": 95.0
+                    "h": 50.0,
+                    "w": 100.0
                   },
-                  "style": "null",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
                   "text": "Quit",
                   "type": "PushButton"
                 },
@@ -16830,14 +16837,14 @@
                   "id": "eTOW4F2TXk",
                   "name": "play",
                   "position": {
-                    "x": 807.0,
+                    "x": 953.0,
                     "y": 492.0
                   },
                   "size": {
-                    "h": 50.0,
-                    "w": 96.0
+                    "h": 53.0,
+                    "w": 119.0
                   },
-                  "style": "null",
+                  "style": "{\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
                   "text": "Play",
                   "type": "PushButton"
                 }
