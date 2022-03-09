@@ -24,8 +24,8 @@
 #else
 #  define APP_TITLE "Gamestudio Editor DEBUG"
 #endif
-#define APP_VERSION "0.1"
-#define APP_COPYRIGHT "Copyright (c) 2020-2021\n" \
+#define APP_VERSION "21ce035c0fe3\n" __DATE__
+#define APP_COPYRIGHT "Copyright (c) 2020-2022\n" \
                       "Sami Väisänen, Ensisoft"   \
 
 #define APP_LINKS "http://www.ensisoft.com\n" \
