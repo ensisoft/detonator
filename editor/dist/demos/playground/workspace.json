@@ -1,7 +1,9 @@
 {
     "2rSIWqteXS": {
+        "checked_for_packing": 1
     },
     "6M7kjbtJOK": {
+        "checked_for_packing": 1
     },
     "7zQLUleDer": {
         "checked_for_packing": 1
@@ -12,17 +14,23 @@
     "ETnTKLXRXi": {
         "checked_for_packing": 1
     },
+    "EnPRIQkKBO": {
+        "checked_for_packing": 1
+    },
     "EsFlY7oEfM": {
+        "checked_for_packing": 1
     },
     "Fwn9yS1gWF": {
         "checked_for_packing": 1
     },
     "Kv8Ml9IlfK": {
+        "checked_for_packing": 1
     },
     "QCSIpWak63": {
         "checked_for_packing": 1
     },
     "TfojPSWQmJ": {
+        "checked_for_packing": 1
     },
     "Xg0GdRiaQU": {
         "checked_for_packing": 1
@@ -40,8 +48,13 @@
         "checked_for_packing": 1
     },
     "f7S1HTDAgE": {
+        "checked_for_packing": 1
+    },
+    "fy5aapEM0F": {
+        "checked_for_packing": 1
     },
     "k4Stm2rLJJ": {
+        "checked_for_packing": 1
     },
     "kpR98Mlxaz": {
         "checked_for_packing": 1
@@ -50,13 +63,16 @@
         "checked_for_packing": 1
     },
     "lCSj0gMTqU": {
+        "checked_for_packing": 1
     },
     "lTi7YXjdsz": {
         "checked_for_packing": 1
     },
     "pATaRMBTR7": {
+        "checked_for_packing": 1
     },
     "pK3rRC7a5h": {
+        "checked_for_packing": 1
     },
     "project": {
         "application_identifier": "I1ULdjZPMrzH",
@@ -129,14 +145,15 @@
         "working_folder": "${workspace}"
     },
     "v8AR2h5m8R": {
+        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_copy_html5": false,
+        "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": false,
-        "packing_param_generate_html5": false,
-        "packing_param_generate_html5_filesys": false,
+        "packing_param_delete_prev": true,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",

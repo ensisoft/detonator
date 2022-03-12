@@ -1232,6 +1232,156 @@
       "resource_id": "TfojPSWQmJ",
       "resource_name": "Fixture Widget",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "EnPRIQkKBO",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "message",
+      "nodes": [
+        {
+          "class": "vY9O53eRKB",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 538.5227661132813,
+            "y": 66.49435424804688
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/orbitron-black.otf",
+            "font_size": 26,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Use mouse click&hold to ray cast",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "vY9O53eRKB"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "EnPRIQkKBO",
+      "resource_name": "message",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "fy5aapEM0F",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "message",
+      "nodes": [
+        {
+          "class": "jpk3WllX74",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 631.583984375,
+            "y": 80.05955505371094
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/orbitron-black.otf",
+            "font_size": 26,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Use the arrow keys to change the test\n",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "jpk3WllX74"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "fy5aapEM0F",
+      "resource_name": "message",
+      "script_file": ""
     }
   ],
   "scenes": [
@@ -1596,6 +1746,45 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "fy5aapEM0F",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "zY5assaRzl",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "message_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -1643,6 +1832,11 @@
           {
             "node": {
               "id": "aALrSMrj7L"
+            }
+          },
+          {
+            "node": {
+              "id": "zY5assaRzl"
             }
           }
         ],
@@ -4914,6 +5108,45 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "EnPRIQkKBO",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "d0rheRzFA9",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "message_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -4976,6 +5209,11 @@
           {
             "node": {
               "id": "1dTdmb3YiW"
+            }
+          },
+          {
+            "node": {
+              "id": "d0rheRzFA9"
             }
           }
         ],
