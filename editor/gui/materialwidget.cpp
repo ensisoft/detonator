@@ -314,6 +314,12 @@ void MaterialWidget::ReloadShaders()
 void MaterialWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
+
+    const auto row = mUI.textures->currentRow();
+    if (row == -1)
+        return;
+
+    on_textures_currentRowChanged(row);
 }
 
 void MaterialWidget::Shutdown()
