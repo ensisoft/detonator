@@ -200,7 +200,7 @@
    <item>
     <widget class="QGroupBox" name="chkCombineTextures">
      <property name="title">
-      <string>Pack textures</string>
+      <string>Combine textures</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -209,7 +209,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Pack height</string>
+         <string>Texture atlas height</string>
         </property>
        </widget>
       </item>
@@ -271,7 +271,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Pack width</string>
+         <string>Texture atlas width</string>
         </property>
        </widget>
       </item>
