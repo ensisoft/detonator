@@ -979,6 +979,9 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         if (node.HasLifetimeSetting())
             entity->SetLifetime(node.GetLifetime());
 
+        if (entity->HasIdleTrack())
+            entity->PlayIdle();
+
         // check which flags the scene node has set and set those on the
         // entity instance. for any flag setting that is not set entity class
         // default will apply.
@@ -1124,6 +1127,10 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
     // always going to be unique.
     auto instance = CreateEntityInstance(args);
     instance->SetScene(this);
+    if (instance->HasIdleTrack())
+    {
+        instance->PlayIdle();
+    }
 
     ASSERT(mIdMap.find(instance->GetId()) == mIdMap.end());
 
@@ -1386,8 +1393,17 @@ void Scene::Update(float dt)
         }
         if (entity->IsAnimating())
             continue;
-        if (entity->HasIdleTrack())
-            entity->PlayIdle();
+
+        if (const auto* anim = entity->GetFinishedAnimation())
+        {
+            if (entity->HasIdleTrack())
+            {
+                const auto& idle_track_id = entity->GetIdleTrackId();
+                const auto& prev_track_id = anim->GetClassId();
+                if (idle_track_id != prev_track_id)
+                    entity->PlayIdle();
+            }
+        }
     }
 }
 
