@@ -1666,6 +1666,10 @@ void EntityWidget::on_dsFlipHorizontally_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
+void EntityWidget::on_dsFlipVertically_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
 
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
@@ -2593,6 +2597,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
+            SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -2748,6 +2753,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::UpdateMaterial, GetValue(mUI.dsUpdateMaterial));
         item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
         item->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, GetValue(mUI.dsFlipHorizontally));
+        item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
     }
 
     if (auto* body = node->GetRigidBody())
