@@ -1240,7 +1240,7 @@ void EntityWidget::on_btnAddScript_clicked()
     {
         ERROR("Failed to open '%1' for writing (%2)", filepath, io.error());
         ERROR(io.errorString());
-        QMessageBox msg;
+        QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
         msg.setWindowTitle(tr("Error Occurred"));
         msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));

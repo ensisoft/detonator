@@ -1182,7 +1182,7 @@ void MainWindow::on_actionImportJSON_triggered()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Information);
         msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Iimported %1 resources into workspace.").arg(import_count));
+        msg.setText(tr("Imported %1 resources into workspace.").arg(import_count));
         msg.exec();
     }
 }
