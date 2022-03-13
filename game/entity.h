@@ -327,6 +327,9 @@ namespace game
             // Whether to flip (mirror) the item about the central vertical axis.
             // This changes the rendering on the direction from left to right.
             FlipHorizontally,
+            // Whether to flip (mirror) the item about the central horizontal axis.
+            // This changes the rendering on the direction from top to bottom.
+            FlipVertically
         };
         DrawableItemClass();
 

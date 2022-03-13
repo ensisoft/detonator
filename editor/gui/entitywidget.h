@@ -152,6 +152,7 @@ namespace gui
         void on_dsUpdateMaterial_stateChanged(int);
         void on_dsRestartDrawable_stateChanged(int);
         void on_dsFlipHorizontally_stateChanged(int);
+        void on_dsFlipVertically_stateChanged(int);
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
         void on_rbPolygon_currentIndexChanged(const QString&);

@@ -1430,36 +1430,6 @@
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
              <layout class="QGridLayout" name="gridLayout_5">
-              <item row="5" column="1">
-               <widget class="QDoubleSpinBox" name="dsLineWidth">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimum">
-                 <double>1.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="11" column="1">
-               <widget class="QCheckBox" name="dsFlipHorizontally">
-                <property name="text">
-                 <string>Flip horizontally</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="dsRenderPass">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="1">
                <widget class="QSpinBox" name="dsLayer">
                 <property name="sizePolicy">
@@ -1476,50 +1446,29 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_6">
+              <item row="6" column="1">
+               <widget class="QDoubleSpinBox" name="dsTimeScale">
+                <property name="minimum">
+                 <double>-99.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="dsDrawable">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Material</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="1">
-               <widget class="QCheckBox" name="dsUpdateMaterial">
-                <property name="text">
-                 <string>Update material</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_10">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Drawable</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QCheckBox" name="dsUpdateDrawable">
-                <property name="text">
-                 <string>Update drawable</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QCheckBox" name="dsVisible">
-                <property name="text">
-                 <string>Visible in game</string>
                 </property>
                </widget>
               </item>
@@ -1533,6 +1482,63 @@
                 </property>
                 <property name="text">
                  <string>Pass </string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QCheckBox" name="dsUpdateDrawable">
+                <property name="text">
+                 <string>Update drawable</string>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="1">
+               <widget class="QCheckBox" name="dsFlipHorizontally">
+                <property name="text">
+                 <string>Flip horizontally</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QCheckBox" name="dsUpdateMaterial">
+                <property name="text">
+                 <string>Update material</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Line width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QDoubleSpinBox" name="dsLineWidth">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimum">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="dsRenderPass">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -1575,49 +1581,6 @@
                 </item>
                </layout>
               </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_5">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Line width</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QDoubleSpinBox" name="dsTimeScale">
-                <property name="minimum">
-                 <double>-99.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-                <property name="stepType">
-                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                </property>
-                <property name="value">
-                 <double>1.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="1">
-               <widget class="QCheckBox" name="dsRestartDrawable">
-                <property name="text">
-                 <string>Restart drawable</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0">
-               <widget class="QLabel" name="label_37">
-                <property name="text">
-                 <string>Time scale</string>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="0">
                <widget class="QLabel" name="label_27">
                 <property name="sizePolicy">
@@ -1631,13 +1594,53 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="dsDrawable">
+              <item row="7" column="1">
+               <widget class="QCheckBox" name="dsVisible">
+                <property name="text">
+                 <string>Visible in game</string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="1">
+               <widget class="QCheckBox" name="dsRestartDrawable">
+                <property name="text">
+                 <string>Restart drawable</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_6">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Material</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QComboBox" name="dsRenderStyle"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Drawable</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Time scale</string>
                 </property>
                </widget>
               </item>
@@ -1654,8 +1657,12 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QComboBox" name="dsRenderStyle"/>
+              <item row="12" column="1">
+               <widget class="QCheckBox" name="dsFlipVertically">
+                <property name="text">
+                 <string>Flip vertically</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -2973,6 +2980,7 @@
   <tabstop>dsUpdateMaterial</tabstop>
   <tabstop>dsRestartDrawable</tabstop>
   <tabstop>dsFlipHorizontally</tabstop>
+  <tabstop>dsFlipVertically</tabstop>
   <tabstop>rigidBodyItem</tabstop>
   <tabstop>rbSimulation</tabstop>
   <tabstop>rbShape</tabstop>

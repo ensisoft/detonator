@@ -407,7 +407,9 @@ void Renderer::DrawEntity(const EntityType& entity,
 
                     paint_node.drawable->SetStyle(style);
                     paint_node.drawable->SetLineWidth(item->GetLineWidth());
-                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+                    const auto flip_h = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+                    const auto flip_v = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+                    if (flip_h ^ flip_v)
                         paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
                     else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
                 }
@@ -422,6 +424,12 @@ void Renderer::DrawEntity(const EntityType& entity,
                         mTransform.Scale(-1.0f , 1.0f);
                         mTransform.Translate(1.0f , 0.0f);
                     }
+                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    {
+                        mTransform.Push();
+                        mTransform.Scale(1.0f, -1.0f);
+                        mTransform.Translate(0.0f, 1.0f);
+                    }
 
                     DrawPacket packet;
                     packet.material  = paint_node.material;
@@ -433,6 +441,8 @@ void Renderer::DrawEntity(const EntityType& entity,
                         mPackets.push_back(std::move(packet));
 
                     if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+                        mTransform.Pop();
+                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
                         mTransform.Pop();
 
                     // pop the model transform
