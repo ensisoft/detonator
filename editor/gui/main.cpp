@@ -210,6 +210,7 @@ int main(int argc, char* argv[])
         format.setSamples(4);
         format.setSwapInterval(0);
         format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+        format.setColorSpace(QSurfaceFormat::ColorSpace::sRGBColorSpace);
         QSurfaceFormat::setDefaultFormat(format);
 
         QApplication app(argc, argv);

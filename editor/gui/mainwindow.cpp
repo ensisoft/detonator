@@ -413,6 +413,9 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
     format.setSamples(settings.multisample_sample_count);
+    format.setColorSpace(settings.config_srgb
+        ? QSurfaceFormat::ColorSpace::sRGBColorSpace
+        : QSurfaceFormat::ColorSpace::DefaultColorSpace);
     QSurfaceFormat::setDefaultFormat(format);
 
     GfxWindow::SetDefaultFilter(settings.default_min_filter);
@@ -1644,6 +1647,9 @@ void MainWindow::on_actionProjectSettings_triggered()
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
     format.setSamples(settings.multisample_sample_count);
+    format.setColorSpace(settings.config_srgb
+        ? QSurfaceFormat::ColorSpace::sRGBColorSpace
+        : QSurfaceFormat::ColorSpace::DefaultColorSpace);
     QSurfaceFormat::setDefaultFormat(format);
 
     mWorkspace->SetProjectSettings(settings);
