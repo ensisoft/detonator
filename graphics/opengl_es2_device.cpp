@@ -631,26 +631,34 @@ public:
                 if (mTextureUnits[unit].texture == texture)
                     break;
             }
+            // if the texture isn't bound yet we need to find a texture
+            // unit that can be used. first look for a free unit if any.
             if (unit == mTextureUnits.size())
             {
-                // look for a first free unit if any.
                 for (unit=0; unit<mTextureUnits.size(); ++unit)
                 {
                     if (mTextureUnits[unit].texture == nullptr)
                         break;
                 }
             }
+            // if the texture isn't bound yet we're using all texture units.
+            // this means a texture must be evicted and to let this texture be
+            // bound to a unit. so we must look for a texture candidate for
+            // replacement.
             if (unit == mTextureUnits.size())
             {
-                size_t frame_stamp = mTextureUnits[0].texture->GetFrameStamp();
+                size_t lru_frame_stamp = mTextureUnits[0].texture->GetFrameStamp();
                 unit = 0;
-                // look for a unit we can reuse
-                for (size_t i=0; i<mTextureUnits.size(); ++i)
+                // look for a unit we can reuse, find the unit with the
+                // LRU (least recently used) texture for replacement.
+                for (size_t i=1; i<mTextureUnits.size(); ++i)
                 {
                     const auto* bound_texture = mTextureUnits[i].texture;
-                    if (bound_texture->GetFrameStamp() < frame_stamp)
+                    const auto frame_stamp = bound_texture->GetFrameStamp();
+                    if (frame_stamp < lru_frame_stamp)
                     {
                         unit = i;
+                        lru_frame_stamp = frame_stamp;
                     }
                 }
             }
