@@ -77,6 +77,8 @@ namespace gui
         void on_actionRemoveTexture_triggered();
         void on_btnReloadShader_clicked();
         void on_btnSelectShader_clicked();
+        void on_btnCreateShader_clicked();
+        void on_btnEditShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnDelTextureMap_clicked();
         void on_btnEditTexture_clicked();

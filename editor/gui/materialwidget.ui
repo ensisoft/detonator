@@ -28,6 +28,12 @@
     <layout class="QVBoxLayout" name="verticalLayout_9">
      <item>
       <widget class="QGroupBox" name="baseProperties">
+       <property name="minimumSize">
+        <size>
+         <width>390</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -148,6 +154,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Reload shader code from the GLSL file</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -165,6 +174,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Select a GLSL file</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -174,6 +186,34 @@
               </property>
               <property name="arrowType">
                <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnCreateShader">
+              <property name="toolTip">
+               <string>Create a new GLSL source file and JSON descriptor</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnEditShader">
+              <property name="toolTip">
+               <string>Edit shader code in an external editor</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
               </property>
              </widget>
             </item>
@@ -1012,6 +1052,12 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>390</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="title">
         <string>Texture map(s)</string>
        </property>
@@ -1046,13 +1092,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="2">
            <widget class="QLineEdit" name="textureWidth">
             <property name="sizePolicy">
@@ -1066,24 +1105,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_36">
-            <property name="text">
-             <string>Width</string>
-            </property>
-           </widget>
-          </item>
           <item row="6" column="2">
            <widget class="QCheckBox" name="chkAllowPacking">
             <property name="text">
              <string>Allow combining</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>File</string>
             </property>
            </widget>
           </item>
@@ -1135,13 +1160,6 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_38">
-            <property name="text">
-             <string>Depth</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2" colspan="2">
            <widget class="QLineEdit" name="textureFile">
             <property name="sizePolicy">
@@ -1171,13 +1189,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_37">
-            <property name="text">
-             <string>Height</string>
-            </property>
-           </widget>
-          </item>
           <item row="7" column="2">
            <widget class="QCheckBox" name="chkAllowResizing">
             <property name="text">
@@ -1185,7 +1196,48 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="1" colspan="3">
+          <item row="1" column="1">
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>File</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label_36">
+            <property name="text">
+             <string>Width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="label_37">
+            <property name="text">
+             <string>Height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="label_38">
+            <property name="text">
+             <string>Depth</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="2" colspan="2">
            <widget class="QPushButton" name="btnEditTexture">
             <property name="text">
              <string>Edit Texture</string>
@@ -1502,6 +1554,8 @@
   <tabstop>shaderFile</tabstop>
   <tabstop>btnReloadShader</tabstop>
   <tabstop>btnSelectShader</tabstop>
+  <tabstop>btnCreateShader</tabstop>
+  <tabstop>btnEditShader</tabstop>
   <tabstop>gamma</tabstop>
   <tabstop>baseColor</tabstop>
   <tabstop>particleAction</tabstop>

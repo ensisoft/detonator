@@ -252,13 +252,16 @@ bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes)
     return true;
 }
 
-bool WriteTextFile(const QString& file, const QString& content)
+bool WriteTextFile(const QString& file, const QString& content, QString* error)
 {
     QFile out;
     out.setFileName(file);
     out.open(QIODevice::WriteOnly | QIODevice::Truncate);
     if (!out.isOpen())
+    {
+        if (error) *error = out.errorString();
         return false;
+    }
 
     QTextStream stream(&out);
     stream.setCodec("UTF-8");
