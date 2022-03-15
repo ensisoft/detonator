@@ -168,6 +168,7 @@
             "drawable": "e1zlPY8HTm",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -204,6 +205,7 @@
             "drawable": "e1zlPY8HTm",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -339,6 +341,7 @@
             "drawable": "_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -451,6 +454,7 @@
             "drawable": "_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,

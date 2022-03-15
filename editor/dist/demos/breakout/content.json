@@ -109,6 +109,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -415,6 +416,7 @@
             "drawable": "_circle",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -520,6 +522,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -613,6 +616,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -712,6 +716,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -811,6 +816,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -910,6 +916,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1009,6 +1016,7 @@
             "drawable": "_round_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1108,6 +1116,7 @@
             "drawable": "_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1144,6 +1153,7 @@
             "drawable": "_isosceles_triangle",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1220,6 +1230,7 @@
             "drawable": "_isosceles_triangle",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1256,6 +1267,7 @@
             "drawable": "_rect",
             "flags": {
               "FlipHorizontally": false,
+              "FlipVertically": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
