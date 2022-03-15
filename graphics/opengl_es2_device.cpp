@@ -395,6 +395,7 @@ public:
         auto program = std::make_unique<ProgImpl>(mGL);
         auto* ret    = program.get();
         mPrograms[name] = std::move(program);
+        ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
 
@@ -411,6 +412,7 @@ public:
         auto geometry = std::make_unique<GeomImpl>(this);
         auto* ret = geometry.get();
         mGeoms[name] = std::move(geometry);
+        ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
 
@@ -427,6 +429,13 @@ public:
         auto texture = std::make_unique<TextureImpl>(mGL, mTextureUnits);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
+        // technically not "use" but we need to track the number of frames
+        // the texture has been unused for cleaning up purposes by computing
+        // the delta between when the texture was last used and how many
+        // frames the device has rendered. if we don't set this then a texture
+        // that is not used will get immediately cleaned away when the current
+        // device frame number exceeds the maximum number of idle frames.
+        ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
 
@@ -451,8 +460,8 @@ public:
     {
         const auto* myprog = static_cast<const ProgImpl*>(&program);
         const auto* mygeom = static_cast<const GeomImpl*>(&geometry);
-        myprog->SetLastUseFrameNumber(mFrameNumber);
-        mygeom->SetLastUseFrameNumber(mFrameNumber);
+        myprog->SetFrameStamp(mFrameNumber);
+        mygeom->SetFrameStamp(mFrameNumber);
 
         // start using this program
         GL_CALL(glUseProgram(myprog->GetName()));
@@ -615,7 +624,7 @@ public:
             if (texture == nullptr)
                 continue;
 
-            texture->SetLastUseFrameNumber(mFrameNumber);
+            texture->SetFrameStamp(mFrameNumber);
 
             // see if there's already a unit that has this texture bound.
             // if so, we use the same unit.
@@ -635,13 +644,13 @@ public:
             }
             if (unit == mTextureUnits.size())
             {
-                size_t last_used_frame_number = mTextureUnits[0].texture->GetLastUsedFrameNumber();
+                size_t frame_stamp = mTextureUnits[0].texture->GetFrameStamp();
                 unit = 0;
                 // look for a unit we can reuse
                 for (size_t i=0; i<mTextureUnits.size(); ++i)
                 {
                     const auto* bound_texture = mTextureUnits[i].texture;
-                    if (bound_texture->GetLastUsedFrameNumber() < last_used_frame_number)
+                    if (bound_texture->GetFrameStamp() < frame_stamp)
                     {
                         unit = i;
                     }
@@ -841,7 +850,7 @@ public:
             for (auto it = mPrograms.begin(); it != mPrograms.end();)
             {
                 auto* impl = static_cast<ProgImpl*>(it->second.get());
-                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+                const auto last_used_frame_number = impl->GetFrameStamp();
                 if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
                     it = mPrograms.erase(it);
                 else ++it;
@@ -864,7 +873,7 @@ public:
                 const auto& group = impl->GetGroup();
                 if (group.empty())
                     continue;
-                const auto last_used  = impl->GetLastUsedFrameNumber();
+                const auto last_used  = impl->GetFrameStamp();
                 group_last_use[group] = std::max(group_last_use[group], last_used);
             }
 
@@ -873,7 +882,7 @@ public:
                 const auto* impl = static_cast<TextureImpl*>(it->second.get());
                 const auto& group = impl->GetGroup();
                 const auto group_last_used = group_last_use[group];
-                const auto this_last_used  = impl->GetLastUsedFrameNumber();
+                const auto this_last_used  = impl->GetFrameStamp();
                 const auto last_used = std::max(group_last_used, this_last_used);
                 const auto is_expired = mFrameNumber - last_used >= max_num_idle_frames;
                 if (is_expired)
@@ -898,7 +907,7 @@ public:
             for (auto it = mGeoms.begin(); it != mGeoms.end();)
             {
                 auto* impl = static_cast<GeomImpl*>(it->second.get());
-                const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+                const auto last_used_frame_number = impl->GetFrameStamp();
                 if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
                     it = mGeoms.erase(it);
                 else ++it;
@@ -940,7 +949,7 @@ public:
         for (auto it = mTextures.begin(); it != mTextures.end();)
         {
             auto* impl = static_cast<TextureImpl*>(it->second.get());
-            const auto last_used_frame_number = impl->GetLastUsedFrameNumber();
+            const auto last_used_frame_number = impl->GetFrameStamp();
             const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
             if (is_expired && impl->IsTransient())
             {
@@ -1331,9 +1340,9 @@ private:
         { return mHasMips; }
         GLuint GetHandle() const
         { return mHandle; }
-        void SetLastUseFrameNumber(size_t frame_number) const
+        void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
-        std::size_t GetLastUsedFrameNumber() const
+        std::size_t GetFrameStamp() const
         { return mFrameNumber; }
         const std::string& GetName() const
         { return mName; }
@@ -1418,7 +1427,7 @@ private:
         virtual size_t GetDataHash() const  override
         { return mHash; }
 
-        void SetLastUseFrameNumber(size_t frame_number) const
+        void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
 
         struct DrawCommand {
@@ -1426,7 +1435,7 @@ private:
             size_t count  = 0;
             size_t offset = 0;
         };
-        size_t GetLastUsedFrameNumber() const
+        size_t GetFrameStamp() const
         { return mFrameNumber; }
         size_t GetBufferIndex() const
         { return mBufferIndex; }
@@ -1781,9 +1790,9 @@ private:
         { return mUniforms[index]; }
         GLuint GetName() const
         { return mProgram; }
-        void SetLastUseFrameNumber(size_t frame_number) const
+        void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
-        size_t GetLastUsedFrameNumber() const
+        size_t GetFrameStamp() const
         { return mFrameNumber; }
     private:
         struct CachedUniform {

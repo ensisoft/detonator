@@ -1012,7 +1012,7 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
     // set the texture that isn't actually set  since the shader
-    // doesnt' use it.
+    // doesn't use it.
     prog->SetTexture("kTexture", 0, *texture);
     prog->SetTextureCount(1);
 
@@ -1020,32 +1020,92 @@ void main() {
     dev->EndFrame();
 }
 
-void unit_test_clean_garbage()
+void unit_test_clean_textures()
 {
     auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
                                    std::make_shared<TestContext>(10, 10));
 
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    const gfx::RGB pixels[2 * 3] = {
+        gfx::Color::White, gfx::Color::White,
+        gfx::Color::Red, gfx::Color::Red,
+        gfx::Color::Blue, gfx::Color::Blue
+    };
+    const gfx::Vertex verts[] = {
+        { {-1,  1}, {0, 1} },
+        { {-1, -1}, {0, 0} },
+        { { 1, -1}, {1, 0} },
+
+        { {-1,  1}, {0, 1} },
+        { { 1, -1}, {1, 0} },
+        { { 1,  1}, {1, 1} }
+    };
+    auto* geom = dev->MakeGeometry("geom");
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    // texture that is used is not cleaned
     {
-        const gfx::RGB pixels[2 * 3] = {
-                gfx::Color::White, gfx::Color::White,
-                gfx::Color::Red, gfx::Color::Red,
-                gfx::Color::Blue, gfx::Color::Blue
-        };
         auto* texture = dev->MakeTexture("foo");
         texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
         TEST_REQUIRE(dev->FindTexture("foo"));
+
+        const char* vs = R"(
+#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+}
+)";
+
+        const char* fs = R"(
+#version 100
+precision mediump float;
+uniform sampler2D kTexture;
+void main() {
+  gl_FragColor = texture2D(kTexture, vec2(0.5));
+}
+)";
+        auto* prog = MakeTestProgram(*dev, vs, fs);
+
+        for (int i=0; i<3; ++i)
+        {
+            dev->BeginFrame();
+
+            prog->SetTexture("kTexture", 0, *texture);
+            prog->SetTextureCount(1);
+
+            dev->Draw(*prog, *geom, state);
+            dev->EndFrame();
+            dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        }
+        TEST_REQUIRE(dev->FindTexture("foo"));
     }
 
-    dev->BeginFrame();
-    dev->EndFrame();
-    dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
 
-    TEST_REQUIRE(dev->FindTexture("foo"));
+    dev->DeleteTextures();
 
-    dev->BeginFrame();
-    dev->EndFrame();
-    dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
-    TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
+    // texture that is not used gets cleaned away
+    {
+        auto* texture = dev->MakeTexture("foo");
+        texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+        dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+        dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
+    }
 
 }
 
@@ -1624,7 +1684,7 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix4x4_uniform();
     unit_test_uniform_sampler_optimize_bug();
     unit_test_render_dynamic();
-    unit_test_clean_garbage();
+    unit_test_clean_textures();
     unit_test_buffer_allocation();
     unit_test_max_texture_units_single_texture();
     unit_test_max_texture_units_many_textures();
