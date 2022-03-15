@@ -617,14 +617,12 @@ public:
         for (size_t i=0; i<num_textures; ++i)
         {
             const auto& sampler = myprog->GetSamplerSetting(i);
-            // it's possible that this is nullptr when the shader compiler
-            // has removed the un-used texture sampler reference. In other
-            // words the glGetUniformLocation returns -1.
-            const TextureImpl* texture = sampler.texture;
-            if (texture == nullptr)
-                continue;
-
+            const auto* texture = sampler.texture;
             texture->SetFrameStamp(mFrameNumber);
+            // if the shader compiler has removed the uniform the location is -1
+            // in which case we can skip rest of the work.
+            if (sampler.location == -1)
+                continue;
 
             // see if there's already a unit that has this texture bound.
             // if so, we use the same unit.
@@ -1681,9 +1679,7 @@ private:
 
         virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
         {
-            auto ret =  GetUniform(sampler);
-            if (ret.location == -1)
-                return;
+            auto ret = GetUniform(sampler);
 
             const auto* impl = static_cast<const TextureImpl*>(&texture);
 
@@ -1697,19 +1693,19 @@ private:
             // - use a matrix to transform the texture coordinates to counter this.
             // - flip texture coordinates and assume that Y=0.0f means the top of
             //   the texture (first scan row) and Y=1.0f means the bottom of the
-            //   the texture (last scan row).
+            //   texture (last scan row).
             //
             //
             // this comment and the below kDeviceTextureMatrix is here only for posterity.
-            // Currently we have flipped the texture coordinates like explained above.
+            // Currently, we have flipped the texture coordinates like explained above.
             //
             // If the program being used to render stuff is using a texture
-            // we helpfully setup here a "device texture matrix" that will be provided
+            // we helpfully set up here a "device texture matrix" that will be provided
             // for the program and should be used to transform the texture coordinates
             // before sampling textures.
-            // This will avoid having to do any image flips which is especilly
-            // handy when dealing with data that gets re-uploaded often
-            // I.e. dynamically changing/procedural texture data.
+            // This will avoid having to do any image flips which is especially
+            // handy when dealing with data that gets often (re)uploaded, e.g.
+            // dynamically changing/procedural texture data.
             //
             // It should also be possible to use the device texture matrix for example
             // in cases where the device would bake some often used textures into an atlas
@@ -1742,11 +1738,13 @@ private:
         void BeginFrame()
         {
             // this clear has some unfortunate consequences.
-            // If we don't clear then we're holding onto some texture object
-            // and either a) it cannot be garbage collected or
-            // b) it is garbage collected and we have a dandling pointer.
-            // However doing this clear means that the program cannot be
-            // used across frame's without having it's state reset.
+            // If we don't clear then we're holding onto some texture objects
+            // which means that:
+            //   a) the texture(s) cannot be garbage collected
+            //   b) the texture(s) are garbage collected and the pointers are garbage
+            // Right now the solution is to clear the texture sampler settings
+            // on every frame and require that the material system sets the
+            // textures again before every draw.
             mSamplers.clear();
             mUniforms.clear();
         }

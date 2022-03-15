@@ -1087,6 +1087,52 @@ void main() {
         TEST_REQUIRE(dev->FindTexture("foo"));
     }
 
+    // texture that is not used because the driver decided to optimize the
+    // uniform away is not cleaned away.
+    // if we let the texture be cleaned away then the material system will
+    // end up trying to reload the texture all the time since it doesn't exist.
+    // this would need some kind of propagation of the fact that the texture
+    // doesn't actually contribute to the shader so that the material system
+    // can then skip it. however, this is all because of this silly internal
+    // optimization that leaks this from the driver. the easier fix for now
+    // is just to let the texture stay there even if it's not used.
+    {
+        auto* texture = dev->MakeTexture("foo");
+        texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+
+        const char* vs = R"(
+#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+}
+)";
+
+        const char* fs = R"(
+#version 100
+precision mediump float;
+uniform sampler2D kTexture;
+void main() {
+  gl_FragColor = vec4(1.0);
+}
+)";
+        auto* prog = MakeTestProgram(*dev, vs, fs);
+
+        for (int i=0; i<3; ++i)
+        {
+            dev->BeginFrame();
+
+            prog->SetTexture("kTexture", 0, *texture);
+            prog->SetTextureCount(1);
+
+            dev->Draw(*prog, *geom, state);
+            dev->EndFrame();
+            dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        }
+        TEST_REQUIRE(dev->FindTexture("foo"));
+    }
+
 
     dev->DeleteTextures();
 
