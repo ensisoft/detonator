@@ -16,13 +16,33 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <boost/math/special_functions/prime.hpp>
+#include "warnpop.h"
+
 #include "base/hash.h"
+#include "base/math.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/bitmap.h"
 
 namespace gfx
 {
+
+void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
+{
+    mLayers.clear();
+    for (unsigned i=0; i<layers; ++i)
+    {
+        const auto prime_index = math::rand(min_prime_index, max_prime_index);
+        const auto prime = boost::math::prime(prime_index);
+        Layer layer;
+        layer.prime0 = prime;
+        layer.frequency = math::rand(1.0f, 100.0f);
+        layer.amplitude = math::rand(1.0f, 255.0f);
+        mLayers.push_back(layer);
+    }
+}
 
 void NoiseBitmapGenerator::IntoJson(data::Writer& data) const
 {
