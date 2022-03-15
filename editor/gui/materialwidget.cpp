@@ -488,6 +488,150 @@ void MaterialWidget::on_btnSelectShader_clicked()
     }
 }
 
+void MaterialWidget::on_btnCreateShader_clicked()
+{
+    if (auto* custom = mMaterial->AsCustom())
+    {
+        QString name = GetValue(mUI.materialName);
+        name.replace(' ', '_');
+        const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
+        const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
+        const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
+        const auto& json_file = mWorkspace->MapFileToFilesystem(json_uri);
+
+        const QString files[2] = {
+            glsl_file, json_file
+        };
+        for (int i=0; i<2; ++i)
+        {
+            const auto& file = files[i];
+            if (!FileExists(file))
+                continue;
+
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Question);
+            msg.setWindowTitle("File Exists");
+            msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(files[i]));
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            if (msg.exec() == QMessageBox::No)
+                return;
+        }
+        const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://"));
+        if (!app::MakePath(path))
+        {
+            ERROR("Failed to create path. [path='%1']", path);
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setWindowTitle("Filesystem Error");
+            msg.setText(tr("Failed to create file system path.\n%1").arg(path));
+            msg.exec();
+            return;
+        }
+constexpr auto glsl = R"(
+#version 100
+
+precision highp float;
+
+// build-in uniforms
+// material time in seconds.
+uniform float kRuntime;
+
+// custom uniforms that need to match the
+// json description
+uniform float kGamma;
+
+uniform sampler2D kNoise;
+uniform vec2 kNoiseRect;
+
+// varyings from vertex stage.
+varying vec2 vTexCoord;
+
+// particle alpha
+varying float vAlpha;
+// particle random value.
+varying float vRandomValue;
+
+void main() {
+    float a = texture2D(kNoise, vTexCoord).a;
+    float r = vTexCoord.x + a + kRuntime;
+    float g = vTexCoord.y + a;
+    float b = kRuntime;
+    vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
+    gl_FragColor = vec4(pow(col, vec3(kGamma)), 1.0);
+}
+)";
+constexpr auto json = R"(
+{
+  "uniforms": [
+     {
+        "type": "Float",
+        "name": "kGamma",
+        "desc": "Gamma",
+        "value": 2.2
+     }
+  ],
+  "maps": [
+     {
+        "type": "Texture2D",
+        "name": "kNoise",
+        "rect": "kNoiseRect",
+        "desc": "Noise"
+     }
+  ]
+}
+)";
+        const char* content[2] = { glsl, json };
+
+        for (int i=0; i<2; ++i)
+        {
+            QString error;
+            if (!app::WriteTextFile(files[i], content[i], &error))
+            {
+                ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error);
+                QMessageBox msg(this);
+                msg.setIcon(QMessageBox::Critical);
+                msg.setWindowTitle("Filesystem Error");
+                msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error));
+                msg.exec();
+                return;
+            }
+        }
+
+        gfx::NoiseBitmapGenerator noise;
+        noise.SetWidth(100);
+        noise.SetHeight(100);
+        // todo: fix this
+        // the min/max prime indices need to be kept in sync with DlgBitmap!
+        noise.Randomize(1, 1000, 3);
+
+        auto tex = gfx::GenerateNoiseTexture(std::move(noise));
+        tex->SetName("Noise");
+
+        gfx::TextureMap2D map;
+        map.SetTexture(std::move(tex));
+        map.SetRectUniformName("kNoiseRect");
+        map.SetSamplerName("kNoise");
+        custom->SetShaderUri(app::ToUtf8(glsl_uri));
+        custom->SetTextureMap("kNoise", std::move(map));
+
+        ApplyShaderDescription();
+        ReloadShaders();
+        GetMaterialProperties();
+    } // if
+}
+
+void MaterialWidget::on_btnEditShader_clicked()
+{
+    if (auto* custom = mMaterial->AsCustom())
+    {
+        const auto& uri = custom->GetShaderUri();
+        if (uri.empty())
+            return;
+        const auto& glsl = mWorkspace->MapFileToFilesystem(uri);
+        emit OpenExternalShader(glsl);
+    }
+}
+
 void MaterialWidget::on_btnAddTextureMap_clicked()
 {
     mUI.btnAddTextureMap->showMenu();
@@ -939,7 +1083,7 @@ void MaterialWidget::ApplyShaderDescription()
             if (!base::JsonReadSafe(json.value(), "name", &name))
                 WARN("Uniform is missing 'name' parameter.");
             if (!base::JsonReadSafe(json.value(), "type", &type))
-                WARN("Uniform is missing 'type' parameter.");
+                WARN("Uniform is missing 'type' parameter or the type is not understood.");
 
             auto* label = new QLabel(this);
             SetValue(label, desc);
@@ -968,17 +1112,41 @@ void MaterialWidget::ApplyShaderDescription()
 
             // set default uniform value if it doesn't exist already.
             if (type == Uniform::Type::Float)
-                material->SetUniform(name, 0.0f);
+            {
+                float value = 0.0f;
+                base::JsonReadSafe(json.value(), "value", &value);
+                material->SetUniform(name, value);
+            }
             else if (type == Uniform::Type::Vec2)
-                material->SetUniform(name, glm::vec2());
+            {
+                glm::vec2 value = {0.0f, 0.0f};
+                base::JsonReadSafe(json.value(), "value", &value);
+                material->SetUniform(name, value);
+            }
             else if (type == Uniform::Type::Vec3)
-                material->SetUniform(name, glm::vec3());
+            {
+                glm::vec3 value = {0.0f, 0.0f, 0.0f};
+                base::JsonReadSafe(json.value(), "value", &value);
+                material->SetUniform(name, value);
+            }
             else if (type == Uniform::Type::Vec4)
-                material->SetUniform(name, glm::vec4());
+            {
+                glm::vec4 value = {0.0f, 0.0f, 0.0f, 0.0f};
+                base::JsonReadSafe(json.value(), "value", &value);
+                material->SetUniform(name, value);
+            }
             else if (type == Uniform::Type::Color)
-                material->SetUniform(name, gfx::Color::White);
+            {
+                gfx::Color4f value = gfx::Color::White;
+                base::JsonReadSafe(name, "value", &value);
+                material->SetUniform(name, value);
+            }
             else if (type == Uniform::Type::Int)
-                material->SetUniform(name, 0);
+            {
+                int value = 0;
+                base::JsonReadSafe(name, "value", &value);
+                material->SetUniform(name, value);
+            }
             else BUG("Unhandled uniform type.");
         }
         // delete the material uniforms that were no longer in the description
@@ -1012,7 +1180,7 @@ void MaterialWidget::ApplyShaderDescription()
             if (!base::JsonReadSafe(json.value(), "name", &name))
                 WARN("Texture map is missing 'name' parameter.");
             if (!base::JsonReadSafe(json.value(), "type", &type))
-                WARN("Texture map is missing 'type' parameter.");
+                WARN("Texture map is missing 'type' parameter or the type is not understood.");
 
             auto* label = new QLabel(this);
             SetValue(label, desc);
@@ -1258,6 +1426,8 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.textureMaps,       false);
     SetEnabled(mUI.btnReloadShader,   false);
     SetEnabled(mUI.btnSelectShader,   false);
+    SetEnabled(mUI.btnCreateShader, false);
+    SetEnabled(mUI.btnEditShader, false);
     SetVisible(mUI.builtInProperties, false);
     SetVisible(mUI.gradientMap,       false);
     SetVisible(mUI.textureCoords,     false);
@@ -1339,6 +1509,7 @@ void MaterialWidget::GetMaterialProperties()
         SetEnabled(mUI.shaderFile,      true);
         SetEnabled(mUI.btnReloadShader, true);
         SetEnabled(mUI.btnSelectShader, true);
+        SetEnabled(mUI.btnCreateShader, true);
         SetEnabled(mUI.textureFilters,  true);
         SetEnabled(mUI.textureMaps,     true);
         SetValue(mUI.shaderFile, ptr->GetShaderUri());
@@ -1347,6 +1518,8 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.magFilter, ptr->GetTextureMagFilter());
         SetValue(mUI.wrapX, ptr->GetTextureWrapX());
         SetValue(mUI.wrapY, ptr->GetTextureWrapY());
+        if (!ptr->GetShaderUri().empty())
+            SetEnabled(mUI.btnEditShader, true);
 
         for (auto* widget : mUniforms)
         {

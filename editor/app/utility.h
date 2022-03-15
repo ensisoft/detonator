@@ -151,7 +151,7 @@ bool ReadAsBinary(const QString& file, std::vector<T>& data)
 // Simple helper to dump a string into a text file.
 // Previous contents of the file will be overwritten.
 // Returns false on failure.
-bool WriteTextFile(const QString& file, const QString& contents);
+bool WriteTextFile(const QString& file, const QString& contents, QString* error = nullptr);
 
 // Read the contents of a text file into a string.
 // Provides no error checking.
