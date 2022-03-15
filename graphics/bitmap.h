@@ -965,6 +965,10 @@ namespace gfx
         }
         bool HasLayers() const
         { return !mLayers.empty(); }
+        // Create random generator settings.
+        void Randomize(unsigned min_prime_index,
+                       unsigned max_prime_index,
+                       unsigned layers=1);
 
         virtual Function GetFunction() const override
         { return Function::Noise; }

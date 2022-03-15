@@ -40,6 +40,7 @@ namespace gui
         std::unique_ptr<gfx::IBitmapGenerator> GetResult()
         { return std::move(mGenerator); }
     private slots:
+        void on_btnRandomize_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnAddNoiseLayer_clicked();

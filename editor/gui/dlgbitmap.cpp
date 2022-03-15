@@ -74,6 +74,15 @@ DlgBitmap::DlgBitmap(QWidget* parent, std::unique_ptr<gfx::IBitmapGenerator> gen
     }
 }
 
+void DlgBitmap::on_btnRandomize_clicked()
+{
+    const auto min_prime_index = mUI.noisePrime0->minimum();
+    const auto max_prime_index = mUI.noisePrime0->maximum();
+    const auto layers = 3;
+    mNoise->Randomize(min_prime_index, max_prime_index, 3);
+    on_cmbNoiseLayers_currentIndexChanged(0);
+}
+
 void DlgBitmap::on_btnAccept_clicked()
 {
     accept();
