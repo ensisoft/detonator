@@ -18,16 +18,10 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <stb/stb_image_write.h>
-#include "warnpop.h"
-
 #include <limits>
 #include <vector>
 #include <cstring>
 #include <type_traits>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <algorithm>
 #include <functional>
@@ -66,7 +60,6 @@ namespace gfx
     inline Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
     { return Grayscale(lhs.r | rhs.r); }
 
-
     struct RGB {
         u8 r = 0;
         u8 g = 0;
@@ -74,82 +67,7 @@ namespace gfx
         RGB() = default;
         RGB(u8 r, u8 g, u8 b) : r(r), g(g), b(b)
         {}
-        RGB(Color c)
-        {
-            switch (c)
-            {
-                case Color::White:
-                    r = g = b = 255;
-                    break;
-                case Color::Black:
-                    break;
-                case Color::Red:
-                   r = 255;
-                   break;
-                case Color::DarkRed:
-                   r = 127;
-                   break;
-                case Color::Green:
-                   g = 255;
-                   break;
-                case Color::DarkGreen:
-                   g = 127;
-                   break;
-                case Color::Blue:
-                   b = 255;
-                   break;
-                case Color::DarkBlue:
-                   b = 127;
-                   break;
-                case Color::Cyan:
-                   g = b = 255;
-                   break;
-                case Color::DarkCyan:
-                   g = b = 127;
-                   break;
-                case Color::Magenta:
-                   r = b = 255;
-                   break;
-                case Color::DarkMagenta:
-                   r = b = 127;
-                   break;
-                case Color::Yellow:
-                   r = g = 255;
-                   break;
-                case Color::DarkYellow:
-                   r = g = 127;
-                   break;
-                case Color::Gray:
-                   r = g = b = 158;
-                   break;
-                case Color::DarkGray:
-                   r = g = b = 127;
-                   break;
-                case Color::LightGray:
-                   r = g = b = 192;
-                   break;
-                case Color::HotPink:
-                    r = 255;
-                    g = 105;
-                    b = 180;
-                    break;
-                case Color::Gold:
-                    r = 255;
-                    g = 215;
-                    b = 0;
-                    break;
-                case Color::Silver:
-                    r = 192;
-                    g = 192;
-                    b = 192;
-                    break;
-                case Color::Bronze:
-                    r = 205;
-                    g = 127;
-                    b = 50;
-                    break;
-            }
-        } // ctor
+        RGB(Color c);
         RGB(const Grayscale& grayscale)
         {
             r = g = b = grayscale.r;
@@ -297,13 +215,10 @@ namespace gfx
     inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
     { return dst | src; }
 
-    // Bitmap interface. Mostly designed so that it's possible
-    // to keep bitmap objects around as generic bitmaps
-    // regardless of their actual underlying pixel representation.
-    class IBitmap
+    class IBitmapView
     {
     public:
-        virtual ~IBitmap() = default;
+        virtual ~IBitmapView() = default;
         // Get the width of the bitmap
         virtual unsigned GetWidth() const = 0;
         // Get the height of the bitmap
@@ -312,34 +227,67 @@ namespace gfx
         virtual unsigned GetDepthBits() const = 0;
         // Get whether bitmap is valid or not (has been allocated)
         virtual bool IsValid() const = 0;
-        // Resize the bitmap. Previous are undefined.
-        virtual void Resize(unsigned width, unsigned height) = 0;
         // Get pointer to underlying data. Can be nullptr if the bitmap
-        // is not currently valid, i.e no pixel storage has been allocated.
+        // is not currently valid, i.e. no pixel storage has been allocated.
         // Access to the data through this pointer is potentially
         // unsafe since the type of the pixel (i.e. the memory layout)
-        // information is lost. However in some cases the generic
+        // information is lost. However, in some cases the generic
         // access is useful for example when passing the pointer to some
         // other APIs
         virtual const void* GetDataPtr() const = 0;
+        // Get unique hash value based on the contents of the bitmap.
+        virtual std::size_t GetHash() const = 0;
+        // Read a RGBA pixel tuple from the underlying bitmap object.
+        // If the underlying bitmap doesn't have all the RGBA channels
+        // the value is converted into RGBA according to the conversion
+        // constructors in the RGBA type.
+        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const = 0;
+        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const = 0;
+        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const = 0;
+
+        template<typename Pixel>
+        inline Pixel ReadPixel(unsigned row, unsigned col) const
+        {
+            Pixel p;
+            ReadPixel(row, col, &p);
+            return p;
+        }
+    protected:
+        // no public dynamic copying or assignment
+        IBitmapView() = default;
+        IBitmapView(IBitmapView&&) = default;
+        IBitmapView(const IBitmapView&) = default;
+        IBitmapView& operator=(const IBitmapView&) = default;
+        IBitmapView& operator=(IBitmapView&&) = default;
+    private:
+    };
+
+    // Bitmap interface. Mostly designed so that it's possible
+    // to keep bitmap objects around as generic bitmaps
+    // regardless of their actual underlying pixel representation.
+    // Extends the read only IBitmapView with functionality that
+    // mutates the actual bitmap object.
+    class IBitmap : public IBitmapView
+    {
+    public:
+        virtual ~IBitmap() = default;
+        // Resize the bitmap. Previous are undefined.
+        virtual void Resize(unsigned width, unsigned height) = 0;
         // Flip the rows of the bitmap around horizontal center line/row.
         // Transforms the bitmap as follows:
         // aaaa           cccc
         // bbbb  becomes  bbbb
         // cccc           aaaa
         virtual void FlipHorizontally() = 0;
-        // Get unique hash value based on the contents of the bitmap.
-        virtual std::size_t GetHash() const = 0;
         // Make a clone of this bitmap.
         virtual std::unique_ptr<IBitmap> Clone() const = 0;
-        // Here we could have methods for dynamically getting
-        // And setting pixels. I.e. there'd be a method for set/get
-        // for each type of pixel and when the format would not match
-        // there'd be a conversion.
-        // This is potentially doing something unexpected and there's
-        // no current use case for this API so this is omitted
-        // and instead one must use the statically typed methods
-        // provided by the actual implementation (Bitmap template)
+        // Write a RGBA pixel tuple to the underlying bitmap object.
+        // If the underlying bitmap doesn't have all the RGBA channels
+        // the value is converted into RGBA according to the conversion
+        // constructors in the RGBA type.
+        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) = 0;
     protected:
         // No public dynamic copying or assignment
         IBitmap() = default;
@@ -350,6 +298,57 @@ namespace gfx
     private:
     };
 
+    template<typename Pixel>
+    class ConstBitmapView : public IBitmapView
+    {
+    public:
+        using PixelType = Pixel;
+        ConstBitmapView(const Pixel* data, unsigned width, unsigned height)
+          : mPixels(data)
+          , mWidth(width)
+          , mHeight(height)
+        {}
+        virtual unsigned GetWidth() const override
+        { return mWidth; }
+        virtual unsigned GetHeight() const override
+        { return mHeight; }
+        virtual unsigned GetDepthBits() const override
+        { return sizeof(Pixel) * 8; }
+        virtual bool IsValid() const override
+        { return mPixels  && mWidth && mHeight; }
+        virtual const void* GetDataPtr() const override
+        { return mPixels; }
+        virtual std::size_t GetHash() const override
+        {
+            std::size_t hash = 0;
+            if (mPixels == nullptr)
+                return hash;
+            const auto* ptr = (const uint8_t*)mPixels;
+            const auto bytes = mWidth * mHeight * sizeof(Pixel);
+            for (size_t i=0; i<bytes; ++i)
+                hash = base::hash_combine(hash, ptr[i]);
+            return hash;
+        }
+        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
+        { read_pixel(row, col, pixel); }
+        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
+        { read_pixel(row, col, pixel); }
+        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const override
+        { read_pixel(row, col, pixel); }
+    private:
+        template<typename T>
+        void read_pixel(unsigned row, unsigned col, T* pout) const
+        {
+            ASSERT(row < mHeight);
+            ASSERT(col < mWidth);
+            const auto index = row * mWidth + col;
+            *pout = mPixels[index];
+        }
+    private:
+        const Pixel* mPixels  = nullptr;
+        const unsigned mWidth  = 0;
+        const unsigned mHeight = 0;
+    };
 
     template<typename Pixel>
     class Bitmap : public IBitmap
@@ -532,17 +531,30 @@ namespace gfx
         {
             return std::make_unique<Bitmap>(*this);
         }
+        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
+        { read_pixel(row, col, pixel); }
+        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
+        { read_pixel(row, col, pixel); }
+        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const override
+        { read_pixel(row, col, pixel); }
+
+        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) override
+        { write_pixel(row, col, pixel); }
+        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) override
+        { write_pixel(row, col, pixel); }
+        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) override
+        { write_pixel(row, col, pixel); }
 
         // Get a pixel from within the bitmap.
-        // The pixel must be within the this bitmap's width and height.
-        Pixel GetPixel(unsigned row, unsigned col) const
+        // The pixel must be within this bitmap's width and height.
+        const Pixel& GetPixel(unsigned row, unsigned col) const
         {
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
-            const auto src = row * mWidth + col;
-            return mPixels[src];
+            const auto index = row * mWidth + col;
+            return mPixels[index];
         }
-        Pixel GetPixel(const UPoint& p) const
+        const Pixel& GetPixel(const UPoint& p) const
         {
             return GetPixel(p.GetY(), p.GetX());
         }
@@ -554,8 +566,8 @@ namespace gfx
         {
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
-            const auto dst = row * mWidth + col;
-            mPixels[dst] = value;
+            const auto index = row * mWidth + col;
+            mPixels[index] = value;
         }
         void SetPixel(const UPoint& p, const Pixel& value)
         {
@@ -563,14 +575,13 @@ namespace gfx
         }
 
         // Compare the pixels in this bitmap within the given rectangle
-        // against the given reference pixel value using the given
-        // compare functor.
-        // returns false if the compare_functor identifies non-equality
-        // for any pixel. otherwise returns true and all pixels equal
-        // the reference pixel as determined by the compare functor.
+        // against the given reference pixel value with the given compare functor.
+        // Returns false if any of the pixels compare to not equal as determined
+        // by the compare functor.
+        // Otherwise, if all pixels compare equal returns true.
         // This is mostly useful as a testing utility.
-        template<typename CompareF>
-        bool Compare(const URect& rc, const Pixel& reference, CompareF comparer) const
+        template<typename CompareFunctor>
+        bool Compare(const URect& rc, const Pixel& reference, CompareFunctor comparer) const
         {
             const auto& dst = Intersect(GetRect(), rc);
 
@@ -595,11 +606,11 @@ namespace gfx
         }
 
         // Compare all pixels in this bitmap against the given
-        // reference pixel for equality using the given comparer functor.
+        // reference pixel for equality using the given compare functor.
         // Returns false if the compare functor identifies non-equality
         // for any pixel otherwise true.
-        template<typename ComparerF>
-        bool Compare(const Pixel& reference, ComparerF comparer) const
+        template<typename CompareFunctor>
+        bool Compare(const Pixel& reference, CompareFunctor comparer) const
         {
             const URect rc(0, 0, mWidth, mHeight);
             return Compare(rc, reference, comparer);
@@ -745,7 +756,23 @@ namespace gfx
         { return URect(0u, 0u, mWidth, mHeight); }
         USize GetSize() const
         { return USize(mWidth, mHeight); }
-
+    private:
+        template<typename T>
+        void read_pixel(unsigned row, unsigned col, T* pout) const
+        {
+            ASSERT(row < mHeight);
+            ASSERT(col < mWidth);
+            const auto index = row * mWidth + col;
+            *pout = mPixels[index];
+        }
+        template<typename T>
+        void write_pixel(unsigned row, unsigned col, const T& value)
+        {
+            ASSERT(row < mHeight);
+            ASSERT(col < mWidth);
+            const auto index = row * mWidth + col;
+            mPixels[index] = Pixel(value);
+        }
     private:
         std::vector<Pixel> mPixels;
         unsigned mWidth  = 0;
@@ -835,63 +862,8 @@ namespace gfx
         return !(lhs == rhs);
     }
 
-    template<typename OutputIt>
-    void WritePPM(const Bitmap<RGB>& bmp, OutputIt out)
-    {
-        static_assert(sizeof(RGB) == 3,
-            "Padding bytes found. Cannot copy RGB data as a byte stream.");
-
-        const auto w = bmp.GetWidth();
-        const auto h = bmp.GetHeight();
-
-        std::stringstream ss;
-        ss << "P6 " << w << " " << h << " 255\n";
-        std::string header = ss.str();
-        std::copy(std::begin(header), std::end(header), out);
-        // todo: fix if out is pointer.
-        const auto bytes = w * h * sizeof(RGB);
-        const auto* beg  = (const char*)bmp.GetData();
-        const auto* end  = (const char*)bmp.GetData() + bytes;
-        std::copy(beg, end, out);
-    }
-
-    inline
-    void WritePPM(const Bitmap<RGB>& bmp, const std::string& filename)
-    {
-        std::ofstream out(filename, std::ios::binary);
-        if (!out.is_open())
-            throw std::runtime_error("failed to open file: " + filename);
-
-        WritePPM(bmp, std::ostreambuf_iterator<char>(out));
-    }
-
-    inline
-    void WritePPM(const Bitmap<RGB>& bmp, const char* filename)
-    {
-        WritePPM(bmp, std::string(filename));
-    }
-
-    template<typename T> inline
-    void WritePNG(const Bitmap<T>& bmp, const char* filename)
-    {
-        const auto w = bmp.GetWidth();
-        const auto h = bmp.GetHeight();
-        if (!stbi_write_png(filename, w, h, sizeof(T), bmp.GetDataPtr(), sizeof(T) * w))
-            throw std::runtime_error(std::string("failed to write png: ") + filename);
-    }
-    template<typename T> inline
-    void WritePNG(const Bitmap<T>& bmp, const std::string& filename)
-    {
-        return WritePNG(bmp, filename.c_str());
-    }
-    inline void WritePNG(const IBitmap& bmp, const std::string& filename)
-    {
-        const auto w = bmp.GetWidth();
-        const auto h = bmp.GetHeight();
-        const auto d = bmp.GetDepthBits() / 8;
-        if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
-            throw std::runtime_error(std::string("failed to write png: " + filename));
-    }
+    void WritePPM(const IBitmapView& bmp, const std::string& filename);
+    void WritePNG(const IBitmapView& bmp, const std::string& filename);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for
