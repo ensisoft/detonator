@@ -560,6 +560,7 @@ add_executable(unit_test_imgpack
         editor/app/unit_test/unit_test_image_packing.cpp
         editor/app/packing.cpp
         base/assert.cpp
+        graphics/bitmap.cpp
         third_party/stb/stb_image.c
         third_party/stb/stb_image_write.c)
 add_executable(unit_test_ipc

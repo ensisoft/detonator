@@ -18,7 +18,10 @@
 
 #include "warnpush.h"
 #  include <boost/math/special_functions/prime.hpp>
+#  include <stb/stb_image_write.h>
 #include "warnpop.h"
+
+#include <fstream>
 
 #include "base/hash.h"
 #include "base/math.h"
@@ -28,6 +31,119 @@
 
 namespace gfx
 {
+RGB::RGB(Color c)
+{
+    switch (c)
+    {
+        case Color::White:
+            r = g = b = 255;
+            break;
+        case Color::Black:
+            break;
+        case Color::Red:
+            r = 255;
+            break;
+        case Color::DarkRed:
+            r = 127;
+            break;
+        case Color::Green:
+            g = 255;
+            break;
+        case Color::DarkGreen:
+            g = 127;
+            break;
+        case Color::Blue:
+            b = 255;
+            break;
+        case Color::DarkBlue:
+            b = 127;
+            break;
+        case Color::Cyan:
+            g = b = 255;
+            break;
+        case Color::DarkCyan:
+            g = b = 127;
+            break;
+        case Color::Magenta:
+            r = b = 255;
+            break;
+        case Color::DarkMagenta:
+            r = b = 127;
+            break;
+        case Color::Yellow:
+            r = g = 255;
+            break;
+        case Color::DarkYellow:
+            r = g = 127;
+            break;
+        case Color::Gray:
+            r = g = b = 158;
+            break;
+        case Color::DarkGray:
+            r = g = b = 127;
+            break;
+        case Color::LightGray:
+            r = g = b = 192;
+            break;
+        case Color::HotPink:
+            r = 255;
+            g = 105;
+            b = 180;
+            break;
+        case Color::Gold:
+            r = 255;
+            g = 215;
+            b = 0;
+            break;
+        case Color::Silver:
+            r = 192;
+            g = 192;
+            b = 192;
+            break;
+        case Color::Bronze:
+            r = 205;
+            g = 127;
+            b = 50;
+            break;
+    }
+} // ctor
+
+void WritePPM(const IBitmapView& bmp, const std::string& filename)
+{
+    static_assert(sizeof(RGB) == 3,
+        "Padding bytes found. Cannot copy RGB data as a byte stream.");
+
+    std::ofstream out(filename, std::ios::binary);
+    if (!out.is_open())
+        throw std::runtime_error("failed to open file: " + filename);
+
+    const auto width  = bmp.GetWidth();
+    const auto height = bmp.GetHeight();
+    const auto depth  = bmp.GetDepthBits() / 8;
+    const auto bytes  = width * height * sizeof(RGB);
+
+    std::vector<RGB> tmp;
+    tmp.reserve(width * height);
+    for (unsigned row=0; row<height; ++row)
+    {
+        for (unsigned col=0; col<width; ++col)
+        {
+            tmp.push_back(bmp.ReadPixel(row, col));
+        }
+    }
+    out << "P6 " << width << " " << height << " 255\n";
+    out.write((const char*)&tmp[0], bytes);
+    out.close();
+}
+
+void WritePNG(const IBitmapView& bmp, const std::string& filename)
+{
+    const auto w = bmp.GetWidth();
+    const auto h = bmp.GetHeight();
+    const auto d = bmp.GetDepthBits() / 8;
+    if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
+        throw std::runtime_error(std::string("failed to write png: " + filename));
+}
 
 void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
 {
