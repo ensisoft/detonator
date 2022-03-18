@@ -133,10 +133,10 @@ public:
     {
         gfx::DrawTextRect(painter,
           "VSYNC TEST",
-          "fonts/AtariFontFullVersion.ttf", 40,
-          gfx::FRect(100, 100, 500, 50),
+          "fonts/AtariFontFullVersion.ttf", 96,
+          gfx::FRect(0, 0, 1024, 768),
           mColors[mColorIndex],
-          gfx::TextAlign::AlignBottom, 0, 1.4f);
+          gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         mColorIndex = (mColorIndex + 1) % mColors.size();
     }
     virtual std::string GetName() const override
