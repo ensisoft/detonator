@@ -452,6 +452,14 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     DEBUG("Host working directory set to '%1'", mHostWorkingDir);
     DEBUG("Game working directory set to '%1'", mGameWorkingDir);
 
+    // Set default surface format.
+    // note that the alpha channel is not used on purpose.
+    // using an alpha channel will cause artifacts with alpha
+    // compositing window compositor such as picom. i.e. the
+    // background surfaces in the compositor's window stack will
+    // show through. in terms of alpha blending the game content
+    // whether the destination color buffer has alpha channel or
+    // not should be irrelevant.
     QSurfaceFormat format;
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setRenderableType(QSurfaceFormat::OpenGLES);
@@ -459,7 +467,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);
     format.setBlueBufferSize(8);
-    format.setAlphaBufferSize(8);
+    format.setAlphaBufferSize(0); // no alpha channel
     format.setStencilBufferSize(8);
     format.setDepthBufferSize(0);
     format.setSamples(settings.multisample_sample_count);
