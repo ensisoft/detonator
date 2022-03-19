@@ -19,6 +19,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "base/utility.h"
+#include "base/format.h"
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "data/json.h"
@@ -337,7 +339,59 @@ int test_main(int argc, char* argv[])
             }
         }
         WritePPM(bmp, "bitmap.ppm");
+        WritePNG(bmp, "bitmap.png");
     }
+
+    // test mip map generation with box filter
+    {
+        gfx::Bitmap<gfx::RGB> src(256, 256);
+        src.Fill(gfx::Color::Green);
+
+        for (int y=0; y<256; ++y)
+        {
+            for (int x=0; x<256; ++x)
+            {
+                int xp = x - 128;
+                int yp = y - 128;
+                const int radius = 100;
+                if (xp*xp + yp*yp <= radius*radius)
+                    src.SetPixel(y, x, gfx::Color::Red);
+            }
+        }
+
+        struct TestCase {
+            unsigned width  = 0;
+            unsigned height = 0;
+        } cases[] = {
+            {256, 256},
+            {257, 256},
+            {256, 257},
+            {300, 256},
+            {256, 300}
+        };
+
+        for (auto test : cases)
+        {
+            gfx::Bitmap<gfx::RGB> bmp;
+            bmp.Resize(test.width, test.height);
+            bmp.Fill(gfx::Color::White);
+            bmp.Copy(0, 0, src);
+
+            WritePNG(bmp, base::FormatString("%1x%2_level_0.png", test.width, test.height));
+            unsigned level = 1;
+
+            auto mip = gfx::GenerateNextMipmap(bmp, false);
+            while (mip)
+            {
+                WritePNG(*mip, base::FormatString("%1x%2_level_%3.png", test.width, test.height, level));
+
+                mip = gfx::GenerateNextMipmap(*mip, false);
+                ++level;
+            }
+        }
+    }
+
+
 
     // random noise bitmap generation
     {

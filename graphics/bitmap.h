@@ -51,14 +51,11 @@ namespace gfx
         Grayscale(const RGB& rgb); // defined after RGB
         Grayscale(const RGBA& rgba); // defined after RGBA
     };
-    inline bool operator==(const Grayscale& lhs, const Grayscale& rhs)
-    { return lhs.r == rhs.r; }
-    inline bool operator!=(const Grayscale& lhs, const Grayscale& rhs)
-    { return lhs.r != rhs.r; }
-    inline Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs)
-    { return Grayscale(lhs.r & rhs.r); }
-    inline Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
-    { return Grayscale(lhs.r | rhs.r); }
+    bool operator==(const Grayscale& lhs, const Grayscale& rhs);
+    bool operator!=(const Grayscale& lhs, const Grayscale& rhs);
+    Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs);
+    Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs);
+    Grayscale operator >> (const Grayscale& lhs, unsigned bits);
 
     struct RGB {
         u8 r = 0;
@@ -75,31 +72,11 @@ namespace gfx
         RGB(const RGBA& rgba);
     };
 
-    inline bool operator==(const RGB& lhs, const RGB& rhs)
-    {
-        return lhs.r == rhs.r &&
-               lhs.g == rhs.g &&
-               lhs.b == rhs.b;
-    }
-    inline bool operator!=(const RGB& lhs, const RGB& rhs)
-    { return !(lhs == rhs); }
-
-    inline RGB operator & (const RGB& lhs, const RGB& rhs)
-    {
-        RGB ret;
-        ret.r = lhs.r & rhs.r;
-        ret.g = lhs.g & rhs.g;
-        ret.b = lhs.b & rhs.b;
-        return ret;
-    }
-    inline RGB operator | (const RGB& lhs, const RGB& rhs)
-    {
-        RGB ret;
-        ret.r = lhs.r | rhs.r;
-        ret.g = lhs.g | rhs.g;
-        ret.b = lhs.b | rhs.b;
-        return ret;
-    }
+    bool operator==(const RGB& lhs, const RGB& rhs);
+    bool operator!=(const RGB& lhs, const RGB& rhs);
+    RGB operator & (const RGB& lhs, const RGB& rhs);
+    RGB operator | (const RGB& lhs, const RGB& rhs);
+    RGB operator >> (const RGB& lhs, unsigned bits);
 
     struct RGBA {
         u8 r = 0;
@@ -131,35 +108,11 @@ namespace gfx
         }
     };
 
-    inline bool operator==(const RGBA& lhs, const RGBA& rhs)
-    {
-        return lhs.r == rhs.r &&
-               lhs.g == rhs.g &&
-               lhs.b == rhs.b &&
-               lhs.a == rhs.a;
-    }
-    inline bool operator!=(const RGBA& lhs, const RGBA& rhs)
-    {
-        return !(lhs == rhs);
-    }
-    inline RGBA operator & (const RGBA& lhs, const RGBA& rhs)
-    {
-        RGBA ret;
-        ret.r = lhs.r & rhs.r;
-        ret.g = lhs.g & rhs.g;
-        ret.b = lhs.b & rhs.b;
-        ret.a = lhs.a & rhs.a;
-        return ret;
-    }
-    inline RGBA operator | (const RGBA& lhs, const RGBA& rhs)
-    {
-        RGBA ret;
-        ret.r = lhs.r | rhs.r;
-        ret.g = lhs.g | rhs.g;
-        ret.b = lhs.b | rhs.b;
-        ret.a = lhs.a | rhs.a;
-        return ret;
-    }
+    bool operator==(const RGBA& lhs, const RGBA& rhs);
+    bool operator!=(const RGBA& lhs, const RGBA& rhs);
+    RGBA operator & (const RGBA& lhs, const RGBA& rhs);
+    RGBA operator | (const RGBA& lhs, const RGBA& rhs);
+    RGBA operator >> (const RGBA& lhs, unsigned bits);
 
     // RGB methods that depend on RGBA
     inline RGB::RGB(const RGBA& rgba)
@@ -195,6 +148,46 @@ namespace gfx
             0.0722f * rgba.b;
         r = u8((y * a) / 255.0f);
     }
+
+    struct fRGBA {
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
+        float a = 0.0f;
+    };
+    fRGBA operator + (const fRGBA& lhs, const fRGBA& rhs);
+    fRGBA operator * (const fRGBA& lhs, float scaler);
+    fRGBA operator * (float scaler, const fRGBA& rhs);
+
+    struct fRGB {
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
+    };
+    fRGB operator + (const fRGB& lhs, const fRGB& rhs);
+    fRGB operator * (const fRGB& lhs, float scaler);
+    fRGB operator * (float scaler, const fRGB& rhs);
+
+    struct fGrayscale {
+        float r = 0.0f;
+    };
+    fGrayscale operator + (const fGrayscale& lhs, const fGrayscale& rhs);
+    fGrayscale operator * (const fGrayscale& lhs, float scaler);
+    fGrayscale operator * (float scaler, const fGrayscale& rhs);
+
+    float sRGB_to_linear(float value);
+    float sRGB_from_linear(float value);
+    fRGBA sRGB_to_linear(const fRGBA& value);
+    fRGB sRGB_to_linear(const fRGB& value);
+    fRGBA sRGB_from_linear(const fRGBA& value);
+    fRGB sRGB_from_linear(const fRGB& value);
+
+    fRGBA RGB_u8_to_float(const RGBA& value);
+    fRGB RGB_u8_to_float(const RGB& value);
+    fGrayscale RGB_u8_to_float(const Grayscale& value);
+    RGBA RGB_u8_from_float(const fRGBA& value);
+    RGB RGB_u8_from_float(const fRGB& value);
+    Grayscale RGB_u8_from_float(const fGrayscale& value);
 
     static_assert(sizeof(Grayscale) == 1,
         "Unexpected size of Grayscale pixel struct type.");
@@ -864,6 +857,8 @@ namespace gfx
 
     void WritePPM(const IBitmapView& bmp, const std::string& filename);
     void WritePNG(const IBitmapView& bmp, const std::string& filename);
+
+    std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for

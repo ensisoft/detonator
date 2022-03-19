@@ -21,13 +21,87 @@
 #  include <stb/stb_image_write.h>
 #include "warnpop.h"
 
+#include <algorithm>
 #include <fstream>
+#include <cmath>
 
 #include "base/hash.h"
 #include "base/math.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/bitmap.h"
+
+namespace {
+template<typename T_u8, typename T_float, bool srgb>
+std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapView& src)
+{
+    ASSERT(src.IsValid());
+
+    const auto src_width  = src.GetWidth();
+    const auto src_height = src.GetHeight();
+    if (src_width == 1 && src_height == 1)
+        return nullptr;
+
+    const auto dst_width  = std::max(1u, src_width / 2);
+    const auto dst_height = std::max(1u, src_height / 2);
+
+    const auto src_height_max = src_height & ~0x1;
+    const auto src_width_max  = src_width & ~0x1;
+
+    using Bitmap = gfx::Bitmap<T_u8>;
+
+    auto ret = std::make_unique<Bitmap>();
+    ret->Resize(dst_width, dst_height);
+
+    for (unsigned dst_row=0, src_row=0; src_row<src_height_max; src_row+=2, dst_row++)
+    {
+        for (unsigned dst_col=0, src_col=0; src_col<src_width_max; src_col+=2, dst_col++)
+        {
+            // read 2x2 pixels from the source image
+            T_u8 values[4];
+            src.ReadPixel(std::min(src_row+0, src_height-1), std::min(src_col+0, src_width-1), &values[0]);
+            src.ReadPixel(std::min(src_row+0, src_height-1), std::min(src_col+1, src_width-1), &values[1]);
+            src.ReadPixel(std::min(src_row+1, src_height-1), std::min(src_col+0, src_width-1), &values[2]);
+            src.ReadPixel(std::min(src_row+1, src_height-1), std::min(src_col+1, src_width-1), &values[3]);
+
+            // normalize the values for better precision. alternative would
+            // be to use bit shift (right shift by two) on the integer type
+            // but that would lose some precision.
+            T_float values_norm[4];
+            values_norm[0] = gfx::RGB_u8_to_float(values[0]);
+            values_norm[1] = gfx::RGB_u8_to_float(values[1]);
+            values_norm[2] = gfx::RGB_u8_to_float(values[2]);
+            values_norm[3] = gfx::RGB_u8_to_float(values[3]);
+
+            // if we're dealing with sRGB color space then the values need first
+            // be converted into linear before averaging. this is only supported
+            // for RGBA and RGB formats.
+            if constexpr (srgb)
+            {
+                values_norm[0] = gfx::sRGB_to_linear(values_norm[0]);
+                values_norm[1] = gfx::sRGB_to_linear(values_norm[1]);
+                values_norm[2] = gfx::sRGB_to_linear(values_norm[2]);
+                values_norm[3] = gfx::sRGB_to_linear(values_norm[3]);
+            }
+
+            // compute the average of the original 4 pixels.
+            T_float value = values_norm[0] * 0.25f +
+                            values_norm[1] * 0.25f +
+                            values_norm[2] * 0.25f +
+                            values_norm[3] * 0.25f;
+            // encode linear in sRGB if needed.
+            if constexpr (srgb)
+            {
+                value = gfx::sRGB_from_linear(value);
+            }
+
+            // write the new pixel value out.
+            ret->WritePixel(dst_row, dst_col, gfx::RGB_u8_from_float(value));
+        }
+    }
+    return ret;
+}
+} // namespace
 
 namespace gfx
 {
@@ -108,6 +182,273 @@ RGB::RGB(Color c)
     }
 } // ctor
 
+bool operator==(const Grayscale& lhs, const Grayscale& rhs)
+{
+    return lhs.r == rhs.r;
+}
+bool operator!=(const Grayscale& lhs, const Grayscale& rhs)
+{
+    return lhs.r != rhs.r;
+}
+Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs)
+{
+    return Grayscale(lhs.r & rhs.r);
+}
+Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
+{
+    return Grayscale(lhs.r | rhs.r);
+}
+
+Grayscale operator >> (const Grayscale& lhs, unsigned bits)
+{
+    return Grayscale (lhs.r >> bits);
+}
+
+bool operator==(const RGB& lhs, const RGB& rhs)
+{
+    return lhs.r == rhs.r &&
+           lhs.g == rhs.g &&
+           lhs.b == rhs.b;
+}
+bool operator!=(const RGB& lhs, const RGB& rhs)
+{ return !(lhs == rhs); }
+
+RGB operator & (const RGB& lhs, const RGB& rhs)
+{
+    RGB ret;
+    ret.r = lhs.r & rhs.r;
+    ret.g = lhs.g & rhs.g;
+    ret.b = lhs.b & rhs.b;
+    return ret;
+}
+RGB operator | (const RGB& lhs, const RGB& rhs)
+{
+    RGB ret;
+    ret.r = lhs.r | rhs.r;
+    ret.g = lhs.g | rhs.g;
+    ret.b = lhs.b | rhs.b;
+    return ret;
+}
+
+RGB operator >> (const RGB& lhs, unsigned bits)
+{
+    RGB ret;
+    ret.r = lhs.r >> bits;
+    ret.g = lhs.g >> bits;
+    ret.b = lhs.b >> bits;
+    return ret;
+}
+
+bool operator==(const RGBA& lhs, const RGBA& rhs)
+{
+    return lhs.r == rhs.r &&
+           lhs.g == rhs.g &&
+           lhs.b == rhs.b &&
+           lhs.a == rhs.a;
+}
+bool operator!=(const RGBA& lhs, const RGBA& rhs)
+{
+    return !(lhs == rhs);
+}
+RGBA operator & (const RGBA& lhs, const RGBA& rhs)
+{
+    RGBA ret;
+    ret.r = lhs.r & rhs.r;
+    ret.g = lhs.g & rhs.g;
+    ret.b = lhs.b & rhs.b;
+    ret.a = lhs.a & rhs.a;
+    return ret;
+}
+RGBA operator | (const RGBA& lhs, const RGBA& rhs)
+{
+    RGBA ret;
+    ret.r = lhs.r | rhs.r;
+    ret.g = lhs.g | rhs.g;
+    ret.b = lhs.b | rhs.b;
+    ret.a = lhs.a | rhs.a;
+    return ret;
+}
+
+RGBA operator >> (const RGBA& lhs, unsigned bits)
+{
+    RGBA ret;
+    ret.r = lhs.r >> bits;
+    ret.g = lhs.g >> bits;
+    ret.b = lhs.b >> bits;
+    ret.a = lhs.a >> bits;
+    return ret;
+}
+
+fRGBA operator + (const fRGBA& lhs, const fRGBA& rhs)
+{
+    fRGBA ret;
+    ret.r = lhs.r + rhs.r;
+    ret.g = lhs.g + rhs.g;
+    ret.b = lhs.b + rhs.b;
+    ret.a = lhs.a + rhs.a;
+    return ret;
+}
+fRGBA operator * (const fRGBA& lhs, float scaler)
+{
+    fRGBA ret;
+    ret.r = lhs.r * scaler;
+    ret.g = lhs.g * scaler;
+    ret.b = lhs.b * scaler;
+    ret.a = lhs.a * scaler;
+    return ret;
+}
+fRGBA operator * (float scaler, const fRGBA& rhs)
+{
+    fRGBA ret;
+    ret.r = rhs.r * scaler;
+    ret.g = rhs.g * scaler;
+    ret.b = rhs.b * scaler;
+    ret.a = rhs.a * scaler;
+    return ret;
+}
+
+fRGB operator + (const fRGB& lhs, const fRGB& rhs)
+{
+    fRGB ret;
+    ret.r = lhs.r + rhs.r;
+    ret.g = lhs.g + rhs.g;
+    ret.b = lhs.b + rhs.b;
+    return ret;
+}
+fRGB operator * (const fRGB& lhs, float scaler)
+{
+    fRGB ret;
+    ret.r = lhs.r * scaler;
+    ret.g = lhs.g * scaler;
+    ret.b = lhs.b * scaler;
+    return ret;
+}
+fRGB operator * (float scaler, const fRGB& rhs)
+{
+    fRGB ret;
+    ret.r = rhs.r * scaler;
+    ret.g = rhs.g * scaler;
+    ret.b = rhs.b * scaler;
+    return ret;
+}
+
+fGrayscale operator + (const fGrayscale& lhs, const fGrayscale& rhs)
+{
+    fGrayscale ret;
+    ret.r = lhs.r + rhs.r;
+    return ret;
+}
+fGrayscale operator * (const fGrayscale& lhs, float scaler)
+{
+    fGrayscale ret;
+    ret.r = lhs.r * scaler;
+    return ret;
+}
+fGrayscale operator * (float scaler, const fGrayscale& rhs)
+{
+    fGrayscale ret;
+    ret.r = rhs.r * scaler;
+    return ret;
+}
+
+float sRGB_to_linear(float value)
+{
+    return value <= 0.04045f
+           ? value / 12.92f
+           : std::pow((value + 0.055f) / 1.055f, 2.4f);
+}
+float sRGB_from_linear(float value)
+{
+    return value <= 0.0031308f
+           ? value * 12.92f
+           : std::pow(value, 1.0f/2.4f) * 1.055f - 0.055f;
+}
+
+fRGBA sRGB_to_linear(const fRGBA& value)
+{
+    fRGBA ret;
+    ret.r = sRGB_to_linear(value.r);
+    ret.g = sRGB_to_linear(value.g);
+    ret.b = sRGB_to_linear(value.b);
+    // alpha is not sRGB encoded.
+    ret.a = value.a;
+    return ret;
+}
+fRGB sRGB_to_linear(const fRGB& value)
+{
+    fRGB ret;
+    ret.r = sRGB_to_linear(value.r);
+    ret.g = sRGB_to_linear(value.g);
+    ret.b = sRGB_to_linear(value.b);
+    return ret;
+}
+fRGBA sRGB_from_linear(const fRGBA& value)
+{
+    fRGBA ret;
+    ret.r = sRGB_from_linear(value.r);
+    ret.g = sRGB_from_linear(value.g);
+    ret.b = sRGB_from_linear(value.b);
+    // alpha is not sRGB encoded.
+    ret.a = value.a;
+    return ret;
+}
+fRGB sRGB_from_linear(const fRGB& value)
+{
+    fRGB ret;
+    ret.r = sRGB_from_linear(value.r);
+    ret.g = sRGB_from_linear(value.g);
+    ret.b = sRGB_from_linear(value.b);
+    return ret;
+}
+
+fRGBA RGB_u8_to_float(const RGBA& value)
+{
+    fRGBA ret;
+    ret.r = value.r / 255.0f;
+    ret.g = value.g / 255.0f;
+    ret.b = value.b / 255.0f;
+    ret.a = value.a / 255.0f;
+    return ret;
+}
+fRGB RGB_u8_to_float(const RGB& value)
+{
+    fRGB ret;
+    ret.r = value.r / 255.0f;
+    ret.g = value.g / 255.0f;
+    ret.b = value.b / 255.0f;
+    return ret;
+}
+fGrayscale RGB_u8_to_float(const Grayscale& value)
+{
+    fGrayscale ret;
+    ret.r = value.r / 255.0f;
+    return ret;
+}
+
+RGBA RGB_u8_from_float(const fRGBA& value)
+{
+    RGBA ret;
+    ret.r = value.r * 255;
+    ret.g = value.g * 255;
+    ret.b = value.b * 255;
+    ret.a = value.a * 255;
+    return ret;
+}
+RGB RGB_u8_from_float(const fRGB& value)
+{
+    RGB ret;
+    ret.r = value.r * 255;
+    ret.g = value.g * 255;
+    ret.b = value.b * 255;
+    return ret;
+}
+Grayscale RGB_u8_from_float(const fGrayscale& value)
+{
+    Grayscale ret;
+    ret.r = value.r * 255;
+    return ret;
+}
+
 void WritePPM(const IBitmapView& bmp, const std::string& filename)
 {
     static_assert(sizeof(RGB) == 3,
@@ -128,7 +469,9 @@ void WritePPM(const IBitmapView& bmp, const std::string& filename)
     {
         for (unsigned col=0; col<width; ++col)
         {
-            tmp.push_back(bmp.ReadPixel(row, col));
+            RGB value;
+            bmp.ReadPixel(row, col, &value);
+            tmp.push_back(value);
         }
     }
     out << "P6 " << width << " " << height << " 255\n";
@@ -143,6 +486,19 @@ void WritePNG(const IBitmapView& bmp, const std::string& filename)
     const auto d = bmp.GetDepthBits() / 8;
     if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
         throw std::runtime_error(std::string("failed to write png: " + filename));
+}
+
+std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb)
+{
+    if (src.GetDepthBits() == 32) {
+        if (srgb) return ::BoxFilter<RGBA, fRGBA, true>(src);
+        return ::BoxFilter<RGBA, fRGBA, false>(src);
+    } else if (src.GetDepthBits() == 24) {
+        if (srgb) return ::BoxFilter<RGB, fRGB, true> (src);
+        return ::BoxFilter<RGB, fRGB, false>(src);
+    } else if (src.GetDepthBits() == 8)
+        return ::BoxFilter<Grayscale, fGrayscale, false>(src);
+    return nullptr;
 }
 
 void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
