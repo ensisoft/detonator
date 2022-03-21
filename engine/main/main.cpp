@@ -514,6 +514,7 @@ int main(int argc, char* argv[])
         attrs.surfaces.window = true;
         attrs.double_buffer   = true;
         attrs.srgb_buffer     = true;
+        bool srgb_buffer      = true;
         base::JsonReadSafe(json["config"], "red_size", &attrs.red_size);
         base::JsonReadSafe(json["config"], "green_size", &attrs.green_size);
         base::JsonReadSafe(json["config"], "blue_size", &attrs.blue_size);
@@ -521,7 +522,8 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["config"], "stencil_size", &attrs.stencil_size);
         base::JsonReadSafe(json["config"], "depth_size", &attrs.depth_size);
         base::JsonReadSafe(json["config"], "sampling", &attrs.sampling);
-        base::JsonReadSafe(json["config"], "srgb", &attrs.srgb_buffer);
+        base::JsonReadSafe(json["config"], "srgb", &srgb_buffer);
+        attrs.srgb_buffer = srgb_buffer;
 
         DEBUG("OpenGL Config:");
         DEBUG("Red: %1, Green: %2, Blue: %3, Alpha: %4, Stencil: %5, Depth: %6",
