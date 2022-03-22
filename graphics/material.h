@@ -809,11 +809,6 @@ namespace gfx
             // The instance uniforms will take precedence over the uniforms
             // set in the class whenever they're set.
             std::unordered_map<std::string, Uniform> uniforms;
-
-            using Blending = Device::State::BlendOp;
-            // The resulting blending state that should be set on the rasterizer
-            // when using the material to draw. Will be set by the material.
-            Blending blending = Blending::None;
         };
 
         virtual ~MaterialClass() = default;
@@ -840,7 +835,7 @@ namespace gfx
         virtual Shader* GetShader(Device& device) const = 0;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const = 0;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const = 0;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
         virtual void ApplyStaticState(Device& device, Program& program) const = 0;
@@ -989,7 +984,7 @@ namespace gfx
             ret->mClassId = base::RandomString(10);
             return ret;
         }
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const override;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
@@ -1050,7 +1045,7 @@ namespace gfx
             ret->mClassId = base::RandomString(10);
             return ret;
         }
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const override;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
@@ -1172,7 +1167,7 @@ namespace gfx
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const override;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
@@ -1277,7 +1272,7 @@ namespace gfx
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const override;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
@@ -1406,7 +1401,7 @@ namespace gfx
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(State& state, Device& device, Program& program) const override;
+        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
@@ -1503,7 +1498,14 @@ namespace gfx
             state.material_time = mRuntime;
             state.uniforms      = mUniforms;
             mClass->ApplyDynamicState(state, device, program);
-            raster.blending = state.blending;
+
+            const auto surface = mClass->GetSurfaceType();
+            if (surface == MaterialClass::SurfaceType::Opaque)
+                raster.blending = RasterState::Blending::None;
+            else if (surface == MaterialClass::SurfaceType::Transparent)
+                raster.blending = RasterState::Blending::Transparent;
+            else if (surface == MaterialClass::SurfaceType::Emissive)
+                raster.blending = RasterState::Blending::Additive;
         }
         virtual void ApplyStaticState(Device& device, Program& program) const override
         { mClass->ApplyStaticState(device, program); }

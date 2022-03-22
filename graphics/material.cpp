@@ -771,15 +771,8 @@ std::string ColorClass::GetProgramId() const
     return std::to_string(hash);
 }
 
-void ColorClass::ApplyDynamicState(State& state, Device& device, Program& program) const
+void ColorClass::ApplyDynamicState(const State& state, Device& device, Program& program) const
 {
-    if (mSurfaceType == SurfaceType::Opaque)
-        state.blending = State::Blending::None;
-    else if (mSurfaceType == SurfaceType::Transparent)
-        state.blending = State::Blending::Transparent;
-    else if (mSurfaceType == SurfaceType::Emissive)
-        state.blending = State::Blending::Additive;
-
     if (!mStatic)
     {
         SetUniform("kGamma",     state.uniforms, mGamma, program);
@@ -891,17 +884,9 @@ std::string GradientClass::GetProgramId() const
     return std::to_string(hash);
 }
 
-void GradientClass::ApplyDynamicState(State& state, Device& device, Program& program) const
+void GradientClass::ApplyDynamicState(const State& state, Device& device, Program& program) const
 {
-    if (mSurfaceType == SurfaceType::Opaque)
-        state.blending = State::Blending::None;
-    else if (mSurfaceType == SurfaceType::Transparent)
-        state.blending = State::Blending::Transparent;
-    else if (mSurfaceType == SurfaceType::Emissive)
-        state.blending = State::Blending::Additive;
-
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
-
     if (!mStatic)
     {
         SetUniform("kGamma",  state.uniforms, mGamma, program);
@@ -1132,15 +1117,8 @@ std::unique_ptr<MaterialClass> SpriteClass::Copy() const
 std::unique_ptr<MaterialClass> SpriteClass::Clone() const
 { return std::make_unique<SpriteClass>(*this, false); }
 
-void SpriteClass::ApplyDynamicState(State& state, Device& device, Program& program) const
+void SpriteClass::ApplyDynamicState(const State& state, Device& device, Program& program) const
 {
-    if (mSurfaceType == SurfaceType::Opaque)
-        state.blending = State::Blending::None;
-    else if (mSurfaceType == SurfaceType::Transparent)
-        state.blending = State::Blending::Transparent;
-    else if (mSurfaceType == SurfaceType::Emissive)
-        state.blending = State::Blending::Additive;
-
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !mStatic;
     ts.current_time    = state.material_time;
@@ -1536,15 +1514,8 @@ std::unique_ptr<MaterialClass> TextureMap2DClass::Copy() const
 std::unique_ptr<MaterialClass> TextureMap2DClass::Clone() const
 { return std::make_unique<TextureMap2DClass>(*this, false); }
 
-void TextureMap2DClass::ApplyDynamicState(State& state, Device& device, Program& program) const
+void TextureMap2DClass::ApplyDynamicState(const State& state, Device& device, Program& program) const
 {
-    if (mSurfaceType == SurfaceType::Opaque)
-        state.blending = State::Blending::None;
-    else if (mSurfaceType == SurfaceType::Transparent)
-        state.blending = State::Blending::Transparent;
-    else if (mSurfaceType == SurfaceType::Emissive)
-        state.blending = State::Blending::Additive;
-
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !mStatic;
     ts.current_time    = 0.0;
@@ -1909,15 +1880,8 @@ std::unique_ptr<MaterialClass> CustomMaterialClass::Clone() const
     ret->mClassId = base::RandomString(10);
     return ret;
 }
-void CustomMaterialClass::ApplyDynamicState(State& state, Device& device, Program& program) const
+void CustomMaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const
 {
-    if (mSurfaceType == SurfaceType::Opaque)
-        state.blending = State::Blending::None;
-    else if (mSurfaceType == SurfaceType::Transparent)
-        state.blending = State::Blending::Transparent;
-    else if (mSurfaceType == SurfaceType::Emissive)
-        state.blending = State::Blending::Additive;
-
     for (const auto& uniform : mUniforms)
     {
         const char* name = uniform.first.c_str();
