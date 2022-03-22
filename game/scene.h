@@ -635,7 +635,7 @@ namespace game
         // If the entity is not in the scene or if the node is not part of the entity
         // the result is undefined.
         FPoint MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const FPoint& point) const;
-
+        glm::vec2 MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const;
 
         void Update(float dt);
 
