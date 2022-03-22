@@ -74,4 +74,33 @@ bool Image::Load(const std::string& URI)
     return true;
 }
 
+std::unique_ptr<IBitmap> Image::AsBitmap() const
+{
+    ASSERT(mData);
+
+    std::unique_ptr<IBitmap> ret;
+    if (mDepth == 1)
+        ret.reset(new Bitmap<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
+    else if (mDepth == 3)
+        ret.reset(new Bitmap<RGB>((const RGB*)mData, mWidth, mHeight));
+    else if (mDepth == 4)
+        ret.reset(new Bitmap<RGBA>((const RGBA*)mData, mWidth, mHeight));
+    return ret;
+}
+
+const IBitmapView* Image::GetBitmapView() const
+{
+    if (mView) return mView.get();
+
+    ASSERT(mData);
+
+    if (mDepth == 1)
+        mView.reset(new ConstBitmapView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
+    else if (mDepth == 3)
+        mView.reset(new ConstBitmapView<RGB>((const RGB*)mData, mWidth, mHeight));
+    else if (mDepth == 4)
+        mView.reset(new ConstBitmapView<RGBA>((const RGBA*)mData, mWidth, mHeight));
+    return mView.get();
+}
+
 } // namespace

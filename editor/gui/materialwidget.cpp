@@ -878,9 +878,10 @@ void MaterialWidget::AddNewTextureMapFromFile()
         const QFileInfo info(ret);
         const auto& name = info.baseName();
         const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
-        auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file));
-
+        auto source = std::make_unique<gfx::detail::TextureFileSource>();
+        source->SetFileName(app::ToUtf8(file));
         source->SetName(app::ToUtf8(name));
+        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::Linear);
         texture->SetTexture(std::move(source));
         texture->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }

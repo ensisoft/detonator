@@ -29,6 +29,7 @@
 #include <cstring> // for memcpy
 #include <vector>
 #include <string>
+#include <sstream>
 #include <map>
 #include <unordered_map>
 
@@ -45,6 +46,17 @@
 #include "graphics/texture.h"
 #include "graphics/color4f.h"
 #include "graphics/loader.h"
+
+// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_sRGB.txt
+// Accepted by the <format> and <internalformat> parameter of TexImage2D, and
+// TexImage3DOES.  These are also accepted by <format> parameter of
+// TexSubImage2D and TexSubImage3DOES:
+#define GL_SRGB_EXT                                       0x8C40
+#define GL_SRGB_ALPHA_EXT                                 0x8C42
+// Accepted by the <internalformat> parameter of RenderbufferStorage:
+#define GL_SRGB8_ALPHA8_EXT                               0x8C43
+// Accepted by the <pname> parameter of GetFramebufferAttachmentParameteriv:
+#define GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT      0x8210
 
 #if defined(WEBGL)
 #  define GL_CALL(x) mGL.x
@@ -324,6 +336,16 @@ public:
         GL_CALL(glEnable(GL_CULL_FACE));
         GL_CALL(glCullFace(GL_BACK));
         GL_CALL(glFrontFace(GL_CCW));
+
+        const char* extensions = (const char*)mGL.glGetString(GL_EXTENSIONS);
+        std::stringstream ss(extensions);
+        std::string extension;
+        while (std::getline(ss, extension, ' '))
+        {
+            if (extension == "GL_EXT_sRGB")
+                mExtensions.sRGB = true;
+        }
+        INFO("sRGB textures: %1", mExtensions.sRGB ? "YES" : "NO");
     }
     OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
         : OpenGLES2GraphicsDevice(context.get())
@@ -426,7 +448,7 @@ public:
 
     virtual Texture* MakeTexture(const std::string& name) override
     {
-        auto texture = std::make_unique<TextureImpl>(mGL, mTextureUnits);
+        auto texture = std::make_unique<TextureImpl>(mGL, *this);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
         // technically not "use" but we need to track the number of frames
@@ -1206,9 +1228,9 @@ private:
     class TextureImpl : public Texture
     {
     public:
-        TextureImpl(const OpenGLFunctions& funcs, TextureUnits& units)
+        TextureImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
            : mGL(funcs)
-           , mTextureUnits(units)
+           , mDevice(device)
         {}
         ~TextureImpl()
         {
@@ -1229,12 +1251,20 @@ private:
                     DEBUG("New texture object. [name='%1', handle=%2]", mName, mHandle);
             }
             if (!mTransient)
-                DEBUG("Loading texture. [name='%1', size=%2x%3, handle=%4]", mName, xres, yres, mHandle);
+                DEBUG("Loading texture. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
 
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
             switch (format)
             {
+                case Format::sRGB:
+                    sizeFormat = GL_SRGB_EXT;
+                    baseFormat = GL_SRGB_EXT;
+                    break;
+                case Format::sRGBA:
+                    sizeFormat = GL_SRGB_ALPHA_EXT;
+                    baseFormat = GL_SRGB_ALPHA_EXT;
+                    break;
                 case Format::RGB:
                     sizeFormat = GL_RGB;
                     baseFormat = GL_RGB;
@@ -1251,11 +1281,34 @@ private:
                 default: BUG("Unknown texture format."); break;
             }
 
+            // if the texture is sRGB it can be used as-is as long as sRGB
+            // extension is present. if no sRGB extension is available then
+            // the texture needs to be converted into linear color space.
+            // todo: convert to normalized linear floats ? converting to
+            // linear u8 loses perceptible precision
+            std::unique_ptr<IBitmap> linear;
+            if (format == Format::sRGB && !mDevice.mExtensions.sRGB)
+            {
+                ConstBitmapView<RGB> view((const RGB*)bytes, xres, yres);
+                linear = ConvertToLinear(view);
+                bytes  = linear->GetDataPtr();
+                sizeFormat = GL_RGB;
+                baseFormat = GL_RGB;
+            }
+            else if (format == Format::sRGBA && !mDevice.mExtensions.sRGB)
+            {
+                ConstBitmapView<RGBA> view((const RGBA*)bytes, xres, yres);
+                linear = ConvertToLinear(view);
+                bytes  = linear->GetDataPtr();
+                sizeFormat = GL_RGBA;
+                baseFormat = GL_RGBA;
+            }
+
             GL_CALL(glActiveTexture(GL_TEXTURE0));
 
             // trash the last texture unit in the hopes that it would not
             // cause a rebind later.
-            const auto last = mTextureUnits.size() - 1;
+            const auto last = mDevice.mTextureUnits.size() - 1;
             const auto unit = GL_TEXTURE0 + last;
 
             // bind our texture here.
@@ -1282,12 +1335,12 @@ private:
                 // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
                 if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
                 {
-                    GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+                    GenerateMips(bytes, xres, yres, format);
                     mHasMips = true;
                 }
                 else WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, xres, yres);
             #else
-                GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+                GenerateMips(bytes, xres, yres, format);
                 mHasMips = true;
             #endif
             }
@@ -1296,11 +1349,11 @@ private:
             mHeight = yres;
             mFormat = format;
             // we trashed this texture unit's texture binding.
-            mTextureUnits[last].texture = this;
-            mTextureUnits[last].wrap_x  = GL_NONE;
-            mTextureUnits[last].wrap_y  = GL_NONE;
-            mTextureUnits[last].min_filter = GL_NONE;
-            mTextureUnits[last].mag_filter = GL_NONE;
+            mDevice.mTextureUnits[last].texture = this;
+            mDevice.mTextureUnits[last].wrap_x  = GL_NONE;
+            mDevice.mTextureUnits[last].wrap_y  = GL_NONE;
+            mDevice.mTextureUnits[last].min_filter = GL_NONE;
+            mDevice.mTextureUnits[last].mag_filter = GL_NONE;
         }
 
         // refer actual state setting to the point when
@@ -1355,8 +1408,47 @@ private:
         const std::string& GetGroup() const
         { return mGroup; }
     private:
+        void GenerateMips(const void* bytes, unsigned xres, unsigned yres, Format format)
+        {
+            if (format == Format::sRGB)
+                GenerateMipsFrom_sRGB<RGB>(bytes, xres, yres, GL_SRGB_EXT);
+            else if (format == Format::sRGBA)
+                GenerateMipsFrom_sRGB<RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
+            else GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+        }
+        template<typename T_rgb>
+        void GenerateMipsFrom_sRGB(const void* bytes, unsigned xres, unsigned yres, GLenum type)
+        {
+            // if the texture has sRGB format then according to GL_EXT_sRGB
+            // no mipmap generation is possible but glGenerateMipmap will return INVALID_OPERATION.
+            // thus with sRGB formats we need to generate the mipmaps manually ourselves.
+            // in this function we're expecting that the base level (level 0) has already
+            // been loaded, so the next level is level 1
+
+            // level 0 view
+            ConstBitmapView<T_rgb> view((const T_rgb*)bytes, xres, yres);
+
+            auto level  = 1u;
+            auto mipmap = GenerateNextMipmap(view, true);
+            while (mipmap)
+            {
+                GL_CALL(glTexImage2D(GL_TEXTURE_2D,
+                    level,
+                    type,
+                    mipmap->GetWidth(),
+                    mipmap->GetHeight(),
+                    0, // border must be 0
+                    type,
+                    GL_UNSIGNED_BYTE,
+                    mipmap->GetDataPtr()));
+
+                mipmap = GenerateNextMipmap(*mipmap, true);
+                level++;
+            }
+        }
+    private:
         const OpenGLFunctions& mGL;
-        TextureUnits& mTextureUnits;
+        OpenGLES2GraphicsDevice& mDevice;
         GLuint mHandle = 0;
     private:
         MinFilter mMinFilter = MinFilter::Default;
@@ -2007,6 +2099,9 @@ private:
         size_t refcount = 0;
     };
     std::vector<VertexBuffer> mBuffers;
+    struct Extensions {
+        bool sRGB = false;
+    } mExtensions;
 };
 
 // static

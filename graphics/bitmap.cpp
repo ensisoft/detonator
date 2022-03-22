@@ -32,6 +32,35 @@
 #include "graphics/bitmap.h"
 
 namespace {
+template<typename T_u8, typename T_float>
+std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapView& src)
+{
+    ASSERT(src.IsValid());
+
+    const auto width  = src.GetWidth();
+    const auto height = src.GetHeight();
+
+    using Bitmap = gfx::Bitmap<T_u8>;
+
+    auto ret = std::make_unique<Bitmap>();
+    ret->Resize(width, height);
+
+    for (unsigned row=0; row<height; ++row)
+    {
+        for (unsigned col=0; col<width; ++col)
+        {
+            T_u8 value;
+            T_float norm;
+            src.ReadPixel(row, col, &value);
+            norm  = gfx::RGB_u8_to_float(value);
+            norm  = gfx::sRGB_to_linear(norm);
+            value = gfx::RGB_u8_from_float(norm);
+            ret->WritePixel(row, col, value);
+        }
+    }
+    return ret;
+}
+
 template<typename T_u8, typename T_float, bool srgb>
 std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapView& src)
 {
@@ -498,6 +527,15 @@ std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb)
         return ::BoxFilter<RGB, fRGB, false>(src);
     } else if (src.GetDepthBits() == 8)
         return ::BoxFilter<Grayscale, fGrayscale, false>(src);
+    return nullptr;
+}
+
+std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapView& src)
+{
+    if (src.GetDepthBits() == 32)
+        return ::ConvertToLinear<RGBA, fRGBA>(src);
+    else if (src.GetDepthBits() == 24)
+        return ::ConvertToLinear<RGB, fRGB>(src);
     return nullptr;
 }
 
