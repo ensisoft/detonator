@@ -141,13 +141,16 @@ void detail::TextureFileSource::IntoJson(data::Writer& data) const
     data.Write("file", mFile);
     data.Write("name", mName);
     data.Write("flags", mFlags);
+    data.Write("colorspace", mColorSpace);
 }
 bool detail::TextureFileSource::FromJson(const data::Reader& data)
 {
-    return data.Read("id",   &mId) &&
-           data.Read("file", &mFile) &&
-           data.Read("name", &mName) &&
-           data.Read("flags", &mFlags);
+    data.Read("id",   &mId);
+    data.Read("file", &mFile);
+    data.Read("name", &mName);
+    data.Read("flags", &mFlags);
+    data.Read("colorspace", &mColorSpace);
+    return true;
 }
 
 void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
@@ -415,7 +418,11 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
         auto* texture = device.FindTexture(name);
 
         bool needs_upload = false;
+        bool srgb_texture = false;
         size_t content_hash = 0;
+
+        if (source->GetColorSpace() == TextureSource::ColorSpace::sRGB)
+            srgb_texture = true;
 
         // check for changes.
         if (texture && state.dynamic_content) {
@@ -432,7 +439,7 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
                 return false;
             const auto width  = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
-            const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
+            const auto format = Texture::DepthToFormat(bitmap->GetDepthBits(), srgb_texture);
             texture->SetName(source->GetName());
             texture->SetGroup(state.group_tag);
             texture->Upload(bitmap->GetDataPtr(), width, height, format);
@@ -551,7 +558,11 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
     auto* texture = device.FindTexture(name);
 
     bool needs_upload = false;
+    bool srgb_texture = false;
     size_t content_hash = 0;
+
+    if (mSource->GetColorSpace() == TextureSource::ColorSpace::sRGB)
+        srgb_texture = true;
 
     // check for changes.
     if (texture && state.dynamic_content) {
@@ -569,7 +580,7 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
             return false;
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
-        const auto format = Texture::DepthToFormat(bitmap->GetDepthBits());
+        const auto format = Texture::DepthToFormat(bitmap->GetDepthBits(), srgb_texture);
         texture->SetName(mSource->GetName());
         texture->Upload(bitmap->GetDataPtr(), width, height, format);
         if (!content_hash)

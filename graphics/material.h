@@ -67,8 +67,14 @@ namespace gfx
             // Data comes from a bitmap generator algorithm.
             BitmapGenerator
         };
+        enum class ColorSpace {
+            Linear, sRGB
+        };
 
         virtual ~TextureSource() = default;
+        // Get the color space of the texture source's texture content
+        virtual ColorSpace GetColorSpace() const
+        { return ColorSpace::Linear; }
         // Get the type of the source of the texture data.
         virtual Source GetSourceType() const = 0;
         // Get texture source class/resource id.
@@ -126,12 +132,19 @@ namespace gfx
             }
             TextureFileSource(const std::string& file) : TextureFileSource()
             { mFile = file; }
+            virtual ColorSpace GetColorSpace() const override
+            { return mColorSpace; }
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
             virtual std::string GetId() const override
             { return mId; }
             virtual std::string GetGpuId() const override
-            { return mFile; }
+            {
+                size_t hash = 0;
+                hash = base::hash_combine(hash, mFile);
+                hash = base::hash_combine(hash, mColorSpace);
+                return std::to_string(hash);
+            }
             virtual std::string GetName() const override
             { return mName; }
             virtual std::size_t GetHash() const override
@@ -140,6 +153,7 @@ namespace gfx
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
                 hash = base::hash_combine(hash, mFlags);
+                hash = base::hash_combine(hash, mColorSpace);
                 return hash;
             }
             virtual std::size_t GetContentHash() const override
@@ -179,11 +193,14 @@ namespace gfx
             { return mFlags.test(flag); }
             void SetFlag(Flags flag, bool on_off)
             { mFlags.set(flag, on_off); }
+            void SetColorSpace(ColorSpace space)
+            { mColorSpace = space; }
         private:
             std::string mId;
             std::string mFile;
             std::string mName;
             base::bitflag<Flags> mFlags;
+            ColorSpace mColorSpace = ColorSpace::Linear; // default to liaear now for compatibility
         private:
         };
 
@@ -1188,7 +1205,6 @@ namespace gfx
         TextureMap2DClass(const TextureMap2DClass& other, bool copy);
         TextureMap2DClass(const TextureMap2DClass& other) : TextureMap2DClass(other, true)
         {}
-
         void SetTexture(std::unique_ptr<TextureSource> source)
         { mTexture.SetTexture(std::move(source)); }
         void SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)

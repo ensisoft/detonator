@@ -78,6 +78,10 @@ namespace gfx
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
             return ret;
         }
+        std::unique_ptr<IBitmap> AsBitmap() const;
+
+        const IBitmapView* GetBitmapView() const;
+
         // Returns true if the image has been loaded, otherwise false.
         bool IsValid() const
         { return mData != nullptr; }
@@ -101,5 +105,6 @@ namespace gfx
         unsigned mHeight = 0;
         unsigned mDepth  = 0;
         unsigned char* mData = nullptr;
+        mutable std::unique_ptr<IBitmapView> mView;
     };
 } // namespace

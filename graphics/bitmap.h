@@ -859,6 +859,7 @@ namespace gfx
     void WritePNG(const IBitmapView& bmp, const std::string& filename);
 
     std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb);
+    std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapView& src);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for

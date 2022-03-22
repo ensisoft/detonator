@@ -1563,11 +1563,13 @@ void main() {
         // This test might give some clues how incorrect the rendering is
         // in regard to sRGB color space (and gamma in-correction).
         //
-        // The shader writes always *linear* values. The OpenGL implementation
-        // will then convert to sRGB or not when writing the actual output values
-        // when updating the color buffer.
+        // The shader always writes linear values. The OpenGL implementation
+        // and the current frame-buffer setting will then be used to determine
+        // the meaning of these values, i.e. whether they should be interpreted
+        // to mean perceptually linear values (in sRGB color space) or physically
+        // linear values (in "raw" RGB color space that drive the monitor's brightness).
         //
-        // Whether sRGB encoding is actually done or not depends on:
+        // Whether sRGB is actually enabled or not depends on:
         //  - whether we're writing to the default frame buffer or GL provided FBO
         //  - what is the current rendering context, ES2, ES3, GLx
         //  - what flags are enabled, GL_FRAMEBUFFER_SRGB (for big Gl)
@@ -1575,26 +1577,27 @@ void main() {
         // The test should be interpreted something like this:
         //
         // - if the physically linear gamma ramp looks *perceptually* linear
-        //   it means that the color buffer is written in linear RGB *without*
-        //   sRGB encoding. Thus, when the buffer is being displayed and gamma
-        //   decoding takes place (in the display system) RGB values lose some
-        //   brightness. For example RGB value v = (0.5, 0.5, 0.5) becomes
-        //   approx (0.22, 0.22, 0.22), which in human visual sensory system
-        //   appears half way bright between 0.0f and 1.0f giving us visually
-        //   perceptually linear ramp.
+        //   it means that the color buffer is written in perceptually linear
+        //   values using sRGB encoding. Thus, when the buffer is being displayed
+        //   and gamma decoding takes place (in the display system) RGB values
+        //   lose some brightness which is compensated by the visual sensory system
+        //   and thus become "perceptually linear". For example RGB value
+        //   v = (0.5, 0.5, 0.5) when gamma decoded becomes approx (0.22, 0.22, 0.22),
+        //   which in human visual sensory system appears half way bright between
+        //   0.0f and 1.0f giving us visually/perceptually linear ramp.
         //
-        //   => the perceptually linear gamma ramp should be too dark.
+        //   corollary => the explicitly g=2.2 encoded ramp should be too dark.
         //
         // - if the physically linear gamma ramp looks too bright and washed out
         //   so that only the left edge is black and the brightness quickly becomes
         //   very bright and white towards the right edge it means that the color
-        //   buffer is likely sRGB encoded. When it gets displayed the sRGB encoded
-        //   values restore their original signal and the original linear RGB value
-        //   written by the shader (RGB = 0.5, 0.5, 0.5) is what we also get out
-        //   the display system. This will then appear too bright to the human perception
-        //   and shades of darkness are lost.
+        //   buffer is likely assumed to be in raw linear space driving the display
+        //   values directly. So when it gets displayed the actual value output by
+        //   the display reflects the value written by the shader. This means that the
+        //   0.5f "half way" bright value will then appear too bright to the human
+        //   perception and shades of darkness are lost.
         //
-        //  => the perceptually linear gamma ramp should be fine.
+        //   corollary => the explicitly g=2.2 encoded ramp should look fine.
         //
         // The big problem here is that ES 2 does not have natively any clue about sRGB.
         //
@@ -1608,7 +1611,7 @@ void main() {
         //   Older versions not supporting sRGB rendering will ignore this
         //   surface attribute."
         //
-        // So this means that with ES2 context even is using EGL with EGL_KHR_gl_colorspace
+        // So this means that with ES2 context even when using EGL with EGL_KHR_gl_colorspace
         // there's no guarantee of any sRGB correct output.
         //
         // The GL_EXT_sRGB extension applies to ES1.0 or greater and brings support
@@ -1619,12 +1622,12 @@ void main() {
         // "For the default framebuffer, color encoding is determined by the implementation."
         //
 
-        // physically linear gradient ramp.
+        // linear gradient ramp.
         // each block grows by a constant amount in intensity.
         inst.SetUniform("kGamma", 1.0f);
         gfx::FillRect(painter, gfx::FRect(20, 20, 800, 300), inst);
 
-        // *perceptually* linear gradient ramp. the steps are adjusted by a gamma value
+        // explicitly gamma decoded gradient ramp. the steps are adjusted by a gamma value
         // that approximates the inverse of the human perception. I.e. small increase
         // in input creates a large visual change. the gamma adjustment takes a large
         // output adjustment and maps it to a small change in input.
@@ -1637,6 +1640,77 @@ void main() {
     virtual bool IsFeatureTest() const override
     { return false; }
 private:
+};
+
+class sRGBTextureTest : public GraphicsTest
+{
+public:
+    virtual void Start() override
+    {
+        // inspect the image
+        {
+            gfx::Image img;
+            img.Load("textures/black-gray-white.png");
+            ASSERT(img.GetDepthBits() == 24);
+            ASSERT(img.GetWidth() == 2);
+            ASSERT(img.GetHeight() == 2);
+
+            const auto* view = img.GetBitmapView();
+            gfx::RGB values[4];
+            // okay so the image was created with THE GIMP and should
+            // contain 4 pixels. One fully black (0.0f, 0.0f, 0.0f),
+            // one gray at (0.5f, 0.5f, 0.5f) and finally one white
+            // pixel @ (1.0f, 1.0f, 1.0f). The values should be in
+            // sRGB encoded perceptually linear space.
+            view->ReadPixel(0, 0, &values[0]);
+            view->ReadPixel(0, 1, &values[1]);
+            view->ReadPixel(1, 0, &values[2]);
+            view->ReadPixel(1, 1, &values[3]);
+            // print the sucker out
+            std::printf("\n[0x%x 0x%x 0x%x][0x%x 0x%x 0x%x]"
+                        "\n[0x%x 0x%x 0x%x][0x%x 0x%x 0x%x]",
+                        values[0].r, values[0].g, values[0].b,
+                        values[1].r, values[1].g, values[1].b,
+                        values[2].r, values[2].g, values[2].b,
+                        values[3].r, values[3].g, values[3].b);
+            const auto srgb   = 0.5f;
+            const auto linear = gfx::sRGB_to_linear(srgb);
+            std::printf("sRGB to linear %f = %f\n", srgb, linear);
+        }
+
+        {
+            gfx::TextureMap2DClass material;
+            auto source = std::make_unique<gfx::detail::TextureFileSource>();
+            source->SetFileName("textures/black-gray-white.png");
+            source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
+            material.SetTexture(std::move(source));
+            material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterialSRGB = gfx::CreateMaterialInstance(std::move(material));
+        }
+
+        {
+            gfx::TextureMap2DClass material;
+            auto source = std::make_unique<gfx::detail::TextureFileSource>();
+            source->SetFileName("textures/black-gray-white.png");
+            source->SetColorSpace(gfx::TextureSource::ColorSpace::Linear);
+            material.SetTexture(std::move(source));
+            material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterialLinear = gfx::CreateMaterialInstance(std::move(material));
+        }
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FillRect(painter, gfx::FRect(20.0f, 20.0f, 400.0f, 400.0f), *mMaterialSRGB);
+        gfx::FillRect(painter, gfx::FRect(520.0f, 20.0f, 400.0f, 400.0f), *mMaterialLinear);
+    }
+    virtual std::string GetName() const override
+    { return "sRGBTextureTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+    std::unique_ptr<gfx::Material> mMaterialSRGB;
+    std::unique_ptr<gfx::Material> mMaterialLinear;
 };
 
 
@@ -1784,6 +1858,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ScissorTest);
     tests.emplace_back(new ViewportTest);
     tests.emplace_back(new sRGBColorGradientTest);
+    tests.emplace_back(new sRGBTextureTest);
 
     bool stop_for_input = false;
 

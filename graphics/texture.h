@@ -27,7 +27,15 @@ namespace gfx
         virtual ~Texture() = default;
 
         enum class Format {
-            RGB, RGBA, Grayscale
+            // non-linear sRGB(A) encoded RGB data.
+            sRGB,
+            sRGBA,
+            // linear RGB(A) data.
+            RGB,
+            RGBA,
+            // Grayscale (8-bit) data only.
+            // Typically used as an alpha mask only.
+            Grayscale,
         };
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
@@ -79,12 +87,16 @@ namespace gfx
         };
 
         // Identify texture format based on the bit depth
-        static Format DepthToFormat(unsigned bit_depth)
+        static Format DepthToFormat(unsigned bit_depth, bool srgb)
         {
             if (bit_depth == 8)
                 return Format::Grayscale;
+            else if (bit_depth == 24 && srgb)
+                return Format::sRGB;
             else if (bit_depth == 24)
                 return Format::RGB;
+            else if (bit_depth == 32 && srgb)
+                return Format::sRGBA;
             else if (bit_depth == 32)
                 return Format::RGBA;
             // this function is only valid for the above bit depths.
