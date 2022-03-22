@@ -2240,11 +2240,17 @@ void BindGameLib(sol::state& L)
     scene["FindEntityNodeBoundingRect"] = &Scene::FindEntityNodeBoundingRect;
     scene["FindEntityNodeBoundingBox"]  = &Scene::FindEntityNodeBoundingBox;
     scene["MapVectorFromEntityNode"]    = &Scene::MapVectorFromEntityNode;
-    scene["MapPointFromEntityNode"]     = &Scene::MapPointFromEntityNode;
-    scene["SpawnEntity"]                = sol::overload(
+    scene["MapPointFromEntityNode"]     = sol::overload(
+        [](Scene& scene, const Entity* entity, const EntityNode* node, const base::FPoint& point) {
+            return scene.MapPointFromEntityNode(entity, node, point);
+        },
+        [](Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& point) {
+            return scene.MapPointFromEntityNode(entity, node, point);
+        });
+    scene["SpawnEntity"] = sol::overload(
         [](Scene& scene, const EntityArgs& args) { return scene.SpawnEntity(args, true); },
         [](Scene& scene, const EntityArgs& args, bool link) { return scene.SpawnEntity(args, link); });
-    scene["QuerySpatialNodes"]          = sol::overload(
+    scene["QuerySpatialNodes"] = sol::overload(
         [](Scene& scene, const base::FPoint& point) {
             std::set<EntityNode*> result;
             scene.QuerySpatialNodes(point, &result);

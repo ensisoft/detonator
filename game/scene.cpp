@@ -1355,6 +1355,12 @@ FPoint Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* nod
     const auto& ret = mat * glm::vec4(point.GetY(), point.GetY(), 1.0f, 1.0f);
     return FPoint(ret.x, ret.y);
 }
+glm::vec2 Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
+{
+    const auto& mat = FindEntityNodeTransform(entity, node);
+    const auto& ret = mat * glm::vec4(point.x, point.y, 1.0f, 1.0f);
+    return glm::vec2(ret.x, ret.y);
+}
 
 const ScriptVar* Scene::FindScriptVarByName(const std::string& name) const
 {

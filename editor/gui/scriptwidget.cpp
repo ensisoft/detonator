@@ -1078,6 +1078,8 @@ void InitDoc()
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
     DOC_METHOD_3("base.FPoint", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
+    DOC_METHOD_3("glm.vec2", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "point");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
