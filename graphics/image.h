@@ -78,9 +78,17 @@ namespace gfx
                 ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
             return ret;
         }
-        std::unique_ptr<IBitmap> AsBitmap() const;
+        // Get a view to mutable bitmap data.
+        // Important, the returned object may not be accessed
+        // after the image has ceased to exist. These views should
+        // only be used for a short term while accessing the contents.
+        std::unique_ptr<IMutableBitmapView> GetWriteView();
 
-        const IBitmapView* GetBitmapView() const;
+        // Get view to immutable bitmap data.
+        // Important, the returned object may not be accessed
+        // after the image has ceased to exist. These views should
+        // only be used for a short term while accessing the contents.
+        std::unique_ptr<IConstBitmapView> GetReadView() const;
 
         // Returns true if the image has been loaded, otherwise false.
         bool IsValid() const
@@ -105,6 +113,5 @@ namespace gfx
         unsigned mHeight = 0;
         unsigned mDepth  = 0;
         unsigned char* mData = nullptr;
-        mutable std::unique_ptr<IBitmapView> mView;
     };
 } // namespace

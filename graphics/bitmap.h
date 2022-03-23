@@ -208,28 +208,20 @@ namespace gfx
     inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
     { return dst | src; }
 
-    class IBitmapView
+    class IConstBitmapView
     {
     public:
-        virtual ~IBitmapView() = default;
+        virtual ~IConstBitmapView() = default;
         // Get the width of the bitmap
         virtual unsigned GetWidth() const = 0;
         // Get the height of the bitmap
         virtual unsigned GetHeight() const = 0;
         // Get the depth of the bitmap
         virtual unsigned GetDepthBits() const = 0;
+        // Get pointer to the underlying raw pixel data.
+        virtual const void* GetDataPtr() const = 0;
         // Get whether bitmap is valid or not (has been allocated)
         virtual bool IsValid() const = 0;
-        // Get pointer to underlying data. Can be nullptr if the bitmap
-        // is not currently valid, i.e. no pixel storage has been allocated.
-        // Access to the data through this pointer is potentially
-        // unsafe since the type of the pixel (i.e. the memory layout)
-        // information is lost. However, in some cases the generic
-        // access is useful for example when passing the pointer to some
-        // other APIs
-        virtual const void* GetDataPtr() const = 0;
-        // Get unique hash value based on the contents of the bitmap.
-        virtual std::size_t GetHash() const = 0;
         // Read a RGBA pixel tuple from the underlying bitmap object.
         // If the underlying bitmap doesn't have all the RGBA channels
         // the value is converted into RGBA according to the conversion
@@ -247,52 +239,47 @@ namespace gfx
         }
     protected:
         // no public dynamic copying or assignment
-        IBitmapView() = default;
-        IBitmapView(IBitmapView&&) = default;
-        IBitmapView(const IBitmapView&) = default;
-        IBitmapView& operator=(const IBitmapView&) = default;
-        IBitmapView& operator=(IBitmapView&&) = default;
+        IConstBitmapView() = default;
+        IConstBitmapView(IConstBitmapView&&) = default;
+        IConstBitmapView(const IConstBitmapView&) = default;
+        IConstBitmapView& operator=(const IConstBitmapView&) = default;
+        IConstBitmapView& operator=(IConstBitmapView&&) = default;
     private:
     };
 
-    // Bitmap interface. Mostly designed so that it's possible
-    // to keep bitmap objects around as generic bitmaps
-    // regardless of their actual underlying pixel representation.
-    // Extends the read only IBitmapView with functionality that
-    // mutates the actual bitmap object.
-    class IBitmap : public IBitmapView
+    class IMutableBitmapView
     {
     public:
-        virtual ~IBitmap() = default;
-        // Resize the bitmap. Previous are undefined.
-        virtual void Resize(unsigned width, unsigned height) = 0;
-        // Flip the rows of the bitmap around horizontal center line/row.
-        // Transforms the bitmap as follows:
-        // aaaa           cccc
-        // bbbb  becomes  bbbb
-        // cccc           aaaa
-        virtual void FlipHorizontally() = 0;
-        // Make a clone of this bitmap.
-        virtual std::unique_ptr<IBitmap> Clone() const = 0;
+        virtual ~IMutableBitmapView() = default;
+        // Get the width of the bitmap
+        virtual unsigned GetWidth() const = 0;
+        // Get the height of the bitmap
+        virtual unsigned GetHeight() const = 0;
+        // Get the depth of the bitmap
+        virtual unsigned GetDepthBits() const = 0;
+        // Get pointer to the underlying raw pixel data.
+        virtual void* GetDataPtr() const = 0;
+        // Get whether bitmap is valid or not (has been allocated)
+        virtual bool IsValid() const = 0;
         // Write a RGBA pixel tuple to the underlying bitmap object.
         // If the underlying bitmap doesn't have all the RGBA channels
         // the value is converted into RGBA according to the conversion
         // constructors in the RGBA type.
-        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) = 0;
-        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) = 0;
-        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const = 0;
     protected:
-        // No public dynamic copying or assignment
-        IBitmap() = default;
-        IBitmap(const IBitmap&) = default;
-        IBitmap(IBitmap&&) = default;
-        IBitmap& operator=(const IBitmap&) = default;
-        IBitmap& operator=(IBitmap&&) = default;
+        // no public dynamic copying or assignment
+        IMutableBitmapView() = default;
+        IMutableBitmapView(IMutableBitmapView&&) = default;
+        IMutableBitmapView(const IMutableBitmapView&) = default;
+        IMutableBitmapView& operator=(const IMutableBitmapView&) = default;
+        IMutableBitmapView& operator=(IMutableBitmapView&&) = default;
     private:
     };
 
     template<typename Pixel>
-    class ConstBitmapView : public IBitmapView
+    class ConstBitmapView : public IConstBitmapView
     {
     public:
         using PixelType = Pixel;
@@ -307,21 +294,10 @@ namespace gfx
         { return mHeight; }
         virtual unsigned GetDepthBits() const override
         { return sizeof(Pixel) * 8; }
-        virtual bool IsValid() const override
-        { return mPixels  && mWidth && mHeight; }
         virtual const void* GetDataPtr() const override
         { return mPixels; }
-        virtual std::size_t GetHash() const override
-        {
-            std::size_t hash = 0;
-            if (mPixels == nullptr)
-                return hash;
-            const auto* ptr = (const uint8_t*)mPixels;
-            const auto bytes = mWidth * mHeight * sizeof(Pixel);
-            for (size_t i=0; i<bytes; ++i)
-                hash = base::hash_combine(hash, ptr[i]);
-            return hash;
-        }
+        virtual bool IsValid() const override
+        { return mPixels  && mWidth && mHeight; }
         virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
         { read_pixel(row, col, pixel); }
         virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
@@ -342,6 +318,100 @@ namespace gfx
         const unsigned mWidth  = 0;
         const unsigned mHeight = 0;
     };
+
+    template<typename Pixel>
+    class MutableBitmapView : public IMutableBitmapView
+    {
+    public:
+        using PixelType = Pixel;
+        MutableBitmapView(Pixel* data, unsigned width, unsigned height)
+          : mPixels(data)
+          , mWidth(width)
+          , mHeight(height)
+        {}
+        virtual unsigned GetWidth() const override
+        { return mWidth; }
+        virtual unsigned GetHeight() const override
+        { return mHeight; }
+        virtual unsigned GetDepthBits() const override
+        { return sizeof(Pixel) * 8; }
+        virtual void* GetDataPtr() const override
+        { return mPixels; }
+        virtual bool IsValid() const override
+        { return mPixels  && mWidth && mHeight; }
+        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const override
+        { write_pixel(row, col, pixel); }
+        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const override
+        { write_pixel(row, col, pixel); }
+        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const override
+        { write_pixel(row, col, pixel); }
+    private:
+        template<typename T>
+        void write_pixel(unsigned row, unsigned col, const T& value) const
+        {
+            ASSERT(row < mHeight);
+            ASSERT(col < mWidth);
+            const auto index = row * mWidth + col;
+            mPixels[index] = Pixel(value);
+        }
+    private:
+        mutable Pixel* mPixels  = nullptr;
+        const unsigned mWidth  = 0;
+        const unsigned mHeight = 0;
+    };
+
+    // Bitmap interface. Mostly designed so that it's possible
+    // to keep bitmap objects around as generic bitmaps
+    // regardless of their actual underlying pixel representation.
+    // Extends the read only IConstBitmapView with functionality that
+    // mutates the actual bitmap object.
+    class IBitmap
+    {
+    public:
+        virtual ~IBitmap() = default;
+        // Get the width of the bitmap
+        virtual unsigned GetWidth() const = 0;
+        // Get the height of the bitmap
+        virtual unsigned GetHeight() const = 0;
+        // Get the depth of the bitmap
+        virtual unsigned GetDepthBits() const = 0;
+        // Get pointer to underlying data. Can be nullptr if the bitmap
+        // is not currently valid, i.e. no pixel storage has been allocated.
+        // Access to the data through this pointer is potentially
+        // unsafe since the type of the pixel (i.e. the memory layout)
+        // information is lost. However, in some cases the generic
+        // access is useful for example when passing the pointer to some
+        // other APIs
+        virtual const void* GetDataPtr() const = 0;
+        virtual       void* GetDataPtr()       = 0;
+        // Get whether bitmap is valid or not (has been allocated)
+        virtual bool IsValid() const = 0;
+        // Resize the bitmap. Previous are undefined.
+        virtual void Resize(unsigned width, unsigned height) = 0;
+        // Flip the rows of the bitmap around horizontal center line/row.
+        // Transforms the bitmap as follows:
+        // aaaa           cccc
+        // bbbb  becomes  bbbb
+        // cccc           aaaa
+        virtual void FlipHorizontally() = 0;
+        // Get a read only view into the contents of the bitmap.
+        virtual std::unique_ptr<IConstBitmapView> GetReadView() const = 0;
+        // Get a write only view into the contents of the bitmap.
+        virtual std::unique_ptr<IMutableBitmapView> GetWriteView() = 0;
+        // Make a clone of this bitmap.
+        virtual std::unique_ptr<IBitmap> Clone() const = 0;
+        // Get unique hash value based on the contents of the bitmap.
+        virtual std::size_t GetHash() const = 0;
+    protected:
+        // No public dynamic copying or assignment
+        IBitmap() = default;
+        IBitmap(const IBitmap&) = default;
+        IBitmap(IBitmap&&) = default;
+        IBitmap& operator=(const IBitmap&) = default;
+        IBitmap& operator=(IBitmap&&) = default;
+    private:
+    };
+
 
     template<typename Pixel>
     class Bitmap : public IBitmap
@@ -493,6 +563,10 @@ namespace gfx
         {
             return mPixels.empty() ? nullptr : (const void*)&mPixels[0];
         }
+        virtual void* GetDataPtr() override
+        {
+            return mPixels.empty() ? nullptr : (void*)&mPixels[0];
+        }
         // Flip the rows of the bitmap around horizontal axis (the middle row)
         virtual void FlipHorizontally() override
         {
@@ -519,24 +593,17 @@ namespace gfx
                 hash_value = base::hash_combine(hash_value, ptr[i]);
             return hash_value;
         }
-
+        virtual std::unique_ptr<IConstBitmapView> GetReadView() const override
+        { return std::make_unique<ConstBitmapView<Pixel>>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
+        virtual std::unique_ptr<IMutableBitmapView> GetWriteView() override
+        { return std::make_unique<MutableBitmapView<Pixel>>((Pixel*)GetDataPtr(), mWidth, mHeight); }
         virtual std::unique_ptr<IBitmap> Clone() const override
-        {
-            return std::make_unique<Bitmap>(*this);
-        }
-        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const override
-        { read_pixel(row, col, pixel); }
+        { return std::make_unique<Bitmap>(*this); }
 
-        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) override
-        { write_pixel(row, col, pixel); }
+        ConstBitmapView<Pixel> GetPixelReadView() const
+        { return ConstBitmapView<Pixel>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
+        MutableBitmapView<Pixel> GetPixelWriteView()
+        { return MutableBitmapView<Pixel>((Pixel*)GetDataPtr(), mWidth, mHeight); }
 
         // Get a pixel from within the bitmap.
         // The pixel must be within this bitmap's width and height.
@@ -855,11 +922,15 @@ namespace gfx
         return !(lhs == rhs);
     }
 
-    void WritePPM(const IBitmapView& bmp, const std::string& filename);
-    void WritePNG(const IBitmapView& bmp, const std::string& filename);
+    void WritePPM(const IConstBitmapView& bmp, const std::string& filename);
+    void WritePNG(const IConstBitmapView& bmp, const std::string& filename);
+    void WritePPM(const IBitmap& bmp, const std::string& filename);
+    void WritePNG(const IBitmap& bmp, const std::string& filename);
 
-    std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb);
-    std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapView& src);
+    std::unique_ptr<IBitmap> GenerateNextMipmap(const IConstBitmapView& src, bool srgb);
+    std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb);
+    std::unique_ptr<IBitmap> ConvertToLinear(const IConstBitmapView& src);
+    std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for

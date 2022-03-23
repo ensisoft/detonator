@@ -33,7 +33,7 @@
 
 namespace {
 template<typename T_u8, typename T_float>
-std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapView& src)
+std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IConstBitmapView& src)
 {
     ASSERT(src.IsValid());
 
@@ -42,8 +42,8 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapView& src)
 
     using Bitmap = gfx::Bitmap<T_u8>;
 
-    auto ret = std::make_unique<Bitmap>();
-    ret->Resize(width, height);
+    auto ret = std::make_unique<Bitmap>(width, height);
+    auto dst = ret->GetWriteView();
 
     for (unsigned row=0; row<height; ++row)
     {
@@ -55,14 +55,14 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapView& src)
             norm  = gfx::RGB_u8_to_float(value);
             norm  = gfx::sRGB_to_linear(norm);
             value = gfx::RGB_u8_from_float(norm);
-            ret->WritePixel(row, col, value);
+            dst->WritePixel(row, col, value);
         }
     }
     return ret;
 }
 
 template<typename T_u8, typename T_float, bool srgb>
-std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapView& src)
+std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IConstBitmapView& src)
 {
     ASSERT(src.IsValid());
 
@@ -79,8 +79,8 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapView& src)
 
     using Bitmap = gfx::Bitmap<T_u8>;
 
-    auto ret = std::make_unique<Bitmap>();
-    ret->Resize(dst_width, dst_height);
+    auto ret = std::make_unique<Bitmap>(dst_width, dst_height);
+    auto dst = ret->GetWriteView();
 
     for (unsigned dst_row=0, src_row=0; src_row<src_height_max; src_row+=2, dst_row++)
     {
@@ -125,7 +125,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapView& src)
             }
 
             // write the new pixel value out.
-            ret->WritePixel(dst_row, dst_col, gfx::RGB_u8_from_float(value));
+            dst->WritePixel(dst_row, dst_col, gfx::RGB_u8_from_float(value));
         }
     }
     return ret;
@@ -478,7 +478,7 @@ Grayscale RGB_u8_from_float(const fGrayscale& value)
     return ret;
 }
 
-void WritePPM(const IBitmapView& bmp, const std::string& filename)
+void WritePPM(const IConstBitmapView& bmp, const std::string& filename)
 {
     static_assert(sizeof(RGB) == 3,
         "Padding bytes found. Cannot copy RGB data as a byte stream.");
@@ -507,8 +507,13 @@ void WritePPM(const IBitmapView& bmp, const std::string& filename)
     out.write((const char*)&tmp[0], bytes);
     out.close();
 }
+void WritePPM(const IBitmap& bmp, const std::string& filename)
+{
+    auto view = bmp.GetReadView();
+    WritePPM(*view, filename);
+}
 
-void WritePNG(const IBitmapView& bmp, const std::string& filename)
+void WritePNG(const IConstBitmapView& bmp, const std::string& filename)
 {
     const auto w = bmp.GetWidth();
     const auto h = bmp.GetHeight();
@@ -516,8 +521,13 @@ void WritePNG(const IBitmapView& bmp, const std::string& filename)
     if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
         throw std::runtime_error(std::string("failed to write png: " + filename));
 }
+void WritePNG(const IBitmap& bmp, const std::string& filename)
+{
+    auto view = bmp.GetReadView();
+    WritePNG(*view, filename);
+}
 
-std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb)
+std::unique_ptr<IBitmap> GenerateNextMipmap(const IConstBitmapView& src, bool srgb)
 {
     if (src.GetDepthBits() == 32) {
         if (srgb) return ::BoxFilter<RGBA, fRGBA, true>(src);
@@ -529,14 +539,24 @@ std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapView& src, bool srgb)
         return ::BoxFilter<Grayscale, fGrayscale, false>(src);
     return nullptr;
 }
+std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb)
+{
+    auto view = src.GetReadView();
+    return GenerateNextMipmap(*view, srgb);
+}
 
-std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapView& src)
+std::unique_ptr<IBitmap> ConvertToLinear(const IConstBitmapView& src)
 {
     if (src.GetDepthBits() == 32)
         return ::ConvertToLinear<RGBA, fRGBA>(src);
     else if (src.GetDepthBits() == 24)
         return ::ConvertToLinear<RGB, fRGB>(src);
     return nullptr;
+}
+std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src)
+{
+    auto view = src.GetReadView();
+    return ConvertToLinear(*view);
 }
 
 void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
