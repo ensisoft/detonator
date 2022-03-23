@@ -454,33 +454,33 @@ namespace gfx
 
     } // detail
 
-    inline std::unique_ptr<TextureSource> LoadTextureFromFile(const std::string& uri)
+    inline std::unique_ptr<detail::TextureFileSource> LoadTextureFromFile(const std::string& uri)
     { return std::make_unique<detail::TextureFileSource>(uri); }
 
     template<typename T> inline
-    std::unique_ptr<TextureSource> CreateTextureFromBitmap(const Bitmap<T>& bitmap)
+    std::unique_ptr<detail::TextureBitmapBufferSource> CreateTextureFromBitmap(const Bitmap<T>& bitmap)
     { return std::make_unique<detail::TextureBitmapBufferSource>(bitmap); }
     template<typename T> inline
     std::unique_ptr<TextureSource> CreateTextureFromBitmap(Bitmap<T>&& bitmap)
     { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<T>(bitmap)); }
 
-    inline std::unique_ptr<TextureSource> CreateTextureFromText(const TextBuffer& text)
+    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(const TextBuffer& text)
     { return std::make_unique<detail::TextureTextBufferSource>(text); }
-    inline std::unique_ptr<TextureSource> CreateTextureFromText(TextBuffer&& text)
+    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(TextBuffer&& text)
     { return std::make_unique<detail::TextureTextBufferSource>(std::move(text)); }
 
-    inline std::unique_ptr<TextureSource> GenerateTexture(std::unique_ptr<IBitmapGenerator> generator)
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(std::unique_ptr<IBitmapGenerator> generator)
     { return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator)); }
     template<typename T> inline
-    std::unique_ptr<TextureSource> GenerateTexture(T&& generator)
+    std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(T&& generator)
     { return GenerateTexture(std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator))); }
 
-    inline std::unique_ptr<TextureSource> GenerateNoiseTexture(const NoiseBitmapGenerator& generator)
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(const NoiseBitmapGenerator& generator)
     {
         auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
         return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
     }
-    inline std::unique_ptr<TextureSource> GenerateNoiseTexture(NoiseBitmapGenerator&& generator)
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(NoiseBitmapGenerator&& generator)
     {
         auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
         return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
