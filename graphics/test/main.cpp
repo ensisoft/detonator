@@ -1655,7 +1655,7 @@ public:
             ASSERT(img.GetWidth() == 2);
             ASSERT(img.GetHeight() == 2);
 
-            const auto* view = img.GetBitmapView();
+            auto view = img.GetReadView();
             gfx::RGB values[4];
             // okay so the image was created with THE GIMP and should
             // contain 4 pixels. One fully black (0.0f, 0.0f, 0.0f),

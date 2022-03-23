@@ -1441,8 +1441,8 @@ private:
                     type,
                     GL_UNSIGNED_BYTE,
                     mipmap->GetDataPtr()));
-
-                mipmap = GenerateNextMipmap(*mipmap, true);
+                auto view = mipmap->GetReadView();
+                mipmap = GenerateNextMipmap(*view, true);
                 level++;
             }
         }
