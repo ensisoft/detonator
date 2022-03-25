@@ -53,7 +53,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IConstBitmapView& 
             T_float norm;
             src.ReadPixel(row, col, &value);
             norm  = gfx::RGB_u8_to_float(value);
-            norm  = gfx::sRGB_to_linear(norm);
+            norm  = gfx::sRGB_decode(norm);
             value = gfx::RGB_u8_from_float(norm);
             dst->WritePixel(row, col, value);
         }
@@ -107,10 +107,10 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IConstBitmapView& src)
             // for RGBA and RGB formats.
             if constexpr (srgb)
             {
-                values_norm[0] = gfx::sRGB_to_linear(values_norm[0]);
-                values_norm[1] = gfx::sRGB_to_linear(values_norm[1]);
-                values_norm[2] = gfx::sRGB_to_linear(values_norm[2]);
-                values_norm[3] = gfx::sRGB_to_linear(values_norm[3]);
+                values_norm[0] = gfx::sRGB_decode(values_norm[0]);
+                values_norm[1] = gfx::sRGB_decode(values_norm[1]);
+                values_norm[2] = gfx::sRGB_decode(values_norm[2]);
+                values_norm[3] = gfx::sRGB_decode(values_norm[3]);
             }
 
             // compute the average of the original 4 pixels.
@@ -121,7 +121,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IConstBitmapView& src)
             // encode linear in sRGB if needed.
             if constexpr (srgb)
             {
-                value = gfx::sRGB_from_linear(value);
+                value = gfx::sRGB_encode(value);
             }
 
             // write the new pixel value out.
@@ -380,53 +380,53 @@ fGrayscale operator * (float scaler, const fGrayscale& rhs)
     return ret;
 }
 
-float sRGB_to_linear(float value)
+float sRGB_decode(float value)
 {
     return value <= 0.04045f
            ? value / 12.92f
            : std::pow((value + 0.055f) / 1.055f, 2.4f);
 }
-float sRGB_from_linear(float value)
+float sRGB_encode(float value)
 {
     return value <= 0.0031308f
            ? value * 12.92f
            : std::pow(value, 1.0f/2.4f) * 1.055f - 0.055f;
 }
 
-fRGBA sRGB_to_linear(const fRGBA& value)
+fRGBA sRGB_decode(const fRGBA& value)
 {
     fRGBA ret;
-    ret.r = sRGB_to_linear(value.r);
-    ret.g = sRGB_to_linear(value.g);
-    ret.b = sRGB_to_linear(value.b);
+    ret.r = sRGB_decode(value.r);
+    ret.g = sRGB_decode(value.g);
+    ret.b = sRGB_decode(value.b);
     // alpha is not sRGB encoded.
     ret.a = value.a;
     return ret;
 }
-fRGB sRGB_to_linear(const fRGB& value)
+fRGB sRGB_decode(const fRGB& value)
 {
     fRGB ret;
-    ret.r = sRGB_to_linear(value.r);
-    ret.g = sRGB_to_linear(value.g);
-    ret.b = sRGB_to_linear(value.b);
+    ret.r = sRGB_decode(value.r);
+    ret.g = sRGB_decode(value.g);
+    ret.b = sRGB_decode(value.b);
     return ret;
 }
-fRGBA sRGB_from_linear(const fRGBA& value)
+fRGBA sRGB_encode(const fRGBA& value)
 {
     fRGBA ret;
-    ret.r = sRGB_from_linear(value.r);
-    ret.g = sRGB_from_linear(value.g);
-    ret.b = sRGB_from_linear(value.b);
+    ret.r = sRGB_encode(value.r);
+    ret.g = sRGB_encode(value.g);
+    ret.b = sRGB_encode(value.b);
     // alpha is not sRGB encoded.
     ret.a = value.a;
     return ret;
 }
-fRGB sRGB_from_linear(const fRGB& value)
+fRGB sRGB_encode(const fRGB& value)
 {
     fRGB ret;
-    ret.r = sRGB_from_linear(value.r);
-    ret.g = sRGB_from_linear(value.g);
-    ret.b = sRGB_from_linear(value.b);
+    ret.r = sRGB_encode(value.r);
+    ret.g = sRGB_encode(value.g);
+    ret.b = sRGB_encode(value.b);
     return ret;
 }
 

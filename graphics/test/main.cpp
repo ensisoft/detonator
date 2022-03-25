@@ -1674,7 +1674,7 @@ public:
                         values[2].r, values[2].g, values[2].b,
                         values[3].r, values[3].g, values[3].b);
             const auto srgb   = 0.5f;
-            const auto linear = gfx::sRGB_to_linear(srgb);
+            const auto linear = gfx::sRGB_decode(srgb);
             std::printf("sRGB to linear %f = %f\n", srgb, linear);
         }
 
