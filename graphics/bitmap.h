@@ -223,10 +223,9 @@ namespace gfx
         virtual const void* GetReadPtr() const = 0;
         // Get whether bitmap is valid or not (has been allocated)
         virtual bool IsValid() const = 0;
-        // Read a RGBA pixel tuple from the underlying bitmap object.
-        // If the underlying bitmap doesn't have all the RGBA channels
-        // the value is converted into RGBA according to the conversion
-        // constructors in the RGBA type.
+        // Read bitwise pixel data from the underlying bitmap
+        // object. These functions don't do any color space etc.
+        // conversion but only consider bits.
         virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const = 0;
         virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const = 0;
         virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const = 0;
@@ -293,10 +292,9 @@ namespace gfx
         virtual void* GetWritePtr() const = 0;
         // Get whether bitmap is valid or not (has been allocated)
         virtual bool IsValid() const = 0;
-        // Write a RGBA pixel tuple to the underlying bitmap object.
-        // If the underlying bitmap doesn't have all the RGBA channels
-        // the value is converted into RGBA according to the conversion
-        // constructors in the RGBA type.
+        // Read bitwise pixel data from the underlying bitmap
+        // object. These functions don't do any color space etc.
+        // conversion but only consider bits.
         virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const = 0;
         virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const = 0;
         virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const = 0;
@@ -377,7 +375,8 @@ namespace gfx
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto index = row * mWidth + col;
-            *pout = mPixels[index];
+            constexpr auto bytes  = std::min(sizeof(T), sizeof(Pixel));
+            std::memcpy(pout, &mPixels[index], bytes);
         }
     private:
         const Pixel* mPixels  = nullptr;
@@ -420,7 +419,8 @@ namespace gfx
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto index = row * mWidth + col;
-            mPixels[index] = Pixel(value);
+            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
+            std::memcpy(&mPixels[index], &value, bytes);
         }
     private:
         mutable Pixel* mPixels  = nullptr;
@@ -472,7 +472,8 @@ namespace gfx
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto index = row * mWidth + col;
-            mPixels[index] = Pixel(value);
+            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
+            std::memcpy(&mPixels[index], &value, bytes);
         }
         template<typename T>
         void read_pixel(unsigned row, unsigned col, T* pout) const
@@ -480,7 +481,8 @@ namespace gfx
             ASSERT(row < mHeight);
             ASSERT(col < mWidth);
             const auto index = row * mWidth + col;
-            *pout = mPixels[index];
+            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
+            std::memcpy(pout, &mPixels[index], bytes);
         }
     private:
         mutable Pixel* mPixels  = nullptr;
