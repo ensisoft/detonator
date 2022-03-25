@@ -34,7 +34,7 @@ int test_main(int argc, char* argv[])
         gfx::Bitmap<gfx::RGB> bmp;
         TEST_REQUIRE(bmp.GetWidth() == 0);
         TEST_REQUIRE(bmp.GetHeight() == 0);
-        TEST_REQUIRE(bmp.GetData() == nullptr);
+        TEST_REQUIRE(bmp.GetDataPtr() == nullptr);
         TEST_REQUIRE(bmp.IsValid() == false);
     }
 
@@ -44,7 +44,7 @@ int test_main(int argc, char* argv[])
         gfx::Bitmap<gfx::RGB> bmp(2, 2);
         TEST_REQUIRE(bmp.GetWidth() == 2);
         TEST_REQUIRE(bmp.GetHeight() == 2);
-        TEST_REQUIRE(bmp.GetData() != nullptr);        
+        TEST_REQUIRE(bmp.GetDataPtr() != nullptr);
         TEST_REQUIRE(bmp.IsValid() == true);
     }
 
