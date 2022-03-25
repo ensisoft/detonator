@@ -208,10 +208,11 @@ namespace gfx
     inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
     { return dst | src; }
 
-    class IConstBitmapView
+
+    class IBitmapReadView
     {
     public:
-        virtual ~IConstBitmapView() = default;
+        virtual ~IBitmapReadView() = default;
         // Get the width of the bitmap
         virtual unsigned GetWidth() const = 0;
         // Get the height of the bitmap
@@ -239,18 +240,18 @@ namespace gfx
         }
     protected:
         // no public dynamic copying or assignment
-        IConstBitmapView() = default;
-        IConstBitmapView(IConstBitmapView&&) = default;
-        IConstBitmapView(const IConstBitmapView&) = default;
-        IConstBitmapView& operator=(const IConstBitmapView&) = default;
-        IConstBitmapView& operator=(IConstBitmapView&&) = default;
+        IBitmapReadView() = default;
+        IBitmapReadView(IBitmapReadView&&) = default;
+        IBitmapReadView(const IBitmapReadView&) = default;
+        IBitmapReadView& operator=(const IBitmapReadView&) = default;
+        IBitmapReadView& operator=(IBitmapReadView&&) = default;
     private:
     };
 
-    class IMutableBitmapView
+    class IBitmapWriteView
     {
     public:
-        virtual ~IMutableBitmapView() = default;
+        virtual ~IBitmapWriteView() = default;
         // Get the width of the bitmap
         virtual unsigned GetWidth() const = 0;
         // Get the height of the bitmap
@@ -270,20 +271,20 @@ namespace gfx
         virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const = 0;
     protected:
         // no public dynamic copying or assignment
-        IMutableBitmapView() = default;
-        IMutableBitmapView(IMutableBitmapView&&) = default;
-        IMutableBitmapView(const IMutableBitmapView&) = default;
-        IMutableBitmapView& operator=(const IMutableBitmapView&) = default;
-        IMutableBitmapView& operator=(IMutableBitmapView&&) = default;
+        IBitmapWriteView() = default;
+        IBitmapWriteView(IBitmapWriteView&&) = default;
+        IBitmapWriteView(const IBitmapWriteView&) = default;
+        IBitmapWriteView& operator=(const IBitmapWriteView&) = default;
+        IBitmapWriteView& operator=(IBitmapWriteView&&) = default;
     private:
     };
 
     template<typename Pixel>
-    class ConstBitmapView : public IConstBitmapView
+    class BitmapReadView : public IBitmapReadView
     {
     public:
         using PixelType = Pixel;
-        ConstBitmapView(const Pixel* data, unsigned width, unsigned height)
+        BitmapReadView(const Pixel* data, unsigned width, unsigned height)
           : mPixels(data)
           , mWidth(width)
           , mHeight(height)
@@ -320,11 +321,11 @@ namespace gfx
     };
 
     template<typename Pixel>
-    class MutableBitmapView : public IMutableBitmapView
+    class BitmapWriteView : public IBitmapWriteView
     {
     public:
         using PixelType = Pixel;
-        MutableBitmapView(Pixel* data, unsigned width, unsigned height)
+        BitmapWriteView(Pixel* data, unsigned width, unsigned height)
           : mPixels(data)
           , mWidth(width)
           , mHeight(height)
@@ -363,7 +364,7 @@ namespace gfx
     // Bitmap interface. Mostly designed so that it's possible
     // to keep bitmap objects around as generic bitmaps
     // regardless of their actual underlying pixel representation.
-    // Extends the read only IConstBitmapView with functionality that
+    // Extends the read only IBitmapReadView with functionality that
     // mutates the actual bitmap object.
     class IBitmap
     {
@@ -395,9 +396,9 @@ namespace gfx
         // cccc           aaaa
         virtual void FlipHorizontally() = 0;
         // Get a read only view into the contents of the bitmap.
-        virtual std::unique_ptr<IConstBitmapView> GetReadView() const = 0;
+        virtual std::unique_ptr<IBitmapReadView> GetReadView() const = 0;
         // Get a write only view into the contents of the bitmap.
-        virtual std::unique_ptr<IMutableBitmapView> GetWriteView() = 0;
+        virtual std::unique_ptr<IBitmapWriteView> GetWriteView() = 0;
         // Make a clone of this bitmap.
         virtual std::unique_ptr<IBitmap> Clone() const = 0;
         // Get unique hash value based on the contents of the bitmap.
@@ -593,17 +594,17 @@ namespace gfx
                 hash_value = base::hash_combine(hash_value, ptr[i]);
             return hash_value;
         }
-        virtual std::unique_ptr<IConstBitmapView> GetReadView() const override
-        { return std::make_unique<ConstBitmapView<Pixel>>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
-        virtual std::unique_ptr<IMutableBitmapView> GetWriteView() override
-        { return std::make_unique<MutableBitmapView<Pixel>>((Pixel*)GetDataPtr(), mWidth, mHeight); }
+        virtual std::unique_ptr<IBitmapReadView> GetReadView() const override
+        { return std::make_unique<BitmapReadView<Pixel>>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
+        virtual std::unique_ptr<IBitmapWriteView> GetWriteView() override
+        { return std::make_unique<BitmapWriteView<Pixel>>((Pixel*)GetDataPtr(), mWidth, mHeight); }
         virtual std::unique_ptr<IBitmap> Clone() const override
         { return std::make_unique<Bitmap>(*this); }
 
-        ConstBitmapView<Pixel> GetPixelReadView() const
-        { return ConstBitmapView<Pixel>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
-        MutableBitmapView<Pixel> GetPixelWriteView()
-        { return MutableBitmapView<Pixel>((Pixel*)GetDataPtr(), mWidth, mHeight); }
+        BitmapReadView<Pixel> GetPixelReadView() const
+        { return BitmapReadView<Pixel>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
+        BitmapWriteView<Pixel> GetPixelWriteView()
+        { return BitmapWriteView<Pixel>((Pixel*)GetDataPtr(), mWidth, mHeight); }
 
         // Get a pixel from within the bitmap.
         // The pixel must be within this bitmap's width and height.
@@ -922,14 +923,14 @@ namespace gfx
         return !(lhs == rhs);
     }
 
-    void WritePPM(const IConstBitmapView& bmp, const std::string& filename);
-    void WritePNG(const IConstBitmapView& bmp, const std::string& filename);
+    void WritePPM(const IBitmapReadView& bmp, const std::string& filename);
+    void WritePNG(const IBitmapReadView& bmp, const std::string& filename);
     void WritePPM(const IBitmap& bmp, const std::string& filename);
     void WritePNG(const IBitmap& bmp, const std::string& filename);
 
-    std::unique_ptr<IBitmap> GenerateNextMipmap(const IConstBitmapView& src, bool srgb);
+    std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapReadView& src, bool srgb);
     std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb);
-    std::unique_ptr<IBitmap> ConvertToLinear(const IConstBitmapView& src);
+    std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapReadView& src);
     std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src);
 
     // Interface for accessing / generating bitmaps procedurally.

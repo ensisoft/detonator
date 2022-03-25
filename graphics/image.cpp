@@ -74,27 +74,27 @@ bool Image::Load(const std::string& URI)
     return true;
 }
 
-std::unique_ptr<IMutableBitmapView> Image::GetWriteView()
+std::unique_ptr<IBitmapWriteView> Image::GetWriteView()
 {
-    std::unique_ptr<IMutableBitmapView> ret;
+    std::unique_ptr<IBitmapWriteView> ret;
     if (mDepth == 1)
-        ret.reset(new MutableBitmapView<Grayscale>((Grayscale*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<Grayscale>((Grayscale*)mData, mWidth, mHeight));
     else if (mDepth == 3)
-        ret.reset(new MutableBitmapView<RGB>((RGB*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<RGB>((RGB*)mData, mWidth, mHeight));
     else if (mDepth == 4)
-        ret.reset(new MutableBitmapView<RGBA>((RGBA*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<RGBA>((RGBA*)mData, mWidth, mHeight));
     return ret;
 }
 
-std::unique_ptr<IConstBitmapView> Image::GetReadView() const
+std::unique_ptr<IBitmapReadView> Image::GetReadView() const
 {
-    std::unique_ptr<IConstBitmapView> ret;
+    std::unique_ptr<IBitmapReadView> ret;
     if (mDepth == 1)
-        ret.reset(new ConstBitmapView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
     else if (mDepth == 3)
-        ret.reset(new ConstBitmapView<RGB>((const RGB*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<RGB>((const RGB*)mData, mWidth, mHeight));
     else if (mDepth == 4)
-        ret.reset(new ConstBitmapView<RGBA>((const RGBA*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<RGBA>((const RGBA*)mData, mWidth, mHeight));
     return ret;
 }
 

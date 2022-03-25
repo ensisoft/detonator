@@ -33,7 +33,7 @@
 
 namespace {
 template<typename T_u8, typename T_float>
-std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IConstBitmapView& src)
+std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapReadView& src)
 {
     ASSERT(src.IsValid());
 
@@ -62,7 +62,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IConstBitmapView& 
 }
 
 template<typename T_u8, typename T_float, bool srgb>
-std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IConstBitmapView& src)
+std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
 {
     ASSERT(src.IsValid());
 
@@ -478,7 +478,7 @@ Grayscale RGB_u8_from_float(const fGrayscale& value)
     return ret;
 }
 
-void WritePPM(const IConstBitmapView& bmp, const std::string& filename)
+void WritePPM(const IBitmapReadView& bmp, const std::string& filename)
 {
     static_assert(sizeof(RGB) == 3,
         "Padding bytes found. Cannot copy RGB data as a byte stream.");
@@ -513,7 +513,7 @@ void WritePPM(const IBitmap& bmp, const std::string& filename)
     WritePPM(*view, filename);
 }
 
-void WritePNG(const IConstBitmapView& bmp, const std::string& filename)
+void WritePNG(const IBitmapReadView& bmp, const std::string& filename)
 {
     const auto w = bmp.GetWidth();
     const auto h = bmp.GetHeight();
@@ -527,7 +527,7 @@ void WritePNG(const IBitmap& bmp, const std::string& filename)
     WritePNG(*view, filename);
 }
 
-std::unique_ptr<IBitmap> GenerateNextMipmap(const IConstBitmapView& src, bool srgb)
+std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapReadView& src, bool srgb)
 {
     if (src.GetDepthBits() == 32) {
         if (srgb) return ::BoxFilter<RGBA, fRGBA, true>(src);
@@ -545,7 +545,7 @@ std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb)
     return GenerateNextMipmap(*view, srgb);
 }
 
-std::unique_ptr<IBitmap> ConvertToLinear(const IConstBitmapView& src)
+std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapReadView& src)
 {
     if (src.GetDepthBits() == 32)
         return ::ConvertToLinear<RGBA, fRGBA>(src);
