@@ -518,7 +518,7 @@ void WritePNG(const IBitmapReadView& bmp, const std::string& filename)
     const auto w = bmp.GetWidth();
     const auto h = bmp.GetHeight();
     const auto d = bmp.GetDepthBits() / 8;
-    if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetDataPtr(), d * w))
+    if (!stbi_write_png(filename.c_str(), w, h, d, bmp.GetReadPtr(), d * w))
         throw std::runtime_error(std::string("failed to write png: " + filename));
 }
 void WritePNG(const IBitmap& bmp, const std::string& filename)

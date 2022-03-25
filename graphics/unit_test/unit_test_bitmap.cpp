@@ -247,8 +247,7 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::Yellow);    
 
         dst.Fill(gfx::Color::White);
-        dst.Fill(gfx::Color::White);
-        dst.Copy(-2, -2, src);                                   
+        dst.Copy(-2, -2, src);
         TEST_REQUIRE(dst.GetPixel(0, 0) == gfx::Color::White);
     }
 

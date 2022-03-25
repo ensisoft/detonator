@@ -357,7 +357,7 @@ int test_main(int argc, char* argv[])
         {
             const auto& rgba = graphics_device->ReadColorBuffer(SurfaceWidth, SurfaceHeight);
             const auto& name = std::string(spec.name) + ".png";
-            gfx::WritePNG(gfx::Bitmap<gfx::RGB>(rgba), name);
+            gfx::WritePNG(rgba, name);
             INFO("Wrote screen capture '%1'", name);
         }
     }
