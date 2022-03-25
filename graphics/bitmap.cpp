@@ -52,9 +52,9 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapReadView& s
             T_u8 value;
             T_float norm;
             src.ReadPixel(row, col, &value);
-            norm  = gfx::RGB_u8_to_float(value);
+            norm  = gfx::Pixel_to_floats(value);
             norm  = gfx::sRGB_decode(norm);
-            value = gfx::RGB_u8_from_float(norm);
+            value = gfx::Pixel_to_uints(norm);
             dst->WritePixel(row, col, value);
         }
     }
@@ -97,10 +97,10 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
             // be to use bit shift (right shift by two) on the integer type
             // but that would lose some precision.
             T_float values_norm[4];
-            values_norm[0] = gfx::RGB_u8_to_float(values[0]);
-            values_norm[1] = gfx::RGB_u8_to_float(values[1]);
-            values_norm[2] = gfx::RGB_u8_to_float(values[2]);
-            values_norm[3] = gfx::RGB_u8_to_float(values[3]);
+            values_norm[0] = gfx::Pixel_to_floats(values[0]);
+            values_norm[1] = gfx::Pixel_to_floats(values[1]);
+            values_norm[2] = gfx::Pixel_to_floats(values[2]);
+            values_norm[3] = gfx::Pixel_to_floats(values[3]);
 
             // if we're dealing with sRGB color space then the values need first
             // be converted into linear before averaging. this is only supported
@@ -125,7 +125,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
             }
 
             // write the new pixel value out.
-            dst->WritePixel(dst_row, dst_col, gfx::RGB_u8_from_float(value));
+            dst->WritePixel(dst_row, dst_col, gfx::Pixel_to_uints(value));
         }
     }
     return ret;
@@ -134,6 +134,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
 
 namespace gfx
 {
+
 RGB::RGB(Color c)
 {
     switch (c)
@@ -211,6 +212,15 @@ RGB::RGB(Color c)
     }
 } // ctor
 
+RGBA::RGBA(Color name, u8 alpha)
+{
+    RGB tmp(name);
+    r = tmp.r;
+    g = tmp.g;
+    b = tmp.b;
+    a = alpha;
+}
+
 bool operator==(const Grayscale& lhs, const Grayscale& rhs)
 {
     return lhs.r == rhs.r;
@@ -221,16 +231,22 @@ bool operator!=(const Grayscale& lhs, const Grayscale& rhs)
 }
 Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs)
 {
-    return Grayscale(lhs.r & rhs.r);
+    Grayscale ret;
+    ret.r = lhs.r & rhs.r;
+    return ret;
 }
 Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
 {
-    return Grayscale(lhs.r | rhs.r);
+    Grayscale ret;
+    ret.r = lhs.r | rhs.r;
+    return ret;
 }
 
 Grayscale operator >> (const Grayscale& lhs, unsigned bits)
 {
-    return Grayscale (lhs.r >> bits);
+    Grayscale ret;
+    ret.r = lhs.r >> bits;
+    return ret;
 }
 
 bool operator==(const RGB& lhs, const RGB& rhs)
@@ -430,7 +446,7 @@ fRGB sRGB_encode(const fRGB& value)
     return ret;
 }
 
-fRGBA RGB_u8_to_float(const RGBA& value)
+fRGBA Pixel_to_floats(const RGBA& value)
 {
     fRGBA ret;
     ret.r = value.r / 255.0f;
@@ -439,7 +455,7 @@ fRGBA RGB_u8_to_float(const RGBA& value)
     ret.a = value.a / 255.0f;
     return ret;
 }
-fRGB RGB_u8_to_float(const RGB& value)
+fRGB Pixel_to_floats(const RGB& value)
 {
     fRGB ret;
     ret.r = value.r / 255.0f;
@@ -447,14 +463,14 @@ fRGB RGB_u8_to_float(const RGB& value)
     ret.b = value.b / 255.0f;
     return ret;
 }
-fGrayscale RGB_u8_to_float(const Grayscale& value)
+fGrayscale Pixel_to_floats(const Grayscale& value)
 {
     fGrayscale ret;
     ret.r = value.r / 255.0f;
     return ret;
 }
 
-RGBA RGB_u8_from_float(const fRGBA& value)
+RGBA Pixel_to_uints(const fRGBA& value)
 {
     RGBA ret;
     ret.r = value.r * 255;
@@ -463,7 +479,7 @@ RGBA RGB_u8_from_float(const fRGBA& value)
     ret.a = value.a * 255;
     return ret;
 }
-RGB RGB_u8_from_float(const fRGB& value)
+RGB Pixel_to_uints(const fRGB& value)
 {
     RGB ret;
     ret.r = value.r * 255;
@@ -471,10 +487,55 @@ RGB RGB_u8_from_float(const fRGB& value)
     ret.b = value.b * 255;
     return ret;
 }
-Grayscale RGB_u8_from_float(const fGrayscale& value)
+Grayscale Pixel_to_uints(const fGrayscale& value)
 {
     Grayscale ret;
     ret.r = value.r * 255;
+    return ret;
+}
+
+fRGBA sRGBA_from_color(Color name)
+{
+    const Color4f color(name);
+
+    fRGBA ret;
+    ret.r = color.Red();
+    ret.g = color.Green();
+    ret.b = color.Blue();
+    ret.a = 1.0f;
+    return ret;
+}
+
+fRGB sRGB_from_color(Color name)
+{
+    const Color4f color(name);
+
+    fRGB ret;
+    ret.r = color.Red();
+    ret.g = color.Green();
+    ret.b = color.Blue();
+    return ret;
+}
+
+fGrayscale sRGB_grayscale_from_color(Color name)
+{
+    // we're taking the sRGB (gamma encoded) color value
+    // and converting it into linear brightness
+    // then apply the RGB to grayscale formula and convert
+    // back into gamma encoded sRGB space but discarding the
+    // duplicate channels (since if the grayscale image was
+    // encoded with R, G, B channels all channels would have
+    // the same value)
+
+    // https://en.wikipedia.org/wiki/Grayscale
+    // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
+    const auto srgb   = sRGB_from_color(name);
+    const auto linear = sRGB_decode(srgb);
+    const float Y_linear = 0.2126f * linear.r +
+                           0.7252f * linear.g +
+                           0.0722f * linear.b;
+    fGrayscale ret;
+    ret.r = sRGB_encode(Y_linear);
     return ret;
 }
 

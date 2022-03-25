@@ -40,16 +40,20 @@ namespace gfx
 {
     using u8 = std::uint8_t;
 
-    struct RGB;
-    struct RGBA;
-
+    // About this monochromatic 8-bits per pixel type.
+    //
+    // This is called grayscale here in the type system but is typically
+    // used to actually represent alpha masks instead of true grayscale images.
+    // Bitwise representation is the same for the both, i.e. both have just
+    // one 8 bit channel but the meaning is completely different. With alpha
+    // masks the channel represents linear opacity from 0.0f/0x00 to 1.0f/0xff,
+    // 0.0f being fully transparent and 1.0f being fully opaque.
+    // True grayscale images use the 8bit channel to represent the luminance
+    // of the image with some encoding such as sRGB.
     struct Grayscale {
         u8 r = 0;
-        Grayscale(u8 r) : r(r)
+        Grayscale(u8 value=0) : r(value)
         {}
-        Grayscale() = default;
-        Grayscale(const RGB& rgb); // defined after RGB
-        Grayscale(const RGBA& rgba); // defined after RGBA
     };
     bool operator==(const Grayscale& lhs, const Grayscale& rhs);
     bool operator!=(const Grayscale& lhs, const Grayscale& rhs);
@@ -57,19 +61,20 @@ namespace gfx
     Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs);
     Grayscale operator >> (const Grayscale& lhs, unsigned bits);
 
+    // RGB represents a pixel in the RGB color model but doesn't
+    // require any specific color model/encoding. The actual channel
+    // values can thus represent color values either in sRGB, linear
+    // or some other 8bit encoding.
     struct RGB {
         u8 r = 0;
         u8 g = 0;
         u8 b = 0;
-        RGB() = default;
-        RGB(u8 r, u8 g, u8 b) : r(r), g(g), b(b)
+        RGB(u8 red=0, u8 green=0, u8 blue=0)
+          : r(red), g(green), b(blue)
         {}
-        RGB(Color c);
-        RGB(const Grayscale& grayscale)
-        {
-            r = g = b = grayscale.r;
-        }
-        RGB(const RGBA& rgba);
+        // Set the RGB value based on a color name.
+        // The result is sRGB encoded RGB triplet.
+        RGB(Color name);
     };
 
     bool operator==(const RGB& lhs, const RGB& rhs);
@@ -78,34 +83,24 @@ namespace gfx
     RGB operator | (const RGB& lhs, const RGB& rhs);
     RGB operator >> (const RGB& lhs, unsigned bits);
 
+    // RGBA represents a pixel in the RGB color model but doesn't
+    // require any actual color model/encoding. The actual channel
+    // color values can thus represent color values either in sRGB,
+    // linear or some other 8bit encoding.
+    // Note that even when using sRGB the alpha value is not sRGB
+    // encoded but represents pixel's transparency on a linear scale.
+    // In addition, the alpha value can be either straight or pre-multiplied.
     struct RGBA {
         u8 r = 0;
         u8 g = 0;
         u8 b = 0;
         u8 a = 255;
-
-        RGBA() = default;
-        RGBA(u8 r, u8 g, u8 b, u8 a) : r(r), g(g), b(b), a(a)
+        RGBA(u8 red=0, u8 green=0, u8 blue=0, u8 alpha = 0xff)
+          : r(red), g(green), b(blue), a(alpha)
         {}
-        RGBA(Color c)
-        {
-            RGB rgb(c);
-            r = rgb.r;
-            g = rgb.g;
-            b = rgb.b;
-            a = 255;
-        }
-        RGBA(const Grayscale& grayscale)
-        {
-            r = g = b = grayscale.r;
-            a = 255;
-        }
-        RGBA(const RGB& rgb)
-        {
-            r = rgb.r;
-            g = rgb.g;
-            b = rgb.b;
-        }
+        // Set the RGB value based on a color name.
+        // The result is sRGB encoded RGB triplet.
+        RGBA(Color name, u8 alpha=255);
     };
 
     bool operator==(const RGBA& lhs, const RGBA& rhs);
@@ -113,41 +108,6 @@ namespace gfx
     RGBA operator & (const RGBA& lhs, const RGBA& rhs);
     RGBA operator | (const RGBA& lhs, const RGBA& rhs);
     RGBA operator >> (const RGBA& lhs, unsigned bits);
-
-    // RGB methods that depend on RGBA
-    inline RGB::RGB(const RGBA& rgba)
-    {
-        const float a = rgba.a / 255.0f;
-        // bake the alpha in the color channels
-        r = u8(rgba.r * a);
-        g = u8(rgba.g * a);
-        b = u8(rgba.b * a);
-    }
-
-    // Grayscale methods that depend on RGB/A come here.
-    inline Grayscale::Grayscale(const RGB& rgb)
-    {
-        // assume linear values here.
-        // https://en.wikipedia.org/wiki/Grayscale
-        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
-        const float y =
-            0.2126f * rgb.r +
-            0.7252f * rgb.g +
-            0.0722f * rgb.b;
-        r = u8(y / 255.0f);
-    }
-    inline Grayscale::Grayscale(const RGBA& rgba)
-    {
-        // assume linear values
-        // https://en.wikipedia.org/wiki/Grayscale
-        // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
-        const float a = rgba.a / 255.0f;
-        const float y =
-            0.2126f * rgba.r +
-            0.7252f * rgba.g +
-            0.0722f * rgba.b;
-        r = u8((y * a) / 255.0f);
-    }
 
     struct fRGBA {
         float r = 0.0f;
@@ -182,12 +142,18 @@ namespace gfx
     fRGB sRGB_decode(const fRGB& value);
     fRGB sRGB_encode(const fRGB& value);
 
-    fRGBA RGB_u8_to_float(const RGBA& value);
-    fRGB RGB_u8_to_float(const RGB& value);
-    fGrayscale RGB_u8_to_float(const Grayscale& value);
-    RGBA RGB_u8_from_float(const fRGBA& value);
-    RGB RGB_u8_from_float(const fRGB& value);
-    Grayscale RGB_u8_from_float(const fGrayscale& value);
+    // transform between unsigned integer and floating
+    // point pixel representations.
+    fRGBA Pixel_to_floats(const RGBA& value);
+    fRGB Pixel_to_floats(const RGB& value);
+    fGrayscale Pixel_to_floats(const Grayscale& value);
+    RGBA Pixel_to_uints(const fRGBA& value);
+    RGB Pixel_to_uints(const fRGB& value);
+    Grayscale Pixel_to_uints(const fGrayscale& value);
+
+    fRGBA sRGBA_from_color(Color name);
+    fRGB sRGB_from_color(Color name);
+    fGrayscale sRGB_grayscale_from_color(Color name);
 
     static_assert(sizeof(Grayscale) == 1,
         "Unexpected size of Grayscale pixel struct type.");
@@ -225,7 +191,8 @@ namespace gfx
         virtual bool IsValid() const = 0;
         // Read bitwise pixel data from the underlying bitmap
         // object. These functions don't do any color space etc.
-        // conversion but only consider bits.
+        // conversion but only consider bits. The number of bytes
+        // copied into output pixel are truncated to actual size.
         virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const = 0;
         virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const = 0;
         virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const = 0;
@@ -294,7 +261,8 @@ namespace gfx
         virtual bool IsValid() const = 0;
         // Read bitwise pixel data from the underlying bitmap
         // object. These functions don't do any color space etc.
-        // conversion but only consider bits.
+        // conversion but only consider bits. The number of bytes
+        // copied into destination bitmap are truncated to actual size.
         virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const = 0;
         virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const = 0;
         virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const = 0;
@@ -902,9 +870,9 @@ namespace gfx
             const auto index = row * mWidth + col;
             mPixels[index] = value;
         }
-        void SetPixel(const UPoint& p, const Pixel& value)
+        void SetPixel(const UPoint& point, const Pixel& value)
         {
-            SetPixel(p.GetY(), p.GetX(), value);
+            SetPixel(point.GetY(), point.GetX(), value);
         }
 
         // Compare the pixels in this bitmap within the given rectangle
@@ -1048,31 +1016,10 @@ namespace gfx
             return ret;
         }
 
-        // Get pixel pointer to the raw data.
-        const Pixel* GetData() const
-        { return mPixels.empty() ? nullptr : &mPixels[0]; }
-
         URect GetRect() const
         { return URect(0u, 0u, mWidth, mHeight); }
         USize GetSize() const
         { return USize(mWidth, mHeight); }
-    private:
-        template<typename T>
-        void read_pixel(unsigned row, unsigned col, T* pout) const
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            *pout = mPixels[index];
-        }
-        template<typename T>
-        void write_pixel(unsigned row, unsigned col, const T& value)
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            mPixels[index] = Pixel(value);
-        }
     private:
         std::vector<Pixel> mPixels;
         unsigned mWidth  = 0;
@@ -1083,6 +1030,7 @@ namespace gfx
     };
 
     using GrayscaleBitmap = Bitmap<Grayscale>;
+    using AlphaMask  = Bitmap<Grayscale>;
     using RgbBitmap  = Bitmap<RGB>;
     using RgbaBitmap = Bitmap<RGBA>;
 
