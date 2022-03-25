@@ -1289,7 +1289,7 @@ private:
             std::unique_ptr<IBitmap> linear;
             if (format == Format::sRGB && !mDevice.mExtensions.sRGB)
             {
-                ConstBitmapView<RGB> view((const RGB*)bytes, xres, yres);
+                BitmapReadView<RGB> view((const RGB*)bytes, xres, yres);
                 linear = ConvertToLinear(view);
                 bytes  = linear->GetDataPtr();
                 sizeFormat = GL_RGB;
@@ -1297,7 +1297,7 @@ private:
             }
             else if (format == Format::sRGBA && !mDevice.mExtensions.sRGB)
             {
-                ConstBitmapView<RGBA> view((const RGBA*)bytes, xres, yres);
+                BitmapReadView<RGBA> view((const RGBA*)bytes, xres, yres);
                 linear = ConvertToLinear(view);
                 bytes  = linear->GetDataPtr();
                 sizeFormat = GL_RGBA;
@@ -1426,7 +1426,7 @@ private:
             // been loaded, so the next level is level 1
 
             // level 0 view
-            ConstBitmapView<T_rgb> view((const T_rgb*)bytes, xres, yres);
+            BitmapReadView<T_rgb> view((const T_rgb*)bytes, xres, yres);
 
             auto level  = 1u;
             auto mipmap = GenerateNextMipmap(view, true);

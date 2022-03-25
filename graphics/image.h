@@ -82,13 +82,13 @@ namespace gfx
         // Important, the returned object may not be accessed
         // after the image has ceased to exist. These views should
         // only be used for a short term while accessing the contents.
-        std::unique_ptr<IMutableBitmapView> GetWriteView();
+        std::unique_ptr<IBitmapWriteView> GetWriteView();
 
         // Get view to immutable bitmap data.
         // Important, the returned object may not be accessed
         // after the image has ceased to exist. These views should
         // only be used for a short term while accessing the contents.
-        std::unique_ptr<IConstBitmapView> GetReadView() const;
+        std::unique_ptr<IBitmapReadView> GetReadView() const;
 
         // Returns true if the image has been loaded, otherwise false.
         bool IsValid() const
