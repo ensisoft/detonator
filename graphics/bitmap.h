@@ -175,12 +175,12 @@ namespace gfx
     fGrayscale operator * (const fGrayscale& lhs, float scaler);
     fGrayscale operator * (float scaler, const fGrayscale& rhs);
 
-    float sRGB_to_linear(float value);
-    float sRGB_from_linear(float value);
-    fRGBA sRGB_to_linear(const fRGBA& value);
-    fRGB sRGB_to_linear(const fRGB& value);
-    fRGBA sRGB_from_linear(const fRGBA& value);
-    fRGB sRGB_from_linear(const fRGB& value);
+    float sRGB_decode(float value);
+    float sRGB_encode(float value);
+    fRGBA sRGB_decode(const fRGBA& value);
+    fRGBA sRGB_encode(const fRGBA& value);
+    fRGB sRGB_decode(const fRGB& value);
+    fRGB sRGB_encode(const fRGB& value);
 
     fRGBA RGB_u8_to_float(const RGBA& value);
     fRGB RGB_u8_to_float(const RGB& value);
