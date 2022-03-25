@@ -71,11 +71,11 @@ namespace gfx
 
             Bitmap<PixelT> ret(mWidth, mHeight);
             if (mDepth == 1)
-                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const Grayscale*>(mData));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
             else if (mDepth == 3)
-                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGB*>(mData));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<RGB>((const RGB*)mData, mWidth, mHeight));
             else if (mDepth == 4)
-                ret.Copy(0, 0, mWidth, mHeight, reinterpret_cast<const RGBA*>(mData));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<RGBA>((const RGBA*)mData, mWidth, mHeight));
             return ret;
         }
         // Get a view to mutable bitmap data.

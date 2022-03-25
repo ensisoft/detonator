@@ -1885,10 +1885,8 @@ int main(int argc, char* argv[])
             const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(),
                 window.GetSurfaceHeight());
 
-            gfx::Bitmap<gfx::RGB> tmp;
-
             const auto& name = "demo_" + std::to_string(screenshot_number) + ".png";
-            gfx::WritePNG(gfx::Bitmap<gfx::RGB>(rgba), name);
+            gfx::WritePNG(rgba, name);
             INFO("Wrote screen capture '%1'", name);
             screenshot_number++;
         }
