@@ -32,6 +32,23 @@
 #include "graphics/bitmap.h"
 
 namespace {
+void PremultiplyPixel_lRGB(const gfx::RGBA& src, gfx::RGBA* dst)
+{
+    gfx::fRGBA norm;
+    norm = gfx::Pixel_to_floats(src);
+    norm = gfx::RGBA_premul_alpha(norm);
+    *dst = gfx::Pixel_to_uints(norm);
+}
+void PremultiplyPixel_sRGB(const gfx::RGBA& src, gfx::RGBA* dst)
+{
+    gfx::fRGBA norm;
+    norm = gfx::Pixel_to_floats(src);
+    norm = gfx::sRGB_decode(norm);
+    norm = gfx::RGBA_premul_alpha(norm);
+    norm = gfx::sRGB_encode(norm);
+    *dst = gfx::Pixel_to_uints(norm);
+}
+
 template<typename T_u8, typename T_float>
 std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapReadView& src)
 {
@@ -61,8 +78,8 @@ std::unique_ptr<gfx::Bitmap<T_u8>> ConvertToLinear(const gfx::IBitmapReadView& s
     return ret;
 }
 
-template<typename T_u8, typename T_float, bool srgb>
-std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
+template<typename T_u8, typename T_float, bool support_srgb, bool alpha_channel>
+std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src, bool srgb, bool premul_alpha)
 {
     ASSERT(src.IsValid());
 
@@ -105,12 +122,27 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
             // if we're dealing with sRGB color space then the values need first
             // be converted into linear before averaging. this is only supported
             // for RGBA and RGB formats.
-            if constexpr (srgb)
+            if constexpr (support_srgb)
             {
-                values_norm[0] = gfx::sRGB_decode(values_norm[0]);
-                values_norm[1] = gfx::sRGB_decode(values_norm[1]);
-                values_norm[2] = gfx::sRGB_decode(values_norm[2]);
-                values_norm[3] = gfx::sRGB_decode(values_norm[3]);
+                if (srgb)
+                {
+                    values_norm[0] = gfx::sRGB_decode(values_norm[0]);
+                    values_norm[1] = gfx::sRGB_decode(values_norm[1]);
+                    values_norm[2] = gfx::sRGB_decode(values_norm[2]);
+                    values_norm[3] = gfx::sRGB_decode(values_norm[3]);
+                }
+            }
+
+            // premultiply alpha into RGB
+            if constexpr (alpha_channel)
+            {
+                if (premul_alpha)
+                {
+                    for (auto& rgba : values_norm)
+                    {
+                        rgba = gfx::RGBA_premul_alpha(rgba);
+                    }
+                }
             }
 
             // compute the average of the original 4 pixels.
@@ -119,9 +151,10 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src)
                             values_norm[2] * 0.25f +
                             values_norm[3] * 0.25f;
             // encode linear in sRGB if needed.
-            if constexpr (srgb)
+            if constexpr (support_srgb)
             {
-                value = gfx::sRGB_encode(value);
+                if (srgb)
+                    value = gfx::sRGB_encode(value);
             }
 
             // write the new pixel value out.
@@ -493,6 +526,15 @@ Grayscale Pixel_to_uints(const fGrayscale& value)
     ret.r = value.r * 255;
     return ret;
 }
+fRGBA RGBA_premul_alpha(const fRGBA& rgba)
+{
+    fRGBA ret;
+    ret.r = rgba.r * rgba.a;
+    ret.g = rgba.g * rgba.a;
+    ret.b = rgba.b * rgba.a;
+    ret.a = rgba.a;
+    return ret;
+}
 
 fRGBA sRGBA_from_color(Color name)
 {
@@ -590,14 +632,13 @@ void WritePNG(const IBitmap& bmp, const std::string& filename)
 
 std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapReadView& src, bool srgb)
 {
+    const auto premul_alpha = false;
     if (src.GetDepthBits() == 32) {
-        if (srgb) return ::BoxFilter<RGBA, fRGBA, true>(src);
-        return ::BoxFilter<RGBA, fRGBA, false>(src);
+       return ::BoxFilter<RGBA, fRGBA, true, true>(src, srgb, premul_alpha);
     } else if (src.GetDepthBits() == 24) {
-        if (srgb) return ::BoxFilter<RGB, fRGB, true> (src);
-        return ::BoxFilter<RGB, fRGB, false>(src);
+        return ::BoxFilter<RGB, fRGB, true, false> (src, srgb, false);
     } else if (src.GetDepthBits() == 8)
-        return ::BoxFilter<Grayscale, fGrayscale, false>(src);
+        return ::BoxFilter<Grayscale, fGrayscale, false, false>(src, false, false);
     return nullptr;
 }
 std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb)
@@ -619,6 +660,32 @@ std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src)
     auto view = src.GetReadView();
     return ConvertToLinear(*view);
 }
+
+void PremultiplyAlpha(const BitmapWriteView<RGBA>& dst,
+                      const BitmapReadView<RGBA>& src, bool srgb)
+{
+    auto conversion  = srgb ? &PremultiplyPixel_sRGB
+                            : &PremultiplyPixel_lRGB;
+    ConvertBitmap(dst, src, conversion);
+}
+
+Bitmap<RGBA> PremultiplyAlpha(const BitmapReadView<RGBA>& src, bool srgb)
+{
+    const auto src_width  = src.GetWidth();
+    const auto src_height = src.GetHeight();
+
+    Bitmap<RGBA> ret;
+    ret.Resize(src_width, src_height);
+
+    PremultiplyAlpha(ret.GetPixelWriteView(), src, srgb);
+    return ret;
+}
+
+Bitmap<RGBA> PremultiplyAlpha(const Bitmap<RGBA>& src, bool srgb)
+{
+    return PremultiplyAlpha(src.GetPixelReadView(), srgb);
+}
+
 
 void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
 {
