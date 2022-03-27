@@ -85,21 +85,21 @@ using gfx::Bitmap;
 using gfx::Grayscale;
 
 template<size_t Pool>
-std::shared_ptr<Bitmap<Grayscale>> AllocateBitmap(unsigned width, unsigned height)
+std::shared_ptr<gfx::AlphaMask> AllocateBitmap(unsigned width, unsigned height)
 {
     // the repeated allocation bitmaps for rasterizing content is
     // actually more expensive than the actual rasterization.
     // we can keep a small cache of frequently used bitmap sizes.
     static std::unordered_map<std::uint64_t,
-               std::shared_ptr<gfx::Bitmap<gfx::Grayscale>>> cache;
+               std::shared_ptr<gfx::AlphaMask>> cache;
 
-    std::shared_ptr<Bitmap<Grayscale>> bmp;
+    std::shared_ptr<gfx::AlphaMask> bmp;
 
     const std::uint64_t key = ((uint64_t)width << 32) | height;
     auto it = cache.find(key);
     if (it == std::end(cache))
     {
-        bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
+        bmp = std::make_shared<gfx::AlphaMask>(width, height);
         cache[key] = bmp;
     }
     else if (it->second.use_count() == 1)
@@ -109,7 +109,7 @@ std::shared_ptr<Bitmap<Grayscale>> AllocateBitmap(unsigned width, unsigned heigh
     }
     else
     {
-        bmp = std::make_shared<Bitmap<Grayscale>>(width, height);
+        bmp = std::make_shared<gfx::AlphaMask>(width, height);
     }
     return bmp;
 }
@@ -117,7 +117,7 @@ std::shared_ptr<Bitmap<Grayscale>> AllocateBitmap(unsigned width, unsigned heigh
 struct LineRaster {
     // bitmap can be nullptr if the line was in fact
     // empty with no text in it. (no rasterization was done)
-    std::shared_ptr<const Bitmap<Grayscale>> bitmap;
+    std::shared_ptr<const gfx::AlphaMask> bitmap;
     // the position of the baseline within the bitmap
     // measured from the top of the bitmap.
     short baseline = 0;
@@ -133,7 +133,7 @@ struct TextBlock {
 struct TextComposite {
     int line_height = 0;
     int num_lines   = 0;
-    std::shared_ptr<const Bitmap<Grayscale>> bitmap;
+    std::shared_ptr<const gfx::AlphaMask> bitmap;
 };
 
 int AlignLine(int line_width, int block_width, gfx::TextBuffer::HorizontalAlignment alignment)
@@ -229,7 +229,7 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
         unsigned height = 0;
         int bearing_x = 0;
         int bearing_y = 0;
-        Bitmap<Grayscale> bitmap;
+        gfx::AlphaMask bitmap;
     };
 
     std::map<unsigned, GlyphRasterInfo> glyph_raster_info;
@@ -269,7 +269,7 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
             FT_GlyphSlot slot = face->glyph;
 
             // copy into our buffer
-            Bitmap<Grayscale> bmp(reinterpret_cast<const Grayscale*>(slot->bitmap.buffer),
+            gfx::AlphaMask bmp(reinterpret_cast<const Grayscale*>(slot->bitmap.buffer),
                                   slot->bitmap.width,
                                   slot->bitmap.rows,
                                   slot->bitmap.pitch);
@@ -390,7 +390,7 @@ void TextBuffer::SetBufferSize(unsigned int width, unsigned int height)
     mBufferHeight = height;
 }
 
-std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
+std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
 {
     static FontLibrary freetype;
 
@@ -504,7 +504,7 @@ std::shared_ptr<Bitmap<Grayscale>> TextBuffer::Rasterize() const
     return out;
 }
 
-std::shared_ptr<Bitmap<Grayscale>> TextBuffer::TryRasterize() const
+std::shared_ptr<AlphaMask> TextBuffer::TryRasterize() const
 {
     try
     {

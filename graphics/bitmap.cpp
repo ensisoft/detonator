@@ -673,7 +673,7 @@ bool NoiseBitmapGenerator::FromJson(const data::Reader& data)
 
 std::unique_ptr<IBitmap> NoiseBitmapGenerator::Generate() const
 {
-    auto ret = std::make_unique<GrayscaleBitmap>();
+    auto ret = std::make_unique<AlphaMask>();
     ret->Resize(mWidth, mHeight);
     const float w = mWidth;
     const float h = mHeight;
