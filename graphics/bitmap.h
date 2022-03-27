@@ -29,6 +29,7 @@
 
 #include "base/assert.h"
 #include "base/hash.h"
+#include "base/math.h"
 #include "data/fwd.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
@@ -154,6 +155,8 @@ namespace gfx
     fRGBA sRGBA_from_color(Color name);
     fRGB sRGB_from_color(Color name);
     fGrayscale sRGB_grayscale_from_color(Color name);
+
+    fRGBA RGBA_premul_alpha(const fRGBA& rgba);
 
     static_assert(sizeof(Grayscale) == 1,
         "Unexpected size of Grayscale pixel struct type.");
@@ -556,6 +559,30 @@ namespace gfx
         }
     }
 
+    template<typename SrcPixel, typename DstPixel, typename Converter>
+    void ConvertBitmap(const BitmapWriteView<DstPixel>& dst,
+                       const BitmapReadView<SrcPixel>& src,
+                       Converter conversion_op)
+    {
+        const auto src_width  = src.GetWidth();
+        const auto src_height = src.GetHeight();
+        const auto dst_width  = dst.GetWidth();
+        const auto dst_height = dst.GetHeight();
+        ASSERT(src_width == dst_width);
+        ASSERT(src_height == dst_height);
+        for (unsigned row=0; row<src_height; ++row)
+        {
+            for (unsigned col=0; col<src_width; ++col)
+            {
+                SrcPixel src_pixel;
+                DstPixel dst_pixel;
+                src.ReadPixel(row, col, &src_pixel);
+                conversion_op(src_pixel, &dst_pixel);
+                dst.WritePixel(row, col, dst_pixel);
+            }
+        }
+    }
+
     template<typename Pixel, typename CompareFunc>
     bool CompareBitmaps(const BitmapReadView<Pixel>& src,
                         const BitmapReadView<Pixel>& dst,
@@ -774,7 +801,6 @@ namespace gfx
                 std::memcpy(&mPixels[dst], &ptr[src], num_bytes_per_row);
             }
         }
-
         // IBitmap interface implementation
 
         // Get the width of the bitmap.
@@ -1116,6 +1142,11 @@ namespace gfx
     std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb);
     std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapReadView& src);
     std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src);
+
+    void PremultiplyAlpha(const BitmapWriteView<RGBA>& dst,
+                          const BitmapReadView<RGBA>& src, bool srgb);
+    Bitmap<RGBA> PremultiplyAlpha(const BitmapReadView<RGBA>& src, bool srgb);
+    Bitmap<RGBA> PremultiplyAlpha(const Bitmap<RGBA>& src, bool srgb);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for
