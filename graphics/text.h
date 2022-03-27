@@ -61,10 +61,10 @@ namespace gfx
 
         // Rasterize the text buffer contents into a bitmap.
         // Throws an exception on an error.
-        std::shared_ptr<Bitmap<Grayscale>> Rasterize() const;
+        std::shared_ptr<AlphaMask> Rasterize() const;
         // Try to rasterize the contents into a a bitmap.
         // Returns nullptr one error.
-        std::shared_ptr<Bitmap<Grayscale>> TryRasterize() const;
+        std::shared_ptr<AlphaMask> TryRasterize() const;
 
         enum class HorizontalAlignment {
             AlignLeft,
@@ -87,7 +87,7 @@ namespace gfx
 
         // Some general notes about text styling:
         // Common "styling" options such as Italic and Bold text are normally
-        // variations of the "Regular" font. Therefore this API provides no
+        // variations of the "Regular" font. Therefore, this API provides no
         // facilities for dealing with "bold" or "italic" text. Simply use
         // the appropriate font file when adding text to the TextBuffer.
         // block of text that is to be rasterized in the buffer.
@@ -107,8 +107,8 @@ namespace gfx
             // Font size (in pixels)
             unsigned fontsize = 0;
 
-            // the lineheight multiplier that is used to compute the
-            // actual text lineheight which is used to advance
+            // The line height multiplier that is used to compute the
+            // actual text line height, which is used to advance
             // from one line to line in the buffer when rasterizing
             // lines of text
             float lineheight = 1.0f;
