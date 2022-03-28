@@ -40,10 +40,8 @@ namespace gfx
         // immediately using the given file URI.
         // If the image load fails the object will be constructed
         // (i.e. no exception is thrown) but IsValid will be false.
-        // The optional resource type is a hint to the resource loader
-        // (in case of using encoded file identifier) as to what's the
-        // purpose of the data.
         Image(const std::string& URI);
+        Image(const void* data, size_t bytes);
         Image(const Image&) = delete;
        ~Image();
 
@@ -55,10 +53,11 @@ namespace gfx
         // On error returns false and the image object remains
         // unchanged.
         bool Load(const std::string& URI);
+        bool Load(const void* data, size_t bytes);
 
         // Copy (and optionally convert) the pixel contents of the
-        // image into a specific type of a bitmap object.
-        // The bitmap allows for more fine grained control over
+        // image to a specific type of bitmap object.
+        // The bitmap allows for more fine-grained control over
         // the pixel data such as GetPixel/SetPixel if that's what you need.
         // If the image cannot be represented as a bitmap of any type
         // known to the system an invalid bitmap will be returned.
@@ -78,6 +77,23 @@ namespace gfx
                 ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<RGBA>((const RGBA*)mData, mWidth, mHeight));
             return ret;
         }
+        template<typename PixelT>
+        BitmapReadView<PixelT> GetPixelReadView() const
+        {
+            if (mDepth == sizeof(PixelT))
+                return BitmapReadView<PixelT>((const PixelT*)mData, mWidth, mHeight);
+            return BitmapReadView<PixelT>();
+        }
+        template<typename PixelT>
+        BitmapWriteView<PixelT> GetPixelWriteView()
+        {
+            if (mDepth == sizeof(PixelT))
+                return BitmapWriteView<PixelT>((const PixelT*)mData, mWidth, mHeight);
+            return BitmapWriteView<PixelT>();
+        }
+
+        std::unique_ptr<IBitmap> GetBitmap() const;
+
         // Get a view to mutable bitmap data.
         // Important, the returned object may not be accessed
         // after the image has ceased to exist. These views should
