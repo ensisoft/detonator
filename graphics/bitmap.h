@@ -318,6 +318,7 @@ namespace gfx
           , mWidth(width)
           , mHeight(height)
         {}
+        BitmapReadView() = default;
         virtual unsigned GetWidth() const override
         { return mWidth; }
         virtual unsigned GetHeight() const override
@@ -362,6 +363,7 @@ namespace gfx
           , mWidth(width)
           , mHeight(height)
         {}
+        BitmapWriteView() = default;
         virtual unsigned GetWidth() const override
         { return mWidth; }
         virtual unsigned GetHeight() const override
