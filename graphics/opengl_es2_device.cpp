@@ -572,7 +572,9 @@ public:
                 break;
             case State::BlendOp::Transparent:
                 GL_CALL(glEnable(GL_BLEND));
-                GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                if (state.premulalpha)
+                    GL_CALL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+                else GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             case State::BlendOp::Additive:
                 GL_CALL(glEnable(GL_BLEND));

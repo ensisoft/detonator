@@ -41,6 +41,7 @@ namespace gfx
         struct State {
             // should write color buffer or not.
             bool bWriteColor = true;
+            bool premulalpha = false;
             // how to mix the fragment with the existing color buffer value.
             enum class BlendOp {
                 None,

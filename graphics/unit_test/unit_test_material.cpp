@@ -132,6 +132,7 @@ void unit_test_color()
     klass.SetStatic(false);
     klass.SetBaseColor(gfx::Color::DarkGreen);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
+    klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
 
     // serialization
     {
@@ -146,6 +147,7 @@ void unit_test_color()
         TEST_REQUIRE(ret->AsColor()->GetBaseColor() == gfx::Color::DarkGreen);
         TEST_REQUIRE(ret->AsColor()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(ret->AsColor()->IsStatic() == false);
+        TEST_REQUIRE(ret->PremultipliedAlpha() == true);
     }
     // copy and assignment
     {
@@ -181,6 +183,7 @@ void unit_test_gradient()
     klass.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
     klass.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
+    klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
 
     // serialization
     {
@@ -198,6 +201,7 @@ void unit_test_gradient()
         TEST_REQUIRE(ret->AsGradient()->GetColor(gfx::GradientClass::ColorIndex::TopRight) == gfx::Color::DarkGray);
         TEST_REQUIRE(ret->AsGradient()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(ret->AsGradient()->IsStatic() == false);
+        TEST_REQUIRE(ret->PremultipliedAlpha());
     }
     // copy and assignment
     {
@@ -222,21 +226,23 @@ void unit_test_gradient()
         TEST_REQUIRE(clone->AsGradient()->GetColor(gfx::GradientClass::ColorIndex::TopRight) == gfx::Color::DarkGray);
         TEST_REQUIRE(clone->AsGradient()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(clone->AsGradient()->IsStatic() == false);
+        TEST_REQUIRE(clone->PremultipliedAlpha());
     }
 }
 
 
 void unit_test_texture()
 {
+    gfx::detail::TextureFileSource texture;
+    texture.SetFileName("file.png");
+    texture.SetName("file");
+
     gfx::TextureMap2DClass klass;
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
     klass.SetBaseColor(gfx::Color::DarkGreen);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
-
-    gfx::detail::TextureFileSource texture;
-    texture.SetFileName("file.png");
-    texture.SetName("file");
+    klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
     klass.SetTexture(texture.Copy());
     klass.SetTextureRect(gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
@@ -258,8 +264,8 @@ void unit_test_texture()
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
-        //TEST_REQUIRE(ret->Getshader() == gfx::MaterialClass::Shader::Sprite);
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
+        TEST_REQUIRE(ret->PremultipliedAlpha());
         TEST_REQUIRE(ret->AsTexture()->GetBaseColor() == gfx::Color::DarkGreen);
         TEST_REQUIRE(ret->AsTexture()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(ret->AsTexture()->IsStatic() == false);
@@ -297,6 +303,7 @@ void unit_test_texture()
         TEST_REQUIRE(clone->GetId() != klass.GetId());
         TEST_REQUIRE(clone->GetHash() != klass.GetHash());
         TEST_REQUIRE(clone->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
+        TEST_REQUIRE(clone->PremultipliedAlpha());
         TEST_REQUIRE(clone->AsTexture()->GetBaseColor() == gfx::Color::DarkGreen);
         TEST_REQUIRE(clone->AsTexture()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(clone->AsTexture()->IsStatic() == false);
@@ -322,6 +329,7 @@ void unit_test_sprite()
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
+    klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
     klass.SetBaseColor(gfx::Color::Blue);
     klass.SetFps(3.0f);
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
@@ -384,6 +392,7 @@ void unit_test_sprite()
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
+        TEST_REQUIRE(ret->PremultipliedAlpha());
         TEST_REQUIRE(ret->AsSprite()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(ret->AsSprite()->GetBaseColor() == gfx::Color::Blue);
         TEST_REQUIRE(ret->AsSprite()->IsStatic() == false);
@@ -480,6 +489,7 @@ void unit_test_custom()
     gfx::CustomMaterialClass klass;
     klass.SetShaderUri("my_shader.glsl");
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
+    klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
     klass.SetUniform("float", 56.0f);
     klass.SetUniform("int", 123);
     klass.SetUniform("vec2", glm::vec2(1.0f, 2.0f));
@@ -520,6 +530,7 @@ void unit_test_custom()
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
+        TEST_REQUIRE(ret->PremultipliedAlpha());
         TEST_REQUIRE(ret->AsCustom()->GetShaderUri() == "my_shader.glsl");
         TEST_REQUIRE(*ret->AsCustom()->GetUniformValue<float>("float") == real::float32(56.0f));
         TEST_REQUIRE(*ret->AsCustom()->GetUniformValue<int>("int") == 123);

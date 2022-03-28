@@ -122,7 +122,8 @@ namespace gfx
         public:
             enum class Flags {
                 AllowPacking,
-                AllowResizing
+                AllowResizing,
+                PremulAlpha
             };
             TextureFileSource()
             {
@@ -140,9 +141,16 @@ namespace gfx
             { return mId; }
             virtual std::string GetGpuId() const override
             {
+                // using the mFile URI is *not* enough to uniquely
+                // identify this texture object on the GPU because it's
+                // possible that the *same* texture object (same underlying file)
+                // is used with *different* flags in another material.
+                // in other words, "foo.png with premultiplied alpha" must be
+                // a different GPU texture object than "foo.png with straight alpha".
                 size_t hash = 0;
                 hash = base::hash_combine(hash, mFile);
                 hash = base::hash_combine(hash, mColorSpace);
+                hash = base::hash_combine(hash, mFlags.test(Flags::PremulAlpha));
                 return std::to_string(hash);
             }
             virtual std::string GetName() const override
@@ -780,6 +788,13 @@ namespace gfx
             Custom
         };
 
+        enum class Flags {
+            // When set, change the transparent blending equation
+            // to expect alpha values to be premultpliesd into the
+            // the RGB values.
+            PremultipliedAlpha
+        };
+
         // Material/Shader uniform.
         using Uniform = std::variant<float, int,
                 gfx::Color4f,
@@ -854,8 +869,14 @@ namespace gfx
         // Finish the packing process by retrieving the new updated resource
         // information the packer and updating the material's state.
         virtual void FinishPacking(const Packer* packer) = 0;
-
+        // Test a material flag. Returns true if the flag is set, otherwise false.
+        virtual bool TestFlag(Flags flag) const = 0;
+        // Set a material flag to on or off.
+        virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Helpers
+        bool PremultipliedAlpha() const
+        { return TestFlag(Flags::PremultipliedAlpha); }
+
         inline BuiltInMaterialClass* AsBuiltIn()
         { return MaterialCast<BuiltInMaterialClass>(this); }
         inline SpriteClass* AsSprite()
@@ -949,11 +970,16 @@ namespace gfx
         { /* empty */ }
         virtual void FinishPacking(const Packer* packer) override
         { /*empty */ }
+        virtual bool TestFlag(Flags flag) const override
+        { return mFlags.test(flag); }
+        virtual void SetFlag(Flags flag, bool on_off) override
+        { mFlags.set(flag, on_off); }
     protected:
         std::string mClassId;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         float mGamma  = 1.0f;
         bool mStatic = false;
+        base::bitflag<Flags> mFlags;
     };
 
     // Shade surfaces using a simple solid color shader only.
@@ -1407,6 +1433,10 @@ namespace gfx
         virtual bool FromJson2(const data::Reader& data) override;
         virtual void BeginPacking(Packer* packer) const override;
         virtual void FinishPacking(const Packer* packer) override;
+        virtual bool TestFlag(Flags flag) const override
+        { return mFlags.test(flag); }
+        virtual void SetFlag(Flags flag, bool on_off) override
+        { mFlags.set(flag, on_off); }
         CustomMaterialClass& operator=(const CustomMaterialClass& other);
     private:
         std::string mClassId;
@@ -1419,6 +1449,7 @@ namespace gfx
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         std::unordered_map<std::string, std::unique_ptr<TextureMap>> mTextureMaps;
+        base::bitflag<Flags> mFlags;
     };
 
     // Material instance. Each instance can contain and alter the
@@ -1441,6 +1472,7 @@ namespace gfx
         struct RasterState {
             using Blending = Device::State::BlendOp;
             Blending blending = Blending::None;
+            bool premultiplied_alpha = false;
         };
         // Apply the dynamic material properties to the given program object
         // and set the rasterizer state.
@@ -1490,23 +1522,8 @@ namespace gfx
         }
 
         // Apply the material properties to the given program object and set the rasterizer state.
-        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override
-        {
-            MaterialClass::State state;
-            state.editing_mode  = env.editing_mode;
-            state.render_points = env.render_points;
-            state.material_time = mRuntime;
-            state.uniforms      = mUniforms;
-            mClass->ApplyDynamicState(state, device, program);
+        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
 
-            const auto surface = mClass->GetSurfaceType();
-            if (surface == MaterialClass::SurfaceType::Opaque)
-                raster.blending = RasterState::Blending::None;
-            else if (surface == MaterialClass::SurfaceType::Transparent)
-                raster.blending = RasterState::Blending::Transparent;
-            else if (surface == MaterialClass::SurfaceType::Emissive)
-                raster.blending = RasterState::Blending::Additive;
-        }
         virtual void ApplyStaticState(Device& device, Program& program) const override
         { mClass->ApplyStaticState(device, program); }
         virtual Shader* GetShader(Device& device) const override

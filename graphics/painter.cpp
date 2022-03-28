@@ -125,6 +125,7 @@ public:
         state.bWriteColor  = true;
         state.stencil_func = Device::State::StencilFunc::Disabled;
         state.blending     = material_raster_state.blending;
+        state.premulalpha  = material_raster_state.premultiplied_alpha;
         state.line_width   = drawable_raster_state.line_width;
         state.culling      = drawable_raster_state.culling;
         mDevice->Draw(*prog, *geom, state);
@@ -196,8 +197,9 @@ public:
 
             Drawable::RasterState drawable_raster_state;
             mask.drawable->ApplyState(*prog, drawable_raster_state);
-            state.culling = drawable_raster_state.culling;
-            state.line_width = drawable_raster_state.line_width;
+            state.culling     = drawable_raster_state.culling;
+            state.line_width  = drawable_raster_state.line_width;
+            state.premulalpha = false;
 
             mDevice->Draw(*prog, *geom, state);
         }
@@ -234,7 +236,8 @@ public:
             material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
 
             draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
-            state.blending = material_raster_state.blending;
+            state.blending    = material_raster_state.blending;
+            state.premulalpha = material_raster_state.premultiplied_alpha;
 
             Drawable::RasterState drawable_raster_state;
             draw.drawable->ApplyState(*prog, drawable_raster_state);
@@ -284,6 +287,7 @@ public:
             state.bWriteColor  = true;
             state.stencil_func = Device::State::StencilFunc::Disabled;
             state.blending     = material_raster_state.blending;
+            state.premulalpha  = material_raster_state.premultiplied_alpha;
             state.culling      = drawable_raster_state.culling;
             state.line_width   = drawable_raster_state.line_width;
             mDevice->Draw(*program, *geom, state);
