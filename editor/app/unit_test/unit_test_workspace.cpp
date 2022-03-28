@@ -64,6 +64,16 @@ size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
     }
     return ret;
 }
+size_t CountPixels(const gfx::Bitmap<gfx::Grayscale>& bmp, int value)
+{
+    size_t ret = 0;
+    for (unsigned  y=0; y<bmp.GetHeight(); ++y) {
+        for (unsigned x=0; x<bmp.GetWidth(); ++x)
+            if (bmp.GetPixel(y, x).r == value)
+                ++ret;
+    }
+    return ret;
+}
 
 void unit_test_path_mapping()
 {
@@ -788,7 +798,116 @@ void unit_test_packing_texture_composition(unsigned padding)
     // todo: test cases where texture packing cannot be done (see material.cpp)
 }
 
-void unit_test_packing_texture_rects(unsigned padding)
+void unit_test_packing_texture_composition_format()
+{
+    // source textures with different formats should not be combined
+    // but rather only textures with the same format should be combined.
+    // in other words, rgba textures can go into a rgba atlas, rgb textures
+    // can be combined into rbg atlas and 8bit grayscale textures into
+    // 8bit grayscale atlas.
+
+    {
+        DeleteDir("TestWorkspace");
+        DeleteDir("TestPackage");
+        MakeDir("TestWorkspace");
+
+        gfx::AlphaMask masks[2];
+        gfx::RgbBitmap rgb_textures[2];
+        gfx::RgbaBitmap rgba_textures[2];
+
+        masks[0].Resize(64, 64);
+        masks[0].Fill(gfx::Grayscale(0x20));
+        masks[1].Resize(50, 180);
+        masks[1].Fill(gfx::Grayscale(0x45));
+
+        rgb_textures[0].Resize(80, 166);
+        rgb_textures[0].Fill(gfx::Color::Red);
+        rgb_textures[1].Resize(64, 64);
+        rgb_textures[1].Fill(gfx::Color::Yellow);
+
+        rgba_textures[0].Resize(100, 100);
+        rgba_textures[0].Fill(gfx::Color::Blue);
+        rgba_textures[1].Resize(200, 100);
+        rgba_textures[1].Fill(gfx::Color::Red);
+
+        gfx::WritePNG(masks[0], "test_8bit_bitmap0.png");
+        gfx::WritePNG(masks[1], "test_8bit_bitmap1.png");
+        gfx::WritePNG(rgb_textures[0], "test_24bit_bitmap0.png");
+        gfx::WritePNG(rgb_textures[1], "test_24bit_bitmap1.png");
+        gfx::WritePNG(rgba_textures[0], "test_32bit_bitmap0.png");
+        gfx::WritePNG(rgba_textures[1], "test_32bit_bitmap1.png");
+
+        gfx::SpriteClass material;
+        material.AddTexture(gfx::LoadTextureFromFile("test_8bit_bitmap0.png"));
+        material.AddTexture(gfx::LoadTextureFromFile("test_8bit_bitmap1.png"));
+        material.AddTexture(gfx::LoadTextureFromFile("test_24bit_bitmap0.png"));
+        material.AddTexture(gfx::LoadTextureFromFile("test_24bit_bitmap1.png"));
+        material.AddTexture(gfx::LoadTextureFromFile("test_32bit_bitmap0.png"));
+        material.AddTexture(gfx::LoadTextureFromFile("test_32bit_bitmap1.png"));
+        app::MaterialResource resource(material, "material");
+
+        MakeDir("TestWorkspace");
+        app::Workspace workspace("TestWorkspace");
+        workspace.SaveResource(resource);
+
+        app::Workspace::ContentPackingOptions options;
+        options.directory           = "TestPackage";
+        options.package_name        = "";
+        options.write_content_file  = true;
+        options.write_config_file   = true;
+        options.combine_textures    = true;
+        options.resize_textures     = false;
+        options.max_texture_width   = 1024;
+        options.max_texture_height  = 1024;
+        options.texture_pack_width  = 1024;
+        options.texture_pack_height = 1024;
+        options.texture_padding     = 0;
+        // select the resources.
+        std::vector<const app::Resource *> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+        TEST_REQUIRE(workspace.PackContent(resources, options));
+
+        // todo: assuming a specific order in which the textures are generated. this needs to be fixed.
+
+        // RGBA
+        {
+            gfx::Image generated;
+            TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
+            TEST_REQUIRE(generated.GetWidth() == 1024);
+            TEST_REQUIRE(generated.GetHeight() == 1024);
+            TEST_REQUIRE(generated.GetDepthBits() == 32);
+            const auto& bmp = generated.AsBitmap<gfx::RGBA>();
+            TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == 100*100);
+            TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 200*100);
+        }
+
+        // RGB
+        {
+            gfx::Image generated;
+            TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_1.png"));
+            TEST_REQUIRE(generated.GetWidth() == 1024);
+            TEST_REQUIRE(generated.GetHeight() == 1024);
+            TEST_REQUIRE(generated.GetDepthBits() == 24);
+            const auto& bmp = generated.AsBitmap<gfx::RGB>();
+            TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 64*64);
+            TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 80*166);
+        }
+
+        // Alpha
+        {
+            gfx::Image generated;
+            TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_2.png"));
+            TEST_REQUIRE(generated.GetWidth() == 1024);
+            TEST_REQUIRE(generated.GetHeight() == 1024);
+            TEST_REQUIRE(generated.GetDepthBits() == 8);
+            const auto& bmp = generated.AsBitmap<gfx::Grayscale>();
+            TEST_REQUIRE(CountPixels(bmp, 0x20) == 64*64);
+            TEST_REQUIRE(CountPixels(bmp, 0x45) == 50*180);
+        }
+    }
+}
+
+void unit_test_packing_texture_composition_rects(unsigned padding)
 {
     // generate a test texture.
     gfx::RgbBitmap bitmap[2];
@@ -1003,7 +1122,7 @@ void unit_test_packing_texture_name_collision()
         const auto& bmp = img.AsBitmap<gfx::RGB>();
         TEST_REQUIRE(bmp == bitmap[1]);
     }
-
+    gfx::SetResourceLoader(nullptr);
 }
 
 void unit_test_packing_ui_style_resources()
@@ -1210,8 +1329,9 @@ int test_main(int argc, char* argv[])
     unit_test_packing_basic();
     unit_test_packing_texture_composition(0);
     unit_test_packing_texture_composition(3);
-    unit_test_packing_texture_rects(0);
-    unit_test_packing_texture_rects(5);
+    unit_test_packing_texture_composition_format();
+    unit_test_packing_texture_composition_rects(0);
+    unit_test_packing_texture_composition_rects(5);
     unit_test_packing_texture_name_collision();
     unit_test_packing_ui_style_resources();
     unit_test_packing_texture_name_collision_resample_bug();
