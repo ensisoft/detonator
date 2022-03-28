@@ -1713,6 +1713,60 @@ private:
     std::unique_ptr<gfx::Material> mMaterialLinear;
 };
 
+class PremultiplyAlphaTest : public GraphicsTest
+{
+public:
+    virtual void Start() override
+    {
+        const char* src = R"(
+#version 100
+precision highp float;
+uniform sampler2D kTexture;
+varying vec2 vTexCoord;
+void main() {
+    vec4 foo = texture2D(kTexture, vTexCoord);
+    gl_FragColor = vec4(foo.rgb, foo.a);
+})";
+        {
+            gfx::TextureMap2D map;
+            map.SetTexture(gfx::LoadTextureFromFile("textures/alpha-cutout.png"));
+            map.SetSamplerName("kTexture");
+            gfx::CustomMaterialClass material;
+            material.SetShaderSrc(src);
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            material.SetTextureMap("kTexture", std::move(map));
+            material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
+            mMaterialStraightAlpha = gfx::CreateMaterialInstance(material);
+        }
+        {
+            gfx::TextureMap2D map;
+            auto tex = gfx::LoadTextureFromFile("textures/alpha-cutout.png");
+            tex->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, true);
+            map.SetTexture(std::move(tex));
+            map.SetSamplerName("kTexture");
+            gfx::CustomMaterialClass material;
+            material.SetShaderSrc(src);
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            material.SetTextureMap("kTexture", std::move(map));
+            material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
+            material.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
+            mMaterialPremultAlpha = gfx::CreateMaterialInstance(material);
+        }
+    }
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FillRect(painter, gfx::FRect(10.0f, 10.0, 512.0f, 512.0f), *mMaterialStraightAlpha);
+        gfx::FillRect(painter, gfx::FRect(500.0f, 10.0, 512.0f, 512.0f), *mMaterialPremultAlpha);
+    }
+    virtual std::string GetName() const override
+    { return "PremultiplyAlphaTest"; }
+    virtual bool IsFeatureTest() const override
+    { return true; }
+private:
+    std::unique_ptr<gfx::Material> mMaterialStraightAlpha;
+    std::unique_ptr<gfx::Material> mMaterialPremultAlpha;
+};
+
 
 int main(int argc, char* argv[])
 {
@@ -1859,6 +1913,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ViewportTest);
     tests.emplace_back(new sRGBColorGradientTest);
     tests.emplace_back(new sRGBTextureTest);
+    tests.emplace_back(new PremultiplyAlphaTest);
 
     bool stop_for_input = false;
 

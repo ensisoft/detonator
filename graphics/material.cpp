@@ -110,29 +110,33 @@ namespace gfx
 
 std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
 {
-    try
+    DEBUG("Loading texture file. [file='%1']", mFile);
+    Image file(mFile);
+    if (!file.IsValid())
     {
-        DEBUG("Loading texture file. [file='%1']", mFile);
-        // in case of an image load exception, catch and log and returnnull.
-        // Todo: image class should probably provide a non-throw load
-        // but then it also needs some mechanism for getting the error
-        // message why it failed.
-        Image file(mFile);
-        if (file.GetDepthBits() == 8)
-            return std::make_shared<GrayscaleBitmap>(file.AsBitmap<Grayscale>());
-        else if (file.GetDepthBits() == 24)
-            return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
-        else if (file.GetDepthBits() == 32)
-            return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
-        else WARN("Unexpected texture bit depth.", mFile);
-
         ERROR("Failed to load texture. [file='%1']", mFile);
         return nullptr;
     }
-    catch (const std::exception& e)
+
+    if (file.GetDepthBits() == 8)
+        return std::make_shared<AlphaMask>(file.AsBitmap<Grayscale>());
+    else if (file.GetDepthBits() == 24)
+        return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
+    else if (file.GetDepthBits() == 32)
     {
-        ERROR("Failed to load texture. [file='%1', error='%2']", mFile, e.what());
+        if (!TestFlag(Flags::PremulAlpha))
+            return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
+
+        auto view = file.GetPixelReadView<RGBA>();
+        auto ret = std::make_shared<Bitmap<RGBA>>();
+        ret->Resize(view.GetWidth(), view.GetHeight());
+        DEBUG("Performing alpha premultiply on texture. [file='%1']", mFile);
+        PremultiplyAlpha(ret->GetPixelWriteView(), view, true /* srgb */);
+        return ret;
     }
+    else WARN("Unexpected texture bit depth.", mFile);
+
+    ERROR("Failed to load texture. [file='%1']", mFile);
     return nullptr;
 }
 void detail::TextureFileSource::IntoJson(data::Writer& data) const
@@ -757,6 +761,7 @@ size_t ColorClass::GetHash() const
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mColor);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -792,15 +797,16 @@ void ColorClass::IntoJson(data::Writer& data) const
     data.Write("gamma",   mGamma);
     data.Write("static",  mStatic);
     data.Write("color",   mColor);
+    data.Write("flags",   mFlags);
 }
 bool ColorClass::FromJson2(const data::Reader& data)
 {
-    if (!data.Read("id",      &mClassId) ||
-        !data.Read("surface", &mSurfaceType) ||
-        !data.Read("gamma",   &mGamma) ||
-        !data.Read("static",  &mStatic) ||
-        !data.Read("color",   &mColor))
-        return false;
+    data.Read("id",      &mClassId);
+    data.Read("surface", &mSurfaceType);
+    data.Read("gamma",   &mGamma);
+    data.Read("static",  &mStatic);
+    data.Read("color",   &mColor);
+    data.Read("flags",   &mFlags);
     return true;
 }
 
@@ -866,6 +872,7 @@ size_t GradientClass::GetHash() const
     hash = base::hash_combine(hash, mColorMap[2]);
     hash = base::hash_combine(hash, mColorMap[3]);
     hash = base::hash_combine(hash, mOffset);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 std::string GradientClass::GetProgramId() const
@@ -910,7 +917,7 @@ void GradientClass::ApplyStaticState(Device& device, Program& program) const
 
 void GradientClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type", Type::Gradient);
+    data.Write("type",       Type::Gradient);
     data.Write("id",         mClassId);
     data.Write("surface",    mSurfaceType);
     data.Write("gamma",      mGamma);
@@ -919,20 +926,21 @@ void GradientClass::IntoJson(data::Writer& data) const
     data.Write("color_map1", mColorMap[1]);
     data.Write("color_map2", mColorMap[2]);
     data.Write("color_map3", mColorMap[3]);
-    data.Write("offset", mOffset);
+    data.Write("offset",     mOffset);
+    data.Write("flags",      mFlags);
 }
 bool GradientClass::FromJson2(const data::Reader& data)
 {
-    if (!data.Read("id",         &mClassId) ||
-        !data.Read("surface",    &mSurfaceType) ||
-        !data.Read("gamma",      &mGamma) ||
-        !data.Read("static",     &mStatic) ||
-        !data.Read("color_map0", &mColorMap[0]) ||
-        !data.Read("color_map1", &mColorMap[1]) ||
-        !data.Read("color_map2", &mColorMap[2]) ||
-        !data.Read("color_map3", &mColorMap[3]) ||
-        !data.Read("offset", &mOffset))
-        return false;
+    data.Read("id",         &mClassId);
+    data.Read("surface",    &mSurfaceType);
+    data.Read("gamma",      &mGamma);
+    data.Read("static",     &mStatic);
+    data.Read("color_map0", &mColorMap[0]);
+    data.Read("color_map1", &mColorMap[1]);
+    data.Read("color_map2", &mColorMap[2]);
+    data.Read("color_map3", &mColorMap[3]);
+    data.Read("offset",     &mOffset);
+    data.Read("flags",      &mFlags);
     return true;
 }
 
@@ -953,8 +961,8 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
     mWrapX           = other.mWrapX;
     mWrapY           = other.mWrapY;
     mParticleAction  = other.mParticleAction;
+    mFlags           = other.mFlags;
 }
-
 
 Shader* SpriteClass::GetShader(Device& device) const
 {
@@ -1092,6 +1100,7 @@ std::size_t SpriteClass::GetHash() const
     hash = base::hash_combine(hash, mWrapX);
     hash = base::hash_combine(hash, mWrapY);
     hash = base::hash_combine(hash, mParticleAction);
+    hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mSprite.GetHash());
     return hash;
 }
@@ -1221,6 +1230,7 @@ void SpriteClass::IntoJson(data::Writer& data) const
     data.Write("texture_velocity", mTextureVelocity);
     data.Write("texture_rotation", mTextureRotation);
     data.Write("particle_action", mParticleAction);
+    data.Write("flags", mFlags);
     mSprite.IntoJson(data);
 }
 
@@ -1240,6 +1250,7 @@ bool SpriteClass::FromJson2(const data::Reader& data)
     data.Read("texture_velocity", &mTextureVelocity);
     data.Read("texture_rotation", &mTextureRotation);
     data.Read("particle_action", &mParticleAction);
+    data.Read("flags", &mFlags);
     mSprite.FromJson(data);
     return true;
 }
@@ -1340,6 +1351,7 @@ SpriteClass& SpriteClass::operator=(const SpriteClass& other)
     std::swap(mWrapY          , tmp.mWrapY);
     std::swap(mParticleAction , tmp.mParticleAction);
     std::swap(mSprite         , tmp.mSprite);
+    std::swap(mFlags          , tmp.mFlags);
     return *this;
 }
 
@@ -1360,6 +1372,7 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
     mWrapX           = other.mWrapX;
     mWrapY           = other.mWrapY;
     mParticleAction  = other.mParticleAction;
+    mFlags           = other.mFlags;
 }
 
 Shader* TextureMap2DClass::GetShader(Device& device) const
@@ -1490,6 +1503,7 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mWrapX);
     hash = base::hash_combine(hash, mWrapY);
     hash = base::hash_combine(hash, mParticleAction);
+    hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mTexture.GetHash());
     return hash;
 }
@@ -1605,6 +1619,7 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
     data.Write("texture_velocity", mTextureVelocity);
     data.Write("texture_rotation", mTextureRotation);
     data.Write("particle_action", mParticleAction);
+    data.Write("flags", mFlags);
     mTexture.IntoJson(data);
 }
 
@@ -1623,6 +1638,7 @@ bool TextureMap2DClass::FromJson2(const data::Reader& data)
     data.Read("texture_velocity", &mTextureVelocity);
     data.Read("texture_rotation", &mTextureRotation);
     data.Read("particle_action", &mParticleAction);
+    data.Read("flags", &mFlags);
     mTexture.FromJson(data);
     return true;
 }
@@ -1713,7 +1729,8 @@ TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
     std::swap(mWrapX          , tmp.mWrapX);
     std::swap(mWrapY          , tmp.mWrapY);
     std::swap(mParticleAction , tmp.mParticleAction);
-    std::swap(mTexture, tmp.mTexture);
+    std::swap(mTexture        , tmp.mTexture);
+    std::swap(mFlags         ,  tmp.mFlags);
     return *this;
 }
 
@@ -1728,6 +1745,7 @@ CustomMaterialClass::CustomMaterialClass(const CustomMaterialClass& other, bool 
     mMagFilter   = other.mMagFilter;
     mWrapX       = other.mWrapX;
     mWrapY       = other.mWrapY;
+    mFlags       = other.mFlags;
     for (const auto& map : other.mTextureMaps)
     {
         mTextureMaps[map.first] = copy ? map.second->Copy() : map.second->Clone();
@@ -1836,6 +1854,7 @@ std::size_t CustomMaterialClass::GetHash() const
     hash = base::hash_combine(hash, mMagFilter);
     hash = base::hash_combine(hash, mWrapX);
     hash = base::hash_combine(hash, mWrapY);
+    hash = base::hash_combine(hash, mFlags);
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -1953,6 +1972,7 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
     data.Write("mag_filter",  mMagFilter);
     data.Write("wrap_x",      mWrapX);
     data.Write("wrap_y",      mWrapY);
+    data.Write("flags",       mFlags);
 
     // use an ordered set for persisting the data to make sure
     // that the order in which the uniforms are written out is
@@ -2000,6 +2020,8 @@ bool CustomMaterialClass::FromJson2(const data::Reader& data)
     data.Read("mag_filter", &mMagFilter);
     data.Read("wrap_x",     &mWrapX);
     data.Read("wrap_y",     &mWrapY);
+    data.Read("flags",      &mFlags);
+
     for (unsigned i=0; i<data.GetNumChunks("uniforms"); ++i)
     {
         Uniform uniform;
@@ -2104,7 +2126,28 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
     std::swap(mMagFilter, tmp.mMagFilter);
     std::swap(mWrapX, tmp.mWrapX);
     std::swap(mWrapY, tmp.mWrapY);
+    std::swap(mFlags, tmp.mFlags);
     return *this;
+}
+
+void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+{
+    MaterialClass::State state;
+    state.editing_mode  = env.editing_mode;
+    state.render_points = env.render_points;
+    state.material_time = mRuntime;
+    state.uniforms      = mUniforms;
+    mClass->ApplyDynamicState(state, device, program);
+
+    const auto surface = mClass->GetSurfaceType();
+    if (surface == MaterialClass::SurfaceType::Opaque)
+        raster.blending = RasterState::Blending::None;
+    else if (surface == MaterialClass::SurfaceType::Transparent)
+        raster.blending = RasterState::Blending::Transparent;
+    else if (surface == MaterialClass::SurfaceType::Emissive)
+        raster.blending = RasterState::Blending::Additive;
+
+    raster.premultiplied_alpha = mClass->PremultipliedAlpha();
 }
 
 TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
