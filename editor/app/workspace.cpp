@@ -187,8 +187,25 @@ public:
         // is implementation specific. :p
         // for maximum portability we then just pretty much skip the whole packing.
 
+        using PackList = std::vector<app::PackingRectangle>;
+
+        struct TextureCategory {
+            QImage::Format format;
+            PackList sources;
+        };
+
         // the source list of rectangles (images to pack)
-        std::vector<app::PackingRectangle> sources;
+
+        TextureCategory rgba_textures;
+        TextureCategory rgb_textures;
+        TextureCategory grayscale_textures;
+        rgba_textures.format = QImage::Format::Format_RGBA8888;
+        rgb_textures.format  = QImage::Format::Format_RGB888;
+        grayscale_textures.format = QImage::Format::Format_Grayscale8;
+
+        TextureCategory* all_textures[] = {
+            &rgba_textures, &rgb_textures, &grayscale_textures
+        };
 
         struct GeneratedTextureEntry {
             QString  texture_file;
@@ -237,10 +254,39 @@ public:
 
             const QFileInfo info(app::FromUtf8(tex.file));
             const QString src_file = info.absoluteFilePath();
-            const QPixmap src_pix(src_file);
-            if (src_pix.isNull())
+            //const QImage src_pix(src_file);
+            // QImage seems to lie about something or then the test pngs are produced
+            // somehow wrong but an image that should have 24 bits for depth gets
+            // reported as 32bit when QImage loads it.
+            std::vector<char> img_data;
+            if (!app::ReadAsBinary(src_file, img_data))
             {
                 ERROR("Failed to open image file. [file='%1']", src_file);
+                mNumErrors++;
+                continue;
+            }
+
+            gfx::Image img;
+            if (!img.Load(&img_data[0], img_data.size()))
+            {
+                ERROR("Failed to decompress image file. [file='%1']", src_file);
+                mNumErrors++;
+                continue;
+            }
+            const auto width  = img.GetWidth();
+            const auto height = img.GetHeight();
+            const auto* data = img.GetData();
+            QImage src_pix;
+            if (img.GetDepthBits() == 8)
+                src_pix = QImage((const uchar*)data, width, height, width*1, QImage::Format_Grayscale8);
+            else if (img.GetDepthBits() == 24)
+                src_pix = QImage((const uchar*)data, width, height, width*3, QImage::Format_RGB888);
+            else if (img.GetDepthBits() == 32)
+                src_pix = QImage((const uchar*)data, width, height, width*4, QImage::Format_RGBA8888);
+
+            if (src_pix.isNull())
+            {
+                ERROR("Failed to load image file. [file='%1']", src_file);
                 mNumErrors++;
                 continue;
             }
@@ -248,23 +294,46 @@ public:
             QString img_name = info.fileName();
             auto img_width  = src_pix.width();
             auto img_height = src_pix.height();
-            DEBUG("Loading image file. [file='%1', width=%2, height=%3]", src_file, img_width, img_height);
+            auto img_depth  = src_pix.depth();
+            DEBUG("Loading image file. [file='%1', width=%2, height=%3, depth=%4]", src_file, img_width, img_height, img_depth);
 
-            if (kResizeLargeTextures && (img_width > kMaxTextureWidth || img_height > kMaxTextureHeight) && tex.allowed_to_resize)
+            if (!(img_depth == 32 || img_depth == 24 || img_depth == 8))
+            {
+                ERROR("Unsupported image format and depth. [file='%1', depth=%2]", src_file, img_depth);
+                mNumErrors++;
+                continue;
+            }
+
+            const bool too_large = img_width > kMaxTextureWidth ||
+                                   img_height > kMaxTextureHeight;
+            const bool can_resize = kResizeLargeTextures && tex.allowed_to_resize;
+            const bool needs_resampling = too_large && can_resize;
+
+            // first check if the source image needs to be resampled. if so
+            // resample in and output into /tmp
+            if (needs_resampling)
             {
                 const auto scale = std::min(kMaxTextureWidth / (float)img_width,
                                             kMaxTextureHeight / (float)img_height);
                 const auto dst_width  = img_width * scale;
                 const auto dst_height = img_height * scale;
-                //QPixmap buffer(dst_width, dst_height);
-                QImage buffer(dst_width, dst_height, QImage::Format::Format_RGBA8888);
+                QImage::Format format = QImage::Format::Format_Invalid;
+                if (img_depth == 32)
+                    format = QImage::Format::Format_RGBA8888;
+                else if (img_depth == 24)
+                    format = QImage::Format::Format_RGB888;
+                else if (img_depth == 8)
+                    format = QImage::Format::Format_Grayscale8;
+                else BUG("Missed image bit depth support check.");
+
+                QImage buffer(dst_width, dst_height, format);
                 buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
                 QPainter painter(&buffer);
                 painter.setCompositionMode(QPainter::CompositionMode_Source);
                 painter.setRenderHint(QPainter::SmoothPixmapTransform, true); // bi-linear filtering
                 const QRectF dst_rect(0, 0, dst_width, dst_height);
                 const QRectF src_rect(0, 0, img_width, img_height);
-                painter.drawPixmap(dst_rect, src_pix, src_rect);
+                painter.drawImage(dst_rect, src_pix, src_rect);
 
                 // create a scratch file into which write the re-sampled image file
                 const QString& name = app::RandomString() + ".png";
@@ -294,6 +363,7 @@ public:
                 image_map[tex.file] = app::FromUtf8(tex.file);
             }
 
+            // check if the texture can be combined.
             if (kPackSmallTextures && tex.can_be_combined && tex.allowed_to_combine && img_width < kTexturePackWidth && img_height < kTexturePackHeight)
             {
                 // add as a source for texture packing
@@ -301,7 +371,13 @@ public:
                 rc.width  = img_width + kTexturePadding * 2;
                 rc.height = img_height + kTexturePadding * 2;
                 rc.cookie = tex.file; // this is just used as an ID here.
-                sources.push_back(rc);
+                if (img_depth == 32)
+                    rgba_textures.sources.push_back(rc);
+                else if (img_depth == 24)
+                    rgb_textures.sources.push_back(rc);
+                else if (img_depth == 8)
+                    grayscale_textures.sources.push_back(rc);
+                else BUG("Missed image bit depth support check.");
             }
             else
             {
@@ -318,123 +394,128 @@ public:
 
         unsigned atlas_number = 0;
         cur_step = 0;
-        max_step = static_cast<int>(sources.size());
+        max_step = static_cast<int>(grayscale_textures.sources.size() +
+                                    rgb_textures.sources.size() +
+                                    rgba_textures.sources.size());
 
-        while (!sources.empty())
+        for (auto* texture_category : all_textures)
         {
-            progress("Packing textures...", cur_step++, max_step);
+            auto& sources = texture_category->sources;
+            while (!sources.empty())
+            {
+                progress("Packing textures...", cur_step++, max_step);
 
-            app::PackRectangles({kTexturePackWidth, kTexturePackHeight}, sources, nullptr);
-            // ok, some of the textures might have failed to pack on this pass.
-            // separate the ones that were successfully packed from the ones that
-            // weren't. then composite the image for the success cases.
-            auto first_success = std::partition(sources.begin(), sources.end(),
-                [](const auto& pack_rect) {
-                    // put the failed cases first.
-                    return pack_rect.success == false;
+                app::PackRectangles({kTexturePackWidth, kTexturePackHeight}, sources, nullptr);
+                // ok, some textures might have failed to pack on this pass.
+                // separate the ones that were successfully packed from the ones that
+                // weren't. then composite the image for the success cases.
+                auto first_success = std::partition(sources.begin(), sources.end(),
+                    [](const auto& pack_rect) {
+                        // put the failed cases first.
+                        return pack_rect.success == false;
                 });
-            const auto num_to_pack = std::distance(first_success, sources.end());
-            // we should have already dealt with too big images already.
-            ASSERT(num_to_pack > 0);
-            if (num_to_pack == 1)
-            {
-                // if we can only fit 1 single image in the container
-                // then what's the point ?
-                // we'd just end up wasting space, so just leave it as is.
-                const auto& rc = *first_success;
-                ASSERT(image_map.find(rc.cookie) != image_map.end());
-                QString file = image_map[rc.cookie];
-
-                GeneratedTextureEntry gen;
-                gen.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(file), "textures"));
-                gen.width  = 1.0f;
-                gen.height = 1.0f;
-                gen.xpos   = 0.0f;
-                gen.ypos   = 0.0f;
-                relocation_map[rc.cookie] = gen;
-                sources.erase(first_success);
-                continue;
-            }
-
-            // composition buffer.
-            QPixmap buffer(kTexturePackWidth, kTexturePackHeight);
-            buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
-
-            QPainter painter(&buffer);
-            painter.setCompositionMode(QPainter::CompositionMode_Source); // copy src pixel as-is
-
-            // do the composite pass.
-            for (auto it = first_success; it != sources.end(); ++it)
-            {
-                const auto& rc = *it;
-                ASSERT(rc.success);
-                const auto padded_width  = rc.width;
-                const auto padded_height = rc.height;
-                const auto width  = padded_width - kTexturePadding*2;
-                const auto height = padded_height - kTexturePadding*2;
-
-                ASSERT(image_map.find(rc.cookie) != image_map.end());
-                const QString img_file = image_map[rc.cookie];
-                const QFileInfo info(img_file);
-                const QString file(info.absoluteFilePath());
-                // compensate for possible texture sampling issues by padding the
-                // image with some extra pixels by growing it a few pixels on both
-                // axis.
-                const QRectF dst(rc.xpos, rc.ypos, padded_width, padded_height);
-                const QRectF src(0, 0, width, height);
-                const QPixmap img(file);
-                if (img.isNull())
+                const auto num_to_pack = std::distance(first_success, sources.end());
+                // we should have already dealt with too big images already.
+                ASSERT(num_to_pack > 0);
+                if (num_to_pack == 1)
                 {
-                    ERROR("Failed to open texture packing image. [file='%1']", file);
+                    // if we can only fit 1 single image in the container
+                    // then what's the point ?
+                    // we'd just end up wasting space, so just leave it as is.
+                    const auto& rc = *first_success;
+                    ASSERT(image_map.find(rc.cookie) != image_map.end());
+                    QString file = image_map[rc.cookie];
+
+                    GeneratedTextureEntry gen;
+                    gen.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(file), "textures"));
+                    gen.width = 1.0f;
+                    gen.height = 1.0f;
+                    gen.xpos = 0.0f;
+                    gen.ypos = 0.0f;
+                    relocation_map[rc.cookie] = gen;
+                    sources.erase(first_success);
+                    continue;
+                }
+
+                // composition buffer.
+                QImage buffer(kTexturePackWidth, kTexturePackHeight, texture_category->format);
+                buffer.fill(QColor(0x00, 0x00, 0x00, 0x00));
+
+                QPainter painter(&buffer);
+                painter.setCompositionMode(QPainter::CompositionMode_Source); // copy src pixel as-is
+
+                // do the composite pass.
+                for (auto it = first_success; it != sources.end(); ++it)
+                {
+                    const auto& rc = *it;
+                    ASSERT(rc.success);
+                    const auto padded_width = rc.width;
+                    const auto padded_height = rc.height;
+                    const auto width = padded_width - kTexturePadding * 2;
+                    const auto height = padded_height - kTexturePadding * 2;
+
+                    ASSERT(image_map.find(rc.cookie) != image_map.end());
+                    const QString img_file = image_map[rc.cookie];
+                    const QFileInfo info(img_file);
+                    const QString file(info.absoluteFilePath());
+                    // compensate for possible texture sampling issues by padding the
+                    // image with some extra pixels by growing it a few pixels on both
+                    // axis.
+                    const QRectF dst(rc.xpos, rc.ypos, padded_width, padded_height);
+                    const QRectF src(0, 0, width, height);
+                    const QPixmap img(file);
+                    if (img.isNull())
+                    {
+                        ERROR("Failed to open texture packing image. [file='%1']", file);
+                        mNumErrors++;
+                    } else
+                    {
+                        painter.drawPixmap(dst, img, src);
+                    }
+                }
+
+                const QString& name = QString("Generated_%1.png").arg(atlas_number);
+                const QString& file = app::JoinPath(app::JoinPath(kOutDir, "textures"), name);
+
+                QImageWriter writer;
+                writer.setFormat("PNG");
+                writer.setQuality(100);
+                writer.setFileName(file);
+                if (!writer.write(buffer))
+                {
+                    ERROR("Failed to write image. [file='%1']", file);
                     mNumErrors++;
                 }
-                else
+                const float pack_width = kTexturePackWidth; //packing_rect_result.width;
+                const float pack_height = kTexturePackHeight; //packing_rect_result.height;
+
+                // create mapping for each source texture to the generated
+                // texture.
+                for (auto it = first_success; it != sources.end(); ++it)
                 {
-                    painter.drawPixmap(dst, img, src);
+                    const auto& rc = *it;
+                    const auto padded_width = rc.width;
+                    const auto padded_height = rc.height;
+                    const auto width = padded_width - kTexturePadding * 2;
+                    const auto height = padded_height - kTexturePadding * 2;
+                    const auto xpos = rc.xpos + kTexturePadding;
+                    const auto ypos = rc.ypos + kTexturePadding;
+                    GeneratedTextureEntry gen;
+                    gen.texture_file = QString("pck://textures/%1").arg(name);
+                    gen.width = (float) width / pack_width;
+                    gen.height = (float) height / pack_height;
+                    gen.xpos = (float) xpos / pack_width;
+                    gen.ypos = (float) ypos / pack_height;
+                    relocation_map[rc.cookie] = gen;
+                    DEBUG("New image packing entry. [id='%1', dst='%2']", rc.cookie, gen.texture_file);
                 }
-            }
 
-            const QString& name = QString("Generated_%1.png").arg(atlas_number);
-            const QString& file = app::JoinPath(app::JoinPath(kOutDir, "textures"), name);
+                // done with these.
+                sources.erase(first_success, sources.end());
 
-            QImageWriter writer;
-            writer.setFormat("PNG");
-            writer.setQuality(100);
-            writer.setFileName(file);
-            if (!writer.write(buffer.toImage()))
-            {
-                ERROR("Failed to write image. [file='%1']", file);
-                mNumErrors++;
-            }
-            const float pack_width  = kTexturePackWidth; //packing_rect_result.width;
-            const float pack_height = kTexturePackHeight; //packing_rect_result.height;
-
-            // create mapping for each source texture to the generated
-            // texture.
-            for (auto it = first_success; it != sources.end(); ++it)
-            {
-                const auto& rc = *it;
-                const auto padded_width  = rc.width;
-                const auto padded_height = rc.height;
-                const auto width  = padded_width - kTexturePadding*2;
-                const auto height = padded_height - kTexturePadding*2;
-                const auto xpos   = rc.xpos + kTexturePadding;
-                const auto ypos   = rc.ypos + kTexturePadding;
-                GeneratedTextureEntry gen;
-                gen.texture_file   = QString("pck://textures/%1").arg(name);
-                gen.width          = (float)width / pack_width;
-                gen.height         = (float)height / pack_height;
-                gen.xpos           = (float)xpos / pack_width;
-                gen.ypos           = (float)ypos / pack_height;
-                relocation_map[rc.cookie] = gen;
-                DEBUG("New image packing entry. [id='%1', dst='%2']", rc.cookie, gen.texture_file);
-            }
-
-            // done with these.
-            sources.erase(first_success, sources.end());
-
-            atlas_number++;
-        } // while (!sources.empty())
+                atlas_number++;
+            } // while (!sources.empty())
+        }
 
         cur_step = 0;
         max_step = static_cast<int>(mTextureMap.size());
