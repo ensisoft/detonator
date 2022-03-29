@@ -806,7 +806,21 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     GetMaterialProperties();
 }
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    const gfx::MaterialClass::SurfaceType type = GetValue(mUI.surfaceType);
+    if (type == gfx::MaterialClass::SurfaceType::Transparent)
+    {
+        SetEnabled(mUI.chkBlendPreMulAlpha, true);
+        SetValue(mUI.chkBlendPreMulAlpha, false);
+    }
+    else
+    {
+        SetValue(mUI.chkBlendPreMulAlpha, false);
+        SetEnabled(mUI.chkBlendPreMulAlpha, false);
+    }
+
+    SetMaterialProperties();
+}
 void MaterialWidget::on_gamma_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_baseColor_colorChanged(QColor color)
@@ -814,6 +828,8 @@ void MaterialWidget::on_baseColor_colorChanged(QColor color)
 void MaterialWidget::on_particleAction_currentIndexChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_spriteFps_valueChanged(double)
+{ SetMaterialProperties(); }
+void MaterialWidget::on_chkBlendPreMulAlpha_stateChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_chkStaticInstance_stateChanged(int)
 { SetMaterialProperties(); }
@@ -864,6 +880,8 @@ void MaterialWidget::on_rectH_valueChanged(double value)
 void MaterialWidget::on_chkAllowPacking_stateChanged(int)
 { SetTextureFlags(); }
 void MaterialWidget::on_chkAllowResizing_stateChanged(int)
+{ SetTextureFlags(); }
+void MaterialWidget::on_chkPreMulAlpha_stateChanged(int)
 { SetTextureFlags(); }
 
 void MaterialWidget::AddNewTextureMapFromFile()
@@ -1310,11 +1328,14 @@ void MaterialWidget::SetTextureFlags()
     {
         ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
         ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
+        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
     }
 }
 
 void MaterialWidget::SetMaterialProperties()
 {
+    mMaterial->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkBlendPreMulAlpha));
+
     if (auto* ptr = mMaterial->AsBuiltIn())
     {
         ptr->SetStatic(GetValue(mUI.chkStaticInstance));
@@ -1418,17 +1439,18 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.spriteFps,         false);
     SetEnabled(mUI.btnAddTextureMap,  false);
     SetEnabled(mUI.btnDelTextureMap,  false);
+    SetEnabled(mUI.chkBlendPreMulAlpha,false);
     SetEnabled(mUI.chkStaticInstance, false);
     SetEnabled(mUI.chkBlendFrames,    false);
-    SetEnabled(mUI.chkLooping, false);
+    SetEnabled(mUI.chkLooping,        false);
     SetEnabled(mUI.gradientMap,       false);
     SetEnabled(mUI.textureCoords,     false);
     SetEnabled(mUI.textureFilters,    false);
     SetEnabled(mUI.textureMaps,       false);
     SetEnabled(mUI.btnReloadShader,   false);
     SetEnabled(mUI.btnSelectShader,   false);
-    SetEnabled(mUI.btnCreateShader, false);
-    SetEnabled(mUI.btnEditShader, false);
+    SetEnabled(mUI.btnCreateShader,   false);
+    SetEnabled(mUI.btnEditShader,     false);
     SetVisible(mUI.builtInProperties, false);
     SetVisible(mUI.gradientMap,       false);
     SetVisible(mUI.textureCoords,     false);
@@ -1456,6 +1478,7 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.gamma, 1.0f);
     SetValue(mUI.baseColor, gfx::Color::White);
     SetValue(mUI.spriteFps, 1.0f);
+    SetValue(mUI.chkBlendFrames, false);
     SetValue(mUI.chkStaticInstance, false);
     SetValue(mUI.chkBlendFrames,    false);
     SetValue(mUI.colorMap0, gfx::Color::White);
@@ -1489,6 +1512,13 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.rectW, 1.0f);
     SetValue(mUI.rectH, 1.0f);
     mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
+
+
+    if (mMaterial->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Transparent)
+    {
+        SetEnabled(mUI.chkBlendPreMulAlpha, true);
+        SetValue(mUI.chkBlendPreMulAlpha, mMaterial->PremultipliedAlpha());
+    }
 
     if (auto* ptr = mMaterial->AsBuiltIn())
     {
@@ -1733,6 +1763,7 @@ void MaterialWidget::GetTextureProperties()
     SetValue(mUI.rectH, 1.0f);
     SetEnabled(mUI.chkAllowPacking,  false);
     SetEnabled(mUI.chkAllowResizing, false);
+    SetEnabled(mUI.chkPreMulAlpha, false);
     mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
 
     const auto current = mUI.textures->currentRow();
@@ -1797,8 +1828,10 @@ void MaterialWidget::GetTextureProperties()
         SetValue(mUI.textureFile, ptr->GetFilename());
         SetValue(mUI.chkAllowPacking, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
         SetValue(mUI.chkAllowResizing, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
+        SetValue(mUI.chkPreMulAlpha, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
         SetEnabled(mUI.chkAllowPacking, true);
         SetEnabled(mUI.chkAllowResizing, true);
+        SetEnabled(mUI.chkPreMulAlpha, true);
     }
 }
 

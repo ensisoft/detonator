@@ -92,6 +92,7 @@ namespace gui
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
         void on_spriteFps_valueChanged(double);
+        void on_chkBlendPreMulAlpha_stateChanged(int);
         void on_chkStaticInstance_stateChanged(int);
         void on_chkBlendFrames_stateChanged(int);
         void on_chkLooping_stateChanged(int);
@@ -117,6 +118,7 @@ namespace gui
         void on_rectH_valueChanged(double value);
         void on_chkAllowPacking_stateChanged(int);
         void on_chkAllowResizing_stateChanged(int);
+        void on_chkPreMulAlpha_stateChanged(int);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
