@@ -299,7 +299,7 @@ public:
                 mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.num_frames_rendered);
 
             const gfx::FRect rect(10, 10, 500, 20);
-            gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+            gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
             gfx::DrawTextRect(*mPainter, hallelujah,
                 mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
@@ -309,7 +309,7 @@ public:
             gfx::FRect rect(10, 30, 500, 20);
             for (const auto& print : mDebugPrints)
             {
-                gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+                gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
                 gfx::DrawTextRect(*mPainter, print.message,
                     mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                    gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
