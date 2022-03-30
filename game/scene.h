@@ -535,7 +535,10 @@ namespace game
         // Note that if there are multiple entities with the same instance
         // name it's undefined which one is returned.
         Entity* FindEntityByInstanceName(const std::string& name);
-
+        // List all entities of the given class identified by its class name.
+        std::vector<Entity*> ListEntitiesByClassName(const std::string& name);
+        // List all entities of the given class identified by its class name.
+        std::vector<const Entity*> ListEntitiesByClassName(const std::string& name) const;
         // Get the node by index. The index must be valid.
         const Entity& GetEntity(size_t index) const;
         // Find entity by id. Returns nullptr if  no such node could be found.

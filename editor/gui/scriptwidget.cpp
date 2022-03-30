@@ -1035,6 +1035,18 @@ void InitDoc()
                                                           "Returns nil if no such script variable could be found.",
                  "string", "name");
 
+    DOC_TABLE("game.EntityList");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the entity list is an empty list or not.");
+    DOC_METHOD_0("bool", "HasNext", "Check whether the entity list has a next item or not.");
+    DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the list. <br>"
+                                 "Returns true if there is a next item or false when there are no more items.");
+    DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the list. <br>"
+                                  "The iteration is already started automatically when the list is created,<br>"
+                                  "so this only needs to be called if restarting.");
+    DOC_METHOD_0("game.Entity", "Get", "Get the current item at this point of iteration over the list.");
+    DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index.", "unsigned", "index");
+    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
+
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
@@ -1042,6 +1054,7 @@ void InitDoc()
     DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta method.<br>"
                                                              "The scene's script variables are accessible as properties of the scene object.<br>"
                                                              "For example a script variable named 'score' would be accessible as object.score.");
+    DOC_METHOD_1("game.EntityList", "ListEntitiesByClassName", "List all entities of the given class identified by its class name", "string", "class");
     DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
                                                           "Returns nil if no such entity could be found.",
