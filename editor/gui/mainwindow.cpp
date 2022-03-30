@@ -1057,47 +1057,39 @@ void MainWindow::on_actionReloadTextures_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new MaterialWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new MaterialWidget(mWorkspace.get()));
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new ParticleEditorWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new ParticleEditorWidget(mWorkspace.get()));
 }
 
 void MainWindow::on_actionNewCustomShape_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new ShapeWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new ShapeWidget(mWorkspace.get()));
 }
 void MainWindow::on_actionNewEntity_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new EntityWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new EntityWidget(mWorkspace.get()));
 }
 void MainWindow::on_actionNewScene_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new SceneWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new SceneWidget(mWorkspace.get()));
 }
 
 void MainWindow::on_actionNewScript_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new ScriptWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new ScriptWidget(mWorkspace.get()));
 }
 
 void MainWindow::on_actionNewUI_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new UIWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new UIWidget(mWorkspace.get()));
 }
 void MainWindow::on_actionNewAudioGraph_triggered()
 {
-    const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(new AudioWidget(mWorkspace.get()), open_new_window);
+    OpenNewWidget(new AudioWidget(mWorkspace.get()));
 }
 
 void MainWindow::on_actionImportFiles_triggered()
@@ -1827,44 +1819,36 @@ void MainWindow::on_btnDerp_clicked()
 
 void MainWindow::on_btnMaterial_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Material), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::Material));
 }
 void MainWindow::on_btnParticle_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::ParticleSystem), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::ParticleSystem));
 }
 void MainWindow::on_btnShape_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Shape), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::Shape));
 }
 void MainWindow::on_btnEntity_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Entity), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::Entity));
 }
 void MainWindow::on_btnScene_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Scene), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::Scene));
 }
 void MainWindow::on_btnScript_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::Script), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::Script));
 }
 void MainWindow::on_btnUI_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::UI), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::UI));
 }
 
 void MainWindow::on_btnAudio_clicked()
 {
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
-    ShowWidget(MakeWidget(app::Resource::Type::AudioGraph), new_window);
+    OpenNewWidget(MakeWidget(app::Resource::Type::AudioGraph));
 }
 
 void MainWindow::RefreshUI()
