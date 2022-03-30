@@ -388,7 +388,7 @@ void InitDoc()
 
     DOC_TABLE("base.FPoint");
     DOC_METHOD_0("base.FPoint", "new", "Construct a new point with zero x, y position.");
-    DOC_METHOD_0("base.FPoint", "new", "Construct a new point with the given x,y position.");
+    DOC_METHOD_2("base.FPoint", "new", "Construct a new point with the given x,y position.", "float", "x", "float", "y");
     DOC_METHOD_0("float", "GetX", "Get the x position.");
     DOC_METHOD_0("float", "GetY", "Get the y position.");
     DOC_META_METHOD_2("base.FPoint", "operator +", "Lua addition meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
@@ -516,7 +516,7 @@ void InitDoc()
     DOC_FUNCTION_1("data.JsonObject", "ReadJsonFile", "Try to read the given JSON file. <br>"
                                                     "Returns new JsonObject and en empty string on success or nil and error string on error.",
                  "string", "filename");
-    DOC_FUNCTION_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string."
+    DOC_FUNCTION_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string.<br>"
                                                "Format string can be one of the following: 'JSON'<br>"
                                                "Returns nil on unsupported format.",
                  "string", "format");
@@ -1250,6 +1250,50 @@ void InitDoc()
     done = true;
 }
 
+QString ParseType(const QString& str)
+{
+    QStringList list = str.split(".");
+    if (list.size() == 2)
+    {
+        // assume table_name.type_name
+        // for example glm.vec2
+        return QString("<a href=\"#%1\">%1</a>").arg(str);
+    }
+    return str;
+}
+
+QString ParseTypeCombo(const QString& str)
+{
+    QString ret;
+
+    // multiple objects are separated by ,
+    // for example string,bool means string and bool.
+    // this is used to return multiple values from functions.
+    QStringList objects = str.split(",", Qt::SkipEmptyParts);
+    for (int i=0; i<objects.size(); ++i)
+    {
+        QString object = objects[i].trimmed();
+        // conditional objects are indicated by |
+        // for example string|glm.vec2 would indicate either a string or glm.vec2
+        QStringList types = object.split("|", Qt::SkipEmptyParts);
+        if (types.isEmpty())
+        {
+            ret.append(ParseType(object));
+        }
+        else
+        {
+            for (int i=0; i<types.size(); ++i)
+            {
+                ret.append(ParseType(types[i]));
+                if (i+1<types.size())
+                    ret.append("|");
+            }
+        }
+        if (i+1 < objects.size())
+            ret.append(", ");
+    }
+    return ret;
+}
 
 } // namespace
 
@@ -1362,6 +1406,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     <meta name="qrichtext"/>
     <title>Lua API</title>
     <style type="text/css">
+    body {
+      font-size: 16px;
+    }
     div {
       margin:0px;
     }
@@ -1399,12 +1446,17 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     {
         const auto& table   = app::FromUtf8(pair.first);
         const auto& methods = pair.second;
-        stream << QString("<li>%1</li>\n").arg(table);
+        stream << QString("<li id=\"%1\">%1</li>\n").arg(table);
         stream << QString("<ul>\n");
         for (const auto& m : methods)
         {
-            const auto& foo = app::FromUtf8(m);
-            stream << QString(R"(<li><a href="#%1_%2">%3</a></li>)").arg(table).arg(foo).arg(foo);
+            const auto& method_name   = app::FromUtf8(m);
+            const auto& method_anchor = QString("%1_%2")
+                    .arg(table)
+                    .arg(method_name);
+            stream << QString(R"(<li><a href="#%1">%2</a></li>)")
+                    .arg(method_anchor)
+                    .arg(method_name);
             stream << "\n";
         }
         stream << QString("</ul>\n");
@@ -1418,39 +1470,53 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
             member.type == LuaMemberType::Method ||
             member.type == LuaMemberType::MetaMethod)
         {
-            std::string args;
+            QString method_args;
             for (const auto& a : member.args)
             {
-                args += "<span class=\"arg\">";
-                args += a.type;
-                args += "</span> ";
-                args += a.name;
-                args += ", ";
+                method_args.append("<span class=\"arg\">");
+                method_args.append(ParseTypeCombo(app::FromUtf8(a.type)));
+                method_args.append("</span> ");
+                method_args.append(app::FromUtf8(a.name));
+                method_args.append(", ");
             }
-            if (!args.empty())
-            {
-                args.pop_back();
-                args.pop_back();
-            }
+            if (!method_args.isEmpty())
+                method_args.chop(2);
+
             std::string name;
             if (member.type == LuaMemberType::Function)
                 name = member.table + "." + member.name;
             else if (member.type == LuaMemberType::Method)
-                name = "obj:" + member.name;
+            {
+                if (member.name == "new")
+                    name = member.table + ":new";
+                else  name = "obj:" + member.name;
+            }
             else name = member.name;
 
+            const auto& method_html_name = QString("%1_%2")
+                    .arg(app::FromUtf8(member.table))
+                    .arg(app::FromUtf8(member.name));
+            const auto& method_html_anchor = QString("%1_%2")
+                    .arg(app::FromUtf8(member.table))
+                    .arg(app::FromUtf8(member.name));
+            const auto& method_return = ParseTypeCombo(app::FromUtf8(member.ret));
+            const auto& method_desc = app::FromUtf8(member.desc);
+            const auto& method_name = app::FromUtf8(name);
+
             stream << QString(
-R"(<div class="method" name="%1_%2" id="%1_%2">
+R"(<div class="method" name="%1" id="%2">
   <div class="signature">
      <span class="return">%3 </span>
      <span class="method">%4</span>(%5)
   </div>
   <div class="description">%6</div>
 </div>
-)").arg(app::FromUtf8(member.table)).arg(app::FromUtf8(member.name))
-                    .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(name))
-                    .arg(app::FromUtf8(args))
-                    .arg(app::FromUtf8(member.desc));
+)").arg(method_html_name)
+   .arg(method_html_anchor)
+   .arg(method_return)
+   .arg(app::FromUtf8(name))
+   .arg(method_args)
+   .arg(method_desc);
         }
         else
         {
@@ -1459,17 +1525,29 @@ R"(<div class="method" name="%1_%2" id="%1_%2">
                 name = member.table + "." + member.name;
             else name = "obj." + member.name;
 
+            const auto& prop_html_name = QString("%1_%2")
+                    .arg(app::FromUtf8(member.table))
+                    .arg(app::FromUtf8(member.name));
+            const auto& prop_html_anchor = QString("%1_%2")
+                    .arg(app::FromUtf8(member.table))
+                    .arg(app::FromUtf8(member.name));
+            const auto& prop_return = ParseTypeCombo(app::FromUtf8(member.ret));
+            const auto& prop_desc = app::FromUtf8(member.desc);
+            const auto& prop_name= app::FromUtf8(name);
+
             stream << QString(
-R"(<div class="member" name="%1_%2" id="%1_%2">
+R"(<div class="member" name="%1" id="%2">
    <div class="signature">
       <span class="return">%3 </span>
       <span class="method">%4 </span>
    </div>
    <div class="description">%5</div>
 </div>
-)").arg(app::FromUtf8(member.table)).arg(app::FromUtf8(member.name))
-   .arg(app::FromUtf8(member.ret)).arg(app::FromUtf8(name))
-   .arg(app::FromUtf8(member.desc));
+)").arg(prop_html_name)
+   .arg(prop_html_anchor)
+   .arg(prop_return)
+   .arg(prop_name)
+   .arg(prop_desc);
         }
     }
 
