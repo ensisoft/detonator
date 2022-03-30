@@ -2222,9 +2222,22 @@ void BindGameLib(sol::state& L)
     scene_class["FindScriptVarById"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarById;
     scene_class["FindScriptVarByName"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarByName;
 
+    using EntityList = ResultVector<Entity*>;
+    auto entity_list = table.new_usertype<EntityList>("EntityList");
+    entity_list["IsEmpty"] = &EntityList::IsEmpty;
+    entity_list["HasNext"] = &EntityList::HasNext;
+    entity_list["Next"]    = &EntityList::Next;
+    entity_list["Begin"]   = &EntityList::BeginIteration;
+    entity_list["Get"]     = &EntityList::GetCurrent;
+    entity_list["GetAt"]   = &EntityList::GetAt;
+    entity_list["Size"]    = &EntityList::GetSize;
+
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
        sol::meta_function::new_index, &SetScriptVar<Scene>);
+    scene["ListEntitiesByClassName"]    = [](Scene& scene, const std::string& name) {
+        return EntityList(scene.ListEntitiesByClassName(name));
+    };
     scene["GetTime"]                    = &Scene::GetTime;
     scene["GetClassName"]               = &Scene::GetClassName;
     scene["GetClassId"]                 = &Scene::GetClassId;

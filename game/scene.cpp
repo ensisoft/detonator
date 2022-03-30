@@ -1085,6 +1085,27 @@ Entity* Scene::FindEntityByInstanceName(const std::string& name)
         return nullptr;
     return it->second;
 }
+std::vector<Entity*> Scene::ListEntitiesByClassName(const std::string& name)
+{
+    std::vector<Entity*> ret;
+    for (auto& entity : mEntities)
+    {
+        if (entity->GetClassName() == name)
+            ret.push_back(entity.get());
+    }
+    return ret;
+}
+
+std::vector<const Entity*> Scene::ListEntitiesByClassName(const std::string& name) const
+{
+    std::vector<const Entity*> ret;
+    for (auto& entity : mEntities)
+    {
+        if (entity->GetClassName() == name)
+            ret.push_back(entity.get());
+    }
+    return ret;
+}
 
 const Entity& Scene::GetEntity(size_t index) const
 {
