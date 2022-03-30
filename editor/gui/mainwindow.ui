@@ -1906,6 +1906,42 @@
     <string>Import resources from JSON</string>
    </property>
   </action>
+  <action name="actionNewBlankScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Blank Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new blank Lua script</string>
+   </property>
+  </action>
+  <action name="actionNewEntityScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Entity Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new entity script</string>
+   </property>
+  </action>
+  <action name="actionNewSceneScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Scene Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new scene script</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>btnBandit</tabstop>

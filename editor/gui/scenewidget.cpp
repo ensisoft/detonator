@@ -1089,6 +1089,7 @@ void SceneWidget::on_btnAddScript_clicked()
     var.replace(' ', '_');
     var = var.toLower();
 
+    // TODO: refactor this and a dupe from MainWindow into a single place.
     QTextStream stream(&io);
     stream.setCodec("UTF-8");
     stream << QString("-- Scene '%1' script.\n\n").arg(name);
