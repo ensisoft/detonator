@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1466</width>
-    <height>1056</height>
+    <height>1149</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -167,7 +167,7 @@
           <item>
            <widget class="QToolButton" name="btnResetLifetime">
             <property name="toolTip">
-             <string>Reset entity script to nothing</string>
+             <string>Reset entity lifetime to unlimited</string>
             </property>
             <property name="text">
              <string>...</string>

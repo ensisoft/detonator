@@ -17,7 +17,7 @@
    <item row="1" column="2">
     <widget class="QToolButton" name="btnResetWidgetFontSize">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset font size to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -78,7 +78,7 @@
    <item row="7" column="2">
     <widget class="QToolButton" name="btnResetWidgetBorder">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset widget border material to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -98,7 +98,7 @@
    <item row="0" column="2">
     <widget class="QToolButton" name="btnResetWidgetFontName">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset font to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -118,7 +118,7 @@
    <item row="3" column="2">
     <widget class="QToolButton" name="btnResetWidgetTextHAlign">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset horizontal text align to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -138,7 +138,7 @@
    <item row="5" column="2">
     <widget class="QToolButton" name="btnResetWidgetTextProp">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset text properties to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -205,7 +205,7 @@
    <item row="2" column="2">
     <widget class="QToolButton" name="btnResetWidgetTextVAlign">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset vertical text align to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -225,7 +225,7 @@
    <item row="6" column="2">
     <widget class="QToolButton" name="btnResetWidgetBackground">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset widget background material to style default</string>
      </property>
      <property name="text">
       <string>...</string>
@@ -289,6 +289,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="btnSelectWidgetBackground">
+       <property name="toolTip">
+        <string>Select widget background material</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -354,6 +357,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="btnSelectWidgetBorder">
+       <property name="toolTip">
+        <string>Select widget border material</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -388,6 +394,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Select a font file</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -404,6 +413,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Select font</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -455,7 +467,7 @@
    <item row="4" column="2">
     <widget class="QToolButton" name="btnResetWidgetTextColor">
      <property name="toolTip">
-      <string>Reset idle track to nothing</string>
+      <string>Reset text color to style default</string>
      </property>
      <property name="text">
       <string>...</string>
