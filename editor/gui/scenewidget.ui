@@ -81,7 +81,7 @@
           <item>
            <widget class="QToolButton" name="btnResetScript">
             <property name="toolTip">
-             <string>Reset entity script to nothing</string>
+             <string>Reset scene script to nothing</string>
             </property>
             <property name="text">
              <string>...</string>
@@ -284,8 +284,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>306</width>
-                 <height>70</height>
+                 <width>318</width>
+                 <height>74</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -466,8 +466,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>143</width>
-                 <height>70</height>
+                 <width>149</width>
+                 <height>74</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -533,8 +533,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>335</width>
-                 <height>72</height>
+                 <width>348</width>
+                 <height>106</height>
                 </rect>
                </property>
                <attribute name="label">

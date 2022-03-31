@@ -358,7 +358,7 @@
                <bool>false</bool>
               </property>
               <property name="toolTip">
-               <string>Reset idle track to nothing</string>
+               <string>Reset textures to nothing</string>
               </property>
               <property name="text">
                <string>,..</string>
@@ -379,6 +379,9 @@
              <widget class="QToolButton" name="btnAddTextureMap">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Add new texture(s)</string>
               </property>
               <property name="text">
                <string>...</string>
