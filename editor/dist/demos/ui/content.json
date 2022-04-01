@@ -7,6 +7,9 @@
         "g": 0.1902189701795578,
         "r": 0.7007858157157898
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "yTsaLXKonJ",
       "particle_action": "None",

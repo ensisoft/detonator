@@ -2573,6 +2573,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "fps": 5.0,
       "gamma": 1.0,
       "id": "rrmZfWe97e",
@@ -2602,10 +2605,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Ship3/1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "DsKu8WXlgk",
           "name": "1",
@@ -2618,10 +2623,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Ship3/2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "HEHUPZWYfi",
           "name": "2",
@@ -2634,10 +2641,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Ship3/3.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "E3EKRUY8jm",
           "name": "3",
@@ -2650,10 +2659,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Ship3/4.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "xKIwXXftpJ",
           "name": "4",
@@ -2666,10 +2677,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Ship3/5.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "LtzUk2Bypd",
           "name": "5",
@@ -2691,6 +2704,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 1.0,
       "id": "4IluygNgeR",
       "particle_action": "None",
@@ -2707,10 +2723,12 @@
       "static": true,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Red/bullet.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "Uq1XErPGt9",
         "name": "bullet",
@@ -2739,6 +2757,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 0.800000011920929,
       "id": "nQUmTOnClw",
       "particle_action": "None",
@@ -2755,10 +2776,12 @@
       "static": true,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Blue/Ship2/0.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "wDtHYRHN35",
         "name": "0",
@@ -2787,6 +2810,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "lOfMr3YBtI",
       "particle_action": "None",
@@ -2803,10 +2829,12 @@
       "static": true,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Asteroids/asteroid_dark.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "7ozeiqjW51",
         "name": "asteroid_dark",
@@ -2835,6 +2863,9 @@
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "fps": 30.0,
       "gamma": 1.0,
@@ -2865,10 +2896,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_0.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "vOx40r7XtN",
           "name": "1_0",
@@ -2881,10 +2914,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "XFQuQa6ke7",
           "name": "1_1",
@@ -2897,10 +2932,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "HNGXvPNbH4",
           "name": "1_2",
@@ -2913,10 +2950,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_3.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "nyevSP2lkN",
           "name": "1_3",
@@ -2929,10 +2968,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_4.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "5Sk4vRsayC",
           "name": "1_4",
@@ -2945,10 +2986,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_5.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "wGQw5zOGxG",
           "name": "1_5",
@@ -2961,10 +3004,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_6.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "Yu9STIukB5",
           "name": "1_6",
@@ -2977,10 +3022,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_7.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "eEJH2tXxbB",
           "name": "1_7",
@@ -2993,10 +3040,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_8.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "zmqJoLWQCT",
           "name": "1_8",
@@ -3009,10 +3058,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_9.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "voaz6zPgC4",
           "name": "1_9",
@@ -3025,10 +3076,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_10.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "5yIKOF9JIU",
           "name": "1_10",
@@ -3041,10 +3094,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_11.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "ZNu0n6eDas",
           "name": "1_11",
@@ -3057,10 +3112,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_12.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "XZOU6mTi3y",
           "name": "1_12",
@@ -3073,10 +3130,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_13.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "IYEJE6HxP5",
           "name": "1_13",
@@ -3089,10 +3148,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_14.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "it6sXiULQ0",
           "name": "1_14",
@@ -3105,10 +3166,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_15.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "YU2RFJUhLn",
           "name": "1_15",
@@ -3121,10 +3184,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Red Explosion/1_16.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "UmBLh98Ua7",
           "name": "1_16",
@@ -3146,6 +3211,9 @@
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "fps": 30.0,
       "gamma": 1.0,
@@ -3176,10 +3244,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_0.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "3tu85ryruW",
           "name": "1_0",
@@ -3192,10 +3262,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "rwPYQ2LwsY",
           "name": "1_1",
@@ -3208,10 +3280,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "h2uBKgs8LL",
           "name": "1_2",
@@ -3224,10 +3298,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_3.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "bS5Rgiv7fD",
           "name": "1_3",
@@ -3240,10 +3316,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_4.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "mweahbO7bu",
           "name": "1_4",
@@ -3256,10 +3334,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_5.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "e4efoyYERF",
           "name": "1_5",
@@ -3272,10 +3352,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_6.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "ydCAYjobBF",
           "name": "1_6",
@@ -3288,10 +3370,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_7.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "ez21XmMXXU",
           "name": "1_7",
@@ -3304,10 +3388,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_8.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "g8zJS2INPy",
           "name": "1_8",
@@ -3320,10 +3406,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_9.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "sIaXh5eA4u",
           "name": "1_9",
@@ -3336,10 +3424,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_10.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "oUnTwROR5P",
           "name": "1_10",
@@ -3352,10 +3442,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_11.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "CMJOBGoizy",
           "name": "1_11",
@@ -3368,10 +3460,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_12.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "RdUkzEK9Ys",
           "name": "1_12",
@@ -3384,10 +3478,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_13.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "aum5n0OTTr",
           "name": "1_13",
@@ -3400,10 +3496,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_14.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "lQuXfLIv1R",
           "name": "1_14",
@@ -3416,10 +3514,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_15.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "78h0IzaBAm",
           "name": "1_15",
@@ -3432,10 +3532,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Effects/Blue Explosion/1_16.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "yFfZgvBT64",
           "name": "1_16",
@@ -3457,6 +3559,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "s4zt0bFnAL",
       "particle_action": "None",
@@ -3473,10 +3578,12 @@
       "static": true,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Blue/bullet.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "KEKTLLkPjy",
         "name": "bullet",
@@ -3505,6 +3612,9 @@
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": true
       },
       "fps": 1.0,
       "gamma": 1.0,
@@ -3535,10 +3645,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Spacemine/1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "qg19pdfC8l",
           "name": "1",
@@ -3551,10 +3663,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/Red/Spacemine/2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": true
           },
           "id": "v6RMllUmIT",
           "name": "2",
@@ -3570,6 +3684,9 @@
       "type": "Sprite"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "r9CF1o27zZ",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -3590,10 +3707,12 @@
           "rect_name": "kTextureRect",
           "sampler_name": "kTexture0",
           "texture": {
+            "colorspace": "Linear",
             "file": "ws://textures/ParticlePack/spark_06.png",
             "flags": {
               "AllowPacking": true,
-              "AllowResizing": true
+              "AllowResizing": true,
+              "PremulAlpha": false
             },
             "id": "n0vn2swGKX",
             "name": "spark_06",
@@ -3631,6 +3750,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "2a488SIQsU",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -3707,6 +3829,9 @@
         "g": 0.32300296425819397,
         "r": 0.18355077505111694
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "CopZZzjQd4",
       "particle_action": "None",
@@ -3723,10 +3848,12 @@
       "static": true,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Background/bg_1_1.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "NjsRA8HdkH",
         "name": "bg_1_1",
@@ -3749,6 +3876,9 @@
       "type": "Texture"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "EgsgPADEqi",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -3773,6 +3903,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "HnopPLXPe5",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -3797,6 +3930,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "Kb5sHrP5bL",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -3865,6 +4001,9 @@
         "g": 0.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 1.0,
       "id": "OFJHLiHeaP",
       "particle_action": "None",
@@ -3881,10 +4020,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Menu Screen/optionst_buttons.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "i1mArtd5tU",
         "name": "optionst_buttons",
@@ -3913,6 +4054,9 @@
         "g": 0.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 1.0,
       "id": "AuNZPvQDrI",
       "particle_action": "None",
@@ -3929,10 +4073,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Menu Screen/Creditst_buttons.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "sxHrljrhni",
         "name": "Creditst_buttons",
@@ -3961,6 +4107,9 @@
         "g": 0.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 1.0,
       "id": "RKmQZx8H1s",
       "particle_action": "None",
@@ -3977,10 +4126,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Menu Screen/play_buttons.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "LFMiq02vEK",
         "name": "play_buttons",
@@ -4009,6 +4160,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "gamma": 1.0,
       "id": "M0ePA9uzA5",
       "particle_action": "None",
@@ -4025,10 +4179,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Menu Screen/exit_buttons.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": true
         },
         "id": "Xk7ul0CO91",
         "name": "exit_buttons",
@@ -4057,6 +4213,9 @@
         "g": 0.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "pGHzP0FH33",
       "particle_action": "None",
@@ -4073,10 +4232,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/cursor/crosshair158.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "rtMnrhrbtN",
         "name": "crosshair158",
@@ -4099,6 +4260,9 @@
       "type": "Texture"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "id": "Z2vMjFgL9w",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -4119,10 +4283,12 @@
           "rect_name": "kTextureRect",
           "sampler_name": "kTexture",
           "texture": {
+            "colorspace": "Linear",
             "file": "ws://textures/Menu Screen/Creditst_buttons.png",
             "flags": {
               "AllowPacking": true,
-              "AllowResizing": true
+              "AllowResizing": true,
+              "PremulAlpha": true
             },
             "id": "9sBNbuo9j9",
             "name": "Creditst_buttons",
@@ -4136,6 +4302,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "id": "IRvSQ66eD6",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -4156,10 +4325,12 @@
           "rect_name": "kTextureRect",
           "sampler_name": "kTexture",
           "texture": {
+            "colorspace": "Linear",
             "file": "ws://textures/Menu Screen/optionst_buttons.png",
             "flags": {
               "AllowPacking": true,
-              "AllowResizing": true
+              "AllowResizing": true,
+              "PremulAlpha": true
             },
             "id": "KyLn5d0Z7B",
             "name": "optionst_buttons",
@@ -4173,6 +4344,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "id": "2HWYlifK1N",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -4193,10 +4367,12 @@
           "rect_name": "kTextureRect",
           "sampler_name": "kTexture",
           "texture": {
+            "colorspace": "Linear",
             "file": "ws://textures/Menu Screen/exit_buttons.png",
             "flags": {
               "AllowPacking": true,
-              "AllowResizing": true
+              "AllowResizing": true,
+              "PremulAlpha": true
             },
             "id": "2MFvJwTS9Y",
             "name": "exit_buttons",
@@ -4210,6 +4386,9 @@
       "wrap_y": "Clamp"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": true
+      },
       "id": "tetreytAkz",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -4230,10 +4409,12 @@
           "rect_name": "kTextureRect",
           "sampler_name": "kTexture",
           "texture": {
+            "colorspace": "Linear",
             "file": "ws://textures/Menu Screen/play_buttons.png",
             "flags": {
               "AllowPacking": true,
-              "AllowResizing": true
+              "AllowResizing": true,
+              "PremulAlpha": true
             },
             "id": "8qTZM3yPRi",
             "name": "play_buttons",
@@ -4253,6 +4434,9 @@
         "g": 0.0941176488995552,
         "r": 0.9450980424880981
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "HyJsrevpdz",
       "particle_action": "None",
@@ -4269,10 +4453,12 @@
       "static": false,
       "surface": "Emissive",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/SmokeParticle.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "mn29S3i6zn",
         "name": "SmokeParticle",
@@ -4301,6 +4487,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "5YQ8ZqObX7",
       "particle_action": "None",
@@ -4317,10 +4506,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/RoundParticle.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "Y6tN5Yy5IM",
         "name": "RoundParticle",
@@ -4349,6 +4540,9 @@
         "g": 0.0,
         "r": 0.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "lu4EmBCEzh",
       "resource_id": "lu4EmBCEzh",
@@ -4363,6 +4557,9 @@
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "gamma": 1.0,
       "id": "kqbXBoi7yD",
@@ -4380,10 +4577,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Lasers/02.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "J2M9Sam3oM",
         "name": "02",

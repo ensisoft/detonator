@@ -579,6 +579,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "fps": 10.0,
       "gamma": 1.0,
       "id": "Fj66N4PDUG",
@@ -608,10 +611,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "Co5k1txT4A",
           "name": "frame-1",
@@ -624,10 +629,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "ZQ9hjH0jrY",
           "name": "frame-2",
@@ -640,10 +647,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-3.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "JOpHaH1Pd9",
           "name": "frame-3",
@@ -656,10 +665,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-4.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "TyAai2iMIa",
           "name": "frame-4",
@@ -672,10 +683,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-5.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "iC2CbjCCZB",
           "name": "frame-5",
@@ -688,10 +701,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-6.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "Bo8rzdihtz",
           "name": "frame-6",
@@ -704,10 +719,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-7.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "0pSTZodGsq",
           "name": "frame-7",
@@ -720,10 +737,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Flying/frame-8.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "833XmLF5lN",
           "name": "frame-8",
@@ -745,6 +764,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "LPH6tgo9eN",
       "particle_action": "None",
@@ -761,10 +783,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Background/full_background.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": false
+          "AllowResizing": false,
+          "PremulAlpha": false
         },
         "id": "szhPHqYeqg",
         "name": "full_background",
@@ -793,6 +817,9 @@
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "fps": 2.0,
       "gamma": 1.0,
@@ -823,10 +850,12 @@
       "texture_wrap_y": "Clamp",
       "textures": [
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "QPWkqRqYkY",
           "name": "frame-1",
@@ -839,10 +868,12 @@
           "type": "Filesystem"
         },
         {
+          "colorspace": "Linear",
           "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
           "flags": {
             "AllowPacking": true,
-            "AllowResizing": true
+            "AllowResizing": true,
+            "PremulAlpha": false
           },
           "id": "L1mEfJMq1o",
           "name": "frame-2",
@@ -864,6 +895,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "8UZOHE5ijx",
       "particle_action": "None",
@@ -880,10 +914,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/Spikes/sharp wood.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "wJ2fqkub2J",
         "name": "sharp wood",
