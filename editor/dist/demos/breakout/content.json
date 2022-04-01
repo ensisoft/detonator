@@ -1633,6 +1633,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "Rs00QF2N4E",
       "particle_action": "None",
@@ -1649,10 +1652,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/paddleBlu.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "f14OR9A2E0",
         "name": "paddleBlu",
@@ -1681,6 +1686,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "vSs0xqS3fS",
       "particle_action": "None",
@@ -1697,10 +1705,12 @@
       "static": false,
       "surface": "Transparent",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/ballBlue.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "ayp8TvzMbA",
         "name": "ballBlue",
@@ -1729,6 +1739,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "4zi9n5RIXq",
       "particle_action": "None",
@@ -1745,10 +1758,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_blue_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "IfPXOd3Ckr",
         "name": "element_blue_rectangle_glossy",
@@ -1777,6 +1792,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "KeITJIrx1I",
       "particle_action": "None",
@@ -1793,10 +1811,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_red_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "UadbRD19J6",
         "name": "element_red_rectangle_glossy",
@@ -1825,6 +1845,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "EtyRugQve2",
       "particle_action": "None",
@@ -1841,10 +1864,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_green_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "3iYjIJvA3e",
         "name": "element_green_rectangle_glossy",
@@ -1873,6 +1898,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "MUQDA03a25",
       "particle_action": "None",
@@ -1889,10 +1917,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_purple_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "IPwfsHtC5k",
         "name": "element_purple_rectangle_glossy",
@@ -1921,6 +1951,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "gRY0JNbDCj",
       "particle_action": "None",
@@ -1937,10 +1970,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_yellow_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "zyuF1qAgw6",
         "name": "element_yellow_rectangle_glossy",
@@ -1969,6 +2004,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "9wG7A0qhYE",
       "particle_action": "None",
@@ -1985,10 +2023,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://textures/element_grey_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "6epMauMCop",
         "name": "element_grey_rectangle_glossy",
@@ -2017,6 +2057,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 0.800000011920929,
       "id": "OgRnbBquEI",
       "particle_action": "None",
@@ -2033,10 +2076,12 @@
       "static": false,
       "surface": "Opaque",
       "texture": {
+        "colorspace": "Linear",
         "file": "ws://backgrounds/22.png",
         "flags": {
           "AllowPacking": true,
-          "AllowResizing": true
+          "AllowResizing": true,
+          "PremulAlpha": false
         },
         "id": "FHJhKbDHyr",
         "name": "22",
@@ -2064,6 +2109,9 @@
         "b": 0.9490196108818054,
         "g": 0.7803616523742676,
         "r": 0.3843137323856354
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "gamma": 1.0,
       "id": "OAFWPyRj28",
@@ -2123,6 +2171,9 @@
         "g": 0.7803616523742676,
         "r": 0.3843137323856354
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "JmwlIMU4Nr",
       "particle_action": "None",
@@ -2180,6 +2231,9 @@
         "b": 0.9490196108818054,
         "g": 0.7803616523742676,
         "r": 0.3843137323856354
+      },
+      "flags": {
+        "PremultipliedAlpha": false
       },
       "gamma": 1.0,
       "id": "7tJg4l9xmT",
@@ -2239,6 +2293,9 @@
         "g": 1.0,
         "r": 1.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 1.0,
       "id": "B3ANINBSbA",
       "resource_id": "B3ANINBSbA",
@@ -2272,6 +2329,9 @@
         "g": 0.0,
         "r": 0.0
       },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "gamma": 0.800000011920929,
       "id": "1Oau6Iem5r",
       "offset": {
@@ -2285,6 +2345,9 @@
       "type": "Gradient"
     },
     {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "rAn0G88CKj",
       "mag_filter": "Default",
       "min_filter": "Default",
