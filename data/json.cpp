@@ -113,6 +113,17 @@ bool JsonObject::Read(const char* name, base::Color4f* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
 }
+bool JsonObject::Read(const char* name, unsigned index, float* out) const
+{ return read_array(name, index, out); }
+bool JsonObject::Read(const char* name, unsigned index, int* out) const
+{ return read_array(name, index, out); }
+bool JsonObject::Read(const char* name, unsigned index, unsigned* out) const
+{ return read_array(name, index, out); }
+bool JsonObject::Read(const char* name, unsigned index, bool* out) const
+{ return read_array(name, index, out); }
+bool JsonObject::Read(const char* name, unsigned index, std::string* out) const
+{ return read_array(name, index, out); }
+
 bool JsonObject::HasValue(const char* name) const
 {
     return mJson->contains(name);
@@ -121,9 +132,20 @@ bool JsonObject::HasChunk(const char* name) const
 {
     return mJson->contains(name) && ((*mJson)[name]).is_object();
 }
+bool JsonObject::HasArray(const char* name) const
+{
+    return mJson->contains(name) && ((*mJson)[name]).is_array();
+}
+
 bool JsonObject::IsEmpty() const
 {
     return mJson->empty();
+}
+unsigned JsonObject::GetNumItems(const char* array) const
+{
+    if (mJson->contains(array) && ((*mJson)[array]).is_array())
+        return (*mJson)[array].size();
+    return 0;
 }
 
 unsigned JsonObject::GetNumChunks(const char* name) const
@@ -205,6 +227,21 @@ void JsonObject::Write(const char* name, std::unique_ptr<Writer> chunk)
     base::detail::JsonWriteJson(*mJson, name, std::move(*json->mJson));
 }
 
+void JsonObject::Write(const char* name, const int* array, size_t size)
+{ write_array<int>(name, array, size); }
+void JsonObject::Write(const char* name, const unsigned* array, size_t size)
+{ write_array<unsigned>(name, array, size); }
+void JsonObject::Write(const char* name, const double* array, size_t size)
+{ write_array<double>(name, array, size); }
+void JsonObject::Write(const char* name, const float* array, size_t size)
+{ write_array<float>(name, array, size); }
+void JsonObject::Write(const char* name, const bool* array, size_t size)
+{ write_array<bool>(name, array, size); }
+void JsonObject::Write(const char* name, const char* const * array, size_t size)
+{ write_array<const char*>(name, array, size); }
+void JsonObject::Write(const char* name, const std::string* array, size_t size)
+{ write_array<std::string>(name, array, size); }
+
 void JsonObject::AppendChunk(const char* name, const Writer& chunk)
 {
     const auto* json = dynamic_cast<const JsonObject*>(&chunk);
@@ -238,6 +275,26 @@ std::tuple<bool, std::string> JsonObject::ParseString(const char* str, size_t le
 
 std::string JsonObject::ToString() const
 { return mJson->dump(2); }
+
+template<typename PrimitiveType>
+void JsonObject::write_array(const char* name, const PrimitiveType* array, size_t size)
+{
+    auto& json_array = (*mJson)[name];
+    for (size_t i=0; i<size; ++i)
+        json_array.push_back(array[i]);
+}
+template<typename PrimitiveType>
+bool JsonObject::read_array(const char* name, unsigned int index, PrimitiveType* out) const
+{
+    if (!mJson->contains(name))
+        return false;
+    const auto& obj = (*mJson)[name];
+    if (!obj.is_array())
+        return false;
+    if (index> obj.size())
+        return false;
+    return base::JsonReadSafe(obj[index], out);
+}
 
 JsonFile::JsonFile(const std::string& file)
 {

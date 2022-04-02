@@ -44,6 +44,13 @@ namespace data
         virtual bool Read(const char* name, int* out) const = 0;
         virtual bool Read(const char* name, unsigned* out) const = 0;
         virtual bool Read(const char* name, bool* out) const = 0;
+        // array read for primitive items.
+        virtual bool Read(const char* name, unsigned index, float* out) const = 0;
+        virtual bool Read(const char* name, unsigned index, int* out) const = 0;
+        virtual bool Read(const char* name, unsigned index, unsigned* out) const = 0;
+        virtual bool Read(const char* name, unsigned index, bool* out) const = 0;
+        virtual bool Read(const char* name, unsigned index, std::string* out) const = 0;
+
         virtual bool Read(const char* name, std::string* out) const = 0;
         virtual bool Read(const char* name, glm::vec2* out) const = 0;
         virtual bool Read(const char* name, glm::vec3* out) const = 0;
@@ -54,7 +61,9 @@ namespace data
         virtual bool Read(const char* name, base::Color4f* color) const = 0;
         virtual bool HasValue(const char* name) const = 0;
         virtual bool HasChunk(const char* name) const = 0;
+        virtual bool HasArray(const char* name) const = 0;
         virtual bool IsEmpty() const = 0;
+        virtual unsigned GetNumItems(const char* array) const = 0;
         virtual unsigned GetNumChunks(const char* name) const = 0;
 
         // helpers
