@@ -171,7 +171,32 @@ void unit_test_optional()
         TEST_REQUIRE(json.Read("float", &opt_f));
         TEST_REQUIRE(!opt_f.has_value());
     }
+}
 
+template<typename T>
+void unit_test_array(const T* array, size_t size)
+{
+    std::string str;
+    {
+        data::JsonObject json;
+        json.Write("foobar", array, size);
+        str = json.ToString();
+        std::cout << str << std::endl;
+    }
+    {
+        data::JsonObject json;
+        const auto [ok, err] = json.ParseString(str);
+        TEST_REQUIRE(ok);
+        TEST_REQUIRE(json.HasArray("foobar"));
+        TEST_REQUIRE(json.GetNumItems("foobar") == size);
+
+        for (size_t i=0; i<size; ++i)
+        {
+            T item;
+            TEST_REQUIRE(json.Read("foobar", i, &item));
+            TEST_REQUIRE(item == array[i]);
+        }
+    }
 }
 
 int test_main(int argc, char* argv[])
@@ -180,5 +205,17 @@ int test_main(int argc, char* argv[])
     unit_test_bitflag();
     unit_test_variant();
     unit_test_optional();
+    {
+        const std::string strs[] = {
+          "jeesus", "ajaa", "mopolla"
+        };
+        unit_test_array(strs, 3);
+    }
+    {
+        const int values[5] = {
+            1, -1, 68, 800, 43
+        };
+        unit_test_array(values, 5);
+    }
     return 0;
 }

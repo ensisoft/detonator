@@ -49,6 +49,12 @@ namespace data
         virtual bool Read(const char* name, unsigned* out) const override;
         virtual bool Read(const char* name, bool* out) const override;
         virtual bool Read(const char* name, std::string* out) const override;
+        // array read for primitive items.
+        virtual bool Read(const char* name, unsigned index, float* out) const override;
+        virtual bool Read(const char* name, unsigned index, int* out) const override;
+        virtual bool Read(const char* name, unsigned index, unsigned* out) const override;
+        virtual bool Read(const char* name, unsigned index, bool* out) const override;
+        virtual bool Read(const char* name, unsigned index, std::string* out) const override;
         virtual bool Read(const char* name, glm::vec2* out) const override;
         virtual bool Read(const char* name, glm::vec3* out) const override;
         virtual bool Read(const char* name, glm::vec4* out) const override;
@@ -58,7 +64,9 @@ namespace data
         virtual bool Read(const char* name, base::Color4f* color) const override;
         virtual bool HasValue(const char* name) const override;
         virtual bool HasChunk(const char* name) const override;
+        virtual bool HasArray(const char* name) const override;
         virtual bool IsEmpty() const override;
+        virtual unsigned GetNumItems(const char* array) const override;
         virtual unsigned GetNumChunks(const char* name) const override;
 
         // writer interface impl.
@@ -79,6 +87,13 @@ namespace data
         virtual void Write(const char* name, const base::Color4f& value) override;
         virtual void Write(const char* name, const Writer& chunk) override;
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) override;
+        virtual void Write(const char* name, const int* array, size_t size) override;
+        virtual void Write(const char* name, const unsigned* array, size_t size) override;
+        virtual void Write(const char* name, const double* array, size_t size) override;
+        virtual void Write(const char* name, const float* array, size_t size) override;
+        virtual void Write(const char* name, const bool* array, size_t size) override;
+        virtual void Write(const char* name, const char* const * array, size_t size) override;
+        virtual void Write(const char* name, const std::string* array, size_t size) override;
         virtual void AppendChunk(const char* name, const Writer& chunk) override;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
 
@@ -95,6 +110,11 @@ namespace data
         std::tuple<bool, std::string> ParseString(const std::string& str);
         std::tuple<bool, std::string> ParseString(const char* str, size_t len);
         std::string ToString() const;
+    private:
+        template<typename PrimitiveType>
+        void write_array(const char* name, const PrimitiveType* array, size_t size);
+        template<typename PrimitiveType>
+        bool read_array(const char* name, unsigned index, PrimitiveType* out) const;
     private:
         std::shared_ptr<nlohmann::json> mJson;
     };
