@@ -117,6 +117,9 @@ namespace game
         // Serialize into JSON.
         void IntoJson(data::Writer& data) const;
 
+        static void IntoJson(const VariantType& variant, data::Writer& writer);
+        static void FromJson(const data::Reader& reader, VariantType* variant);
+
         static std::optional<ScriptVar> FromJson(const data::Reader& data);
 
         static Type GetTypeFromVariant(const VariantType& variant);

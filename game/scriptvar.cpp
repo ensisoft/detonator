@@ -52,6 +52,17 @@ void ScriptVar::IntoJson(data::Writer& data) const
 }
 
 // static
+void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
+{
+    writer.Write("value", variant);
+}
+// static
+void ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
+{
+    reader.Read("value", variant);
+}
+
+// static
 std::optional<ScriptVar> ScriptVar::FromJson(const data::Reader& data)
 {
     ScriptVar ret;
