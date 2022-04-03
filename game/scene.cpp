@@ -202,7 +202,8 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
     {
         auto chunk = data.NewWriteChunk();
         chunk->Write("id", value.id);
-        chunk->Write("value", value.value);
+        //chunk->Write("value", value.value);
+        ScriptVar::IntoJson(value.value, *chunk);
         data.AppendChunk("values", std::move(chunk));
     }
 }
@@ -236,7 +237,8 @@ std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
         const auto& chunk = data.GetReadChunk("values", i);
         ScriptVarValue value;
         chunk->Read("id", &value.id);
-        chunk->Read("value", &value.value);
+        //chunk->Read("value", &value.value);
+        ScriptVar::FromJson(*chunk, &value.value);
         ret.mScriptVarValues.push_back(std::move(value));
     }
     return ret;
