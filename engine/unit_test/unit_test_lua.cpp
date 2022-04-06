@@ -514,7 +514,7 @@ void unit_test_scene_interface()
         // add some entity script vars
         entity->AddScriptVar(game::ScriptVar("int_var", 123, false));
         entity->AddScriptVar(game::ScriptVar("float_var", 40.0f, false));
-        entity->AddScriptVar(game::ScriptVar("str_var", "foobar", false));
+        entity->AddScriptVar(game::ScriptVar("str_var", std::string("foobar"), false));
         entity->AddScriptVar(game::ScriptVar("bool_var", false, false));
         entity->AddScriptVar(game::ScriptVar("vec2_var", glm::vec2(3.0f, -1.0f), false));
         entity->AddScriptVar(game::ScriptVar("read_only", 43, true));
@@ -534,7 +534,7 @@ void unit_test_scene_interface()
     {
         scene.AddScriptVar(game::ScriptVar("int_var", 123, false));
         scene.AddScriptVar(game::ScriptVar("float_var", 40.0f, false));
-        scene.AddScriptVar(game::ScriptVar("str_var", "foobar", false));
+        scene.AddScriptVar(game::ScriptVar("str_var", std::string("foobar"), false));
         scene.AddScriptVar(game::ScriptVar("bool_var", false, false));
         scene.AddScriptVar(game::ScriptVar("vec2_var", glm::vec2(3.0f, -1.0f), false));
         scene.AddScriptVar(game::ScriptVar("read_only", 43, true));

@@ -180,11 +180,13 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value)
     SetEnabled(mUI.boolValueTrue, true);
     SetEnabled(mUI.boolValueFalse, true);
 
+    const auto index = 0;
+
     switch (game::ScriptVar::GetTypeFromVariant(value))
     {
         case game::ScriptVar::Type::Vec2:
             {
-                const auto& val = std::get<glm::vec2>(value);
+                const auto& val = std::get<std::vector<glm::vec2>>(value)[index];
                 SetValue(mUI.vec2ValueX, val.x);
                 SetValue(mUI.vec2ValueY, val.y);
                 SetVisible(mUI.vec2ValueX, true);
@@ -194,25 +196,25 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value)
             break;
         case game::ScriptVar::Type::Float:
             {
-                SetValue(mUI.floatValue, std::get<float>(value));
+                SetValue(mUI.floatValue, std::get<std::vector<float>>(value)[index]);
                 SetVisible(mUI.floatValue, true);
             }
             break;
         case game::ScriptVar::Type::Integer:
             {
-                SetValue(mUI.intValue, std::get<int>(value));
+                SetValue(mUI.intValue, std::get<std::vector<int>>(value)[index]);
                 SetVisible(mUI.intValue, true);
             }
             break;
         case game::ScriptVar::Type::String:
             {
-                SetValue(mUI.strValue, std::get<std::string>(value));
+                SetValue(mUI.strValue, std::get<std::vector<std::string>>(value)[index]);
                 SetVisible(mUI.strValue, true);
             }
             break;
         case game::ScriptVar::Type::Boolean:
             {
-                const auto val = std::get<bool>(value);
+                const auto val = std::get<std::vector<bool>>(value)[index];
                 SetValue(mUI.boolValueTrue, val == true);
                 SetValue(mUI.boolValueFalse, val == false);
                 SetVisible(mUI.boolValueTrue, true);
@@ -234,22 +236,33 @@ void DlgScriptVal::on_btnAccept_clicked()
                 glm::vec2 val;
                 val.x = GetValue(mUI.vec2ValueX);
                 val.y = GetValue(mUI.vec2ValueY);
-                mVal = val;
+                mVal = std::vector<glm::vec2> {val};
             }
             break;
         case game::ScriptVar::Type::Float:
-            mVal = (float)GetValue(mUI.floatValue);
+            {
+                const auto val = (float)GetValue(mUI.floatValue);
+                mVal = std::vector<float> {val};
+            }
             break;
         case game::ScriptVar::Type::Integer:
-            mVal = (int)GetValue(mUI.intValue);
+            {
+                const auto val = (int)GetValue(mUI.intValue);
+                mVal = std::vector<int> { val };
+            }
             break;
         case game::ScriptVar::Type::String:
-            mVal = (std::string)GetValue(mUI.strValue);
+            {
+                const auto val = (std::string)GetValue(mUI.strValue);
+                mVal =  std::vector<std::string> {val};
+            }
             break;
         case game::ScriptVar::Type::Boolean:
-            mVal = (bool)GetValue(mUI.boolValueTrue);
+            {
+                const auto val = (bool)GetValue(mUI.boolValueTrue);
+                mVal = std::vector<bool> { val };
+            }
             break;
-
         default:  BUG("Unhandled ScriptVar value type.");
     }
     accept();

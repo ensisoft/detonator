@@ -334,10 +334,12 @@ void unit_test_entity_class()
     }
 
     {
-        game::ScriptVar something("something", 123, game::ScriptVar::ReadOnly);
-        game::ScriptVar otherthing("other_thing", "jallukola", game::ScriptVar::ReadWrite);
-        entity.AddScriptVar(something);
-        entity.AddScriptVar(otherthing);
+        game::ScriptVar foo("something", 123, game::ScriptVar::ReadOnly);
+        game::ScriptVar bar("other_thing", std::string("jallukola"), game::ScriptVar::ReadWrite);
+        game::ScriptVar arr("array", std::vector<int>{1, 8, -1}, game::ScriptVar::ReadWrite);
+        entity.AddScriptVar(foo);
+        entity.AddScriptVar(bar);
+        entity.AddScriptVar(arr);
     }
 
     // physics joint
@@ -373,8 +375,18 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetNumAnimations() == 2);
     TEST_REQUIRE(entity.FindAnimationByName("test1"));
     TEST_REQUIRE(entity.FindAnimationByName("sdgasg") == nullptr);
-    TEST_REQUIRE(entity.GetNumScriptVars() == 2);
+    TEST_REQUIRE(entity.GetNumScriptVars() == 3);
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
+    TEST_REQUIRE(entity.GetScriptVar(0).GetValue<int>() == 123);
+    TEST_REQUIRE(entity.GetScriptVar(0).IsReadOnly() == true);
+    TEST_REQUIRE(entity.GetScriptVar(0).IsArray() == false);
+    TEST_REQUIRE(entity.GetScriptVar(1).GetName() == "other_thing");
+    TEST_REQUIRE(entity.GetScriptVar(1).GetValue<std::string>() == "jallukola");
+    TEST_REQUIRE(entity.GetScriptVar(1).IsReadOnly() == false);
+    TEST_REQUIRE(entity.GetScriptVar(1).IsArray() == false);
+    TEST_REQUIRE(entity.GetScriptVar(2).GetName() == "array");
+    TEST_REQUIRE(entity.GetScriptVar(2).IsReadOnly() == false);
+    TEST_REQUIRE(entity.GetScriptVar(2).IsArray() == true);
     TEST_REQUIRE(entity.FindScriptVarByName("foobar") == nullptr);
     TEST_REQUIRE(entity.FindScriptVarByName("something"));
     TEST_REQUIRE(entity.GetNumJoints() == 1);
@@ -403,13 +415,24 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetHash() == entity.GetHash());
         TEST_REQUIRE(ret->GetNumAnimations() == 2);
         TEST_REQUIRE(ret->FindAnimationByName("test1"));
-        TEST_REQUIRE(ret->GetNumScriptVars() == 2);
+        TEST_REQUIRE(ret->GetNumScriptVars() == 3);
+        TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "something");
+        TEST_REQUIRE(ret->GetScriptVar(0).GetValue<int>() == 123);
+        TEST_REQUIRE(ret->GetScriptVar(0).IsReadOnly() == true);
+        TEST_REQUIRE(ret->GetScriptVar(0).IsArray() == false);
+        TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "other_thing");
+        TEST_REQUIRE(ret->GetScriptVar(1).GetValue<std::string>() == "jallukola");
+        TEST_REQUIRE(ret->GetScriptVar(1).IsReadOnly() == false);
+        TEST_REQUIRE(ret->GetScriptVar(1).IsArray() == false);
+        TEST_REQUIRE(ret->GetScriptVar(2).GetName() == "array");
+        TEST_REQUIRE(ret->GetScriptVar(2).IsReadOnly() == false);
+        TEST_REQUIRE(ret->GetScriptVar(2).IsArray() == true);
         TEST_REQUIRE(ret->GetNumJoints() == 1);
-        TEST_REQUIRE(entity.GetJoint(0).name == "test");
-        TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
-        TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
-        TEST_REQUIRE(entity.GetJoint(0).src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
-        TEST_REQUIRE(entity.GetJoint(0).dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
+        TEST_REQUIRE(ret->GetJoint(0).name == "test");
+        TEST_REQUIRE(ret->GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
+        TEST_REQUIRE(ret->GetJoint(0).src_node_id == entity.GetNode(1).GetId());
+        TEST_REQUIRE(ret->GetJoint(0).src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
+        TEST_REQUIRE(ret->GetJoint(0).dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
         const auto* joint_params = std::get_if<game::EntityClass::DistanceJointParams>(&entity.GetJoint(0).params);
         TEST_REQUIRE(joint_params);
         TEST_REQUIRE(joint_params->damping == real::float32(2.0f));
