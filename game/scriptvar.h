@@ -25,6 +25,7 @@
 #include <variant>
 #include <string>
 #include <optional>
+#include <vector>
 
 #include "base/assert.h"
 #include "base/utility.h"
@@ -40,7 +41,18 @@ namespace game
         static constexpr bool ReadOnly = true;
         static constexpr bool ReadWrite = false;
 
-        using VariantType = std::variant<bool, float, int, std::string, glm::vec2>;
+        // So instead of holding a single variant
+        // we want to have possibility to store an "array"
+        // of variables. And to that extent we have a
+        // variant of arrays rather than an array of variants
+        // since with variant of arrays there's no question
+        // about what to do with heterogeneous arrays.
+        using VariantType = std::variant<
+                std::vector<bool>,
+                std::vector<float>,
+                std::vector<int>,
+                std::vector<std::string>,
+                std::vector<glm::vec2>>;
 
         // The types of values supported by the ScriptVar.
         enum class Type {
@@ -54,29 +66,47 @@ namespace game
         ScriptVar(std::string name, T value, bool read_only = true)
           : mId(base::RandomString(10))
           , mName(std::move(name))
-          , mData(std::move(value))
           , mReadOnly(read_only)
-        {}
+        {
+              mData = std::vector<T>{std::move(value)};
+        }
+        template<typename T>
+        ScriptVar(std::string name, std::vector<T> array, bool read_only = true)
+          : mId(base::RandomString(10))
+          , mName(std::move(name))
+          , mReadOnly(read_only)
+        {
+              mData = std::move(array);
+        }
 
         // Get whether the variable is considered read-only/constant
         // in the scripting environment.
         bool IsReadOnly() const
         { return mReadOnly; }
+        bool IsArray() const;
         // Get the type of the variable.
         Type GetType() const;
         // Get the script variable ID.
-        std::string GetId() const
+        const std::string& GetId() const
         { return mId; }
         // Get the script variable name.
-        std::string GetName() const
+        const std::string& GetName() const
         { return mName; }
         // Get the actual value. The ScriptVar *must* hold that
         // type internally for the data item.
         template<typename T>
         T GetValue() const
         {
-            ASSERT(std::holds_alternative<T>(mData));
-            return std::get<T>(mData);
+            ASSERT(std::holds_alternative<std::vector<T>>(mData));
+            const auto& array = std::get<std::vector<T>>(mData);
+            ASSERT(array.size() == 1);
+            return array[0];
+        }
+        template<typename T>
+        const std::vector<T>& GetArray() const
+        {
+            ASSERT(std::holds_alternative<std::vector<T>>(mData));
+            return std::get<std::vector<T>>(mData);
         }
         // Set a new value in the script var. The value must
         // have the same type as previously (i.e. always match the
@@ -87,29 +117,43 @@ namespace game
         // The value however can change since that "constness" is expressed
         // with the boolean read-only flag.
         template<typename T>
+        void SetArray(std::vector<T> values) const
+        {
+            ASSERT(std::holds_alternative<std::vector<T>>(mData));
+            ASSERT(mReadOnly == false);
+            mData = std::move(values);
+        }
+        template<typename T>
         void SetValue(T value) const
         {
-            ASSERT(std::holds_alternative<T>(mData));
+            ASSERT(std::holds_alternative<std::vector<T>>(mData));
             ASSERT(mReadOnly == false);
-            mData = std::move(value);
+            auto& array = std::get<std::vector<T>>(mData);
+            ASSERT(array.size() == 1);
+            array[0] = std::move(value);
         }
+
+        void SetData(VariantType&& data)
+        { mData = std::move(data); }
+        void SetData(const VariantType& data)
+        { mData = data; }
 
         template<typename T>
         void SetNewValueType(T value)
-        { mData = value; }
+        { mData = std::vector<T> {value}; }
+        template<typename T>
+        void SetNewArrayType(std::vector<T> array)
+        { mData = std::move(array); }
         void SetName(const std::string& name)
         { mName = name; }
         void SetReadOnly(bool read_only)
         { mReadOnly = read_only; }
-        void SetVariantValue(VariantType value)
-        { mData = value; }
-
-        VariantType GetVariantValue() const
+        const VariantType& GetVariantValue() const
         { return mData; }
 
         template<typename T>
         bool HasType() const
-        { return std::holds_alternative<T>(mData); }
+        { return std::holds_alternative<std::vector<T>>(mData); }
 
         // Get the hash value of the current parameters.
         size_t GetHash() const;
@@ -117,6 +161,7 @@ namespace game
         // Serialize into JSON.
         void IntoJson(data::Writer& data) const;
 
+        static size_t GetHash(const VariantType& variant);
         static void IntoJson(const VariantType& variant, data::Writer& writer);
         static void FromJson(const data::Reader& reader, VariantType* variant);
 

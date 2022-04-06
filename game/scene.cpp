@@ -162,7 +162,7 @@ std::size_t SceneNodeClass::GetHash() const
         hash = base::hash_combine(hash, mLifetime.value());
     for (const auto& value : mScriptVarValues) {
         hash = base::hash_combine(hash, value.id);
-        hash = base::hash_combine(hash, value.value);
+        hash = base::hash_combine(hash, ScriptVar::GetHash(value.value));
     }
     return hash;
 }
@@ -997,7 +997,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         for (size_t i=0; i<node.GetNumScriptVarValues(); ++i)
         {
             const auto& val = node.GetScriptVarValue(i);
-            const auto* var = entity->FindScriptVarById(val.id);
+            auto* var = entity->FindScriptVarById(val.id);
             // deal with potentially stale data in the scene node.
             if (var == nullptr)
             {
@@ -1015,7 +1015,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
                 continue;
             }
             std::visit([var](const auto& variant_value) {
-                var->SetValue(variant_value);
+                // eh what??
+                const_cast<ScriptVar*>(var)->SetData(variant_value);
             }, val.value);
         }
 

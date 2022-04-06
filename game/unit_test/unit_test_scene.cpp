@@ -162,8 +162,16 @@ void unit_test_scene_class()
     {
         game::ScriptVar foo("foo", 123, game::ScriptVar::ReadOnly);
         game::ScriptVar bar("bar", 1.0f, game::ScriptVar::ReadWrite);
+        game::ScriptVar arr("array", std::vector<int>{6, 0, -4}, game::ScriptVar::ReadOnly);
+        TEST_REQUIRE(foo.IsReadOnly() == true);
+        TEST_REQUIRE(foo.IsArray() == false);
+        TEST_REQUIRE(bar.IsReadOnly() == false);
+        TEST_REQUIRE(bar.IsArray() == false);
+        TEST_REQUIRE(arr.IsReadOnly() == true);
+        TEST_REQUIRE(arr.IsArray() == true);
         klass.AddScriptVar(foo);
-        klass.AddScriptVar(std::move(bar));
+        klass.AddScriptVar(bar);
+        klass.AddScriptVar(arr);
     }
 
     TEST_REQUIRE(klass.GetNumNodes() == 3);
@@ -174,9 +182,24 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.FindNodeById(klass.GetNode(0).GetId()));
     TEST_REQUIRE(klass.FindNodeById("asgas") == nullptr);
     TEST_REQUIRE(klass.FindNodeByName("foasg") == nullptr);
-    TEST_REQUIRE(klass.GetNumScriptVars() == 2);
+    TEST_REQUIRE(klass.GetNumScriptVars() == 3);
     TEST_REQUIRE(klass.GetScriptVar(0).GetName() == "foo");
+    TEST_REQUIRE(klass.GetScriptVar(0).GetType() == game::ScriptVar::Type::Integer);
+    TEST_REQUIRE(klass.GetScriptVar(0).IsArray() == false);
+    TEST_REQUIRE(klass.GetScriptVar(0).IsReadOnly() == true);
+    TEST_REQUIRE(klass.GetScriptVar(0).GetValue<int>() == 123);
     TEST_REQUIRE(klass.GetScriptVar(1).GetName() == "bar");
+    TEST_REQUIRE(klass.GetScriptVar(1).GetType() == game::ScriptVar::Type::Float);
+    TEST_REQUIRE(klass.GetScriptVar(1).IsArray() == false);
+    TEST_REQUIRE(klass.GetScriptVar(1).IsReadOnly() == false);
+    TEST_REQUIRE(klass.GetScriptVar(1).GetValue<float>() == real::float32(1.0f));
+    TEST_REQUIRE(klass.GetScriptVar(2).GetName() == "array");
+    TEST_REQUIRE(klass.GetScriptVar(2).GetType() == game::ScriptVar::Type::Integer);
+    TEST_REQUIRE(klass.GetScriptVar(2).IsArray() == true);
+    TEST_REQUIRE(klass.GetScriptVar(2).IsReadOnly() == true);
+    TEST_REQUIRE(klass.GetScriptVar(2).GetArray<int>()[0] == 6);
+    TEST_REQUIRE(klass.GetScriptVar(2).GetArray<int>()[1] == 0);
+    TEST_REQUIRE(klass.GetScriptVar(2).GetArray<int>()[2] == -4);
     TEST_REQUIRE(klass.GetQuadTreeArgs()->max_items == 10);
     TEST_REQUIRE(klass.GetQuadTreeArgs()->max_levels == 8);
     TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
@@ -208,7 +231,21 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret->FindNodeByName("foasg") == nullptr);
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "foo");
+        TEST_REQUIRE(ret->GetScriptVar(0).GetType() == game::ScriptVar::Type::Integer);
+        TEST_REQUIRE(ret->GetScriptVar(0).IsArray() == false);
+        TEST_REQUIRE(ret->GetScriptVar(0).IsReadOnly() == true);
+        TEST_REQUIRE(ret->GetScriptVar(0).GetValue<int>() == 123);
         TEST_REQUIRE(ret->GetScriptVar(1).GetName() == "bar");
+        TEST_REQUIRE(ret->GetScriptVar(1).GetType() == game::ScriptVar::Type::Float);
+        TEST_REQUIRE(ret->GetScriptVar(1).IsArray() == false);
+        TEST_REQUIRE(ret->GetScriptVar(1).IsReadOnly() == false);
+        TEST_REQUIRE(ret->GetScriptVar(2).GetName() == "array");
+        TEST_REQUIRE(ret->GetScriptVar(2).GetType() == game::ScriptVar::Type::Integer);
+        TEST_REQUIRE(ret->GetScriptVar(2).IsArray() == true);
+        TEST_REQUIRE(ret->GetScriptVar(2).IsReadOnly() == true);
+        TEST_REQUIRE(ret->GetScriptVar(2).GetArray<int>()[0] == 6);
+        TEST_REQUIRE(ret->GetScriptVar(2).GetArray<int>()[1] == 0);
+        TEST_REQUIRE(ret->GetScriptVar(2).GetArray<int>()[2] == -4);
         TEST_REQUIRE(ret->GetQuadTreeArgs()->max_items == 10);
         TEST_REQUIRE(ret->GetQuadTreeArgs()->max_levels == 8);
         TEST_REQUIRE(ret->GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
@@ -350,7 +387,10 @@ void unit_test_scene_instance_create()
         node.SetEntity(entity);
         node.SetFlag(game::SceneNodeClass::Flags::TickEntity, false);
         node.SetFlag(game::SceneNodeClass::Flags::UpdateEntity, true);
-        node.AddScriptVarValue({var0.GetId(), 70});
+        game::SceneNodeClass::ScriptVarValue val;
+        val.id = var0.GetId();
+        val.value = std::vector<int>{70};
+        node.AddScriptVarValue(val);
         klass.AddNode(node);
     }
     {

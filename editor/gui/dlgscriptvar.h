@@ -27,6 +27,8 @@
 
 namespace gui
 {
+    // Dialog for editing a scripting variable, i.e. it's
+    // type, data and other properties.
     class DlgScriptVar :  public QDialog
     {
         Q_OBJECT
@@ -43,6 +45,9 @@ namespace gui
         game::ScriptVar& mVar;
     };
 
+    // Dialog for editing the scripting variable *data* only.
+    // Uses the same UI resource as the DlgScriptVar dialog
+    // but with limitations.
     class DlgScriptVal : public QDialog
     {
         Q_OBJECT

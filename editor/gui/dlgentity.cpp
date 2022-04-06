@@ -104,20 +104,47 @@ private:
     {
         switch (game::ScriptVar::GetTypeFromVariant(value.value))
         {
-            case game::ScriptVar::Type::Boolean:
-                return std::get<bool>(value.value);
-            case game::ScriptVar::Type::String:
-                return app::FromUtf8(std::get<std::string>(value.value));
-            case game::ScriptVar::Type::Float:
-                return QString("%1").arg(QString::number(std::get<float>(value.value), 'f', 2));
-            case game::ScriptVar::Type::Integer:
-                return std::get<int>(value.value);
-            case game::ScriptVar::Type::Vec2: {
-                const auto& val = std::get<glm::vec2>(value.value);
-                return QString("%1,%2")
-                        .arg(QString::number(val.x, 'f', 2))
-                        .arg(QString::number(val.y, 'f', 2));
+            case game::ScriptVar::Type::Boolean: {
+                const auto& array = std::get<std::vector<bool>>(value.value);
+                if (array.size() == 1)
+                    return array[0];
+                return QString("[0]=%1 ...").arg(array[0]);
             }
+            break;
+            case game::ScriptVar::Type::String: {
+                const auto& array = std::get<std::vector<std::string>>(value.value);
+                if (array.size() == 1)
+                    return app::FromUtf8(array[0]);
+                return QString("[0]='%1' ...").arg(app::FromUtf8(array[0]));
+            }
+            break;
+            case game::ScriptVar::Type::Float: {
+                const auto& array = std::get<std::vector<float>>(value.value);
+                if (array.size() == 1)
+                    return QString::number(array[0], 'f', 2);
+                return QString("[0]=%1 ...").arg(QString::number(array[0], 'f', 2));
+            }
+            break;
+            case game::ScriptVar::Type::Integer: {
+                const auto& array = std::get<std::vector<int>>(value.value);
+                if (array.size() == 1)
+                    return array[0];
+                return QString("[0]=%1 ...").arg(array[0]);
+            }
+            break;
+            case game::ScriptVar::Type::Vec2: {
+                const auto& array = std::get<std::vector<glm::vec2>>(value.value);
+                const auto& vec = array[0];
+                if (array.size() == 1)
+                    return QString("%1,%2")
+                            .arg(QString::number(vec.x, 'f', 2))
+                            .arg(QString::number(vec.y, 'f', 2));
+
+                return QString("[0]=%1,%2 ...")
+                        .arg(QString::number(vec.x, 'f', 2))
+                        .arg(QString::number(vec.y, 'f', 2));
+            }
+            break;
         }
         BUG("Unknown ScriptVar type.");
         return QVariant();
