@@ -103,13 +103,35 @@ namespace game
 ScriptVar::Type ScriptVar::GetType() const
 { return GetTypeFromVariant(mData); }
 
-bool ScriptVar::IsArray() const
+void ScriptVar::AppendItem()
 {
-    bool ret = false;
-    std::visit([&ret](const auto& variant_value_vector) {
-        ret = variant_value_vector.size() > 1;
+    std::visit([](auto& variant_value_vector) {
+        const auto size = variant_value_vector.size();
+        variant_value_vector.resize(size+1);
     }, mData);
-    return ret;
+}
+void ScriptVar::RemoveItem(size_t index)
+{
+    std::visit([index](auto& variant_value_vector) {
+        ASSERT(index < variant_value_vector.size());
+        auto it = variant_value_vector.begin();
+        std::advance(it, index);
+        variant_value_vector.erase(it);
+    }, mData);
+}
+
+void ScriptVar::ResizeToOne()
+{
+    std::visit([](auto& variant_value_vector) {
+        variant_value_vector.resize(1);
+    }, mData);
+}
+
+void ScriptVar::Resize(size_t size)
+{
+    std::visit([size](auto& variant_value_vector) {
+        variant_value_vector.resize(size);
+    }, mData);
 }
 
 size_t ScriptVar::GetHash() const
@@ -118,8 +140,17 @@ size_t ScriptVar::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mReadOnly);
+    hash = base::hash_combine(hash, mIsArray);
     hash = base::hash_combine(hash, GetHash(mData));
     return hash;
+}
+size_t ScriptVar::GetArraySize() const
+{
+    size_t ret = 0;
+    std::visit([&ret](const auto& variant_value_vector) {
+        ret = variant_value_vector.size();
+    }, mData);
+    return ret;
 }
 
 void ScriptVar::IntoJson(data::Writer& writer) const
@@ -127,6 +158,7 @@ void ScriptVar::IntoJson(data::Writer& writer) const
     writer.Write("id", mId);
     writer.Write("name", mName);
     writer.Write("readonly", mReadOnly);
+    writer.Write("array", mIsArray);
     IntoJson(mData, writer);
 }
 
@@ -140,6 +172,15 @@ size_t ScriptVar::GetHash(const VariantType& variant)
             hash = base::hash_combine(hash, val);
     }, variant);
     return hash;
+}
+// static
+size_t ScriptVar::GetArraySize(const VariantType& variant)
+{
+    size_t size = 0;
+    std::visit([&size](const auto& variant_value_vector) {
+        size = variant_value_vector.size();
+    },  variant);
+    return size;
 }
 
 // static
@@ -165,18 +206,37 @@ void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
 // static
 void ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
 {
-    //reader.Read("value", variant);
-    if (reader.HasArray("strings"))
-        read_primitive_array<std::string>("strings", reader, variant);
-    else if (reader.HasArray("ints"))
-        read_primitive_array<int>("ints", reader, variant);
-    else if (reader.HasArray("floats"))
-        read_primitive_array<float>("floats", reader, variant);
-    else if (reader.HasArray("bools"))
-        read_bool_array("bools", reader, variant);
-    else if (reader.HasArray("vec2s"))
-        read_object_array<glm::vec2>("vec2s", reader, variant);
-    else BUG("Unhandled script variable type.");
+    // migration path from a single variant to a variant of arrays
+    using OldVariant = std::variant<bool, float, int, std::string, glm::vec2>;
+    OldVariant  old_data;
+    if (reader.Read("value", &old_data))
+    {
+        if (const auto* ptr = std::get_if<int>(&old_data))
+            *variant = std::vector<int> {*ptr};
+        else if (const auto* ptr = std::get_if<float>(&old_data))
+            *variant = std::vector<float> {*ptr};
+        else if (const auto* ptr = std::get_if<bool>(&old_data))
+            *variant = std::vector<bool> {*ptr};
+        else if (const auto* ptr = std::get_if<std::string>(&old_data))
+            *variant = std::vector<std::string> {*ptr};
+        else if (const auto* ptr = std::get_if<glm::vec2>(&old_data))
+            *variant = std::vector<glm::vec2> {*ptr};
+        else BUG("Unhandled script variable type.");
+    }
+    else
+    {
+        if (reader.HasArray("strings"))
+            read_primitive_array<std::string>("strings", reader, variant);
+        else if (reader.HasArray("ints"))
+            read_primitive_array<int>("ints", reader, variant);
+        else if (reader.HasArray("floats"))
+            read_primitive_array<float>("floats", reader, variant);
+        else if (reader.HasArray("bools"))
+            read_bool_array("bools", reader, variant);
+        else if (reader.HasArray("vec2s"))
+            read_object_array<glm::vec2>("vec2s", reader, variant);
+        else BUG("Unhandled script variable type.");
+    }
 }
 
 // static
@@ -186,27 +246,8 @@ std::optional<ScriptVar> ScriptVar::FromJson(const data::Reader& reader)
     reader.Read("id", &ret.mId);
     reader.Read("name", &ret.mName);
     reader.Read("readonly", &ret.mReadOnly);
-
-    // migration path from a single variant to a variant of arrays
-    using OldVariant = std::variant<bool, float, int, std::string, glm::vec2>;
-    OldVariant  old_data;
-    if (reader.Read("value", &old_data))
-    {
-        if (const auto* ptr = std::get_if<int>(&old_data))
-            ret.mData = std::vector<int> {*ptr};
-        else if (const auto* ptr = std::get_if<float>(&old_data))
-            ret.mData = std::vector<float> {*ptr};
-        else if (const auto* ptr = std::get_if<bool>(&old_data))
-            ret.mData = std::vector<bool> {*ptr};
-        else if (const auto* ptr = std::get_if<std::string>(&old_data))
-            ret.mData = std::vector<std::string> {*ptr};
-        else if (const auto* ptr = std::get_if<glm::vec2>(&old_data))
-            ret.mData = std::vector<glm::vec2> {*ptr};
-    }
-    else
-    {
-        FromJson(reader, &ret.mData);
-    }
+    reader.Read("array", &ret.mIsArray);
+    FromJson(reader, &ret.mData);
     return ret;
 }
 // static

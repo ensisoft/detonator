@@ -38,7 +38,23 @@ namespace gui
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnAdd_clicked();
+        void on_btnDel_clicked();
+        void on_chkArray_stateChanged(int);
         void on_varType_currentIndexChanged(int);
+        void on_strValue_textChanged(const QString& text);
+        void on_intValue_valueChanged(int value);
+        void on_floatValue_valueChanged(double value);
+        void on_vec2ValueX_valueChanged(double value);
+        void on_vec2ValueY_valueChanged(double value);
+        void on_boolValueTrue_clicked(bool checked);
+        void on_boolValueFalse_clicked(bool checked);
+        void on_index_valueChanged(int);
+    private:
+        void UpdateArrayIndex();
+        void UpdateArrayType();
+        void SetArrayValue(unsigned index);
+        void ShowArrayValue(unsigned index);
     private:
         Ui::DlgScriptVar mUI;
     private:
@@ -52,14 +68,26 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value);
+        DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value, bool array);
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_index_valueChanged(int);
+        void on_strValue_textChanged(const QString& text);
+        void on_intValue_valueChanged(int value);
+        void on_floatValue_valueChanged(double value);
+        void on_vec2ValueX_valueChanged(double value);
+        void on_vec2ValueY_valueChanged(double value);
+        void on_boolValueTrue_clicked(bool checked);
+        void on_boolValueFalse_clicked(bool checked);
+    private:
+        void SetArrayValue(unsigned index);
+        void ShowArrayValue(unsigned index);
     private:
         Ui::DlgScriptVar mUI;
     private:
         game::ScriptVar::VariantType& mVal;
+
     };
 
 } // namespace

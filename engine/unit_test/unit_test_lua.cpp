@@ -518,6 +518,12 @@ void unit_test_scene_interface()
         entity->AddScriptVar(game::ScriptVar("bool_var", false, false));
         entity->AddScriptVar(game::ScriptVar("vec2_var", glm::vec2(3.0f, -1.0f), false));
         entity->AddScriptVar(game::ScriptVar("read_only", 43, true));
+
+        // array
+        std::vector<std::string> strs;
+        strs.push_back("foo");
+        strs.push_back("bar");
+        entity->AddScriptVar(game::ScriptVar("str_array", strs, false));
     }
 
     game::SceneClass scene;
@@ -538,6 +544,12 @@ void unit_test_scene_interface()
         scene.AddScriptVar(game::ScriptVar("bool_var", false, false));
         scene.AddScriptVar(game::ScriptVar("vec2_var", glm::vec2(3.0f, -1.0f), false));
         scene.AddScriptVar(game::ScriptVar("read_only", 43, true));
+
+        // array
+        std::vector<std::string> strs;
+        strs.push_back("foo");
+        strs.push_back("bar");
+        scene.AddScriptVar(game::ScriptVar("str_array", strs, false));
     }
 
     // create instance
@@ -560,6 +572,10 @@ function try_set_wrong_type(obj)
   obj.int_var = 'string here'
 end
 
+function try_array_oob(obj)
+   local foo = obj.str_array[4]
+end
+
 function test(scene)
    test_int(scene.int_var,     123)
    test_float(scene.float_var, 40.0)
@@ -567,6 +583,13 @@ function test(scene)
    test_bool(scene.bool_var,    false)
    test_vec2(scene.vec2_var,    3.0, -1.0)
    test_int(scene.read_only,    43)
+
+   test_str(scene.str_array[1], 'foo')
+   test_str(scene.str_array[2], 'bar')
+   -- going out of bounds on array should raise an error
+   if pcall(try_array_oob, scene) then
+     error('fail testing array oob access')
+   end
 
    -- writing read-only should raise an error
    if pcall(try_set_read_only, scene) then
@@ -635,6 +658,9 @@ function test(scene)
    test_bool(entity.bool_var,    true)
    test_vec2(entity.vec2_var,    -1.0, -2.0)
 
+   test_str(entity.str_array[1], 'foo')
+   test_str(entity.str_array[2], 'bar')
+
    test_str(entity:GetName(), 'test_entity_1')
    test_str(entity:GetClassName(), 'test_entity')
    test_int(entity:GetNumNodes(), 1)
@@ -680,6 +706,7 @@ end
             throw std::runtime_error("int fail");
     };
     L["test_str"] = [](std::string a, std::string b) {
+        std::printf("test_str a='%s', b='%s'\n", a.c_str(), b.c_str());
         if (a != b)
             throw std::runtime_error("string fail");
     };

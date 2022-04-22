@@ -30,49 +30,20 @@ DlgScriptVar::DlgScriptVar(QWidget* parent, game::ScriptVar& variable)
   , mVar(variable)
 {
     mUI.setupUi(this);
-    // lalal these don't work ?
-    // mUI.floatValue->setMaximum(std::numeric_limits<float>::max());
-    // mUI.floatValue->setMinimum(std::numeric_limits<float>::min());
-    // mUI.intValue->setMaximum(std::numeric_limits<int>::max());
-    // mUI.intValue->setMinimum(std::numeric_limits<int>::min());
-    // mUI.vec2ValueX->setMaximum(std::numeric_limits<float>::max());
-    // mUI.vec2ValueX->setMinimum(std::numeric_limits<float>::min());
-    // mUI.vec2ValueY->setMaximum(std::numeric_limits<float>::max());
-    // mUI.vec2ValueY->setMinimum(std::numeric_limits<float>::min());
 
     PopulateFromEnum<game::ScriptVar::Type>(mUI.varType);
-    SetValue(mUI.varID, variable.GetId());
-    SetValue(mUI.varName, variable.GetName());
-    SetValue(mUI.varType, variable.GetType());
+    SetValue(mUI.varID,       variable.GetId());
+    SetValue(mUI.varName,     variable.GetName());
+    SetValue(mUI.varType,     variable.GetType());
     SetValue(mUI.chkReadOnly, variable.IsReadOnly());
-    const game::ScriptVar::Type type = GetValue(mUI.varType);
-    switch (type)
-    {
-        case game::ScriptVar::Type::Vec2:
-            {
-                const auto& val = variable.GetValue<glm::vec2>();
-                SetValue(mUI.vec2ValueX, val.x);
-                SetValue(mUI.vec2ValueY, val.y);
-            }
-            break;
-        case game::ScriptVar::Type::Integer:
-            SetValue(mUI.intValue, variable.GetValue<int>());
-            break;
-        case game::ScriptVar::Type::String:
-            SetValue(mUI.strValue, variable.GetValue<std::string>());
-            break;
-        case game::ScriptVar::Type::Float:
-            SetValue(mUI.floatValue, variable.GetValue<float>());
-            break;
-        case game::ScriptVar::Type::Boolean:
-            {
-                const auto val = variable.GetValue<bool>();
-                SetValue(mUI.boolValueTrue, val == true);
-                SetValue(mUI.boolValueFalse, val == false);
-            }
-            break;
-    }
-    on_varType_currentIndexChanged(0);
+    SetValue(mUI.chkArray,    variable.IsArray());
+    SetEnabled(mUI.btnAdd,    variable.IsArray());
+    SetEnabled(mUI.btnDel,    variable.IsArray());
+
+    UpdateArrayType();
+    UpdateArrayIndex();
+    ShowArrayValue(0);
+
     mUI.varName->setFocus();
 }
 
@@ -80,30 +51,6 @@ void DlgScriptVar::on_btnAccept_clicked()
 {
     if (!MustHaveInput(mUI.varName))
         return;
-    switch ((game::ScriptVar::Type)GetValue(mUI.varType))
-    {
-        case game::ScriptVar::Type::Vec2:
-            {
-                glm::vec2 val;
-                val.x = GetValue(mUI.vec2ValueX);
-                val.y = GetValue(mUI.vec2ValueY);
-                mVar.SetNewValueType(val);
-            }
-            break;
-        case game::ScriptVar::Type::Integer:
-            mVar.SetNewValueType((int)GetValue(mUI.intValue));
-            break;
-        case game::ScriptVar::Type::String:
-            mVar.SetNewValueType((std::string)GetValue(mUI.strValue));
-            break;
-        case game::ScriptVar::Type::Float:
-            mVar.SetNewValueType((float)GetValue(mUI.floatValue));
-            break;
-        case game::ScriptVar::Type::Boolean:
-            mVar.SetNewValueType(false);
-            mVar.SetNewValueType((bool)GetValue(mUI.boolValueTrue));
-            break;
-    }
     mVar.SetName(GetValue(mUI.varName));
     mVar.SetReadOnly(GetValue(mUI.chkReadOnly));
     accept();
@@ -113,7 +60,124 @@ void DlgScriptVar::on_btnCancel_clicked()
     reject();
 }
 
+void DlgScriptVar::on_btnAdd_clicked()
+{
+    mVar.AppendItem();
+    UpdateArrayIndex();
+
+    const auto size = mVar.GetArraySize();
+    SetValue(mUI.index, size-1);
+    ShowArrayValue(size-1);
+}
+void DlgScriptVar::on_btnDel_clicked()
+{
+    const auto size = mVar.GetArraySize();
+    if (size == 1)
+        return;
+
+    const unsigned index = GetValue(mUI.index);
+    mVar.RemoveItem(index);
+    UpdateArrayIndex();
+
+    const auto next = index > 0 ? index - 1 : 0;
+    SetValue(mUI.index, next);
+    ShowArrayValue(next);
+}
+void DlgScriptVar::on_chkArray_stateChanged(int)
+{
+    const bool checked = GetValue(mUI.chkArray);
+    if (!checked)
+    {
+        mVar.ResizeToOne();
+    }
+    mVar.SetArray(checked);
+    UpdateArrayIndex();
+}
+
 void DlgScriptVar::on_varType_currentIndexChanged(int)
+{
+    const auto size = mVar.GetArraySize();
+
+    const game::ScriptVar::Type type = GetValue(mUI.varType);
+    switch (type)
+    {
+        case game::ScriptVar::Type::Vec2:
+            {
+                std::vector<glm::vec2> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.vec2ValueX->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Integer:
+            {
+                std::vector<int> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.intValue->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::String:
+            {
+                std::vector<std::string> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.strValue->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Float:
+            {
+                std::vector<float> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.floatValue->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Boolean:
+            {
+                std::vector<bool> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.boolValueTrue->setFocus();
+            }
+            break;
+    }
+    mVar.Resize(size);
+
+    UpdateArrayType();
+    UpdateArrayIndex();
+}
+
+void DlgScriptVar::on_strValue_textChanged(const QString& text)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_intValue_valueChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_floatValue_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_vec2ValueX_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_vec2ValueY_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVar::on_boolValueTrue_clicked(bool checked)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_boolValueFalse_clicked(bool checked)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_index_valueChanged(int)
+{
+    ShowArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVar::UpdateArrayType()
 {
     SetEnabled(mUI.strValue, false);
     SetEnabled(mUI.intValue, false);
@@ -123,35 +187,126 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
     SetEnabled(mUI.boolValueTrue, false);
     SetEnabled(mUI.boolValueFalse, false);
 
-    const game::ScriptVar::Type type = GetValue(mUI.varType);
-    switch (type)
+    const auto type = mVar.GetType();
+    if (type == game::ScriptVar::Type::String)
     {
-        case game::ScriptVar::Type::Vec2:
-            SetEnabled(mUI.vec2ValueX, true);
-            SetEnabled(mUI.vec2ValueY, true);
-            mUI.vec2ValueX->setFocus();
-            break;
-        case game::ScriptVar::Type::Integer:
-            SetEnabled(mUI.intValue, true);
-            mUI.intValue->setFocus();
-            break;
-        case game::ScriptVar::Type::String:
-            SetEnabled(mUI.strValue, true);
-            mUI.strValue->setFocus();
-            break;
-        case game::ScriptVar::Type::Float:
-            SetEnabled(mUI.floatValue, true);
-            mUI.floatValue->setFocus();
-            break;
-        case game::ScriptVar::Type::Boolean:
-            SetEnabled(mUI.boolValueTrue, true);
-            SetEnabled(mUI.boolValueFalse, true);
-            mUI.boolValueTrue->setFocus();
-            break;
+        SetEnabled(mUI.strValue, true);
+    }
+    else if (type == game::ScriptVar::Type::Integer)
+    {
+        SetEnabled(mUI.intValue, true);
+    }
+    else if  (type == game::ScriptVar::Type::Float)
+    {
+        SetEnabled(mUI.floatValue, true);
+    }
+    else if (type == game::ScriptVar::Type::Vec2)
+    {
+        SetEnabled(mUI.vec2ValueX, true);
+        SetEnabled(mUI.vec2ValueY, true);
+    }
+    else if (type  == game::ScriptVar::Type::Boolean)
+    {
+        SetEnabled(mUI.boolValueTrue, true);
+        SetEnabled(mUI.boolValueFalse, true);
+    } else BUG("Unhandled scripting variable type.");
+}
+
+void DlgScriptVar::UpdateArrayIndex()
+{
+    const auto& size = mVar.GetArraySize();
+    mUI.index->setMinimum(0);
+    mUI.index->setMaximum(size-1);
+
+    if (mVar.IsArray())
+    {
+        SetEnabled(mUI.index, true);
+        SetEnabled(mUI.btnAdd, true);
+        SetEnabled(mUI.btnDel, size > 1);
+    }
+    else
+    {
+        SetEnabled(mUI.index, GetValue(mUI.chkArray));
+        SetEnabled(mUI.btnAdd, GetValue(mUI.chkArray));
+        SetEnabled(mUI.btnDel, false);
     }
 }
 
-DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value)
+void DlgScriptVar::SetArrayValue(unsigned index)
+{
+    const auto type = mVar.GetType();
+    if (type == game::ScriptVar::Type::String)
+    {
+        auto& arr = mVar.GetArray<std::string>();
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.strValue);
+    }
+    else if (type == game::ScriptVar::Type::Integer)
+    {
+        auto& arr = mVar.GetArray<int>();
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.intValue);
+    }
+    else if  (type == game::ScriptVar::Type::Float)
+    {
+        auto& arr = mVar.GetArray<float>();
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.floatValue);
+    }
+    else if (type == game::ScriptVar::Type::Vec2)
+    {
+        auto& arr = mVar.GetArray<glm::vec2>();
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec2(GetValue(mUI.vec2ValueX),
+                               GetValue(mUI.vec2ValueY));
+    }
+    else if (type  == game::ScriptVar::Type::Boolean)
+    {
+        auto& arr = mVar.GetArray<bool>();
+        ASSERT(index < arr.size());
+        arr[index] = (bool)GetValue(mUI.boolValueTrue);
+    } else BUG("Unhandled scripting variable type.");
+}
+
+void DlgScriptVar::ShowArrayValue(unsigned index)
+{
+    const auto type = mVar.GetType();
+    if (type == game::ScriptVar::Type::String)
+    {
+        const auto& arr = mVar.GetArray<std::string>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.strValue, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::Integer)
+    {
+        const auto& arr = mVar.GetArray<int>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.intValue, arr[index]);
+    }
+    else if  (type == game::ScriptVar::Type::Float)
+    {
+        const auto& arr = mVar.GetArray<float>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.floatValue, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::Vec2)
+    {
+        const auto& arr = mVar.GetArray<glm::vec2>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.vec2ValueX, arr[index].x);
+        SetValue(mUI.vec2ValueY, arr[index].y);
+    }
+    else if (type  == game::ScriptVar::Type::Boolean)
+    {
+        const auto& arr = mVar.GetArray<bool>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.boolValueTrue, arr[index] == true);
+        SetValue(mUI.boolValueFalse, arr[index] == false);
+    } else BUG("Unhandled scripting variable type.");
+}
+
+
+DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value, bool array)
   : QDialog(parent)
   , mVal(value)
 {
@@ -180,91 +335,69 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value)
     SetEnabled(mUI.boolValueTrue, true);
     SetEnabled(mUI.boolValueFalse, true);
 
-    const auto index = 0;
+    SetVisible(mUI.index, false);
+    SetVisible(mUI.btnAdd, false);
+    SetVisible(mUI.btnDel, false);
+    SetVisible(mUI.lblIndex, false);
+
+    if (array)
+    {
+        const auto size = game::ScriptVar::GetArraySize(mVal);
+        SetVisible(mUI.index, true);
+        SetVisible(mUI.lblIndex, true);
+        SetValue(mUI.index, 0);
+        mUI.index->setMinimum(0);
+        mUI.index->setMaximum(size-1);
+    }
 
     switch (game::ScriptVar::GetTypeFromVariant(value))
     {
         case game::ScriptVar::Type::Vec2:
             {
-                const auto& val = std::get<std::vector<glm::vec2>>(value)[index];
-                SetValue(mUI.vec2ValueX, val.x);
-                SetValue(mUI.vec2ValueY, val.y);
                 SetVisible(mUI.vec2ValueX, true);
                 SetVisible(mUI.vec2ValueY, true);
+                SetVisible(mUI.lblVec2, true);
                 mUI.vec2ValueX->setFocus();
             }
             break;
         case game::ScriptVar::Type::Float:
             {
-                SetValue(mUI.floatValue, std::get<std::vector<float>>(value)[index]);
                 SetVisible(mUI.floatValue, true);
+                SetVisible(mUI.lblFloat, true);
+                mUI.floatValue->setFocus();
             }
             break;
         case game::ScriptVar::Type::Integer:
             {
-                SetValue(mUI.intValue, std::get<std::vector<int>>(value)[index]);
                 SetVisible(mUI.intValue, true);
+                SetVisible(mUI.lblInteger, true);
+                mUI.intValue->setFocus();
             }
             break;
         case game::ScriptVar::Type::String:
             {
-                SetValue(mUI.strValue, std::get<std::vector<std::string>>(value)[index]);
                 SetVisible(mUI.strValue, true);
+                SetVisible(mUI.lblString, true);
+                mUI.strValue->setFocus();
             }
             break;
         case game::ScriptVar::Type::Boolean:
             {
-                const auto val = std::get<std::vector<bool>>(value)[index];
-                SetValue(mUI.boolValueTrue, val == true);
-                SetValue(mUI.boolValueFalse, val == false);
                 SetVisible(mUI.boolValueTrue, true);
                 SetVisible(mUI.boolValueFalse, true);
+                SetVisible(mUI.lblBool, true);
                 mUI.boolValueTrue->setFocus();
             }
             break;
         default:  BUG("Unhandled ScriptVar value type.");
     }
     adjustSize();
+
+    ShowArrayValue(0);
 }
 
 void DlgScriptVal::on_btnAccept_clicked()
 {
-    switch (game::ScriptVar::GetTypeFromVariant(mVal))
-    {
-        case game::ScriptVar::Type::Vec2:
-            {
-                glm::vec2 val;
-                val.x = GetValue(mUI.vec2ValueX);
-                val.y = GetValue(mUI.vec2ValueY);
-                mVal = std::vector<glm::vec2> {val};
-            }
-            break;
-        case game::ScriptVar::Type::Float:
-            {
-                const auto val = (float)GetValue(mUI.floatValue);
-                mVal = std::vector<float> {val};
-            }
-            break;
-        case game::ScriptVar::Type::Integer:
-            {
-                const auto val = (int)GetValue(mUI.intValue);
-                mVal = std::vector<int> { val };
-            }
-            break;
-        case game::ScriptVar::Type::String:
-            {
-                const auto val = (std::string)GetValue(mUI.strValue);
-                mVal =  std::vector<std::string> {val};
-            }
-            break;
-        case game::ScriptVar::Type::Boolean:
-            {
-                const auto val = (bool)GetValue(mUI.boolValueTrue);
-                mVal = std::vector<bool> { val };
-            }
-            break;
-        default:  BUG("Unhandled ScriptVar value type.");
-    }
     accept();
 }
 
@@ -273,5 +406,112 @@ void DlgScriptVal::on_btnCancel_clicked()
     reject();
 }
 
+void DlgScriptVal::on_index_valueChanged(int)
+{
+    ShowArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVal::on_strValue_textChanged(const QString& text)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_intValue_valueChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_floatValue_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_vec2ValueX_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_vec2ValueY_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVal::on_boolValueTrue_clicked(bool checked)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_boolValueFalse_clicked(bool checked)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVal::SetArrayValue(unsigned index)
+{
+    const auto type = game::ScriptVar::GetTypeFromVariant(mVal);
+    if (type == game::ScriptVar::Type::String)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<std::string>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.strValue);
+    }
+    else if (type == game::ScriptVar::Type::Integer)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<int>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.intValue);
+    }
+    else if  (type == game::ScriptVar::Type::Float)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<float>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.floatValue);
+    }
+    else if (type == game::ScriptVar::Type::Vec2)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec2>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec2(GetValue(mUI.vec2ValueX),
+                               GetValue(mUI.vec2ValueY));
+    }
+    else if (type  == game::ScriptVar::Type::Boolean)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<bool>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = (bool)GetValue(mUI.boolValueTrue);
+    } else BUG("Unhandled scripting variable type.");
+}
+
+void DlgScriptVal::ShowArrayValue(unsigned index)
+{
+    const auto type = game::ScriptVar::GetTypeFromVariant(mVal);
+    if (type == game::ScriptVar::Type::String)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<std::string>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.strValue, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::Integer)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<int>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.intValue, arr[index]);
+    }
+    else if  (type == game::ScriptVar::Type::Float)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<float>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.floatValue, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::Vec2)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec2>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.vec2ValueX, arr[index].x);
+        SetValue(mUI.vec2ValueY, arr[index].y);
+    }
+    else if (type  == game::ScriptVar::Type::Boolean)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<bool>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.boolValueTrue, arr[index] == true);
+        SetValue(mUI.boolValueFalse, arr[index] == false);
+    } else BUG("Unhandled scripting variable type.");
+}
 
 } // namespace
