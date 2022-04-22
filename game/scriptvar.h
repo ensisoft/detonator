@@ -67,6 +67,7 @@ namespace game
           : mId(base::RandomString(10))
           , mName(std::move(name))
           , mReadOnly(read_only)
+          , mIsArray(false)
         {
               mData = std::vector<T>{std::move(value)};
         }
@@ -75,6 +76,7 @@ namespace game
           : mId(base::RandomString(10))
           , mName(std::move(name))
           , mReadOnly(read_only)
+          , mIsArray(true)
         {
               mData = std::move(array);
         }
@@ -83,7 +85,8 @@ namespace game
         // in the scripting environment.
         bool IsReadOnly() const
         { return mReadOnly; }
-        bool IsArray() const;
+        bool IsArray() const
+        { return mIsArray; }
         // Get the type of the variable.
         Type GetType() const;
         // Get the script variable ID.
@@ -92,22 +95,27 @@ namespace game
         // Get the script variable name.
         const std::string& GetName() const
         { return mName; }
+
         // Get the actual value. The ScriptVar *must* hold that
         // type internally for the data item.
         template<typename T>
         T GetValue() const
         {
+            // returning by value because of vector<bool> returns a temporary.
+
             ASSERT(std::holds_alternative<std::vector<T>>(mData));
             const auto& array = std::get<std::vector<T>>(mData);
             ASSERT(array.size() == 1);
             return array[0];
         }
         template<typename T>
-        const std::vector<T>& GetArray() const
+        std::vector<T>& GetArray() const
         {
+            // see the comments below about why this function is marked
             ASSERT(std::holds_alternative<std::vector<T>>(mData));
             return std::get<std::vector<T>>(mData);
         }
+
         // Set a new value in the script var. The value must
         // have the same type as previously (i.e. always match the
         // type of the encapsulated value inside ScriptVar) and
@@ -148,6 +156,8 @@ namespace game
         { mName = name; }
         void SetReadOnly(bool read_only)
         { mReadOnly = read_only; }
+        void SetArray(bool array)
+        { mIsArray = array; }
         const VariantType& GetVariantValue() const
         { return mData; }
 
@@ -155,19 +165,41 @@ namespace game
         bool HasType() const
         { return std::holds_alternative<std::vector<T>>(mData); }
 
+        void AppendItem();
+        void RemoveItem(size_t index);
+        void ResizeToOne();
+        void Resize(size_t size);
+
         // Get the hash value of the current parameters.
         size_t GetHash() const;
+
+        size_t GetArraySize() const;
 
         // Serialize into JSON.
         void IntoJson(data::Writer& data) const;
 
         static size_t GetHash(const VariantType& variant);
+        static size_t GetArraySize(const VariantType& variant);
         static void IntoJson(const VariantType& variant, data::Writer& writer);
         static void FromJson(const data::Reader& reader, VariantType* variant);
 
         static std::optional<ScriptVar> FromJson(const data::Reader& data);
 
         static Type GetTypeFromVariant(const VariantType& variant);
+
+        template<typename T>
+        static std::vector<T>& GetVectorFromVariant(VariantType& variant)
+        {
+            ASSERT(std::holds_alternative<std::vector<T>>(variant));
+            return std::get<std::vector<T>>(variant);
+        }
+        template<typename T>
+        static const std::vector<T>& GetVectorFromVariant(const VariantType& variant)
+        {
+            ASSERT(std::holds_alternative<std::vector<T>>(variant));
+            return std::get<std::vector<T>>(variant);
+        }
+
     private:
         ScriptVar() = default;
         // ID of the script variable.
@@ -181,6 +213,7 @@ namespace game
         // shared by multiple object instances thus leading to
         // reduced memory consumption. (hence the default)
         bool mReadOnly = true;
+        bool mIsArray = false;
     };
 } // namespace
 

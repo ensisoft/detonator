@@ -173,6 +173,7 @@ using namespace game;
 // exceptions. So unless we're very careful we end up having BUGS in the Lua binding
 // code turned into "Lua game errors" which is not what we should want to do!!
 
+namespace {
 class GameError : public std::exception {
 public:
     GameError(std::string&& message)
@@ -184,7 +185,119 @@ private:
     std::string mMessage;
 };
 
-namespace {
+// template to adapt an underlying std::vector
+// to sol2's Lua container interface. the vector
+// is not owned by the array interface object and
+// may come for example from a scene/entity scripting
+// variable when the variable is an array.
+template<typename T>
+class ArrayInterface {
+public:
+    using value_type = typename std::vector<T>::value_type;
+    using iterator   = typename std::vector<T>::const_iterator;
+    using size_type  = typename std::vector<T>::size_type;
+    ArrayInterface(std::vector<T>* vector, bool read_only)
+      : mArray(vector)
+      , mReadOnly(read_only)
+    {}
+    iterator begin() noexcept
+    { return mArray->begin(); }
+    iterator end() noexcept
+    { return mArray->end(); }
+    size_type size() const noexcept
+    { return mArray->size(); }
+    void push_back(const T& value)
+    { mArray->push_back(value); }
+    bool empty() const noexcept
+    { return mArray->empty(); }
+
+    T GetItem(unsigned index) const
+    {
+        // lua uses 1 based indexing.
+        index = index - 1;
+        if (index >= size())
+            throw GameError("ArrayInterface access out of bounds.");
+        return (*mArray)[index];
+    }
+    void SetItem(unsigned index, const T& item)
+    {
+        // Lua uses 1 based indexing
+        index = index - 1;
+        if (index >= size())
+            throw GameError("ArrayInterface access out of bounds.");
+        if (IsReadOnly())
+            throw GameError("Trying to write to read only array.");
+        (*mArray)[index] = item;
+    }
+    void PopBack()
+    {
+        auto& arr = *mArray;
+        if (arr.empty())
+            return;
+        arr.pop_back();
+    }
+    void PopFront()
+    {
+        auto& arr = *mArray;
+        if (arr.empty())
+            return;
+        arr.erase(arr.begin());
+    }
+
+    T GetFirst() const
+    {
+        return GetItem(1);
+    }
+    T GetLast() const
+    {
+        return GetItem(size());
+    }
+
+    bool IsReadOnly() const
+    { return mReadOnly; }
+
+private:
+    std::vector<T>* mArray = nullptr;
+    bool mReadOnly = false;
+};
+
+template<typename T>
+void BindArrayInterface(sol::table& table, const char* name)
+{
+    using Type = ArrayInterface<T>;
+
+    // regarding the array indexing for the subscript operator.
+    // Lua uses 1 based indexing and allows (with built-in arrays)
+    // access to indices that don't exist. For example, you can do
+    //   local foo = {'foo', 'bar'}
+    //   print(foo[0])
+    //   print(foo[3])
+    //
+    // this will print nil twice.
+    // Lua also allows for holes to be had in the array. for example
+    //    foo[4] = 'keke'
+    //    print(foo[4])
+    //    print(foo[3])
+    //
+    // will print keke followed by nil
+    //
+    // Going to stick to more C++ like semantics here and say that
+    // trying to access an index that doesn't exist is Lua application error.
+    auto arr = table.new_usertype<Type>(name,
+        sol::meta_function::index, &Type::GetItem,
+        sol::meta_function::new_index, &Type::SetItem);
+    arr["IsEmpty"]    = &Type::empty;
+    arr["Size"]       = &Type::size;
+    arr["IsReadOnly"] = &Type::IsReadOnly;
+    arr["GetItem"]    = &Type::GetItem;
+    arr["SetItem"]    = &Type::SetItem;
+    arr["PopBack"]    = &Type::PopBack;
+    arr["PopFront"]   = &Type::PopFront;
+    arr["First"]      = &Type::GetFirst;
+    arr["Last"]       = &Type::GetLast;
+    arr["PushBack"]   = &Type::push_back;
+}
+
 template<typename... Args>
 void CallLua(const sol::protected_function& func, const Args&... args)
 {
@@ -382,15 +495,40 @@ sol::object ObjectFromScriptVarValue(const ScriptVar& var, sol::this_state state
     sol::state_view lua(state);
     const auto type = var.GetType();
     if (type == ScriptVar::Type::Boolean)
+    {
+        using ArrayType = ArrayInterface<bool>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(&var.GetArray<bool>(), var.IsReadOnly()));
         return sol::make_object(lua, var.GetValue<bool>());
+    }
     else if (type == ScriptVar::Type::Float)
+    {
+        using ArrayType = ArrayInterface<float>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(&var.GetArray<float>(), var.IsReadOnly()));
         return sol::make_object(lua, var.GetValue<float>());
+    }
     else if (type == ScriptVar::Type::String)
+    {
+        using ArrayType = ArrayInterface<std::string>;
+        if (var.IsArray())
+            return sol::make_object(lua,  ArrayType(&var.GetArray<std::string>(), var.IsReadOnly()));
         return sol::make_object(lua, var.GetValue<std::string>());
+    }
     else if (type == ScriptVar::Type::Integer)
+    {
+        using ArrayType = ArrayInterface<int>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(&var.GetArray<int>(), var.IsReadOnly()));
         return sol::make_object(lua, var.GetValue<int>());
+    }
     else if (type == ScriptVar::Type::Vec2)
+    {
+        using ArrayType = ArrayInterface<glm::vec2>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(&var.GetArray<glm::vec2>(), var.IsReadOnly()));
         return sol::make_object(lua, var.GetValue<glm::vec2>());
+    }
     else BUG("Unhandled ScriptVar type.");
 }
 
@@ -2013,6 +2151,13 @@ void BindGameLib(sol::state& L)
     auto table = L["game"].get_or_create<sol::table>();
     table["X"] = glm::vec2(1.0f, 0.0f);
     table["Y"] = glm::vec2(0.0f, 1.0f);
+
+    BindArrayInterface<int>(table, "IntArrayInterface");
+    BindArrayInterface<float>(table, "FloatArrayInterface");
+    BindArrayInterface<bool>(table, "BoolArrayInterface");
+    BindArrayInterface<std::string>(table, "StringArrayInterface");
+    BindArrayInterface<glm::vec2>(table, "Vec2ArrayInterface");
+
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"]     = &ClassLibrary::FindEntityClassByName;

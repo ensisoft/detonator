@@ -257,7 +257,7 @@ void DlgEntity::on_btnEditVar_clicked()
     if (const auto* val = mNodeClass.FindScriptVarValueById(value.id))
         value.value = val->value;
 
-    DlgScriptVal dlg(this, value.value);
+    DlgScriptVal dlg(this, value.value, var.IsArray());
     if (dlg.exec() == QDialog::Rejected)
         return;
 
