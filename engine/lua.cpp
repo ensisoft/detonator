@@ -211,7 +211,7 @@ public:
     bool empty() const noexcept
     { return mArray->empty(); }
 
-    T GetItem(unsigned index) const
+    T GetItemFromLua(unsigned index) const
     {
         // lua uses 1 based indexing.
         index = index - 1;
@@ -219,7 +219,7 @@ public:
             throw GameError("ArrayInterface access out of bounds.");
         return (*mArray)[index];
     }
-    void SetItem(unsigned index, const T& item)
+    void SetItemFromLua(unsigned index, const T& item)
     {
         // Lua uses 1 based indexing
         index = index - 1;
@@ -231,6 +231,8 @@ public:
     }
     void PopBack()
     {
+        if (IsReadOnly())
+            throw GameError("Trying to modify read only array.");
         auto& arr = *mArray;
         if (arr.empty())
             return;
@@ -238,20 +240,31 @@ public:
     }
     void PopFront()
     {
+        if (IsReadOnly())
+            throw GameError("Trying to modify read only array.");
         auto& arr = *mArray;
         if (arr.empty())
             return;
         arr.erase(arr.begin());
     }
+    void Clear()
+    {
+        if (IsReadOnly())
+            throw GameError("Trying to modify read only array.");
+        mArray->clear();
+    }
 
     T GetFirst() const
     {
-        return GetItem(1);
+        return GetItemFromLua(1);
     }
     T GetLast() const
     {
-        return GetItem(size());
+        return GetItemFromLua(size());
     }
+
+    T GetItem(unsigned index) const
+    { return base::SafeIndex(*mArray, index); }
 
     bool IsReadOnly() const
     { return mReadOnly; }
@@ -284,18 +297,19 @@ void BindArrayInterface(sol::table& table, const char* name)
     // Going to stick to more C++ like semantics here and say that
     // trying to access an index that doesn't exist is Lua application error.
     auto arr = table.new_usertype<Type>(name,
-        sol::meta_function::index, &Type::GetItem,
-        sol::meta_function::new_index, &Type::SetItem);
+        sol::meta_function::index, &Type::GetItemFromLua,
+        sol::meta_function::new_index, &Type::SetItemFromLua);
     arr["IsEmpty"]    = &Type::empty;
     arr["Size"]       = &Type::size;
     arr["IsReadOnly"] = &Type::IsReadOnly;
-    arr["GetItem"]    = &Type::GetItem;
-    arr["SetItem"]    = &Type::SetItem;
+    arr["GetItem"]    = &Type::GetItemFromLua;
+    arr["SetItem"]    = &Type::SetItemFromLua;
     arr["PopBack"]    = &Type::PopBack;
     arr["PopFront"]   = &Type::PopFront;
     arr["First"]      = &Type::GetFirst;
     arr["Last"]       = &Type::GetLast;
     arr["PushBack"]   = &Type::push_back;
+    arr["Clear"]      = &Type::Clear;
 }
 
 template<typename... Args>
@@ -1625,6 +1639,21 @@ void BindUtil(sol::state& L)
         }
         return str;
     };
+
+    BindArrayInterface<int>(util, "IntArrayInterface");
+    BindArrayInterface<float>(util, "FloatArrayInterface");
+    BindArrayInterface<bool>(util, "BoolArrayInterface");
+    BindArrayInterface<std::string>(util, "StringArrayInterface");
+    BindArrayInterface<glm::vec2>(util, "Vec2ArrayInterface");
+
+    util["Join"] = [](const ArrayInterface<std::string>& array, const std::string& separator) {
+        std::string ret;
+        for (unsigned i=0; i<array.size(); ++i) {
+            ret += array.GetItem(i);
+            ret += separator;
+        }
+        return ret;
+    };
 }
 
 void BindBase(sol::state& L)
@@ -2151,13 +2180,6 @@ void BindGameLib(sol::state& L)
     auto table = L["game"].get_or_create<sol::table>();
     table["X"] = glm::vec2(1.0f, 0.0f);
     table["Y"] = glm::vec2(0.0f, 1.0f);
-
-    BindArrayInterface<int>(table, "IntArrayInterface");
-    BindArrayInterface<float>(table, "FloatArrayInterface");
-    BindArrayInterface<bool>(table, "BoolArrayInterface");
-    BindArrayInterface<std::string>(table, "StringArrayInterface");
-    BindArrayInterface<glm::vec2>(table, "Vec2ArrayInterface");
-
 
     auto classlib = table.new_usertype<ClassLibrary>("ClassLibrary");
     classlib["FindEntityClassByName"]     = &ClassLibrary::FindEntityClassByName;
