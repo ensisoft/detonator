@@ -765,7 +765,7 @@ end
     TEST_REQUIRE(script.GetNextAction(&action));
     const auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
-    TEST_REQUIRE(event->event.from == "entity");
+    TEST_REQUIRE(std::get<std::string>(event->event.from) == "entity");
     TEST_REQUIRE(event->event.message == "begin");
     TEST_REQUIRE(script.HasAction() == false);
 
@@ -783,7 +783,7 @@ end
     TEST_REQUIRE(script.GetNextAction(&action));
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
-    TEST_REQUIRE(event->event.from == "entity");
+    TEST_REQUIRE(std::get<std::string>(event->event.from) == "entity");
     TEST_REQUIRE(event->event.message == "end");
     TEST_REQUIRE(script.HasAction() == false);
 
@@ -805,7 +805,7 @@ end
     TEST_REQUIRE(script.GetNextAction(&action));
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
-    TEST_REQUIRE(event->event.from == "spawned");
+    TEST_REQUIRE(std::get<std::string>(event->event.from) == "spawned");
     TEST_REQUIRE(event->event.message == "begin");
     TEST_REQUIRE(script.HasAction() == false);
 }
@@ -866,7 +866,7 @@ end
     TEST_REQUIRE(script.GetNextAction(&action));
     const auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
-    TEST_REQUIRE(event->event.from == "foo");
+    TEST_REQUIRE(std::get<std::string>(event->event.from) == "foo");
     TEST_REQUIRE(event->event.message == "tick");
     TEST_REQUIRE(script.HasAction() == false);
 
@@ -875,7 +875,7 @@ end
     TEST_REQUIRE(script.GetNextAction(&action));
     event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event);
-    TEST_REQUIRE(event->event.from == "bar");
+    TEST_REQUIRE(std::get<std::string>(event->event.from) == "bar");
     TEST_REQUIRE(event->event.message == "update");
     TEST_REQUIRE(script.HasAction() == false);
 

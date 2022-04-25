@@ -2682,10 +2682,24 @@ void BindGameLib(sol::state& L)
             throw GameError(base::FormatString("No such game event index: %1", key));
         },
         sol::meta_function::new_index, [&L](GameEvent& event, const char* key, sol::object value) {
-            if (!std::strcmp(key, "from"))
-                event.from = value.as<std::string>();
-            else if (!std::strcmp(key, "to"))
-                event.to = value.as<std::string>();
+            if (!std::strcmp(key, "from")) {
+                if (value.is<std::string>())
+                    event.from = value.as<std::string>();
+                else if (value.is<game::Scene*>())
+                    event.from = value.as<game::Scene*>();
+                else if (value.is<game::Entity*>())
+                    event.from = value.as<game::Entity*>();
+                else throw GameError("Unsupported game event from field type.");
+            }
+            else if (!std::strcmp(key, "to")) {
+                if (value.is<std::string>())
+                    event.to = value.as<std::string>();
+                else if (value.is<game::Scene*>())
+                    event.to = value.as<game::Scene*>();
+                else if (value.is<game::Entity*>())
+                    event.to = value.as<game::Entity*>();
+                else throw GameError("Unsupported game event to field type.");
+            }
             else if (!std::strcmp(key, "message"))
                 event.message = value.as<std::string>();
             else if (!std::strcmp(key, "value")) {
@@ -2711,6 +2725,10 @@ void BindGameLib(sol::state& L)
                     event.value = key, value.as<base::FRect>();
                 else if (value.is<base::FPoint>())
                     event.value = value.as<base::FPoint>();
+                else if (value.is<game::Entity*>())
+                    event.value = value.as<game::Entity*>();
+                else if (value.is<game::Scene*>())
+                    event.value = value.as<game::Scene*>();
                 else throw GameError("Unsupported game event value type.");
             } else throw GameError(base::FormatString("No such game event index: %1", key));
         });
