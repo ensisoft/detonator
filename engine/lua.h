@@ -132,6 +132,7 @@ namespace engine
         { return mActionQueue.size(); }
     private:
         sol::environment* GetTypeEnv(const game::EntityClass& klass);
+        sol::object CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args va);
         template<typename KeyEvent>
         void DispatchKeyboardEvent(const std::string& method, const KeyEvent& key);
         void DispatchMouseEvent(const std::string& method, const MouseEvent& mouse);

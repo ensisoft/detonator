@@ -1273,6 +1273,12 @@ void ScriptEngine::BeginPlay(Scene* scene)
     (*mLuaState)["Scene"]    = mScene;
     (*mLuaState)["State"]    = mStateStore;
     (*mLuaState)["Game"]     = this;
+
+    (*mLuaState)["CallMethod"] = [this](sol::object object, const std::string& method,
+                                        sol::variadic_args va) {
+        return this->CallCrossEnvMethod(object, method, va);
+    };
+
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
     table["OS"] = OS_NAME;
     auto engine = table.new_usertype<ScriptEngine>("Engine");
@@ -1517,6 +1523,42 @@ void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEven
             CallLua((*env)[method], entity, mouse);
         }
     }
+}
+
+sol::object ScriptEngine::CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args args)
+{
+    sol::environment* env = nullptr;
+    if (object.is<game::Scene*>())
+    {
+        env = mSceneEnv.get();
+    }
+    else if (object.is<game::Entity*>())
+    {
+        auto* entity = object.as<game::Entity*>();
+        env = GetTypeEnv(entity->GetClass());
+    }
+    else throw GameError("Unsupported object type in Lua method call. Only entity or scene object is supported.");
+
+    if (env == nullptr)
+        throw GameError("Method call target object doesn't have a Lua environment.");
+
+    sol::protected_function func = (*env)[method];
+    if (!func.valid())
+        throw GameError(base::FormatString("No such method ('%1') was found. ", method));
+
+    const auto& result = func(object, args);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        throw GameError(base::FormatString("Method ('%1') call failed. %2", method, err.what()));
+    }
+    // todo: how to return any number of return values ?
+    if (result.return_count() == 1)
+    {
+        sol::object ret = result;
+        return ret;
+    }
+    return sol::make_object(*mLuaState, sol::nil);
 }
 
 sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
