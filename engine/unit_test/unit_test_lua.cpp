@@ -952,6 +952,94 @@ end
 
 }
 
+void unit_test_entity_cross_env_call()
+{
+    // call an entity method inside one entity environment
+    // from another entity environment.
+    base::OverwriteTextFile("entity_env_foo_test.lua", R"(
+function TestFunction(entity, int_val, str_val, flt_val)
+   local event   = game.GameEvent:new()
+
+   event.value   = int_val
+   Game:PostEvent(event)
+
+   event.value = str_val
+   Game:PostEvent(event)
+
+   event.value = flt_val
+   Game:PostEvent(event)
+
+   return glm.vec2:new(45.0, 80.0)
+end
+)");
+    base::OverwriteTextFile("entity_env_bar_test.lua", R"(
+function Tick(entity, game_time, dt)
+    local scene = entity:GetScene()
+    local other = scene:FindEntityByInstanceName('foo')
+    if other == nil then
+       error('nil object')
+    end
+
+    local vec = CallMethod(other, 'TestFunction', 123, 'huhu', 123.5)
+    local event = game.GameEvent:new()
+    event.value = vec
+    Game:PostEvent(event)
+end
+)");
+
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    auto bar = std::make_shared<game::EntityClass>();
+    bar->SetName("bar");
+    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("bar");
+        node.SetEntity(bar);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    game::Scene instance(scene_class);
+
+    TestLoader loader;
+
+    engine::ScriptEngine script(".");
+    script.SetDataLoader(&loader);
+    script.BeginPlay(&instance);
+    script.Tick(0.0, 0.0);
+
+    engine::Action action1;
+    engine::Action action2;
+    engine::Action action3;
+    engine::Action action4;
+    TEST_REQUIRE(script.GetNextAction(&action1));
+    TEST_REQUIRE(script.GetNextAction(&action2));
+    TEST_REQUIRE(script.GetNextAction(&action3));
+    TEST_REQUIRE(script.GetNextAction(&action4));
+
+    const auto* e1 = std::get_if<engine::PostEventAction>(&action1);
+    const auto* e2 = std::get_if<engine::PostEventAction>(&action2);
+    const auto* e3 = std::get_if<engine::PostEventAction>(&action3);
+    const auto* e4 = std::get_if<engine::PostEventAction>(&action4);
+    TEST_REQUIRE(e1 && e2 && e3 && e4);
+    TEST_REQUIRE(std::get<int>(e1->event.value) == 123);
+    TEST_REQUIRE(std::get<std::string>(e2->event.value) == "huhu");
+    TEST_REQUIRE(std::get<float>(e3->event.value) == real::float32(123.5f));
+    TEST_REQUIRE(std::get<glm::vec2>(e4->event.value) == glm::vec2(45.0f, 80.0f));
+}
+
 void unit_test_entity_shared_globals()
 {
     base::OverwriteTextFile("entity_shared_global_test_foo.lua", R"(
@@ -1133,6 +1221,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_begin_end_play();
     unit_test_entity_tick_update();
     unit_test_entity_private_environment();
+    unit_test_entity_cross_env_call();
     unit_test_entity_shared_globals();
     unit_test_game_main_script_load_success();
     unit_test_game_main_script_load_failure();
