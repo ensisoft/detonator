@@ -202,9 +202,9 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     // positions of widgets when they're being contained inside other
     // widgets.
     // The problem however is whether a container will cover non-container
-    // widgets or not. For example if we have a 2 widgets, a button and
+    // widgets or not. For example if we have 2 widgets, a button and
     // a group box, the group box may or may not end up obscuring the button
-    // depending what is their relative order in the children array.
+    // depending on what is their relative order in the children array.
     //
     // A possible way to solve this could be to use a breadth first traversal
     // of the widget tree or use a depth first traversal but with buffering
@@ -213,7 +213,7 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     // sure that the widget on top obscures the widget below from getting
     // the hits.
     //
-    // However for example Qt seems to have similar issue. If one adds a
+    // However, for example Qt seems to have similar issue. If one adds a
     // container widget such as a TabWidget first followed by a button
     // the button can render on top of the container even when not inside
     // the tab widget.
@@ -412,23 +412,23 @@ void Window::IntoJson(data::Writer& data) const
     RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
 
-Window::WidgetAction Window::PollAction(State& state, double time, float dt)
+std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, float dt)
 {
-    Widget* active_widget = nullptr;
-    state.GetValue(mId + "/active-widget", &active_widget);
-    if (!active_widget)
-        return WidgetAction {};
+    std::vector<WidgetAction> actions;
+    for (auto& widget : mWidgets)
+    {
+        const auto& ret = widget->PollAction(state, time, dt);
+        if (ret.type == WidgetActionType::None)
+            continue;
 
-    const auto& ret = active_widget->PollAction(state, time, dt);
-    if (ret.type == WidgetActionType::None)
-        return WidgetAction {};
-
-    WidgetAction action;
-    action.id    = active_widget->GetId();
-    action.name  = active_widget->GetName();
-    action.type  = ret.type;
-    action.value = ret.value;
-    return action;
+        WidgetAction action;
+        action.id    = widget->GetId();
+        action.name  = widget->GetName();
+        action.type  = ret.type;
+        action.value = ret.value;
+        actions.push_back(std::move(action));
+    }
+    return actions;
 }
 
 Window::WidgetAction Window::MousePress(const MouseEvent& mouse, State& state)

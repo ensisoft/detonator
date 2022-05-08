@@ -721,13 +721,11 @@ public:
     virtual void Update(float dt) override
     {
         mPainter.Update(mTime, dt);
-        auto action = mWindow.PollAction(mState, mTime, dt);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mWindow.PollAction(mState, mTime, dt);
+        for (const auto& action : actions)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
-
         }
-
         mTime += dt;
     }
     virtual void Start(engine::ClassLibrary* loader) override

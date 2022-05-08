@@ -22,6 +22,7 @@
 #include <memory>
 #include <optional>
 #include <functional>
+#include <vector>
 
 #include "data/fwd.h"
 #include "base/tree.h"
@@ -264,12 +265,14 @@ namespace uik
         // or not.
         //
 
-        // Poll the currently active widget for an action.
+        // Poll widgets for an action.
         // The widget might generate actions when for example a button
-        // or a key is pressed and held for some duration of time.
+        // or a key is pressed and held for some duration of time or
+        // when a widget API call from the client enqueues an action
+        // that must be dispatched.
         // Time is the current time and dt is the delta time since
         // the last PollAction call.
-        WidgetAction PollAction(State& state, double time, float dt);
+        std::vector<WidgetAction> PollAction(State& state, double time, float dt);
 
         // Dispatch mouse press event.
         WidgetAction MousePress(const MouseEvent& mouse, State& state);
