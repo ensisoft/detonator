@@ -402,14 +402,29 @@ int main(int argc, char* argv[])
             std::fprintf(stderr, "Json parse error. [error='%s']", json_error.c_str());
             return EXIT_FAILURE;
         }
+        const char* mandatory_blocks[] = {
+            "application", "window", "config"
+        };
+        for (const auto* block : mandatory_blocks)
+        {
+            if (!json.contains(block))
+            {
+                std::fprintf(stderr, "Config file is missing mandatory object. [object='%s']", block);
+                return EXIT_FAILURE;
+            }
+        }
+
         bool global_log_debug = true;
         bool global_log_warn  = true;
         bool global_log_info  = true;
         bool global_log_error = true;
-        base::JsonReadSafe(json["logging"], "debug", &global_log_debug);
-        base::JsonReadSafe(json["logging"], "warn",  &global_log_warn);
-        base::JsonReadSafe(json["logging"], "info",  &global_log_info);
-        base::JsonReadSafe(json["logging"], "error", &global_log_error);
+        if (json.contains("logging"))
+        {
+            base::JsonReadSafe(json["logging"], "debug", &global_log_debug);
+            base::JsonReadSafe(json["logging"], "warn", &global_log_warn);
+            base::JsonReadSafe(json["logging"], "info", &global_log_info);
+            base::JsonReadSafe(json["logging"], "error", &global_log_error);
+        }
 
         if (debug_log_override.has_value())
             global_log_debug = debug_log_override.value();
