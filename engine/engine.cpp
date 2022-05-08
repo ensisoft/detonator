@@ -948,9 +948,11 @@ private:
             // any possible "in game debug/system menu" that would be
             // running in real wall time.
             TRACE_CALL("UI::Update", mUIPainter.Update(game_time, dt));
-            const auto& action = ui->PollAction(mUIState, game_time, dt);
-            if (action.type != uik::WidgetActionType::None)
+            const auto& actions = ui->PollAction(mUIState, game_time, dt);
+            for (const auto& action : actions)
+            {
                 mGame->OnUIAction(ui, action);
+            }
         }
 
         mMouseMaterial->Update(dt);

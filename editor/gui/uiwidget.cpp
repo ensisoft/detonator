@@ -699,9 +699,11 @@ void UIWidget::Update(double dt)
         mPlayTime += dt;
         mState.painter->Update(mPlayTime, dt);
         mState.active_window->Update(*mState.active_state, mPlayTime, dt);
-        const auto& action = mState.active_window->PollAction(*mState.active_state, mPlayTime, dt);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->PollAction(*mState.active_state, mPlayTime, dt);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     mCurrentTime += dt;
 }
