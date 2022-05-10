@@ -257,23 +257,24 @@ void unit_test_render_tree()
 
 void unit_test_render_tree_op()
 {
+
+    using MyTree = game::RenderTree<MyNode>;
+    MyNode foo("foo", 123);
+    MyNode bar("bar", 222);
+    MyNode child0("child 0", 1);
+    MyNode child1("child 1", 2);
+    MyNode child2("child 2", 3);
+    MyNode child3("child 3", 3);
+
+    MyTree tree;
+    tree.LinkChild(nullptr, &foo);
+    tree.LinkChild(nullptr, &bar);
+    tree.LinkChild(&foo, &child0);
+    tree.LinkChild(&foo, &child1);
+    tree.LinkChild(&bar, &child2);
+    tree.LinkChild(&bar, &child3);
+
     {
-        using MyTree = game::RenderTree<MyNode>;
-        MyNode foo("foo", 123);
-        MyNode bar("bar", 222);
-        MyNode child0("child 0", 1);
-        MyNode child1("child 1", 2);
-        MyNode child2("child 2", 3);
-        MyNode child3("child 3", 3);
-
-        MyTree tree;
-        tree.LinkChild(nullptr, &foo);
-        tree.LinkChild(nullptr, &bar);
-        tree.LinkChild(&foo, &child0);
-        tree.LinkChild(&foo, &child1);
-        tree.LinkChild(&bar, &child2);
-        tree.LinkChild(&bar, &child3);
-
         std::vector<const MyNode*> path;
         // root to root is just one hop, i.e. root
         TEST_REQUIRE(game::SearchChild<MyNode>(tree, nullptr, nullptr, &path));
@@ -310,6 +311,34 @@ void unit_test_render_tree_op()
 
         path.clear();
         TEST_REQUIRE(game::SearchParent<MyNode>(tree, &child3, &foo, &path) == false);
+    }
+
+    {
+        std::vector<const MyNode*> vec;
+        base::ListChildren<MyNode>(tree, (const MyNode*)nullptr, &vec);
+        TEST_REQUIRE(vec.size() == 2);
+        TEST_REQUIRE(vec[0] == &foo);
+        TEST_REQUIRE(vec[1] == &bar);
+
+        vec.clear();
+        base::ListChildren<MyNode>(tree, &foo, &vec);
+        TEST_REQUIRE(vec.size() == 2);
+        TEST_REQUIRE(vec[0] == &child0);
+        TEST_REQUIRE(vec[1] == &child1);
+
+        vec.clear();
+        base::ListChildren<MyNode>(tree, &child3, &vec);
+        TEST_REQUIRE(vec.size() == 0);
+    }
+
+    {
+        std::vector<const MyNode*> vec;
+        base::ListSiblings<MyNode>(tree,  (const MyNode*)nullptr, &vec);
+        TEST_REQUIRE(vec.size() == 0);
+
+        base::ListSiblings<MyNode>(tree,  &foo, &vec);
+        TEST_REQUIRE(vec.size() == 1);
+        TEST_REQUIRE(vec[0] == &bar);
     }
 }
 
