@@ -27,6 +27,45 @@
 namespace base
 {
 
+template<typename Node>
+void ListChildren(const RenderTree<Node>& tree, const Node* parent, std::vector<const Node*>* result)
+{
+    tree.ForEachChild([&result](const Node* child) {
+        result->push_back(child);
+    }, parent);
+}
+
+template<typename Node>
+void ListChildren(RenderTree<Node>& tree, Node* parent, std::vector<Node*>* result)
+{
+    tree.ForEachChild([&result](Node* child) {
+        result->push_back(child);
+    }, parent);
+}
+
+template<typename Node>
+void ListSiblings(const RenderTree<Node>& tree, const Node* sibling, std::vector<const Node*>* siblings)
+{
+    if (!tree.HasParent(sibling))
+        return;
+    const auto* parent = tree.GetParent(sibling);
+    tree.ForEachChild([&siblings, &sibling](const Node* node) {
+        if (node != sibling)
+            siblings->push_back(node);
+    }, parent);
+}
+template<typename Node>
+void ListSiblings(RenderTree<Node>& tree, Node* sibling, std::vector<Node*>* siblings)
+{
+    if (!tree.HasParent(sibling))
+        return;
+    auto* parent = tree.GetParent(sibling);
+    tree.ForEachChild([&siblings, &sibling](Node* node) {
+        if (node != sibling)
+            siblings->push_back(node);
+    }, parent);
+}
+
 // Search the tree for a route from parent to assumed child node.
 // When node is a descendant of parent returns true. Otherwise,
 // false is returned and there's no path from parent to node.
@@ -171,5 +210,6 @@ void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtre
 template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
 { detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+
 
 } // namespace

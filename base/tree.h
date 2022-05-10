@@ -89,7 +89,7 @@ namespace base
         { ForEachChild<const Element>(std::move(callback), parent); }
 
         template<typename Function>
-        void ForEachChild(Function function, Element* parent = nullptr) const
+        void ForEachChild(Function function, Element* parent = nullptr)
         { ForEachChild<Element>(std::move(function), parent); }
 
         // Convenience operation for moving a child node to a new parent.
@@ -256,7 +256,7 @@ namespace base
                 return;
             const auto& children = it->second;
             for (auto* child : children)
-                callback(child);
+                callback(const_cast<T*>(child));
         }
     private:
         using ChildList = std::vector<const Element*>;
