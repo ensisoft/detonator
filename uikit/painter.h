@@ -113,6 +113,8 @@ namespace uik
         // Draw a checkbox.
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const = 0;
 
+        virtual void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const = 0;
+
         enum class ButtonIcon {
             None, ArrowUp, ArrowDown
         };

@@ -21,6 +21,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/treeop.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "uikit/window.h"
@@ -427,6 +428,34 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
         action.type  = ret.type;
         action.value = ret.value;
         actions.push_back(std::move(action));
+
+        if (ret.type == WidgetActionType::ValueChanged && widget->GetType() == Widget::Type::RadioButton)
+        {
+            // implement radio button exclusivity by finding all sibling radio
+            // buttons under the same parent and then toggling on only the one
+            // that generated the value changed action.
+            std::vector<Widget*> siblings;
+            base::ListSiblings<Widget>(mRenderTree, widget.get(), &siblings);
+            for (auto* widget : siblings)
+            {
+                if (auto* radio_btn = WidgetCast<RadioButton>(widget))
+                {
+                    radio_btn->SetSelected(false);
+                }
+            }
+            const auto* parent = mRenderTree.HasParent(widget.get()) ?
+                                 mRenderTree.GetParent(widget.get()) : nullptr;
+            // generate a radio button selection event on the parent widget.
+            if (parent)
+            {
+                WidgetAction action;
+                action.id    = parent->GetId();
+                action.name  = parent->GetName();
+                action.value = widget->GetName();
+                action.type  = WidgetActionType::RadioButtonSelected;
+                actions.push_back(action);
+            }
+        }
     }
     return actions;
 }

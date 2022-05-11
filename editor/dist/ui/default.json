@@ -202,6 +202,26 @@
     },
 
     {
+      "key": "radiobutton/check-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "radiobutton/check-border",
+      "type": "Color",
+      "color": "Gray"
+    },
+    {
+      "key": "radiobutton/check-mark",
+      "type": "Color",
+      "color": "LightGray"
+    },
+
+    {
       "key": "progress-bar/progress-bar-background",
       "type": "Gradient",
       "color0": "Black",

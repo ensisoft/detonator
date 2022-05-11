@@ -625,6 +625,131 @@ void CheckBoxModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) 
     }
 }
 
+std::size_t RadioButtonModel::GetHash(size_t hash) const
+{
+    hash = base::hash_combine(hash, mText);
+    hash = base::hash_combine(hash, mSelected);
+    hash = base::hash_combine(hash, mCheck);
+    return hash;
+}
+
+void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.focused = paint.focused;
+    p.moused  = paint.moused;
+    p.enabled = paint.enabled;
+    p.rect    = paint.rect;
+    p.clip    = paint.clip;
+    p.time    = paint.time;
+    p.pressed = false;
+    p.klass   = "radiobutton";
+    ps.painter->DrawWidgetBackground(ps.widgetId, p);
+
+    FRect text, check;
+    ComputeLayout(paint.rect, &text, &check);
+
+    p.rect   = check;
+    p.moused = ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
+
+    p.rect = text;
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+
+    p.rect = paint.rect;
+    ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+
+void RadioButtonModel::IntoJson(data::Writer& data) const
+{
+    data.Write("text", mText);
+    data.Write("selected", mSelected);
+    data.Write("check", mCheck);
+}
+bool RadioButtonModel::FromJson(const data::Reader& data)
+{
+    data.Read("text", &mText);
+    data.Read("selected", &mSelected);
+    data.Read("check", &mCheck);
+    return true;
+}
+
+WidgetAction RadioButtonModel::PollAction(const PollStruct& poll)
+{
+    if (!mRequestSelection)
+        return WidgetAction {};
+
+    mRequestSelection = false;
+    mSelected = true;
+
+    WidgetAction action;
+    action.type  = WidgetActionType::ValueChanged;
+    action.value = true;
+    return action;
+}
+
+WidgetAction RadioButtonModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    ms.state->SetValue(ms.widgetId + "/mouse-over-check", check.TestPoint(mouse.window_mouse_pos));
+    return WidgetAction{};
+}
+WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    if (!check.TestPoint(mouse.window_mouse_pos))
+        return WidgetAction {};
+
+    if (!mSelected)
+        mRequestSelection = true;
+
+    return WidgetAction {};
+}
+WidgetAction RadioButtonModel::MouseLeave(const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    return WidgetAction {};
+}
+
+void RadioButtonModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) const
+{
+    const auto width = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    if (width > height && mCheck == Check::Right)
+    {
+        const auto check_size = height;
+        const auto check_x = width - check_size;
+        check->SetWidth(check_size);
+        check->SetHeight(check_size);
+        check->Move(rect.GetPosition());
+        check->Translate(check_x, 0.0f);
+
+        text->SetWidth(width-check_size);
+        text->SetHeight(height);
+        text->Move(rect.GetPosition());
+    }
+    else if (width > height && mCheck == Check::Left)
+    {
+        const auto check_size = height;
+        const auto check_x = 0.0f;
+        const auto text_x  = check_size;
+        check->SetWidth(check_size);
+        check->SetHeight(check_size);
+        check->Move(rect.GetPosition());
+
+        text->SetWidth(width-check_size);
+        text->SetHeight(height);
+        text->Move(rect.GetPosition());
+        text->Translate(text_x, 0.0f);
+    }
+    else
+    {
+        *check = rect;
+    }
+}
+
 std::size_t GroupBoxModel::GetHash(size_t hash) const
 {
     hash = base::hash_combine(hash, mText);
@@ -677,6 +802,8 @@ std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
         return std::make_unique<uik::Slider>();
     else if (type == Widget::Type::ProgressBar)
         return std::make_unique<uik::ProgressBar>();
+    else if (type == Widget::Type::RadioButton)
+        return std::make_unique<uik::RadioButton>();
     else BUG("Unhandled widget type.");
     return nullptr;
 }

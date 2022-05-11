@@ -848,7 +848,7 @@
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>7</number>
           </property>
           <widget class="QWidget" name="spinPage">
            <layout class="QGridLayout" name="gridLayout_4">
@@ -1248,6 +1248,50 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="rbPage">
+           <layout class="QGridLayout" name="gridLayout_10">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Text</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="rbText"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>Check</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="rbPlacement"/>
+            </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="rbSelected">
+              <property name="text">
+               <string>Selected</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>52</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -1439,6 +1483,18 @@
     <string>Place a new background form</string>
    </property>
   </action>
+  <action name="actionNewRadioButton">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>RadioButton</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new radio button</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1502,6 +1558,9 @@
   <tabstop>chkText</tabstop>
   <tabstop>chkPlacement</tabstop>
   <tabstop>chkCheck</tabstop>
+  <tabstop>rbText</tabstop>
+  <tabstop>rbPlacement</tabstop>
+  <tabstop>rbSelected</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
