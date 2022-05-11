@@ -81,6 +81,8 @@ public:
     {}
     void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override
     {}
+    void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const override
+    {}
     void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override
     {}
     virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override

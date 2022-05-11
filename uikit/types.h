@@ -49,6 +49,7 @@ namespace uik
         None,
         ButtonPress,
         ValueChanged,
+        RadioButtonSelected,
         SingleItemSelected
     };
     struct ListItem {

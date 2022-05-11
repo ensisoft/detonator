@@ -2106,6 +2106,7 @@ void BindUIK(sol::state& L)
     widget["AsProgressBar"]  = &WidgetCast<uik::ProgressBar>;
     widget["AsForm"]         = &WidgetCast<uik::Form>;
     widget["AsSlider"]       = &WidgetCast<uik::Slider>;
+    widget["AsRadioButton"]  = &WidgetCast<uik::RadioButton>;
 
     auto form = table.new_usertype<uik::Form>("Form");
     BindWidgetInterface(form);
@@ -2159,6 +2160,13 @@ void BindUIK(sol::state& L)
     BindWidgetInterface(slider);
     slider["SetValue"] = &uik::Slider::SetValue;
     slider["GetValue"] = &uik::Slider::GetValue;
+
+    auto radio = table.new_usertype<uik::RadioButton>("RadioButton");
+    BindWidgetInterface(radio);
+    radio["Select"]     = &uik::RadioButton::Select;
+    radio["IsSelected"] = &uik::RadioButton::IsSelected;
+    radio["GetText"]    = &uik::RadioButton::GetText;
+    radio["SetText"]    = &uik::RadioButton::SetText;
 
     auto window = table.new_usertype<uik::Window>("Window");
     window["GetId"]            = &uik::Window::GetId;

@@ -84,6 +84,7 @@ namespace gui
         void on_actionNewSpinBox_triggered();
         void on_actionNewSlider_triggered();
         void on_actionNewProgressBar_triggered();
+        void on_actionNewRadioButton_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_windowName_textChanged(const QString& text);
@@ -93,6 +94,9 @@ namespace gui
         void on_widgetHeight_valueChanged(double value);
         void on_widgetXPos_valueChanged(double value);
         void on_widgetYPos_valueChanged(double value);
+        void on_rbText_textChanged();
+        void on_rbPlacement_currentIndexChanged(int);
+        void on_rbSelected_stateChanged(int);
         void on_btnText_textChanged();
         void on_lblText_textChanged();
         void on_lblLineHeight_valueChanged(double);

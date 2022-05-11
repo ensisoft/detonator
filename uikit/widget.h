@@ -46,6 +46,9 @@ namespace uik
             Label,
             // Widget is a push button that can be clicked/triggered.
             PushButton,
+            // Widget a a radio button with automatic exclusion between
+            // radio buttons within a container.
+            RadioButton,
             // Widget is a checkbox which has a boolean on/off toggle.
             CheckBox,
             // Groupbox is a container widget for grouping widgets together
@@ -474,6 +477,60 @@ namespace uik
             Check mCheck  = Check::Left;
         };
 
+        class RadioButtonModel
+        {
+        public:
+            // where is the check mark with respect to the
+            // text.
+            enum class Check {
+                // Check mark is on the left, text on the right
+                Left,
+                // Check mark is on the right, text on the left
+                Right
+            };
+            RadioButtonModel()
+              : mText("RadioButton")
+            {}
+            RadioButtonModel(const std::string& text)
+              : mText(text)
+            {}
+
+            void Select()
+            { mRequestSelection = true; }
+            void SetSelected(bool selected)
+            { mSelected = selected; }
+            bool IsSelected() const
+            { return mSelected; }
+            void SetText(const std::string& text)
+            { mText = text; }
+            void SetCheckLocation(Check location)
+            { mCheck = location; }
+            const std::string& GetText() const
+            { return mText; }
+            Check GetCheckLocation() const
+            { return mCheck; }
+
+            std::size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+            inline WidgetAction MouseEnter(const MouseStruct&)
+            { return WidgetAction{}; }
+            inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
+            { return WidgetAction{}; }
+            WidgetAction PollAction(const PollStruct& poll);
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseLeave(const MouseStruct&);
+        private:
+            void ComputeLayout(const FRect& rect, FRect* text, FRect* check) const;
+        private:
+            std::string mText;
+            Check mCheck = Check::Left;
+            bool mSelected = false;
+            bool mRequestSelection = false;
+        };
+
         class GroupBoxModel
         {
         public:
@@ -526,6 +583,13 @@ namespace uik
         {
             static constexpr auto Type = Widget::Type::CheckBox;
             static constexpr auto WantsMouseEvents = true;
+        };
+        template<>
+        struct WidgetModelTraits<RadioButtonModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::RadioButton;
+            static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsPoll = true;
         };
         template<>
         struct WidgetModelTraits<GroupBoxModel> : public WidgetTraits
@@ -762,6 +826,7 @@ namespace uik
     using ProgressBar = detail::BasicWidget<detail::ProgressBarModel>;
     using GroupBox    = detail::BasicWidget<detail::GroupBoxModel>;
     using Form        = detail::BasicWidget<detail::FormModel>;
+    using RadioButton = detail::BasicWidget<detail::RadioButtonModel>;
 
     template<typename T>
     T* WidgetCast(Widget* widget)

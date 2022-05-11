@@ -327,6 +327,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
 
     PopulateUIStyles(mUI.baseStyle);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
+    PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
@@ -409,6 +410,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewSpinBox);
     bar.addAction(mUI.actionNewSlider);
     bar.addAction(mUI.actionNewProgressBar);
+    bar.addAction(mUI.actionNewRadioButton);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -427,6 +429,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewSpinBox);
     menu.addAction(mUI.actionNewSlider);
     menu.addAction(mUI.actionNewProgressBar);
+    menu.addAction(mUI.actionNewRadioButton);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -866,6 +869,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewSpinBox,    false);
     SetEnabled(mUI.actionNewSlider,     false);
     SetEnabled(mUI.actionNewProgressBar, false);
+    SetEnabled(mUI.actionNewRadioButton, false);
     SetEnabled(mUI.actionNewGroupBox,   false);
     SetEnabled(mUI.actionNewForm,       false);
     SetEnabled(mUI.actionNewLabel,      false);
@@ -907,6 +911,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewSpinBox,    true);
     SetEnabled(mUI.actionNewSlider,     true);
     SetEnabled(mUI.actionNewProgressBar, true);
+    SetEnabled(mUI.actionNewRadioButton, true);
     SetEnabled(mUI.cmbGrid,       true);
     SetEnabled(mUI.zoom,          true);
     SetEnabled(mUI.chkSnap,       true);
@@ -998,6 +1003,14 @@ void UIWidget::on_actionNewProgressBar_triggered()
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
 }
 
+void UIWidget::on_actionNewRadioButton_triggered()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    auto widget = std::make_unique<uik::RadioButton>();
+    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
+}
+
 void UIWidget::on_actionNewGroupBox_triggered()
 {
     const auto snap = (bool)GetValue(mUI.chkSnap);
@@ -1071,6 +1084,18 @@ void UIWidget::on_widgetXPos_valueChanged(double value)
     UpdateCurrentWidgetProperties();
 }
 void UIWidget::on_widgetYPos_valueChanged(double value)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_rbText_textChanged()
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_rbPlacement_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_rbSelected_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
@@ -1579,38 +1604,55 @@ void UIWidget::UpdateCurrentWidgetProperties()
         // those UI values are changed.
 
         // set widget data.
-        if (auto* label = dynamic_cast<uik::Label*>(widget))
+        if (auto* label = uik::WidgetCast<uik::Label>(widget))
         {
             label->SetText(GetValue(mUI.lblText));
             label->SetLineHeight(GetValue(mUI.lblLineHeight));
         }
-        else if (auto* pushbtn = dynamic_cast<uik::PushButton*>(widget))
+        else if (auto* pushbtn = uik::WidgetCast<uik::PushButton>(widget))
         {
             pushbtn->SetText(GetValue(mUI.btnText));
         }
-        else if (auto* chkbox = dynamic_cast<uik::CheckBox*>(widget))
+        else if (auto* chkbox = uik::WidgetCast<uik::CheckBox>(widget))
         {
             chkbox->SetText(GetValue(mUI.chkText));
             chkbox->SetChecked(GetValue(mUI.chkCheck));
             chkbox->SetCheckLocation(GetValue(mUI.chkPlacement));
         }
-        else if (auto* slider = dynamic_cast<uik::Slider*>(widget))
+        else if (auto* slider = uik::WidgetCast<uik::Slider>(widget))
         {
             slider->SetValue(GetValue(mUI.sliderVal));
         }
-        else if (auto* spin = dynamic_cast<uik::SpinBox*>(widget))
+        else if (auto* spin = uik::WidgetCast<uik::SpinBox>(widget))
         {
             spin->SetMin(GetValue(mUI.spinMin));
             spin->SetMax(GetValue(mUI.spinMax));
             spin->SetValue(GetValue(mUI.spinVal));
         }
-        else if (auto* prog = dynamic_cast<uik::ProgressBar*>(widget))
+        else if (auto* prog = uik::WidgetCast<uik::ProgressBar>(widget))
         {
             const int val = GetValue(mUI.progVal);
             if (val == -1)
                 prog->ClearValue();
             else prog->SetValue(val / 100.0f);
             prog->SetText(GetValue(mUI.progText));
+        }
+        else if (auto* radio = uik::WidgetCast<uik::RadioButton>(widget))
+        {
+            radio->SetText(GetValue(mUI.rbText));
+            radio->SetCheckLocation(GetValue(mUI.rbPlacement));
+            radio->SetSelected(GetValue(mUI.rbSelected));
+            if (radio->IsSelected())
+            {
+                std::vector<uik::Widget*> siblings;
+                auto& tree = mState.window.GetRenderTree();
+                base::ListSiblings(tree, widget, &siblings);
+                for (auto* sibling : siblings)
+                {
+                    if (auto* radio = uik::WidgetCast<uik::RadioButton>(sibling))
+                        radio->SetSelected(false);
+                }
+            }
         }
     }
 }
@@ -1666,37 +1708,37 @@ void UIWidget::DisplayCurrentWidgetProperties()
         SetValue(mUI.chkWidgetEnabled, widget->TestFlag(uik::Widget::Flags::Enabled));
         SetValue(mUI.chkWidgetVisible, widget->TestFlag(uik::Widget::Flags::VisibleInGame));
 
-        if (const auto* label = dynamic_cast<const uik::Label*>(widget))
+        if (const auto* label = uik::WidgetCast<uik::Label>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.lblPage);
             SetValue(mUI.lblText,       label->GetText());
             SetValue(mUI.lblLineHeight, label->GetLineHeight());
         }
-        else if (const auto* pushbtn = dynamic_cast<const uik::PushButton*>(widget))
+        else if (const auto* button = uik::WidgetCast<uik::PushButton>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.btnPage);
-            SetValue(mUI.btnText, pushbtn->GetText());
+            SetValue(mUI.btnText, button->GetText());
         }
-        else if (const auto* chkbox = dynamic_cast<const uik::CheckBox*>(widget))
+        else if (const auto* chkbox = uik::WidgetCast<uik::CheckBox>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.chkPage);
             SetValue(mUI.chkText,      chkbox->GetText());
             SetValue(mUI.chkPlacement, chkbox->GetCheckLocation());
             SetValue(mUI.chkCheck,     chkbox->IsChecked());
         }
-        else if (const auto* spin = dynamic_cast<const uik::SpinBox*>(widget))
+        else if (const auto* spin = uik::WidgetCast<uik::SpinBox>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.spinPage);
             SetValue(mUI.spinMin, spin->GetMin());
             SetValue(mUI.spinMax, spin->GetMax());
             SetValue(mUI.spinVal, spin->GetValue());
         }
-        else if (const auto* slider = dynamic_cast<const uik::Slider*>(widget))
+        else if (const auto* slider = uik::WidgetCast<uik::Slider>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.sliderPage);
             SetValue(mUI.sliderVal, slider->GetValue());
         }
-        else if (const auto* prog = dynamic_cast<const uik::ProgressBar*>(widget))
+        else if (const auto* prog = uik::WidgetCast<uik::ProgressBar>(widget))
         {
             mUI.stackedWidget->setCurrentWidget(mUI.progPage);
             const auto val = prog->GetValue();
@@ -1704,6 +1746,13 @@ void UIWidget::DisplayCurrentWidgetProperties()
                 SetValue(mUI.progVal, 100 * val.value());
             else SetValue(mUI.progVal, -1);
             SetValue(mUI.progText, prog->GetText());
+        }
+        else if (const auto* radio = uik::WidgetCast<uik::RadioButton>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.rbPage);
+            SetValue(mUI.rbText, radio->GetText());
+            SetValue(mUI.rbPlacement, radio->GetCheckLocation());
+            SetValue(mUI.rbSelected, radio->IsSelected());
         }
         else
         {

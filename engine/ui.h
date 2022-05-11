@@ -490,6 +490,7 @@ namespace engine
         virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
         virtual void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
+        virtual void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const override;
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;

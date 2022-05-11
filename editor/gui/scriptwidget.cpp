@@ -721,6 +721,7 @@ void InitDoc()
     DOC_METHOD_0("uik.ProgressBar", "AsProgressBar", "Cast the widget to ProgressBar.");
     DOC_METHOD_0("uik.Form", "AsForm", "Cast the widget to Form.");
     DOC_METHOD_0("uik.Slider", "AsSlider", "Cast the widget to Slider.");
+    DOC_METHOD_0("uik.RadioButton", "AsRadioButton", "Cast the widget to RadioButton");
     DOC_TABLE("uik.Label");
     DOC_METHOD_0("string", "GetText", "Get the label text.");
     DOC_METHOD_1("void", "SetText", "Set the label text.", "string", "text");
@@ -753,6 +754,12 @@ void InitDoc()
     DOC_TABLE("uik.Slider");
     DOC_METHOD_1("void", "SetValue", "Set the current (normalized) slider value.", "float", "value");
     DOC_METHOD_0("float", "GetValue", "Get the current (normalized) slider value.");
+    DOC_TABLE("uik.RadioButton");
+    DOC_METHOD_0("void", "Select", "Select this radio button in this radio button group.");
+    DOC_METHOD_0("bool", "IsSelected", "Check whether this radio button is currently selected or not");
+    DOC_METHOD_0("string", "GetText", "Get the radio button text.");
+    DOC_METHOD_1("void", "SetText", "Set the radio button text.", "string", "text");
+
     DOC_TABLE("uik.Window");
     DOC_METHOD_0("string", "GetId", "Get the window ID.");
     DOC_METHOD_0("string", "GetName", "Get the window name.");

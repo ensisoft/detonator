@@ -581,6 +581,34 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
     }
 }
 
+void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const
+{
+    if (const auto* material = GetWidgetMaterial(id, ps, "check-background"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Circle);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
+    {
+        const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
+        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Circle);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
+    if (!selected)
+        return;
+
+    if (const auto* material = GetWidgetMaterial(id, ps, "check-mark"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
+        gfx::FRect mark;
+        mark.Move(ps.rect.GetPosition());
+        mark.Resize(ps.rect.GetSize());
+        mark.Grow(-6.0f, -6.0f);
+        mark.Translate(3.0f, 3.0f);
+        FillShape(mark, *material, shape);
+    }
+}
+
 void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const
 {
     if  (const auto* material = GetWidgetMaterial(id, ps, "button-background"))
