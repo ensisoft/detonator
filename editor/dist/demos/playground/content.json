@@ -309,10 +309,13 @@
       "script_file": "QCSIpWak63",
       "vars": [
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "okXYmDrXS3",
           "name": "dragging",
-          "readonly": false,
-          "value": false
+          "readonly": false
         }
       ]
     },
@@ -4036,13 +4039,18 @@
       "script_file": "",
       "vars": [
         {
+          "array": false,
           "id": "1q92zKnzLR",
           "name": "gravity",
           "readonly": true,
-          "value": {
-            "x": 0.0,
-            "y": 10.0
-          }
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 10.0
+              }
+            }
+          ]
         }
       ]
     },
@@ -4640,13 +4648,18 @@
       "script_file": "",
       "vars": [
         {
+          "array": false,
           "id": "iZL98vAl8x",
           "name": "gravity",
           "readonly": true,
-          "value": {
-            "x": 0.0,
-            "y": 10.0
-          }
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 10.0
+              }
+            }
+          ]
         }
       ]
     },

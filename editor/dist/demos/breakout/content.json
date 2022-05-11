@@ -173,16 +173,22 @@
       "script_file": "HRXSPeXFUN",
       "vars": [
         {
+          "array": false,
+          "floats": [
+            0.0
+          ],
           "id": "Sd8W5Swonw",
           "name": "position",
-          "readonly": false,
-          "value": 0.0
+          "readonly": false
         },
         {
+          "array": false,
+          "floats": [
+            0.0
+          ],
           "id": "QRIOhDMMW8",
           "name": "velocity",
-          "readonly": false,
-          "value": 0.0
+          "readonly": false
         }
       ]
     },
@@ -480,22 +486,31 @@
       "script_file": "8xZogKY3K1",
       "vars": [
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "vJBkUv4ab7",
           "name": "demo_ball",
-          "readonly": false,
-          "value": false
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "rmaviKxieZ",
           "name": "contact",
-          "readonly": false,
-          "value": false
+          "readonly": false
         },
         {
+          "array": false,
+          "floats": [
+            10.0
+          ],
           "id": "w2uXtk4g4Z",
           "name": "speed",
-          "readonly": true,
-          "value": 10.0
+          "readonly": true
         }
       ]
     },
@@ -586,10 +601,13 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
+          "bools": [
+            1
+          ],
           "id": "ixZGSIICeW",
           "name": "immortal",
-          "readonly": true,
-          "value": true
+          "readonly": true
         }
       ]
     },
@@ -680,16 +698,22 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
           "id": "BZmL4Gyum0",
+          "ints": [
+            2
+          ],
           "name": "hit_count",
-          "readonly": false,
-          "value": 2
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "py40Ln0bAb",
           "name": "immortal",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -780,16 +804,22 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
           "id": "JIbEPOZkCZ",
+          "ints": [
+            1
+          ],
           "name": "hit_count",
-          "readonly": false,
-          "value": 1
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "bxFqM6Xyxb",
           "name": "immortal",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -880,16 +910,22 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
           "id": "5UG4twU3FH",
+          "ints": [
+            3
+          ],
           "name": "hit_count",
-          "readonly": false,
-          "value": 3
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "vCxEuX7z0Z",
           "name": "immortal",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -980,16 +1016,22 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
           "id": "JGbawtMq25",
+          "ints": [
+            4
+          ],
           "name": "hit_count",
-          "readonly": false,
-          "value": 4
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "u8klgFThAx",
           "name": "immortal",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -1080,16 +1122,22 @@
       "script_file": "viXTDKHRIB",
       "vars": [
         {
+          "array": false,
           "id": "Txs5644Cfr",
+          "ints": [
+            1
+          ],
           "name": "hit_count",
-          "readonly": false,
-          "value": 1
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "yyokeFraaw",
           "name": "immortal",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -17502,8 +17550,10 @@
           },
           "values": [
             {
-              "id": "vJBkUv4ab7",
-              "value": true
+              "bools": [
+                1
+              ],
+              "id": "vJBkUv4ab7"
             }
           ]
         },

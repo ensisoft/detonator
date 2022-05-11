@@ -2788,28 +2788,40 @@
       ],
       "vars": [
         {
+          "array": false,
           "id": "i1H9Y16IyZ",
+          "ints": [
+            0
+          ],
           "name": "coins",
-          "readonly": false,
-          "value": 0
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "7Mk6fLbXqk",
           "name": "died",
-          "readonly": false,
-          "value": false
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            1
+          ],
           "id": "jeHEPWKRvo",
           "name": "can_move_right",
-          "readonly": false,
-          "value": true
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            1
+          ],
           "id": "GFqruXXZiv",
           "name": "can_move_left",
-          "readonly": false,
-          "value": true
+          "readonly": false
         }
       ]
     },
@@ -13686,10 +13698,13 @@
       "script_file": "",
       "vars": [
         {
+          "array": false,
           "id": "rirgM7AvyE",
+          "ints": [
+            123
+          ],
           "name": "foobar",
-          "readonly": true,
-          "value": 123
+          "readonly": true
         }
       ]
     },
