@@ -857,16 +857,22 @@
       "script_file": "4KwMiHn2Zz",
       "vars": [
         {
+          "array": false,
+          "floats": [
+            -500.0
+          ],
           "id": "hFhxI5uRXf",
           "name": "velocity",
-          "readonly": true,
-          "value": -500.0
+          "readonly": true
         },
         {
+          "array": false,
+          "bools": [
+            1
+          ],
           "id": "Gb9JXeOtbb",
           "name": "red",
-          "readonly": true,
-          "value": true
+          "readonly": true
         }
       ]
     },
@@ -1329,19 +1335,27 @@
       ],
       "vars": [
         {
+          "array": false,
           "id": "wAKwhKlI98",
           "name": "velocity",
           "readonly": false,
-          "value": {
-            "x": 200.0,
-            "y": 50.0
-          }
+          "vec2s": [
+            {
+              "object": {
+                "x": 200.0,
+                "y": 50.0
+              }
+            }
+          ]
         },
         {
+          "array": false,
           "id": "Xt8WfHILKd",
+          "ints": [
+            100
+          ],
           "name": "score",
-          "readonly": false,
-          "value": 100
+          "readonly": false
         }
       ]
     },
@@ -1517,10 +1531,13 @@
       "script_file": "bjZ0TrwuxI",
       "vars": [
         {
+          "array": false,
+          "floats": [
+            30.0
+          ],
           "id": "NvQJb17Mlj",
           "name": "radius",
-          "readonly": false,
-          "value": 30.0
+          "readonly": false
         }
       ]
     },
@@ -1732,16 +1749,22 @@
       "script_file": "4KwMiHn2Zz",
       "vars": [
         {
+          "array": false,
+          "floats": [
+            500.0
+          ],
           "id": "CGpy59Lkmy",
           "name": "velocity",
-          "readonly": false,
-          "value": 500.0
+          "readonly": false
         },
         {
+          "array": false,
+          "bools": [
+            0
+          ],
           "id": "LjhZ24Oglo",
           "name": "red",
-          "readonly": true,
-          "value": false
+          "readonly": true
         }
       ]
     },
@@ -5019,10 +5042,13 @@
       "top_boundary": -500.0,
       "vars": [
         {
+          "array": false,
           "id": "7OIIPrIlIQ",
+          "ints": [
+            0
+          ],
           "name": "score",
-          "readonly": false,
-          "value": 0
+          "readonly": false
         }
       ]
     },
