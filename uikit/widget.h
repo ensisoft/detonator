@@ -774,7 +774,7 @@ namespace uik
     const T* WidgetCast(const Widget* widget)
     {
         if (widget->GetType() == T::RuntimeWidgetType)
-            return static_cast<T*>(widget);
+            return static_cast<const T*>(widget);
         return nullptr;
     }
 
