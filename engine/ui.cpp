@@ -743,6 +743,17 @@ bool UIPainter::ParseStyle(const WidgetId& id , const std::string& style)
     return false;
 }
 
+void UIPainter::DeleteMaterialInstances(const std::string& filter)
+{
+    for (auto it = mMaterials.begin(); it != mMaterials.end(); )
+    {
+        const auto& key = it->first;
+        if (base::Contains(key, filter))
+            it = mMaterials.erase(it);
+        else ++it;
+    }
+}
+
 void UIPainter::DeleteMaterialInstanceByKey(const std::string& key)
 {
     auto it = mMaterials.find(key);

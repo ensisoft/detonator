@@ -115,6 +115,8 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
+        void on_btnEditWidgetStyle_clicked();
+        void on_btnResetWidgetStyle_clicked();
         void on_chkWidgetEnabled_stateChanged(int);
         void on_chkWidgetVisible_stateChanged(int);
         void on_tree_customContextMenuRequested(QPoint);
@@ -125,6 +127,7 @@ namespace gui
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
+        void WidgetStyleEdited();
     private:
         void PaintScene(gfx::Painter& painter, double sec);
         void MouseMove(QMouseEvent* mickey);

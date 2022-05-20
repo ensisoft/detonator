@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "base/assert.h"
+#include "base/color4f.h"
 #include "editor/app/format.h"
 
 namespace app
@@ -100,6 +101,11 @@ QString toString(QProcess::ProcessError error)
 QString toString(const audio::Format& format)
 {
     return app::FromUtf8(audio::ToString(format));
+}
+
+QString toString(const base::Color4f& color)
+{
+    return app::FromUtf8(base::ToString(color));
 }
 
 } // app

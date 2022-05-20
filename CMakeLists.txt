@@ -292,6 +292,11 @@ add_executable(GSEditor
     editor/gui/dlgscriptvar.h
     editor/gui/dlgscriptvar.ui
     editor/gui/dlgscriptvar.cpp
+    editor/gui/dlgstyleproperties.h
+    editor/gui/dlgstyleproperties.ui
+    editor/gui/dlgstyleproperties.cpp
+    editor/gui/dlggradient.h
+    editor/gui/dlggradient.ui
     editor/gui/dlgnew.h
     editor/gui/dlgnew.ui
     editor/gui/gfxwidget.h

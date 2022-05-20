@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
-    <height>329</height>
+    <width>368</width>
+    <height>276</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -299,6 +299,9 @@
         <iconset resource="../resource/resource.qrc">
          <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
        </property>
+       <property name="popupMode">
+        <enum>QToolButton::MenuButtonPopup</enum>
+       </property>
        <property name="arrowType">
         <enum>Qt::NoArrow</enum>
        </property>
@@ -366,6 +369,9 @@
        <property name="icon">
         <iconset resource="../resource/resource.qrc">
          <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+       </property>
+       <property name="popupMode">
+        <enum>QToolButton::MenuButtonPopup</enum>
        </property>
        <property name="arrowType">
         <enum>Qt::NoArrow</enum>
