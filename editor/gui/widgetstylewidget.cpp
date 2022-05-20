@@ -23,6 +23,7 @@
 #  include <QFileInfo>
 #  include <QStringList>
 #  include <boost/algorithm/string/erase.hpp>
+#  include <Qt-Color-Widgets/include/ColorDialog>
 #include "warnpop.h"
 
 #include "uikit/widget.h"
@@ -32,6 +33,7 @@
 #include "editor/gui/widgetstylewidget.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgfont.h"
+#include "editor/gui/dlggradient.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -41,6 +43,28 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
     mUI.setupUi(this);
     PopulateFromEnum<engine::UIStyle::VerticalTextAlign>(mUI.widgetTextVAlign);
     PopulateFromEnum<engine::UIStyle::HorizontalTextAlign>(mUI.widgetTextHAlign);
+
+    {
+        QMenu* menu = new QMenu(this);
+        QAction* set_background_material = menu->addAction(QIcon("icons:material.png"), "Material");
+        QAction* set_background_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
+        QAction* set_background_gradient = menu->addAction(QIcon("icons:color_gradient.png"), "Gradient");
+        connect(set_background_material, &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundMaterial);
+        connect(set_background_color,    &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundColor);
+        connect(set_background_gradient, &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundGradient);
+        mUI.btnSelectWidgetBackground->setMenu(menu);
+    }
+
+    {
+        QMenu* menu = new QMenu(this);
+        QAction* set_border_material = menu->addAction(QIcon("icons:material.png"), "Material");
+        QAction* set_border_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
+        QAction* set_border_gradient = menu->addAction(QIcon("icons:color_gradient.png"), "Gradient");
+        connect(set_border_material, &QAction::triggered, this, &WidgetStyleWidget::SetBorderMaterial);
+        connect(set_border_color,    &QAction::triggered, this, &WidgetStyleWidget::SetBorderColor);
+        connect(set_border_gradient, &QAction::triggered, this, &WidgetStyleWidget::SetBorderGradient);
+        mUI.btnSelectWidgetBorder->setMenu(menu);
+    }
 
     PopulateFontNames(mUI.widgetFontName);
     PopulateFontSizes(mUI.widgetFontSize);
@@ -198,22 +222,64 @@ void WidgetStyleWidget::on_btnResetWidgetBorder_clicked()
 }
 void WidgetStyleWidget::on_btnSelectWidgetBackground_clicked()
 {
-    DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBackground));
-    if (dlg.exec() == QDialog::Rejected)
-        return;
 
-    SetValue(mUI.widgetBackground, ListItemId(dlg.GetSelectedMaterialId()));
-    UpdateCurrentWidgetProperties();
 
 }
 void WidgetStyleWidget::on_btnSelectWidgetBorder_clicked()
 {
-    DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBorder));
-    if (dlg.exec() == QDialog::Rejected)
-        return;
 
-    SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));
-    UpdateCurrentWidgetProperties();
+}
+
+void WidgetStyleWidget::SetBackgroundMaterial()
+{
+    if (auto* widget = mWidget)
+    {
+        DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBackground));
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+        SetValue(mUI.widgetBackground, ListItemId(dlg.GetSelectedMaterialId()));
+
+        mStyle->SetMaterial(widget->GetId() + mSelector + "/background",
+            engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
+
+        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + "/background");
+
+        UpdateWidgetStyleString();
+    }
+}
+void WidgetStyleWidget::SetBackgroundColor()
+{
+    SetMaterialColor("/background");
+}
+void WidgetStyleWidget::SetBackgroundGradient()
+{
+    SetMaterialGradient("/background");
+}
+
+void WidgetStyleWidget::SetBorderMaterial()
+{
+    if (auto* widget = mWidget)
+    {
+        DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBorder));
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+        SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));
+
+        mStyle->SetMaterial(widget->GetId() + mSelector + "/border",
+                            engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
+
+        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + "/border");
+
+        UpdateWidgetStyleString();
+    }
+}
+void WidgetStyleWidget::SetBorderColor()
+{
+    SetMaterialColor("/border");
+}
+void WidgetStyleWidget::SetBorderGradient()
+{
+    SetMaterialGradient("/border");
 }
 
 void WidgetStyleWidget::UpdateCurrentWidgetProperties()
@@ -284,32 +350,109 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
             mStyle->DeleteMaterial(id + mSelector + "/background");
         else if (mUI.widgetBackground->currentIndex() == 0)
             mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UINullMaterial());
+        else if (mUI.widgetBackground->currentIndex() == 1)
+            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIColor());
+        else if (mUI.widgetBackground->currentIndex() == 2)
+            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIGradient());
         else mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
         if (mUI.widgetBorder->currentIndex() == -1)
             mStyle->DeleteMaterial(id + mSelector + "/border");
         else if (mUI.widgetBorder->currentIndex() == 0)
             mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UINullMaterial());
+        else if (mUI.widgetBorder->currentIndex() == 1)
+            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIColor());
+        else if (mUI.widgetBorder->currentIndex() == 2)
+            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIGradient());
         else mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         // purge old material instances if any.
         mPainter->DeleteMaterialInstanceByKey(id + mSelector + "/border");
         mPainter->DeleteMaterialInstanceByKey(id + mSelector + "/background");
 
-        // update widget's style string so that it contains the
-        // latest widget style.
+        UpdateWidgetStyleString();
 
-        // gather the style properties for this widget into a single style string
-        // in the styling engine specific format.
-        auto style = mStyle->MakeStyleString(id);
-        // this is a bit of a hack but we know that the style string
-        // contains the widget id for each property. removing the
-        // widget id from the style properties:
-        // a) saves some space
-        // b) makes the style string copyable from one widget to another as-s
-        boost::erase_all(style, id + "/");
-        // set the actual style string.
-        widget->SetStyleString(style);
+        emit StyleEdited();
+    }
+}
+
+void WidgetStyleWidget::UpdateWidgetStyleString()
+{
+    // update widget's style string so that it contains the
+    // latest widget style.
+    const auto& id = mWidget->GetId();
+
+    // gather the style properties for this widget into a single style string
+    // in the styling engine specific format.
+    auto style = mStyle->MakeStyleString(id);
+    // this is a bit of a hack but we know that the style string
+    // contains the widget id for each property. removing the
+    // widget id from the style properties:
+    // a) saves some space
+    // b) makes the style string copyable from one widget to another as-s
+    boost::erase_all(style, id + "/");
+    // set the actual style string.
+    mWidget->SetStyleString(style);
+}
+
+void WidgetStyleWidget::SetMaterialColor(const char* key)
+{
+    if (auto* widget = mWidget)
+    {
+        color_widgets::ColorDialog dlg(this);
+        dlg.setAlphaEnabled(false);
+        dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
+        if (const auto* material = mStyle->GetMaterialType(widget->GetId() + mSelector + key))
+        {
+            if (const auto* p = dynamic_cast<const engine::detail::UIColor*>(material))
+                dlg.setColor(FromGfx(p->GetColor()));
+        }
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        mStyle->SetMaterial(widget->GetId() + mSelector + key,
+                            engine::detail::UIColor(ToGfx(dlg.color())));
+
+        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + key);
+
+        UpdateWidgetStyleString();
+    }
+}
+void WidgetStyleWidget::SetMaterialGradient(const char* key)
+{
+    using Index = engine::detail::UIGradient::ColorIndex;
+
+    if (auto* widget = mWidget)
+    {
+        DlgGradient dlg(this);
+        if (const auto* material = mStyle->GetMaterialType(widget->GetId() + mSelector + key))
+        {
+            if (const auto* p = dynamic_cast<const engine::detail::UIGradient*>(material))
+            {
+                const auto color_top_left = p->GetColor(Index::TopLeft);
+                const auto color_top_right = p->GetColor(Index::TopRight);
+                const auto color_bot_left = p->GetColor(Index::BottomLeft);
+                const auto color_bot_right = p->GetColor(Index::BottomRight);
+
+                dlg.SetColor(FromGfx(color_top_left), 0);
+                dlg.SetColor(FromGfx(color_top_right), 1);
+                dlg.SetColor(FromGfx(color_bot_left), 2);
+                dlg.SetColor(FromGfx(color_bot_right), 3);
+            }
+        }
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        engine::detail::UIGradient gradient;
+        gradient.SetColor(ToGfx(dlg.GetColor(0)), Index::TopLeft);
+        gradient.SetColor(ToGfx(dlg.GetColor(1)), Index::TopRight);
+        gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::BottomLeft);
+        gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::BottomRight);
+        mStyle->SetMaterial(widget->GetId() + mSelector + key, std::move(gradient));
+
+        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + key);
+
+        UpdateWidgetStyleString();
     }
 }
 
@@ -354,15 +497,25 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
 
         if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/background"))
         {
-            if (material->GetType() == engine::UIMaterial::Type::Null)
-                SetValue(mUI.widgetBackground, QString("None"));
+            const auto type = material->GetType();
+            if (type == engine::UIMaterial::Type::Null)
+                SetValue(mUI.widgetBackground, QString("UI_None"));
+            else if (type == engine::UIMaterial::Type::Color)
+                SetValue(mUI.widgetBackground, QString("UI_Color"));
+            else if (type == engine::UIMaterial::Type::Gradient)
+                SetValue(mUI.widgetBackground, QString("UI_Gradient"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBackground, ListItemId(p->GetMaterialId()));
         }
         if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/border"))
         {
-            if (material->GetType() == engine::UIMaterial::Type::Null)
-                SetValue(mUI.widgetBorder, QString("None"));
+            const auto type = material->GetType();
+            if (type == engine::UIMaterial::Type::Null)
+                SetValue(mUI.widgetBorder, QString("UI_None"));
+            else if (type == engine::UIMaterial::Type::Color)
+                SetValue(mUI.widgetBorder, QString("UI_Color"));
+            else if (type == engine::UIMaterial::Type::Gradient)
+                SetValue(mUI.widgetBorder, QString("UI_Gradient"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBorder, ListItemId(p->GetMaterialId()));
         }

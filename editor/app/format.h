@@ -36,6 +36,7 @@
 #include <type_traits>
 
 #include "audio/format.h"
+#include "base/format.h"
 #include "editor/app/utility.h"
 
 namespace app
@@ -45,6 +46,7 @@ namespace app
     QString toString(QProcess::ProcessState state);
     QString toString(QProcess::ProcessError error);
     QString toString(const audio::Format& format);
+    QString toString(const base::Color4f& color);
 
     inline QString toString(const std::string& s)
     { return FromUtf8(s); }

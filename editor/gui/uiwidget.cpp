@@ -51,6 +51,44 @@
 #include "editor/gui/tool.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgstyleproperties.h"
+
+namespace {
+std::vector<app::ListItem> ListMaterials(const app::Workspace* workspace)
+{
+    std::vector<app::ListItem> materials;
+    for (size_t i=0; i<workspace->GetNumResources(); ++i)
+    {
+        const auto& resource = workspace->GetResource(i);
+        if (!resource.IsMaterial())
+            continue;
+        app::ListItem item;
+        item.name = resource.GetName();
+        item.id   = resource.GetId();
+        materials.push_back(std::move(item));
+    }
+    std::sort(materials.begin(), materials.end(), [](const auto& a, const auto& b) {
+        return a.name < b.name;
+    });
+
+    // little special case in order to be able to have "default", "nothing" and material reference
+    // all available in the same UI element.
+    app::ListItem item;
+
+    item.name = "UI_Gradient";
+    item.id   = "_ui_gradient";
+    materials.insert(materials.begin(), item);
+
+    item.name = "UI_Color";
+    item.id   = "_ui_color";
+    materials.insert(materials.begin(), item);
+
+    item.name = "UI_None";
+    item.id   = "_ui_none";
+    materials.insert(materials.begin(), item);
+    return materials;
+}
+} // namespace
 
 namespace gui
 {
@@ -308,6 +346,12 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::NewResourceAvailable, this, &UIWidget::NewResourceAvailable);
     connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &UIWidget::ResourceToBeDeleted);
     connect(workspace, &app::Workspace::ResourceUpdated,      this, &UIWidget::ResourceUpdated);
+
+    connect(mUI.widgetNormal,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
+    connect(mUI.widgetDisabled, &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
+    connect(mUI.widgetFocused,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
+    connect(mUI.widgetMoused,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
+    connect(mUI.widgetPressed,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
 
     uik::Form form;
     form.SetSize(1024, 768);
@@ -1210,6 +1254,66 @@ void UIWidget::on_btnResetTransform_clicked()
     mUI.rotation->setValue(0);
 }
 
+void UIWidget::on_btnEditWidgetStyle_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        // copy the current style string and use the copy
+        // to restore the style if the dialog is cancelled.
+        std::string style_string = widget->GetStyleString();
+
+        DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace, widget->GetId());
+        dlg.SetPainter(mState.painter.get());
+        dlg.SetMaterials(ListMaterials(mState.workspace));
+        if (dlg.exec() == QDialog::Rejected)
+        {
+            // delete all properties including both changes we want to discard
+            // *and* properties we want to keep (that are in the old style string)
+            mState.style->DeleteMaterials(widget->GetId());
+            mState.style->DeleteProperties(widget->GetId());
+            mState.painter->DeleteMaterialInstances(widget->GetId());
+
+            // restore properties from the old style string.
+            if (!style_string.empty())
+                mState.style->ParseStyleString(widget->GetId(), style_string);
+
+            // restore old style string.
+            widget->SetStyleString(std::move(style_string));
+            return;
+        }
+
+        // update widget's style string so that it contains the
+        // latest widget style.
+
+        // gather the style properties for this widget into a single style string
+        // in the styling engine specific format.
+        style_string = mState.style->MakeStyleString(widget->GetId());
+        // this is a bit of a hack but we know that the style string
+        // contains the widget id for each property. removing the
+        // widget id from the style properties:
+        // a) saves some space
+        // b) makes the style string copyable from one widget to another as-s
+        const auto id = widget->GetId();
+        boost::erase_all(style_string, id + "/");
+        // set the actual style string.
+        widget->SetStyleString(std::move(style_string));
+
+        DisplayCurrentWidgetProperties();
+    }
+}
+void UIWidget::on_btnResetWidgetStyle_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        widget->SetStyleString("");
+        mState.style->DeleteMaterials(widget->GetId());
+        mState.style->DeleteProperties(widget->GetId());
+        mState.painter->DeleteMaterialInstances(widget->GetId());
+
+        DisplayCurrentWidgetProperties();
+    }
+}
+
 void UIWidget::on_chkWidgetEnabled_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
@@ -1302,6 +1406,14 @@ void UIWidget::ResourceUpdated(const app::Resource* resource)
     RebuildCombos();
     DisplayCurrentWidgetProperties();
     mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
+}
+
+void UIWidget::WidgetStyleEdited()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        SetValue(mUI.widgetStyleString, widget->GetStyleString());
+    }
 }
 
 void UIWidget::PaintScene(gfx::Painter& painter, double sec)
@@ -1679,6 +1791,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
 {
     SetValue(mUI.widgetId, QString(""));
     SetValue(mUI.widgetName, QString(""));
+    SetValue(mUI.widgetStyleString, QString(""));
     SetValue(mUI.widgetWidth, 0.0f);
     SetValue(mUI.widgetHeight, 0.0f);
     SetValue(mUI.widgetXPos, 0.0f);
@@ -1701,6 +1814,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         const auto& pos = widget->GetPosition();
         SetValue(mUI.widgetId , widget->GetId());
         SetValue(mUI.widgetName , widget->GetName());
+        SetValue(mUI.widgetStyleString, widget->GetStyleString());
         SetValue(mUI.widgetWidth , size.GetWidth());
         SetValue(mUI.widgetHeight , size.GetHeight());
         SetValue(mUI.widgetXPos , pos.GetX());
@@ -1790,28 +1904,7 @@ void UIWidget::DisplayCurrentCameraLocation()
 
 void UIWidget::RebuildCombos()
 {
-    std::vector<ListItem> materials;
-    for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
-    {
-        const auto& resource = mState.workspace->GetResource(i);
-        if (!resource.IsMaterial())
-            continue;
-        ListItem item;
-        item.name = resource.GetName();
-        item.id   = resource.GetId();
-        materials.push_back(std::move(item));
-    }
-    std::sort(materials.begin(), materials.end(), [](const auto& a, const auto& b) {
-                  return a.name < b.name;
-              });
-
-    // little special case in order to be able to have "default", "nothing" and material reference
-    // all available in the same UI element.
-    ListItem item;
-    item.name = "None";
-    item.id   = "_none";
-    materials.insert(materials.begin(), std::move(item));
-
+    const auto& materials = ListMaterials(mState.workspace);
     mUI.widgetNormal->RebuildMaterialCombos(materials);
     mUI.widgetDisabled->RebuildMaterialCombos(materials);
     mUI.widgetFocused->RebuildMaterialCombos(materials);

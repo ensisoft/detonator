@@ -502,6 +502,8 @@ namespace engine
 
         // Delete all material instances.
         void DeleteMaterialInstances();
+        // Delete material instances that match the filter string.
+        void DeleteMaterialInstances(const std::string& filter);
         // Delete a specific material instance identified by the property key.
         // I.e. id + "/" + "property name". Example as1243sad/background
         void DeleteMaterialInstanceByKey(const std::string& key);

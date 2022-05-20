@@ -41,7 +41,6 @@ namespace engine {
 
 namespace gui
 {
-
     class WidgetStyleWidget : public QWidget
     {
         Q_OBJECT
@@ -62,6 +61,9 @@ namespace gui
         void RebuildMaterialCombos(const std::vector<app::ListItem>& list);
 
         bool IsUnderEdit() const;
+
+    signals:
+        void StyleEdited();
 
     private slots:
         void on_widgetFontName_currentIndexChanged(int);
@@ -85,8 +87,19 @@ namespace gui
         void on_btnResetWidgetTextColor_clicked();
         void on_btnSelectWidgetBackground_clicked();
         void on_btnSelectWidgetBorder_clicked();
+
+        void SetBackgroundMaterial();
+        void SetBackgroundColor();
+        void SetBackgroundGradient();
+
+        void SetBorderMaterial();
+        void SetBorderColor();
+        void SetBorderGradient();
     private:
         void UpdateCurrentWidgetProperties();
+        void UpdateWidgetStyleString();
+        void SetMaterialColor(const char* key);
+        void SetMaterialGradient(const char* key);
     private:
         Ui::Style mUI;
     private:
