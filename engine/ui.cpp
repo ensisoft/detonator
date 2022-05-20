@@ -340,6 +340,10 @@ std::string UIStyle::MakeStyleString(const std::string& filter) const
         mat->IntoJson(material);
         json["materials"].push_back(std::move(material));
     }
+    // if JSON object is "empty" then explicitly return an empty string
+    // calling dump on an empty json object returns "null" string.
+    if (json.empty())
+        return "";
     return json.dump();
 }
 
