@@ -132,7 +132,8 @@ Window::Window(const Window& other)
 {
     mId    = other.mId;
     mName  = other.mName;
-    mStyle = other.mStyle;
+    mStyleFile = other.mStyleFile;
+    mStyleString = other.mStyleString;
 
     std::unordered_map<const Widget*, const Widget*> map;
 
@@ -317,6 +318,9 @@ void Window::Update(State& state, double time, float dt)
 
 void Window::Style(Painter& painter) const
 {
+    if (!mStyleString.empty())
+        painter.ParseStyle("window", mStyleString);
+
     for (const auto& widget : mWidgets)
     {
         const auto& style = widget->GetStyleString();
@@ -409,7 +413,8 @@ void Window::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
     data.Write("name", mName);
-    data.Write("style", mStyle);
+    data.Write("style_file", mStyleFile);
+    data.Write("style_string", mStyleString);
     RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
 
@@ -491,7 +496,8 @@ size_t Window::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mStyle);
+    hash = base::hash_combine(hash, mStyleFile);
+    hash = base::hash_combine(hash, mStyleString);
     mRenderTree.PreOrderTraverseForEach([&hash](const Widget* widget) {
         if (widget == nullptr)
             return;
@@ -508,7 +514,8 @@ Window& Window::operator=(const Window& other)
     Window copy(other);
     std::swap(mId,    copy.mId);
     std::swap(mName,  copy.mName);
-    std::swap(mStyle, copy.mStyle);
+    std::swap(mStyleFile, copy.mStyleFile);
+    std::swap(mStyleString, copy.mStyleString);
     std::swap(mWidgets, copy.mWidgets);
     std::swap(mRenderTree, copy.mRenderTree);
     return *this;
@@ -518,10 +525,11 @@ Window& Window::operator=(const Window& other)
 std::optional<Window> Window::FromJson(const data::Reader& data)
 {
     Window ret;
-    if (!data.Read("id",   &ret.mId) ||
-        !data.Read("name", &ret.mName) ||
-        !data.Read("style", &ret.mStyle))
-        return std::nullopt;
+    data.Read("id",   &ret.mId);
+    data.Read("name", &ret.mName);
+    if (!data.Read("style_file", &ret.mStyleFile))
+        data.Read("style", &ret.mStyleFile); // old version before style_string and style_file
+    data.Read("style_string", &ret.mStyleString);
 
     if (!data.GetNumChunks("widgets"))
         return ret;
