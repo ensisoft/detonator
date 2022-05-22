@@ -1157,6 +1157,7 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(d.mkpath("ui"));
     TEST_REQUIRE(d.mkpath("fonts"));
     TEST_REQUIRE(app::WriteTextFile("fonts/widget_font.otf", "widget_font.otf"));
+    TEST_REQUIRE(app::WriteTextFile("fonts/window_font.otf", "window_font.otf"));
     TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
 
     MakeDir("TestWorkspace");
@@ -1175,10 +1176,12 @@ void unit_test_packing_ui_style_resources()
 
         engine::UIStyle style;
         style.SetProperty(label.GetId() + "/text-font", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
+        style.SetProperty("window/radiobutton/text-font", workspace.MapFileToWorkspace(std::string("fonts/window_font.otf")));
         label.SetStyleString(style.MakeStyleString(label.GetId()));
 
         uik::Window window;
         window.SetStyleName(workspace.MapFileToWorkspace(std::string("ui/style.json")));
+        window.SetStyleString(style.MakeStyleString("window"));
         window.AddWidget(std::move(label));
         app::UIResource ui_resource(window, "UI");
         workspace.SaveResource(ui_resource);
@@ -1201,6 +1204,7 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
     // UI Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/widget_font.otf") == "widget_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/window_font.otf") == "window_font.otf");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/style_font.otf") == "style_font.otf");
 }
 

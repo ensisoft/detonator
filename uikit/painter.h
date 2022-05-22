@@ -126,11 +126,14 @@ namespace uik
 
         // todo: more sub widget draw ops.
 
-        // Parse the style string associated with a widget. The painter can use
-        // this information to realize widget specific styling and property attributes.
+        // Parse a style string that can be used to convey painter specific styling
+        // data and properties such as colors, font sizes, font names etc. The
+        // tag value is used to indicate the source of the styling data and in case
+        // of a widget's inline style information is set to the widget ID and for
+        // window's inline style information is set to a string "window".
         // Should return true if styling was successfully parsed and understood or
         // false to indicate an error.
-        virtual bool ParseStyle(const WidgetId& id, const std::string& style) = 0;
+        virtual bool ParseStyle(const std::string& tag, const std::string& style) = 0;
     private:
     };
 

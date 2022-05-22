@@ -147,7 +147,7 @@ private:
             {
                 const auto type = material->GetType();
                 if (type == engine::UIMaterial::Type::Null)
-                    return "UI_Null";
+                    return "UI_None";
                 else if (type == engine::UIMaterial::Type::Color)
                     return "UI_Color";
                 else if (type == engine::UIMaterial::Type::Gradient)
@@ -207,6 +207,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     PopulateFromEnum<engine::UIStyle::WidgetShape>(mUI.widgetShape);
     PopulateFontNames(mUI.widgetFontName);
     PopulateFontSizes(mUI.widgetFontSize);
+    SetVisible(mUI.lblWidgetClass, false);
+    SetVisible(mUI.cmbWidgetClass, false);
     SetVisible(mUI.widgetFontName, false);
     SetVisible(mUI.btnOpenFontFile, false);
     SetVisible(mUI.btnSelectFont, false);
@@ -221,6 +223,13 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     SetVisible(mUI.widgetMaterial, false);
     SetEnabled(mUI.btnResetProperty, false);
     SetEnabled(mUI.cmbSelector, false);
+
+    if (mIdentifier.empty())
+    {
+        SetVisible(mUI.lblWidgetClass, true);
+        SetVisible(mUI.cmbWidgetClass, true);
+        mIdentifier = "window/checkbox";
+    }
 
     QMenu* menu = new QMenu(this);
     QAction* set_material = menu->addAction(QIcon("icons:material.png"), "Material");
@@ -274,7 +283,6 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"progress-bar-fill",             PropertyType::Material},
         {"progress-bar-fill-shape",       PropertyType::Shape},
         {"progress-bar-border",           PropertyType::Material},
-        {"progress-bar-background-shape", PropertyType::Shape},
         {"progress-bar-border-width",     PropertyType::Float}
     };
     std::sort(props.begin(), props.end(), [](const auto& lhs, const auto& rhs) {
@@ -561,6 +569,13 @@ void DlgWidgetStyleProperties::on_btnResetProperty_clicked()
     ShowPropertyValue();
 }
 
+void DlgWidgetStyleProperties::on_cmbWidgetClass_currentIndexChanged(int)
+{
+    const std::string& klass = GetValue(mUI.cmbWidgetClass);
+    mIdentifier = "window/" + klass,
+    mModel->SetIdentifier(mIdentifier);
+}
+
 void DlgWidgetStyleProperties::on_cmbSelector_currentIndexChanged(int)
 {
     ShowPropertyValue();
@@ -631,6 +646,8 @@ void DlgWidgetStyleProperties::SetWidgetMaterial()
     mStyle->SetMaterial(property_key, engine::detail::UIMaterialReference(GetItemId(mUI.widgetMaterial)));
     mPainter->DeleteMaterialInstanceByKey(property_key);
     mModel->UpdateRow(row);
+
+    ShowPropertyValue();
 }
 void DlgWidgetStyleProperties::SetWidgetColor()
 {
@@ -659,6 +676,8 @@ void DlgWidgetStyleProperties::SetWidgetColor()
     mStyle->SetMaterial(property_key, engine::detail::UIColor(ToGfx(dlg.color())));
     mPainter->DeleteMaterialInstanceByKey(property_key);
     mModel->UpdateRow(row);
+
+    ShowPropertyValue();
 }
 void DlgWidgetStyleProperties::SetWidgetGradient()
 {
@@ -702,6 +721,8 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
     mPainter->DeleteMaterialInstanceByKey(property_key);
 
     mModel->UpdateRow(row);
+
+    ShowPropertyValue();
 }
 
 } // namespace

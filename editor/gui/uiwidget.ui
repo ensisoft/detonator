@@ -28,6 +28,29 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="windowName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
@@ -48,27 +71,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="windowName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QComboBox" name="baseStyle">
+             <widget class="QComboBox" name="windowStyleFile">
               <property name="editable">
                <bool>true</bool>
               </property>
@@ -116,16 +122,77 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_23">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Name</string>
+             <string>ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLineEdit" name="windowStyleString">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="placeholderText">
+               <string>No style set</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnEditWindowStyle">
+              <property name="toolTip">
+               <string>Edit widget's style properties</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/style_edit.png</normaloff>:/16x16_ico_png/style_edit.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnResetWindowStyle">
+              <property name="toolTip">
+               <string>Reset widget style to nothing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Style string</string>
             </property>
            </widget>
           </item>
@@ -1592,9 +1659,12 @@
  <tabstops>
   <tabstop>windowName</tabstop>
   <tabstop>windowID</tabstop>
-  <tabstop>baseStyle</tabstop>
+  <tabstop>windowStyleFile</tabstop>
   <tabstop>btnReloadStyle</tabstop>
   <tabstop>btnSelectStyle</tabstop>
+  <tabstop>windowStyleString</tabstop>
+  <tabstop>btnEditWindowStyle</tabstop>
+  <tabstop>btnResetWindowStyle</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>

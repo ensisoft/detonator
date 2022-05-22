@@ -299,12 +299,18 @@ namespace uik
         void SetName(std::string&& name)
         { mName = std::move(name); }
         void SetStyleName(const std::string& style)
-        { mStyle = style; }
+        { mStyleFile = style; }
+        void SetStyleString(const std::string& style)
+        { mStyleString = style; }
+        void ResetStyleString()
+        { mStyleString.clear(); }
 
         // Getters.
         std::size_t GetHash() const;
         std::string GetStyleName() const
-        { return mStyle; }
+        { return mStyleFile; }
+        std::string GetStyleString() const
+        { return mStyleString; }
         std::size_t GetNumWidgets() const
         { return mWidgets.size(); }
         std::string GetId() const
@@ -347,7 +353,8 @@ namespace uik
     private:
         std::string mId;
         std::string mName;
-        std::string mStyle;
+        std::string mStyleFile;
+        std::string mStyleString;
         std::vector<std::unique_ptr<Widget>> mWidgets;
         RenderTree mRenderTree;
     };

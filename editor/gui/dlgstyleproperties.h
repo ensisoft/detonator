@@ -68,6 +68,7 @@ namespace gui
         void on_btnOpenFontFile_clicked();
         void on_btnSelectFont_clicked();
         void on_btnResetProperty_clicked();
+        void on_cmbWidgetClass_currentIndexChanged(int);
         void on_cmbSelector_currentIndexChanged(int);
         void on_widgetFontName_currentIndexChanged(int);
         void on_widgetFontSize_currentIndexChanged(int);

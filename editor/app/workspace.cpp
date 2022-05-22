@@ -2303,6 +2303,35 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                 DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
                 widget->SetStyleString(std::move(style_string));
             });
+            auto window_style_string = window->GetStyleString();
+            if (!window_style_string.empty())
+            {
+                DEBUG("Original window style string. [window='%1', style='%2']", window->GetName(), window_style_string);
+                style.ClearProperties();
+                style.ClearMaterials();
+                style.ParseStyleString("window", window_style_string);
+                std::vector<engine::UIStyle::PropertyKeyValue> props;
+                style.GatherProperties("-font", &props);
+                for (auto& p : props)
+                {
+                    std::string src_font_uri;
+                    std::string dst_font_uri;
+                    p.prop.GetValue(&src_font_uri);
+                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+                    p.prop.SetValue(dst_font_uri);
+                    style.SetProperty(p.key, p.prop);
+                }
+                window_style_string = style.MakeStyleString("window");
+                // this is a bit of a hack but we know that the style string
+                // contains the prefix "window" for each property. removing the
+                // prefix from the style properties:
+                // a) saves some space
+                // b) makes the style string copyable from one widget to another as-s
+                boost::erase_all(window_style_string, "window/");
+                // set the actual style string.
+                DEBUG("Updated window style string. [window='%1', style='%2']", window->GetName(), window_style_string);
+                window->SetStyleString(std::move(window_style_string));
+            }
         }
         else if (resource->IsEntity())
         {

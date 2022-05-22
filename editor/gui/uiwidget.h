@@ -88,7 +88,7 @@ namespace gui
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_windowName_textChanged(const QString& text);
-        void on_baseStyle_currentIndexChanged(int);
+        void on_windowStyleFile_currentIndexChanged(int);
         void on_widgetName_textChanged(const QString& text);
         void on_widgetWidth_valueChanged(double value);
         void on_widgetHeight_valueChanged(double value);
@@ -117,6 +117,8 @@ namespace gui
         void on_btnResetTransform_clicked();
         void on_btnEditWidgetStyle_clicked();
         void on_btnResetWidgetStyle_clicked();
+        void on_btnEditWindowStyle_clicked();
+        void on_btnResetWindowStyle_clicked();
         void on_chkWidgetEnabled_stateChanged(int);
         void on_chkWidgetVisible_stateChanged(int);
         void on_tree_customContextMenuRequested(QPoint);

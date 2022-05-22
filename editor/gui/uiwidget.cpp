@@ -369,13 +369,14 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
 
     LoadStyleQuiet("app://ui/default.json");
 
-    PopulateUIStyles(mUI.baseStyle);
+    PopulateUIStyles(mUI.windowStyleFile);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
-    SetValue(mUI.baseStyle, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
@@ -413,7 +414,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
 
     SetValue(mUI.windowName, window->GetName());
     SetValue(mUI.windowID, window->GetId());
-    SetValue(mUI.baseStyle, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleFile, window->GetStyleName());
+    SetValue(mUI.windowStyleString, window->GetStyleString());
     setWindowTitle(GetValue(mUI.windowName));
 
     UpdateDeletedResourceReferences();
@@ -532,7 +534,8 @@ bool UIWidget::LoadState(const Settings& settings)
 
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
-    SetValue(mUI.baseStyle, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     setWindowTitle(GetValue(mUI.windowName));
 
     DisplayCurrentCameraLocation();
@@ -796,6 +799,9 @@ void UIWidget::Undo()
     mUndoStack.pop_back();
 
     DisplayCurrentWidgetProperties();
+    SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     NOTE("Undo!");
 }
 
@@ -1096,12 +1102,12 @@ void UIWidget::on_windowName_textChanged(const QString& text)
     mState.window.SetName(app::ToUtf8(text));
 }
 
-void UIWidget::on_baseStyle_currentIndexChanged(int)
+void UIWidget::on_windowStyleFile_currentIndexChanged(int)
 {
     const auto& name = mState.window.GetStyleName();
 
-    if (!LoadStyleVerbose(GetValue(mUI.baseStyle)))
-        SetValue(mUI.baseStyle, name);
+    if (!LoadStyleVerbose(GetValue(mUI.windowStyleFile)))
+        SetValue(mUI.windowStyleFile, name);
 }
 
 void UIWidget::on_widgetName_textChanged(const QString& text)
@@ -1218,7 +1224,7 @@ void UIWidget::on_btnSelectStyle_clicked()
         return;
     const auto& name = mState.workspace->MapFileToWorkspace(file);
     if (LoadStyleVerbose(name))
-        SetValue(mUI.baseStyle, name);
+        SetValue(mUI.windowStyleFile, name);
 }
 
 void UIWidget::on_btnViewPlus90_clicked()
@@ -1312,6 +1318,56 @@ void UIWidget::on_btnResetWidgetStyle_clicked()
 
         DisplayCurrentWidgetProperties();
     }
+}
+
+void UIWidget::on_btnEditWindowStyle_clicked()
+{
+    std::string style_string = mState.window.GetStyleString();
+
+    DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace, "");
+    dlg.SetPainter(mState.painter.get());
+    dlg.SetMaterials(ListMaterials(mState.workspace));
+    if (dlg.exec() == QDialog::Rejected)
+    {
+        // delete all properties including both changes we want to discard
+        // *and* properties we want to keep (that are in the old style string)
+        mState.style->DeleteMaterials("window");
+        mState.style->DeleteProperties("window");
+        mState.painter->DeleteMaterialInstances("window");
+
+        // restore properties from the old style string.
+        if (!style_string.empty())
+            mState.style->ParseStyleString("window", style_string);
+
+        // restore old style string.
+        mState.window.SetStyleString(std::move(style_string));
+        return;
+    }
+
+    // gather the style properties for this widget into a single style string
+    // in the styling engine specific format.
+    style_string = mState.style->MakeStyleString("window");
+
+    SetValue(mUI.windowStyleString, style_string);
+
+    // this is a bit of a hack but we know that the style string
+    // contains the prefix "window" for each property. removing the
+    // prefix from the style properties:
+    // a) saves some space
+    // b) makes the style string copyable from one widget to another as-s
+    boost::erase_all(style_string, "window/");
+    // set the actual style string.
+    mState.window.SetStyleString(std::move(style_string));
+}
+
+void UIWidget::on_btnResetWindowStyle_clicked()
+{
+    mState.window.ResetStyleString();
+    mState.style->DeleteMaterials("window");
+    mState.style->DeleteProperties("window");
+    mState.painter->DeleteMaterialInstances("window");
+
+    SetValue(mUI.windowStyleString, QString(""));
 }
 
 void UIWidget::on_chkWidgetEnabled_stateChanged(int)

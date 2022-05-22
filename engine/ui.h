@@ -392,7 +392,7 @@ namespace engine
 
         std::optional<MaterialClass> GetMaterial(const std::string& key) const;
         UIProperty GetProperty(const std::string& key) const;
-        bool ParseStyleString(const WidgetId& id, const std::string& style);
+        bool ParseStyleString(const std::string& tag, const std::string& style);
 
         // Set the class library loader. This is needed when a style references a material
         // that needs to be loaded through the class library.
@@ -494,7 +494,7 @@ namespace engine
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
-        virtual bool ParseStyle(const WidgetId& id, const std::string& style) override;
+        virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
 
         // About deleting material instances.
         // This is mostly useful when designing the UI in the editor and changes
@@ -554,7 +554,7 @@ namespace engine
 
         // material instances.
         mutable std::unordered_map<std::string,
-                std::unique_ptr<gfx::Material>> mMaterials;
+                    std::unique_ptr<gfx::Material>> mMaterials;
         // failed properties. use this to avoid spamming
         // the log with properties that are failing on every
         // single iteration of paint.

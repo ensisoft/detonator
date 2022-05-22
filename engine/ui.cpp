@@ -170,13 +170,12 @@ UIProperty UIStyle::GetProperty(const std::string& key) const
     return UIProperty(it->second);
 }
 
-bool UIStyle::ParseStyleString(const WidgetId& id, const std::string& style)
+bool UIStyle::ParseStyleString(const std::string& tag, const std::string& style)
 {
     auto [ok, json, error] = base::JsonParse(style);
     if (!ok)
     {
-        ERROR("Failed to parse widget ('%1') style.", id);
-        ERROR("JSON parse error: '%1'", error);
+        ERROR("Failed to parse UI style string. [tag=%1, error='%2']", tag, error);
         return false;
     }
     std::vector<PropertyPair> props;
@@ -189,19 +188,18 @@ bool UIStyle::ParseStyleString(const WidgetId& id, const std::string& style)
 
     for (auto& p : props)
     {
-        if (base::StartsWith(p.key, id))
+        if (base::StartsWith(p.key, tag))
             mProperties[p.key] = std::move(p.value);
-        else mProperties[id + "/" + p.key] = std::move(p.value);
+        else mProperties[tag + "/" + p.key] = std::move(p.value);
     }
     for (auto& m : materials)
     {
-        if (base::StartsWith(m.key, id))
+        if (base::StartsWith(m.key, tag))
             mMaterials[m.key] = std::move(m.material);
-        else mMaterials[id + "/" + m.key] = std::move(m.material);
+        else mMaterials[tag + "/" + m.key] = std::move(m.material);
     }
     return true;
 }
-
 
 bool UIStyle::HasProperty(const std::string& key) const
 { return mProperties.find(key) != mProperties.end(); }
@@ -292,7 +290,7 @@ bool UIStyle::LoadStyle(const GameData& data)
     auto [ok, json, error] = base::JsonParse(beg, end);
     if (!ok)
     {
-        ERROR("JSON parse error: '%1' in file: '%2'", error, data.GetName());
+        ERROR("Load style failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
         return false;
     }
     return LoadStyle(json);
@@ -735,12 +733,9 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
     }
 }
 
-bool UIPainter::ParseStyle(const WidgetId& id , const std::string& style)
+bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
 {
-    if (mStyle->ParseStyleString(id, style))
-        return true;
-    WARN("Failed to parse widget ('%1') style string.", id);
-    return false;
+    return mStyle->ParseStyleString(tag, style);
 }
 
 void UIPainter::DeleteMaterialInstances(const std::string& filter)
@@ -875,7 +870,11 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id,
     gfx::Material* material = nullptr;
     if (GetMaterial(id + "/" + key, &material))
         return material;
+    else if (GetMaterial("window/" + klass + "/" + key, &material))
+        return material;
     else if (GetMaterial(klass + "/" + key, &material))
+        return material;
+    else if (GetMaterial("window/widget/" + key, &material))
         return material;
     else if (GetMaterial("widget/" + key, &material))
     {
@@ -916,7 +915,13 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
     auto prop = mStyle->GetProperty(id + "/" + key);
     if (prop.HasValue())
         return prop;
+    prop = mStyle->GetProperty("window/" + klass + "/" + key);
+    if (prop.HasValue())
+        return prop;
     prop = mStyle->GetProperty(klass + "/" + key);
+    if (prop.HasValue())
+        return prop;
+    prop = mStyle->GetProperty("window/widget/" + key);
     if (prop.HasValue())
         return prop;
     prop = mStyle->GetProperty("widget/" + key);
