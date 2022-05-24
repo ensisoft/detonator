@@ -383,7 +383,8 @@ namespace engine
             Rectangle,
             RoundRect,
             Parallelogram,
-            Circle
+            Circle,
+            Capsule
         };
 
         UIStyle(const ClassLibrary* classlib = nullptr)

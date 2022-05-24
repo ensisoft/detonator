@@ -808,6 +808,8 @@ void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material,
         gfx::FillShape(*mPainter, rect, gfx::Parallelogram(), material);
     else if (shape == UIStyle::WidgetShape::Circle)
         gfx::FillShape(*mPainter, rect, gfx::Circle(), material);
+    else if (shape == UIStyle::WidgetShape::Capsule)
+        gfx::FillShape(*mPainter, rect, gfx::Capsule(), material);
     else BUG("Unknown widget shape.");
 }
 
@@ -821,6 +823,8 @@ void UIPainter::OutlineShape(const gfx::FRect& rect, const gfx::Material& materi
         gfx::DrawShapeOutline(*mPainter, rect, gfx::Parallelogram(), material, width);
     else if (shape == UIStyle::WidgetShape::Circle)
         gfx::DrawShapeOutline(*mPainter, rect, gfx::Circle(), material, width);
+    else if (shape == UIStyle::WidgetShape::Capsule)
+        gfx::DrawShapeOutline(*mPainter, rect, gfx::Capsule(), material, width);
     else BUG("Unknown widget shape.");
 }
 
