@@ -270,6 +270,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"button-border",                 PropertyType::Material},
         {"button-border-width",           PropertyType::Float},
         {"button-icon",                   PropertyType::Material},
+        {"button-icon-arrow-up",          PropertyType::Material},
+        {"button-icon-arrow-down",        PropertyType::Material},
         {"slider-background",             PropertyType::Material},
         {"slider-background-shape",       PropertyType::Shape},
         {"slider-knob",                   PropertyType::Material},

@@ -399,8 +399,10 @@ namespace engine
         // that needs to be loaded through the class library.
         void SetClassLibrary(const ClassLibrary* classlib)
         { mClassLib = classlib; }
-        // Returns if the style contains a property under the given property key.
+        // Returns whether the style contains a property by the given property key.
         bool HasProperty(const std::string& key) const;
+        // Returns whether the style contains a material by the given material name.
+        bool HasMaterial(const std::string& key) const;
         // Delete a style property under the given property key.
         void DeleteProperty(const std::string& key);
         // Delete style properties that match with the given filter.
