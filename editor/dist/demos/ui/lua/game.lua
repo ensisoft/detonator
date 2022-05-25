@@ -2,7 +2,7 @@
 -- You're free to delete functions that you don't need.
 
 local _index = 0
-local _max_index = 2
+local _max_index = 5
 
 local _TestTable = {}
 
@@ -10,9 +10,12 @@ local _TestTable = {}
 -- This is the place where you might want to load some 
 -- previous/initial game state. 
 function LoadGame()
-    _TestTable[0] = 'Top Secret'
-    _TestTable[1] = 'All Widgets'
-    _TestTable[2] = 'Label Demo'
+    _TestTable[0] = 'All Widgets'
+    _TestTable[1] = 'Font Demo'
+    _TestTable[2] = 'Buttons'
+    _TestTable[3] = 'Loaders'
+    _TestTable[4] = 'Jungle'
+    _TestTable[5] = 'Kenney'
     Game:OpenUI(_TestTable[0])
     return true
 end
@@ -95,7 +98,7 @@ function OnKeyDown(symbol, modifier_bits)
 
     if index < 0 then 
         index = _max_index
-    elseif index >= _max_index then 
+    elseif index > _max_index then 
         index = 0 
     end
 
@@ -116,12 +119,12 @@ end
 -- 'modifiers'    - modifier bits of keyboard mods that were pressed (if any).
 -- 'over_scene'   - true to indicate that the mouse cursor is over the scene viewport in window.
 function OnMousePress(mouse)
-    Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
+    --Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse button release events.
 function OnMouseRelease(mouse)
-    Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
+    --Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse move events.
@@ -148,7 +151,13 @@ end
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
+    Game:DebugPrint(action.name)
 
+    if action.name == 'Slider_1' then 
+        local prog = ui:FindWidgetByName('ProgressBar_1', 'ProgressBar')
+        prog:SetValue(action.value)
+        Game:DebugPrint(tostring(action.value))    
+    end
 end
 
 -- Called when an audio event happens.
