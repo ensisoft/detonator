@@ -32,8 +32,6 @@ Currently supported major features:
 * Demo content
 * Game content packaging
 * Window integration (https://github.com/ensisoft/wdk)
-
-Planned major features not yet fully implemented:
 * HTML5/WASM build target support
 
 Planned major features not yet implemented:
@@ -42,8 +40,6 @@ Planned major features not yet implemented:
 * OpenGL ES3 backend, WebGL2
 
 Planned minor features not yet implemented:
-* Acceleration structures / scene queries / ray casting
-* Several other functional and performance improvements
 * See issues for more details
 
 ![Screenshot](screens/editor-animation.png "Entity editor")
