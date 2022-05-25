@@ -1,10 +1,62 @@
 {
-    "C34ZUG5Ums": {
+    "0Ll9lSrzWl": {
+        "checked_for_packing": 1
+    },
+    "4qvyEBTB4F": {
+        "checked_for_packing": 1
+    },
+    "6E6PvayxaN": {
+        "checked_for_packing": 1
+    },
+    "DANndT4HWt": {
+        "checked_for_packing": 1
     },
     "GUqwuv4TMH": {
         "checked_for_packing": 1
     },
+    "HU96WMrFpk": {
+        "checked_for_packing": 1
+    },
+    "LpdMb67NSB": {
+        "checked_for_packing": 1
+    },
+    "OqRvzjnzW5": {
+        "checked_for_packing": 1
+    },
+    "Oy4DagSFlB": {
+        "checked_for_packing": 1
+    },
+    "TkUiWPFJd7": {
+        "checked_for_packing": 1
+    },
+    "XFp2yP7TDj": {
+        "checked_for_packing": 1
+    },
     "Xg0GdRiaQU": {
+        "checked_for_packing": 1
+    },
+    "YhgdhQ1IUT": {
+        "checked_for_packing": 1
+    },
+    "d7Z89Xy9iD": {
+        "checked_for_packing": 1
+    },
+    "dd8Ju6AKhO": {
+        "checked_for_packing": 1
+    },
+    "eeAJs1B4tT": {
+        "checked_for_packing": 1
+    },
+    "fQLKKyNYYt": {
+        "checked_for_packing": 1
+    },
+    "jWhZFo43TS": {
+        "checked_for_packing": 1
+    },
+    "kljFlfexQD": {
+        "checked_for_packing": 1
+    },
+    "oXAiESiaJx": {
         "checked_for_packing": 1
     },
     "project": {
@@ -77,13 +129,25 @@
         "window_width": 1024,
         "working_folder": "${workspace}"
     },
+    "pvnDjWDxs8": {
+        "checked_for_packing": 1
+    },
+    "q2BRyKzJzf": {
+        "checked_for_packing": 1
+    },
+    "qNrtwb1b52": {
+        "checked_for_packing": 1
+    },
+    "uw7esRl3hJ": {
+        "checked_for_packing": 1
+    },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_copy_html5": false,
+        "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
         "packing_param_delete_prev": true,
-        "packing_param_generate_html5": false,
-        "packing_param_generate_html5_filesys": false,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
@@ -95,6 +159,7 @@
         "packing_param_write_content": true
     },
     "x8itAE59QO": {
+        "checked_for_packing": 1
     },
     "yTsaLXKonJ": {
         "checked_for_packing": 1
