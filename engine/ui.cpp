@@ -203,6 +203,8 @@ bool UIStyle::ParseStyleString(const std::string& tag, const std::string& style)
 
 bool UIStyle::HasProperty(const std::string& key) const
 { return mProperties.find(key) != mProperties.end(); }
+bool UIStyle::HasMaterial(const std::string& key) const
+{ return mMaterials.find(key) != mMaterials.end(); }
 
 void UIStyle::DeleteProperty(const std::string& key)
 {
@@ -627,33 +629,49 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     if (btn == ButtonIcon::None)
         return;
 
-    if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+    const auto btn_width  = ps.rect.GetWidth();
+    const auto btn_height = ps.rect.GetHeight();
+    const auto min_side = std::min(btn_width, btn_height);
+    const auto ico_size = min_side * 0.4f;
+
+    // previously the only way to customize the button icon was to set a material
+    // that would get applied to all button icons. this however would make it difficult
+    // to use for example pre-rendered button textures (via materials) as up/down buttons.
+    // therefore, an alternative/additional mechanism is added here which allows each
+    // button to be customized via a specific button material name. if no such button
+    // specific material is found then we render the button icon the built-in (old) way.
+    if (btn == ButtonIcon::ArrowUp)
     {
-        const auto btn_width  = ps.rect.GetWidth();
-        const auto btn_height = ps.rect.GetHeight();
-        const auto min_side = std::min(btn_width, btn_height);
-        const auto ico_size = min_side * 0.4f;
-        if (btn == ButtonIcon::ArrowUp)
-        {
-            gfx::Transform icon;
-            icon.Resize(ico_size, ico_size);
-            icon.MoveTo(ps.rect.GetPosition());
-            icon.Translate(btn_width*0.5, btn_height*0.5);
-            icon.Translate(ico_size*-0.5, ico_size*-0.5);
+        gfx::Transform icon;
+        icon.Resize(ico_size, ico_size);
+        icon.MoveTo(ps.rect.GetPosition());
+        icon.Translate(btn_width*0.5, btn_height*0.5);
+        icon.Translate(ico_size*-0.5, ico_size*-0.5);
+        if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-up"))
+            mPainter->Draw(gfx::Rectangle(), icon, *material);
+        else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
             mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
-        }
-        else if (btn == ButtonIcon::ArrowDown)
-        {
-            gfx::Transform icon;
-            icon.Resize(ico_size, ico_size);
-            icon.Translate(ico_size*-0.5, ico_size*-0.5);
-            icon.Rotate(math::Pi);
-            icon.Translate(ico_size*0.5, ico_size*0.5);
-            icon.Translate(ps.rect.GetPosition());
-            icon.Translate(btn_width*0.5, btn_height*0.5);
-            icon.Translate(ico_size*-0.5, ico_size*-0.5);
+    }
+    else if (btn == ButtonIcon::ArrowDown)
+    {
+        // expecting that the material would have something like a pre-rendered down button
+        // so in this case the geometry should not be rotated.
+        float rotation = 0.0f;
+        if (!GetWidgetMaterial(id, ps,"button-icon-arrow-down"))
+            rotation = math::Pi;
+
+        gfx::Transform icon;
+        icon.Resize(ico_size, ico_size);
+        icon.Translate(ico_size*-0.5, ico_size*-0.5);
+        icon.Rotate(rotation);
+        icon.Translate(ico_size*0.5, ico_size*0.5);
+        icon.Translate(ps.rect.GetPosition());
+        icon.Translate(btn_width*0.5, btn_height*0.5);
+        icon.Translate(ico_size*-0.5, ico_size*-0.5);
+        if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-down"))
+            mPainter->Draw(gfx::Rectangle(), icon, *material);
+        else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
             mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
-        }
     }
 }
 
