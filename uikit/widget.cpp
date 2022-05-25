@@ -258,6 +258,9 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 
     FRect edt, btn_inc, btn_dec;
     ComputeBoxes(paint.rect, &btn_inc, &btn_dec, &edt);
+    // check against minimum size. (see below for the size of the edit text area)
+    if (edt.GetWidth() < 4.0f || edt.GetHeight() < 4.0f)
+        return;
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
