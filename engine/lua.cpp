@@ -194,7 +194,10 @@ template<typename T>
 class ArrayInterface {
 public:
     using value_type = typename std::vector<T>::value_type;
-    using iterator   = typename std::vector<T>::const_iterator;
+    // this was using const_iterator and i'm not sure where that
+    // came from (perhaps from the sol3 "documentation"). Anyway,
+    // using const_iterator makes emscripten build shit itself.
+    using iterator   = typename std::vector<T>::iterator;
     using size_type  = typename std::vector<T>::size_type;
     ArrayInterface(std::vector<T>* vector, bool read_only)
       : mArray(vector)

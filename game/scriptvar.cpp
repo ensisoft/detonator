@@ -20,6 +20,8 @@
 #  include <glm/glm.hpp>
 #include "warnpop.h"
 
+#include <type_traits>
+
 #include "base/assert.h"
 #include "base/utility.h"
 #include "data/writer.h"
@@ -168,8 +170,15 @@ size_t ScriptVar::GetHash(const VariantType& variant)
     size_t hash = 0;
     std::visit([&hash](const auto& variant_value) {
         // the type of variant_value should be a vector<T>
+        using Type = std::decay_t<decltype(variant_value)>;
+
         for (const auto& val : variant_value)
-            hash = base::hash_combine(hash, val);
+        {
+            // WAR for emscripten shitting itself with vector<bool>
+            // use a temp variable for the actual value.
+            const typename Type::value_type tmp = val;
+            hash = base::hash_combine(hash, tmp);
+        }
     }, variant);
     return hash;
 }
