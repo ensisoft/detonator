@@ -1229,7 +1229,7 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
 {
     if (auto* node = GetCurrentNode())
     {
-        auto klass = mState.workspace->GetEntityClassByName(name);
+        auto klass = mState.workspace->GetEntityClassById(GetItemId(mUI.nodeEntity));
         node->SetEntity(klass);
 
         const auto visible_in_game = node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame);
@@ -1726,7 +1726,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
-        SetValue(mUI.nodeEntity, mState.workspace->MapEntityIdToName(node->GetEntityId()));
+        SetValue(mUI.nodeEntity, ListItemId(node->GetEntityId()));
         SetValue(mUI.nodeLayer, node->GetLayer());
         SetValue(mUI.nodeIsVisible, node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
