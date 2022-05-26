@@ -2263,6 +2263,20 @@ void MainWindow::RefreshWidget()
     UpdateStats();
 }
 
+void MainWindow::OpenResource(const QString& id)
+{
+    if (id.isEmpty())
+        return;
+    if (auto* resource = mWorkspace->FindResourceById(id))
+    {
+        const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
+
+        if (!FocusWidget(id))
+            ShowWidget(MakeWidget(resource->GetType(), resource), open_new_window);
+    }
+
+}
+
 void MainWindow::OpenRecentWorkspace()
 {
     const QAction* action = qobject_cast<const QAction*>(sender());
@@ -2488,6 +2502,7 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         connect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
         connect(widget, &MainWidget::OpenNewWidget, this, &MainWindow::OpenNewWidget);
         connect(widget, &MainWidget::RefreshRequest, this, &MainWindow::RefreshWidget);
+        connect(widget, &MainWidget::OpenResource, this, &MainWindow::OpenResource);
         widget->setProperty("_main_window_connected_", true);
     }
 

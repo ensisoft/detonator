@@ -111,6 +111,7 @@ namespace gui
         void on_btnAddIdleTrack_clicked();
         void on_btnResetIdleTrack_clicked();
         void on_btnAddScript_clicked();
+        void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
@@ -126,7 +127,8 @@ namespace gui
         void on_btnEditJoint_clicked();
         void on_btnDeleteJoint_clicked();
         void on_btnSelectMaterial_clicked();
-        void on_btnMaterialParams_clicked();
+        void on_btnSetMaterialParams_clicked();
+        void on_btnEditMaterial_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
