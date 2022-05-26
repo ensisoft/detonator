@@ -814,6 +814,7 @@ void SceneWidget::on_name_textChanged(const QString&)
 void SceneWidget::on_cmbScripts_currentIndexChanged(const QString)
 {
     mState.scene.SetScriptFileId(GetItemId(mUI.cmbScripts));
+    SetEnabled(mUI.btnEditScript, true);
 }
 
 void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(const QString&)
@@ -1045,10 +1046,19 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
     DisplayCurrentNodeProperties();
 }
 
+void SceneWidget::on_btnEditScript_clicked()
+{
+    const auto& id = (QString)GetItemId(mUI.cmbScripts);
+    if (id.isEmpty())
+        return;
+    emit OpenResource(id);
+}
+
 void SceneWidget::on_btnResetScript_clicked()
 {
     mState.scene.ResetScriptFile();
     SetValue(mUI.cmbScripts, -1);
+    SetEnabled(mUI.btnEditScript, false);
 }
 void SceneWidget::on_btnAddScript_clicked()
 {
@@ -1137,6 +1147,7 @@ void SceneWidget::on_btnAddScript_clicked()
     emit OpenNewWidget(widget);
 
     SetValue(mUI.cmbScripts, ListItemId(script.GetId()));
+    SetEnabled(mUI.btnEditScript, true);
 }
 
 void SceneWidget::on_btnNewScriptVar_clicked()
@@ -1312,16 +1323,26 @@ void SceneWidget::on_nodeRotation_valueChanged(double value)
     }
 }
 
+void SceneWidget::on_btnEditEntity_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& id = (QString)GetItemId(mUI.nodeEntity);
+        if (id.isEmpty())
+            return;
+
+        emit OpenResource(id);
+    }
+}
+
 void SceneWidget::on_btnEntityParams_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
         auto klass = node->GetEntityClass();
         if (!klass)
-        {
-            NOTE("Node has no entity klass set.");
             return;
-        }
+
         DlgEntity dlg(this, *klass, *node);
         dlg.exec();
     }
@@ -1771,6 +1792,7 @@ void SceneWidget::DisplaySceneProperties()
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.cmbScripts, ListItemId(mState.scene.GetScriptFileId()));
     SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
+    SetEnabled(mUI.btnEditScript, mState.scene.HasScriptFile());
 
     const auto index = mState.scene.GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
@@ -1934,6 +1956,7 @@ void SceneWidget::UpdateResourceReferences()
         {
             WARN("Scene '%1' script is no longer available.", mState.scene.GetName());
             mState.scene.ResetScriptFile();
+            SetEnabled(mUI.btnEditScript, false);
         }
     }
 }

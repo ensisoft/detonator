@@ -254,6 +254,8 @@ namespace gui
         // widget again to see which actions (cut,copy, paste, zoom etc)
         // can or cannot take place.
         void ActionStateChanged();
+        // Open the resource identified by its resource ID in the editor.
+        void OpenResource(const QString& id);
     private:
         QString mId;
     };

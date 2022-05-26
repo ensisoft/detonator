@@ -59,6 +59,26 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="btnEditScript">
+            <property name="toolTip">
+             <string>Open the script for editing</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="btnAddScript">
             <property name="toolTip">
              <string>Add new entity script</string>
@@ -1259,6 +1279,26 @@
              <widget class="QComboBox" name="nodeEntity"/>
             </item>
             <item>
+             <widget class="QToolButton" name="btnEditEntity">
+              <property name="toolTip">
+               <string>Open the script for editing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/entity_go.png</normaloff>:/16x16_ico_png/entity_go.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="btnEntityParams">
               <property name="text">
                <string>...</string>
@@ -1736,6 +1776,7 @@
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
   <tabstop>cmbScripts</tabstop>
+  <tabstop>btnEditScript</tabstop>
   <tabstop>btnAddScript</tabstop>
   <tabstop>btnResetScript</tabstop>
   <tabstop>tabWidget</tabstop>
@@ -1778,6 +1819,7 @@
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeEntity</tabstop>
+  <tabstop>btnEditEntity</tabstop>
   <tabstop>btnEntityParams</tabstop>
   <tabstop>nodeLink</tabstop>
   <tabstop>nodeLayer</tabstop>

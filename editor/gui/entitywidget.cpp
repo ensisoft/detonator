@@ -1315,12 +1315,21 @@ void EntityWidget::on_btnAddScript_clicked()
     emit OpenNewWidget(widget);
 
     SetValue(mUI.scriptFile, ListItemId(script.GetId()));
+    SetEnabled(mUI.btnEditScript, true);
+}
+void EntityWidget::on_btnEditScript_clicked()
+{
+    const auto& id = (QString)GetItemId(mUI.scriptFile);
+    if (id.isEmpty())
+        return;
+    emit OpenResource(id);
 }
 
 void EntityWidget::on_btnResetScript_clicked()
 {
     mState.entity->ResetScriptFile();
     SetValue(mUI.scriptFile, -1);
+    SetEnabled(mUI.btnEditScript, false);
 }
 
 void EntityWidget::on_btnViewPlus90_clicked()
@@ -1535,7 +1544,7 @@ void EntityWidget::on_btnSelectMaterial_clicked()
     }
 }
 
-void EntityWidget::on_btnMaterialParams_clicked()
+void EntityWidget::on_btnSetMaterialParams_clicked()
 {
     if (auto* node = GetCurrentNode())
     {
@@ -1544,6 +1553,20 @@ void EntityWidget::on_btnMaterialParams_clicked()
             DlgMaterialParams dlg(this, mState.workspace, drawable);
             dlg.exec();
         }
+    }
+}
+
+void EntityWidget::on_btnEditMaterial_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& id = (QString)GetItemId(mUI.dsMaterial);
+        if (id.isEmpty())
+            return;
+        auto& resource = mState.workspace->GetResourceById(id);
+        if (resource.IsPrimitive())
+            return;
+        emit OpenResource(id);
     }
 }
 
@@ -1569,9 +1592,11 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
     if (index == -1)
     {
         mState.entity->ResetScriptFile();
+        SetEnabled(mUI.btnEditScript, false);
         return;
     }
     mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));
+    SetEnabled(mUI.btnEditScript, true);
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -1636,6 +1661,7 @@ void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
 void EntityWidget::on_dsMaterial_currentIndexChanged(const QString& name)
 {
     UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 void EntityWidget::on_dsRenderPass_currentIndexChanged(const QString&)
 {
@@ -2497,6 +2523,7 @@ void EntityWidget::DisplayEntityProperties()
     SetEnabled(mUI.btnEditTrack, false);
     SetEnabled(mUI.btnEditJoint, joints > 0);
     SetEnabled(mUI.btnDeleteJoint, joints > 0);
+    SetEnabled(mUI.btnEditScript, mState.entity->HasScriptFile());
 
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityID, mState.entity->GetId());
@@ -2614,6 +2641,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
+
+            const auto& resource = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
+            SetEnabled(mUI.btnEditMaterial, !resource.IsPrimitive());
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -2962,6 +2992,7 @@ void EntityWidget::UpdateDeletedResourceReferences()
         {
             WARN("Entity '%1' script is no longer available.", mState.entity->GetName());
             mState.entity->ResetScriptFile();
+            SetEnabled(mUI.btnEditScript, false);
         }
     }
     RealizeEntityChange(mState.entity);

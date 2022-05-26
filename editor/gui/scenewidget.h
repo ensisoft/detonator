@@ -108,6 +108,7 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
+        void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
         void on_btnAddScript_clicked();
         void on_btnNewScriptVar_clicked();
@@ -126,6 +127,7 @@ namespace gui
         void on_nodeScaleX_valueChanged(double value);
         void on_nodeScaleY_valueChanged(double value);
         void on_nodeRotation_valueChanged(double value);
+        void on_btnEditEntity_clicked();
         void on_btnEntityParams_clicked();
         void on_btnNodePlus90_clicked();
         void on_btnNodeMinus90_clicked();

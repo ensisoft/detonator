@@ -168,6 +168,7 @@ namespace gui
         void OpenExternalAudio(const QString& file);
         void OpenNewWidget(MainWidget* widget);
         void RefreshWidget();
+        void OpenResource(const QString& id);
         void OpenRecentWorkspace();
         void ToggleShowResource();
 

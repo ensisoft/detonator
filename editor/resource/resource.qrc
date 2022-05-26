@@ -13,6 +13,7 @@
     <file>16x16_ico_png/app_pop_out_window.png</file>
     <file>16x16_ico_png/app_close_window.png</file>
     <file>16x16_ico_png/material.png</file>
+    <file>16x16_ico_png/material_go.png</file>
     <file>16x16_ico_png/zoom_in.png</file>
     <file>16x16_ico_png/zoom_out.png</file>
     <file>16x16_ico_png/refresh.png</file>
@@ -38,8 +39,10 @@
     <file>16x16_ico_png/layer_down.png</file>
     <file>16x16_ico_png/layer_up.png</file>
     <file>16x16_ico_png/entity.png</file>
+    <file>16x16_ico_png/entity_go.png</file>
     <file>16x16_ico_png/scene.png</file>
     <file>16x16_ico_png/script.png</file>
+    <file>16x16_ico_png/script_go.png</file>
     <file>16x16_ico_png/cut.png</file>
     <file>16x16_ico_png/copy.png</file>
     <file>16x16_ico_png/paste.png</file>
