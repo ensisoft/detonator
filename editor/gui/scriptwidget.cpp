@@ -713,15 +713,15 @@ void InitDoc()
     DOC_METHOD_2("void", "Translate", "Translate the widget relative to it's current position.", "float", "dx", "float", "dy");
     DOC_METHOD_1("void", "SetVisible", "Change widget visibility.", "bool", "visible");
     DOC_METHOD_1("void", "Enable", "Enable widget.", "bool", "enable");
-    DOC_METHOD_0("uik.Label", "AsLabel", "Cast the widget to Label.");
-    DOC_METHOD_0("uik.PushButton", "AsPushButton", "Cast the widget to PushButton.");
-    DOC_METHOD_0("uik.CheckBox", "AsCheckBox", "Cast the widget to CheckBox.");
-    DOC_METHOD_0("uik.GroupBox", "AsGroupBox", "Cast the widget to GroupBox.");
-    DOC_METHOD_0("uik.SpinBox", "AsSpinBox", "Cast the widget to SpinBox.");
-    DOC_METHOD_0("uik.ProgressBar", "AsProgressBar", "Cast the widget to ProgressBar.");
-    DOC_METHOD_0("uik.Form", "AsForm", "Cast the widget to Form.");
-    DOC_METHOD_0("uik.Slider", "AsSlider", "Cast the widget to Slider.");
-    DOC_METHOD_0("uik.RadioButton", "AsRadioButton", "Cast the widget to RadioButton");
+    DOC_METHOD_0("uik.Label", "AsLabel", "Cast the widget to Label. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.PushButton", "AsPushButton", "Cast the widget to PushButton. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.CheckBox", "AsCheckBox", "Cast the widget to CheckBox. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.GroupBox", "AsGroupBox", "Cast the widget to GroupBox. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.SpinBox", "AsSpinBox", "Cast the widget to SpinBox. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.ProgressBar", "AsProgressBar", "Cast the widget to ProgressBar. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.Form", "AsForm", "Cast the widget to Form. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.Slider", "AsSlider", "Cast the widget to Slider. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.RadioButton", "AsRadioButton", "Cast the widget to RadioButton. Returns nil if the cast failed.");
     DOC_TABLE("uik.Label");
     DOC_METHOD_0("string", "GetText", "Get the label text.");
     DOC_METHOD_1("void", "SetText", "Set the label text.", "string", "text");
@@ -1247,39 +1247,41 @@ void InitDoc()
 
 
     DOC_TABLE("game.Audio");
-    DOC_METHOD_1("bool", "PrepareMusicGraph", "Prepare a new named music graph for playback.<br>"
+    DOC_METHOD_1("bool", "PrepareMusicGraph", "Prepare a new named music graph for playback. The name of the music graph resource can be used "
+                                              "to later identify the audio track when calling functions such as ResumeMusic or PauseMusic.<br>"
                                               "The audio graph is initially only prepared and sent to the audio mixer in paused state.<br>"
                                               "In order to start the actual audio playback ResumeMusic must be called separately.<br>"
                                               "Returns true if the audio graph was prepared successfully or false on error.",
-                 "audio.GraphClass|string", "graph|name");
+                 "audio.GraphClass|string", "graph|graph_name");
     DOC_METHOD_1("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is also started immediately.",
-                 "audio.GraphClass|string", "graph|name");
+                 "audio.GraphClass|string", "graph|graph_name");
     DOC_METHOD_2("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is started after some delay (in milliseconds) elapses.",
-                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
-    DOC_METHOD_1("void", "ResumeMusic", "Resume the playback of the named music graph immediately.", "string", "name");
+                 "audio.GraphClass|string", "graph|graph_name", "unsigned", "delay");
+    DOC_METHOD_1("void", "ResumeMusic", "Resume the playback of the named music graph immediately.",
+                 "string", "graph_name");
     DOC_METHOD_2("void", "ResumeMusic", "Resume the playback of the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "track_name", "unsigned", "delay");
+                 "string", "graph_name", "unsigned", "delay");
     DOC_METHOD_1("void", "PauseMusic", "Pause the playback of the named music graph immediately.", "string", "name");
     DOC_METHOD_2("void", "PauseMusic", "Pause the playback of the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "name", "unsigned", "delay");
+                 "string", "graph_name", "unsigned", "delay");
     DOC_METHOD_1("void", "KillMusic", "Kill the named music graph immediately.", "string", "name");
     DOC_METHOD_2("void", "KillMusic", "Kill the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "name", "unsigned", "delay");
-    DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music tracks.");
-    DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music track commands.", "string", "name");
-    DOC_METHOD_3("void", "SetMusicEffect", "Set an audio effect on the named music track.<br>"
+                 "string", "graph_name", "unsigned", "delay");
+    DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music graphs.");
+    DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music graph commands.", "string", "graph_name");
+    DOC_METHOD_3("void", "SetMusicEffect", "Set an audio effect on the named music graph.<br>"
                                            "Effect can be one of the following: 'FadeIn', 'FadeOut'",
-                 "string", "track_name", "string", "effect_name", "unsigned", "duration");
+                 "string", "graph_name", "string", "effect_name", "unsigned", "duration");
     DOC_METHOD_1("void", "SetMusicGain", "Set the overall music gain (volume adjustment) in the audio mixer.", "float", "gain");
-    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect immediately.", "audio.GraphClass|string", "graph|name");
-    DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect after some delay (in milliseconds) elapses.",
-                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
+    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect audio graph immediately.", "audio.GraphClass|string", "graph|graph_name");
+    DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect audio graph after some delay (in milliseconds) elapses.",
+                 "audio.GraphClass|string", "graph|graph_name", "unsigned", "delay");
     DOC_METHOD_1("void", "SetSoundEffectGain", "Set the overall sound effect gain (volume adjustment) in the audio mixer.", "float", "gain");
 
     DOC_TABLE("game.AudioEvent");
     DOC_OBJECT_PROPERTY("string", "type", "The type of the audio event.<br>"
                                           "One of the following: 'TrackDone'");
-    DOC_OBJECT_PROPERTY("string", "track", "Name of the track to which the event pertains to.");
+    DOC_OBJECT_PROPERTY("string", "track", "Name of the audio graph to which the event pertains to.");
     DOC_OBJECT_PROPERTY("string", "source", "Source of the audio event. Either 'music' or 'effect'");
 
     DOC_TABLE("game.MouseEvent");
