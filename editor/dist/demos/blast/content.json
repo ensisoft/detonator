@@ -5284,7 +5284,8 @@
       "name": "GameOver",
       "resource_id": "RoGbL91JLQ",
       "resource_name": "GameOver",
-      "style": "app://ui/default.json",
+      "style_file": "app://ui/default.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
@@ -5423,7 +5424,8 @@
       "name": "MainMenu",
       "resource_id": "T38qa8wN2K",
       "resource_name": "MainMenu",
-      "style": "ws://ui/style.json",
+      "style_file": "ws://ui/style.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
@@ -5642,7 +5644,8 @@
       "name": "Credits",
       "resource_id": "4eIBhHhK0W",
       "resource_name": "Credits",
-      "style": "app://ui/default.json",
+      "style_file": "app://ui/default.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
@@ -5739,7 +5742,8 @@
       "name": "Options",
       "resource_id": "PYYxBsykKG",
       "resource_name": "Options",
-      "style": "app://ui/default.json",
+      "style_file": "app://ui/default.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [

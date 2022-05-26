@@ -17020,7 +17020,8 @@
       "name": "Game UI",
       "resource_id": "7qhE9P3Lno",
       "resource_name": "Game UI",
-      "style": "app://ui/default.json",
+      "style_file": "app://ui/default.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
@@ -17160,7 +17161,8 @@
       "name": "Menu UI",
       "resource_id": "M3GBwLlWRp",
       "resource_name": "Menu UI",
-      "style": "ws://ui/style.json",
+      "style_file": "ws://ui/style.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
