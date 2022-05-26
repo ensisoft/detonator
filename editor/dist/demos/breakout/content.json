@@ -19062,7 +19062,8 @@
       "name": "MainMenu",
       "resource_id": "847gBr2NKv",
       "resource_name": "MainMenu",
-      "style": "ws://ui/style.json",
+      "style_file": "ws://ui/style.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
@@ -19179,7 +19180,8 @@
       "name": "HUD",
       "resource_id": "3J49aF64Jm",
       "resource_name": "HUD",
-      "style": "app://ui/default.json",
+      "style_file": "app://ui/default.json",
+      "style_string": "",
       "widgets": [
         {
           "widgets": [
