@@ -1135,23 +1135,12 @@ void LuaGame::OnMouseRelease(const MouseEvent& mouse)
 }
 
 ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
-{}
-
-ScriptEngine::~ScriptEngine() = default;
-
-void ScriptEngine::BeginPlay(Scene* scene)
 {
-    // When the game play begins we create fresh new lua state
-    // and environments for all scriptable entity classes.
+    mLuaState = std::make_unique<sol::state>();
+    mLuaState->open_libraries();
+    mLuaState->clear_package_loaders();
 
-    auto state = std::make_unique<sol::state>();
-    state->open_libraries();
-
-    state->clear_package_loaders();
-
-    auto* lua_state = state.get();
-
-    lua_state->add_package_loader([lua_state, this](std::string module) {
+    mLuaState->add_package_loader([this](std::string module) {
         ASSERT(mDataLoader);
         if (!base::EndsWith(module, ".lua"))
             module += ".lua";
@@ -1161,7 +1150,7 @@ void ScriptEngine::BeginPlay(Scene* scene)
         const auto& buff = mDataLoader->LoadGameDataFromFile(file);
         if (!buff)
             throw std::runtime_error("can't find lua module: " + module);
-        auto ret = lua_state->load_buffer((const char*)buff->GetData(), buff->GetSize());
+        auto ret = mLuaState->load_buffer((const char*)buff->GetData(), buff->GetSize());
         if (!ret.valid())
         {
             sol::error err = ret;
@@ -1170,14 +1159,37 @@ void ScriptEngine::BeginPlay(Scene* scene)
         return ret.get<sol::function>(); // hmm??
     });
 
-    BindBase(*state);
-    BindUtil(*state);
-    BindData(*state);
-    BindGLM(*state);
-    BindGFX(*state);
-    BindWDK(*state);
-    BindGameLib(*state);
+    BindBase(*mLuaState);
+    BindUtil(*mLuaState);
+    BindData(*mLuaState);
+    BindGLM(*mLuaState);
+    BindGFX(*mLuaState);
+    BindWDK(*mLuaState);
+    BindGameLib(*mLuaState);
 
+    (*mLuaState)["CallMethod"] = [this](sol::object object, const std::string& method,
+                                        sol::variadic_args va) {
+        return this->CallCrossEnvMethod(object, method, va);
+    };
+
+    auto table = (*mLuaState)["game"].get_or_create<sol::table>();
+    table["OS"] = OS_NAME;
+    auto engine = table.new_usertype<ScriptEngine>("Engine");
+    BindEngine(engine, *this);
+}
+
+ScriptEngine::~ScriptEngine()
+{
+    // careful here, make sure to clean up the environment objects
+    // first since they depend on lua state.
+    mTypeEnvs.clear();
+    mSceneEnv.reset();
+
+    mLuaState.reset();
+}
+
+void ScriptEngine::BeginPlay(Scene* scene)
+{
     // table that maps entity types to their scripting
     // environments. then we later invoke the script per
     // each instance's type on each instance of that type.
@@ -1211,10 +1223,10 @@ void ScriptEngine::BeginPlay(Scene* scene)
                 ERROR("Failed to load entity class script file. [class='%1', file='%2']", klass.GetName(), script_file);
                 continue;
             }
-            auto script_env = std::make_shared<sol::environment>(*state, sol::create, state->globals());
+            auto script_env = std::make_shared<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
             const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
                     script_buff->GetSize());
-            const auto& result = state->script(script_view, *script_env);
+            const auto& result = mLuaState->script(script_view, *script_env);
             if (!result.valid())
             {
                 const sol::error err = result;
@@ -1244,10 +1256,10 @@ void ScriptEngine::BeginPlay(Scene* scene)
         }
         else
         {
-            scene_env = std::make_unique<sol::environment>(*state, sol::create, state->globals());
+            scene_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
             const auto& view = sol::string_view((const char*)script_buff->GetData(),
                                                 script_buff->GetSize());
-            const auto& result = state->script(view, *scene_env);
+            const auto& result = mLuaState->script(view, *scene_env);
             if (!result.valid())
             {
                 const sol::error err = result;
@@ -1262,30 +1274,16 @@ void ScriptEngine::BeginPlay(Scene* scene)
         }
     }
 
-    // careful here, make sure to clean up the environment objects
-    // first since they depend on lua state. changing the order
-    // of these two lines will crash.
     mSceneEnv = std::move(scene_env);
     mTypeEnvs = std::move(entity_env_map);
-    mLuaState = std::move(state);
 
-    mScene    = scene;
+    mScene = scene;
     (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClassLib;
     (*mLuaState)["Scene"]    = mScene;
     (*mLuaState)["State"]    = mStateStore;
     (*mLuaState)["Game"]     = this;
-
-    (*mLuaState)["CallMethod"] = [this](sol::object object, const std::string& method,
-                                        sol::variadic_args va) {
-        return this->CallCrossEnvMethod(object, method, va);
-    };
-
-    auto table = (*mLuaState)["game"].get_or_create<sol::table>();
-    table["OS"] = OS_NAME;
-    auto engine = table.new_usertype<ScriptEngine>("Engine");
-    BindEngine(engine, *this);
 
     if (mSceneEnv)
         CallLua((*mSceneEnv)["BeginPlay"], scene);
