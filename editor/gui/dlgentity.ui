@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
+    <width>481</width>
     <height>512</height>
    </rect>
   </property>
@@ -100,7 +100,7 @@
              <item row="6" column="1">
               <widget class="QCheckBox" name="chkKeyEvents">
                <property name="text">
-                <string>Receive key events</string>
+                <string>Receive keyboard events</string>
                </property>
                <property name="checked">
                 <bool>false</bool>
@@ -272,7 +272,7 @@
                 <bool>false</bool>
                </attribute>
                <attribute name="verticalHeaderDefaultSectionSize">
-                <number>21</number>
+                <number>24</number>
                </attribute>
               </widget>
              </item>
