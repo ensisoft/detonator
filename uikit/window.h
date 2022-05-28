@@ -257,7 +257,7 @@ namespace uik
 
         // Notes about event dispatching. In general there will
         // be only one widget that will receive the input events.
-        // However keyboard and mouse events can be dispatched to
+        // However, keyboard and mouse events can be dispatched to
         // different widgets. Keyboard events are dispatched to the
         // widget that currently has the keyboard focus while mouse
         // actions are dispatched to the widget that is under the mouse
@@ -302,11 +302,17 @@ namespace uik
         { mStyleFile = style; }
         void SetStyleString(const std::string& style)
         { mStyleString = style; }
+        void SetScriptFile(const std::string& file)
+        { mScriptFile = file; }
         void ResetStyleString()
         { mStyleString.clear(); }
+        void ResetScriptFile()
+        { mScriptFile.clear(); }
 
         // Getters.
         std::size_t GetHash() const;
+        std::string GetScriptFile() const
+        { return mScriptFile; }
         std::string GetStyleName() const
         { return mStyleFile; }
         std::string GetStyleString() const
@@ -321,6 +327,8 @@ namespace uik
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const
         { return mRenderTree; }
+        bool HasScriptFile() const
+        { return !mScriptFile.empty(); }
 
         // Helpers
         Widget* FindWidgetByName(const std::string& name)
@@ -353,6 +361,7 @@ namespace uik
     private:
         std::string mId;
         std::string mName;
+        std::string mScriptFile;
         std::string mStyleFile;
         std::string mStyleString;
         std::vector<std::unique_ptr<Widget>> mWidgets;

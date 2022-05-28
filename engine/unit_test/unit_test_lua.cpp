@@ -757,6 +757,7 @@ end
 
     engine::ScriptEngine script(".");
     script.SetDataLoader(&loader);
+    script.Init();
     script.BeginPlay(&scene);
 
     // begin play should invoke BeginPlay on the entities that are
@@ -857,6 +858,7 @@ end
     game::Scene scene(scene_class);
     engine::ScriptEngine script(".");
     script.SetDataLoader(&loader);
+    script.Init();
     script.BeginPlay(&scene);
 
     script.BeginLoop();
@@ -936,6 +938,7 @@ end
 
     engine::ScriptEngine script(".");
     script.SetDataLoader(&loader);
+    script.Init();
     script.BeginPlay(&instance);
     script.Tick(0.0, 0.0);
 
@@ -1017,6 +1020,7 @@ end
 
     engine::ScriptEngine script(".");
     script.SetDataLoader(&loader);
+    script.Init();
     script.BeginPlay(&instance);
     script.Tick(0.0, 0.0);
 
@@ -1085,6 +1089,7 @@ end
 
     engine::ScriptEngine script(".");
     script.SetDataLoader(&loader);
+    script.Init();
     script.BeginPlay(&instance);
     script.Tick(0.0, 0.0);
 

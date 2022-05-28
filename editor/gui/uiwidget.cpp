@@ -33,25 +33,27 @@
 #include <cmath>
 
 #include "base/assert.h"
-#include "base/utility.h"
 #include "base/format.h"
+#include "base/utility.h"
 #include "data/json.h"
-#include "uikit/widget.h"
-#include "uikit/window.h"
-#include "uikit/state.h"
-#include "uikit/op.h"
-#include "graphics/drawing.h"
-#include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/resource.h"
+#include "editor/app/utility.h"
 #include "editor/app/workspace.h"
-#include "editor/gui/uiwidget.h"
 #include "editor/gui/clipboard.h"
-#include "editor/gui/drawing.h"
-#include "editor/gui/utility.h"
-#include "editor/gui/tool.h"
-#include "editor/gui/settings.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgstyleproperties.h"
+#include "editor/gui/drawing.h"
+#include "editor/gui/scriptwidget.h"
+#include "editor/gui/settings.h"
+#include "editor/gui/tool.h"
+#include "editor/gui/uiwidget.h"
+#include "editor/gui/utility.h"
+#include "graphics/drawing.h"
+#include "uikit/op.h"
+#include "uikit/state.h"
+#include "uikit/widget.h"
+#include "uikit/window.h"
 
 namespace {
 std::vector<app::ListItem> ListMaterials(const app::Workspace* workspace)
@@ -377,9 +379,11 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.windowName, mState.window.GetName());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
+    SetValue(mUI.windowScriptFile, mState.window.GetScriptFile());
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
     RebuildCombos();
@@ -416,6 +420,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     SetValue(mUI.windowID, window->GetId());
     SetValue(mUI.windowStyleFile, window->GetStyleName());
     SetValue(mUI.windowStyleString, window->GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(window->GetScriptFile()));
+    SetEnabled(mUI.btnEditScript, window->HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
     UpdateDeletedResourceReferences();
@@ -536,6 +542,8 @@ bool UIWidget::LoadState(const Settings& settings)
     SetValue(mUI.windowName, mState.window.GetName());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
     DisplayCurrentCameraLocation();
@@ -802,6 +810,8 @@ void UIWidget::Undo()
     SetValue(mUI.windowName, mState.window.GetName());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     NOTE("Undo!");
 }
 
@@ -1082,7 +1092,7 @@ void UIWidget::on_actionWidgetDuplicate_triggered()
     if (auto* widget = GetCurrentWidget())
     {
         auto* dupe = mState.window.DuplicateWidget(widget);
-        // update the the translation for the parent of the new hierarchy
+        // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->Translate(10.0f, 10.0f);
 
@@ -1108,6 +1118,12 @@ void UIWidget::on_windowStyleFile_currentIndexChanged(int)
 
     if (!LoadStyleVerbose(GetValue(mUI.windowStyleFile)))
         SetValue(mUI.windowStyleFile, name);
+}
+
+void UIWidget::on_windowScriptFile_currentIndexChanged(int index)
+{
+    mState.window.SetScriptFile(GetItemId(mUI.windowScriptFile));
+    SetEnabled(mUI.btnEditScript, true);
 }
 
 void UIWidget::on_widgetName_textChanged(const QString& text)
@@ -1370,6 +1386,87 @@ void UIWidget::on_btnResetWindowStyle_clicked()
     SetValue(mUI.windowStyleString, QString(""));
 }
 
+void UIWidget::on_btnEditScript_clicked()
+{
+    const auto id = (QString)GetItemId(mUI.windowScriptFile);
+    if (id.isEmpty())
+        return;
+    emit OpenResource(id);
+}
+void UIWidget::on_btnAddScript_clicked()
+{
+    app::Script script;
+    // use the script ID as the file name so that we can
+    // avoid naming clashes and always find the correct lua
+    // file even if the entity is later renamed.
+    const auto& filename = app::FromUtf8(script.GetId());
+    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
+    const auto& filepath = mState.workspace->MapFileToFilesystem(fileuri);
+    const auto& name = GetValue(mUI.windowName);
+    const QFileInfo info(filepath);
+    if (info.exists())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle(tr("File already exists"));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
+    }
+
+    QFile io;
+    io.setFileName(filepath);
+    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        ERROR("Failed to open file for writing. [file='%1, error='%2']", filepath, io.error());
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle(tr("Error Occurred"));
+        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setStandardButtons(QMessageBox::Ok);
+        return;
+    }
+    QString var = name;
+    var.replace(' ', '_');
+    var = var.toLower();
+
+    // TODO: refactor this and a dupe from MainWindow into a single place.
+    QTextStream stream(&io);
+    stream.setCodec("UTF-8");
+    stream << QString("-- UI '%1' script.\n\n").arg(name);
+    stream << QString("-- This script will be called for every instance of '%1.'\n").arg(name);
+    stream << "-- You're free to delete functions you don't need.\n\n";
+    stream << "-- Called whenever the UI has been opened.\n";
+    stream << "function OnUIOpen(ui)\nend\n\n";
+    stream << " -- Called whenever the UI is about to be closed.\n";
+    stream << "-- result is the value passed in the exit_code in the call to CloseUI.\n";
+    stream << "function OnUIClose(ui, result)\nend\n\n";
+    stream << "-- Called whenever some UI action such as button click etc. occurs\n";
+    stream << "function OnUIAction(ui, action)\nend\n\n";
+
+    io.flush();
+    io.close();
+
+    script.SetFileURI(app::ToUtf8(fileuri));
+    app::ScriptResource resource(script, name);
+    mState.workspace->SaveResource(resource);
+    mState.window.SetScriptFile(script.GetId());
+
+    ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
+    emit OpenNewWidget(widget);
+
+    SetValue(mUI.windowScriptFile, ListItemId(script.GetId()));
+    SetEnabled(mUI.btnEditScript, true);
+}
+
+void UIWidget::on_btnResetScript_clicked()
+{
+    mState.window.ResetScriptFile();
+    SetValue(mUI.windowScriptFile, -1);
+    SetEnabled(mUI.btnEditScript, false);
+}
+
 void UIWidget::on_chkWidgetEnabled_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
@@ -1442,26 +1539,28 @@ void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 
 void UIWidget::NewResourceAvailable(const app::Resource* resource)
 {
-    if (!resource->IsMaterial())
+    if (!(resource->IsMaterial() || resource->IsScript()))
         return;
     RebuildCombos();
 }
 void UIWidget::ResourceToBeDeleted(const app::Resource* resource)
 {
-    if (!resource->IsMaterial())
+    if (!(resource->IsMaterial() || resource->IsScript()))
         return;
     UpdateDeletedResourceReferences();
     RebuildCombos();
     DisplayCurrentWidgetProperties();
-    mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
+    if (resource->IsMaterial())
+        mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
 }
 void UIWidget::ResourceUpdated(const app::Resource* resource)
 {
-    if (!resource->IsMaterial())
+    if (!(resource->IsMaterial() || resource->IsScript()))
         return;
     RebuildCombos();
     DisplayCurrentWidgetProperties();
-    mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
+    if (resource->IsMaterial())
+        mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
 }
 
 void UIWidget::WidgetStyleEdited()
@@ -1966,6 +2065,8 @@ void UIWidget::RebuildCombos()
     mUI.widgetFocused->RebuildMaterialCombos(materials);
     mUI.widgetMoused->RebuildMaterialCombos(materials);
     mUI.widgetPressed->RebuildMaterialCombos(materials);
+
+    SetList(mUI.windowScriptFile, mState.workspace->ListUserDefinedScripts());
 }
 
 uik::Widget* UIWidget::GetCurrentWidget()
@@ -2066,6 +2167,18 @@ void UIWidget::UpdateDeletedResourceReferences()
         });
         // todo: improve the message/information about which widgets were affected.
         WARN("Some UI material references are no longer available and have been defaulted.");
+    }
+
+    if (mState.window.HasScriptFile())
+    {
+        const auto& script = mState.window.GetScriptFile();
+        if (!mState.workspace->IsValidScript(script))
+        {
+            WARN("Window '%1' script is no longer available.", mState.window.GetName());
+            mState.window.ResetScriptFile();
+            SetValue(mUI.windowScriptFile, -1);
+            SetEnabled(mUI.btnEditScript, false);
+        }
     }
 }
 
