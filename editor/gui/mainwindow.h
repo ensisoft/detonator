@@ -116,6 +116,7 @@ namespace gui
         void on_actionNewBlankScript_triggered();
         void on_actionNewEntityScript_triggered();
         void on_actionNewSceneScript_triggered();
+        void on_actionNewUIScript_triggered();
         void on_actionNewUI_triggered();
         void on_actionNewAudioGraph_triggered();
         void on_actionImportFiles_triggered();

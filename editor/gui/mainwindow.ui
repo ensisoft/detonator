@@ -1942,6 +1942,18 @@
     <string>Create new scene script</string>
    </property>
   </action>
+  <action name="actionNewUIScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
+   </property>
+   <property name="text">
+    <string>New UI Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new UI script</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>btnBandit</tabstop>

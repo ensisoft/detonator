@@ -72,7 +72,6 @@ public:
     virtual bool GetNextRequest(Request* out) override
     { return mRequests.GetNext(out); }
 
-
     virtual void Init(const InitParams& init) override
     {
         DEBUG("Engine initializing. [surface=%1x%2]", init.surface_width, init.surface_height);
@@ -98,6 +97,7 @@ public:
         mScripting->SetStateStore(&mStateStore);
         mScripting->SetAudioEngine(mAudio.get());
         mScripting->SetDataLoader(mGameDataLoader);
+        mScripting->Init();
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
@@ -677,6 +677,7 @@ private:
         if (action.type == uik::WidgetActionType::None)
             return;
         mGame->OnUIAction(ui, action);
+        mScripting->OnUIAction(ui, action);
         //DEBUG("Widget action: '%1'", action.type);
     }
     template<typename WdkMouseEvent>
@@ -770,16 +771,23 @@ private:
         mUIPainter.DeleteMaterialInstances();
         mUIState.Clear();
 
-        mGame->OnUIOpen(mUIStack.top().get());
+        auto* ui = mUIStack.top().get();
+        mGame->OnUIOpen(ui);
+        mScripting->OnUIOpen(ui);
     }
     void OnAction(const engine::CloseUIAction& action)
     {
-        if (mUIStack.empty())
-            return;
+        // get the current top UI (if any) and close it and
+        // pop it off the UI stack.
+        if (auto* ui = GetUI())
+        {
+            mGame->OnUIClose(ui, action.result);
+            mScripting->OnUIClose(ui, action.result);
+            mUIStack.pop();
+        }
 
-        mGame->OnUIClose(mUIStack.top().get(), action.result);
-        mUIStack.pop();
-
+        // If there's another UI in the UI stack then reapply
+        // styling information.
         if (auto* ui = GetUI())
         {
             LoadStyle(ui->GetStyleName());
@@ -952,6 +960,7 @@ private:
             for (const auto& action : actions)
             {
                 mGame->OnUIAction(ui, action);
+                mScripting->OnUIAction(ui, action);
             }
         }
 

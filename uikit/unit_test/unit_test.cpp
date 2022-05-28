@@ -395,6 +395,7 @@ void unit_test_window()
     win.SetName("window");
     win.SetStyleName("window_style.json");
     win.SetStyleString("style string");
+    win.SetScriptFile("123sgsss");
 
     {
         uik::Form form;
@@ -472,6 +473,7 @@ void unit_test_window()
         TEST_REQUIRE(copy.GetName() == "window");
         TEST_REQUIRE(copy.GetStyleName() == "window_style.json");
         TEST_REQUIRE(copy.GetStyleString() == "style string");
+        TEST_REQUIRE(copy.GetScriptFile() == "123sgsss");
         TEST_REQUIRE(copy.GetNumWidgets() == 5);
 
         uik::Window w;
@@ -491,6 +493,7 @@ void unit_test_window()
         TEST_REQUIRE(ret->GetName() == "window");
         TEST_REQUIRE(ret->GetStyleName() == "window_style.json");
         TEST_REQUIRE(ret->GetStyleString() == "style string");
+        TEST_REQUIRE(ret->GetScriptFile() == "123sgsss");
         TEST_REQUIRE(ret->GetNumWidgets() == 5);
         TEST_REQUIRE(ret->GetHash() == win.GetHash());
     }

@@ -1135,6 +1135,9 @@ void LuaGame::OnMouseRelease(const MouseEvent& mouse)
 }
 
 ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
+{}
+
+void ScriptEngine::Init()
 {
     mLuaState = std::make_unique<sol::state>();
     mLuaState->open_libraries();
@@ -1165,8 +1168,14 @@ ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
     BindGLM(*mLuaState);
     BindGFX(*mLuaState);
     BindWDK(*mLuaState);
+    BindUIK(*mLuaState);
     BindGameLib(*mLuaState);
 
+    (*mLuaState)["Audio"]    = mAudioEngine;
+    (*mLuaState)["Physics"]  = mPhysicsEngine;
+    (*mLuaState)["ClassLib"] = mClassLib;
+    (*mLuaState)["State"]    = mStateStore;
+    (*mLuaState)["Game"]     = this;
     (*mLuaState)["CallMethod"] = [this](sol::object object, const std::string& method,
                                         sol::variadic_args va) {
         return this->CallCrossEnvMethod(object, method, va);
@@ -1182,7 +1191,8 @@ ScriptEngine::~ScriptEngine()
 {
     // careful here, make sure to clean up the environment objects
     // first since they depend on lua state.
-    mTypeEnvs.clear();
+    mEntityEnvs.clear();
+    mWindowEnvs.clear();
     mSceneEnv.reset();
 
     mLuaState.reset();
@@ -1274,16 +1284,11 @@ void ScriptEngine::BeginPlay(Scene* scene)
         }
     }
 
-    mSceneEnv = std::move(scene_env);
-    mTypeEnvs = std::move(entity_env_map);
+    mSceneEnv   = std::move(scene_env);
+    mEntityEnvs = std::move(entity_env_map);
 
     mScene = scene;
-    (*mLuaState)["Audio"]    = mAudioEngine;
-    (*mLuaState)["Physics"]  = mPhysicsEngine;
-    (*mLuaState)["ClassLib"] = mClassLib;
-    (*mLuaState)["Scene"]    = mScene;
-    (*mLuaState)["State"]    = mStateStore;
-    (*mLuaState)["Game"]     = this;
+    (*mLuaState)["Scene"] = mScene;
 
     if (mSceneEnv)
         CallLua((*mSceneEnv)["BeginPlay"], scene);
@@ -1296,8 +1301,8 @@ void ScriptEngine::BeginPlay(Scene* scene)
 
         const auto& klass   = entity->GetClass();
         const auto& klassId = klass.GetId();
-        auto it = mTypeEnvs.find(klassId);
-        if (it == mTypeEnvs.end())
+        auto it = mEntityEnvs.find(klassId);
+        if (it == mEntityEnvs.end())
             continue;
         auto& env = it->second;
         CallLua((*env)["BeginPlay"], entity, scene);
@@ -1310,7 +1315,7 @@ void ScriptEngine::EndPlay(Scene* scene)
         CallLua((*mSceneEnv)["EndPlay"], scene);
 
     mSceneEnv.reset();
-    mTypeEnvs.clear();
+    mEntityEnvs.clear();
     mScene = nullptr;
     (*mLuaState)["Scene"] = nullptr;
 }
@@ -1487,6 +1492,28 @@ void ScriptEngine::OnMouseRelease(const MouseEvent& mouse)
     DispatchMouseEvent("OnMouseRelease", mouse);
 }
 
+void ScriptEngine::OnUIOpen(uik::Window* ui)
+{
+    if (auto* env = GetTypeEnv(*ui))
+    {
+        CallLua((*env)["OnUIOpen"], ui);
+    }
+}
+void ScriptEngine::OnUIClose(uik::Window* ui, int result)
+{
+    if (auto* env = GetTypeEnv(*ui))
+    {
+        CallLua((*env)["OnUIClose"], ui, result);
+    }
+}
+void ScriptEngine::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
+{
+    if (auto* env = GetTypeEnv(*ui))
+    {
+        CallLua((*env)["OnUIAction"], ui, action);
+    }
+}
+
 template<typename KeyEvent>
 void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
 {
@@ -1567,8 +1594,8 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
     if (!klass.HasScriptFile())
         return nullptr;
     const auto& klassId = klass.GetId();
-    auto it = mTypeEnvs.find(klassId);
-    if (it != mTypeEnvs.end())
+    auto it = mEntityEnvs.find(klassId);
+    if (it != mEntityEnvs.end())
         return it->second.get();
 
     const auto& script_id   = klass.GetScriptFileId();
@@ -1594,7 +1621,43 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
         throw std::runtime_error(err.what());
     }
     DEBUG("Entity class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
-    it = mTypeEnvs.insert({klassId, std::move(env)}).first;
+    it = mEntityEnvs.insert({klassId, std::move(env)}).first;
+    return it->second.get();
+}
+
+sol::environment* ScriptEngine::GetTypeEnv(const uik::Window& window)
+{
+    if (!window.HasScriptFile())
+        return nullptr;
+    const auto& id = window.GetId();
+    auto it = mWindowEnvs.find(id);
+    if (it != mWindowEnvs.end())
+        return it->second.get();
+
+    const auto& script_id   = window.GetScriptFile();
+    const auto& script_file = base::JoinPath(mLuaPath, script_id + ".lua");
+    const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+    if (!script_buff)
+    {
+        ERROR("Failed to load UiKit window script file. [class='%1', file='%2']", window.GetName(), script_file);
+        return nullptr;
+    }
+    const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
+        script_buff->GetSize());
+    auto env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+    const auto& result = mLuaState->script(script_view, *env);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+        // throwing here is just too convenient way to propagate the Lua
+        // specific error message up the stack without cluttering the interface,
+        // and when running the engine inside the editor we really want to
+        // have this lua error propagated all the way to the UI
+        throw std::runtime_error(err.what());
+    }
+    DEBUG("UiKit window script loaded. [window='%1', file='%2']", window.GetName(), script_file);
+    it = mWindowEnvs.insert({id, std::move(env)}).first;
     return it->second.get();
 }
 

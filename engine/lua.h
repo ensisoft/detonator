@@ -106,6 +106,7 @@ namespace engine
         { mDataLoader = loader; }
         void SetStateStore(KeyValueStore* store)
         { mStateStore = store; }
+        void Init();
         void BeginPlay(game::Scene* scene);
         void EndPlay(game::Scene* scene);
         void Tick(double game_time, double dt);
@@ -122,6 +123,9 @@ namespace engine
         void OnMouseMove(const MouseEvent& mouse);
         void OnMousePress(const MouseEvent& mouse);
         void OnMouseRelease(const MouseEvent& mouse);
+        void OnUIOpen(uik::Window* ui);
+        void OnUIClose(uik::Window* ui, int result);
+        void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action);
         void PushAction(Action action)
         { mActionQueue.push(std::move(action)); }
         const ClassLibrary* GetClassLib() const
@@ -132,6 +136,7 @@ namespace engine
         { return mActionQueue.size(); }
     private:
         sol::environment* GetTypeEnv(const game::EntityClass& klass);
+        sol::environment* GetTypeEnv(const uik::Window& window);
         sol::object CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args va);
         template<typename KeyEvent>
         void DispatchKeyboardEvent(const std::string& method, const KeyEvent& key);
@@ -144,7 +149,8 @@ namespace engine
         const Loader* mDataLoader = nullptr;
         KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
-        std::unordered_map<std::string, std::shared_ptr<sol::environment>> mTypeEnvs;
+        std::unordered_map<std::string, std::shared_ptr<sol::environment>> mEntityEnvs;
+        std::unordered_map<std::string, std::unique_ptr<sol::environment>> mWindowEnvs;
         std::queue<Action> mActionQueue;
         game::Scene* mScene = nullptr;
         std::unique_ptr<sol::environment> mSceneEnv;
