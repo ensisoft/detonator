@@ -103,6 +103,7 @@ function OnKeyDown(symbol, modifier_bits)
     end
 
     if index ~= _index then 
+        Game:CloseUI(0)
         Game:OpenUI(_TestTable[index])
         _index = index
     end
@@ -151,13 +152,7 @@ end
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
-    Game:DebugPrint(action.name)
 
-    if action.name == 'Slider_1' then 
-        local prog = ui:FindWidgetByName('ProgressBar_1', 'ProgressBar')
-        prog:SetValue(action.value)
-        Game:DebugPrint(tostring(action.value))    
-    end
 end
 
 -- Called when an audio event happens.

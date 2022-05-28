@@ -50,6 +50,8 @@
     "fQLKKyNYYt": {
         "checked_for_packing": 1
     },
+    "hz6w2tG1gv": {
+    },
     "jWhZFo43TS": {
         "checked_for_packing": 1
     },
@@ -136,7 +138,6 @@
         "checked_for_packing": 1
     },
     "qNrtwb1b52": {
-        "checked_for_packing": 1
     },
     "uw7esRl3hJ": {
         "checked_for_packing": 1
@@ -163,5 +164,20 @@
     },
     "yTsaLXKonJ": {
         "checked_for_packing": 1
+    },
+    "zNOWw04fYZ": {
+        "elem_0sroSvwwzT_pos_x": -292,
+        "elem_0sroSvwwzT_pos_y": -134,
+        "elem_GhszDt2nDm_pos_x": -560,
+        "elem_GhszDt2nDm_pos_y": -109,
+        "link_wE822ZDz3i_dst_x": -292,
+        "link_wE822ZDz3i_dst_y": -84,
+        "link_wE822ZDz3i_src_x": -360,
+        "link_wE822ZDz3i_src_y": -59,
+        "mapping_0_link": "wE822ZDz3i",
+        "mapping_0_port": "0sroSvwwzT:in",
+        "mapping_1_link": "wE822ZDz3i",
+        "mapping_1_port": "GhszDt2nDm:out",
+        "mapping_count": 2
     }
 }
