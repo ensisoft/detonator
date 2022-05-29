@@ -1307,6 +1307,16 @@ void MainWindow::on_actionNewUIScript_triggered()
     stream << "function OnUIClose(ui, result)\nend\n\n";
     stream << "-- Called whenever some UI action such as button click etc. occurs\n";
     stream << "function OnUIAction(ui, action)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMouseMove(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMousePress(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMouseRelease(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on keyboard events when the flag is set.\n";
+    stream << "function OnKeyDown(ui, symbol, modifier_bits)\nend\n\n";
+    stream << "-- Optionally called on keyboard events when the flag is set.\n";
+    stream << "function OnKeyUp(ui, symbol, modifier_bits)\nend\n\n";
 
     io.flush();
     io.close();

@@ -552,20 +552,14 @@ public:
         if (mBlockKeyboard)
             return;
         mGame->OnKeyDown(key);
-        if (mScene)
-        {
-            mScripting->OnKeyDown(key);
-        }
+        mScripting->OnKeyDown(key);
     }
     virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
         if (mBlockKeyboard)
             return;
         mGame->OnKeyUp(key);
-        if (mScene)
-        {
-            mScripting->OnKeyUp(key);
-        }
+        mScripting->OnKeyUp(key);
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
@@ -641,8 +635,6 @@ private:
     using EntityScriptMouseFunc = void (engine::ScriptEngine::*)(const engine::MouseEvent&);
     void SendEntityScriptMouseEvent(const engine::MouseEvent& mickey, EntityScriptMouseFunc which)
     {
-        if (!mScene)
-            return;
         auto* scripting = mScripting.get();
         (scripting->*which)(mickey);
     }
@@ -774,6 +766,7 @@ private:
         auto* ui = mUIStack.top().get();
         mGame->OnUIOpen(ui);
         mScripting->OnUIOpen(ui);
+        mScripting->SetCurrentUI(ui);
     }
     void OnAction(const engine::CloseUIAction& action)
     {
@@ -785,6 +778,7 @@ private:
             mScripting->OnUIClose(ui, action.result);
             mUIStack.pop();
         }
+        mScripting->SetCurrentUI(GetUI());
 
         // If there's another UI in the UI stack then reapply
         // styling information.
