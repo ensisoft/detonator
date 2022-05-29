@@ -765,6 +765,7 @@ private:
 
         auto* ui = mUIStack.top().get();
         mGame->OnUIOpen(ui);
+        mGame->SetCurrentUI(ui);
         mScripting->OnUIOpen(ui);
         mScripting->SetCurrentUI(ui);
     }
@@ -778,6 +779,7 @@ private:
             mScripting->OnUIClose(ui, action.result);
             mUIStack.pop();
         }
+        mGame->SetCurrentUI(GetUI());
         mScripting->SetCurrentUI(GetUI());
 
         // If there's another UI in the UI stack then reapply
