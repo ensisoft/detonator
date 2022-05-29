@@ -949,9 +949,9 @@ LuaGame::LuaGame(const std::string& lua_path,
         });
     engine["GetTopUI"] = [](LuaGame& self, sol::this_state state) {
         sol::state_view lua(state);
-        if (self.mWindowStack.empty())
+        if (self.mWindow == nullptr)
             return sol::make_object(lua, sol::nil);
-        return sol::make_object(lua, self.mWindowStack.top());
+        return sol::make_object(lua, self.mWindow);
     };
 }
 
@@ -977,6 +977,10 @@ void LuaGame::SetDataLoader(const Loader* loader)
 void LuaGame::SetClassLibrary(const ClassLibrary* classlib)
 {
     mClasslib = classlib;
+}
+void LuaGame::SetCurrentUI(uik::Window* window)
+{
+    mWindow = window;
 }
 
 bool LuaGame::LoadGame()
@@ -1065,12 +1069,10 @@ FRect LuaGame::GetViewport() const
 void LuaGame::OnUIOpen(uik::Window* ui)
 {
     CallLua((*mLuaState)["OnUIOpen"], ui);
-    mWindowStack.push(ui);
 }
 void LuaGame::OnUIClose(uik::Window* ui, int result)
 {
     CallLua((*mLuaState)["OnUIClose"], ui, result);
-    mWindowStack.pop();
 }
 
 void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)

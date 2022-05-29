@@ -65,6 +65,9 @@ namespace engine
         virtual void SetDataLoader(const Loader* loader) = 0;
         // Set the class loader.
         virtual void SetClassLibrary(const ClassLibrary* classlib) = 0;
+        // Set the current UI instance (if any). Will be nullptr when there's no
+        // current UI open.
+        virtual void SetCurrentUI(uik::Window* window) = 0;
         // Load the game data. This is called once by the engine after the
         // main application has started. In the implementation you should
         // load whatever initial game state that is needed. It's possible to

@@ -48,6 +48,7 @@ namespace engine
         virtual void SetAudioEngine(const AudioEngine* engine) override;
         virtual void SetDataLoader(const Loader* loader) override;
         virtual void SetClassLibrary(const ClassLibrary* classlib) override;
+        virtual void SetCurrentUI(uik::Window* window) override;
         virtual bool LoadGame() override;
         virtual void StartGame() override;
         virtual void Tick(double game_time, double dt) override;
@@ -86,7 +87,7 @@ namespace engine
         std::queue<Action> mActionQueue;
         FRect mView;
         game::Scene* mScene = nullptr;
-        std::stack<uik::Window*> mWindowStack;
+        uik::Window* mWindow = nullptr;
     };
 
 
