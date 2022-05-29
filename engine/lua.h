@@ -106,6 +106,8 @@ namespace engine
         { mDataLoader = loader; }
         void SetStateStore(KeyValueStore* store)
         { mStateStore = store; }
+        void SetCurrentUI(uik::Window* window)
+        { mWindow = window; }
         void Init();
         void BeginPlay(game::Scene* scene);
         void EndPlay(game::Scene* scene);
@@ -153,6 +155,7 @@ namespace engine
         std::unordered_map<std::string, std::unique_ptr<sol::environment>> mWindowEnvs;
         std::queue<Action> mActionQueue;
         game::Scene* mScene = nullptr;
+        uik::Window* mWindow = nullptr;
         std::unique_ptr<sol::environment> mSceneEnv;
     };
 

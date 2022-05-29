@@ -90,6 +90,8 @@ namespace gui
         void on_windowName_textChanged(const QString& text);
         void on_windowStyleFile_currentIndexChanged(int);
         void on_windowScriptFile_currentIndexChanged(int);
+        void on_chkRecvMouseEvents_stateChanged(int);
+        void on_chkRecvKeyEvents_stateChanged(int);
         void on_widgetName_textChanged(const QString& text);
         void on_widgetWidth_valueChanged(double value);
         void on_widgetHeight_valueChanged(double value);

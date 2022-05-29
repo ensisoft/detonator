@@ -380,6 +380,8 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, mState.window.GetScriptFile());
+    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
@@ -421,6 +423,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     SetValue(mUI.windowStyleFile, window->GetStyleName());
     SetValue(mUI.windowStyleString, window->GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(window->GetScriptFile()));
+    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, window->HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
@@ -543,6 +547,8 @@ bool UIWidget::LoadState(const Settings& settings)
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
@@ -811,6 +817,8 @@ void UIWidget::Undo()
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     NOTE("Undo!");
 }
@@ -1124,6 +1132,15 @@ void UIWidget::on_windowScriptFile_currentIndexChanged(int index)
 {
     mState.window.SetScriptFile(GetItemId(mUI.windowScriptFile));
     SetEnabled(mUI.btnEditScript, true);
+}
+
+void UIWidget::on_chkRecvMouseEvents_stateChanged(int)
+{
+    mState.window.SetFlag(uik::Window::Flags::WantsMouseEvents, GetValue(mUI.chkRecvMouseEvents));
+}
+void UIWidget::on_chkRecvKeyEvents_stateChanged(int)
+{
+    mState.window.SetFlag(uik::Window::Flags::WantsKeyEvents, GetValue(mUI.chkRecvKeyEvents));
 }
 
 void UIWidget::on_widgetName_textChanged(const QString& text)
@@ -1444,6 +1461,16 @@ void UIWidget::on_btnAddScript_clicked()
     stream << "function OnUIClose(ui, result)\nend\n\n";
     stream << "-- Called whenever some UI action such as button click etc. occurs\n";
     stream << "function OnUIAction(ui, action)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMouseMove(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMousePress(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on mouse events when the flag is set.\n";
+    stream << "function OnMouseRelease(ui, mouse)\nend\n\n";
+    stream << "-- Optionally called on keyboard events when the flag is set.\n";
+    stream << "function OnKeyDown(ui, symbol, modifier_bits)\nend\n\n";
+    stream << "-- Optionally called on keyboard events when the flag is set.\n";
+    stream << "function OnKeyUp(ui, symbol, modifier_bits)\nend\n\n";
 
     io.flush();
     io.close();

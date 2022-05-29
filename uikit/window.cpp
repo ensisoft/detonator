@@ -135,6 +135,7 @@ Window::Window(const Window& other)
     mScriptFile  = other.mScriptFile;
     mStyleFile   = other.mStyleFile;
     mStyleString = other.mStyleString;
+    mFlags       = other.mFlags;
 
     std::unordered_map<const Widget*, const Widget*> map;
 
@@ -417,6 +418,7 @@ void Window::IntoJson(data::Writer& data) const
     data.Write("script_file", mScriptFile);
     data.Write("style_file", mStyleFile);
     data.Write("style_string", mStyleString);
+    data.Write("flags", mFlags);
     RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
 
@@ -501,6 +503,7 @@ size_t Window::GetHash() const
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mStyleFile);
     hash = base::hash_combine(hash, mStyleString);
+    hash = base::hash_combine(hash, mFlags);
     mRenderTree.PreOrderTraverseForEach([&hash](const Widget* widget) {
         if (widget == nullptr)
             return;
@@ -522,6 +525,7 @@ Window& Window::operator=(const Window& other)
     std::swap(mStyleString, copy.mStyleString);
     std::swap(mWidgets, copy.mWidgets);
     std::swap(mRenderTree, copy.mRenderTree);
+    std::swap(mFlags, copy.mFlags);
     return *this;
 }
 
@@ -535,6 +539,7 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
     if (!data.Read("style_file", &ret.mStyleFile))
         data.Read("style", &ret.mStyleFile); // old version before style_string and style_file
     data.Read("style_string", &ret.mStyleString);
+    data.Read("flags", &ret.mFlags);
 
     if (!data.GetNumChunks("widgets"))
         return ret;

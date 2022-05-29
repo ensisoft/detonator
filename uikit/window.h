@@ -26,6 +26,7 @@
 
 #include "data/fwd.h"
 #include "base/tree.h"
+#include "base/bitflag.h"
 #include "uikit/widget.h"
 #include "uikit/types.h"
 #include "uikit/op.h"
@@ -74,6 +75,13 @@ namespace uik
         using RenderTree    = base::RenderTree<Widget>;
         using Visitor       = RenderTree::Visitor;
         using ConstVisitor  = RenderTree::ConstVisitor;
+
+        enum class Flags {
+            // Whether to pass keyboard events to the window script or not.
+            WantsKeyEvents,
+            // Whether to pass mouse events to the window script or not.
+            WantsMouseEvents,
+        };
 
         Window();
         Window(const Window& other);
@@ -236,13 +244,13 @@ namespace uik
         // will be None.
         struct WidgetAction {
             // Name of the widget that generated the action.
-            // Note that this isn't necessarily unique but depends entirely
+            // Note that this isn't necessarily unique but depends on entirely
             // how the widgets have been named. If you're relying on this
             // for identifying the source of the event (such as OK button)
             // then make sure to use unique names.
             std::string name;
-            // Id of the widget that generated the action. Unlike the name
-            // the widget Ids are always created uniquely when a widget is
+            // ID of the widget that generated the action. Unlike the name
+            // the widget IDs are always created uniquely when a widget is
             // created (except when they're copied bitwise!). In terms of
             // identifying which widget generated the action this is more
             // reliable than the name.
@@ -308,6 +316,8 @@ namespace uik
         { mStyleString.clear(); }
         void ResetScriptFile()
         { mScriptFile.clear(); }
+        void SetFlag(Flags flag, bool on_off)
+        { mFlags.set(flag, on_off); }
 
         // Getters.
         std::size_t GetHash() const;
@@ -329,6 +339,8 @@ namespace uik
         { return mRenderTree; }
         bool HasScriptFile() const
         { return !mScriptFile.empty(); }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
 
         // Helpers
         Widget* FindWidgetByName(const std::string& name)
@@ -366,5 +378,6 @@ namespace uik
         std::string mStyleString;
         std::vector<std::unique_ptr<Widget>> mWidgets;
         RenderTree mRenderTree;
+        base::bitflag<Flags> mFlags;
     };
 } // namespace

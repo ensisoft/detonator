@@ -1517,38 +1517,62 @@ void ScriptEngine::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& 
 template<typename KeyEvent>
 void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
 {
-    if (mSceneEnv)
-        CallLua((*mSceneEnv)[method], mScene,
-                static_cast<int>(key.symbol),
-                static_cast<int>(key.modifiers.value()));
-
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsKeyEvents))
     {
-        auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
-            continue;
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        if (auto* env = GetTypeEnv(*mWindow))
         {
-            CallLua((*env)[method], entity,
-                    static_cast<int>(key.symbol) ,
+            CallLua((*env)[method], mWindow,
+                    static_cast<int>(key.symbol),
                     static_cast<int>(key.modifiers.value()));
+        }
+    }
+
+    if (mScene)
+    {
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)[method], mScene,
+                    static_cast<int>(key.symbol),
+                    static_cast<int>(key.modifiers.value()));
+
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+        {
+            auto* entity = &mScene->GetEntity(i);
+            if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
+                continue;
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)[method], entity,
+                        static_cast<int>(key.symbol),
+                        static_cast<int>(key.modifiers.value()));
+            }
         }
     }
 }
 
 void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
 {
-    if (mSceneEnv)
-        CallLua((*mSceneEnv)[method], mScene, mouse);
-
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsMouseEvents))
     {
-        auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::WantsMouseEvents))
-            continue;
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        if (auto* env = GetTypeEnv(*mWindow))
         {
-            CallLua((*env)[method], entity, mouse);
+            CallLua((*env)[method], mWindow, mouse);
+        }
+    }
+
+    if (mScene)
+    {
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)[method], mScene, mouse);
+
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+        {
+            auto* entity = &mScene->GetEntity(i);
+            if (!entity->TestFlag(Entity::Flags::WantsMouseEvents))
+                continue;
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)[method], entity, mouse);
+            }
         }
     }
 }
