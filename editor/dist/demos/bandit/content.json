@@ -17016,10 +17016,15 @@
   ],
   "uis": [
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "7qhE9P3Lno",
       "name": "Game UI",
       "resource_id": "7qhE9P3Lno",
       "resource_name": "Game UI",
+      "script_file": "",
       "style_file": "app://ui/default.json",
       "style_string": "",
       "widgets": [
@@ -17157,10 +17162,15 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "M3GBwLlWRp",
       "name": "Menu UI",
       "resource_id": "M3GBwLlWRp",
       "resource_name": "Menu UI",
+      "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",
       "widgets": [
