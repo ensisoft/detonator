@@ -5280,10 +5280,15 @@
   ],
   "uis": [
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "RoGbL91JLQ",
       "name": "GameOver",
       "resource_id": "RoGbL91JLQ",
       "resource_name": "GameOver",
+      "script_file": "",
       "style_file": "app://ui/default.json",
       "style_string": "",
       "widgets": [
@@ -5420,10 +5425,15 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "T38qa8wN2K",
       "name": "MainMenu",
       "resource_id": "T38qa8wN2K",
       "resource_name": "MainMenu",
+      "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",
       "widgets": [
@@ -5640,10 +5650,15 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "4eIBhHhK0W",
       "name": "Credits",
       "resource_id": "4eIBhHhK0W",
       "resource_name": "Credits",
+      "script_file": "",
       "style_file": "app://ui/default.json",
       "style_string": "",
       "widgets": [
@@ -5738,10 +5753,15 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "PYYxBsykKG",
       "name": "Options",
       "resource_id": "PYYxBsykKG",
       "resource_name": "Options",
+      "script_file": "",
       "style_file": "app://ui/default.json",
       "style_string": "",
       "widgets": [

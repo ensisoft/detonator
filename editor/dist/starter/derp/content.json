@@ -1330,10 +1330,15 @@
   ],
   "uis": [
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "id5BsoCSrO",
       "name": "MainMenu",
       "resource_id": "id5BsoCSrO",
       "resource_name": "MainMenu",
+      "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",
       "widgets": [
