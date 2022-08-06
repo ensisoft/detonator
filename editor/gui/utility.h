@@ -267,6 +267,12 @@ inline void SetValue(QGroupBox* group, const QString& text)
     group->setTitle(text);
 }
 
+inline void SetValue(QGroupBox* group, const std::string& text)
+{
+    QSignalBlocker s(group);
+    group->setTitle(app::FromUtf8(text));
+}
+
 inline void SetValue(QLineEdit* line, const std::string& val)
 {
     QSignalBlocker s(line);

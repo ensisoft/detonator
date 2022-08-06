@@ -22,8 +22,12 @@
 #  include <QFileDialog>
 #  include <QFileInfo>
 #  include <Qt-Color-Widgets/include/ColorDialog>
+#  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
+#include <algorithm>
+
+#include "base/assert.h"
 #include "base/utility.h"
 #include "uikit/widget.h"
 #include "engine/ui.h"
@@ -53,6 +57,7 @@ enum class PropertyType {
 enum class PropertySelector {
     Normal, Disabled, Focused, Moused, Pressed
 };
+
 std::string GetSelectorString(PropertySelector selector)
 {
     if (selector == PropertySelector::Disabled)
@@ -65,20 +70,36 @@ std::string GetSelectorString(PropertySelector selector)
         return "/pressed";
     return "";
 }
+std::string GetPropertyKey(const std::string& klass,
+                           const std::string& id,
+                           const std::string& key,
+                           const std::string& selector)
+{
+    ASSERT(!key.empty());
+    ASSERT(!klass.empty());
+
+    // if we modify the properties of a specific widget then
+    // ID takes over, otherwise we use the widget class to apply
+    // the property to all widgets of the specific class
+    if (!id.empty())
+        return id + selector + "/" + key;
+    return "window/" + klass + selector + "/" + key;
+}
 
 struct Property {
-    std::string key;
+    std::string key;   // property key name
+    std::string klass; // the widget class name
     PropertyType type = PropertyType::Material;
 };
 class DlgWidgetStyleProperties::PropertyModel : public QAbstractTableModel {
 public:
-    PropertyModel(const std::string& identifier,
-                  std::vector<Property>&& props, engine::UIStyle* style, app::Workspace* workspace)
+    PropertyModel(std::vector<Property>&& props, engine::UIStyle* style, app::Workspace* workspace)
       : mWorkspace(workspace)
-      , mIdentifier(identifier)
       , mProperties(std::move(props))
       , mStyle(style)
-    {}
+    {
+        mPropertyCount = mProperties.size();
+    }
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
         if (role == Qt::DisplayRole)
@@ -86,13 +107,14 @@ public:
             const auto col = index.column();
             const auto row = index.row();
             const auto& prop = mProperties[row];
-            if (col == 0) return app::FromUtf8(prop.key);
-            else if (col == 1) return app::toString(prop.type);
-            else if (col == 2) return PropString(row, "");
-            else if (col == 3) return PropString(row, "/disabled");
-            else if (col == 4) return PropString(row, "/focused");
-            else if (col == 5) return PropString(row, "/mouse-over");
-            else if (col == 6) return PropString(row, "/pressed");
+            if (col == 0) return app::FromUtf8(prop.klass);
+            else if (col == 1) return app::FromUtf8(prop.key);
+            else if (col == 2) return app::toString(prop.type);
+            else if (col == 3) return PropString(row, "");
+            else if (col == 4) return PropString(row, "/disabled");
+            else if (col == 5) return PropString(row, "/focused");
+            else if (col == 6) return PropString(row, "/mouse-over");
+            else if (col == 7) return PropString(row, "/pressed");
             else BUG("Unknown property table column index.");
         }
         return QVariant();
@@ -101,24 +123,25 @@ public:
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
-            if (section == 0) return "Key";
-            else if (section == 1) return "Type";
-            else if (section == 2) return "Normal";
-            else if (section == 3) return "Disabled";
-            else if (section == 4) return "Focused";
-            else if (section == 5) return "Moused";
-            else if (section == 6) return "Pressed";
+            if (section == 0) return "Class";
+            else if (section == 1) return "Key";
+            else if (section == 2) return "Type";
+            else if (section == 3) return "Normal";
+            else if (section == 4) return "Disabled";
+            else if (section == 5) return "Focused";
+            else if (section == 6) return "Moused";
+            else if (section == 7) return "Pressed";
             else BUG("Unknown property table column index.");
         }
         return QVariant();
     }
     virtual int rowCount(const QModelIndex&) const override
     {
-        return static_cast<int>(mProperties.size());
+        return static_cast<int>(mPropertyCount);
     }
     virtual int columnCount(const QModelIndex&) const override
     {
-        return 7;
+        return 8;
     }
     const Property& GetProperty(size_t index) const
     {
@@ -126,20 +149,34 @@ public:
     }
     void UpdateRow(size_t row)
     {
-        emit dataChanged(index(row, 0), index(row, 7));
+        emit dataChanged(index(row, 0), index(row, 8));
     }
-    void SetIdentifier(const std::string& identifier)
+    void SetWidgetId(const std::string& id)
     {
-        mIdentifier = identifier;
-
-        emit dataChanged(index(0, 0), index(static_cast<int>(mProperties.size()), 7));
+        mWidgetId = id;
     }
+    void FilterPropertiesByClass(const std::string& klass)
+    {
+        QAbstractTableModel::beginResetModel();
+
+        // partition the list of properties based on the widget class
+        // so that only properties that apply to the particular class
+        // are visible in the table.
+        auto end = std::stable_partition(mProperties.begin(),
+                                         mProperties.end(), [&klass](const auto& prop) {
+            return prop.klass == klass;
+        });
+        mPropertyCount = std::distance(mProperties.begin(), end);
+
+        QAbstractTableModel::endResetModel();
+    }
+
 private:
     QString PropString(int row, const char* selector) const
     {
-        const auto& spec = mProperties[row];
-        const auto type  = spec.type;
-        const auto& property_key = mIdentifier + selector + "/" + spec.key;
+        const auto& prop = mProperties[row];
+        const auto type  = prop.type;
+        const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
         if (type == PropertyType::Material)
         {
@@ -188,17 +225,17 @@ private:
 
 private:
     const app::Workspace* mWorkspace = nullptr;
-    std::string mIdentifier;
+    std::string mWidgetId;
+    std::size_t mPropertyCount = 0;
     std::vector<Property> mProperties;
     engine::UIStyle* mStyle = nullptr;
     uik::Widget* mWidget = nullptr;
 };
 
-DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UIStyle* style,  app::Workspace* workspace, std::string identifier)
+DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UIStyle* style,  app::Workspace* workspace)
   : QDialog(parent)
   , mWorkspace(workspace)
   , mStyle(style)
-  , mIdentifier(std::move(identifier))
 {
     mUI.setupUi(this);
     PopulateFromEnum<PropertySelector>(mUI.cmbSelector);
@@ -207,8 +244,6 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     PopulateFromEnum<engine::UIStyle::WidgetShape>(mUI.widgetShape);
     PopulateFontNames(mUI.widgetFontName);
     PopulateFontSizes(mUI.widgetFontSize);
-    SetVisible(mUI.lblWidgetClass, false);
-    SetVisible(mUI.cmbWidgetClass, false);
     SetVisible(mUI.widgetFontName, false);
     SetVisible(mUI.btnOpenFontFile, false);
     SetVisible(mUI.btnSelectFont, false);
@@ -224,13 +259,6 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     SetEnabled(mUI.btnResetProperty, false);
     SetEnabled(mUI.cmbSelector, false);
 
-    if (mIdentifier.empty())
-    {
-        SetVisible(mUI.lblWidgetClass, true);
-        SetVisible(mUI.cmbWidgetClass, true);
-        mIdentifier = "window/checkbox";
-    }
-
     QMenu* menu = new QMenu(this);
     QAction* set_material = menu->addAction(QIcon("icons:material.png"), "Material");
     QAction* set_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
@@ -240,60 +268,152 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     connect(set_gradient, &QAction::triggered, this, &DlgWidgetStyleProperties::SetWidgetGradient);
     mUI.btnSelectMaterial->setMenu(menu);
 
+    using T = uik::Widget::Type;
+
     std::vector<Property> props = {
-        {"background",                    PropertyType::Material},
-        {"shape",                         PropertyType::Shape},
-        {"border",                        PropertyType::Material},
-        {"border-width",                  PropertyType::Float},
-        {"text-color",                    PropertyType::Color},
-        {"text-blink",                    PropertyType::Bool},
-        {"text-underline",                PropertyType::Bool},
-        {"text-font",                     PropertyType::FontString},
-        {"text-size",                     PropertyType::FontSize},
-        {"text-vertical-align",           PropertyType::VertTextAlign},
-        {"text-horizontal-align",         PropertyType::HortTextAlign},
-        {"edit-text-color",               PropertyType::Color},
-        {"edit-text-font",                PropertyType::FontString},
-        {"edit-text-size",                PropertyType::FontSize},
-        {"text-edit-background",          PropertyType::Material},
-        {"text-edit-shape",               PropertyType::Shape},
-        {"text-edit-border",              PropertyType::Material},
-        {"text-edit-border-width",        PropertyType::Float},
-        {"check-background",              PropertyType::Material},
-        {"check-background-shape",        PropertyType::Shape},
-        {"check-border",                  PropertyType::Material},
-        {"check-border-width",            PropertyType::Float},
-        {"check-mark",                    PropertyType::Material},
-        {"check-shape",                   PropertyType::Shape},
-        {"button-background",             PropertyType::Material},
-        {"button-shape",                  PropertyType::Shape},
-        {"button-border",                 PropertyType::Material},
-        {"button-border-width",           PropertyType::Float},
-        {"button-icon",                   PropertyType::Material},
-        {"button-icon-arrow-up",          PropertyType::Material},
-        {"button-icon-arrow-down",        PropertyType::Material},
-        {"slider-background",             PropertyType::Material},
-        {"slider-background-shape",       PropertyType::Shape},
-        {"slider-knob",                   PropertyType::Material},
-        {"slider-knob-shape",             PropertyType::Shape},
-        {"slider-knob-border",            PropertyType::Material},
-        {"slider-knob-border-width",      PropertyType::Float},
-        {"slider-border",                 PropertyType::Material},
-        {"slider-border-width",           PropertyType::Float},
-        {"progress-bar-background",       PropertyType::Material},
-        {"progress-bar-background-shape", PropertyType::Shape},
-        {"progress-bar-fill",             PropertyType::Material},
-        {"progress-bar-fill-shape",       PropertyType::Shape},
-        {"progress-bar-border",           PropertyType::Material},
-        {"progress-bar-border-width",     PropertyType::Float}
+        // base widget style properties that apply to all widgets.
+        {"background",                    "widget", PropertyType::Material},
+        {"shape",                         "widget", PropertyType::Shape},
+        {"border",                        "widget", PropertyType::Material},
+        {"border-width",                  "widget", PropertyType::Float},
+        {"background",                    "label", PropertyType::Material},
+        {"shape",                         "label", PropertyType::Shape},
+        {"border",                        "label", PropertyType::Material},
+        {"border-width",                  "label", PropertyType::Float},
+        {"background",                    "form", PropertyType::Material},
+        {"shape",                         "form", PropertyType::Shape},
+        {"border",                        "form", PropertyType::Material},
+        {"border-width",                  "form", PropertyType::Float},
+        {"background",                    "groupbox", PropertyType::Material},
+        {"shape",                         "groupbox", PropertyType::Shape},
+        {"border",                        "groupbox", PropertyType::Material},
+        {"border-width",                  "groupbox", PropertyType::Float},
+        {"background",                    "progress-bar", PropertyType::Material},
+        {"shape",                         "progress-bar", PropertyType::Shape},
+        {"border",                        "progress-bar", PropertyType::Material},
+        {"border-width",                  "progress-bar", PropertyType::Float},
+        {"background",                    "push-button", PropertyType::Material},
+        {"shape",                         "push-button", PropertyType::Shape},
+        {"border",                        "push-button", PropertyType::Material},
+        {"border-width",                  "push-button", PropertyType::Float},
+        {"background",                    "checkbox", PropertyType::Material},
+        {"shape",                         "checkbox", PropertyType::Shape},
+        {"border",                        "checkbox", PropertyType::Material},
+        {"border-width",                  "checkbox", PropertyType::Float},
+        {"background",                    "radiobutton", PropertyType::Material},
+        {"shape",                         "radiobutton", PropertyType::Shape},
+        {"border",                        "radiobutton", PropertyType::Material},
+        {"border-width",                  "radiobutton", PropertyType::Float},
+        {"background",                    "spinbox", PropertyType::Material},
+        {"shape",                         "spinbox", PropertyType::Shape},
+        {"border",                        "spinbox", PropertyType::Material},
+        {"border-width",                  "spinbox", PropertyType::Float},
+        {"background",                    "slider", PropertyType::Material},
+        {"shape",                         "slider", PropertyType::Shape},
+        {"border",                        "slider", PropertyType::Material},
+        {"border-width",                  "slider", PropertyType::Float},
+
+        // DrawStaticText
+        {"text-color",                    "label", PropertyType::Color},
+        {"text-blink",                    "label", PropertyType::Bool},
+        {"text-underline",                "label", PropertyType::Bool},
+        {"text-font",                     "label", PropertyType::FontString},
+        {"text-size",                     "label", PropertyType::FontSize},
+        {"text-vertical-align",           "label", PropertyType::VertTextAlign},
+        {"text-horizontal-align",         "label", PropertyType::HortTextAlign},
+        {"text-color",                    "progress-bar", PropertyType::Color},
+        {"text-blink",                    "progress-bar", PropertyType::Bool},
+        {"text-underline",                "progress-bar", PropertyType::Bool},
+        {"text-font",                     "progress-bar", PropertyType::FontString},
+        {"text-size",                     "progress-bar", PropertyType::FontSize},
+        {"text-vertical-align",           "progress-bar", PropertyType::VertTextAlign},
+        {"text-horizontal-align",         "progress-bar", PropertyType::HortTextAlign},
+        {"text-color",                    "push-button", PropertyType::Color},
+        {"text-blink",                    "push-button", PropertyType::Bool},
+        {"text-underline",                "push-button", PropertyType::Bool},
+        {"text-font",                     "push-button", PropertyType::FontString},
+        {"text-size",                     "push-button", PropertyType::FontSize},
+        {"text-vertical-align",           "push-button", PropertyType::VertTextAlign},
+        {"text-horizontal-align",         "push-button", PropertyType::HortTextAlign},
+        {"text-color",                    "checkbox", PropertyType::Color},
+        {"text-blink",                    "checkbox", PropertyType::Bool},
+        {"text-underline",                "checkbox", PropertyType::Bool},
+        {"text-font",                     "checkbox", PropertyType::FontString},
+        {"text-size",                     "checkbox", PropertyType::FontSize},
+        {"text-vertical-align",           "checkbox", PropertyType::VertTextAlign},
+        {"text-horizontal-align",         "checkbox", PropertyType::HortTextAlign},
+        {"text-color",                    "radiobutton", PropertyType::Color},
+        {"text-blink",                    "radiobutton", PropertyType::Bool},
+        {"text-underline",                "radiobutton", PropertyType::Bool},
+        {"text-font",                     "radiobutton", PropertyType::FontString},
+        {"text-size",                     "radiobutton", PropertyType::FontSize},
+        {"text-vertical-align",           "radiobutton", PropertyType::VertTextAlign},
+        {"text-horizontal-align",         "radiobutton", PropertyType::HortTextAlign},
+        // DrawEditableText
+        {"edit-text-color",               "spinbox", PropertyType::Color},
+        {"edit-text-font",                "spinbox", PropertyType::FontString},
+        {"edit-text-size",                "spinbox", PropertyType::FontSize},
+        // DrawTextEditBox
+        {"text-edit-background",          "spinbox", PropertyType::Material},
+        {"text-edit-shape",               "spinbox", PropertyType::Shape},
+        {"text-edit-border",              "spinbox", PropertyType::Material},
+        {"text-edit-border-width",        "spinbox", PropertyType::Float},
+        // DrawCheckBox, DrawRadioButton
+        {"check-background",              "checkbox", PropertyType::Material},
+        {"check-background-shape",        "checkbox", PropertyType::Shape},
+        {"check-border",                  "checkbox", PropertyType::Material},
+        {"check-border-width",            "checkbox", PropertyType::Float},
+        {"check-mark",                    "checkbox", PropertyType::Material},
+        {"check-shape",                   "checkbox", PropertyType::Shape},
+        {"check-background",              "radiobutton", PropertyType::Material},
+        {"check-background-shape",        "radiobutton", PropertyType::Shape},
+        {"check-border",                  "radiobutton", PropertyType::Material},
+        {"check-border-width",            "radiobutton", PropertyType::Float},
+        {"check-mark",                    "radiobutton", PropertyType::Material},
+        {"check-shape",                   "radiobutton", PropertyType::Shape},
+        // DrawButton
+        {"button-background",             "push-button", PropertyType::Material},
+        {"button-shape",                  "push-button", PropertyType::Shape},
+        {"button-border",                 "push-button", PropertyType::Material},
+        {"button-border-width",           "push-button", PropertyType::Float},
+        {"button-icon",                   "push-button", PropertyType::Material},
+        {"button-icon-arrow-up",          "push-button", PropertyType::Material},
+        {"button-icon-arrow-down",        "push-button", PropertyType::Material},
+        {"button-background",             "spinbox", PropertyType::Material},
+        {"button-shape",                  "spinbox", PropertyType::Shape},
+        {"button-border",                 "spinbox", PropertyType::Material},
+        {"button-border-width",           "spinbox", PropertyType::Float},
+        {"button-icon",                   "spinbox", PropertyType::Material},
+        {"button-icon-arrow-up",          "spinbox", PropertyType::Material},
+        {"button-icon-arrow-down",        "spinbox", PropertyType::Material},
+        // DrawSlider
+        {"slider-background",             "slider", PropertyType::Material},
+        {"slider-background-shape",       "slider", PropertyType::Shape},
+        {"slider-knob",                   "slider", PropertyType::Material},
+        {"slider-knob-shape",             "slider", PropertyType::Shape},
+        {"slider-knob-border",            "slider", PropertyType::Material},
+        {"slider-knob-border-width",      "slider", PropertyType::Float},
+        {"slider-border",                 "slider", PropertyType::Material},
+        {"slider-border-width",           "slider", PropertyType::Float},
+        // DrawProgressBar
+        {"progress-bar-background",       "progress-bar", PropertyType::Material},
+        {"progress-bar-background-shape", "progress-bar", PropertyType::Shape},
+        {"progress-bar-fill",             "progress-bar", PropertyType::Material},
+        {"progress-bar-fill-shape",       "progress-bar", PropertyType::Shape},
+        {"progress-bar-border",           "progress-bar", PropertyType::Material},
+        {"progress-bar-border-width",     "progress-bar", PropertyType::Float}
     };
     std::sort(props.begin(), props.end(), [](const auto& lhs, const auto& rhs) {
-        return lhs.key < rhs.key;
+        if (lhs.klass < rhs.klass)
+            return true;
+        else if (lhs.klass == rhs.klass)
+            return lhs.key < rhs.key;
+        return false;
     });
 
-    mModel.reset(new PropertyModel(mIdentifier, std::move(props), style, workspace));
+    mModel.reset(new PropertyModel(std::move(props), style, workspace));
     mUI.tableView->setModel(mModel.get());
-    mUI.tableView->setColumnWidth(0, 300);
+    mUI.tableView->setColumnWidth(1, 250);
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &DlgWidgetStyleProperties::TableSelectionChanged);
 
@@ -307,6 +427,17 @@ DlgWidgetStyleProperties::~DlgWidgetStyleProperties() = default;
 void DlgWidgetStyleProperties::SetMaterials(const std::vector<app::ListItem>& list)
 {
     SetList(mUI.widgetMaterial, list);
+}
+
+void DlgWidgetStyleProperties::SetWidget(const uik::Widget* widget)
+{
+    // when applying the dialog to change the properties for a
+    // specific widget we must
+    // - filter the list of properties based on the widget class.
+    // - then use the widget's ID when setting a property.
+    mModel->FilterPropertiesByClass(widget->GetClassName());
+    mModel->SetWidgetId(widget->GetId());
+    mWidgetId = widget->GetId();
 }
 
 void DlgWidgetStyleProperties::ShowPropertyValue()
@@ -335,6 +466,7 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
     SetValue(mUI.widgetFloat, 0.0f);
     SetValue(mUI.widgetShape, -1);
     SetValue(mUI.widgetMaterial, -1);
+    SetValue(mUI.grpValue, std::string("Value"));
 
     const auto& indices = mUI.tableView->selectionModel()->selectedRows();
     if (indices.empty())
@@ -342,7 +474,7 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
 
     const auto& prop = mModel->GetProperty(indices[0].row());
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
     const auto type = prop.type;
 
     if (type == PropertyType::Material)
@@ -416,8 +548,7 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
         if (const auto& prop = mStyle->GetProperty(property_key))
             SetValue(mUI.widgetShape, prop.GetValue<engine::UIStyle::WidgetShape>());
     }
-    mUI.grpValue->setTitle(app::FromUtf8(prop.key));
-
+    SetValue(mUI.grpValue, prop.key);
     SetEnabled(mUI.btnResetProperty, true);
     SetEnabled(mUI.cmbSelector, true);
 }
@@ -431,7 +562,7 @@ void DlgWidgetStyleProperties::SetPropertyValue()
     const auto row = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
     const auto type  = prop.type;
 
     if (type == PropertyType::Material)
@@ -524,7 +655,7 @@ void DlgWidgetStyleProperties::on_btnSelectFont_clicked()
     const auto row = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key  = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key  = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     QString font = GetValue(mUI.widgetFontName);
     if (font.isEmpty())
@@ -554,7 +685,7 @@ void DlgWidgetStyleProperties::on_btnResetProperty_clicked()
     const auto row = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key  = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key  = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     if (prop.type == PropertyType::Material)
     {
@@ -569,13 +700,6 @@ void DlgWidgetStyleProperties::on_btnResetProperty_clicked()
     mModel->UpdateRow(row);
 
     ShowPropertyValue();
-}
-
-void DlgWidgetStyleProperties::on_cmbWidgetClass_currentIndexChanged(int)
-{
-    const std::string& klass = GetValue(mUI.cmbWidgetClass);
-    mIdentifier = "window/" + klass,
-    mModel->SetIdentifier(mIdentifier);
 }
 
 void DlgWidgetStyleProperties::on_cmbSelector_currentIndexChanged(int)
@@ -641,7 +765,7 @@ void DlgWidgetStyleProperties::SetWidgetMaterial()
     const auto row = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     SetValue(mUI.widgetMaterial, ListItemId(dlg.GetSelectedMaterialId()));
 
@@ -660,7 +784,7 @@ void DlgWidgetStyleProperties::SetWidgetColor()
     const auto row   = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     color_widgets::ColorDialog dlg(this);
     dlg.setAlphaEnabled(false);
@@ -692,7 +816,7 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
     const auto row = indices[0].row();
     const auto& prop = mModel->GetProperty(row);
     const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
-    const auto& property_key = mIdentifier + selector + "/" + prop.key;
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     DlgGradient dlg(this);
     if (const auto* material = mStyle->GetMaterialType(property_key))

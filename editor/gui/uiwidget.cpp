@@ -1301,9 +1301,10 @@ void UIWidget::on_btnEditWidgetStyle_clicked()
         // to restore the style if the dialog is cancelled.
         std::string style_string = widget->GetStyleString();
 
-        DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace, widget->GetId());
+        DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace);
         dlg.SetPainter(mState.painter.get());
         dlg.SetMaterials(ListMaterials(mState.workspace));
+        dlg.SetWidget(widget);
         if (dlg.exec() == QDialog::Rejected)
         {
             // delete all properties including both changes we want to discard
@@ -1357,7 +1358,7 @@ void UIWidget::on_btnEditWindowStyle_clicked()
 {
     std::string style_string = mState.window.GetStyleString();
 
-    DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace, "");
+    DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace);
     dlg.SetPainter(mState.painter.get());
     dlg.SetMaterials(ListMaterials(mState.workspace));
     if (dlg.exec() == QDialog::Rejected)
