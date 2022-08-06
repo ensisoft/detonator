@@ -46,7 +46,7 @@ namespace uik
             Label,
             // Widget is a push button that can be clicked/triggered.
             PushButton,
-            // Widget a a radio button with automatic exclusion between
+            // Widget is a radio button with automatic exclusion between
             // radio buttons within a container.
             RadioButton,
             // Widget is a checkbox which has a boolean on/off toggle.
@@ -72,7 +72,7 @@ namespace uik
         virtual ~Widget() = default;
         // Get the unique Widget ID.
         virtual std::string GetId() const = 0;
-        // Get the human readable name assigned to the widget
+        // Get the human-readable name assigned to the widget
         virtual std::string GetName() const = 0;
         // Get the current hash value based on the widget's state.
         // The hash can be used to detect changes in the widget's state.
@@ -238,6 +238,8 @@ namespace uik
         { return GetSize().GetWidth(); }
         inline float GetHeight() const
         { return GetSize().GetHeight(); }
+        inline std::string GetClassName() const
+        { return GetWidgetClassName(this->GetType()); }
 
         static FSize ClampSize(const FSize& size)
         {
@@ -245,6 +247,8 @@ namespace uik
             const auto height = math::clamp(0.0f, size.GetHeight(), size.GetHeight());
             return FSize(width, height);
         }
+        static std::string GetWidgetClassName(Type type);
+        static Type GetWidgetClassType(const std::string& klass);
     private:
     };
 
