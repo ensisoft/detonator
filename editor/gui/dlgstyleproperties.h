@@ -52,13 +52,14 @@ namespace gui
     public:
         DlgWidgetStyleProperties(QWidget* parent,
             engine::UIStyle* style,
-            app::Workspace* workspace,
-            std::string identifier);
+            app::Workspace* workspace);
        ~DlgWidgetStyleProperties();
 
         void SetMaterials(const std::vector<app::ListItem>& list);
         void SetPainter(engine::UIPainter* painter)
         { mPainter = painter; }
+        // call this to apply the dialog to a specific widget instance
+        void SetWidget(const uik::Widget* widget);
     private:
         void ShowPropertyValue();
         void SetPropertyValue();
@@ -68,7 +69,6 @@ namespace gui
         void on_btnOpenFontFile_clicked();
         void on_btnSelectFont_clicked();
         void on_btnResetProperty_clicked();
-        void on_cmbWidgetClass_currentIndexChanged(int);
         void on_cmbSelector_currentIndexChanged(int);
         void on_widgetFontName_currentIndexChanged(int);
         void on_widgetFontSize_currentIndexChanged(int);
@@ -92,6 +92,6 @@ namespace gui
         app::Workspace* mWorkspace  = nullptr;
         engine::UIStyle* mStyle     = nullptr;
         engine::UIPainter* mPainter = nullptr;
-        std::string mIdentifier;
+        std::string mWidgetId;
     };
 } // namespace
