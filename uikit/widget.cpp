@@ -811,4 +811,54 @@ std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
     return nullptr;
 }
 
+// static
+std::string Widget::GetWidgetClassName(uik::Widget::Type type)
+{
+    if (type == Widget::Type::Form)
+        return "form";
+    if (type == Widget::Type::Label)
+        return "label";
+    else if (type == Widget::Type::PushButton)
+        return "push-button";
+    else if (type == Widget::Type::CheckBox)
+        return "checkbox";
+    else if (type == Widget::Type::GroupBox)
+        return "groupbox";
+    else if (type == Widget::Type::SpinBox)
+        return "spinbox";
+    else if (type == Widget::Type::Slider)
+        return "slider";
+    else if (type == Widget::Type::ProgressBar)
+        return "progress-bar";
+    else if (type == Widget::Type::RadioButton)
+        return "radiobutton";
+    else BUG("Unhandled widget type.");
+    return "";
+}
+
+// static
+Widget::Type Widget::GetWidgetClassType(const std::string& klass)
+{
+    if (klass == "form")
+        return Widget::Type::Form;
+    else if (klass == "label")
+        return Widget::Type::Label;
+    else if (klass == "push-button")
+        return Widget::Type::PushButton;
+    else if (klass == "checkbox")
+        return Widget::Type::CheckBox;
+    else if (klass == "groupbox")
+        return Widget::Type::GroupBox;
+    else if (klass == "spinbox")
+        return Widget::Type::SpinBox;
+    else if (klass == "slider")
+        return Widget::Type::Slider;
+    else if (klass == "progress-bar")
+        return Widget::Type::ProgressBar;
+    else if (klass == "radiobutton")
+        return Widget::Type::RadioButton;
+    else BUG("No such widget class.");
+    return Widget::Type::RadioButton;
+}
+
 } // namespace
