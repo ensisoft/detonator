@@ -86,7 +86,10 @@ public:
     {
         mContext->MakeCurrent(mSurface.get());
     }
-
+    virtual Version GetVersion() const override
+    {
+        return Version::OpenGL_ES2;
+    }
 private:
     std::unique_ptr<wdk::Context> mContext;
     std::unique_ptr<wdk::Surface> mSurface;
@@ -300,8 +303,7 @@ int test_main(int argc, char* argv[])
     constexpr auto SurfaceHeight = 768;
     const bool screenshot = opt.WasGiven("--screenshot");
 
-    auto graphics_device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight));
+    auto graphics_device = gfx::Device::Create(std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight));
     auto graphics_painter = gfx::Painter::Create(graphics_device);
     graphics_painter->SetSurfaceSize(SurfaceWidth, SurfaceHeight);
     graphics_painter->SetEditingMode(false);

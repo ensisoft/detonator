@@ -138,6 +138,7 @@ add_library(GfxLib
     graphics/drawable.cpp
     graphics/material.cpp
     graphics/image.cpp
+    graphics/device.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -166,6 +167,7 @@ add_library(GfxLibTesting
     graphics/drawable.cpp
     graphics/material.cpp
     graphics/image.cpp
+    graphics/device.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -474,6 +476,7 @@ add_executable(graphics_test
     graphics/material.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
+    graphics/device.cpp
     graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp

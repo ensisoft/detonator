@@ -980,7 +980,7 @@ public:
 
     virtual void Init(const InitParams& init) override
     {
-        mDevice  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, init.context);
+        mDevice  = gfx::Device::Create(init.context);
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mPainter->SetEditingMode(false);

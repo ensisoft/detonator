@@ -1849,6 +1849,10 @@ int main(int argc, char* argv[])
         {
             mContext->MakeCurrent(mSurface.get());
         }
+        virtual Version GetVersion() const override
+        {
+            return Version::OpenGL_ES2;
+        }
         wdk::uint_t GetVisualID() const
         { return mVisualID; }
 
@@ -1877,7 +1881,7 @@ int main(int argc, char* argv[])
     };
 
     auto context = std::make_shared<WindowContext>(sampling, srgb);
-    auto device  = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, context);
+    auto device  = gfx::Device::Create(context);
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
 

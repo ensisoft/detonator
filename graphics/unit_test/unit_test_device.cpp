@@ -76,6 +76,10 @@ public:
     {
         mContext->MakeCurrent(mSurface.get());
     }
+    virtual Version GetVersion() const override
+    {
+        return Version::OpenGL_ES2;
+    }
 
 private:
     std::unique_ptr<wdk::Context> mContext;
@@ -101,8 +105,7 @@ gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* f
 
 void unit_test_device()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     // test clear color.
     const gfx::Color colors[] = {
@@ -151,8 +154,7 @@ void unit_test_device()
 
 void unit_test_shader()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     // junk
     {
@@ -207,8 +209,7 @@ void main() {
 
 void unit_test_texture()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     auto* texture = dev->MakeTexture("foo");
     TEST_REQUIRE(texture->GetWidth() == 0);
@@ -242,8 +243,7 @@ void unit_test_texture()
 
 void unit_test_program()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     auto* prog = dev->MakeProgram("foo");
 
@@ -308,8 +308,7 @@ void main() {
 
 void unit_test_render_color_only()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
@@ -366,8 +365,7 @@ void main() {
 
 void unit_test_render_with_single_texture()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(4, 4));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(4, 4));
 
     gfx::Bitmap<gfx::RGBA> data(4, 4);
     data.SetPixel(0, 0, gfx::Color::Red);
@@ -453,8 +451,7 @@ void main() {
 
 void unit_test_render_with_multiple_textures()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(4, 4));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(4, 4));
 
     // setup 4 textures and the output from fragment shader
     // is then the sum of all of these, i.e. white.
@@ -545,9 +542,7 @@ void main() {
 
 void unit_test_render_set_float_uniforms()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
-
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
@@ -668,8 +663,7 @@ void main() {
 
 void unit_test_render_set_int_uniforms()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     auto *geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
@@ -754,8 +748,8 @@ void main() {
 }
 void unit_test_render_set_matrix2x2_uniform()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
             { {-1,  1}, {0, 1} },
@@ -820,8 +814,8 @@ void main() {
 
 void unit_test_render_set_matrix3x3_uniform()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
             { {-1,  1}, {0, 1} },
@@ -886,8 +880,8 @@ void main() {
 
 void unit_test_render_set_matrix4x4_uniform()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
             { {-1,  1}, {0, 1} },
@@ -956,7 +950,8 @@ void unit_test_uniform_sampler_optimize_bug()
 {
     // shader code doesn't actually use the material, the sampler/uniform location
     // is thus -1 and no texture will be set.
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2, std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
@@ -1022,8 +1017,7 @@ void main() {
 
 void unit_test_clean_textures()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
@@ -1157,8 +1151,8 @@ void main() {
 
 void unit_test_render_dynamic()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
@@ -1256,8 +1250,7 @@ void main() {
 
 void unit_test_buffer_allocation()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     char junk_data[512] = {0};
 
@@ -1420,9 +1413,7 @@ void unit_test_empty_draw_lost_uniform_bug()
     // hash value will cause the uniform set to be skipped.
     // thus resulting in incorrect state!
 
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                   std::make_shared<TestContext>(10, 10));
-
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     auto* geom = dev->MakeGeometry("geom");
     // geometry doesn't have any actual vertex data!
@@ -1493,8 +1484,8 @@ void unit_test_max_texture_units_single_texture()
     // create enough textures to saturate all texture units.
     // then do enough draws to have all texture units become used.
     // then check that textures get evicted/rebound properly.
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+
     gfx::Device::DeviceCaps caps = {};
     dev->GetDeviceCaps(&caps);
 
@@ -1588,8 +1579,7 @@ void main() {
 
 void unit_test_max_texture_units_many_textures()
 {
-    auto dev = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(10, 10));
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
 
     gfx::Device::DeviceCaps caps = {};
     dev->GetDeviceCaps(&caps);

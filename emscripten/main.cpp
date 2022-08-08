@@ -157,6 +157,10 @@ public:
     {
         emscripten_webgl_make_context_current(mContext);
     }
+    virtual Version GetVersion() const override
+    {
+        return Version::WebGL_1;
+    }
 private:
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE mContext = 0;
 };

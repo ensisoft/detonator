@@ -311,6 +311,10 @@ void GfxWindow::doInit()
         {
             return (void*)mContext->getProcAddress(name);
         }
+        virtual Version GetVersion() const override
+        {
+            return Version::OpenGL_ES2;
+        }
     private:
         QOpenGLContext* mContext = nullptr;
     };
@@ -320,8 +324,7 @@ void GfxWindow::doInit()
     if (!device)
     {
         // create custom painter for fancier shader based effects.
-        device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-                                     std::make_shared<WindowContext>(mContext.get()));
+        device = gfx::Device::Create(std::make_shared<WindowContext>(mContext.get()));
         shared_device = device;
     }
     mCustomGraphicsDevice  = device;

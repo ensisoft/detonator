@@ -210,6 +210,10 @@ public:
     {
         return (void*)mContext->getProcAddress(name);
     }
+    virtual Version GetVersion() const override
+    {
+        return Version::OpenGL_ES2;
+    }
     void SetSurface(QWindow* surface)
     { mSurface = surface; }
 private:

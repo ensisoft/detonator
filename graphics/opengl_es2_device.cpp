@@ -870,9 +870,6 @@ public:
         TRACE_LEAVE(DrawGeometry);
     }
 
-    virtual Type GetDeviceType() const override
-    { return Type::OpenGL_ES2; }
-
     virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
     {
         if (flags & GCFlags::Programs)
@@ -2106,16 +2103,15 @@ private:
     } mExtensions;
 };
 
-// static
-std::shared_ptr<Device> Device::Create(Type type,
-    std::shared_ptr<Device::Context> context)
+namespace detail {
+std::shared_ptr<Device> CreateOpenGLES2Device(std::shared_ptr<gfx::Device::Context> context)
 {
     return std::make_shared<OpenGLES2GraphicsDevice>(context);
 }
-// static
-std::shared_ptr<Device> Device::Create(Type type, Device::Context* context)
+std::shared_ptr<Device> CreateOpenGLES2Device(gfx::Device::Context* context)
 {
     return std::make_shared<OpenGLES2GraphicsDevice>(context);
 }
+} // namespace
 
 } // namespace

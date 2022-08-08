@@ -367,8 +367,6 @@ public:
     virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
     {}
 
-    virtual Type GetDeviceType() const override
-    { return Type::OpenGL_ES2; }
     virtual void CleanGarbage(size_t, unsigned) override
     {}
 

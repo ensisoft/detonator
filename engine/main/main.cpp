@@ -211,6 +211,10 @@ public:
     {
         mContext->MakeCurrent(mSurface.get());
     }
+    virtual Version GetVersion() const override
+    {
+        return Version::OpenGL_ES2;
+    }
     wdk::uint_t GetVisualID() const
     { return mVisualID; }
 
