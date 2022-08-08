@@ -146,6 +146,11 @@ namespace gfx
             virtual void* Resolve(const char* name) = 0;
             // Get the context version.
             virtual Version GetVersion() const = 0;
+            // Check whether the context is a debug context or not.
+            // if the context is a debug context then additional debug
+            // features are enabled when supported by the underlying platform.
+            virtual bool IsDebug() const
+            { return false; }
         private:
         };
 

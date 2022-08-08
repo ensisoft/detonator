@@ -1784,6 +1784,7 @@ int main(int argc, char* argv[])
     bool fullscreen = false;
     bool user_interaction = true;
     bool srgb = true;
+    bool debug_context = false;
     int swap_interval = 0;
     int test_result   = EXIT_SUCCESS;
     std::string casename;
@@ -1792,6 +1793,8 @@ int main(int argc, char* argv[])
     {
         if (!std::strcmp(argv[i], "--debug-log"))
             base::EnableDebugLog(true);
+        else if (!std::strcmp(argv[i], "--debug"))
+            debug_context = true;
         else if (!std::strcmp(argv[i], "--msaa4"))
             sampling = wdk::Config::Multisampling::MSAA4;
         else if (!std::strcmp(argv[i], "--msaa8"))
@@ -1819,7 +1822,7 @@ int main(int argc, char* argv[])
     class WindowContext : public gfx::Device::Context
     {
     public:
-        WindowContext(wdk::Config::Multisampling sampling, bool srgb)
+        WindowContext(wdk::Config::Multisampling sampling, bool srgb, bool debug)
         {
             wdk::Config::Attributes attrs;
             attrs.red_size  = 8;
@@ -1833,9 +1836,10 @@ int main(int argc, char* argv[])
             attrs.srgb_buffer = srgb;
 
             mConfig   = std::make_unique<wdk::Config>(attrs);
-            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
+            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  debug,
                 wdk::Context::Type::OpenGL_ES);
             mVisualID = mConfig->GetVisualID();
+            mDebug = debug;
         }
         virtual void Display() override
         {
@@ -1852,6 +1856,10 @@ int main(int argc, char* argv[])
         virtual Version GetVersion() const override
         {
             return Version::OpenGL_ES2;
+        }
+        virtual bool IsDebug() const override
+        {
+            return mDebug;
         }
         wdk::uint_t GetVisualID() const
         { return mVisualID; }
@@ -1878,9 +1886,10 @@ int main(int argc, char* argv[])
         std::unique_ptr<wdk::Surface> mSurface;
         std::unique_ptr<wdk::Config>  mConfig;
         wdk::uint_t mVisualID = 0;
+        bool mDebug = false;
     };
 
-    auto context = std::make_shared<WindowContext>(sampling, srgb);
+    auto context = std::make_shared<WindowContext>(sampling, srgb, debug_context);
     auto device  = gfx::Device::Create(context);
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
