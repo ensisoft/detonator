@@ -87,7 +87,8 @@ public:
     {
         mContext->MakeCurrent(mSurface.get());
     }
-
+    virtual Version GetVersion() const override
+    { return Version::OpenGL_ES2; }
 private:
     std::unique_ptr<wdk::Context> mContext;
     std::unique_ptr<wdk::Surface> mSurface;
@@ -193,8 +194,7 @@ private:
 
 void unit_test_drawable_item()
 {
-    auto device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(256, 256));
+    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
     painter->SetOrthographicView(256, 256);
@@ -394,8 +394,7 @@ void unit_test_text_item()
 
 void unit_test_entity_layering()
 {
-    auto device = gfx::Device::Create(gfx::Device::Type::OpenGL_ES2,
-        std::make_shared<TestContext>(256, 256));
+    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
     painter->SetOrthographicView(256, 256);

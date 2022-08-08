@@ -109,10 +109,6 @@ namespace gfx
             float line_width = 1.0f;
         };
 
-        enum class Type {
-            OpenGL_ES2
-        };
-
         // OpenGL graphics context. The context is the interface for the device
         // to resolve the (possibly context specific) OpenGL entry points.
         // This abstraction allows the device to remain agnostic as to
@@ -121,6 +117,13 @@ namespace gfx
         class Context
         {
         public:
+            enum class Version {
+                OpenGL_ES2,
+                OpenGL_ES3,
+                WebGL_1,
+                WebGL_2
+            };
+
             virtual ~Context() = default;
             // Display the current contents of the rendering target.
             virtual void Display() = 0;
@@ -141,6 +144,8 @@ namespace gfx
             // Returns a valid pointer or nullptr if there's no such
             // function. (For example an extension function is not available).
             virtual void* Resolve(const char* name) = 0;
+            // Get the context version.
+            virtual Version GetVersion() const = 0;
         private:
         };
 
@@ -205,8 +210,6 @@ namespace gfx
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
 
-        virtual Type GetDeviceType() const = 0;
-
         enum GCFlags {
             Textures   = 0x1,
             Programs   = 0x2,
@@ -251,15 +254,18 @@ namespace gfx
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
 
-        // Create a rendering device of the requested type.
-        // Context should be a valid non null context object with the
-        // right version.
-        // Type = OpenGL_ES2, Context 2.0
+        // Create a rendering device appropriate for the given OpenGL graphics context.
+        // Context should be a valid non-null context object.
         static
-        std::shared_ptr<Device> Create(Type type, std::shared_ptr<Context> context);
+        std::shared_ptr<Device> Create(std::shared_ptr<Context> context);
         static
-        std::shared_ptr<Device> Create(Type type, Context* context);
+        std::shared_ptr<Device> Create(Context* context);
     private:
     };
+
+    namespace detail {
+        std::shared_ptr<Device> CreateOpenGLES2Device(std::shared_ptr<gfx::Device::Context> context);
+        std::shared_ptr<Device> CreateOpenGLES2Device(gfx::Device::Context* context);
+    }
 
 } // namespace
