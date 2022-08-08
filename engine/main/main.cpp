@@ -192,12 +192,13 @@ std::string GenerateGameHome(const std::string& user_home, const std::string& ti
 class WindowContext : public gfx::Device::Context
 {
 public:
-    WindowContext(const wdk::Config::Attributes& attrs)
+    WindowContext(const wdk::Config::Attributes& attrs, bool debug)
     {
         mConfig  = std::make_unique<wdk::Config>(attrs);
-        mContext = std::make_unique<wdk::Context>(*mConfig, 2, 0, false, // debug
+        mContext = std::make_unique<wdk::Context>(*mConfig, 2, 0, debug,
             wdk::Context::Type::OpenGL_ES);
         mVisualID = mConfig->GetVisualID();
+        mDebug = debug;
     }
     virtual void Display() override
     {
@@ -214,6 +215,10 @@ public:
     virtual Version GetVersion() const override
     {
         return Version::OpenGL_ES2;
+    }
+    virtual bool IsDebug() const override
+    {
+        return mDebug;
     }
     wdk::uint_t GetVisualID() const
     { return mVisualID; }
@@ -240,6 +245,7 @@ private:
     std::unique_ptr<wdk::Surface> mSurface;
     std::unique_ptr<wdk::Config>  mConfig;
     wdk::uint_t mVisualID = 0;
+    bool mDebug = false;
 };
 
 // returns number of seconds elapsed since the last call
@@ -334,6 +340,7 @@ int main(int argc, char* argv[])
         engine::Engine::DebugOptions debug;
         std::optional<bool> debug_log_override;
         std::optional<bool> vsync_override;
+        bool debug_context = false;
 
         std::string trace_file;
         std::string config_file;
@@ -344,6 +351,7 @@ int main(int argc, char* argv[])
         opt.Add("--config", "Application configuration JSON file.", std::string("config.json"));
         opt.Add("--help", "Print this help and exit.");
         opt.Add("--debug", "Enable all debug features.");
+        opt.Add("--debug-ctx", "Enable debug rendering context and debug output.");
         opt.Add("--debug-log", "Enable debug logging.");
         opt.Add("--debug-draw", "Enable debug drawing.");
         opt.Add("--debug-font", "Set debug font for debug messages.", std::string(""));
@@ -374,6 +382,7 @@ int main(int argc, char* argv[])
         if (opt.WasGiven("--debug"))
         {
             debug_log_override = true;
+            debug_context      = true;
             debug.debug_draw      = true;
             debug.debug_show_fps  = true;
             debug.debug_show_msg  = true;
@@ -388,6 +397,7 @@ int main(int argc, char* argv[])
             debug.debug_show_fps  = opt.WasGiven("--debug-show-fps");
             debug.debug_draw      = opt.WasGiven("--debug-draw");
             debug.debug_show_msg  = opt.WasGiven("--debug-show-msg");
+            debug_context = opt.WasGiven("--debug-ctx");
         }
 
         debug.debug_font = opt.GetValue<std::string>("--debug-font");
@@ -550,7 +560,7 @@ int main(int argc, char* argv[])
             attrs.stencil_size, attrs.depth_size);
         DEBUG("Sampling: %1", attrs.sampling);
 
-        auto context = std::make_shared<WindowContext>(attrs);
+        auto context = std::make_shared<WindowContext>(attrs, debug_context);
 
         unsigned window_width  = 0;
         unsigned window_height = 0;

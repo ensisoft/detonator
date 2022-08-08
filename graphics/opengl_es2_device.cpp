@@ -47,6 +47,8 @@
 #include "graphics/color4f.h"
 #include "graphics/loader.h"
 
+// EXT_sRGB
+
 // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_sRGB.txt
 // Accepted by the <format> and <internalformat> parameter of TexImage2D, and
 // TexImage3DOES.  These are also accepted by <format> parameter of
@@ -57,6 +59,76 @@
 #define GL_SRGB8_ALPHA8_EXT                               0x8C43
 // Accepted by the <pname> parameter of GetFramebufferAttachmentParameteriv:
 #define GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT      0x8210
+
+// KHR_debug
+typedef void (GL_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+typedef  void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, const void* user);
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_debug.txt
+// Tokens accepted by the <target> parameters of Enable, Disable, and IsEnabled:
+#define GL_DEBUG_OUTPUT_KHR                                     0x92E0
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR                         0x8242
+// Returned by GetIntegerv when <pname> is CONTEXT_FLAGS:
+#define GL_CONTEXT_FLAG_DEBUG_BIT_KHR                           0x00000002
+// Tokens accepted by the <value> parameters of GetBooleanv, GetIntegerv,
+// GetFloatv, GetDoublev and GetInteger64v:
+#define GL_MAX_DEBUG_MESSAGE_LENGTH_KHR                         0x9143
+#define GL_MAX_DEBUG_LOGGED_MESSAGES_KHR                        0x9144
+#define GL_DEBUG_LOGGED_MESSAGES_KHR                            0x9145
+#define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR                 0x8243
+#define GL_MAX_DEBUG_GROUP_STACK_DEPTH_KHR                      0x826C
+#define GL_DEBUG_GROUP_STACK_DEPTH_KHR                          0x826D
+#define GL_MAX_LABEL_LENGTH_KHR                                 0x82E8
+// Tokens accepted by the <pname> parameter of GetPointerv:
+#define GL_DEBUG_CALLBACK_FUNCTION_KHR                          0x8244
+#define GL_DEBUG_CALLBACK_USER_PARAM_KHR                        0x8245
+// Tokens accepted or provided by the <source> parameters of
+// DebugMessageControl, DebugMessageInsert and DEBUGPROC, and the <sources>
+// parameter of GetDebugMessageLog (some commands restrict <source> to a
+// subset of these parameters; see the specification body for details):
+#define GL_DEBUG_SOURCE_API_KHR                                 0x8246
+#define GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR                       0x8247
+#define GL_DEBUG_SOURCE_SHADER_COMPILER_KHR                     0x8248
+#define GL_DEBUG_SOURCE_THIRD_PARTY_KHR                         0x8249
+#define GL_DEBUG_SOURCE_APPLICATION_KHR                         0x824A
+#define GL_DEBUG_SOURCE_OTHER_KHR                               0x824B
+// Tokens accepted or provided by the <type> parameters of
+// DebugMessageControl, DebugMessageInsert and DEBUGPROC, and the <types>
+// parameter of GetDebugMessageLog:
+#define GL_DEBUG_TYPE_ERROR_KHR                                 0x824C
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR                   0x824D
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR                    0x824E
+#define GL_DEBUG_TYPE_PORTABILITY_KHR                           0x824F
+#define GL_DEBUG_TYPE_PERFORMANCE_KHR                           0x8250
+#define GL_DEBUG_TYPE_OTHER_KHR                                 0x8251
+#define GL_DEBUG_TYPE_MARKER_KHR                                0x8268
+// Tokens accepted or provided by the <type> parameters of
+// DebugMessageControl and DEBUGPROC, and the <types> parameter of
+// GetDebugMessageLog:
+#define GL_DEBUG_TYPE_PUSH_GROUP_KHR                            0x8269
+#define GL_DEBUG_TYPE_POP_GROUP_KHR                             0x826A
+// Tokens accepted or provided by the <severity> parameters of
+// DebugMessageControl, DebugMessageInsert and DEBUGPROC callback functions,
+// and the <severities> parameter of GetDebugMessageLog:
+#define GL_DEBUG_SEVERITY_HIGH_KHR                              0x9146
+#define GL_DEBUG_SEVERITY_MEDIUM_KHR                            0x9147
+#define GL_DEBUG_SEVERITY_LOW_KHR                               0x9148
+#define GL_DEBUG_SEVERITY_NOTIFICATION_KHR                      0x826B
+// Returned by GetError:
+#define GL_STACK_UNDERFLOW_KHR                                  0x0504
+#define GL_STACK_OVERFLOW_KHR                                   0x0503
+// Tokens accepted or provided by the <identifier> parameters of
+// ObjectLabel and GetObjectLabel:
+#define GL_BUFFER_KHR                                           0x82E0
+#define GL_SHADER_KHR                                           0x82E1
+#define GL_PROGRAM_KHR                                          0x82E2
+// #define VERTEX_ARRAY_KHR                                  ????
+#define GL_QUERY_KHR                                            0x82E3
+#define GL_PROGRAM_PIPELINE_KHR                                 0x82E4
+// #define TRANSFORM_FEEDBACK_KHR                            ????
+#define GL_SAMPLER_KHR                                          0x82E6
+// #define TEXTURE_KHR                                       ????
+// #define RENDERBUFFER_KHR                                  ????
+// #define FRAMEBUFFER_KHR                                   ????
 
 #if defined(WEBGL)
 #  define GL_CALL(x) mGL.x
@@ -111,6 +183,23 @@ const To* SafeCast(const From* from)
     const auto* ptr = dynamic_cast<const To*>(from);
     ASSERT(ptr);
     return ptr;
+}
+
+void GL_APIENTRY DebugCallback(GLenum source,
+                               GLenum type,
+                               GLuint id,
+                               GLenum severity,
+                               GLsizei length, const GLchar* message,
+                               const void* user)
+{
+    if (type == GL_DEBUG_TYPE_PERFORMANCE_KHR)
+        WARN("GL perf warning. %1", message);
+    else if (type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR)
+        WARN("GL deprecated behaviour detected. %1", message);
+    else if (type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR)
+        WARN("GL undefined behavior detected. %1", message);
+    else if (type == GL_DEBUG_TYPE_ERROR_KHR)
+        ERROR("GL error detected. %1", message);
 }
 
 } // namespace
@@ -208,6 +297,8 @@ struct OpenGLFunctions
     PFNGLBINDBUFFERPROC              glBindBuffer;
     PFNGLBUFFERDATAPROC              glBufferData;
     PFNGLBUFFERSUBDATAPROC           glBufferSubData;
+    // KHR_debug
+    PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback;
 };
 
 //
@@ -285,6 +376,7 @@ public:
         RESOLVE(glBindBuffer);
         RESOLVE(glBufferData);
         RESOLVE(glBufferSubData);
+        RESOLVE(glDebugMessageCallback);
     #undef RESOLVE
 
         GLint stencil_bits = 0;
@@ -346,6 +438,13 @@ public:
                 mExtensions.sRGB = true;
         }
         INFO("sRGB textures: %1", mExtensions.sRGB ? "YES" : "NO");
+
+        if (context->IsDebug() && mGL.glDebugMessageCallback)
+        {
+            GL_CALL(glDebugMessageCallback(DebugCallback, nullptr));
+            GL_CALL(glEnable(GL_DEBUG_OUTPUT_KHR));
+            INFO("Debug output is enabled.");
+        }
     }
     OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
         : OpenGLES2GraphicsDevice(context.get())
