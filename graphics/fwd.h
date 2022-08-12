@@ -34,5 +34,6 @@ namespace gfx
     class Packer;
     class Loader;
     class Resource;
+    class Framebuffer;
 
 } // namespace

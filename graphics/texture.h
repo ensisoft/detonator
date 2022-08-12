@@ -34,7 +34,7 @@ namespace gfx
             RGB,
             RGBA,
             // Grayscale (8-bit) data only.
-            // Typically used as an alpha mask only.
+            // Typically, used as an alpha mask only.
             Grayscale,
         };
         // Texture minifying filter is used whenever the
@@ -64,7 +64,7 @@ namespace gfx
         };
 
         // Texture magnifying filter is used whenever the
-        // pixel being textured maps to to an area less than
+        // pixel being textured maps to an area less than
         // one texture element.
         enum class MagFilter {
             // Use the default filtering set for the device.
@@ -78,7 +78,7 @@ namespace gfx
         };
 
         // Texture wrapping options for how to deal with
-        // texture coords outside of [0,1] range,
+        // texture coordinates outside of [0,1] range,
         enum class Wrapping {
             // Clamp the texture coordinate to the boundary.
             Clamp,
@@ -122,10 +122,10 @@ namespace gfx
         virtual Wrapping GetWrapX() const = 0;
         // Get current texture coordinate wrapping behaviour on Y axis.
         virtual Wrapping GetWrapY() const = 0;
-        // Upload the texture contents from the given buffer.
-        // Will overwrite any previous contents and reshape the texture dimensions.
-        // If mips is false (no mipmap generation) the texture minification
-        // text filter must be set to not use any mips either.
+        // Upload the texture contents from the given CPU side buffer.
+        // This will overwrite any previous contents and reshape the texture dimensions.
+        // If mips is false (no mipmap generation) the texture minification filter
+        // must be set to not use any mips either.
         virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips=true) = 0;
         // Get the texture width. Initially 0 until Upload is called
         // and new texture contents are uploaded.

@@ -354,6 +354,14 @@ public:
         mTextureIndexMap[name] = index;
         return mTextures.back().get();
     }
+    virtual gfx::Framebuffer* FindFramebuffer(const std::string& name) override
+    {
+        return nullptr;
+    }
+    virtual gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
+    {
+        return nullptr;
+    }
     // Resource deletion APIs
     virtual void DeleteShaders() override
     {}
@@ -363,7 +371,12 @@ public:
     {}
     virtual void DeleteTextures() override
     {}
+    virtual void DeleteFramebuffers() override
+    {}
+    virtual void SetFramebuffer(const gfx::Framebuffer* fbo) override
+    {
 
+    }
     virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
     {}
 

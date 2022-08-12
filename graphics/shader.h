@@ -28,16 +28,16 @@ namespace gfx
         virtual ~Shader() = default;
 
         // Compile the shader from the given source string.
-        // Returns true if compilation was succesful, otherwise
+        // Returns true if compilation was successful, otherwise
         // returns false.
-        // If the compilation was not succesful the state of the
+        // If the compilation was not successful the state of the
         // shader does not change, i.e. the shader will retain
         // any previously compiled state.
         virtual bool CompileSource(const std::string& source) = 0;
 
         virtual bool CompileFile(const std::string& file) = 0;
 
-        // Returns true if the shader has been compiled succesfully.
+        // Returns true if the shader has been compiled successfully.
         virtual bool IsValid() const = 0;
     private:
     };

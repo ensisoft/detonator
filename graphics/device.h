@@ -32,6 +32,7 @@ namespace gfx
     class Program;
     class Geometry;
     class Texture;
+    class Framebuffer;
 
     class Device
     {
@@ -92,10 +93,11 @@ namespace gfx
             // Which polygon faces to cull. Note that this only applies
             // to polygons, not to lines or points.
             enum class Culling {
-                // Dont' cull anything, both polygon front and back faces are rasterized
+                // Don't cull anything, both polygon front and back faces are rasterized
                 None,
                 // Cull front faces. Front face is determined by the polygon
-                // winding order. Currently counter clockwise is the front.
+                // winding order. Currently, counter-clockwise winding is used to
+                // indicate front face.
                 Front,
                 // Cull back faces. This is the default.
                 Back,
@@ -184,7 +186,7 @@ namespace gfx
         };
 
         // Texture magnifying filter is used whenever the
-        // pixel being textured maps to to an area less than
+        // pixel being textured maps to an area less than
         // one texture element.
         enum class MagFilter {
             // Use the texture element nearest to the center
@@ -206,11 +208,18 @@ namespace gfx
         virtual Geometry* MakeGeometry(const std::string& name) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
+        virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;
+        virtual Framebuffer* MakeFramebuffer(const std::string& name) = 0;
         // Resource deletion APIs
         virtual void DeleteShaders() = 0;
         virtual void DeletePrograms() = 0;
         virtual void DeleteGeometries() = 0;
         virtual void DeleteTextures() = 0;
+        virtual void DeleteFramebuffers() = 0;
+        // Set the render buffer used for the next Draw, Clear and Read commands.
+        // If the fbo is nullptr then set the frame buffer to the default fbo 
+        // that is the rendering surface of the context.
+        virtual void SetFramebuffer(const Framebuffer* fbo = nullptr) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
@@ -224,7 +233,7 @@ namespace gfx
         // Delete GPU resources that are no longer being used and that are
         // eligible for garbage collection (i.e. are marked as okay to delete).
         // Resources that have not been used in the last N frames can be deleted.
-        // For example if a texture was last used to render frame N and we're
+        // For example if a texture was last used to render frame N, and we're
         // currently at frame N+max_num_idle_frames then the texture is deleted.
         virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) = 0;
 
@@ -256,6 +265,8 @@ namespace gfx
 
         struct DeviceCaps {
             unsigned num_texture_units = 0;
+            unsigned max_fbo_width = 0;
+            unsigned max_fbo_height = 0;
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
 

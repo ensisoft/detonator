@@ -46,9 +46,13 @@
 #include "graphics/texture.h"
 #include "graphics/color4f.h"
 #include "graphics/loader.h"
+#include "graphics/framebuffer.h"
+
+// WebGL
+#define WEBGL_DEPTH_STENCIL_ATTACHMENT 0x821A
+#define WEBGL_DEPTH_STENCIL            0x84F9
 
 // EXT_sRGB
-
 // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_sRGB.txt
 // Accepted by the <format> and <internalformat> parameter of TexImage2D, and
 // TexImage3DOES.  These are also accepted by <format> parameter of
@@ -59,6 +63,18 @@
 #define GL_SRGB8_ALPHA8_EXT                               0x8C43
 // Accepted by the <pname> parameter of GetFramebufferAttachmentParameteriv:
 #define GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT      0x8210
+
+// OES_packed_depth_stencil
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_packed_depth_stencil.txt
+// Accepted by the <format> parameter of TexImage2D and TexSubImage2D and by the
+// <internalformat> parameter of TexImage2D:
+#define GL_DEPTH_STENCIL_OES                              0x84F9
+// Accepted by the <type> parameter of TexImage2D and TexSubImage2D:
+#define GL_UNSIGNED_INT_24_8_OES                          0x84FA
+// Accepted by the <internalformat> parameter of RenderbufferStorage, and
+// returned in the <params> parameter of GetRenderbufferParameteriv when
+// <pname> is RENDERBUFFER_INTERNAL_FORMAT:
+#define GL_DEPTH24_STENCIL8_OES                           0x88F0
 
 // KHR_debug
 typedef void (GL_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
@@ -163,15 +179,15 @@ const char* GLEnumToStr(GLenum eval)
         CASE(GL_STREAM_DRAW);
         CASE(GL_ELEMENT_ARRAY_BUFFER);
         CASE(GL_ARRAY_BUFFER);
-
-        // framebuffer
         CASE(GL_FRAMEBUFFER_COMPLETE);
         CASE(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
         CASE(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
         CASE(GL_FRAMEBUFFER_UNSUPPORTED);
-
         CASE(GL_FRAGMENT_SHADER);
         CASE(GL_VERTEX_SHADER);
+        CASE(GL_DEPTH_COMPONENT16);
+        CASE(GL_RGBA4);
+        CASE(GL_STENCIL_INDEX8);
     }
     return "???";
 #undef CASE
@@ -297,6 +313,17 @@ struct OpenGLFunctions
     PFNGLBINDBUFFERPROC              glBindBuffer;
     PFNGLBUFFERDATAPROC              glBufferData;
     PFNGLBUFFERSUBDATAPROC           glBufferSubData;
+    PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
+    PFNGLGENFRAMEBUFFERSPROC         glGenFramebuffers;
+    PFNGLDELETEFRAMEBUFFERSPROC      glDeleteFramebuffers;
+    PFNGLBINDFRAMEBUFFERPROC         glBindFramebuffer;
+    PFNGLGENRENDERBUFFERSPROC        glGenRenderbuffers;
+    PFNGLDELETERENDERBUFFERSPROC     glDeleteRenderbuffers;
+    PFNGLBINDRENDERBUFFERPROC        glBindRenderbuffer;
+    PFNGLRENDERBUFFERSTORAGEPROC     glRenderbufferStorage;
+    PFNGLFRAMEBUFFERTEXTURE2DPROC    glFramebufferTexture2D;
+    PFNGLCHECKFRAMEBUFFERSTATUSPROC  glCheckFramebufferStatus;
+
     // KHR_debug
     PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback;
 };
@@ -376,6 +403,17 @@ public:
         RESOLVE(glBindBuffer);
         RESOLVE(glBufferData);
         RESOLVE(glBufferSubData);
+        RESOLVE(glFramebufferRenderbuffer);
+        RESOLVE(glGenFramebuffers);
+        RESOLVE(glDeleteFramebuffers);
+        RESOLVE(glBindFramebuffer);
+        RESOLVE(glGenRenderbuffers);
+        RESOLVE(glDeleteRenderbuffers);
+        RESOLVE(glBindRenderbuffer);
+        RESOLVE(glRenderbufferStorage);
+        RESOLVE(glFramebufferTexture2D);
+        RESOLVE(glCheckFramebufferStatus);
+        // KHR_debug
         RESOLVE(glDebugMessageCallback);
     #undef RESOLVE
 
@@ -387,6 +425,7 @@ public:
         GLint depth_bits = 0;
         GLint point_size[2];
         GLint max_texture_units = 0;
+        GLint max_rbo_size = 0;
         GL_CALL(glGetIntegerv(GL_STENCIL_BITS, &stencil_bits));
         GL_CALL(glGetIntegerv(GL_RED_BITS, &red_bits));
         GL_CALL(glGetIntegerv(GL_GREEN_BITS, &green_bits));
@@ -395,6 +434,7 @@ public:
         GL_CALL(glGetIntegerv(GL_DEPTH_BITS, &depth_bits));
         GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
         GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units));
+        GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_rbo_size));
         DEBUG("OpenGLESGraphicsDevice");
         DEBUG("GL %1 Vendor: %2, %3",
             mGL.glGetString(GL_VERSION),
@@ -420,6 +460,7 @@ public:
         DEBUG("Depth bits: %1", depth_bits);
         DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
         DEBUG("Fragment shader texture units: %1", max_texture_units);
+        DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
         mTextureUnits.resize(max_texture_units);
 
         // set some initial state
@@ -435,9 +476,13 @@ public:
         while (std::getline(ss, extension, ' '))
         {
             if (extension == "GL_EXT_sRGB")
-                mExtensions.sRGB = true;
+                mExtensions.EXT_sRGB = true;
+            else if (extension == "GL_OES_packed_depth_stencil")
+                mExtensions.OES_packed_depth_stencil = true;
+            //DEBUG("Found extension '%1'", extension);
         }
-        INFO("sRGB textures: %1", mExtensions.sRGB ? "YES" : "NO");
+        INFO("sRGB textures: %1", mExtensions.EXT_sRGB ? "YES" : "NO");
+        INFO("FBO packed depth+stencil: %1", mExtensions.OES_packed_depth_stencil ? "YES" : "NO");
 
         if (context->IsDebug() && mGL.glDebugMessageCallback)
         {
@@ -456,6 +501,7 @@ public:
         DEBUG("~OpenGLES2GraphicsDevice");
        // make sure our cleanup order is specific so that the
        // resources are deleted before the context is deleted.
+       mFBOs.clear();
        mTextures.clear();
        mShaders.clear();
        mPrograms.clear();
@@ -559,6 +605,20 @@ public:
         ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
+    virtual Framebuffer* FindFramebuffer(const std::string& name) override
+    {
+        auto it = mFBOs.find(name);
+        if (it == std::end(mFBOs))
+            return nullptr;
+        return it->second.get();
+    }
+    virtual Framebuffer* MakeFramebuffer(const std::string& name) override
+    {
+        auto fbo = std::make_unique<FramebufferImpl>(name, mGL, *this);
+        auto* ret = fbo.get();
+        mFBOs[name] = std::move(fbo);
+        return ret;
+    }
 
     virtual void DeleteShaders() override
     {
@@ -575,6 +635,23 @@ public:
     virtual void DeleteTextures() override
     {
         mTextures.clear();
+    }
+    virtual void DeleteFramebuffers() override
+    {
+        mFBOs.clear();
+    }
+
+    virtual void SetFramebuffer(const Framebuffer* fbo) override
+    {
+        if (fbo)
+        {
+            const auto* impl = static_cast<const FramebufferImpl*>(fbo);
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, impl->GetHandle()));
+        }
+        else
+        {
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        }
     }
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
@@ -1142,8 +1219,13 @@ public:
     {
         std::memset(caps, 0, sizeof(*caps));
         GLint num_texture_units = 0;
+        GLint max_fbo_size = 0;
         GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num_texture_units));
-        caps->num_texture_units = num_texture_units;
+        GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_fbo_size));
+
+        caps->num_texture_units     = num_texture_units;
+        caps->max_fbo_height        = max_fbo_size;
+        caps->max_fbo_width         = max_fbo_size;
     }
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
@@ -1285,7 +1367,7 @@ private:
             case Func::RefIsEqual:       return GL_EQUAL;
             case Func::RefIsNotEqual:    return GL_NOTEQUAL;
         }
-        ASSERT(!"???");
+        BUG("Unknown GL stencil function");
         return GL_NONE;
     }
     static GLenum ToGLEnum(State::StencilOp op)
@@ -1299,7 +1381,7 @@ private:
             case Op::Increment:  return GL_INCR;
             case Op::Decrement:  return GL_DECR;
         }
-        ASSERT(!"???");
+        BUG("Unknown GL stencil op");
         return GL_NONE;
     }
 private:
@@ -1385,21 +1467,24 @@ private:
             // todo: convert to normalized linear floats ? converting to
             // linear u8 loses perceptible precision
             std::unique_ptr<IBitmap> linear;
-            if (format == Format::sRGB && !mDevice.mExtensions.sRGB)
+            if (bytes)
             {
-                BitmapReadView<RGB> view((const RGB*)bytes, xres, yres);
-                linear = ConvertToLinear(view);
-                bytes  = linear->GetDataPtr();
-                sizeFormat = GL_RGB;
-                baseFormat = GL_RGB;
-            }
-            else if (format == Format::sRGBA && !mDevice.mExtensions.sRGB)
-            {
-                BitmapReadView<RGBA> view((const RGBA*)bytes, xres, yres);
-                linear = ConvertToLinear(view);
-                bytes  = linear->GetDataPtr();
-                sizeFormat = GL_RGBA;
-                baseFormat = GL_RGBA;
+                if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
+                {
+                    BitmapReadView<RGB> view((const RGB*) bytes, xres, yres);
+                    linear = ConvertToLinear(view);
+                    bytes = linear->GetDataPtr();
+                    sizeFormat = GL_RGB;
+                    baseFormat = GL_RGB;
+                }
+                else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
+                {
+                    BitmapReadView<RGBA> view((const RGBA*) bytes, xres, yres);
+                    linear = ConvertToLinear(view);
+                    bytes = linear->GetDataPtr();
+                    sizeFormat = GL_RGBA;
+                    baseFormat = GL_RGBA;
+                }
             }
 
             GL_CALL(glActiveTexture(GL_TEXTURE0));
@@ -1424,7 +1509,7 @@ private:
 
             mHasMips = false;
 
-            if (mips)
+            if (bytes && mips)
             {
             #if defined(WEBGL)
                 // WebGL only supports mips with POT textures.
@@ -2175,11 +2260,204 @@ private:
         GLuint mShader  = 0;
         GLuint mVersion = 0;
     };
+    struct Extensions;
+
+    class FramebufferImpl : public Framebuffer
+    {
+    public:
+        FramebufferImpl(const std::string& name, const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
+          : mName(name)
+          , mGL(funcs)
+          , mDevice(device)
+        {}
+       ~FramebufferImpl()
+        {
+            if (mColor)
+            {
+                for (size_t unit=0; unit<mDevice.mTextureUnits.size(); ++unit)
+                {
+                    if (mDevice.mTextureUnits[unit].texture == mColor.get())
+                    {
+                        mDevice.mTextureUnits[unit].texture = nullptr;
+                        break;
+                    }
+                }
+                mColor.reset();
+            }
+
+            if (mDepthBuffer)
+            {
+                GL_CALL(glDeleteRenderbuffers(1, &mDepthBuffer));
+            }
+            if (mHandle)
+            {
+                GL_CALL(glDeleteFramebuffers(1, &mHandle));
+                DEBUG("Deleted frame buffer object. [handle=%1]", mHandle);
+            }
+        }
+        virtual bool Create(const Config& conf) override
+        {
+            ASSERT(mHandle == 0);
+            ASSERT(conf.width && conf.height);
+
+            // WebGL spec see.
+            // https://registry.khronos.org/webgl/specs/latest/1.0/
+
+            // The OpenGL ES Framebuffer has multiple different sometimes exclusive properties/features that can be
+            // parametrized when creating an FBO.
+            // - Logical buffers attached to the FBO possible combinations of
+            //   logical buffers including not having some buffer.
+            //    * Color buffer
+            //    * Depth buffer
+            //    * Stencil buffer
+            // - The bit representation for some logical buffer that dictates the number of bits used for the data.
+            //   For example 8bit RGBA/32bit float color buffer or 16bit depth buffer or 8bit stencil buffer.
+            // - The storage object that provides the data for the bitwise representation of the buffer's contents.
+            //    * Texture object
+            //    * Render buffer
+            //
+            // The OpenGL API essentially allows for a lot of possible FBO configurations to be created while in
+            // practice only few are supported (and make sense). Unfortunately the ES2 spec does not require any
+            // particular configurations to be supported by the implementation. Additionally, only 16bit color buffer
+            // configurations are available for render buffer. In practice, it seems that implementations prefer
+            // to support configurations that use a combined storage for depth + stencil and this requires and
+            // extension 'OES_packed_depth_stencil'.
+            // WebGL however makes an explicit requirement for implementations to support at least the following
+            // configurations:
+            // COLOR0                            DEPTH                           STENCIL
+            // RGBA/UNSIGNED_BYTE texture        N/A                             N/A
+            // RGBA/UNSIGNED_BYTE texture        DEPTH_COMPONENT16 renderbuffer  N/A
+            // RGBA/UNSIGNED_BYTE texture        DEPTH_STENCIL     renderbuffer  DEPTH_STENCIL renderbuffer
+            //
+            // Small caveat the WebGL spec doesn't specify the bitwise representation for DEPTH_STENCIL, i.e.
+            // how many bits of depth and how many bits of stencil.
+
+            // Some relevant extensions that provide more FBO format support.(All tested on Linux + NVIDIA)
+            // NAME                       Firefox   Chrome   Desktop   Desc
+            // ---------------------------------------------------------------------------------------------------------
+            // OES_rgb8_rgba8             No        No       Yes       RGB8 and RGBA8 color render buffer support (written against ES1)
+            // OES_depth32                No        No       Yes       32bit depth render buffer (written against ES1)
+            // OES_depth24                No        No       Yes       24bit depth render buffer (written against ES1)
+            // OES_depth_texture          No        No       Yes
+            // OES_packed_depth_stencil   No        No       Yes       24bit depth combined with 8bit stencil render buffer and texture format
+            // WEBGL_color_buffer_float   Yes       Yes      No        32bit float color render buffer and float texture attachment
+            // WEBGL_depth_texture        ?         ?        No        Limited form of OES_packed_depth_stencil + OES_depth_texture (ANGLE_depth_texture)
+            //
+
+            // Additional issues:
+            // * WebGL supports only POT textures with mips
+            // * Multisampled FBO creation and resolve. -> EXT_multisampled_render_to_texture but only for desktop
+            // * MIP generation
+            // * sRGB encoding
+
+            const auto xres = conf.width;
+            const auto yres = conf.height;
+
+            struct Binder {
+                Binder(const OpenGLFunctions& gl) : mGL(gl)
+                {
+                    GL_CALL(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mCurrentFBO));
+                }
+               ~Binder()
+                {
+                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFBO));
+                }
+            private:
+                const OpenGLFunctions& mGL;
+                GLint mCurrentFBO = 0;
+            } binder(mGL);
+
+            mColor = std::make_unique<TextureImpl>(mGL, mDevice);
+            mColor->Upload(nullptr, xres, yres, Texture::Format::RGBA, false /*mips*/);
+            mColor->SetName("FBO/" + mName + "/color0");
+
+            GL_CALL(glGenFramebuffers(1, &mHandle));
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+
+            if (conf.format == Format::ColorRGBA8)
+            {
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+            }
+            else if (conf.format == Format::ColorRGBA8_Depth16)
+            {
+                GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
+                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
+                GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, xres, yres));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+            }
+            else if (conf.format == Format::ColorRGBA8_Depth24_Stencil8)
+            {
+                if (mDevice.mContext->GetVersion() == Device::Context::Version::OpenGL_ES2)
+                {
+                    if (!mDevice.mExtensions.OES_packed_depth_stencil)
+                    {
+                        ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found.");
+                        return false;
+                    }
+                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
+                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, xres, yres));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                }
+                else
+                {
+                    // the WebGL spec doesn't actually mention the bit depths for the packed
+                    // depth+stencil render buffer and the API exposed GLenum is GL_DEPTH_STENCIL 0x84F9
+                    // which however is the same as GL_DEPTH_STENCIL_OES from OES_packed_depth_stencil
+                    // So, I'm assuming here that the format is in fact 24bit depth with 8bit stencil.
+                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
+                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                }
+            }
+            // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
+            // we're treating these status codes as BUGS in the engine code that is trying to create the
+            // frame buffer object and has violated the frame buffer completeness requirement or other
+            // creation parameter constraints.
+            const auto ret = mGL.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (ret == GL_FRAMEBUFFER_COMPLETE)
+                DEBUG("Created new FBO. [width=%1, height=%2, format=%3, handle=%4]", xres, yres, conf.format, mHandle);
+            else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
+                ERROR("Unsupported FBO configuration. [width=%1, height=%2, format=%3]", xres, yres, conf.format);
+            else BUG("Incorrect FBO setup.");
+            mConfig = conf;
+            return ret == GL_FRAMEBUFFER_COMPLETE;
+        }
+        virtual void Resolve(Texture** color) const override
+        {
+            ASSERT(mColor);
+            *color = mColor.get();
+        }
+        virtual unsigned GetWidth() const override
+        { return mConfig.width; }
+        virtual unsigned GetHeight() const override
+        { return mConfig.height; }
+        virtual Format GetFormat() const override
+        { return mConfig.format; }
+
+        GLuint GetHandle() const
+        { return mHandle; }
+    private:
+        const std::string mName;
+        const OpenGLFunctions& mGL;
+        OpenGLES2GraphicsDevice& mDevice;
+        std::unique_ptr<TextureImpl> mColor;
+        GLuint mHandle = 0;
+        // this is either only depth or packed depth+stencil
+        GLuint mDepthBuffer = 0;
+        Config mConfig;
+    };
 private:
     std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
     std::map<std::string, std::unique_ptr<Shader>> mShaders;
     std::map<std::string, std::unique_ptr<Program>> mPrograms;
     std::map<std::string, std::unique_ptr<Texture>> mTextures;
+    std::map<std::string, std::unique_ptr<Framebuffer>> mFBOs;
     std::shared_ptr<Context> mContextImpl;
     Context* mContext = nullptr;
     std::size_t mFrameNumber = 0;
@@ -2198,7 +2476,8 @@ private:
     };
     std::vector<VertexBuffer> mBuffers;
     struct Extensions {
-        bool sRGB = false;
+        bool EXT_sRGB = false;
+        bool OES_packed_depth_stencil = false;
     } mExtensions;
 };
 
