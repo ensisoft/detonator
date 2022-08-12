@@ -58,12 +58,12 @@ namespace audio
         virtual State GetState() const = 0;
 
         // Set the requested default audio buffer size defined in milliseconds.
-        // The bigger the buffer size the more latency there can be and the less
+        // The bigger, the buffer size the more latency there can be and the less
         // accurate the stream timing since the stream time is derived from the
         // buffer playback. On the other hand if the buffer size is too small
-        // there's a risk of buffer underrruns if the system cannot deliver audio
-        // buffers too fast. Recommended value is around 20ms which seems to
-        // work quite well so far.
+        // there's a risk of buffer underruns whenever the system fails to deliver
+        // audio buffers fast enough. Recommended value is around 20ms which seems
+        // to work quite well so far.
         virtual void SetBufferSize(unsigned milliseconds) = 0;
 
         // Create the appropriate audio device for this platform.

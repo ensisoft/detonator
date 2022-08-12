@@ -139,7 +139,7 @@ namespace audio
     class Graph :  public Element
     {
     public:
-        // Create new audio graph with the given human readable name.
+        // Create new audio graph with the given human-readable name.
         // The name will be audio stream name on the device, and will be
         // shown for example in Pavucontrol on Linux.
         Graph(const std::string& name, const std::string& id);
@@ -180,8 +180,8 @@ namespace audio
         { return *base::SafeIndex(mElements, index).get(); }
 
         // Link two elements together so that the source port on the
-        // the source element is used as the buffer source for the
-        // input on the destinations element's destination port.
+        // source element is used as the buffer source for the input
+        // on the destination element's destination port.
         // No error checking is performed in terms of checking the
         // validity of the provided objects or the semantics of link
         // on the graph's validity.
@@ -194,7 +194,7 @@ namespace audio
         // the output buffer for the audio device from element C.
         void LinkGraph(Element* src_elem, Port* src_port);
         // Convenience function to link graph elements together using their
-        // human readable names. Care should be taken to make sure that the
+        // human-readable names. Care should be taken to make sure that the
         // names are unique. In case of duplicated names the first matching
         // element/port is used.
         // Returns true if linking succeeded, i.e. all elements/ports by the
@@ -206,10 +206,10 @@ namespace audio
         // by the given names were found.
         bool LinkGraph(const std::string& src_elem_name, const std::string& src_port_name);
 
-        // Create a human readable description of the routes between
+        // Create a human-readable description of the routes between
         // elements and their ports in the audio graph.
         std::vector<std::string> Describe() const;
-        // Create a human readable description of the routes between
+        // Create a human-readable description of the routes between
         // elements and their ports in the audio graph starting at
         // the given src element.
         std::vector<std::string> DescribePaths(const Element* src) const;

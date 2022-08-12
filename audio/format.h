@@ -51,6 +51,9 @@ namespace audio
     bool IsValid(const Format& format);
     std::string ToString(const Format& fmt);
 
+    // Audio frame contains samples of all channels in the stream
+    // in some particular bitwise representation and order.
+    // In case of Stereo frame it's first Left and then Right channel.
     template<typename DataType, unsigned ChannelCount>
     struct Frame {
         DataType channels[ChannelCount];

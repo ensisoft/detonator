@@ -627,6 +627,23 @@ bool Mixer::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Mixer::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    // The mixing here only looks at incoming buffers and combines them together
+    // in chunks of whole buffers. No buffer splitting or queueing is supported.
+    // This works only as long as every incoming buffer contains an equal amount
+    // of PMC data (as measured in milliseconds).
+    // So for example when mixing together src0 and src1 which both produce audio
+    // buffers with 20ms worth of PCM data the mixer will then produce a single
+    // output buffer with 20ms worth of data and everything will work fine.
+    // If however src0 produced 20ms audio buffers and src1 produced 5ms audio
+    // buffers the mixer *could not* produce 20ms output but only 5ms and would have
+    // to keep the rest of the unmixed data around until the next Process call.
+    // Mixing 20ms and 5ms together into 20ms combination would produce 15ms gaps
+    // in src1's output.
+    // The only exception to the above rule is when a source element is winding
+    // down and is producing its *last* audio buffer which can then contain less
+    // than the requested milliseconds. Since there's no next buffer from this
+    // source there'll be no audio gap either.
+
     const float src_gain = 1.0f/mSrcs.size();
 
     std::vector<BufferHandle> src_buffers;
