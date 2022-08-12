@@ -400,6 +400,17 @@ public:
             }
             element.input_ports = std::move(ports);
         }
+        if (mType == "Splitter")
+        {
+            std::vector<audio::PortDesc> ports;
+            for (const auto& port : mOPorts)
+            {
+                audio::PortDesc desc;
+                desc.name = port.name;
+                ports.push_back(std::move(desc));
+            }
+            element.output_ports = std::move(ports);
+        }
 
         klass.AddElement(std::move(element));
     }
@@ -493,6 +504,13 @@ public:
         ComputePorts();
         return name;
     }
+    std::string RemoveOutputPort()
+    {
+        auto name = mOPorts.back().name;
+        mOPorts.pop_back();
+        ComputePorts();
+        return name;
+    }
     bool CanAddInputPort() const
     {
         if (mType == "Mixer" || mType == "Playlist")
@@ -502,6 +520,18 @@ public:
     bool CanRemoveInputPort() const
     {
         if ((mType == "Mixer" || mType == "Playlist") && mIPorts.size() > 2)
+            return true;
+        return false;
+    }
+    bool CanAddOutputPort() const
+    {
+        if (mType == "Splitter")
+            return true;
+        return false;
+    }
+    bool CanRemoveOutputPort() const
+    {
+        if ((mType == "Splitter") && mOPorts.size() > 2)
             return true;
         return false;
     }
@@ -608,6 +638,8 @@ public:
         }
         if (mType == "Mixer" || mType == "Playlist")
             writer.Write("iports", (unsigned)mIPorts.size());
+        if (mType == "Splitter")
+            writer.Write("oports", (unsigned)mOPorts.size());
     }
     void FromJson(const data::Reader& reader)
     {
@@ -664,6 +696,9 @@ protected:
     {
         if (CanAddInputPort())
             AddInputPort();
+        else if (CanAddOutputPort())
+            AddOutputPort();
+
         // stupid... no other way??
         scene()->invalidate();
     }
@@ -1609,6 +1644,32 @@ void AudioWidget::on_actionRemoveInputPort_triggered()
     mScene->invalidate();
 }
 
+void AudioWidget::on_actionAddOutputPort_triggered()
+{
+    auto selected = mScene->selectedItems();
+    if (selected.isEmpty())
+        return;
+    for (auto* item : selected)
+    {
+        if (auto* element = dynamic_cast<AudioElement*>(item))
+        {
+            if (element->CanAddOutputPort())
+                element->AddOutputPort();
+        }
+    }
+    mScene->invalidate();
+}
+void AudioWidget::on_actionRemoveOutputPort_triggered()
+{
+    auto selected = mScene->selectedItems();
+    for (auto* item : selected)
+    {
+        if (auto* element = dynamic_cast<AudioElement*>(item))
+            mScene->UnlinkPort(element->GetId(), element->RemoveOutputPort());
+    }
+    mScene->invalidate();
+}
+
 void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
 {
     QMenu menu(this);
@@ -1621,6 +1682,8 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     mUI.actionUnlink->setEnabled(!selected.isEmpty() && item != nullptr);
     mUI.actionAddInputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanAddInputPort());
     mUI.actionRemoveInputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanRemoveInputPort());
+    mUI.actionAddOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanAddOutputPort());
+    mUI.actionRemoveOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanRemoveOutputPort());
     const auto& map = GetElementMap();
     for (const auto& pair : map)
     {
@@ -1634,7 +1697,11 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     QMenu input_port_menu("Input Ports");
     input_port_menu.addAction(mUI.actionAddInputPort);
     input_port_menu.addAction(mUI.actionRemoveInputPort);
+    QMenu output_port_menu("Output Ports");
+    output_port_menu.addAction(mUI.actionAddOutputPort);
+    output_port_menu.addAction(mUI.actionRemoveOutputPort);
     menu.addMenu(&input_port_menu);
+    menu.addMenu(&output_port_menu);
     menu.addSeparator();
     menu.addAction(mUI.actionUnlink);
     menu.addAction(mUI.actionDelete);
@@ -1673,6 +1740,8 @@ void AudioWidget::on_elements_customContextMenuRequested(QPoint)
     mUI.actionUnlink->setEnabled(!selected.isEmpty());
     mUI.actionAddInputPort->setEnabled(true);
     mUI.actionRemoveInputPort->setEnabled(true);
+    mUI.actionAddOutputPort->setEnabled(true);
+    mUI.actionRemoveOutputPort->setEnabled(true);
     for (auto* item : selected)
     {
         const auto* elem = dynamic_cast<const AudioElement*>(item);
@@ -1680,12 +1749,20 @@ void AudioWidget::on_elements_customContextMenuRequested(QPoint)
             mUI.actionAddInputPort->setEnabled(false);
         if (!elem->CanRemoveInputPort())
             mUI.actionRemoveInputPort->setEnabled(false);
+        if (!elem->CanAddOutputPort())
+            mUI.actionAddOutputPort->setEnabled(false);
+        if (!elem->CanRemoveOutputPort())
+            mUI.actionRemoveOutputPort->setEnabled(false);
     }
     menu.addSeparator();
     QMenu input_port_menu("Input Ports");
     input_port_menu.addAction(mUI.actionAddInputPort);
     input_port_menu.addAction(mUI.actionRemoveInputPort);
+    QMenu output_port_menu("Output Ports");
+    output_port_menu.addAction(mUI.actionAddOutputPort);
+    output_port_menu.addAction(mUI.actionRemoveOutputPort);
     menu.addMenu(&input_port_menu);
+    menu.addMenu(&output_port_menu);
     menu.addSeparator();
     menu.addAction(mUI.actionUnlink);
     menu.addAction(mUI.actionDelete);

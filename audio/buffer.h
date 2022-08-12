@@ -84,6 +84,22 @@ namespace audio
             for (size_t i=0; i<src.GetNumInfoTags(); ++i)
                 dst.AddInfoTag(src.GetInfoTag(i));
         }
+        inline void CopyData(const void* src, size_t bytes)
+        {
+            ASSERT(GetCapacity() >= bytes);
+            std::memcpy(GetPtr(), src, bytes);
+            SetByteSize(bytes);
+        }
+        inline void CopyData(const Buffer& src)
+        {
+            ASSERT(GetCapacity() >= src.GetByteSize());
+            std::memcpy(GetPtr(), src.GetPtr(), src.GetByteSize());
+            SetByteSize(src.GetByteSize());
+        }
+        inline void CopyInfoTags(const Buffer& src)
+        {
+            Buffer::CopyInfoTags(src, *this);
+        }
     private:
     };
     using BufferHandle = std::shared_ptr<Buffer>;
