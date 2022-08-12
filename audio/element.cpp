@@ -507,6 +507,66 @@ void StereoSplitter::Split(Allocator& allocator, BufferHandle buffer)
     mOutRight.PushBuffer(right);
 }
 
+Splitter::Splitter(const std::string& name, unsigned num_outs)
+  : Splitter(name, base::RandomString(10), num_outs)
+{}
+
+Splitter::Splitter(const std::string& name, const std::string& id, unsigned num_outs)
+  : mName(name)
+  , mId(id)
+  , mIn("in")
+{
+    ASSERT(num_outs);
+    for (unsigned i=0; i<num_outs; ++i)
+    {
+        SingleSlotPort port(base::FormatString("out%1", i));
+        mOuts.push_back(std::move(port));
+    }
+}
+Splitter::Splitter(const std::string& name, const std::string& id, const std::vector<PortDesc>& outs)
+  : mName(name)
+  , mId(id)
+  , mIn("in")
+{
+    for (const auto& out : outs)
+    {
+        SingleSlotPort port(out.name);
+        mOuts.push_back(std::move(port));
+    }
+}
+
+bool Splitter::Prepare(const Loader& loader, const PrepareParams& params)
+{
+    const auto& format = mIn.GetFormat();
+    if (!IsValid(format))
+    {
+        ERROR("Audio splitter input format is invalid. [elem=%1, port=%2]", mName, mIn.GetName());
+        return false;
+    }
+    for (auto& out : mOuts)
+    {
+        out.SetFormat(format);
+    }
+    DEBUG("Audio splitter prepared successfully. [elem=%1, format=%2]", format);
+    return true;
+}
+void Splitter::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
+{
+    BufferHandle src_buffer;
+    if (!mIn.PullBuffer(src_buffer))
+        return;
+
+    for (auto& out : mOuts)
+    {
+        BufferHandle out_buffer = allocator.Allocate(src_buffer->GetByteSize());
+        out_buffer->SetFormat(out_buffer->GetFormat());
+        out_buffer->CopyData(*src_buffer);
+        out_buffer->CopyInfoTags(*src_buffer);
+        out.PushBuffer(out_buffer);
+    }
+}
+
+
 Mixer::Mixer(const std::string& name, const std::string& id, unsigned int num_srcs)
   : mName(name)
   , mId(id)
@@ -1764,6 +1824,7 @@ std::vector<std::string> ListAudioElements()
         list.push_back("StereoSplitter");
         list.push_back("StereoJoiner");
         list.push_back("StereoMaker");
+        list.push_back("Splitter");
         list.push_back("Mixer");
         list.push_back("Delay");
         list.push_back("Playlist");
@@ -1872,6 +1933,14 @@ const ElementDesc* FindElementDesc(const std::string& type)
             delay.output_ports.push_back({"out"});
             map["Delay"] = delay;
         }
+        {
+            ElementDesc splitter;
+            splitter.args["num_outs"] = 2u;
+            splitter.input_ports.push_back({"in"});
+            splitter.output_ports.push_back({"out0"});
+            splitter.output_ports.push_back({"out1"});
+            map["Splitter"] = splitter;
+        }
     }
     return base::SafeFind(map, type);
 }
@@ -1893,6 +1962,8 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
         return std::make_unique<Null>(desc.name, desc.id);
     else if (desc.type == "Mixer")
         return Construct<Mixer>(desc.name, desc.id, &desc.input_ports);
+    else if (desc.type == "Splitter")
+        return Construct<Splitter>(desc.name, desc.id, &desc.output_ports);
     else if (desc.type == "Delay")
         return Construct<Delay>(desc.name, desc.id,
             GetArg<unsigned>(args, "delay", name));

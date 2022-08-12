@@ -457,6 +457,39 @@ namespace audio
         SingleSlotPort mIn;
     };
 
+    // Split incoming stream into multiple output streams.
+    class Splitter : public Element
+    {
+    public:
+        Splitter(const std::string& name, unsigned num_outs = 2);
+        Splitter(const std::string& name, const std::string& id, unsigned num_outs = 2);
+        Splitter(const std::string& name, const std::string& id, const std::vector<PortDesc>& outs);
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual std::string GetType() const override
+        { return "Splitter"; }
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
+        virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
+        virtual unsigned GetNumOutputPorts() const override
+        { return mOuts.size(); }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        { return base::SafeIndex(mOuts, index); }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port index.");
+        }
+    private:
+        const std::string mName;
+        const std::string mId;
+        std::vector<SingleSlotPort> mOuts;
+        SingleSlotPort mIn;
+    };
+
     // Mix multiple audio streams into a single stream.
     // The streams must all have the same format, i.e. the same
     // underlying type, sample rate and channel count.
