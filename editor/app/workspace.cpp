@@ -2443,7 +2443,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         base::JsonWrite(json["config"], "blue_size",    8);
         base::JsonWrite(json["config"], "alpha_size",   8);
         base::JsonWrite(json["config"], "stencil_size", 8);
-        base::JsonWrite(json["config"], "depth_size",   0);
+        base::JsonWrite(json["config"], "depth_size",   24);
         base::JsonWrite(json["config"], "srgb", mSettings.config_srgb);
         if (mSettings.multisample_sample_count == 0)
             base::JsonWrite(json["config"], "sampling", "None");
