@@ -86,7 +86,7 @@ attribute vec2 aPosition;
 attribute vec2 aTexCoord;
 
 uniform mat4 kProjectionMatrix;
-uniform mat4 kViewMatrix;
+uniform mat4 kModelViewMatrix;
 
 varying vec2 vTexCoord;
 varying float vRandomValue;
@@ -98,7 +98,7 @@ void main()
     vTexCoord    = aTexCoord;
     vRandomValue = 0.0;
     vAlpha       = 1.0;
-    gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
+    gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
     shader->CompileSource(src);
@@ -1424,7 +1424,7 @@ attribute vec2 aPosition;
 attribute vec4 aData;
 
 uniform mat4 kProjectionMatrix;
-uniform mat4 kViewMatrix;
+uniform mat4 kModelViewMatrix;
 
 varying vec2  vTexCoord;
 varying float vRandomValue;
@@ -1436,7 +1436,7 @@ void main()
     gl_PointSize = aData.x;
     vRandomValue = aData.y;
     vAlpha       = aData.z;
-    gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
+    gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
     )";
 

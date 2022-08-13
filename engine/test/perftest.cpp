@@ -307,7 +307,7 @@ int test_main(int argc, char* argv[])
     auto graphics_painter = gfx::Painter::Create(graphics_device);
     graphics_painter->SetSurfaceSize(SurfaceWidth, SurfaceHeight);
     graphics_painter->SetEditingMode(false);
-    graphics_painter->SetOrthographicView(SurfaceWidth, SurfaceHeight);
+    graphics_painter->SetOrthographicProjection(SurfaceWidth, SurfaceHeight);
     graphics_painter->SetViewport(0, 0, SurfaceWidth, SurfaceHeight);
 
     audio::Loader audio_loader;

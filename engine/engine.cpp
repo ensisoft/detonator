@@ -238,7 +238,7 @@ public:
             // and is centered in the middle of the rendering surface.
             mPainter->SetViewport(GetViewport());
             // set the logical viewport to whatever the game has set it.
-            mPainter->SetOrthographicView(game_view);
+            mPainter->SetOrthographicProjection(game_view);
             // set the pixel ratio for mapping game units to rendering surface units.
             mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
 
@@ -274,7 +274,7 @@ public:
             const float device_viewport_height = height * scale;
 
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetOrthographicView(0, 0, width, height);
+            mPainter->SetOrthographicProjection(0, 0, width, height);
             // Set the actual device viewport for rendering into the window surface.
             // the viewport retains the UI's aspect ratio and is centered in the middle
             // of the rendering surface.
@@ -288,7 +288,7 @@ public:
         if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mShowMouseCursor)
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetOrthographicView(0, 0, surf_width, surf_height);
+            mPainter->SetOrthographicProjection(0, 0, surf_width, surf_height);
             mPainter->SetViewport(0, 0, surf_width, surf_height);
         }
         if (mDebug.debug_show_fps)

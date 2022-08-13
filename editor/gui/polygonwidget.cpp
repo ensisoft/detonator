@@ -462,7 +462,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto width = size;
     const auto height = size;
     painter.SetViewport(xoffset, yoffset, size, size);
-    painter.SetOrthographicView(width , height);
+    painter.SetOrthographicProjection(width , height);
 
     gfx::Transform view;
     // fiddle with the view transform in order to avoid having

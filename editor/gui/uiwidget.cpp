@@ -1689,7 +1689,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         mCurrentTool->Render(painter, view);
     }
 
-    painter.SetOrthographicView(0.0f , 0.0f , surface_width , surface_height);
+    painter.SetOrthographicProjection(0.0f , 0.0f , surface_width , surface_height);
     painter.ResetViewMatrix();
 }
 
