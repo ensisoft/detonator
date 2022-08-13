@@ -130,9 +130,9 @@ namespace gfx
         // in terms of device/render target coordinate space. I.e. the area
         // of the rendering surface where the pixels of the rendered scene are
         // placed in the surface.
-        void SetOrthographicView(const FRect& view);
-        void SetOrthographicView(float left, float top, float width, float height);
-        void SetOrthographicView(float width, float height);
+        void SetOrthographicProjection(const FRect& view);
+        void SetOrthographicProjection(float left, float top, float width, float height);
+        void SetOrthographicProjection(float width, float height);
 
         void SetViewport(int x, int y, unsigned width, unsigned height);
         void SetScissor(int x, int y, unsigned width, unsigned height);

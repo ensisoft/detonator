@@ -89,15 +89,15 @@ public:
     {
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
-        const auto& kProjMatrix = mProjection;
-        const auto& kViewMatrix = mViewMatrix * transform.GetAsMatrix();
+        const auto& kProjectionMatrix = mProjection;
+        const auto& kModelViewMatrix  = mViewMatrix * transform.GetAsMatrix();
         const auto style = shape.GetStyle();
 
         Drawable::Environment draw_env;
         draw_env.editing_mode = mEditingMode;
         draw_env.pixel_ratio  = mPixelRatio;
-        draw_env.proj_matrix  = &kProjMatrix;
-        draw_env.view_matrix  = &kViewMatrix;
+        draw_env.proj_matrix  = &kProjectionMatrix;
+        draw_env.view_matrix  = &kModelViewMatrix;
 
         Geometry* geom = shape.Upload(draw_env, *mDevice);
         Program* prog = GetProgram(shape, mat);
@@ -110,9 +110,9 @@ public:
         material_env.render_points = style == Drawable::Style::Points;
 
         prog->SetUniform("kProjectionMatrix",
-            *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-        prog->SetUniform("kViewMatrix",
-            *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+            *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+        prog->SetUniform("kModelViewMatrix",
+            *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
         mat.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
@@ -156,7 +156,7 @@ public:
     {
         mDevice->ClearStencil(1);
 
-        const auto& kProjMatrix = mProjection;
+        const auto& kProjectionMatrix = mProjection;
 
         Device::State state;
         state.viewport      = MapToDevice(mViewport);
@@ -171,12 +171,12 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
-            const auto& kViewMatrix = mViewMatrix * (*mask.transform);
+            const auto& kModelViewMatrix = mViewMatrix * (*mask.transform);
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &kViewMatrix;
-            draw_env.proj_matrix  = &kProjMatrix;
+            draw_env.view_matrix  = &kModelViewMatrix;
+            draw_env.proj_matrix  = &kProjectionMatrix;
             Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -185,9 +185,9 @@ public:
                 continue;
 
             prog->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-            prog->SetUniform("kViewMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+                *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -212,12 +212,12 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
-            const auto& kViewMatrix = mViewMatrix * (*draw.transform);
+            const auto& kModelViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &kViewMatrix;
-            draw_env.proj_matrix  = &kProjMatrix;
+            draw_env.view_matrix  = &kModelViewMatrix;
+            draw_env.proj_matrix  = &kProjectionMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -226,9 +226,9 @@ public:
                 continue;
 
             prog->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kProjMatrix));
-            prog->SetUniform("kViewMatrix",
-               *(const Program::Matrix4x4*)glm::value_ptr(kViewMatrix));
+                *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+            prog->SetUniform("kModelViewMatrix",
+               *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -250,16 +250,16 @@ public:
 
     virtual void Draw(const std::vector<DrawShape>& shapes) override
     {
-        const auto& kProjMatrix = mProjection;
+        const auto& kProjectionMatrix = mProjection;
 
         for (const auto& draw : shapes)
         {
-            const auto& kViewMatrix = mViewMatrix * (*draw.transform);
+            const auto& kModelViewMatrix = mViewMatrix * (*draw.transform);
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.proj_matrix  = &kProjMatrix;
-            draw_env.view_matrix  = &kViewMatrix;
+            draw_env.proj_matrix  = &kProjectionMatrix;
+            draw_env.view_matrix  = &kModelViewMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -268,9 +268,9 @@ public:
                 continue;
 
             program->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjMatrix));
-            program->SetUniform("kViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kViewMatrix));
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program->SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -379,17 +379,17 @@ std::unique_ptr<Painter> Painter::Create(Device* device)
     return std::make_unique<StandardPainter>(device);
 }
 
-void Painter::SetOrthographicView(const FRect& view)
+void Painter::SetOrthographicProjection(const FRect& view)
 {
     SetProjectionMatrix(MakeOrthographicProjection(view));
 }
-void Painter::SetOrthographicView(float left, float top, float width, float height)
+void Painter::SetOrthographicProjection(float left, float top, float width, float height)
 {
     const FRect view(left, top, width, height);
     SetProjectionMatrix(MakeOrthographicProjection(view));
 }
 // Set the logical viewport for "top left" origin based drawing.
-void Painter::SetOrthographicView(float width, float height)
+void Painter::SetOrthographicProjection(float width, float height)
 {
     const FRect view(0.0f, 0.0f, width, height);
     SetProjectionMatrix(MakeOrthographicProjection(view));
