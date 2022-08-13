@@ -297,6 +297,12 @@ public:
     {}
     virtual void ClearStencil(int value) override
     {}
+    virtual void ClearDepth(float value) override
+    {}
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth) override
+    {}
+    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil) override
+    {}
 
     virtual void SetDefaultTextureFilter(MinFilter filter) override
     {}

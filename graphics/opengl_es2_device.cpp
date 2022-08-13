@@ -265,10 +265,11 @@ struct OpenGLFunctions
     PFNGLSTENCILFUNCPROC             glStencilFunc;
     PFNGLSTENCILOPPROC               glStencilOp;
     PFNGLCLEARCOLORPROC              glClearColor;
+    PFNGLCLEARDEPTHFPROC             glClearDepthf;
     PFNGLCLEARPROC                   glClear;
     PFNGLCLEARSTENCILPROC            glClearStencil;
-    PFNGLCLEARDEPTHFPROC             glClearDepthf;
     PFNGLBLENDFUNCPROC               glBlendFunc;
+    PFNGLDEPTHFUNCPROC               glDepthFunc;
     PFNGLVIEWPORTPROC                glViewport;
     PFNGLDRAWARRAYSPROC              glDrawArrays;
     PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
@@ -355,6 +356,7 @@ public:
         RESOLVE(glStencilFunc);
         RESOLVE(glStencilOp);
         RESOLVE(glClearColor);
+        RESOLVE(glClearDepthf);
         RESOLVE(glClear);
         RESOLVE(glClearStencil);
         RESOLVE(glClearDepthf);
@@ -522,6 +524,24 @@ public:
     {
         GL_CALL(glClearStencil(value));
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
+    }
+    virtual void ClearDepth(float value) override
+    {
+        GL_CALL(glClearDepthf(value));
+        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
+    }
+    virtual void ClearColorDepth(const Color4f& color, float depth) override
+    {
+        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+        GL_CALL(glClearDepthf(depth));
+        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+    }
+    virtual void ClearColorDepthStencil(const Color4f&  color, float depth, int stencil) override
+    {
+        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+        GL_CALL(glClearDepthf(depth));
+        GL_CALL(glClearStencil(stencil));
+        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
     }
 
     virtual void SetDefaultTextureFilter(MinFilter filter) override
@@ -773,6 +793,14 @@ public:
             const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
             GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
             GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        }
+        if (EnableIf(GL_DEPTH_TEST, state.depth_test != State::DepthTest::Disabled))
+        {
+            GLenum depth_test;
+            if (state.depth_test == State::DepthTest::LessOrEQual)
+                depth_test = GL_LEQUAL;
+            else BUG("Unknown GL depth test mode.");
+            GL_CALL(glDepthFunc(depth_test));
         }
 
         if (state.bWriteColor) {

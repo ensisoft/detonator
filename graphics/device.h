@@ -40,6 +40,14 @@ namespace gfx
         // Device state including the rasterizer state
         // that is to be applied for any draw operation.
         struct State {
+            enum class DepthTest {
+                Disabled,
+                // Depth test passes and color buffer is updated when the fragments
+                // depth value is less or equal to previously written depth value.
+                LessOrEQual
+            };
+            DepthTest depth_test = DepthTest::Disabled;
+
             // should write color buffer or not.
             bool bWriteColor = true;
             bool premulalpha = false;
@@ -160,6 +168,9 @@ namespace gfx
 
         virtual void ClearColor(const Color4f& color) = 0;
         virtual void ClearStencil(int value) = 0;
+        virtual void ClearDepth(float value) = 0;
+        virtual void ClearColorDepth(const Color4f& color, float depth) = 0;
+        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil) = 0;
 
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
