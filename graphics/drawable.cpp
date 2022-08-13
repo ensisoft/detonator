@@ -94,7 +94,7 @@ varying float vAlpha;
 
 void main()
 {
-    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 1.0, 1.0);
+    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
     vTexCoord    = aTexCoord;
     vRandomValue = 0.0;
     vAlpha       = 1.0;
