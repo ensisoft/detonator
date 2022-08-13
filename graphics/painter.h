@@ -86,7 +86,7 @@ namespace gfx
         // Draw the given shape using the given material with the given transformation.
         virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
         // Draw using a mask to cover some areas where painting is not desired.
-        // This is a two step draw operation:
+        // This is a two-step draw operation:
         // 1. Draw the mask shape using the given mask transform into the stencil buffer.
         // 2. Draw the actual shape using the given material and transform into the color
         //    buffer in the area not covered by the mask.
