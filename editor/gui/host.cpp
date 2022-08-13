@@ -211,7 +211,7 @@ void Main(int argc, char* argv[])
     format.setVersion(2, 0);
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setDepthBufferSize(0); // currently we don't care
+    format.setDepthBufferSize(24);
     format.setAlphaBufferSize(0); // no alpha channel
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);

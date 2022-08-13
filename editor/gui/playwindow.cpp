@@ -473,7 +473,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     format.setBlueBufferSize(8);
     format.setAlphaBufferSize(0); // no alpha channel
     format.setStencilBufferSize(8);
-    format.setDepthBufferSize(0);
+    format.setDepthBufferSize(24);
     format.setSamples(settings.multisample_sample_count);
     format.setSwapInterval(settings.window_vsync ? 1 : 0);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);

@@ -1825,15 +1825,16 @@ int main(int argc, char* argv[])
         WindowContext(wdk::Config::Multisampling sampling, bool srgb, bool debug)
         {
             wdk::Config::Attributes attrs;
-            attrs.red_size  = 8;
-            attrs.green_size = 8;
-            attrs.blue_size = 8;
-            attrs.alpha_size = 8;
-            attrs.stencil_size = 8;
+            attrs.red_size        = 8;
+            attrs.green_size      = 8;
+            attrs.blue_size       = 8;
+            attrs.alpha_size      = 8;
+            attrs.stencil_size    = 8;
+            attrs.depth_size      = 24;
             attrs.surfaces.window = true;
-            attrs.double_buffer = true;
-            attrs.sampling = sampling; //wdk::Config::Multisampling::MSAA4;
-            attrs.srgb_buffer = srgb;
+            attrs.double_buffer   = true;
+            attrs.sampling        = sampling;
+            attrs.srgb_buffer     = srgb;
 
             mConfig   = std::make_unique<wdk::Config>(attrs);
             mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  debug,

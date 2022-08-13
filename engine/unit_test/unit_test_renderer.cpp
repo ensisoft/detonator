@@ -53,15 +53,17 @@ public:
     TestContext(unsigned w, unsigned h)
     {
         wdk::Config::Attributes attrs;
-        attrs.red_size  = 8;
-        attrs.green_size = 8;
-        attrs.blue_size = 8;
-        attrs.alpha_size = 8;
-        attrs.stencil_size = 8;
+        attrs.red_size         = 8;
+        attrs.green_size       = 8;
+        attrs.blue_size        = 8;
+        attrs.alpha_size       = 8;
+        attrs.stencil_size     = 8;
+        attrs.depth_size       = 24;
         attrs.surfaces.pbuffer = true;
-        attrs.double_buffer = false;
-        attrs.sampling = wdk::Config::Multisampling::MSAA4;
-        attrs.srgb_buffer = true;
+        attrs.double_buffer    = false;
+        attrs.srgb_buffer      = true;
+        attrs.sampling         = wdk::Config::Multisampling::MSAA4;
+
         mConfig   = std::make_unique<wdk::Config>(attrs);
         mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
                                                    wdk::Context::Type::OpenGL_ES);
