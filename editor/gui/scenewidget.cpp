@@ -761,7 +761,10 @@ bool SceneWidget::ConfirmClose()
 bool SceneWidget::OnEscape()
 {
     if (mCurrentTool)
+    {
         mCurrentTool.reset();
+        UncheckPlacementActions();
+    }
     else mUI.tree->ClearSelection();
     return true;
 }
@@ -1011,6 +1014,7 @@ void SceneWidget::on_actionNodePlace_triggered()
     tool->AdjustPlacementPosition(mUI.widget->mapFromGlobal(QCursor::pos()), view);
 
     mCurrentTool = std::move(tool);
+    mUI.actionNodePlace->setChecked(true);
 }
 
 void SceneWidget::on_actionNodeDuplicate_triggered()
@@ -1018,7 +1022,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
     if (const auto* node = GetCurrentNode())
     {
         auto* dupe = mState.scene.DuplicateNode(node);
-        // update the the translation for the parent of the new hierarchy
+        // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
@@ -1711,7 +1715,10 @@ bool SceneWidget::KeyPress(QKeyEvent* key)
             break;
         case Qt::Key_Escape:
             if (mCurrentTool)
+            {
                 mCurrentTool.reset();
+                UncheckPlacementActions();
+            }
             else mUI.tree->ClearSelection();
             break;
         default:
@@ -1884,7 +1891,7 @@ void SceneWidget::DisplayCurrentCameraLocation()
 
 void SceneWidget::UncheckPlacementActions()
 {
-
+    mUI.actionNodePlace->setChecked(false);
 }
 
 void SceneWidget::TranslateCurrentNode(float dx, float dy)
