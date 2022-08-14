@@ -216,7 +216,7 @@ public:
         {
             TRACE_SCOPE("DrawScene");
             // low level draw packet filter for culling draw packets
-            // that fall outside of the current viewport.
+            // that fall outside the current viewport.
             class Culler : public engine::EntityInstanceDrawHook {
             public:
                 Culler(const engine::FRect& view) : mViewRect(view)
@@ -229,20 +229,24 @@ public:
                     return true;
                 }
             private:
-                const engine::FRect& mViewRect;
+                const engine::FRect mViewRect;
             };
-            Culler cull(game_view);
+            Culler cull(engine::FRect(0.0f, 0.0f, game_view_width, game_view_height));
+
+            gfx::Transform transform;
+            // set the game view transform. moving the viewport is the same as
+            // moving the objects in the opposite direction relative to the viewport.
+            transform.Translate(-game_view.GetX(), -game_view.GetY());
 
             // set the actual device viewport for rendering into the window buffer.
             // the device viewport retains the game's logical viewport aspect ratio
             // and is centered in the middle of the rendering surface.
             mPainter->SetViewport(GetViewport());
-            // set the logical viewport to whatever the game has set it.
-            mPainter->SetOrthographicProjection(game_view);
+            // set the projection transform based on the game's logical viewport size.
+            mPainter->SetOrthographicProjection(0.0f, 0.0f, game_view_width, game_view_height);
             // set the pixel ratio for mapping game units to rendering surface units.
             mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
 
-            gfx::Transform transform;
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull));
             if (mDebug.debug_draw && mPhysics.HaveWorld())
