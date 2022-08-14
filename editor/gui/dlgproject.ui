@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>478</width>
-    <height>810</height>
+    <width>471</width>
+    <height>940</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -307,7 +307,7 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Window size (w,h)</string>
+             <string>Window size</string>
             </property>
            </widget>
           </item>
@@ -528,24 +528,74 @@
           <string>HTML5/WASM settings</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbPowerPref"/>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_36">
+            <property name="text">
+             <string>Default audio IO</string>
+            </property>
+           </widget>
           </item>
-          <item row="4" column="1">
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="5" column="1">
            <widget class="QCheckBox" name="chkAntialias">
             <property name="text">
              <string>Antialias</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbCanvasMode"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="cmbWasmAudioIO"/>
+          </item>
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="chkDevUI">
+            <property name="text">
+             <string>Show dev control panel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_27">
+            <property name="text">
+             <string>Canvas mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Power preference</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
            <widget class="QLabel" name="label_32">
             <property name="text">
              <string>Canvas size</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbPowerPref"/>
+          </item>
+          <item row="1" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
              <widget class="QSpinBox" name="canvasWidth">
@@ -587,56 +637,6 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="2">
-           <spacer name="horizontalSpacer_11">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Power preference</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="chkDevUI">
-            <property name="text">
-             <string>Show dev control panel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbCanvasMode"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_27">
-            <property name="text">
-             <string>Canvas mode</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbWasmAudioIO"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_36">
-            <property name="text">
-             <string>Default audio IO</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -674,6 +674,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="suffix">
+             <string> Hz</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -700,6 +703,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string> Hz</string>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -816,6 +822,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="suffix">
+               <string/>
+              </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
               </property>
@@ -840,6 +849,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="suffix">
+               <string/>
               </property>
               <property name="minimum">
                <double>-100.000000000000000</double>
@@ -1609,9 +1621,9 @@
   <tabstop>chkGrabMouse</tabstop>
   <tabstop>chkVsync</tabstop>
   <tabstop>cmbCanvasMode</tabstop>
-  <tabstop>cmbPowerPref</tabstop>
   <tabstop>canvasWidth</tabstop>
   <tabstop>canvasHeight</tabstop>
+  <tabstop>cmbPowerPref</tabstop>
   <tabstop>cmbWasmAudioIO</tabstop>
   <tabstop>chkAntialias</tabstop>
   <tabstop>chkDevUI</tabstop>
