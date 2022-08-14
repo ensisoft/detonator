@@ -19058,10 +19058,15 @@
   ],
   "uis": [
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "847gBr2NKv",
       "name": "MainMenu",
       "resource_id": "847gBr2NKv",
       "resource_name": "MainMenu",
+      "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",
       "widgets": [
@@ -19176,10 +19181,15 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "3J49aF64Jm",
       "name": "HUD",
       "resource_id": "3J49aF64Jm",
       "resource_name": "HUD",
+      "script_file": "",
       "style_file": "app://ui/default.json",
       "style_string": "",
       "widgets": [

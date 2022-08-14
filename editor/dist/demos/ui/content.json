@@ -1070,6 +1070,10 @@
   ],
   "uis": [
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "GUqwuv4TMH",
       "name": "Font Demo",
       "resource_id": "GUqwuv4TMH",
@@ -1253,6 +1257,10 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "x8itAE59QO",
       "name": "All Widgets",
       "resource_id": "x8itAE59QO",
@@ -1795,6 +1803,10 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "0Ll9lSrzWl",
       "name": "Buttons",
       "resource_id": "0Ll9lSrzWl",
@@ -2111,6 +2123,10 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "DANndT4HWt",
       "name": "Jungle",
       "resource_id": "DANndT4HWt",
@@ -2248,6 +2264,10 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "q2BRyKzJzf",
       "name": "Loaders",
       "resource_id": "q2BRyKzJzf",
@@ -2448,6 +2468,10 @@
       ]
     },
     {
+      "flags": {
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "qNrtwb1b52",
       "name": "Kenney",
       "resource_id": "qNrtwb1b52",
