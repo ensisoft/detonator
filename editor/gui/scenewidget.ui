@@ -1281,7 +1281,7 @@
             <item>
              <widget class="QToolButton" name="btnEditEntity">
               <property name="toolTip">
-               <string>Open the script for editing</string>
+               <string>Open the entity for editing</string>
               </property>
               <property name="text">
                <string>...</string>
@@ -1300,6 +1300,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="btnEntityParams">
+              <property name="toolTip">
+               <string>Edit entity instance properties</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -1719,12 +1722,15 @@
    </property>
   </action>
   <action name="actionNodePlace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/tool_place.png</normaloff>:/32x32_ico_png/tool_place.png</iconset>
    </property>
    <property name="text">
-    <string>Place</string>
+    <string>Place Tool</string>
    </property>
    <property name="toolTip">
     <string>Place a new entity node</string>
