@@ -237,6 +237,10 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
 
     UpdateTrackUI();
 
+    if (properties.contains("use_physics"))
+    {
+        SetValue(mUI.actionUsePhysics, properties["use_physics"].toBool());
+    }
 }
 AnimationTrackWidget::~AnimationTrackWidget()
 {
@@ -713,6 +717,7 @@ void AnimationTrackWidget::on_actionSave_triggered()
     ASSERT(parent);
 
     QVariantMap properties;
+    properties["use_physics"] = (bool)GetValue(mUI.actionUsePhysics);
     properties["num_timelines"] = (int)mState.timelines.size();
     for (int i=0; i<(int)mState.timelines.size(); ++i)
     {
