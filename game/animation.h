@@ -63,13 +63,15 @@ namespace game
             Kinematic,
             // SetValue actuators sets some parameter to the specific value on the node.
             SetValue,
-            // SetFlag actuator sets a a binary flag to the specific state on the node.
+            // SetFlag actuator sets a binary flag to the specific state on the node.
             SetFlag,
             // Material actuator changes material parameters
             Material
         };
         // dtor.
         virtual ~ActuatorClass() = default;
+        // Get human-readable name of the actuator class.
+        virtual std::string GetName() const = 0;
         // Get the id of this actuator
         virtual std::string GetId() const = 0;
         // Get the ID of the node affected by this actuator.
@@ -81,7 +83,7 @@ namespace game
         // Create a new actuator class instance with same property values
         // with this object but with a unique id.
         virtual std::unique_ptr<ActuatorClass> Clone() const = 0;
-        // Get the type of the represented actuator.
+        // Get the dynamic type of the represented actuator.
         virtual Type GetType() const = 0;
         // Get the normalized start time when this actuator starts.
         virtual float GetStartTime() const = 0;
@@ -93,6 +95,8 @@ namespace game
         virtual void SetDuration(float duration) = 0;
         // Set the ID of the node affected by this actuator.
         virtual void SetNodeId(const std::string& id) = 0;
+        // Set the human-readable name of the actuator class.
+        virtual void SetName(const std::string& name) = 0;
         // Serialize the actuator class object into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load the actuator class object state from JSON. Returns true
@@ -132,6 +136,10 @@ namespace game
         { return Type::SetFlag;}
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetNodeId() const override
@@ -164,9 +172,12 @@ namespace game
         { mFlagName = name; }
         void SetFlagAction(FlagAction action)
         { mFlagAction = action; }
+
     private:
         // id of the actuator.
         std::string mId;
+        // Human-readable name of the actuator class
+        std::string mName;
         // id of the node that the action will be applied onto
         std::string mNodeId;
         // Normalized start time.
@@ -201,6 +212,10 @@ namespace game
         { mEndAngularVelocity = velocity; }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetNodeId() const override
@@ -228,8 +243,10 @@ namespace game
         virtual bool FromJson(const data::Reader& data) override;
 
     private:
-        // id of the actuator.
+        // ID of the actuator class.
         std::string mId;
+        // Human-readable name of the actuator class.
+        std::string mName;
         // id of the node that the action will be applied on.
         std::string mNodeId;
         // the interpolation method to be used.
@@ -287,6 +304,10 @@ namespace game
         { mEndValue = value; }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name;}
+        virtual std::string GetName() const override
+        { return mName; }
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetNodeId() const override
@@ -313,8 +334,10 @@ namespace game
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
     private:
-        // id of the actuator.
+        // ID of the actuator class.
         std::string mId;
+        // Human-readable name of the actuator class.
+        std::string mName;
         // id of the node that the action will be applied on.
         std::string mNodeId;
         // the interpolation method to be used.
@@ -345,6 +368,8 @@ namespace game
         { return Type::Transform; }
         virtual std::string GetNodeId() const override
         { return mNodeId; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual float GetStartTime() const override
         { return mStartTime; }
         virtual float GetDuration() const override
@@ -355,6 +380,8 @@ namespace game
         { mDuration = math::clamp(0.0f, 1.0f, duration); }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual std::string GetId() const override
         { return mId; }
         Interpolation GetInterpolation() const
@@ -399,8 +426,10 @@ namespace game
         }
 
     private:
-        // id of the actuator.
+        // ID of the actuator class.
         std::string mId;
+        // Human-readable name of the actuator class.
+        std::string mName;
         // id of the node we're going to change.
         std::string mNodeId;
         // the interpolation method to be used.
@@ -449,10 +478,14 @@ namespace game
         { mInterpolation = method; }
         virtual void SetNodeId(const std::string& id) override
         { mNodeId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual std::string GetId() const override
         { return mId; }
         virtual std::string GetNodeId() const override
         { return mNodeId; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual std::unique_ptr<ActuatorClass> Copy() const override
         { return std::make_unique<MaterialActuatorClass>(*this); }
         virtual std::unique_ptr<ActuatorClass> Clone() const override
@@ -475,8 +508,10 @@ namespace game
         virtual bool FromJson(const data::Reader& data) override;
         virtual std::size_t GetHash() const override;
     private:
-        // Id of the actuator class.
+        // ID of the actuator class.
         std::string mId;
+        // Human-readable name of the actuator class.
+        std::string mName;
         // Id of the node class that the actuator applies on
         std::string mNodeId;
         // Interpolation method used to change the value.
@@ -490,6 +525,12 @@ namespace game
         // The value of the material parameter.
         MaterialParam mParamValue;
     };
+
+    class KinematicActuator;
+    class TransformActuator;
+    class MaterialActuator;
+    class SetFlagActuator;
+    class SetValueActuator;
 
     // An instance of ActuatorClass object.
     class Actuator
@@ -511,9 +552,54 @@ namespace game
         virtual float GetDuration() const = 0;
         // Get the id of the node that will be modified by this actuator.
         virtual std::string GetNodeId() const = 0;
+        // Get the actuator class ID.
+        virtual std::string GetClassId() const = 0;
+        // Get the actuator class name.
+        virtual std::string GetClassName() const = 0;
         // Create an exact copy of this actuator object.
         virtual std::unique_ptr<Actuator> Copy() const = 0;
+        // Get the dynamic type of the actuator.
+        virtual Type GetType() const = 0;
+
+        inline KinematicActuator* AsKinematicActuator()
+        { return Cast<KinematicActuator>(Type::Kinematic); }
+        inline const KinematicActuator* AsKinematicActuator() const
+        { return Cast<KinematicActuator>(Type::Kinematic); }
+
+        inline TransformActuator* AsTransformActuator()
+        { return Cast<TransformActuator>(Type::Transform); }
+        inline const TransformActuator* AsTransformActuator() const
+        { return Cast<TransformActuator>(Type::Transform); }
+
+        inline MaterialActuator* AsMaterialActuator()
+        { return Cast<MaterialActuator>(Type::Material); }
+        inline const MaterialActuator* AsMaterialActuator() const
+        { return Cast<MaterialActuator>(Type::Material); }
+
+        inline SetValueActuator* AsValueActuator()
+        { return Cast<SetValueActuator>(Type::SetValue); }
+        inline const SetValueActuator* AsValueActuator() const
+        { return Cast<SetValueActuator>(Type::SetValue); }
+
+        inline SetFlagActuator* AsFlagActuator()
+        { return Cast<SetFlagActuator>(Type::SetValue); }
+        inline const SetFlagActuator* AsFlagActuator() const
+        { return Cast<SetFlagActuator>(Type::SetValue); }
     private:
+        template<typename T>
+        T* Cast(Type desire)
+        {
+            if (GetType() == desire)
+                return static_cast<T*>(this);
+            return nullptr;
+        }
+        template<typename T>
+        const T* Cast(Type desire) const
+        {
+            if (GetType() == desire)
+                return static_cast<const T*>(this);
+            return nullptr;
+        }
     };
 
     // Apply a kinematic change to a rigid body's linear or angular velocity.
@@ -539,8 +625,14 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual std::string GetClassName() const override
+        { return mClass->GetName(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<KinematicActuator>(*this); }
+        virtual Type GetType() const override
+        { return Type::Kinematic;}
     private:
         std::shared_ptr<const KinematicActuatorClass> mClass;
         glm::vec2 mStartLinearVelocity = {0.0f, 0.0f};
@@ -570,8 +662,14 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual std::string GetClassName() const override
+        { return mClass->GetName(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<SetFlagActuator>(*this); }
+        virtual Type GetType() const override
+        { return Type::SetFlag; }
         bool CanApply(EntityNode& node, bool verbose) const;
     private:
         std::shared_ptr<const SetFlagActuatorClass> mClass;
@@ -604,8 +702,14 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual std::string GetClassName() const override
+        { return mClass->GetName(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<SetValueActuator>(*this); }
+        virtual Type GetType() const override
+        { return Type::SetValue; }
         bool CanApply(EntityNode& node, bool verbose) const;
     private:
         template<typename T>
@@ -643,8 +747,14 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual std::string GetClassName() const override
+        { return mClass->GetName(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<TransformActuator>(*this); }
+        virtual Type GetType() const override
+        { return Type::Transform; }
     private:
         std::shared_ptr<const TransformActuatorClass> mClass;
         // The starting state for the transformation.
@@ -677,8 +787,14 @@ namespace game
         { return mClass->GetDuration(); }
         virtual std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
+        virtual std::string GetClassId() const override
+        { return mClass->GetId(); }
+        virtual std::string GetClassName() const override
+        { return mClass->GetName(); }
         virtual std::unique_ptr<Actuator> Copy() const override
         { return std::make_unique<MaterialActuator>(*this); }
+        virtual Type GetType() const override
+        { return Type::Material; }
     private:
         template<typename T>
         T Interpolate(float t)
@@ -807,7 +923,6 @@ namespace game
         bool mLooping = false;
     };
 
-
     // Animation is an instance of some type of AnimationClass.
     // It contains the per instance data of the animation track which is
     // modified over time through updates to the track and its actuators states.
@@ -835,6 +950,19 @@ namespace game
         // Returns true if the animation is complete, i.e. all the
         // actions have been performed.
         bool IsComplete() const;
+
+        // Find an actuator instance by on its class ID.
+        // If there's no such actuator with such class ID then nullptr is returned.
+        Actuator* FindActuatorById(const std::string& id);
+        // Find an actuator instance by its class name.
+        // If there's no such actuator with such class ID then nullptr is returned.
+        Actuator* FindActuatorByName(const std::string& name);
+        // Find an actuator instance by on its class ID.
+        // If there's no such actuator with such class ID then nullptr is returned.
+        const Actuator* FindActuatorById(const std::string& id) const;
+        // Find an actuator instance by its class name.
+        // If there's no such actuator with such class ID then nullptr is returned.
+        const Actuator* FindActuatorByName(const std::string& name) const;
 
         // Set one time animation delay that takes place
         // before the animation starts.

@@ -38,6 +38,7 @@ std::size_t SetFlagActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mFlagName);
     hash = base::hash_combine(hash, mStartTime);
@@ -49,6 +50,7 @@ std::size_t SetFlagActuatorClass::GetHash() const
 void SetFlagActuatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
+    data.Write("name",      mName);
     data.Write("node",      mNodeId);
     data.Write("flag",      mFlagName);
     data.Write("starttime", mStartTime);
@@ -58,18 +60,21 @@ void SetFlagActuatorClass::IntoJson(data::Writer& data) const
 
 bool SetFlagActuatorClass::FromJson(const data::Reader& data)
 {
-    return data.Read("id",        &mId) &&
-           data.Read("node",      &mNodeId) &&
-           data.Read("flag",      &mFlagName) &&
-           data.Read("starttime", &mStartTime) &&
-           data.Read("duration",  &mDuration) &&
-           data.Read("action",    &mFlagAction);
+    data.Read("id",        &mId);
+    data.Read("name",      &mName);
+    data.Read("node",      &mNodeId);
+    data.Read("flag",      &mFlagName);
+    data.Read("starttime", &mStartTime);
+    data.Read("duration",  &mDuration);
+    data.Read("action",    &mFlagAction);
+    return true;
 }
 
 std::size_t KinematicActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
@@ -82,6 +87,7 @@ std::size_t KinematicActuatorClass::GetHash() const
 void KinematicActuatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",               mId);
+    data.Write("name",             mName);
     data.Write("node",             mNodeId);
     data.Write("method",           mInterpolation);
     data.Write("starttime",        mStartTime);
@@ -92,31 +98,35 @@ void KinematicActuatorClass::IntoJson(data::Writer& data) const
 
 bool KinematicActuatorClass::FromJson(const data::Reader& data)
 {
-    return data.Read("id",               &mId) &&
-           data.Read("node",             &mNodeId) &&
-           data.Read("method",           &mInterpolation) &&
-           data.Read("starttime",        &mStartTime) &&
-           data.Read("duration",         &mDuration) &&
-           data.Read("linear_velocity",  &mEndLinearVelocity) &&
-           data.Read("angular_velocity", &mEndAngularVelocity);
+    data.Read("id",               &mId);
+    data.Read("name",             &mName);
+    data.Read("node",             &mNodeId);
+    data.Read("method",           &mInterpolation);
+    data.Read("starttime",        &mStartTime);
+    data.Read("duration",         &mDuration);
+    data.Read("linear_velocity",  &mEndLinearVelocity);
+    data.Read("angular_velocity", &mEndAngularVelocity);
+    return true;
 }
 
 size_t SetValueActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mParamName);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
-    hash = base::hash_combine(hash, mEndValue);
+    hash = base::hash_combine(hash,mEndValue);
     return hash;
 }
 
 void SetValueActuatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
+    data.Write("cname",     mName);
     data.Write("node",      mNodeId);
     data.Write("method",    mInterpolation);
     data.Write("name",      mParamName);
@@ -127,18 +137,21 @@ void SetValueActuatorClass::IntoJson(data::Writer& data) const
 
 bool SetValueActuatorClass::FromJson(const data::Reader& data)
 {
-    return data.Read("id",        &mId) &&
-           data.Read("node",      &mNodeId) &&
-           data.Read("method",    &mInterpolation) &&
-           data.Read("name",      &mParamName) &&
-           data.Read("starttime", &mStartTime) &&
-           data.Read("duration",  &mDuration) &&
-           data.Read("value",     &mEndValue);
+    data.Read("id",        &mId);
+    data.Read("cname",     &mName);
+    data.Read("node",      &mNodeId);
+    data.Read("method",    &mInterpolation);
+    data.Read("name",      &mParamName);
+    data.Read("starttime", &mStartTime);
+    data.Read("duration",  &mDuration);
+    data.Read("value",     &mEndValue);
+    return true;
 }
 
 void TransformActuatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
+    data.Write("name",      mName);
     data.Write("node",      mNodeId);
     data.Write("method",    mInterpolation);
     data.Write("starttime", mStartTime);
@@ -151,21 +164,24 @@ void TransformActuatorClass::IntoJson(data::Writer& data) const
 
 bool TransformActuatorClass::FromJson(const data::Reader& data)
 {
-    return data.Read("id",        &mId) &&
-           data.Read("node",      &mNodeId) &&
-           data.Read("starttime", &mStartTime) &&
-           data.Read("duration",  &mDuration) &&
-           data.Read("position",  &mEndPosition) &&
-           data.Read("size",      &mEndSize) &&
-           data.Read("scale",     &mEndScale) &&
-           data.Read("rotation",  &mEndRotation) &&
-           data.Read("method",    &mInterpolation);
+    data.Read("id",        &mId);
+    data.Read("name",      &mName);
+    data.Read("node",      &mNodeId);
+    data.Read("starttime", &mStartTime);
+    data.Read("duration",  &mDuration);
+    data.Read("position",  &mEndPosition);
+    data.Read("size",      &mEndSize);
+    data.Read("scale",     &mEndScale);
+    data.Read("rotation",  &mEndRotation);
+    data.Read("method",    &mInterpolation);
+    return true;
 }
 
 std::size_t TransformActuatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
@@ -180,6 +196,7 @@ std::size_t TransformActuatorClass::GetHash() const
 void MaterialActuatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",       mId);
+    data.Write("cname",    mName);
     data.Write("node",     mNodeId);
     data.Write("method",   mInterpolation);
     data.Write("start",    mStartTime);
@@ -189,18 +206,21 @@ void MaterialActuatorClass::IntoJson(data::Writer& data) const
 }
 bool MaterialActuatorClass::FromJson(const data::Reader& data)
 {
-    return (data.Read("id",       &mId) &&
-            data.Read("node",     &mNodeId) &&
-            data.Read("method",   &mInterpolation) &&
-            data.Read("start",    &mStartTime) &&
-            data.Read("duration", &mDuration) &&
-            data.Read("name",     &mParamName) &&
-            data.Read("value",    &mParamValue));
+    data.Read("id",       &mId);
+    data.Read("cname",    &mName);
+    data.Read("node",     &mNodeId);
+    data.Read("method",   &mInterpolation);
+    data.Read("start",    &mStartTime);
+    data.Read("duration", &mDuration);
+    data.Read("name",     &mParamName);
+    data.Read("value",    &mParamValue);
+    return true;
 }
 std::size_t MaterialActuatorClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
@@ -209,7 +229,6 @@ std::size_t MaterialActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mParamValue);
     return hash;
 }
-
 
 void KinematicActuator::Start(EntityNode& node)
 {
@@ -902,6 +921,44 @@ bool Animation::IsComplete() const
     if (mCurrentTime >= mClass->GetDuration())
         return true;
     return false;
+}
+
+Actuator* Animation::FindActuatorById(const std::string& id)
+{
+    for (auto& item : mTracks)
+    {
+        if (item.actuator->GetClassId() == id)
+            return item.actuator.get();
+    }
+    return nullptr;
+}
+Actuator* Animation::FindActuatorByName(const std::string& name)
+{
+    for (auto& item : mTracks)
+    {
+        if (item.actuator->GetClassName() == name)
+            return item.actuator.get();
+    }
+    return nullptr;
+}
+
+const Actuator* Animation::FindActuatorById(const std::string& id) const
+{
+    for (auto& item : mTracks)
+    {
+        if (item.actuator->GetClassId() == id)
+            return item.actuator.get();
+    }
+    return nullptr;
+}
+const Actuator* Animation::FindActuatorByName(const std::string& name) const
+{
+    for (auto& item : mTracks)
+    {
+        if (item.actuator->GetClassName() == name)
+            return item.actuator.get();
+    }
+    return nullptr;
 }
 
 std::unique_ptr<Animation> CreateAnimationInstance(std::shared_ptr<const AnimationClass> klass)
