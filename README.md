@@ -177,6 +177,11 @@ Penguin Juice (Linux)
 - Install Conan build system.
 https://docs.conan.io/en/latest/installation.html
 
+$ conan profile new default --detect
+
+If conan bitches about "ERROR: invalid stting" (for example when GCC major version changes)
+you can try edit ~/.conan/settings.yaml 
+
 - Build the project in RELEASE mode
 ```
   $ git clone https://github.com/ensisoft/gamestudio
