@@ -621,6 +621,10 @@ template<typename Widget> inline
 Widget* WidgetCast(uik::Widget* widget)
 { return uik::WidgetCast<Widget>(widget); }
 
+template<typename Actuator> inline
+Actuator* ActuatorCast(game::Actuator* actuator)
+{ return dynamic_cast<Actuator*>(actuator); }
+
 sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget, const std::string& type_string)
 {
     sol::state_view lua(state);
@@ -685,6 +689,16 @@ void BindWidgetInterface(sol::usertype<Widget>& widget)
         [](Widget& widget, float x, float y) {
             widget.SetPosition(x, y);
         });
+}
+
+template<typename Actuator>
+void BindActuatorInterface(sol::usertype<Actuator>& actuator)
+{
+    actuator["GetClassId"]   = &Actuator::GetClassId;
+    actuator["GetClassName"] = &Actuator::GetClassName;
+    actuator["GetNodeId"]    = &Actuator::GetNodeId;
+    actuator["GetStartTime"] = &Actuator::GetStartTime;
+    actuator["GetDuration"]  = &Actuator::GetDuration;
 }
 
 // the problem with using a std random number generation is that
@@ -2454,6 +2468,61 @@ void BindGameLib(sol::state& L)
     entity_class["GetName"] = &EntityClass::GetName;
     entity_class["GetLifetime"] = &EntityClass::GetLifetime;
 
+    auto actuator_class = table.new_usertype<ActuatorClass>("ActuatorClass");
+    actuator_class["GetName"]       = &ActuatorClass::GetName;
+    actuator_class["GetId"]         = &ActuatorClass::GetId;
+    actuator_class["GetNodeId"]     = &ActuatorClass::GetNodeId;
+    actuator_class["GetStartTime"]  = &ActuatorClass::GetStartTime;
+    actuator_class["GetDuration"]   = &ActuatorClass::GetDuration;
+    actuator_class["GetType"]       = [](const ActuatorClass* klass) {
+        return magic_enum::enum_name(klass->GetType());
+    };
+
+    auto actuator = table.new_usertype<Actuator>("Actuator");
+    BindActuatorInterface<Actuator>(actuator);
+    actuator["AsKinematicActuator"] = &ActuatorCast<KinematicActuator>;
+    actuator["AsFlagActuator"]      = &ActuatorCast<SetFlagActuator>;
+    actuator["AsValueActuator"]     = &ActuatorCast<SetValueActuator>;
+    actuator["AsTransformActuator"] = &ActuatorCast<TransformActuator>;
+    actuator["AsMaterialActuator"]  = &ActuatorCast<MaterialActuator>;
+
+    auto kinematic_actuator = table.new_usertype<KinematicActuator>("KinematicActuator");
+    BindActuatorInterface<KinematicActuator>(kinematic_actuator);
+
+    auto setflag_actuator = table.new_usertype<SetFlagActuator>("SetFlagActuator");
+    BindActuatorInterface<SetFlagActuator>(setflag_actuator);
+
+    auto setvalue_actuator = table.new_usertype<SetValueActuator>("SetValueActuator");
+    BindActuatorInterface<SetValueActuator>(setvalue_actuator);
+
+    auto transform_actuator = table.new_usertype<TransformActuator>("TransformActuator");
+    BindActuatorInterface<TransformActuator>(transform_actuator);
+    transform_actuator["SetEndPosition"] = sol::overload(
+        [](TransformActuator* actuator, const glm::vec2& position) {
+            actuator->SetEndPosition(position);
+        },
+        [](TransformActuator* actuator, float x, float y) {
+            actuator->SetEndPosition(x, y);
+        });
+    transform_actuator["SetEndSize"] = sol::overload(
+        [](TransformActuator* actuator, const glm::vec2& size) {
+            actuator->SetEndSize(size);
+        },
+        [](TransformActuator* actuator, float x, float y) {
+            actuator->SetEndSize(x, y);
+        });
+    transform_actuator["SetEndScale"] = sol::overload(
+        [](TransformActuator* actuator, const glm::vec2& scale) {
+            actuator->SetEndScale(scale);
+        },
+        [](TransformActuator* actuator, float x, float y) {
+            actuator->SetEndScale(x, y);
+        });
+    transform_actuator["SetEndRotation"] = &TransformActuator::SetEndRotation;
+
+    auto material_actuator = table.new_usertype<MaterialActuator>("MaterialActuator");
+    BindActuatorInterface<MaterialActuator>(material_actuator);
+
     auto anim_class = table.new_usertype<AnimationClass>("AnimationClass");
     anim_class["GetName"]     = &AnimationClass::GetName;
     anim_class["GetId"]       = &AnimationClass::GetId;
@@ -2462,14 +2531,64 @@ void BindGameLib(sol::state& L)
     anim_class["IsLooping"]   = &AnimationClass::IsLooping;
 
     auto anim = table.new_usertype<Animation>("Animation");
-    anim["GetClassName"]   = &Animation::GetClassName;
-    anim["GetClassId"]     = &Animation::GetClassId;
-    anim["IsComplete"]     = &Animation::IsComplete;
-    anim["IsLooping"]      = &Animation::IsLooping;
-    anim["SetDelay"]       = &Animation::SetDelay;
-    anim["GetDelay"]       = &Animation::GetDelay;
-    anim["GetCurrentTime"] = &Animation::GetCurrentTime;
-    anim["GetClass"]       = &Animation::GetClass;
+    anim["GetClassName"]       =  &Animation::GetClassName;
+    anim["GetClassId"]         =  &Animation::GetClassId;
+    anim["IsComplete"]         =  &Animation::IsComplete;
+    anim["IsLooping"]          =  &Animation::IsLooping;
+    anim["SetDelay"]           =  &Animation::SetDelay;
+    anim["GetDelay"]           =  &Animation::GetDelay;
+    anim["GetCurrentTime"]     =  &Animation::GetCurrentTime;
+    anim["GetClass"]           =  &Animation::GetClass;
+    anim["FindActuatorById"]   = sol::overload(
+        [](game::Animation* animation, const std::string& name) {
+            return animation->FindActuatorById(name);
+        },
+        [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
+            sol::state_view lua(state);
+            auto* actuator = animation->FindActuatorById(name);
+            if (!actuator)
+                return sol::make_object(lua, sol::nil);
+            const auto enum_val = magic_enum::enum_cast<game::ActuatorClass::Type>(type);
+            if (!enum_val.has_value())
+                throw GameError("No such Actuator type: " + type);
+            const auto value = enum_val.value();
+            if (value == game::ActuatorClass::Type::Transform)
+                return sol::make_object(lua, actuator->AsTransformActuator());
+            else if (value == game::ActuatorClass::Type::Material)
+                return sol::make_object(lua, actuator->AsMaterialActuator());
+            else if (value== game::ActuatorClass::Type::Kinematic)
+                return sol::make_object(lua, actuator->AsKinematicActuator());
+            else if (value == game::ActuatorClass::Type::SetFlag)
+                return sol::make_object(lua, actuator->AsFlagActuator());
+            else if (value == game::ActuatorClass::Type::SetValue)
+                return sol::make_object(lua, actuator->AsValueActuator());
+            else BUG("Unhandled actuator type.");
+        });
+    anim["FindActuatorByName"] = sol::overload(
+        [](game::Animation* animation, const std::string& name) {
+           return animation->FindActuatorByName(name);
+        },
+        [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
+            sol::state_view lua(state);
+            auto* actuator = animation->FindActuatorByName(name);
+            if (!actuator)
+                return sol::make_object(lua, sol::nil);
+            const auto enum_val = magic_enum::enum_cast<game::ActuatorClass::Type>(type);
+            if (!enum_val.has_value())
+                throw GameError("No such Actuator type: " + type);
+            const auto value = enum_val.value();
+            if (value == game::ActuatorClass::Type::Transform)
+                return sol::make_object(lua, actuator->AsTransformActuator());
+            else if (value == game::ActuatorClass::Type::Material)
+                return sol::make_object(lua, actuator->AsMaterialActuator());
+            else if (value== game::ActuatorClass::Type::Kinematic)
+                return sol::make_object(lua, actuator->AsKinematicActuator());
+            else if (value == game::ActuatorClass::Type::SetFlag)
+                return sol::make_object(lua, actuator->AsFlagActuator());
+            else if (value == game::ActuatorClass::Type::SetValue)
+                return sol::make_object(lua, actuator->AsValueActuator());
+            else BUG("Unhandled actuator type.");
+        });
 
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index,     &GetScriptVar<Entity>,
