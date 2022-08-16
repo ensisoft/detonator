@@ -44,6 +44,7 @@ std::size_t SetFlagActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mFlagAction);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -56,6 +57,7 @@ void SetFlagActuatorClass::IntoJson(data::Writer& data) const
     data.Write("starttime", mStartTime);
     data.Write("duration",  mDuration);
     data.Write("action",    mFlagAction);
+    data.Write("flags",     mFlags);
 }
 
 bool SetFlagActuatorClass::FromJson(const data::Reader& data)
@@ -67,6 +69,7 @@ bool SetFlagActuatorClass::FromJson(const data::Reader& data)
     data.Read("starttime", &mStartTime);
     data.Read("duration",  &mDuration);
     data.Read("action",    &mFlagAction);
+    data.Read("flags",     &mFlags);
     return true;
 }
 
@@ -81,6 +84,7 @@ std::size_t KinematicActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mEndLinearVelocity);
     hash = base::hash_combine(hash, mEndAngularVelocity);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -94,6 +98,7 @@ void KinematicActuatorClass::IntoJson(data::Writer& data) const
     data.Write("duration",         mDuration);
     data.Write("linear_velocity",  mEndLinearVelocity);
     data.Write("angular_velocity", mEndAngularVelocity);
+    data.Write("flags",            mFlags);
 }
 
 bool KinematicActuatorClass::FromJson(const data::Reader& data)
@@ -106,6 +111,7 @@ bool KinematicActuatorClass::FromJson(const data::Reader& data)
     data.Read("duration",         &mDuration);
     data.Read("linear_velocity",  &mEndLinearVelocity);
     data.Read("angular_velocity", &mEndAngularVelocity);
+    data.Read("flags",            &mFlags);
     return true;
 }
 
@@ -119,7 +125,8 @@ size_t SetValueActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mParamName);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
-    hash = base::hash_combine(hash,mEndValue);
+    hash = base::hash_combine(hash, mEndValue);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -133,6 +140,7 @@ void SetValueActuatorClass::IntoJson(data::Writer& data) const
     data.Write("starttime", mStartTime);
     data.Write("duration",  mDuration);
     data.Write("value",     mEndValue);
+    data.Write("flags",     mFlags);
 }
 
 bool SetValueActuatorClass::FromJson(const data::Reader& data)
@@ -145,6 +153,7 @@ bool SetValueActuatorClass::FromJson(const data::Reader& data)
     data.Read("starttime", &mStartTime);
     data.Read("duration",  &mDuration);
     data.Read("value",     &mEndValue);
+    data.Read("flags",     &mFlags);
     return true;
 }
 
@@ -160,6 +169,7 @@ void TransformActuatorClass::IntoJson(data::Writer& data) const
     data.Write("size",      mEndSize);
     data.Write("scale",     mEndScale);
     data.Write("rotation",  mEndRotation);
+    data.Write("flags",     mFlags);
 }
 
 bool TransformActuatorClass::FromJson(const data::Reader& data)
@@ -174,6 +184,7 @@ bool TransformActuatorClass::FromJson(const data::Reader& data)
     data.Read("scale",     &mEndScale);
     data.Read("rotation",  &mEndRotation);
     data.Read("method",    &mInterpolation);
+    data.Read("flags",     &mFlags);
     return true;
 }
 
@@ -190,6 +201,7 @@ std::size_t TransformActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mEndSize);
     hash = base::hash_combine(hash, mEndScale);
     hash = base::hash_combine(hash, mEndRotation);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -203,6 +215,7 @@ void MaterialActuatorClass::IntoJson(data::Writer& data) const
     data.Write("duration", mDuration);
     data.Write("name",     mParamName);
     data.Write("value",    mParamValue);
+    data.Write("flags",    mFlags);
 }
 bool MaterialActuatorClass::FromJson(const data::Reader& data)
 {
@@ -214,6 +227,7 @@ bool MaterialActuatorClass::FromJson(const data::Reader& data)
     data.Read("duration", &mDuration);
     data.Read("name",     &mParamName);
     data.Read("value",    &mParamValue);
+    data.Read("flags",   &mFlags);
     return true;
 }
 std::size_t MaterialActuatorClass::GetHash() const
@@ -227,6 +241,7 @@ std::size_t MaterialActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mParamName);
     hash = base::hash_combine(hash, mParamValue);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
