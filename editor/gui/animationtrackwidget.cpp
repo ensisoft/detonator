@@ -90,7 +90,8 @@ public:
             const auto& nodeId = actuator.GetNodeId();
             const auto& lineId = mState.actuator_to_timeline[actuator.GetId()];
             const auto* node = mState.entity->FindNodeById(nodeId);
-            const auto& name = app::FromUtf8(node->GetName());
+            const auto& node_name = app::FromUtf8(node->GetName());
+            const auto& actuator_name = app::FromUtf8(actuator.GetName());
             const auto index = id_to_index_map[lineId];
             const auto num   = (*list)[index].GetNumItems();
 
@@ -98,7 +99,7 @@ public:
             // https://colorhunt.co/palette/226038
 
             TimelineWidget::TimelineItem item;
-            item.text      = QString("%1 (%2)").arg(name).arg(num+1);
+            item.text      = QString("%1 (%2)").arg(node_name).arg(actuator_name);
             item.id        = app::FromUtf8(actuator.GetId());
             item.starttime = actuator.GetStartTime();
             item.duration  = actuator.GetDuration();
@@ -819,6 +820,11 @@ void AnimationTrackWidget::on_looping_stateChanged(int)
     mState.track->SetLooping(GetValue(mUI.looping));
 }
 
+void AnimationTrackWidget::on_actuatorName_textChanged(const QString&)
+{
+    SetSelectedActuatorProperties();
+}
+
 void AnimationTrackWidget::on_actuatorStartTime_valueChanged(double value)
 {
     const auto* selected = mUI.timeline->GetSelectedItem();
@@ -915,7 +921,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     QMenu add_timeline(this);
     add_timeline.setEnabled(true);
     add_timeline.setIcon(QIcon("icons:add.png"));
-    add_timeline.setTitle(tr("New Timeline ..."));
+    add_timeline.setTitle(tr("New Timeline On ..."));
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
@@ -958,11 +964,12 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
             action->setData(seconds);
         }
     }
+    menu.addSeparator();
     menu.addMenu(&add_timeline);
+    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteActuator);
     menu.addAction(mUI.actionDeleteActuators);
-    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());
@@ -1168,7 +1175,8 @@ void AnimationTrackWidget::on_btnAddActuator_clicked()
     const auto start = std::max(lo_bound, norm_start);
     const auto end   = std::min(hi_bound, norm_end);
     const game::Actuator::Type type = GetValue(mUI.actuatorType);
-    AddActuatorFromUI(timeline.selfId, node->GetId(), type, start, end - start);
+    const std::string& name = GetValue(mUI.actuatorName);
+    AddActuatorFromUI(timeline.selfId, node->GetId(), name, type, start, end - start);
 }
 
 void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
@@ -1265,6 +1273,8 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         return;
 
     auto* klass = mState.track->FindActuatorById(app::ToUtf8(item->id));
+    klass->SetName(GetValue(mUI.actuatorName));
+
     if (auto* transform = dynamic_cast<game::TransformActuatorClass*>(klass))
     {
         transform->SetInterpolation(GetValue(mUI.transformInterpolation));
@@ -1418,6 +1428,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     if (item == nullptr)
     {
         const auto duration = mState.track->GetDuration();
+        SetValue(mUI.actuatorName, QString(""));
+        SetValue(mUI.actuatorID, QString(""));
         SetMinMax(mUI.actuatorStartTime, 0.0, duration);
         SetMinMax(mUI.actuatorEndTime, 0.0, duration);
         SetValue(mUI.actuatorType, game::ActuatorClass::Type::Transform);
@@ -1473,6 +1485,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
                 lo_bound = std::max(lo_bound, end);
         }
         const auto& len = QString::number(end-start, 'f', 2);
+        SetValue(mUI.actuatorName, actuator->GetName());
+        SetValue(mUI.actuatorID, actuator->GetId());
         SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
         SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
         SetValue(mUI.actuatorStartTime, start);
@@ -1927,16 +1941,22 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         if (end <= position)
             lo_bound = std::max(lo_bound, end);
     }
-    AddActuatorFromUI(timeline.selfId, node->GetId(), type, lo_bound, hi_bound - lo_bound);
+    const auto& name = base::FormatString("Actuator_%1", mState.track->GetNumActuators());
+
+    AddActuatorFromUI(timeline.selfId, node->GetId(), name, type, lo_bound, hi_bound - lo_bound);
 }
 
-void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, const std::string& nodeId,
+void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
+                                             const std::string& nodeId,
+                                             const std::string& name,
                                              game::ActuatorClass::Type type,
-                                             float start_time, float duration)
+                                             float start_time,
+                                             float duration)
 {
     if (type == game::ActuatorClass::Type::Transform)
     {
         game::TransformActuatorClass klass;
+        klass.SetName(name);
         klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
@@ -1950,27 +1970,28 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
     }
     else if (type == game::ActuatorClass::Type::SetValue)
     {
-        using Name = game::SetValueActuatorClass::ParamName;
-        const auto name = (Name)GetValue(mUI.setvalName);
+        using ValName = game::SetValueActuatorClass::ParamName;
+        const auto value = (ValName)GetValue(mUI.setvalName);
         game::SetValueActuatorClass klass;
+        klass.SetName(name);
         klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
-        if (name == Name::DrawableTimeScale)
+        if (value == ValName::DrawableTimeScale)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (name == Name::LinearVelocityX)
+        else if (value == ValName::LinearVelocityX)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (name == Name::LinearVelocityY)
+        else if (value == ValName::LinearVelocityY)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (name == Name::AngularVelocity)
+        else if (value == ValName::AngularVelocity)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (name == Name::LinearVelocity)
+        else if (value == ValName::LinearVelocity)
             klass.SetEndValue(mUI.setvalEndValue->GetAsVec2());
-        else if (name == Name::TextItemText)
+        else if (value == ValName::TextItemText)
             klass.SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
-        else if (name == Name::TextItemColor)
+        else if (value == ValName::TextItemColor)
             klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
         else BUG("Unhandled value actuator value type.");
 
@@ -1980,6 +2001,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
     else if (type == game::ActuatorClass::Type::Kinematic)
     {
         game::KinematicActuatorClass klass;
+        klass.SetName(name);
         klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
@@ -1994,6 +2016,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId, cons
     else if (type == game::ActuatorClass::Type::SetFlag)
     {
         game::SetFlagActuatorClass klass;
+        klass.SetName(name);
         klass.SetNodeId(nodeId);
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);

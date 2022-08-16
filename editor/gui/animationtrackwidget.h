@@ -106,6 +106,7 @@ namespace gui
         void on_delay_valueChanged(double value);
         void on_looping_stateChanged(int);
         void on_timeline_customContextMenuRequested(QPoint);
+        void on_actuatorName_textChanged(const QString&);
         void on_actuatorStartTime_valueChanged(double value);
         void on_actuatorEndTime_valueChanged(double value);
         void on_actuatorNode_currentIndexChanged(int index);
@@ -146,9 +147,12 @@ namespace gui
         void SetActuatorUIEnabled(bool enabled);
         void SetActuatorUIDefaults(const std::string& nodeId);
         void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
-        void AddActuatorFromUI(const std::string& timelineId, const std::string& nodeId,
+        void AddActuatorFromUI(const std::string& timelineId,
+                               const std::string& nodeId,
+                               const std::string& name,
                                game::ActuatorClass::Type type,
-                               float start_time, float duration);
+                               float start_time,
+                               float duration);
         void DisplayCurrentCameraLocation();
         void CreateTimelines();
         void RemoveDeletedItems();

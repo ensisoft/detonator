@@ -619,8 +619,75 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Node</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QComboBox" name="actuatorNode">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>Select node ...</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="2">
-           <widget class="QDoubleSpinBox" name="actuatorEndTime">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>End time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="actuatorType">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="actuatorID">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Start time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QDoubleSpinBox" name="actuatorStartTime">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -639,67 +706,10 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Node</string>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="actuatorName"/>
           </item>
-          <item row="0" column="2">
-           <widget class="QComboBox" name="actuatorNode">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="placeholderText">
-             <string>Select node ...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QComboBox" name="actuatorType">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Type</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Start time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>End time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QDoubleSpinBox" name="actuatorStartTime">
+          <item row="3" column="3">
+           <widget class="QDoubleSpinBox" name="actuatorEndTime">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -714,6 +724,20 @@
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_32">
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>ID</string>
             </property>
            </widget>
           </item>
@@ -1448,6 +1472,8 @@
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>actuatorName</tabstop>
+  <tabstop>actuatorID</tabstop>
   <tabstop>actuatorNode</tabstop>
   <tabstop>actuatorType</tabstop>
   <tabstop>actuatorStartTime</tabstop>
@@ -1472,6 +1498,7 @@
   <tabstop>itemFlags</tabstop>
   <tabstop>flagAction</tabstop>
   <tabstop>btnAddActuator</tabstop>
+  <tabstop>setvalEndValue</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
