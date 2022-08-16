@@ -34,8 +34,7 @@
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 
-// macro poisoning
-#undef RGB
+#include "base/snafu.h"
 
 namespace gfx
 {

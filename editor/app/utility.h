@@ -42,8 +42,7 @@
 
 #include "base/assert.h"
 
-// Win32 macro poisoning
-#undef CopyFile
+#include "base/snafu.h"
 
 // general dumping ground for utility type of functionality
 // preferably not specific to any GUI or application.
