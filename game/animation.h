@@ -34,6 +34,7 @@
 
 #include "base/math.h"
 #include "base/utility.h"
+#include "base/bitflag.h"
 #include "data/fwd.h"
 #include "game/types.h"
 
@@ -68,6 +69,9 @@ namespace game
             // Material actuator changes material parameters
             Material
         };
+        enum class Flags {
+            StaticInstance
+        };
         // dtor.
         virtual ~ActuatorClass() = default;
         // Get human-readable name of the actuator class.
@@ -89,6 +93,10 @@ namespace game
         virtual float GetStartTime() const = 0;
         // Get the normalized duration of this actuator.
         virtual float GetDuration() const = 0;
+        // Set a class flag to on/off.
+        virtual void SetFlag(Flags flag, bool on_off) = 0;
+        // Test a class flag.
+        virtual bool TestFlag(Flags flag) const = 0;
         // Set a new normalized start time for the actuator.
         // The value will be clamped to [0.0f, 1.0f].
         virtual void SetStartTime(float start) = 0;
@@ -126,6 +134,10 @@ namespace game
             { return mStartTime; }
             virtual float GetDuration() const override
             { return mDuration; }
+            virtual void SetFlag(Flags flag, bool on_off) override
+            { mFlags.set(flag, on_off); }
+            virtual bool TestFlag(Flags flag) const override
+            { return mFlags.test(flag); }
             virtual void SetStartTime(float start) override
             { mStartTime = math::clamp(0.0f, 1.0f, start); }
             virtual void SetDuration(float duration) override
@@ -140,7 +152,10 @@ namespace game
             }
         protected:
             ActuatorClassBase()
-            { mId = base::RandomString(10); }
+            {
+                mId = base::RandomString(10);
+                mFlags.set(Flags::StaticInstance, true);
+            }
            ~ActuatorClassBase() = default;
         protected:
             // ID of the actuator class.
@@ -153,6 +168,8 @@ namespace game
             float mStartTime = 0.0f;
             // Normalized duration.
             float mDuration = 1.0f;
+            // bitflags set on the class.
+            base::bitflag<Flags> mFlags;
         private:
         };
     } // namespace detail
@@ -393,7 +410,8 @@ namespace game
     class Actuator
     {
     public:
-        using Type = ActuatorClass::Type;
+        using Type  = ActuatorClass::Type;
+        using Flags = ActuatorClass::Flags;
         virtual ~Actuator() = default;
         // Start the action/transition to be applied by this actuator.
         // The node is the node in question that the changes will be applied to.
