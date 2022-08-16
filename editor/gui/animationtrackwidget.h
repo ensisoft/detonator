@@ -106,6 +106,7 @@ namespace gui
         void on_delay_valueChanged(double value);
         void on_looping_stateChanged(int);
         void on_timeline_customContextMenuRequested(QPoint);
+        void on_actuatorIsStatic_stateChanged(int);
         void on_actuatorName_textChanged(const QString&);
         void on_actuatorStartTime_valueChanged(double value);
         void on_actuatorEndTime_valueChanged(double value);
