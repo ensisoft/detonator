@@ -80,6 +80,7 @@ void apply_material_value(const char* name,
 void unit_test_setflag_actuator()
 {
     game::SetFlagActuatorClass klass;
+    klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
@@ -100,6 +101,7 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetName() == "test");
         TEST_REQUIRE(copy.GetNodeId() == "1234");
         TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
@@ -249,6 +251,7 @@ void unit_test_setflag_actuator()
 void unit_test_setval_actuator()
 {
     game::SetValueActuatorClass klass;
+    klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
@@ -263,6 +266,7 @@ void unit_test_setval_actuator()
         game::SetValueActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -272,10 +276,11 @@ void unit_test_setval_actuator()
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
     }
 
-    // copy assingment and ctor.
+    // copy assignment and ctor.
     {
         game::SetValueActuatorClass copy(klass);
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -338,6 +343,7 @@ void unit_test_setval_actuator()
 void unit_test_kinematic_actuator()
 {
     game::KinematicActuatorClass klass;
+    klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
@@ -345,7 +351,8 @@ void unit_test_kinematic_actuator()
     klass.SetEndAngularVelocity(3.0f);
     klass.SetEndLinearVelocity(glm::vec2(1.0f, 2.0f));
 
-    TEST_REQUIRE(klass.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(klass.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(klass.GetName()                == "test");
     TEST_REQUIRE(klass.GetNodeId()              == "1234");
     TEST_REQUIRE(klass.GetStartTime()           == real::float32(0.1f));
     TEST_REQUIRE(klass.GetDuration()            == real::float32(0.5f));
@@ -358,7 +365,8 @@ void unit_test_kinematic_actuator()
         klass.IntoJson(json);
         game::KinematicActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()                == "test");
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));
@@ -371,7 +379,8 @@ void unit_test_kinematic_actuator()
     // copy assignment and copy ctor
     {
         game::KinematicActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()                == "test");
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()            == real::float32(0.5f));
@@ -422,6 +431,7 @@ void unit_test_kinematic_actuator()
 void unit_test_transform_actuator()
 {
     game::TransformActuatorClass act;
+    act.SetName("test");
     act.SetNodeId("123");
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
@@ -432,6 +442,7 @@ void unit_test_transform_actuator()
     act.SetEndRotation(1.5f);
 
     TEST_REQUIRE(act.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(act.GetName()          == "test");
     TEST_REQUIRE(act.GetNodeId()        == "123");
     TEST_REQUIRE(act.GetStartTime()     == real::float32(0.1f));
     TEST_REQUIRE(act.GetDuration()      == real::float32(0.5f));
@@ -447,6 +458,7 @@ void unit_test_transform_actuator()
         game::TransformActuatorClass copy;
         copy.FromJson(json);
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -454,16 +466,17 @@ void unit_test_transform_actuator()
         TEST_REQUIRE(copy.GetEndSize()       == glm::vec2(5.0f, 6.0f));
         TEST_REQUIRE(copy.GetEndScale()      == glm::vec2(3.0f, 8.0f));
         TEST_REQUIRE(copy.GetEndRotation()   == real::float32(1.5f));
-        TEST_REQUIRE(copy.GetId()   == act.GetId());
-        TEST_REQUIRE(copy.GetHash() == act.GetHash());
+        TEST_REQUIRE(copy.GetId()            == act.GetId());
+        TEST_REQUIRE(copy.GetHash()          == act.GetHash());
     }
 
     // copy assignment and copy ctor
     {
         auto copy(act);
-        TEST_REQUIRE(copy.GetHash() == act.GetHash());
-        TEST_REQUIRE(copy.GetId()   == act.GetId());
+        TEST_REQUIRE(copy.GetHash()          == act.GetHash());
+        TEST_REQUIRE(copy.GetId()            == act.GetId());
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
@@ -533,6 +546,7 @@ void unit_test_transform_actuator()
 void unit_test_material_actuator()
 {
     game::MaterialActuatorClass klass;
+    klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
@@ -546,26 +560,28 @@ void unit_test_material_actuator()
         klass.IntoJson(json);
         game::MaterialActuatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
-        TEST_REQUIRE(copy.GetNodeId()     == "1234");
-        TEST_REQUIRE(copy.GetStartTime()  == real::float32(0.1f));
-        TEST_REQUIRE(copy.GetDuration()   == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == "kColor");
+        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()                       == "test");
+        TEST_REQUIRE(copy.GetNodeId()                     == "1234");
+        TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()                   == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetParamName()                  == "kColor");
         TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
-        TEST_REQUIRE(copy.GetId() == klass.GetId());
-        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetId()                         == klass.GetId());
+        TEST_REQUIRE(copy.GetHash()                       == klass.GetHash());
     }
     // copy assignment and copy ctor
     {
         game::MaterialActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
-        TEST_REQUIRE(copy.GetNodeId()     == "1234");
-        TEST_REQUIRE(copy.GetStartTime()  == real::float32(0.1f));
-        TEST_REQUIRE(copy.GetDuration()   == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == "kColor");
+        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetName()                       == "test");
+        TEST_REQUIRE(copy.GetNodeId()                     == "1234");
+        TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
+        TEST_REQUIRE(copy.GetDuration()                   == real::float32(0.5f));
+        TEST_REQUIRE(copy.GetParamName()                  == "kColor");
         TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
-        TEST_REQUIRE(copy.GetId() == klass.GetId());
-        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetId()                         == klass.GetId());
+        TEST_REQUIRE(copy.GetHash()                       == klass.GetHash());
         copy = klass;
         TEST_REQUIRE(copy.GetId()   == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
