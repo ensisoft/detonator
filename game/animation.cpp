@@ -575,6 +575,20 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     return false;
 }
 
+TransformActuator::TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
+    : mClass(klass)
+{
+    if (!mClass->TestFlag(Flags::StaticInstance))
+    {
+        Instance instance;
+        instance.end_position = mClass->GetEndPosition();
+        instance.end_size     = mClass->GetEndSize();
+        instance.end_scale    = mClass->GetEndScale();
+        instance.end_rotation = mClass->GetEndRotation();
+        mDynamicInstance      = instance;
+    }
+}
+
 void TransformActuator::Start(EntityNode& node)
 {
     mStartPosition = node.GetTranslation();
@@ -584,12 +598,14 @@ void TransformActuator::Start(EntityNode& node)
 }
 void TransformActuator::Apply(EntityNode& node, float t)
 {
+    const auto& inst = GetInstance();
+
     // apply interpolated state on the node.
     const auto method = mClass->GetInterpolation();
-    const auto& p = math::interpolate(mStartPosition, mClass->GetEndPosition(), t, method);
-    const auto& s = math::interpolate(mStartSize,     mClass->GetEndSize(),     t, method);
-    const auto& r = math::interpolate(mStartRotation, mClass->GetEndRotation(), t, method);
-    const auto& f = math::interpolate(mStartScale,    mClass->GetEndScale(),    t, method);
+    const auto& p = math::interpolate(mStartPosition, inst.end_position, t, method);
+    const auto& s = math::interpolate(mStartSize,     inst.end_size,     t, method);
+    const auto& r = math::interpolate(mStartRotation, inst.end_rotation, t, method);
+    const auto& f = math::interpolate(mStartScale,    inst.end_scale,    t, method);
     node.SetTranslation(p);
     node.SetSize(s);
     node.SetRotation(r);
@@ -597,10 +613,61 @@ void TransformActuator::Apply(EntityNode& node, float t)
 }
 void TransformActuator::Finish(EntityNode& node)
 {
-    node.SetTranslation(mClass->GetEndPosition());
-    node.SetRotation(mClass->GetEndRotation());
-    node.SetSize(mClass->GetEndSize());
-    node.SetScale(mClass->GetEndScale());
+    const auto& inst = GetInstance();
+
+    node.SetTranslation(inst.end_position);
+    node.SetRotation(inst.end_rotation);
+    node.SetSize(inst.end_size);
+    node.SetScale(inst.end_scale);
+}
+
+void TransformActuator::SetEndPosition(const glm::vec2& pos)
+{
+    if (mClass->TestFlag(Flags::StaticInstance))
+    {
+        WARN("Ignoring transform actuator position set on static actuator instance. [name=%1]", mClass->GetName());
+        return;
+    }
+    mDynamicInstance.value().end_position = pos;
+}
+void TransformActuator::SetEndScale(const glm::vec2& scale)
+{
+    if (mClass->TestFlag(Flags::StaticInstance))
+    {
+        WARN("Ignoring transform actuator scale set on static actuator instance. [name=%1]", mClass->GetName());
+        return;
+    }
+    mDynamicInstance.value().end_position = scale;
+}
+void TransformActuator::SetEndSize(const glm::vec2& size)
+{
+    if (mClass->TestFlag(Flags::StaticInstance))
+    {
+        WARN("Ignoring transform actuator size set on static actuator instance. [name=%1]", mClass->GetName());
+        return;
+    }
+    mDynamicInstance.value().end_position = size;
+}
+void TransformActuator::SetEndRotation(float angle)
+{
+    if (mClass->TestFlag(Flags::StaticInstance))
+    {
+        WARN("Ignoring transform actuator rotation set on static actuator instance. [name=%1]", mClass->GetName());
+        return;
+    }
+    mDynamicInstance.value().end_rotation = angle;
+}
+
+TransformActuator::Instance TransformActuator::GetInstance() const
+{
+    if (mDynamicInstance.has_value())
+        return mDynamicInstance.value();
+    Instance inst;
+    inst.end_size     = mClass->GetEndSize();
+    inst.end_scale    = mClass->GetEndScale();
+    inst.end_rotation = mClass->GetEndRotation();
+    inst.end_position = mClass->GetEndPosition();
+    return inst;
 }
 
 void MaterialActuator::Start(EntityNode& node)
