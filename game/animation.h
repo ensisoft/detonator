@@ -89,9 +89,11 @@ namespace game
         virtual float GetStartTime() const = 0;
         // Get the normalized duration of this actuator.
         virtual float GetDuration() const = 0;
-        // Set a new start time for the actuator.
+        // Set a new normalized start time for the actuator.
+        // The value will be clamped to [0.0f, 1.0f].
         virtual void SetStartTime(float start) = 0;
-        // Set the new duration value for the actuator.
+        // Set a new normalized duration value for the actuator.
+        // The value will be clamped to [0.0f, 1.0f].
         virtual void SetDuration(float duration) = 0;
         // Set the ID of the node affected by this actuator.
         virtual void SetNodeId(const std::string& id) = 0;
@@ -105,7 +107,57 @@ namespace game
     private:
     };
 
-    class SetFlagActuatorClass : public ActuatorClass
+    namespace detail {
+        template<typename T>
+        class ActuatorClassBase : public ActuatorClass
+        {
+        public:
+            virtual void SetNodeId(const std::string& id) override
+            { mNodeId = id; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual std::string GetId() const override
+            { return mId; }
+            virtual std::string GetNodeId() const override
+            { return mNodeId; }
+            virtual float GetStartTime() const override
+            { return mStartTime; }
+            virtual float GetDuration() const override
+            { return mDuration; }
+            virtual void SetStartTime(float start) override
+            { mStartTime = math::clamp(0.0f, 1.0f, start); }
+            virtual void SetDuration(float duration) override
+            { mDuration = math::clamp(0.0f, 1.0f, duration); }
+            virtual std::unique_ptr<ActuatorClass> Copy() const override
+            { return std::make_unique<T>(*static_cast<const T*>(this)); }
+            virtual std::unique_ptr<ActuatorClass> Clone() const override
+            {
+                auto ret = std::make_unique<T>(*static_cast<const T*>(this));
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+        protected:
+            ActuatorClassBase()
+            { mId = base::RandomString(10); }
+           ~ActuatorClassBase() = default;
+        protected:
+            // ID of the actuator class.
+            std::string mId;
+            // Human-readable name of the actuator class
+            std::string mName;
+            // id of the node that the action will be applied onto
+            std::string mNodeId;
+            // Normalized start time.
+            float mStartTime = 0.0f;
+            // Normalized duration.
+            float mDuration = 1.0f;
+        private:
+        };
+    } // namespace detail
+
+    class SetFlagActuatorClass : public detail::ActuatorClassBase<SetFlagActuatorClass>
     {
     public:
         enum class FlagName {
@@ -127,40 +179,9 @@ namespace game
         enum class FlagAction {
             On, Off, Toggle
         };
-
-        SetFlagActuatorClass()
-        { mId = base::RandomString(10); }
-        SetFlagActuatorClass(const std::string& node) : mNodeId(node)
-        { mId = base::RandomString(10); }
         virtual Type GetType() const override
         { return Type::SetFlag;}
-        virtual void SetNodeId(const std::string& id) override
-        { mNodeId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::string GetNodeId() const override
-        { return mNodeId; }
         virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<SetFlagActuatorClass>(*this); }
-        virtual std::unique_ptr<ActuatorClass> Clone() const override
-        {
-            auto ret = std::make_unique<SetFlagActuatorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual float GetStartTime() const override
-        { return mStartTime; }
-        virtual float GetDuration() const override
-        { return mDuration; }
-        virtual void SetStartTime(float start) override
-        { mStartTime = start; }
-        virtual void SetDuration(float duration) override
-        { mDuration = duration; }
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
 
@@ -172,32 +193,19 @@ namespace game
         { mFlagName = name; }
         void SetFlagAction(FlagAction action)
         { mFlagAction = action; }
-
     private:
-        // id of the actuator.
-        std::string mId;
-        // Human-readable name of the actuator class
-        std::string mName;
-        // id of the node that the action will be applied onto
-        std::string mNodeId;
-        // Normalized start time.
-        float mStartTime = 0.0f;
-        // Normalized duration.
-        float mDuration = 1.0f;
         FlagAction mFlagAction = FlagAction::Off;
         FlagName   mFlagName   = FlagName::Drawable_FlipHorizontally;
     };
 
     // Modify the kinematic physics body properties, i.e.
     // the instantaneous linear and angular velocities.
-    class KinematicActuatorClass : public ActuatorClass
+    class KinematicActuatorClass : public detail::ActuatorClassBase<KinematicActuatorClass>
     {
     public:
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        KinematicActuatorClass()
-        { mId = base::RandomString(10); }
         Interpolation GetInterpolation() const
         { return mInterpolation; }
         void SetInterpolation(Interpolation method)
@@ -210,51 +218,15 @@ namespace game
         { mEndLinearVelocity = velocity; }
         void SetEndAngularVelocity(float velocity)
         { mEndAngularVelocity = velocity; }
-        virtual void SetNodeId(const std::string& id) override
-        { mNodeId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::string GetNodeId() const override
-        { return mNodeId; }
-        virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<KinematicActuatorClass>(*this); }
-        virtual std::unique_ptr<ActuatorClass> Clone() const override
-        {
-            auto ret = std::make_unique<KinematicActuatorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
+
         virtual Type GetType() const override
         { return Type::Kinematic; }
-        virtual float GetStartTime() const override
-        { return mStartTime; }
-        virtual float GetDuration() const override
-        { return mDuration; }
-        virtual void SetStartTime(float start) override
-        { mStartTime = start; }
-        virtual void SetDuration(float duration) override
-        { mDuration = duration; }
+        virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
-
     private:
-        // ID of the actuator class.
-        std::string mId;
-        // Human-readable name of the actuator class.
-        std::string mName;
-        // id of the node that the action will be applied on.
-        std::string mNodeId;
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
-        // Normalized start time of the action
-        float mStartTime = 0.0f;
-        // Normalized duration of the action.
-        float mDuration = 1.0f;
         // The ending linear velocity in meters per second.
         glm::vec2 mEndLinearVelocity = {0.0f, 0.0f};
         // The ending angular velocity in radians per second.
@@ -262,7 +234,7 @@ namespace game
     };
 
     // Modify node parameter value over time.
-    class SetValueActuatorClass : public ActuatorClass
+    class SetValueActuatorClass : public detail::ActuatorClassBase<SetValueActuatorClass>
     {
     public:
         // Enumeration of support node parameters that can be changed.
@@ -282,8 +254,6 @@ namespace game
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        SetValueActuatorClass()
-        { mId = base::RandomString(10); }
         Interpolation GetInterpolation() const
         { return mInterpolation; }
         ParamName GetParamName() const
@@ -302,88 +272,29 @@ namespace game
         { return std::get_if<T>(&mEndValue); }
         void SetEndValue(ParamValue value)
         { mEndValue = value; }
-        virtual void SetNodeId(const std::string& id) override
-        { mNodeId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name;}
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::string GetNodeId() const override
-        { return mNodeId; }
-        virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<SetValueActuatorClass>(*this); }
-        virtual std::unique_ptr<ActuatorClass> Clone() const override
-        {
-            auto ret = std::make_unique<SetValueActuatorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
+
         virtual Type GetType() const override
         { return Type::SetValue; }
-        virtual float GetStartTime() const override
-        { return mStartTime; }
-        virtual float GetDuration() const override
-        { return mDuration; }
-        virtual void SetStartTime(float start) override
-        { mStartTime = start; }
-        virtual void SetDuration(float duration) override
-        { mDuration = duration; }
+        virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
     private:
-        // ID of the actuator class.
-        std::string mId;
-        // Human-readable name of the actuator class.
-        std::string mName;
-        // id of the node that the action will be applied on.
-        std::string mNodeId;
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
         // which parameter to adjust
         ParamName mParamName = ParamName::DrawableTimeScale;
-        // Normalized start time of the action
-        float mStartTime = 0.0f;
-        // Normalized duration of the action.
-        float mDuration = 1.0f;
         // the end value
         ParamValue mEndValue;
     };
 
     // TransformActuatorClass holds the transform data for some
     // particular type of linear transform of a node.
-    class TransformActuatorClass : public ActuatorClass
+    class TransformActuatorClass : public detail::ActuatorClassBase<TransformActuatorClass>
     {
     public:
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        TransformActuatorClass()
-        { mId = base::RandomString(10); }
-        TransformActuatorClass(const std::string& node) : mNodeId(node)
-        { mId = base::RandomString(10); }
-        virtual Type GetType() const override
-        { return Type::Transform; }
-        virtual std::string GetNodeId() const override
-        { return mNodeId; }
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual float GetStartTime() const override
-        { return mStartTime; }
-        virtual float GetDuration() const override
-        { return mDuration; }
-        virtual void SetStartTime(float start) override
-        { mStartTime = math::clamp(0.0f, 1.0f, start); }
-        virtual void SetDuration(float duration) override
-        { mDuration = math::clamp(0.0f, 1.0f, duration); }
-        virtual void SetNodeId(const std::string& id) override
-        { mNodeId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual std::string GetId() const override
-        { return mId; }
         Interpolation GetInterpolation() const
         { return mInterpolation; }
         glm::vec2 GetEndPosition() const
@@ -412,33 +323,15 @@ namespace game
         void SetEndScale(float x, float y)
         { mEndScale = glm::vec2(x, y); }
 
+        virtual Type GetType() const override
+        { return Type::Transform; }
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
         virtual std::size_t GetHash() const override;
-
-        virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<TransformActuatorClass>(*this); }
-        virtual std::unique_ptr<ActuatorClass> Clone() const override
-        {
-            auto ret = std::make_unique<TransformActuatorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-
     private:
-        // ID of the actuator class.
-        std::string mId;
-        // Human-readable name of the actuator class.
-        std::string mName;
-        // id of the node we're going to change.
-        std::string mNodeId;
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
-        // Normalized start time.
-        float mStartTime = 0.0f;
-        // Normalized duration.
-        float mDuration = 1.0f;
-        // the ending state of the the transformation.
+        // the ending state of the transformation.
         // the ending position (translation relative to parent)
         glm::vec2 mEndPosition = {0.0f, 0.0f};
         // the ending size
@@ -449,15 +342,14 @@ namespace game
         float mEndRotation = 0.0f;
     };
 
-    class MaterialActuatorClass : public ActuatorClass
+    class MaterialActuatorClass : public detail::ActuatorClassBase<MaterialActuatorClass>
     {
     public:
         using Interpolation = math::Interpolation;
         using MaterialParam = std::variant<float, int,
             Color4f,
             glm::vec2, glm::vec3, glm::vec4>;
-        MaterialActuatorClass()
-        { mId = base::RandomString(10); }
+
         Interpolation GetInterpolation() const
         { return mInterpolation; }
         std::string GetParamName() const
@@ -476,50 +368,15 @@ namespace game
         { mParamValue = value; }
         void SetInterpolation(Interpolation method)
         { mInterpolation = method; }
-        virtual void SetNodeId(const std::string& id) override
-        { mNodeId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::string GetNodeId() const override
-        { return mNodeId; }
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual std::unique_ptr<ActuatorClass> Copy() const override
-        { return std::make_unique<MaterialActuatorClass>(*this); }
-        virtual std::unique_ptr<ActuatorClass> Clone() const override
-        {
-            auto ret = std::make_unique<MaterialActuatorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
+
         virtual Type GetType() const override
         { return Type::Material; }
-        virtual float GetStartTime() const override
-        { return mStartTime; }
-        virtual float GetDuration() const override
-        { return mDuration; }
-        virtual void SetStartTime(float start) override
-        { mStartTime = start; }
-        virtual void SetDuration(float duration) override
-        { mDuration = duration; }
+        virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
-        virtual std::size_t GetHash() const override;
     private:
-        // ID of the actuator class.
-        std::string mId;
-        // Human-readable name of the actuator class.
-        std::string mName;
-        // Id of the node class that the actuator applies on
-        std::string mNodeId;
         // Interpolation method used to change the value.
         Interpolation mInterpolation = Interpolation::Linear;
-        // Actuator start time on the timeline.
-        float mStartTime = 0.0f;
-        // Actuator duration on the timeline.
-        float mDuration  = 1.0f;
         // The name of the material parameter that is going to be changed (uniform name)
         std::string mParamName;
         // The value of the material parameter.
