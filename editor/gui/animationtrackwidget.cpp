@@ -825,6 +825,11 @@ void AnimationTrackWidget::on_looping_stateChanged(int)
     mState.track->SetLooping(GetValue(mUI.looping));
 }
 
+void AnimationTrackWidget::on_actuatorIsStatic_stateChanged(int)
+{
+    SetSelectedActuatorProperties();
+}
+
 void AnimationTrackWidget::on_actuatorName_textChanged(const QString&)
 {
     SetSelectedActuatorProperties();
@@ -1435,6 +1440,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         const auto duration = mState.track->GetDuration();
         SetValue(mUI.actuatorName, QString(""));
         SetValue(mUI.actuatorID, QString(""));
+        SetValue(mUI.actuatorIsStatic, false);
         SetMinMax(mUI.actuatorStartTime, 0.0, duration);
         SetMinMax(mUI.actuatorEndTime, 0.0, duration);
         SetValue(mUI.actuatorType, game::ActuatorClass::Type::Transform);
@@ -1492,6 +1498,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         const auto& len = QString::number(end-start, 'f', 2);
         SetValue(mUI.actuatorName, actuator->GetName());
         SetValue(mUI.actuatorID, actuator->GetId());
+        SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::ActuatorClass::Flags::StaticInstance));
         SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
         SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
         SetValue(mUI.actuatorStartTime, start);
