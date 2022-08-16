@@ -606,11 +606,9 @@ namespace game
     class TransformActuator : public Actuator
     {
     public:
-        TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
-            : mClass(klass)
-        {}
+        TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass);
         TransformActuator(const TransformActuatorClass& klass)
-            : mClass(std::make_shared<TransformActuatorClass>(klass))
+            : TransformActuator(std::make_shared<TransformActuatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -630,8 +628,30 @@ namespace game
         { return std::make_unique<TransformActuator>(*this); }
         virtual Type GetType() const override
         { return Type::Transform; }
+
+        void SetEndPosition(const glm::vec2& pos);
+        void SetEndScale(const glm::vec2& scale);
+        void SetEndSize(const glm::vec2& size);
+        void SetEndRotation(float angle);
+
+        inline void SetEndPosition(float x, float y)
+        { SetEndPosition(glm::vec2(x, y)); }
+        inline void SetEndScale(float x, float y)
+        { SetEndScale(glm::vec2(x, y)); }
+        inline void SetEndSize(float x, float y)
+        { SetEndSize(glm::vec2(x, y)); }
+    private:
+        struct Instance {
+            glm::vec2 end_position;
+            glm::vec2 end_size;
+            glm::vec2 end_scale;
+            float end_rotation = 0.0f;
+        };
+        Instance GetInstance() const;
     private:
         std::shared_ptr<const TransformActuatorClass> mClass;
+        // exists only if StaticInstance is not set.
+        std::optional<Instance> mDynamicInstance;
         // The starting state for the transformation.
         // the transform actuator will then interpolate between the
         // current starting and expected ending state.
