@@ -41,6 +41,8 @@
 #include "editor/app/workspace.h"
 #include "editor/app/resource.h"
 
+#include "base/snafu.h"
+
 namespace gui
 {
 enum class PropertyType {
