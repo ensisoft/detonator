@@ -2558,6 +2558,7 @@ void BindGameLib(sol::state& L)
     anim["SetDelay"]           =  &Animation::SetDelay;
     anim["GetDelay"]           =  &Animation::GetDelay;
     anim["GetCurrentTime"]     =  &Animation::GetCurrentTime;
+    anim["GetDuration"]        =  &Animation::GetDuration;
     anim["GetClass"]           =  &Animation::GetClass;
     anim["FindActuatorById"]   = sol::overload(
         [](game::Animation* animation, const std::string& name) {

@@ -876,6 +876,8 @@ namespace game
         { return mCurrentTime; }
         float GetDelay() const
         { return mDelay; }
+        float GetDuration() const
+        { return mClass->GetDuration(); }
         // Access for the tracks class object.
         const AnimationClass& GetClass() const
         { return *mClass; }
