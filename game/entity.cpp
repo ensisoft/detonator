@@ -1650,10 +1650,27 @@ void Entity::Die()
     SetFlag(ControlFlags::WantsToDie, true);
 }
 
-void Entity::Update(float dt)
+void Entity::Update(float dt, std::vector<Event>* events)
 {
     mCurrentTime += dt;
     mFinishedAnimation.reset();
+
+    for (auto it = mTimers.begin(); it != mTimers.end();)
+    {
+        auto& timer = *it;
+        timer.when -= dt;
+        if (timer.when < 0.0f)
+        {
+            if (events)
+            {
+                TimerEvent event;
+                event.name   = timer.name;
+                event.jitter = timer.when;
+                events->push_back(std::move(event));
+            }
+            it = mTimers.erase(it);
+        } else ++it;
+    }
 
     if (!mCurrentAnimation)
         return;

@@ -923,7 +923,15 @@ private:
     {
         if (mScene)
         {
-            TRACE_CALL("Scene::Update", mScene->Update(dt));
+            std::vector<game::Scene::Event> events;
+            TRACE_CALL("Scene::Update", mScene->Update(dt, &events));
+            TRACE_BLOCK("Scene::Events",
+                for (const auto& event : events)
+                {
+                    mGame->OnSceneEvent(event);
+                    mScripting->OnSceneEvent(event);
+                }
+            );
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
