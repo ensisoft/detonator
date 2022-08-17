@@ -1284,6 +1284,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
 
     auto* klass = mState.track->FindActuatorById(app::ToUtf8(item->id));
     klass->SetName(GetValue(mUI.actuatorName));
+    klass->SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
 
     if (auto* transform = dynamic_cast<game::TransformActuatorClass*>(klass))
     {
@@ -1970,6 +1971,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         game::TransformActuatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(nodeId);
+        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1987,6 +1989,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         game::SetValueActuatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(nodeId);
+        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetParamName(GetValue(mUI.setvalName));
@@ -2015,6 +2018,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         game::KinematicActuatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(nodeId);
+        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
@@ -2030,6 +2034,7 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         game::SetFlagActuatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(nodeId);
+        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(start_time);
         klass.SetDuration(duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
