@@ -1056,6 +1056,7 @@ void InitDoc()
     DOC_METHOD_1("void", "SetDelay", "Set the animation delay in seconds.", "float", "delay");
     DOC_METHOD_0("float", "GetDelay", "Get the animation delay in seconds.");
     DOC_METHOD_0("float", "GetCurrentTime", "Get the current animation time in seconds.");
+    DOC_METHOD_0("float", "GetDuration", "Get the animation duration in seconds.");
     DOC_METHOD_0("game.AnimationClass", "GetClass", "Get the class object.");
     DOC_METHOD_2("game.Actuator", "FindActuatorById", "Find an animation actuator by its class ID.<br>"
                                                       "Returns nil if no such actuator could be found.<br>"
