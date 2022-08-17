@@ -1752,7 +1752,13 @@ namespace game
 
         void Die();
 
-        void Update(float dt);
+        struct TimerEvent {
+            std::string name;
+            float jitter = 0.0f;
+        };
+        using Event = std::variant<TimerEvent>;
+
+        void Update(float dt, std::vector<Event>* events = nullptr);
 
         // Play the given animation immediately. If there's any
         // current animation it is replaced.
@@ -1864,6 +1870,9 @@ namespace game
         void SetScene(Scene* scene)
         { mScene = scene; }
 
+        void SetTimer(const std::string& name, double when)
+        { mTimers.push_back({name, when}); }
+
         // Get the current track if any. (when IsAnimating is true)
         Animation* GetCurrentAnimation()
         { return mCurrentAnimation.get(); }
@@ -1957,6 +1966,12 @@ namespace game
         std::unique_ptr<Animation> mFinishedAnimation;
         // the current scene.
         Scene* mScene = nullptr;
+
+        struct Timer {
+            std::string name;
+            double when = 0.0f;
+        };
+        std::vector<Timer> mTimers;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

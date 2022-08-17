@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <variant>
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
@@ -640,7 +641,14 @@ namespace game
         FPoint MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const FPoint& point) const;
         glm::vec2 MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const;
 
-        void Update(float dt);
+        struct EntityTimerEvent {
+            Entity* entity = nullptr;
+            std::string timer;
+            float jitter = 0.0f;
+        };
+        using Event = std::variant<EntityTimerEvent>;
+
+        void Update(float dt, std::vector<Event>* events = nullptr);
 
         void Rebuild();
 

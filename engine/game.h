@@ -23,9 +23,10 @@
 #include <string>
 
 #include "wdk/events.h"
-#include "engine/classlib.h"
 #include "game/types.h"
 #include "game/fwd.h"
+#include "game/scene.h"
+#include "engine/classlib.h"
 #include "engine/action.h"
 #include "engine/types.h"
 #include "uikit/window.h"
@@ -72,7 +73,7 @@ namespace engine
         // main application has started. In the implementation you should
         // load whatever initial game state that is needed. It's possible to
         // fail (indicated by returning false) or by throwing an exception.
-        // Failure will will make the host application exit early since the
+        // Failure will make the host application exit early since the
         // game obviously cannot be run.
         virtual bool LoadGame() = 0;
         // Start the actual game after all required initial content has been
@@ -122,7 +123,7 @@ namespace engine
         // Get the game's logical viewport into the game world.
         // The viewport is defined in the same units as the game itself
         // and has no direct relation to pixels or to the graphics device
-        // viewport. Instead it's completely game related and is managed by
+        // viewport. Instead, it's completely game related and is managed by
         // the game. The engine will then use the viewport information to
         // render the contents within the game's viewport into some area
         // in some rendering surface such as a window. If your game returns
@@ -139,13 +140,19 @@ namespace engine
 
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
-        virtual void OnContactEvent(const ContactEvent& contact) = 0;
+        virtual void OnContactEvent(const ContactEvent& contact)
+        {}
 
         // Act on audio playback event.
-        virtual void OnAudioEvent(const AudioEvent& event) = 0;
+        virtual void OnAudioEvent(const AudioEvent& event)
+        {}
 
         // Act on a game event posted through PostEvent
-        virtual void OnGameEvent(const GameEvent& event) = 0;
+        virtual void OnGameEvent(const GameEvent& event)
+        {}
+
+        virtual void OnSceneEvent(const game::Scene::Event& event)
+        {}
 
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) {}

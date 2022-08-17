@@ -1407,14 +1407,27 @@ const ScriptVar* Scene::FindScriptVarById(const std::string& id) const
     return mClass->FindScriptVarById(id);
 }
 
-void Scene::Update(float dt)
+void Scene::Update(float dt, std::vector<Event>* events)
 {
     mCurrentTime += dt;
 
     // todo: limit which entities are getting updated.
     for (auto& entity : mEntities)
     {
-        entity->Update(dt);
+        std::vector<Entity::Event> entity_events;
+        entity->Update(dt, events ? &entity_events : nullptr);
+        for (auto& entity_event : entity_events)
+        {
+            if (auto* ptr = std::get_if<Entity::TimerEvent>(&entity_event))
+            {
+                EntityTimerEvent timer;
+                timer.entity = entity.get();
+                timer.jitter = ptr->jitter;
+                timer.timer  = std::move(ptr->name);
+                events->push_back(std::move(timer));
+            }
+        }
+
         if (entity->HasExpired())
         {
             if (entity->TestFlag(Entity::Flags::KillAtLifetime))

@@ -1302,6 +1302,8 @@ void EntityWidget::on_btnAddScript_clicked()
     stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
     stream << "-- Called on animation finished events.\n";
     stream << QString("function OnAnimationFinished(%1, animation)\nend\n\n").arg(var);
+    stream << "-- Called on timer events.\n";
+    stream << QString("function OnTimer(%1, timer, jitter)\nend\n\n").arg(var);
 
     io.flush();
     io.close();

@@ -1121,6 +1121,11 @@ void LuaGame::OnGameEvent(const GameEvent& event)
     CallLua((*mLuaState)["OnGameEvent"], event);
 }
 
+void LuaGame::OnSceneEvent(const game::Scene::Event& event)
+{
+    // todo: if needed
+}
+
 void LuaGame::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     CallLua((*mLuaState)["OnKeyDown"],
@@ -1479,6 +1484,21 @@ void ScriptEngine::OnGameEvent(const GameEvent& event)
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["OnGameEvent"], entity, event);
+        }
+    }
+}
+
+void ScriptEngine::OnSceneEvent(const game::Scene::Event& event)
+{
+    if (const auto* ptr = std::get_if<game::Scene::EntityTimerEvent>(&event))
+    {
+        auto* entity = ptr->entity;
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->timer, ptr->jitter);
+
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["OnTimer"], entity, ptr->timer, ptr->jitter);
         }
     }
 }
@@ -2616,6 +2636,7 @@ void BindGameLib(sol::state& L)
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
     entity["Die"]                  = &Entity::Die;
     entity["TestFlag"]             = &TestFlag<Entity>;
+    entity["SetTimer"]             = &Entity::SetTimer;
 
     auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());
     entity_args["id"]       = sol::property(&EntityArgs::id);
