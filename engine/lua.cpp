@@ -1494,11 +1494,11 @@ void ScriptEngine::OnSceneEvent(const game::Scene::Event& event)
     {
         auto* entity = ptr->entity;
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->timer, ptr->jitter);
+            CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->event.name, ptr->event.jitter);
 
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["OnTimer"], entity, ptr->timer, ptr->jitter);
+            CallLua((*env)["OnTimer"], entity, ptr->event.name, ptr->event.jitter);
         }
     }
     else if (const auto* ptr = std::get_if<game::Scene::EntityEventPostedEvent>(&event))
