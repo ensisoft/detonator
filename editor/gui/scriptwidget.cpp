@@ -1580,6 +1580,11 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
        font-weight: bold;
        color: DarkRed;
     }
+    span.table {
+       font-size: 20px;
+       font-weight: bold;
+       font-style: italic;
+    }
   </style>
   </head>
   <body>
@@ -1608,9 +1613,17 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     }
     stream << "</ul>\n";
 
+    std::string current_table;
+
     // build method documentation bodies.
     for (const auto& member : g_method_docs)
     {
+        if (member.table != current_table)
+        {
+            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(app::FromUtf8(member.table));
+            current_table = member.table;
+        }
+
         if (member.type == LuaMemberType::Function ||
             member.type == LuaMemberType::Method ||
             member.type == LuaMemberType::MetaMethod)
@@ -1694,7 +1707,7 @@ R"(<div class="member" name="%1" id="%2">
    .arg(prop_name)
    .arg(prop_desc);
         }
-    }
+    } // for
 
     stream << R"(
 </body>
