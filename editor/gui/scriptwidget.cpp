@@ -1119,6 +1119,17 @@ void InitDoc()
                                      "between the ideal time and the actual time when he timer fired. A negative value indicates that the timer"
                                      "fired late.",
                  "string", "name", "float", "time");
+    DOC_METHOD_3("void", "PostEvent", "Post an event to this entity.<br>"
+                                      "The entity will be able to process this event in its OnEvent callback.",
+                 "string", "message", "string", "sender", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4", "value");
+    DOC_METHOD_1("void", "PostEvent", "Post an event to this entity.<br>"
+                                      "The entity will be able to process this event in its OnEvent callback.",
+                 "game.EntityEvent", "event");
+
+    DOC_TABLE("game.EntityEvent");
+    DOC_OBJECT_PROPERTY("string", "message", "Free form message string.");
+    DOC_OBJECT_PROPERTY("string", "sender", "Free form sender string.");
+    DOC_OBJECT_PROPERTY("int|float|string|glm.vec2|glm.vec3|glm.vec4", "value", "Value associated with the event.");
 
     DOC_TABLE("game.EntityArgs");
     DOC_OBJECT_PROPERTY("game.EntityClass", "class", "The class object (type) of the entity.");

@@ -1752,11 +1752,21 @@ namespace game
 
         void Die();
 
+        using PostedEventValue = std::variant<
+            bool, int, float,
+            std::string,
+            glm::vec2, glm::vec3, glm::vec4>;
+        struct PostedEvent {
+            std::string message;
+            std::string sender;
+            PostedEventValue value;
+        };
+
         struct TimerEvent {
             std::string name;
             float jitter = 0.0f;
         };
-        using Event = std::variant<TimerEvent>;
+        using Event = std::variant<TimerEvent, PostedEvent>;
 
         void Update(float dt, std::vector<Event>* events = nullptr);
 
@@ -1873,6 +1883,11 @@ namespace game
         void SetTimer(const std::string& name, double when)
         { mTimers.push_back({name, when}); }
 
+        void PostEvent(const PostedEvent& event)
+        { mEvents.push_back(event); }
+        void PostEvent(PostedEvent&& event)
+        { mEvents.push_back(std::move(event)); }
+
         // Get the current track if any. (when IsAnimating is true)
         Animation* GetCurrentAnimation()
         { return mCurrentAnimation.get(); }
@@ -1942,8 +1957,8 @@ namespace game
         std::unique_ptr<Animation> mCurrentAnimation;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
-        // the list of script variables. read-only ones can
-        // be shared between all instances and the EntityClass.
+        // the list of read-write script variables. read-only ones are
+        // shared between all instances and the EntityClass.
         std::vector<ScriptVar> mScriptVars;
         // list of physics joints between nodes with rigid bodies.
         std::vector<PhysicsJoint> mJoints;
@@ -1972,6 +1987,7 @@ namespace game
             double when = 0.0f;
         };
         std::vector<Timer> mTimers;
+        std::vector<PostedEvent> mEvents;
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

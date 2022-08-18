@@ -1426,6 +1426,13 @@ void Scene::Update(float dt, std::vector<Event>* events)
                 timer.timer  = std::move(ptr->name);
                 events->push_back(std::move(timer));
             }
+            else if (auto* ptr = std::get_if<Entity::PostedEvent>(&entity_event))
+            {
+                EntityEventPostedEvent posted_event;
+                posted_event.entity  = entity.get();
+                posted_event.event   = std::move(*ptr);
+                events->push_back(std::move(posted_event));
+            }
         }
 
         if (entity->HasExpired())
