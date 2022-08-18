@@ -159,6 +159,7 @@ namespace gui
         QElapsedTimer mClock;
         bool mVsync       = false;
         bool mHasFocus    = false;
+        bool mInitDone    = false;
     private:
         quint64 mNumFrames = 0;
         float mCurrentFps  = 0.0f;
