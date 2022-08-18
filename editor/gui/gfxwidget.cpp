@@ -124,7 +124,7 @@ GfxWindow::GfxWindow()
     // multiple invocations of resizeGL where the first call(s)
     // don't report the final size that the widget will eventually
     // have. I suspect this happens because there is some layout
-    // engine adjusting the widget sizes. However this is a problem
+    // engine adjusting the widget sizes. However, this is a problem
     // if we want to for example have a user modifiable viewport
     // default to the initial size of the widget.
     // Doing a little hack here and hoping that when the first timer
@@ -136,7 +136,7 @@ GfxWindow::GfxWindow()
     // have a surface and a valid context that is current with the surface
     // the device isn't created correctly. The calls to probe the device
     // in graphics/opengl_es2_device for number of texture units, color buffer
-    // info, etc all provide junk values (0 for texture units.. really??)
+    // info, etc. all provide junk values (0 for texture units.. really??)
     // Moving all context/device creation to take place after a hack delay.
     // yay! 
     QTimer::singleShot(10, this, &GfxWindow::doInit);
@@ -159,23 +159,14 @@ void GfxWindow::dispose()
     // then the device will end deleting resources that actually belong
     // to a different device! *OOPS*
     mContext->makeCurrent(this);
-
-    if (mVsync)
-    {
-        // if this surface was vsynced then toggle the flag
-        // in order to indicate that we have vsync no more and
-        // some other surface must be recreated.
-        DEBUG("Lost VSYNC GfxWindow.");
-    }
-
     mCustomGraphicsDevice.reset();
     mCustomGraphicsPainter.reset();
     // release the underlying native resources.
     // The Qt documentation https://doc.qt.io/qt-5/qwindow.html#destroy
     // doesn't say whether this would be called automatically by the QWindow
     // implementation or not.
-    // However there seems to be a problem that something is leaking some
-    // resources. I've experienced an issue several times where the rendering
+    // However, there seems to be a problem that something is leaking some
+    // resources. I've experienced an issue several times when the rendering
     // gets slower and slower until at some point X server crashes and the X11
     // session is killed. I'm assuming that this issue is caused by some
     // resource leakage that happens. Maybe adding this explicit call to
@@ -185,6 +176,10 @@ void GfxWindow::dispose()
     destroy();
 
     DEBUG("Released GfxWindow device and painter.");
+    if (mVsync)
+    {
+        DEBUG("Lost VSYNC GfxWindow.");
+    }
 }
 
 bool GfxWindow::hasInputFocus() const
@@ -199,6 +194,9 @@ void GfxWindow::initializeGL()
 
 void GfxWindow::paintGL()
 {
+    if (!mInitDone)
+        return;
+
     if (!mContext)
         return;
     else if (!isExposed())
@@ -278,14 +276,31 @@ void GfxWindow::CreateRenderingSurface(bool vsync)
     show();
 
     mVsync = vsync;
-    DEBUG("Created rendering surface with VSYNC set to %1", vsync);
+    DEBUG("Created rendering surface. [VSYNC=%1]", vsync);
 }
 
 void GfxWindow::doInit()
 {
-    if (surfaces.empty() && should_have_vsync)
-        CreateRenderingSurface(true);
-    else CreateRenderingSurface(false);
+    if (should_have_vsync)
+    {
+        bool have_vsync = false;
+        for (const auto* surf  : surfaces)
+        {
+            if (surf == this)
+                continue;
+
+            if (surf->mVsync)
+            {
+                have_vsync = true;
+                break;
+            }
+        }
+        CreateRenderingSurface(!have_vsync);
+    }
+    else
+    {
+        CreateRenderingSurface(false);
+    }
 
     auto context = shared_context.lock();
     if (!context)
@@ -319,7 +334,6 @@ void GfxWindow::doInit()
         QOpenGLContext* mContext = nullptr;
     };
 
-
     auto device = shared_device.lock();
     if (!device)
     {
@@ -330,7 +344,7 @@ void GfxWindow::doInit()
     mCustomGraphicsDevice  = device;
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
     // this magic flag here turns all statics into "non-statics"
-    // and let's resources that we create with static flags to
+    // and lets resources that we create with static flags to
     // re-inspect their content for modification and then possibly
     // re-upload/regenerate the required GPU objects.
     mCustomGraphicsPainter->SetEditingMode(true);
@@ -340,6 +354,11 @@ void GfxWindow::doInit()
     onInitScene(w, h);
 
     mClock.start();
+
+    // set flag to indicate that we're finally done initializing.
+    // this is done because the init actually happens on timer some
+    // time after the widget has actually been created.
+    mInitDone = true;
  }
 
 void GfxWindow::mouseMoveEvent(QMouseEvent* mickey)
@@ -359,7 +378,7 @@ void GfxWindow::keyPressEvent(QKeyEvent* key)
 {
     // the Qt documents don't say anything regarding QWindow::keyPressEvent
     // whether the base class implementation should be called or not.
-    // However there seems to be some occasional hiccups with keyboard
+    // However, there seems to be some occasional hiccups with keyboard
     // shortcuts not working. I'm guessing the issue is the lack of
     // QWindow::keyPressEvent call.
     // The QWidget documentation however stresses how important it is
@@ -414,22 +433,29 @@ void GfxWindow::BeginFrame()
         bool have_vsync = false;
         for (auto* window : surfaces)
         {
-            if (window->mVsync)
+            if (window->mVsync && window->mInitDone)
             {
                 have_vsync = true;
                 break;
             }
         }
-        if (!have_vsync && !surfaces.empty())
+        if (!have_vsync)
         {
-            (*surfaces.begin())->CreateRenderingSurface(true);
+            for (auto* window : surfaces)
+            {
+                if (window->mInitDone)
+                {
+                    window->CreateRenderingSurface(true);
+                    break;
+                }
+            }
         }
     }
     else
     {
         for (auto* window : surfaces)
         {
-            if (window->mVsync)
+            if (window->mVsync && window->mInitDone)
                 window->CreateRenderingSurface(false);
         }
     }
@@ -441,7 +467,7 @@ void GfxWindow::EndFrame()
 
     for (auto* window : surfaces)
     {
-        if (!window->mContext)
+        if (!window->mInitDone)
             continue;
         else if (!window->isExposed())
             continue;
@@ -457,11 +483,14 @@ void GfxWindow::EndFrame()
     if (should_have_vsync && did_vsync)
         return;
 
-    // this is ugly but is there something else we could do?
-    // ideally wait for some time *or* until there's pending user
-    // input/message from the underlying OS.
-    // Maybe a custom QAbstractEventDispatcher implementation could work.
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    if (should_have_vsync && !did_vsync)
+    {
+        // this is ugly but is there something else we could do?
+        // ideally wait for some time *or* until there's pending user
+        // input/message from the underlying OS.
+        // Maybe a custom QAbstractEventDispatcher implementation could work.
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
 }
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
@@ -566,7 +595,7 @@ void GfxWidget::focusInEvent(QFocusEvent* focus)
     // when swapping between applications. For example when the GfxWindow
     // isActive swapping to another application and then back to the editor
     // will not activate the previous GfxWindow but the mainwindow window
-    // which will then activate some of the widgets in the main window.
+    // which will then activate some widgets in the main window.
     // I don't know how to solve this problem reliably yet.
 }
 
