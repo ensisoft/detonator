@@ -242,7 +242,7 @@ void InitDoc()
     DOC_TABLE_PROPERTY("game.ClassLib", "ClassLib", "Global class library instance.");
     DOC_TABLE_PROPERTY("game.KeyValueStore", "State", "Global key-value store instance.");
     DOC_TABLE_PROPERTY("game.Engine", "Game", "Global game engine instance.");
-    DOC_TABLE_PROPERTY("game.Scene", "Scene", "The current scene or nil if no scene is being played.");
+    DOC_TABLE_PROPERTY("game.Scene", "Scene", "Global scene instance or nil if no scene is being played.");
 
     DOC_TABLE("util");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
@@ -531,8 +531,9 @@ void InitDoc()
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the data chunk is empty or not.<br>"
                                    "A data chunk is considered empty when it has no values or child data chunks.");
     DOC_METHOD_1("int", "GetNumChunks", "Get the number of data chunks under the given key.","string", "key");
-    DOC_METHOD_2("data.Reader", "GetReadChunk", "Get a read chunk at the given index under the given key."
-                                                "Returns a new data reader object for that chunk.",
+    DOC_METHOD_2("data.Reader", "GetReadChunk", "Get a read chunk at the given index under the given key.<br>"
+                                                "Returns a new data reader object for that chunk.<br>"
+                                                "Both key and index must be valid.",
                  "string", "key", "int", "index");
 
     DOC_TABLE("data.Writer");
@@ -561,28 +562,28 @@ void InitDoc()
     DOC_METHOD_0("string", "ToString", "Dump the contents of the JsonObject into a string.");
 
     DOC_TABLE("data");
-    DOC_METHOD_1("data.JsonObject", "ParseJsonString", "Create a new JsonObject based on the JSON string.<br>"
-                                    "Returns a new JsonObject and an empty string on success or nil and error string on error.",
+    DOC_METHOD_1("data.JsonObject, string", "ParseJsonString", "Create a new JsonObject based on the JSON string.<br>"
+                                                               "Returns a new JsonObject object and an empty string on success or nil and an error string on error.",
                  "string", "json");
-    DOC_FUNCTION_2("data.JsonObject", "ParseJsonString", "Create a new JsonObject based on the JSON data buffer.<br>"
-                                                       "Returns a new JsonObject and an empty string on success or nil and an error string on error.",
+    DOC_FUNCTION_2("data.JsonObject, string", "ParseJsonString", "Create a new JsonObject based on the JSON data buffer.<br>"
+                                                                 "Returns a new JsonObject and an empty string on success or nil and an error string on error.",
                  "todo", "json_data", "size_t", "data_len");
     DOC_FUNCTION_2("bool, string", "WriteJsonFile", "Write the contents of the JsonObject into a file.<br>"
-                                                  "Returns true and en empty string on success or false and error string on error.",
+                                                    "Returns true and an empty string on success or false and error string on error.",
                  "data.JsonObject", "json", "string", "filename");
-    DOC_FUNCTION_1("data.JsonObject", "ReadJsonFile", "Try to read the given JSON file. <br>"
-                                                    "Returns new JsonObject and en empty string on success or nil and error string on error.",
+    DOC_FUNCTION_1("data.JsonObject, string", "ReadJsonFile", "Try to read the given JSON file. <br>"
+                                                              "Returns new JsonObject object and en empty string on success or nil and error string on error.",
                  "string", "filename");
     DOC_FUNCTION_1("data.Writer", "CreateWriter", "Create a new data.Writer object based on the given format string.<br>"
-                                               "Format string can be one of the following: 'JSON'<br>"
-                                               "Returns nil on unsupported format.",
+                                                  "Format string can be one of the following: 'JSON'<br>"
+                                                  "Returns nil on unsupported format.",
                  "string", "format");
     DOC_FUNCTION_2("bool, string", "WriteFile", "Dump the contents of the given Writer into a file.<br>"
-                                              "Returns true and en empty string on success or false and an error string on error.",
+                                                "Returns true and en empty string on success or false and an error string on error.",
                  "data.Writer", "data", "string", "filename");
     DOC_FUNCTION_1("data.Reader, string", "ReadFile", "Try to read the given file in some supported format.<br>"
-                                                    "Currently supported formats: JSON.<br>"
-                                                    "Returns a new data.Reader and an empty string on success or nil and an error string on error.",
+                                                      "Currently supported formats: JSON.<br>"
+                                                      "Returns a new data.Reader object and an empty string on success or nil and an error string on error.",
                  "string", "filename");
 
     DOC_TABLE("glm");
@@ -882,7 +883,7 @@ void InitDoc()
     DOC_METHOD_0("bool", "IsVisible", "Check whether the drawable is currently visible or not.");
     DOC_METHOD_1("void", "SetVisible", "Hide or show the drawable.", "bool", "visible");
     DOC_METHOD_2("void", "SetUniform", "Set a material parameter (shader uniform) value.<br>"
-                                       "The parameter is identified by it's uniform name in the material shader.<br>"
+                                       "The parameter is identified by its uniform name in the material shader.<br>"
                                        "Supported values are float, int, base.Color4f, glm.vec2, glm.vec3, glm.vec4",
                  "string", "name", "float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "value");
     DOC_METHOD_1("float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "FindUniform",
@@ -901,10 +902,10 @@ void InitDoc()
     DOC_METHOD_0("bool", "IsBullet", "Check whether the body is a fast moving (bullet) body.");
     DOC_METHOD_0("bool", "CanSleep", "Check whether the body can sleep in the physics simulation or not.");
     DOC_METHOD_0("bool", "DiscardRotation", "Check whether the body discards any rotation or not.");
-    DOC_METHOD_0("float", "GetFriction", "Return the friction value of the rigid body.");
-    DOC_METHOD_0("float", "GetRestitution", "Return the restitution value of the rigid body.");
-    DOC_METHOD_0("float", "GetAngularDamping", "Return the angular damping of the rigid body.");
-    DOC_METHOD_0("float", "GetLinearDamping", "Return the linear damping of the rigid body.");
+    DOC_METHOD_0("float", "GetFriction", "Get the friction value of the rigid body.");
+    DOC_METHOD_0("float", "GetRestitution", "Get the restitution value of the rigid body.");
+    DOC_METHOD_0("float", "GetAngularDamping", "Get the angular damping of the rigid body.");
+    DOC_METHOD_0("float", "GetLinearDamping", "Get the linear damping of the rigid body.");
     DOC_METHOD_0("float", "GetDensity", "Get the density value of the rigid body.");
     DOC_METHOD_0("string", "GetPolygonShapeId", "Get the ID of the polygonal shape for the physics body.");
     DOC_METHOD_0("glm.vec2", "GetLinearVelocity", "Get the current linear velocity (m/s) of the rigid body.");
@@ -1106,12 +1107,14 @@ void InitDoc()
                  "string", "id");
     DOC_METHOD_0("game.Animation", "PlayIdle", "Play the entity's idle animation (if any).<br>"
                                                "Returns nil if the entity doesn't have any idle animation or is already playing an animation.");
-    DOC_METHOD_0("game.Animation", "PlayAnimationByName", "Play an animation by the given name if found.<br>"
+    DOC_METHOD_1("game.Animation", "PlayAnimationByName", "Play an animation by the given name if found.<br>"
                                                           "Any current animation is replaced by this new animation.<br>"
-                                                          "Returns the animation instance or nil if no such animation could be found.");
-    DOC_METHOD_0("game.Animation", "PlayAnimationById", "Play an animation by the given ID.<br>"
+                                                          "Returns the animation instance or nil if no such animation could be found.",
+                 "string", "name");
+    DOC_METHOD_1("game.Animation", "PlayAnimationById", "Play an animation by the given ID.<br>"
                                                         "Any current animation is replaced by this new animation.<br>"
-                                                        "Returns the animation instance or nil if no such animation could be found.");
+                                                        "Returns the animation instance or nil if no such animation could be found.",
+                 "string", "id");
     DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
     DOC_METHOD_0("void", "Die", "Let the entity die and be removed from the scene.");
     DOC_METHOD_2("void", "SetTimer", "Set a named timer on the entity.<br>"
@@ -1194,8 +1197,8 @@ void InitDoc()
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
                                                         "For example a script variable named 'score' would be accessible as object.score.");
     DOC_METHOD_0("bool|float|string|int|vec2", "newindex", "Lua new index meta method.<br>"
-                                                             "The scene's script variables are accessible as properties of the scene object.<br>"
-                                                             "For example a script variable named 'score' would be accessible as object.score.");
+                                                           "The scene's script variables are accessible as properties of the scene object.<br>"
+                                                           "For example a script variable named 'score' would be accessible as object.score.");
     DOC_METHOD_1("game.EntityList", "ListEntitiesByClassName", "List all entities of the given class identified by its class name", "string", "class");
     DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
@@ -1203,7 +1206,7 @@ void InitDoc()
                  "string", "id");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceName", "Find an entity with the given instance name.<br>"
                                                             "Returns nil if no such entity could be found.<br>"
-                                                            "In case of multiple entities with the same name the first one with a matching name is returned.<br>",
+                                                            "In case of multiple entities with the same name the first one with a matching name is returned.",
                  "string", "name");
     DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index.", "int", "index");
     DOC_METHOD_1("void", "KillEntity", "Flag an entity for removal from the scene. <br>"
@@ -1314,12 +1317,12 @@ void InitDoc()
     DOC_METHOD_1("void", "SetGravity", "Set the physics engine gravity vector.<br>"
                                        "Normally the gravity setting is applied through project settings but<br>"
                                        "this function allows explicit control to override that value.<br>"
-                                       "The new gravity setting should be called before any physics world is created.",
+                                       "The new gravity setting should be called before any physics world is created, i.e. before any scene is loaded",
                  "glm.vec2", "gravity");
-    DOC_METHOD_1("void", "SetGravity", "Set the physics engine scaling vector for scaling units from game to physics world and vice versa.<br>"
-                                       "Normally the scale setting is applied through project settings but<br>"
-                                       "this function allows explicit control to override that value.<br>"
-                                       "The new gravity setting should be called before any physics world is created.",
+    DOC_METHOD_1("void", "SetScale", "Set the physics engine scaling vector for scaling units from game to physics world and vice versa.<br>"
+                                     "Normally the scale setting is applied through project settings but<br>"
+                                     "this function allows explicit control to override that value.<br>"
+                                     "The new scale setting should be called before any physics world is created., i.e. before any scene is loaded",
                  "glm.vec2", "scale");
 
 
