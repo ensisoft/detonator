@@ -2479,6 +2479,7 @@ void BindGameLib(sol::state& L)
     entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
     entity_node["GetEntity"]      = (Entity*(EntityNode::*)(void))&EntityNode::GetEntity;
     entity_node["SetName"]        = &EntityNode::SetName;
+    entity_node["SetRotation"]    = &EntityNode::SetRotation;
     entity_node["SetScale"] = sol::overload(
         [](EntityNode& node, const glm::vec2& scale) { node.SetScale(scale); },
         [](EntityNode& node, float sx, float sy) { node.SetScale(sx, sy); });

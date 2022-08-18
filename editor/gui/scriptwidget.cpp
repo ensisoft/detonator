@@ -979,9 +979,10 @@ void InitDoc()
     DOC_METHOD_1("void", "SetTranslation", "Set the node's translation relative to its parent.", "glm.vec2", "translation");
     DOC_METHOD_2("void", "SetTranslation", "Set the node's translation relative to its parent.", "float", "x", "float", "y");
     DOC_METHOD_1("void", "SetName", "Set the node's instance name.", "string", "name");
+    DOC_METHOD_1("void", "SetRotation", "Set the new rotation value in radians relative to the node's parent.", "float", "angle");
     DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "delta");
     DOC_METHOD_2("void", "Translate", "Translate the node relative to its current translation.", "float", "dx", "float", "dy");
-    DOC_METHOD_1("void", "Rotate", "Rotate the node relative to its current rotation.", "float", "rotation");
+    DOC_METHOD_1("void", "Rotate", "Rotate the node in radians relative to its current rotation.", "float", "delta");
 
     DOC_TABLE("game.EntityClass");
     DOC_METHOD_0("string", "GetId", "Get the entity class ID.");
