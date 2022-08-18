@@ -1672,6 +1672,15 @@ void Entity::Update(float dt, std::vector<Event>* events)
         } else ++it;
     }
 
+    if (events)
+    {
+        for (auto& event: mEvents)
+        {
+            events->push_back(std::move(event));
+        }
+    }
+    mEvents.clear();
+
     if (!mCurrentAnimation)
         return;
 

@@ -646,7 +646,12 @@ namespace game
             std::string timer;
             float jitter = 0.0f;
         };
-        using Event = std::variant<EntityTimerEvent>;
+        struct EntityEventPostedEvent {
+            Entity* entity = nullptr;
+            Entity::PostedEvent event;
+        };
+        using Event = std::variant<EntityTimerEvent,
+                EntityEventPostedEvent>;
 
         void Update(float dt, std::vector<Event>* events = nullptr);
 

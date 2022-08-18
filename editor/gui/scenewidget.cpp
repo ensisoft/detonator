@@ -1140,6 +1140,8 @@ void SceneWidget::on_btnAddScript_clicked()
     stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
     stream << "-- Called on entity timer events.\n";
     stream << QString("function OnEntityTimer(%1, entity, timer, jitter)\nend\n\n").arg(var);
+    stream << "-- Called on posted entity events.\n";
+    stream << QString("function OnEntityEvent(%1, entity, event)\nend\n\n").arg(var);
 
     io.flush();
     io.close();

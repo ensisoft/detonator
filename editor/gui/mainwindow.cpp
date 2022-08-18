@@ -1163,6 +1163,8 @@ void MainWindow::on_actionNewEntityScript_triggered()
     stream << QString("function OnAnimationFinished(%1, animation)\nend\n\n").arg(var);
     stream << "-- Called on timer events.\n";
     stream << QString("function OnTimer(%1, timer, jitter)\nend\n\n").arg(var);
+    stream << "-- Called on posted entity events.\n";
+    stream << QString("function OnEvent(%1, event)\nend\n\n").arg(var);
 
     io.flush();
     io.close();
@@ -1248,6 +1250,8 @@ void MainWindow::on_actionNewSceneScript_triggered()
     stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
     stream << "-- Called on entity timer events.\n";
     stream << QString("function OnEntityTimer(%1, entity, timer, jitter)\nend\n\n").arg(var);
+    stream << "-- Called on posted entity events.\n";
+    stream << QString("function OnEntityEvent(%1, entity, event)\nend\n\n").arg(var);
 
     io.flush();
     io.close();

@@ -1501,6 +1501,17 @@ void ScriptEngine::OnSceneEvent(const game::Scene::Event& event)
             CallLua((*env)["OnTimer"], entity, ptr->timer, ptr->jitter);
         }
     }
+    else if (const auto* ptr = std::get_if<game::Scene::EntityEventPostedEvent>(&event))
+    {
+        auto* entity = ptr->entity;
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)["OnEntityEvent"], mScene, entity, ptr->event);
+
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["OnEvent"], entity, ptr->event);
+        }
+    }
 }
 
 void ScriptEngine::OnKeyDown(const wdk::WindowEventKeyDown& key)
@@ -2638,6 +2649,36 @@ void BindGameLib(sol::state& L)
     entity["Die"]                  = &Entity::Die;
     entity["TestFlag"]             = &TestFlag<Entity>;
     entity["SetTimer"]             = &Entity::SetTimer;
+    entity["PostEvent"]            = sol::overload(
+        [](Entity* entity, const std::string& message, const std::string& sender, sol::object value) {
+            Entity::PostedEvent event;
+            event.message = message;
+            event.sender  = sender;
+            if (value.is<bool>())
+                event.value = value.as<bool>();
+            else if (value.is<int>())
+                event.value = value.as<int>();
+            else if (value.is<float>())
+                event.value = value.as<float>();
+            else if (value.is<std::string>())
+                event.value = value.as<std::string>();
+            else if (value.is<glm::vec2>())
+                event.value = value.as<glm::vec2>();
+            else if (value.is<glm::vec3>())
+                event.value = value.as<glm::vec3>();
+            else if (value.is<glm::vec4>())
+                event.value = value.as<glm::vec4>();
+            else throw GameError("Unsupported event event value type.");
+            entity->PostEvent(std::move(event));
+        },
+        [](Entity* entity, const Entity::PostedEvent& event) {
+            entity->PostEvent(event);
+        });
+
+    auto entity_posted_event = table.new_usertype<Entity::PostedEvent>("EntityEvent", sol::constructors<Entity::PostedEvent()>());
+    entity_posted_event["message"] = &Entity::PostedEvent::message;
+    entity_posted_event["sender"]  = &Entity::PostedEvent::sender;
+    entity_posted_event["value"]   = &Entity::PostedEvent::value;
 
     auto entity_args = table.new_usertype<EntityArgs>("EntityArgs", sol::constructors<EntityArgs()>());
     entity_args["id"]       = sol::property(&EntityArgs::id);
