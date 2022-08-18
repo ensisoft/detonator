@@ -134,6 +134,8 @@ namespace gui
         static void BeginFrame();
         static void EndFrame();
 
+        static void SetVSYNC(bool on_off);
+        static bool GetVSYNC();
     public slots:
         void clearColorChanged(QColor color);
     private slots:

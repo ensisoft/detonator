@@ -56,6 +56,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.edtAudioEditorArguments,  settings.audio_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
     SetUIValue(mUI.chkSaveAutomatically, settings.save_automatically_on_play);
+    SetUIValue(mUI.chkVSYNC, settings.vsync);
     SetUIValue(mUI.edtPythonExecutable, settings.python_executable);
     SetUIValue(mUI.edtEmscriptenPath, settings.emsdk);
     SetUIValue(mUI.clearColor, settings.clear_color);
@@ -107,6 +108,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.cmbWinOrTab,               &mSettings.default_open_win_or_tab);
     GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
     GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
+    GetUIValue(mUI.chkVSYNC,                  &mSettings.vsync);
     GetUIValue(mUI.edtPythonExecutable,       &mSettings.python_executable);
     GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);
     GetUIValue(mUI.clearColor,                &mSettings.clear_color);

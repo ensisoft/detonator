@@ -492,6 +492,17 @@ void GfxWindow::EndFrame()
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
+// static
+void GfxWindow::SetVSYNC(bool on_off)
+{
+    should_have_vsync = on_off;
+    DEBUG("Set GfxWindow VSYNC to: %1", on_off);
+}
+// static
+bool GfxWindow::GetVSYNC()
+{
+    return should_have_vsync;
+}
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
 {

@@ -76,6 +76,8 @@ namespace gui
         bool save_automatically_on_play = false;
         // default accelerated widget clear color.
         QColor clear_color = {int(255*0.2f),int(255*0.3f), int(255*0.4f), 255};
+        // Whether to try to VSYNC or not.
+        bool vsync = false;
     };
 
 } // namespace
