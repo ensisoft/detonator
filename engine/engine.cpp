@@ -258,8 +258,13 @@ public:
             TRACE_BLOCK("DebugDraw",
                 for (const auto& draw : mDebugDraws)
                 {
-                    if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw)) {
-                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                    if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
+                    {
+                        // map the line end points A and B from the game space
+                        // into view space.
+                        const auto beg = ptr->a - game_view.GetPosition();
+                        const auto end = ptr->b - game_view.GetPosition();
+                        gfx::DrawLine(*mPainter, beg, end, ptr->color, ptr->width);
                     }
                 }
             );
