@@ -270,7 +270,11 @@
                 "action": "Off",
                 "duration": 0.10009009391069412,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "KG5fOHpMYa",
+                "name": "",
                 "node": "mqxbWFGIg9",
                 "starttime": 0.0
               },
@@ -281,7 +285,11 @@
                 "action": "On",
                 "duration": 0.10414785146713257,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "sTMBX1vz6w",
+                "name": "",
                 "node": "mqxbWFGIg9",
                 "starttime": 0.8958521485328674
               },
@@ -292,7 +300,11 @@
                 "action": "On",
                 "duration": 0.09963932633399963,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "QeuPJrbmpq",
+                "name": "",
                 "node": "2qZDXrpOrX",
                 "starttime": 0.0
               },
@@ -303,7 +315,11 @@
                 "action": "Off",
                 "duration": 0.10414791107177734,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "OHFoxLJrUF",
+                "name": "",
                 "node": "2qZDXrpOrX",
                 "starttime": 0.8958520889282227
               },

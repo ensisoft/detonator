@@ -136,12 +136,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "hJ7fkd0GBS",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 2.0
                 },
                 "method": "Linear",
+                "name": "",
                 "node": "WyKYhKjCKB",
                 "starttime": 0.0
               },
@@ -2342,7 +2346,11 @@
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "06gyuPzb5f",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2353,7 +2361,11 @@
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "JC3lUWX3Ql",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2364,7 +2376,11 @@
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "Ai9eUuSfLT",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2375,7 +2391,11 @@
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "s1avLU11xY",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2386,7 +2406,11 @@
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "vE0jOzB9Al",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2397,7 +2421,11 @@
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "E1aDIr8lKY",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -2417,7 +2445,11 @@
                 "action": "Off",
                 "duration": 0.09909459948539734,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "op5x2NvFOx",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2428,7 +2460,11 @@
                 "action": "On",
                 "duration": 0.09859158843755722,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "yqnECxRbfe",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2439,7 +2475,11 @@
                 "action": "Off",
                 "duration": 0.09959757328033447,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "HIiYvFjrt5",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2450,7 +2490,11 @@
                 "action": "Off",
                 "duration": 0.09657948464155197,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "tyr8CZjEKL",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2461,7 +2505,11 @@
                 "action": "Off",
                 "duration": 0.09507054090499878,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "W7wHPdMQPU",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2472,7 +2520,11 @@
                 "action": "Off",
                 "duration": 0.09305836260318756,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "v5XjD51HyC",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -2492,7 +2544,11 @@
                 "action": "Off",
                 "duration": 0.10261563211679459,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "eHsXYXnOSm",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2503,7 +2559,11 @@
                 "action": "Off",
                 "duration": 0.10311861336231232,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "4GO5ossMne",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2514,7 +2574,11 @@
                 "action": "On",
                 "duration": 0.1021127998828888,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "v2lpIPoSS5",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2525,7 +2589,11 @@
                 "action": "Off",
                 "duration": 0.1006036028265953,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "MJH6wGdHim",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2536,7 +2604,11 @@
                 "action": "Off",
                 "duration": 0.10060364007949829,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "rF7YiWpIw4",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2547,7 +2619,11 @@
                 "action": "Off",
                 "duration": 0.10261568427085876,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "7Lzy2z4gXA",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -2567,7 +2643,11 @@
                 "action": "Off",
                 "duration": 0.0985916405916214,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "DwhRxYGReS",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2578,7 +2658,11 @@
                 "action": "Off",
                 "duration": 0.09909455478191376,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "7fHrPoitWh",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2589,7 +2673,11 @@
                 "action": "Off",
                 "duration": 0.09808850288391113,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "kOMtBqgmNz",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2600,7 +2688,11 @@
                 "action": "On",
                 "duration": 0.09909453988075256,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "zArZ66mIS4",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2611,7 +2703,11 @@
                 "action": "Off",
                 "duration": 0.09708249568939209,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "YjgFLgRgGR",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2622,7 +2718,11 @@
                 "action": "Off",
                 "duration": 0.09758555144071579,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "HgA8F8j3t1",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -2642,7 +2742,11 @@
                 "action": "Off",
                 "duration": 0.20271632075309753,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "XnRGMMR7jE",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2653,7 +2757,11 @@
                 "action": "Off",
                 "duration": 0.20120733976364136,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "iP8hmKsLaR",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2664,7 +2772,11 @@
                 "action": "Off",
                 "duration": 0.20020131766796112,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "OD52kANM1i",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2675,7 +2787,11 @@
                 "action": "Off",
                 "duration": 0.2002009004354477,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "JByFlM7KOG",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2686,7 +2802,11 @@
                 "action": "On",
                 "duration": 0.1971834897994995,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "ms9sT29MFj",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2697,7 +2817,11 @@
                 "action": "Off",
                 "duration": 0.1986924558877945,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "hS7rTubFpi",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -2717,7 +2841,11 @@
                 "action": "Off",
                 "duration": 0.19969822466373444,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "N2JkMyiHk9",
+                "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0
               },
@@ -2728,7 +2856,11 @@
                 "action": "Off",
                 "duration": 0.1996982842683792,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "6ZAjJr1plq",
+                "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0
               },
@@ -2739,7 +2871,11 @@
                 "action": "Off",
                 "duration": 0.20020121335983276,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "OYeWJs9j6z",
+                "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0
               },
@@ -2750,7 +2886,11 @@
                 "action": "Off",
                 "duration": 0.19969843327999115,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "SvC7JwLtel",
+                "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0
               },
@@ -2761,7 +2901,11 @@
                 "action": "Off",
                 "duration": 0.20070414245128632,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "yuYiHj1dJx",
+                "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0
               },
@@ -2772,7 +2916,11 @@
                 "action": "On",
                 "duration": 0.19919505715370178,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "8ozpAa96iF",
+                "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0
               },
@@ -3070,12 +3218,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.24949704110622406,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "GaomHIXLnl",
                 "linear_velocity": {
                   "x": -5.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "93WF45z7i9",
                 "starttime": 0.0
               },
@@ -3085,12 +3237,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.24899399280548096,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "PW1jx93CME",
                 "linear_velocity": {
                   "x": 5.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "93WF45z7i9",
                 "starttime": 0.5
               },
@@ -3100,12 +3256,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25050294399261475,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "JermqDxpog",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "93WF45z7i9",
                 "starttime": 0.24949704110622406
               },
@@ -3115,12 +3275,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25100600719451904,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "56sCux3qYZ",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "93WF45z7i9",
                 "starttime": 0.748993992805481
               },
@@ -3380,12 +3544,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.24949704110622406,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "utTEXjQ3Dk",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": -5.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0
               },
@@ -3395,12 +3563,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.24899399280548096,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "QMw6o5bsIt",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 5.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.5
               },
@@ -3410,12 +3582,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25050294399261475,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "Azw6MqyNQ7",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.24949704110622406
               },
@@ -3425,12 +3601,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25100600719451904,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "D2UpEsKIAT",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.748993992805481
               },
@@ -3449,12 +3629,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "LsoPCxj4x8",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 5.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0
               },
@@ -3464,12 +3648,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "YaBYKKli1T",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.25
               },
@@ -3479,12 +3667,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "15Uo6BfvUA",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": -5.0
                 },
                 "method": "Cosine",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.5
               },
@@ -3494,12 +3686,16 @@
               "actuator": {
                 "angular_velocity": 0.0,
                 "duration": 0.25,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "vjYoO82jjJ",
                 "linear_velocity": {
                   "x": 0.0,
                   "y": 0.0
                 },
                 "method": "Linear",
+                "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.75
               },
@@ -5196,8 +5392,12 @@
             {
               "actuator": {
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "wmG9QbLrmF",
                 "method": "Cosine",
+                "name": "",
                 "node": "w7ahuB3YZx",
                 "position": {
                   "x": -0.5,

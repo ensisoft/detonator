@@ -703,8 +703,12 @@
             {
               "actuator": {
                 "duration": 0.9015048146247864,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "SOys5Ry1kP",
                 "method": "Cosine",
+                "name": "",
                 "node": "zP7K5Htw9Y",
                 "position": {
                   "x": 0.0,
@@ -726,8 +730,12 @@
             {
               "actuator": {
                 "duration": 0.09849518537521362,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "MPkMdJ4HCb",
                 "method": "Cosine",
+                "name": "",
                 "node": "zP7K5Htw9Y",
                 "position": {
                   "x": 0.0,
@@ -758,8 +766,12 @@
             {
               "actuator": {
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "UAGlQqyfHA",
                 "method": "Cosine",
+                "name": "",
                 "node": "MThUBoKUmu",
                 "position": {
                   "x": 0.0,
@@ -1273,8 +1285,12 @@
             {
               "actuator": {
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "fI9qj7Xw9l",
                 "method": "Cosine",
+                "name": "",
                 "node": "sWMIUMAUPt",
                 "position": {
                   "x": 0.7099999785423279,
@@ -1305,8 +1321,12 @@
             {
               "actuator": {
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "gaggOy4IX2",
                 "method": "Cosine",
+                "name": "",
                 "node": "sWMIUMAUPt",
                 "position": {
                   "x": 0.7099999785423279,
@@ -1841,7 +1861,11 @@
           "actuators": [
             {
               "actuator": {
+                "cname": "",
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "IXQDBTw7Ub",
                 "method": "Acceleration",
                 "name": "DrawableTimeScale",
@@ -1978,7 +2002,11 @@
                 "action": "Off",
                 "duration": 0.5018398761749268,
                 "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "21YaGXkIQp",
+                "name": "",
                 "node": "EQKGzykOAt",
                 "starttime": 0.0
               },
@@ -1986,7 +2014,11 @@
             },
             {
               "actuator": {
+                "cname": "",
                 "duration": 0.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "boFQxygnMI",
                 "method": "Cosine",
                 "name": "DrawableTimeScale",
@@ -2112,8 +2144,12 @@
             {
               "actuator": {
                 "duration": 0.5013895034790039,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "sdAGTSoJav",
                 "method": "Cosine",
+                "name": "",
                 "node": "FwndgajgOa",
                 "position": {
                   "x": 0.0,
@@ -2135,8 +2171,12 @@
             {
               "actuator": {
                 "duration": 0.4986104965209961,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "uZqW9kL1Cn",
                 "method": "Cosine",
+                "name": "",
                 "node": "FwndgajgOa",
                 "position": {
                   "x": 0.0,
@@ -2158,8 +2198,12 @@
             {
               "actuator": {
                 "duration": 1.0,
+                "flags": {
+                  "StaticInstance": true
+                },
                 "id": "8l8mk3xaCl",
                 "method": "Cosine",
+                "name": "",
                 "node": "E5w4haXq1s",
                 "position": {
                   "x": -450.0,
