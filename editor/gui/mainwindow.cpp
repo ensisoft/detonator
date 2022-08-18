@@ -270,7 +270,9 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "show_viewport", &mUISettings.show_viewport);
     settings.GetValue("Settings", "show_origin", &mUISettings.show_origin);
     settings.GetValue("Settings", "show_grid", &mUISettings.show_grid);
+    settings.GetValue("Settings", "vsync", &mSettings.vsync);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
+    GfxWindow::SetVSYNC(mSettings.vsync);
 
     TextEditor::Settings editor_settings;
     settings.GetValue("TextEditor", "font", &editor_settings.font_description);
@@ -768,6 +770,8 @@ void MainWindow::iterateGameLoop()
 
     GfxWindow::EndFrame();
     GfxWindow::CleanGarbage();
+    // could be changed through the widget's hotkey handler.
+    mSettings.vsync = GfxWindow::GetVSYNC();
 }
 
 bool MainWindow::haveAcceleratedWindows() const
@@ -1690,6 +1694,7 @@ void MainWindow::on_actionSettings_triggered()
 
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
+    GfxWindow::SetVSYNC(mSettings.vsync);
 
     if (current_style == mSettings.style_name)
         return;
@@ -2558,6 +2563,7 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "show_viewport", mUISettings.show_viewport);
     settings.SetValue("Settings", "show_origin", mUISettings.show_origin);
     settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
+    settings.SetValue("Settings", "vsync", mSettings.vsync);
 
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
@@ -2774,7 +2780,7 @@ void MainWindow::UpdateStats()
             .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
 
     SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+    SetValue(mUI.statVsync, GfxWindow::GetVSYNC() ? QString("ON") : QString("OFF"));
 }
 
 } // namespace
