@@ -643,8 +643,7 @@ namespace game
 
         struct EntityTimerEvent {
             Entity* entity = nullptr;
-            std::string timer;
-            float jitter = 0.0f;
+            Entity::TimerEvent event;
         };
         struct EntityEventPostedEvent {
             Entity* entity = nullptr;

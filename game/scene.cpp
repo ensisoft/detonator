@@ -1422,8 +1422,7 @@ void Scene::Update(float dt, std::vector<Event>* events)
             {
                 EntityTimerEvent timer;
                 timer.entity = entity.get();
-                timer.jitter = ptr->jitter;
-                timer.timer  = std::move(ptr->name);
+                timer.event  = std::move(*ptr);
                 events->push_back(std::move(timer));
             }
             else if (auto* ptr = std::get_if<Entity::PostedEvent>(&entity_event))
