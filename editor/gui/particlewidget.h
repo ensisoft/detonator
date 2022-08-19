@@ -74,19 +74,47 @@ namespace gui
         void on_btnViewMinus90_clicked();
         void on_btnSelectMaterial_clicked();
         void on_motion_currentIndexChanged(int);
+        void on_boundary_currentIndexChanged(int);
+        void on_when_currentIndexChanged(int);
+        void on_simWidth_valueChanged(double);
+        void on_simHeight_valueChanged(double);
+        void on_gravityX_valueChanged(double);
+        void on_gravityY_valueChanged(double);
+        void on_numParticles_valueChanged(double);
+        void on_initX_valueChanged(double);
+        void on_initY_valueChanged(double);
+        void on_initWidth_valueChanged(double);
+        void on_initHeight_valueChanged(double);
+        void on_dirStartAngle_valueChanged(double);
+        void on_dirSizeAngle_valueChanged(double);
+        void on_minVelocity_valueChanged(double);
+        void on_maxVelocity_valueChanged(double);
+        void on_minLifetime_valueChanged(double);
+        void on_maxLifetime_valueChanged(double);
+        void on_minPointsize_valueChanged(int);
+        void on_maxPointsize_valueChanged(int);
+        void on_minAlpha_valueChanged(double);
+        void on_maxAlpha_valueChanged(double);
+        void on_timeSizeDerivative_valueChanged(double);
+        void on_distSizeDerivative_valueChanged(double);
+        void on_timeAlphaDerivative_valueChanged(double);
+        void on_distAlphaDerivative_valueChanged(double);
+        void on_canExpire_stateChanged(int);
+
         void PaintScene(gfx::Painter& painter, double secs);
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
 
     private:
-        void FillParams(gfx::KinematicsParticleEngineClass::Params& params) const;
+        void SetParams();
+        void ShowParams();
 
     private:
         Ui::ParticleWidget mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        gfx::KinematicsParticleEngineClass mClass;
+        std::shared_ptr<gfx::KinematicsParticleEngineClass> mClass;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
         std::unique_ptr<gfx::Material> mMaterial;
         bool mPaused = false;
