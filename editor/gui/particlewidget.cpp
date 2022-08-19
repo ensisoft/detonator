@@ -49,64 +49,64 @@ namespace gui
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 {
     mWorkspace = workspace;
-
+    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>();
     DEBUG("Create ParticleEditorWidget");
+
     mUI.setupUi(this);
     mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onZoomIn  = std::bind(&ParticleEditorWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
-    // get the current list of materials from the workspace
-    SetList(mUI.materials, workspace->ListAllMaterials());
-    SetValue(mUI.materials, QString("White"));
-
-    // Set default transform state here. if there's a previous user setting
-    // they'll get loaded in LoadState and will override these values.
-    mUI.transform->setChecked(false);
-    mUI.scaleX->setValue(500);
-    mUI.scaleY->setValue(500);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(false);
-    SetValue(mUI.name, QString("My Particle System"));
-    SetValue(mUI.ID, mClass.GetId());
-
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    SetList(mUI.materials, workspace->ListAllMaterials());
+    SetValue(mUI.name, QString("My Particle System"));
+    SetValue(mUI.ID, mClass->GetId());
+    SetValue(mUI.scaleX, 500.0f);
+    SetValue(mUI.scaleY, 500.0f);
+    SetValue(mUI.rotation, 0.0f);
+    SetValue(mUI.materials, QString("White"));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, false);
+    SetParams();
     on_motion_currentIndexChanged(0);
+    on_canExpire_stateChanged(0);
 
     // connect workspace signals for resource management
     connect(mWorkspace, &app::Workspace::NewResourceAvailable,this, &ParticleEditorWidget::NewResourceAvailable);
     connect(mWorkspace, &app::Workspace::ResourceToBeDeleted, this, &ParticleEditorWidget::ResourceToBeDeleted);
     connect(mWorkspace, &app::Workspace::ResourceUpdated,     this, &ParticleEditorWidget::ResourceUpdated);
     setWindowTitle("My Particle System");
+    mOriginalHash = mClass->GetHash();
 }
 
-ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource) : ParticleEditorWidget(workspace)
+ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource)
+  : ParticleEditorWidget(workspace)
 {
     const auto& name   = resource.GetName();
-    const auto* engine = resource.GetContent<gfx::KinematicsParticleEngineClass>();
-    const auto& params = engine->GetParams();
+    const auto* klass  = resource.GetContent<gfx::KinematicsParticleEngineClass>();
+    const auto& params = klass->GetParams();
+    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(*klass);
+    mOriginalHash = mClass->GetHash();
     DEBUG("Editing particle system: '%1'", name);
+
+    SetValue(mUI.name, name);
+    SetValue(mUI.ID, mClass->GetId());
 
     QString material;
     GetProperty(resource, "material", &material);
     GetProperty(resource, "transform_width", mUI.scaleX);
     GetProperty(resource, "transform_height", mUI.scaleY);
     GetProperty(resource, "transform_rotation", mUI.rotation);
-    GetProperty(resource, "use_init_rect", mUI.initRect);
-    GetProperty(resource, "use_direction_sector", mUI.dirSector);
-    GetProperty(resource, "use_size_derivatives", mUI.sizeDerivatives);
-    GetProperty(resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
-
     if (mWorkspace->IsValidMaterial(material))
     {
         SetValue(mUI.materials, ListItemId(material));
@@ -116,45 +116,15 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
         WARN("Material '%1' is no longer available.", material);
         SetValue(mUI.materials, QString("White"));
     }
-
-    SetValue(mUI.name, name);
-    SetValue(mUI.ID, engine->GetId());
-    SetValue(mUI.motion, params.motion);
-    SetValue(mUI.when,   params.mode);
-    SetValue(mUI.boundary, params.boundary);
-    SetValue(mUI.numParticles, params.num_particles);
-    SetValue(mUI.simWidth, params.max_xpos);
-    SetValue(mUI.simHeight, params.max_ypos);
-    SetValue(mUI.gravityX, params.gravity.x);
-    SetValue(mUI.gravityY, params.gravity.y);
-    SetValue(mUI.minLifetime, params.min_lifetime);
-    SetValue(mUI.maxLifetime, params.max_lifetime);
-    SetValue(mUI.minPointsize, params.min_point_size);
-    SetValue(mUI.maxPointsize, params.max_point_size);
-    SetValue(mUI.minAlpha, params.min_alpha);
-    SetValue(mUI.maxAlpha, params.max_alpha);
-    SetValue(mUI.minVelocity, params.min_velocity);
-    SetValue(mUI.maxVelocity, params.max_velocity);
-    SetValue(mUI.initX, params.init_rect_xpos);
-    SetValue(mUI.initY, params.init_rect_ypos);
-    SetValue(mUI.initWidth, params.init_rect_width);
-    SetValue(mUI.initHeight, params.init_rect_height);
-    SetValue(mUI.dirStartAngle, qRadiansToDegrees(params.direction_sector_start_angle));
-    SetValue(mUI.dirSizeAngle, qRadiansToDegrees(params.direction_sector_size));
-    SetValue(mUI.timeSizeDerivative, params.rate_of_change_in_size_wrt_time);
-    SetValue(mUI.distSizeDerivative, params.rate_of_change_in_size_wrt_dist);
-    SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
-    SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
+    ShowParams();
     on_motion_currentIndexChanged(0);
-    mOriginalHash = engine->GetHash();
-    mClass = *engine;
-
+    on_canExpire_stateChanged(0);
     setWindowTitle(name);
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
 {
-    DEBUG("Destroy ParticleEdtiorWidget");
+    DEBUG("Destroy ParticleEditorWidget");
 }
 
 void ParticleEditorWidget::Initialize(const UISettings& settings)
@@ -187,45 +157,14 @@ void ParticleEditorWidget::AddActions(QMenu& menu)
 bool ParticleEditorWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
-    mClass.IntoJson(json);
+    mClass->IntoJson(json);
     settings.SetValue("Particle", "content", base64::Encode(json.ToString()));
     settings.SetValue("Particle", "material", (QString) GetItemId(mUI.materials));
     settings.SaveWidget("Particle", mUI.name);
-    settings.SaveWidget("Particle", mUI.ID);
     settings.SaveWidget("Particle", mUI.scaleX);
     settings.SaveWidget("Particle", mUI.scaleY);
     settings.SaveWidget("Particle", mUI.rotation);
-    settings.SaveWidget("Particle", mUI.simWidth);
-    settings.SaveWidget("Particle", mUI.simHeight);
-    settings.SaveWidget("Particle", mUI.motion);
-    settings.SaveWidget("Particle", mUI.boundary);
-    settings.SaveWidget("Particle", mUI.gravityX);
-    settings.SaveWidget("Particle", mUI.gravityY);
-    settings.SaveWidget("Particle", mUI.when);
-    settings.SaveWidget("Particle", mUI.numParticles);
-    settings.SaveWidget("Particle", mUI.initRect);
-    settings.SaveWidget("Particle", mUI.initX);
-    settings.SaveWidget("Particle", mUI.initY);
-    settings.SaveWidget("Particle", mUI.initWidth);
-    settings.SaveWidget("Particle", mUI.initHeight);
-    settings.SaveWidget("Particle", mUI.dirSector);
-    settings.SaveWidget("Particle", mUI.dirStartAngle);
-    settings.SaveWidget("Particle", mUI.dirSizeAngle);
-    settings.SaveWidget("Particle", mUI.minVelocity);
-    settings.SaveWidget("Particle", mUI.maxVelocity);
-    settings.SaveWidget("Particle", mUI.minLifetime);
-    settings.SaveWidget("Particle", mUI.maxLifetime);
-    settings.SaveWidget("Particle", mUI.minPointsize);
-    settings.SaveWidget("Particle", mUI.maxPointsize);
-    settings.SaveWidget("Particle", mUI.minAlpha);
-    settings.SaveWidget("Particle", mUI.maxAlpha);
     settings.SaveWidget("Particle", mUI.canExpire);
-    settings.SaveWidget("Particle", mUI.sizeDerivatives);
-    settings.SaveWidget("Particle", mUI.timeSizeDerivative);
-    settings.SaveWidget("Particle", mUI.distSizeDerivative);
-    settings.SaveWidget("Particle", mUI.alphaDerivatives);
-    settings.SaveWidget("Particle", mUI.timeAlphaDerivative);
-    settings.SaveWidget("Particle", mUI.distAlphaDerivative);
     settings.SaveWidget("Particle", mUI.chkShowGrid);
     settings.SaveWidget("Particle", mUI.chkShowBounds);
     settings.SaveWidget("Particle", mUI.cmbGrid);
@@ -251,11 +190,18 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
         ERROR("Failed to restore class from JSON.");
         return false;
     }
-    mClass = std::move(ret.value());
-    mOriginalHash = mClass.GetHash();
+    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(std::move(ret.value()));
+    mOriginalHash = mClass->GetHash();
+    SetValue(mUI.ID, mClass->GetId());
 
     QString material;
     settings.GetValue("Particle", "material", &material);
+    settings.LoadWidget("Particle", mUI.name);
+    settings.LoadWidget("Particle", mUI.chkShowGrid);
+    settings.LoadWidget("Particle", mUI.chkShowBounds);
+    settings.LoadWidget("Particle", mUI.cmbGrid);
+    settings.LoadWidget("Particle", mUI.zoom);
+    settings.LoadWidget("Particle", mUI.canExpire);
     if (mWorkspace->IsValidMaterial(material))
     {
         SetValue(mUI.materials, ListItemId(material));
@@ -266,47 +212,10 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
         SetValue(mUI.materials, QString("White"));
     }
 
-    settings.LoadWidget("Particle", mUI.name);
-    settings.LoadWidget("Particle", mUI.ID);
-    settings.LoadWidget("Particle", mUI.scaleX);
-    settings.LoadWidget("Particle", mUI.scaleY);
-    settings.LoadWidget("Particle", mUI.rotation);
-    settings.LoadWidget("Particle", mUI.simWidth);
-    settings.LoadWidget("Particle", mUI.simHeight);
-    settings.LoadWidget("Particle", mUI.motion);
-    settings.LoadWidget("Particle", mUI.boundary);
-    settings.LoadWidget("Particle", mUI.when);
-    settings.LoadWidget("Particle", mUI.gravityX);
-    settings.LoadWidget("Particle", mUI.gravityY);
-    settings.LoadWidget("Particle", mUI.numParticles);
-    settings.LoadWidget("Particle", mUI.initRect);
-    settings.LoadWidget("Particle", mUI.initX);
-    settings.LoadWidget("Particle", mUI.initY);
-    settings.LoadWidget("Particle", mUI.initWidth);
-    settings.LoadWidget("Particle", mUI.initHeight);
-    settings.LoadWidget("Particle", mUI.dirSector);
-    settings.LoadWidget("Particle", mUI.dirStartAngle);
-    settings.LoadWidget("Particle", mUI.dirSizeAngle);
-    settings.LoadWidget("Particle", mUI.minVelocity);
-    settings.LoadWidget("Particle", mUI.maxVelocity);
-    settings.LoadWidget("Particle", mUI.minLifetime);
-    settings.LoadWidget("Particle", mUI.maxLifetime);
-    settings.LoadWidget("Particle", mUI.minPointsize);
-    settings.LoadWidget("Particle", mUI.maxPointsize);
-    settings.LoadWidget("Particle", mUI.minAlpha);
-    settings.LoadWidget("Particle", mUI.maxAlpha);
-    settings.LoadWidget("Particle", mUI.canExpire);
-    settings.LoadWidget("Particle", mUI.sizeDerivatives);
-    settings.LoadWidget("Particle", mUI.timeSizeDerivative);
-    settings.LoadWidget("Particle", mUI.distSizeDerivative);
-    settings.LoadWidget("Particle", mUI.alphaDerivatives);
-    settings.LoadWidget("Particle", mUI.timeAlphaDerivative);
-    settings.LoadWidget("Particle", mUI.distAlphaDerivative);
-    settings.LoadWidget("Particle", mUI.chkShowGrid);
-    settings.LoadWidget("Particle", mUI.chkShowBounds);
-    settings.LoadWidget("Particle", mUI.cmbGrid);
-    settings.LoadWidget("Particle", mUI.zoom);
+    ShowParams();
     on_motion_currentIndexChanged(0);
+    on_canExpire_stateChanged(0);
+    setWindowTitle(GetValue(mUI.name));
     return true;
 }
 
@@ -383,9 +292,9 @@ void ParticleEditorWidget::Update(double secs)
     if (!mEngine->IsAlive())
     {
         DEBUG("Particle simulation finished");
-        mUI.actionStop->setEnabled(false);
-        mUI.actionPause->setEnabled(false);
-        mUI.actionPlay->setEnabled(true);
+        SetEnabled(mUI.actionStop, false);
+        SetEnabled(mUI.actionPause, false);
+        SetEnabled(mUI.actionPlay, true);
         mEngine.reset();
         mMaterial.reset();
         return;
@@ -404,25 +313,14 @@ void ParticleEditorWidget::Save()
 
 bool ParticleEditorWidget::HasUnsavedChanges() const
 {
-    if (!mOriginalHash)
-        return false;
-
-    gfx::KinematicsParticleEngineClass::Params params;
-    gfx::KinematicsParticleEngineClass klass;
-    FillParams(params);
-    klass.SetParams(params);
-    const auto hash = klass.GetHash();
-    return hash != mOriginalHash;
+    if (mOriginalHash != mClass->GetHash())
+        return true;
+    return false;
 }
 
 bool ParticleEditorWidget::ConfirmClose()
 {
-    gfx::KinematicsParticleEngineClass::Params params;
-    FillParams(params);
-    mClass.SetParams(params);
-
-    const auto hash = mClass.GetHash();
-    if (hash == mOriginalHash)
+    if (mOriginalHash == mClass->GetHash())
         return true;
 
     QMessageBox msg(this);
@@ -469,75 +367,53 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     const QString& name = GetValue(mUI.name);
 
-    gfx::KinematicsParticleEngineClass::Params params;
-    FillParams(params);
-    mClass.SetParams(params);
-
     // setup the resource with the current auxiliary params
-    app::ParticleSystemResource particle_resource(mClass, name);
+    app::ParticleSystemResource particle_resource(*mClass, name);
     SetProperty(particle_resource, "material", (QString)GetItemId(mUI.materials));
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
-    SetProperty(particle_resource, "use_init_rect", mUI.initRect);
-    SetProperty(particle_resource, "use_direction_sector", mUI.dirSector);
-    SetProperty(particle_resource, "use_size_derivatives", mUI.sizeDerivatives);
-    SetProperty(particle_resource, "use_alpha_derivatives", mUI.alphaDerivatives);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     SetUserProperty(particle_resource, "grid", mUI.cmbGrid);
     SetUserProperty(particle_resource, "zoom", mUI.zoom);
     SetUserProperty(particle_resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(particle_resource, "show_bounds", mUI.chkShowBounds);
     mWorkspace->SaveResource(particle_resource);
-    mOriginalHash = mClass.GetHash();
+    mOriginalHash = mClass->GetHash();
 
     INFO("Saved particle system '%1'", name);
     NOTE("Saved particle system '%1'", name);
     setWindowTitle(name);
 }
 
-void ParticleEditorWidget::FillParams(gfx::KinematicsParticleEngineClass::Params& params) const
+void ParticleEditorWidget::SetParams()
 {
-    params.motion         = GetValue(mUI.motion);
-    params.mode           = GetValue(mUI.when);
-    params.boundary       = GetValue(mUI.boundary);
-    params.num_particles  = GetValue(mUI.numParticles);
-    params.max_xpos       = GetValue(mUI.simWidth);
-    params.max_ypos       = GetValue(mUI.simHeight);
-    params.gravity.x      = GetValue(mUI.gravityX);
-    params.gravity.y      = GetValue(mUI.gravityY);
-    params.min_point_size = GetValue(mUI.minPointsize);
-    params.max_point_size = GetValue(mUI.maxPointsize);
-    params.min_velocity   = GetValue(mUI.minVelocity);
-    params.max_velocity   = GetValue(mUI.maxVelocity);
-    params.min_alpha      = GetValue(mUI.minAlpha);
-    params.max_alpha      = GetValue(mUI.maxAlpha);
-
-    if (mUI.initRect->isChecked())
-    {
-        params.init_rect_xpos   = GetValue(mUI.initX);
-        params.init_rect_ypos   = GetValue(mUI.initY);
-        params.init_rect_width  = GetValue(mUI.initWidth);
-        params.init_rect_height = GetValue(mUI.initHeight);
-    }
-    else
-    {
-        params.init_rect_xpos = 0.0f;
-        params.init_rect_ypos = 0.0f;
-        params.init_rect_width = params.max_xpos;
-        params.init_rect_height = params.max_ypos;
-    }
-    if (mUI.dirSector->isChecked())
-    {
-        params.direction_sector_start_angle = qDegreesToRadians(mUI.dirStartAngle->value());
-        params.direction_sector_size        = qDegreesToRadians(mUI.dirSizeAngle->value());
-    }
-    else
-    {
-        params.direction_sector_start_angle = 0.0f;
-        params.direction_sector_size        = qDegreesToRadians(360.0f);
-    }
-    if (mUI.canExpire->isChecked())
+    gfx::KinematicsParticleEngineClass::Params params;
+    params.motion                           = GetValue(mUI.motion);
+    params.mode                             = GetValue(mUI.when);
+    params.boundary                         = GetValue(mUI.boundary);
+    params.num_particles                    = GetValue(mUI.numParticles);
+    params.max_xpos                         = GetValue(mUI.simWidth);
+    params.max_ypos                         = GetValue(mUI.simHeight);
+    params.gravity.x                        = GetValue(mUI.gravityX);
+    params.gravity.y                        = GetValue(mUI.gravityY);
+    params.min_point_size                   = GetValue(mUI.minPointsize);
+    params.max_point_size                   = GetValue(mUI.maxPointsize);
+    params.min_velocity                     = GetValue(mUI.minVelocity);
+    params.max_velocity                     = GetValue(mUI.maxVelocity);
+    params.min_alpha                        = GetValue(mUI.minAlpha);
+    params.max_alpha                        = GetValue(mUI.maxAlpha);
+    params.init_rect_xpos                   = GetValue(mUI.initX);
+    params.init_rect_ypos                   = GetValue(mUI.initY);
+    params.init_rect_width                  = GetValue(mUI.initWidth);
+    params.init_rect_height                 = GetValue(mUI.initHeight);
+    params.rate_of_change_in_size_wrt_time  = GetValue(mUI.timeSizeDerivative);
+    params.rate_of_change_in_size_wrt_dist  = GetValue(mUI.distSizeDerivative);
+    params.rate_of_change_in_alpha_wrt_time = GetValue(mUI.timeAlphaDerivative);
+    params.rate_of_change_in_alpha_wrt_dist = GetValue(mUI.distAlphaDerivative);
+    params.direction_sector_start_angle     = qDegreesToRadians(mUI.dirStartAngle->value());
+    params.direction_sector_size            = qDegreesToRadians(mUI.dirSizeAngle->value());
+    if (GetValue(mUI.canExpire))
     {
         params.min_lifetime   = GetValue(mUI.minLifetime);
         params.max_lifetime   = GetValue(mUI.maxLifetime);
@@ -547,28 +423,42 @@ void ParticleEditorWidget::FillParams(gfx::KinematicsParticleEngineClass::Params
         params.min_lifetime   = std::numeric_limits<float>::max();
         params.max_lifetime   = std::numeric_limits<float>::max();
     }
+    params.init_rect_xpos *= params.max_xpos;
+    params.init_rect_ypos *= params.max_ypos;
+    params.init_rect_width *= params.max_xpos;
+    params.init_rect_height *=params.max_ypos;
+    mClass->SetParams(params);
+}
 
-    if (mUI.sizeDerivatives->isChecked())
-    {
-        params.rate_of_change_in_size_wrt_time = GetValue(mUI.timeSizeDerivative);
-        params.rate_of_change_in_size_wrt_dist = GetValue(mUI.distSizeDerivative);
-    }
-    else
-    {
-        params.rate_of_change_in_size_wrt_time = 0.0f;
-        params.rate_of_change_in_size_wrt_dist = 0.0f;
-    }
-
-    if (mUI.alphaDerivatives->isChecked())
-    {
-        params.rate_of_change_in_alpha_wrt_time = GetValue(mUI.timeAlphaDerivative);
-        params.rate_of_change_in_alpha_wrt_dist = GetValue(mUI.distAlphaDerivative);
-    }
-    else
-    {
-        params.rate_of_change_in_alpha_wrt_time = 0.0f;
-        params.rate_of_change_in_alpha_wrt_dist = 0.0f;
-    }
+void ParticleEditorWidget::ShowParams()
+{
+    const auto& params = mClass->GetParams();
+    SetValue(mUI.motion,              params.motion);
+    SetValue(mUI.when,                params.mode);
+    SetValue(mUI.boundary,            params.boundary);
+    SetValue(mUI.numParticles,        params.num_particles);
+    SetValue(mUI.simWidth,            params.max_xpos);
+    SetValue(mUI.simHeight,           params.max_ypos);
+    SetValue(mUI.gravityX,            params.gravity.x);
+    SetValue(mUI.gravityY,            params.gravity.y);
+    SetValue(mUI.minLifetime,         params.min_lifetime);
+    SetValue(mUI.maxLifetime,         params.max_lifetime);
+    SetValue(mUI.minPointsize,        params.min_point_size);
+    SetValue(mUI.maxPointsize,        params.max_point_size);
+    SetValue(mUI.minAlpha,            params.min_alpha);
+    SetValue(mUI.maxAlpha,            params.max_alpha);
+    SetValue(mUI.minVelocity,         params.min_velocity);
+    SetValue(mUI.maxVelocity,         params.max_velocity);
+    SetValue(mUI.initX,               params.init_rect_xpos / params.max_ypos);
+    SetValue(mUI.initY,               params.init_rect_ypos / params.max_ypos);
+    SetValue(mUI.initWidth,           params.init_rect_width / params.max_xpos);
+    SetValue(mUI.initHeight,          params.init_rect_height / params.max_ypos);
+    SetValue(mUI.timeSizeDerivative,  params.rate_of_change_in_size_wrt_time);
+    SetValue(mUI.distSizeDerivative,  params.rate_of_change_in_size_wrt_dist);
+    SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
+    SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
+    SetValue(mUI.dirStartAngle,       qRadiansToDegrees(params.direction_sector_start_angle));
+    SetValue(mUI.dirSizeAngle,        qRadiansToDegrees(params.direction_sector_size));
 }
 
 void ParticleEditorWidget::on_actionPlay_triggered()
@@ -576,28 +466,23 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     if (mPaused)
     {
         mPaused = false;
-        mUI.actionPause->setEnabled(true);
+        SetEnabled(mUI.actionPause, true);
         return;
     }
-
-    gfx::KinematicsParticleEngineClass::Params p;
-    FillParams(p);
-    mEngine.reset(new gfx::KinematicsParticleEngine(p));
-
-    mUI.actionPause->setEnabled(true);
-    mUI.actionStop->setEnabled(true);
+    mEngine.reset(new gfx::KinematicsParticleEngine(mClass));
     mTime   = 0.0f;
     mPaused = false;
-
+    SetEnabled(mUI.actionPause, true);
+    SetEnabled(mUI.actionStop, true);
     DEBUG("Created new particle engine");
 }
 
 void ParticleEditorWidget::on_actionStop_triggered()
 {
     mEngine.reset();
-    mUI.actionStop->setEnabled(false);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionPlay->setEnabled(true);
+    SetEnabled(mUI.actionStop, false);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionPlay, true);
     mPaused = false;
 }
 
@@ -635,14 +520,135 @@ void ParticleEditorWidget::on_motion_currentIndexChanged(int)
     const gfx::KinematicsParticleEngineClass::Motion motion = GetValue(mUI.motion);
     if (motion == gfx::KinematicsParticleEngineClass::Motion::Projectile)
     {
-        mUI.gravityY->setEnabled(true);
-        mUI.gravityX->setEnabled(true);
+        SetEnabled(mUI.gravityY, true);
+        SetEnabled(mUI.gravityX, true);
     }
     else
     {
-        mUI.gravityY->setEnabled(false);
-        mUI.gravityX->setEnabled(false);
+        SetEnabled(mUI.gravityY, false);
+        SetEnabled(mUI.gravityX, false);
     }
+    SetParams();
+}
+
+void ParticleEditorWidget::on_boundary_currentIndexChanged(int)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_when_currentIndexChanged(int)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_simWidth_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_simHeight_valueChanged(double)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_gravityX_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_gravityY_valueChanged(double)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_numParticles_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_initX_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_initY_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_initWidth_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_initHeight_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_dirStartAngle_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_dirSizeAngle_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_minVelocity_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_maxVelocity_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_minLifetime_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_maxLifetime_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_minPointsize_valueChanged(int)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_maxPointsize_valueChanged(int)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_minAlpha_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_maxAlpha_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_timeSizeDerivative_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_distSizeDerivative_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_timeAlphaDerivative_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_distAlphaDerivative_valueChanged(double)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_canExpire_stateChanged(int)
+{
+    if (GetValue(mUI.canExpire))
+    {
+        SetEnabled(mUI.minLifetime, true);
+        SetEnabled(mUI.maxLifetime, true);
+    }
+    else
+    {
+        SetEnabled(mUI.minLifetime, false);
+        SetEnabled(mUI.maxLifetime, false);
+    }
+    SetParams();
 }
 
 void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
