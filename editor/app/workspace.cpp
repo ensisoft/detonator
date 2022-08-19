@@ -703,14 +703,17 @@ Workspace::Workspace(const QString& dir)
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }
 
-    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>("Capsule"));
-    mResources.emplace_back(new DrawableResource<gfx::RectangleClass>("Rectangle"));
-    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>("IsoscelesTriangle"));
-    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>("RightTriangle"));
-    mResources.emplace_back(new DrawableResource<gfx::CircleClass>("Circle"));
-    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>("SemiCircle"));
-    mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>("Trapezoid"));
-    mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>("Parallelogram"));
+    // setup primitive drawables with known/fixed class IDs
+    // these IDs are also hardcoded in the engine/loader.cpp which uses
+    // these same IDs to create primitive resources.
+    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_capsule"), "Capsule"));
+    mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "Rectangle"));
+    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "IsoscelesTriangle"));
+    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "RightTriangle"));
+    mResources.emplace_back(new DrawableResource<gfx::CircleClass>(gfx::CircleClass("_circle"), "Circle"));
+    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "SemiCircle"));
+    mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>(gfx::TrapezoidClass("_trapezoid"), "Trapezoid"));
+    mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>(gfx::ParallelogramClass("_parallelogram"), "Parallelogram"));
     mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", 0.05f), "RoundRect"));
     mResources.emplace_back(new DrawableResource<gfx::CursorClass>(gfx::CursorClass("_arrow_cursor",
                                                                           gfx::CursorClass::Shape::Arrow),"Arrow Cursor"));
