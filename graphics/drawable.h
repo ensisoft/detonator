@@ -33,7 +33,8 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "base/hash.h"
-#include "data/fwd.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "graphics/geometry.h"
 #include "graphics/device.h"
 
@@ -46,10 +47,7 @@ namespace gfx
     class Packer;
 
     // DrawableClass defines a new type of drawable.
-    // Currently not all drawable shapes have a drawable specific
-    // class since theres's no actual class specific state, so
-    // the class state can be folded directly into he instance classes.
-    class DrawableClass
+     class DrawableClass
     {
     public:
         using Culling = Device::State::Culling;
@@ -185,59 +183,50 @@ namespace gfx
     };
 
     namespace detail {
-        // generic shim to help refactoring efforts.
-        // todo: replace this with the actual class types for
-        // RoundRectangle and Circle (anything that has parameters
-        // that affect the geometry generation)
-        template<DrawableClass::Type ActualType>
+        // helper class template to stomp out generic class type that
+        // doesn't have any associated class state other than ID.
+        template<DrawableClass::Type DrawableType>
         class GenericDrawableClass : public DrawableClass
         {
         public:
+            GenericDrawableClass()
+                    : mId(base::RandomString(10))
+            {}
+            GenericDrawableClass(const std::string& id)
+                    : mId(id)
+            {}
+            virtual Type GetType() const override
+            { return DrawableType; }
             virtual std::string GetId() const override
-            {
-                // since the generic drawable class doesn't actually
-                // have any state that would define new drawable types
-                // the IDs can be fixed.
-                using types = DrawableClass::Type;
-                if constexpr (ActualType == types::Arrow)
-                    return "_arrow";
-                else if (ActualType == types::Capsule)
-                    return "_capsule";
-                else if (ActualType == types::SemiCircle)
-                    return "_semi_circle";
-                else if (ActualType == types::Circle)
-                    return "_circle";
-                else if (ActualType == types::IsoscelesTriangle)
-                    return "_isosceles_triangle";
-                else if (ActualType == types::Line)
-                    return "_line";
-                else if (ActualType == types::Parallelogram)
-                    return "_parallelogram";
-                else if (ActualType == types::Rectangle)
-                    return "_rect";
-                else if (ActualType == types::RightTriangle)
-                    return "_right_triangle";
-                else if (ActualType == types::Trapezoid)
-                    return "_trapezoid";
-                else BUG("???");
-            }
+            { return mId; }
             virtual std::unique_ptr<DrawableClass> Clone() const override
-            { return std::make_unique<GenericDrawableClass>(*this); }
+            {
+                auto ret = std::make_unique<GenericDrawableClass>(*this);
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
             virtual std::unique_ptr<DrawableClass> Copy() const override
             { return std::make_unique<GenericDrawableClass>(*this); }
             virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, GetId()); }
-            virtual Type GetType() const override
-            { return ActualType; }
+            { return base::hash_combine(0, mId); }
             virtual void Pack(Packer*) const override {}
-            virtual void IntoJson(data::Writer&) const override
-            { }
-            virtual bool LoadFromJson(const data::Reader&) override
-            { return true; }
-        private:
+            virtual void IntoJson(data::Writer& writer) const override
+            {
+                writer.Write("id", mId);
+            }
+            virtual bool LoadFromJson(const data::Reader& reader) override
+            {
+                reader.Read("id", &mId);
+                return true;
+            }
+        protected:
+            std::string mId;
         };
 
-        template<typename GeometryType>
+
+        // helper class template to create a mostly generic drawable instance
+        // that is customized through the DrawableGeometry template parameter
+        template<typename DrawableGeometry>
         class GenericDrawable : public Drawable
         {
         public:
@@ -265,9 +254,9 @@ namespace gfx
                 state.culling    = mCulling;
             }
             virtual Shader* GetShader(Device& device) const override
-            { return GeometryType::GetShader(device); }
+            { return DrawableGeometry::GetShader(device); }
             virtual Geometry* Upload(const Environment& env, Device& device) const override
-            { return GeometryType::Generate(env, mStyle, device); }
+            { return DrawableGeometry::Generate(env, mStyle, device); }
             virtual void SetCulling(Culling culling) override
             { mCulling = culling; }
             virtual void SetLineWidth(float width) override
@@ -277,8 +266,8 @@ namespace gfx
             virtual Style GetStyle() const override
             { return mStyle; }
         private:
-            Style mStyle     = GeometryType::InitialStyle;
-            Culling mCulling = GeometryType::InitialCulling;
+            Style mStyle     = DrawableGeometry::InitialStyle;
+            Culling mCulling = DrawableGeometry::InitialCulling;
             float mLineWidth = 1.0f;
         };
 
