@@ -30,7 +30,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "mainwidget.h"
+#include "editor/gui/mainwidget.h"
 
 namespace app {
     class Resource;
@@ -39,9 +39,12 @@ namespace app {
 
 namespace gui
 {
+    class MouseTool;
+
     class ParticleEditorWidget : public MainWidget
     {
         Q_OBJECT
+
     public:
         ParticleEditorWidget(app::Workspace* workspace);
         ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource);
@@ -101,22 +104,28 @@ namespace gui
         void on_distAlphaDerivative_valueChanged(double);
         void on_canExpire_stateChanged(int);
 
-        void PaintScene(gfx::Painter& painter, double secs);
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
-
     private:
         void SetParams();
         void ShowParams();
-
+        void PaintScene(gfx::Painter& painter, double secs);
+        void MouseMove(QMouseEvent* mickey);
+        void MousePress(QMouseEvent* mickey);
+        void MouseRelease(QMouseEvent* mickey);
     private:
         Ui::ParticleWidget mUI;
     private:
+        class MoveEmitterTool;
+        class SizeEmitterTool;
+        struct UIState;
         app::Workspace* mWorkspace = nullptr;
         std::shared_ptr<gfx::KinematicsParticleEngineClass> mClass;
         std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
         std::unique_ptr<gfx::Material> mMaterial;
+        std::unique_ptr<MouseTool> mMouseTool;
+        std::unique_ptr<UIState> mState;
         bool mPaused = false;
         float mTime  = 0.0f;
     private:
