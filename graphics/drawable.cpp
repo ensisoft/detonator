@@ -962,6 +962,14 @@ Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable
     return geom;
 }
 
+std::size_t RoundRectangleClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mRadius);
+    return hash;
+}
+
 void RoundRectangleClass::Pack(Packer* packer) const
 {
 }
@@ -973,9 +981,8 @@ void RoundRectangleClass::IntoJson(data::Writer& data) const
 
 bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
 {
-    if (!data.Read("id", &mId) ||
-        !data.Read("radius", &mRadius))
-        return false;
+    data.Read("id", &mId);
+    data.Read("radius", &mRadius);
     return true;
 }
 
@@ -1048,6 +1055,16 @@ Geometry* GridClass::Upload(Device& device) const
     return geom;
 }
 
+std::size_t GridClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mNumHorizontalLines);
+    hash = base::hash_combine(hash, mNumVerticalLines);
+    hash = base::hash_combine(hash, mBorderLines);
+    return hash;
+}
+
 void GridClass::Pack(Packer* packer) const
 {
 }
@@ -1062,16 +1079,17 @@ void GridClass::IntoJson(data::Writer& data) const
 
 bool GridClass::LoadFromJson(const data::Reader& data)
 {
-    if (!data.Read("id", &mId) ||
-        !data.Read("vertical_lines", &mNumVerticalLines) ||
-        !data.Read("horizontal_lines", &mNumHorizontalLines) ||
-        !data.Read("border_lines", &mBorderLines))
-        return false;
+    data.Read("id", &mId);
+    data.Read("vertical_lines", &mNumVerticalLines);
+    data.Read("horizontal_lines", &mNumHorizontalLines);
+    data.Read("border_lines", &mBorderLines);
     return true;
 }
 
 PolygonClass::PolygonClass()
 { mId = base::RandomString(10); }
+PolygonClass::PolygonClass(const std::string& id)
+{ mId = id; }
 
 void PolygonClass::Clear()
 {
@@ -1342,6 +1360,14 @@ const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
     BUG("no draw command found.");
 }
 
+std::size_t CursorClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mShape);
+    return hash;
+}
+
 void CursorClass::Pack(Packer* packer) const
 {
 
@@ -1353,9 +1379,8 @@ void CursorClass::IntoJson(data::Writer& data) const
 }
 bool CursorClass::LoadFromJson(const data::Reader& data)
 {
-    if (!data.Read("id", &mId) ||
-        !data.Read("shape", &mShape))
-        return false;
+    data.Read("id", &mId);
+    data.Read("shape", &mShape);
     return true;
 }
 
@@ -1615,38 +1640,33 @@ bool KinematicsParticleEngineClass::LoadFromJson(const data::Reader& data)
 // static
 std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const data::Reader& data)
 {
-    std::string id;
-    Params params;
-    if (!data.Read("id", &id) ||
-        !data.Read("motion", &params.motion) ||
-        !data.Read("mode", &params.mode) ||
-        !data.Read("boundary", &params.boundary) ||
-        !data.Read("num_particles", &params.num_particles) ||
-        !data.Read("min_lifetime", &params.min_lifetime) ||
-        !data.Read("max_lifetime", &params.max_lifetime) ||
-        !data.Read("max_xpos", &params.max_xpos) ||
-        !data.Read("max_ypos", &params.max_ypos) ||
-        !data.Read("init_rect_xpos", &params.init_rect_xpos) ||
-        !data.Read("init_rect_ypos", &params.init_rect_ypos) ||
-        !data.Read("init_rect_width", &params.init_rect_width) ||
-        !data.Read("init_rect_height", &params.init_rect_height) ||
-        !data.Read("min_velocity", &params.min_velocity) ||
-        !data.Read("max_velocity", &params.max_velocity) ||
-        !data.Read("direction_sector_start_angle", &params.direction_sector_start_angle) ||
-        !data.Read("direction_sector_size", &params.direction_sector_size) ||
-        !data.Read("min_point_size", &params.min_point_size) ||
-        !data.Read("max_point_size", &params.max_point_size) ||
-        !data.Read("min_alpha", &params.min_alpha) ||
-        !data.Read("max_alpha", &params.max_alpha) ||
-        !data.Read("growth_over_time", &params.rate_of_change_in_size_wrt_time) ||
-        !data.Read("growth_over_dist", &params.rate_of_change_in_size_wrt_dist) ||
-        !data.Read("alpha_over_time", &params.rate_of_change_in_alpha_wrt_time) ||
-        !data.Read("alpha_over_dist", &params.rate_of_change_in_alpha_wrt_dist) ||
-        !data.Read("gravity", &params.gravity))
-            return std::nullopt;
     KinematicsParticleEngineClass ret;
-    ret.mId = std::move(id);
-    ret.SetParams(params);
+    data.Read("id",                           &ret.mId);
+    data.Read("motion",                       &ret.mParams.motion);
+    data.Read("mode",                         &ret.mParams.mode);
+    data.Read("boundary",                     &ret.mParams.boundary);
+    data.Read("num_particles",                &ret.mParams.num_particles);
+    data.Read("min_lifetime",                 &ret.mParams.min_lifetime) ;
+    data.Read("max_lifetime",                 &ret.mParams.max_lifetime);
+    data.Read("max_xpos",                     &ret.mParams.max_xpos);
+    data.Read("max_ypos",                     &ret.mParams.max_ypos);
+    data.Read("init_rect_xpos",               &ret.mParams.init_rect_xpos);
+    data.Read("init_rect_ypos",               &ret.mParams.init_rect_ypos);
+    data.Read("init_rect_width",              &ret.mParams.init_rect_width);
+    data.Read("init_rect_height",             &ret.mParams.init_rect_height);
+    data.Read("min_velocity",                 &ret.mParams.min_velocity);
+    data.Read("max_velocity",                 &ret.mParams.max_velocity);
+    data.Read("direction_sector_start_angle", &ret.mParams.direction_sector_start_angle);
+    data.Read("direction_sector_size",        &ret.mParams.direction_sector_size);
+    data.Read("min_point_size",               &ret.mParams.min_point_size);
+    data.Read("max_point_size",               &ret.mParams.max_point_size);
+    data.Read("min_alpha",                    &ret.mParams.min_alpha);
+    data.Read("max_alpha",                    &ret.mParams.max_alpha);
+    data.Read("growth_over_time",             &ret.mParams.rate_of_change_in_size_wrt_time);
+    data.Read("growth_over_dist",             &ret.mParams.rate_of_change_in_size_wrt_dist);
+    data.Read("alpha_over_time",              &ret.mParams.rate_of_change_in_alpha_wrt_time);
+    data.Read("alpha_over_dist",              &ret.mParams.rate_of_change_in_alpha_wrt_dist);
+    data.Read("gravity",                      &ret.mParams.gravity);
     return ret;
 }
 

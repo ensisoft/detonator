@@ -183,6 +183,33 @@ namespace gfx
     };
 
     namespace detail {
+        // helper class template to stomp out the class implementation classes
+        // in cases where some class state is needed including a class ID
+        template<typename Class>
+        class DrawableClassBase : public DrawableClass
+        {
+        public:
+            virtual std::string GetId() const override
+            { return mId; }
+            virtual std::unique_ptr<DrawableClass> Clone() const override
+            {
+                auto ret = std::make_unique<Class>(*static_cast<const Class*>(this));
+                ret->mId = base::RandomString(10);
+                return ret;
+            }
+            virtual std::unique_ptr<DrawableClass> Copy() const override
+            { return std::make_unique<Class>(*static_cast<const Class*>(this)); }
+        protected:
+            DrawableClassBase()
+              : mId(base::RandomString(10))
+            {}
+            DrawableClassBase(const std::string& id)
+              : mId(id)
+            {}
+        protected:
+            std::string mId;
+        };
+
         // helper class template to stomp out generic class type that
         // doesn't have any associated class state other than ID.
         template<DrawableClass::Type DrawableType>
@@ -339,17 +366,15 @@ namespace gfx
     using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
     using Trapezoid         = detail::GenericDrawable<detail::TrapezoidGeometry>;
 
-    class RoundRectangleClass : public DrawableClass
+    class RoundRectangleClass : public detail::DrawableClassBase<RoundRectangleClass>
     {
     public:
         RoundRectangleClass(float radius = 0.05) : mRadius(radius)
         { mId = base::RandomString(10); }
         // This ctor can be used (very carefully) to create a "known"
         // class object with a known (yet unique) class id.
-        RoundRectangleClass(const std::string& id, float radius = 0.05)
-          : mId(id)
-          , mRadius(radius)
-        {}
+        RoundRectangleClass(const std::string& id, float radius = 0.05) : mRadius(radius)
+        { mId = id; }
 
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const;
@@ -361,28 +386,11 @@ namespace gfx
 
         virtual Type GetType() const override
         { return DrawableClass::Type::RoundRectangle; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
-        {
-            auto ret = std::make_unique<RoundRectangleClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
-        { return std::make_unique<RoundRectangleClass>(*this); }
-        virtual std::size_t GetHash() const override
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mId);
-            hash = base::hash_combine(hash, mRadius);
-            return hash;
-        }
+        virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
     private:
-        std::string mId;
         float mRadius = 0.05;
     };
 
@@ -425,11 +433,13 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
-    class GridClass : public DrawableClass
+    class GridClass : public detail::DrawableClassBase<GridClass>
     {
     public:
         GridClass()
         { mId = base::RandomString(10); }
+        GridClass(const std::string& id)
+        { mId = id; }
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Device& device) const;
         void SetNumVerticalLines(unsigned lines)
@@ -447,30 +457,11 @@ namespace gfx
 
         virtual Type GetType() const override
         { return DrawableClass::Type::Grid; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
-        {
-            auto ret = std::make_unique<GridClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
-        { return std::make_unique<GridClass>(*this); }
-        virtual std::size_t GetHash() const override
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mId);
-            hash = base::hash_combine(hash, mNumHorizontalLines);
-            hash = base::hash_combine(hash, mNumVerticalLines);
-            hash = base::hash_combine(hash, mBorderLines);
-            return hash;
-        }
+        virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
     private:
-        std::string mId;
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;
         bool mBorderLines = false;
@@ -519,7 +510,7 @@ namespace gfx
 
     // Combines multiple primitive draw commands into a single
     // drawable shape.
-    class PolygonClass : public DrawableClass
+    class PolygonClass : public detail::DrawableClassBase<PolygonClass>
     {
     public:
         // Define how the geometry is to be rasterized.
@@ -534,6 +525,7 @@ namespace gfx
         using Vertex = gfx::Vertex;
 
         PolygonClass();
+        PolygonClass(const std::string& id);
 
         void Clear();
         void ClearDrawCommands();
@@ -595,20 +587,9 @@ namespace gfx
         Shader* GetShader(Device& device) const;
         Geometry* Upload(bool editing_mode, Device& device) const;
 
-        virtual void Pack(Packer* packer) const override;
         virtual Type GetType() const override
         { return Type::Polygon; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
-        {
-            auto ret = std::make_unique<PolygonClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
-        { return std::make_unique<PolygonClass>(*this); }
-
+        virtual void Pack(Packer* packer) const override;
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
@@ -616,7 +597,6 @@ namespace gfx
         // Load from JSON
         static std::optional<PolygonClass> FromJson(const data::Reader& data);
     private:
-        std::string mId;
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
@@ -653,7 +633,7 @@ namespace gfx
         float mLineWidth = 1.0f;
     };
 
-    class CursorClass : public DrawableClass
+    class CursorClass : public detail::DrawableClassBase<CursorClass>
     {
     public:
         enum class Shape {
@@ -661,41 +641,21 @@ namespace gfx
             Block
         };
         CursorClass(const std::string& id, Shape shape)
-          : mId(id)
-          , mShape(shape)
-        {}
+          :  mShape(shape)
+        { mId = id; }
         CursorClass(Shape shape)
-          : mId(base::RandomString(10))
-          , mShape(shape)
-        {}
+          : mShape(shape)
+        { mId = base::RandomString(10); }
         Shape GetShape() const
         { return mShape; }
 
         virtual Type GetType() const override
         { return Type::Cursor; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
-        {
-            auto ret = std::make_unique<CursorClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
-        { return std::make_unique<CursorClass>(*this); }
-        virtual std::size_t GetHash() const override
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, mId);
-            hash = base::hash_combine(hash, mShape);
-            return hash;
-        }
+        virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
-
     private:
-        std::string mId;
         Shape mShape = Shape::Arrow;
     };
 
@@ -743,7 +703,7 @@ namespace gfx
     // class for class specific behaviour while containing their
     // instance specific data. (I.e. one instance of "smoke" can have
     // particles in different stages as some other instance of "smoke".
-    class KinematicsParticleEngineClass : public DrawableClass
+    class KinematicsParticleEngineClass : public detail::DrawableClassBase<KinematicsParticleEngineClass>
     {
     public:
         struct Particle {
@@ -868,9 +828,12 @@ namespace gfx
 
         KinematicsParticleEngineClass()
         { mId = base::RandomString(10); }
-
+        KinematicsParticleEngineClass(const std::string& id)
+        { mId = id; }
         KinematicsParticleEngineClass(const Params& init) : mParams(init)
         { mId = base::RandomString(10); }
+        KinematicsParticleEngineClass(const std::string& id, const Params& init) : mParams(init)
+        { mId = id; }
 
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
@@ -888,23 +851,10 @@ namespace gfx
 
         virtual Type GetType() const override
         { return DrawableClass::Type::KinematicsParticleEngine; }
-        virtual std::string GetId() const override
-        { return mId; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
-        {
-            auto ret = std::make_unique<KinematicsParticleEngineClass>(*this);
-            ret->mId = base::RandomString(10);
-            return ret;
-        }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
-        { return std::make_unique<KinematicsParticleEngineClass>(*this); }
+        virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool LoadFromJson(const data::Reader& data) override;
-        // Get a hash value based on the engine parameters
-        // and excluding any runtime data.
-        virtual std::size_t GetHash() const override;
-
         // Load from JSON
         static std::optional<KinematicsParticleEngineClass> FromJson(const data::Reader& data);
     private:
@@ -912,7 +862,6 @@ namespace gfx
         void KillParticle(InstanceState& state, size_t i) const;
         bool UpdateParticle(InstanceState& state, size_t i, float dt) const;
     private:
-        std::string mId;
         Params mParams;
     };
 
