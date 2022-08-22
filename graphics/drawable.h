@@ -69,10 +69,41 @@ namespace gfx
             RoundRectangle,
             Trapezoid,
         };
+         // Style of the drawable's geometry determines how the geometry
+         // is to be rasterized.
+         enum class Style {
+             // Rasterize the outline of the shape as lines.
+             // Only the fragments that are within the line are shaded.
+             // Line width setting is applied to determine the width
+             // of the lines.
+             Outline,
+             // Rasterize the individual triangles as lines.
+             Wireframe,
+             // Rasterize the interior of the drawable. This is the default
+             Solid,
+             // Rasterize the shape's vertices as individual points.
+             Points
+         };
+         struct Environment {
+             // true if running in an "editor mode", which means that even
+             // content marked static might have changed and should be checked
+             // in case it has been modified and should be re-uploaded.
+             bool editing_mode = false;
+             // how many render surface units (pixels, texels if rendering to a texture)
+             // to a game unit.
+             glm::vec2 pixel_ratio = {1.0f, 1.0f};
+             // the current projection matrix that will be used to project the
+             // vertices from the view space into Normalized Device Coordinates.
+             const glm::mat4* proj_matrix = nullptr;
+             // The current view matrix that will be used to transform the
+             // vertices to the game camera/view space.
+             const glm::mat4* view_matrix = nullptr;
+         };
+
         virtual ~DrawableClass() = default;
         // Get the type of the drawable.
         virtual Type GetType() const = 0;
-        // Get the class object resource id.
+        // Get the class ID.
         virtual std::string GetId() const = 0;
         // Create a copy of this drawable class object but with unique id.
         virtual std::unique_ptr<DrawableClass> Clone() const = 0;
@@ -96,41 +127,13 @@ namespace gfx
     class Drawable
     {
     public:
-        // Style of the drawable's geometry determines how the geometry
-        // is to be rasterized.
-        enum class Style {
-            // Rasterize the outline of the shape as lines.
-            // Only the fragments that are within the line are shaded.
-            // Line width setting is applied to determine the width
-            // of the lines.
-            Outline,
-            // Rasterize the individual triangles as lines.
-            Wireframe,
-            // Rasterize the interior of the drawable. This is the default
-            Solid,
-            // Rasterize the shape's vertices as individual points.
-            Points
-        };
-
+        using Style = DrawableClass::Style;
         // Which polygon faces to cull. Note that this only applies
         // to polygons, not to lines or points.
         using Culling = DrawableClass::Culling;
-
-        struct Environment {
-            // true if running in an "editor mode", which means that even
-            // content marked static might have changed and should be checked
-            // in case it has been modified and should be re-uploaded.
-            bool editing_mode = false;
-            // how many render surface units (pixels, texels if rendering to a texture)
-            // to a game unit.
-            glm::vec2 pixel_ratio = {1.0f, 1.0f};
-            // the current projection matrix that will be used to project the
-            // vertices from the view space into Normalized Device Coordinates.
-            const glm::mat4* proj_matrix = nullptr;
-            // The current view matrix that will be used to transform the
-            // vertices to the game camera/view space.
-            const glm::mat4* view_matrix = nullptr;
-        };
+        // The environment that possibly affects the geometry and drawable
+        // generation and update in some way.
+        using Environment = DrawableClass::Environment;
 
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {
@@ -189,6 +192,8 @@ namespace gfx
         class DrawableClassBase : public DrawableClass
         {
         public:
+            using BaseClass = DrawableClassBase;
+
             virtual std::string GetId() const override
             { return mId; }
             virtual std::unique_ptr<DrawableClass> Clone() const override
@@ -217,10 +222,10 @@ namespace gfx
         {
         public:
             GenericDrawableClass()
-                    : mId(base::RandomString(10))
+              : mId(base::RandomString(10))
             {}
             GenericDrawableClass(const std::string& id)
-                    : mId(id)
+              : mId(id)
             {}
             virtual Type GetType() const override
             { return DrawableType; }
@@ -258,22 +263,15 @@ namespace gfx
         {
         public:
             GenericDrawable() = default;
-            GenericDrawable(Style style) : mStyle(style) {}
-            GenericDrawable(Style style, Culling culling)
+            GenericDrawable(Style style, float linewidth)
               : mStyle(style)
-              , mCulling(culling)
+              , mLineWidth(linewidth)
             {}
-            GenericDrawable(Style style, Culling culling, float line_width)
+            GenericDrawable(Style style)
               : mStyle(style)
-              , mCulling(culling)
-              , mLineWidth(line_width)
             {}
-            GenericDrawable(Style style, float line_width)
-              : mStyle(style)
-              , mLineWidth(line_width)
-            {}
-            GenericDrawable(float line_width)
-              : mLineWidth(line_width)
+            GenericDrawable(float linewidth)
+              : mLineWidth(linewidth)
             {}
             virtual void ApplyState(Program& program, RasterState& state) const override
             {
@@ -366,26 +364,93 @@ namespace gfx
     using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
     using Trapezoid         = detail::GenericDrawable<detail::TrapezoidGeometry>;
 
+    class SectorClass : public detail::DrawableClassBase<SectorClass>
+    {
+    public:
+        SectorClass(float percentage = 0.25f)
+          : BaseClass()
+          , mPercentage(percentage)
+        {}
+        SectorClass(const std::string& id, float percentage = 0.25f)
+          : BaseClass(id)
+          , mPercentage(percentage)
+        {}
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(const Environment& environment, Style style, Device& device) const;
+
+        virtual Type GetType() const override
+        { return Type::Sector; }
+        virtual std::size_t GetHash() const override;
+        virtual void Pack(Packer* packer) const override;
+        virtual void IntoJson(data::Writer& data) const override;
+        virtual bool LoadFromJson(const data::Reader& data) override;
+    private:
+        float mPercentage = 0.25f;
+    };
+    class Sector : public Drawable
+    {
+    public:
+        Sector(const std::shared_ptr<const SectorClass>& klass)
+          : mClass(klass)
+        {}
+        Sector()
+          : mClass(std::make_shared<SectorClass>())
+        {}
+        Sector(Style style) : Sector()
+        {
+            mStyle = style;
+        }
+        Sector(Style style, float linewidth) : Sector()
+        {
+            mStyle = style;
+            mLineWidth = linewidth;
+        }
+        virtual void ApplyState(Program& program, RasterState& state) const override
+        {
+            state.line_width = mLineWidth;
+            state.culling    = mCulling;
+        }
+        virtual Shader* GetShader(Device& device) const override
+        { return mClass->GetShader(device); }
+        virtual Geometry* Upload(const Environment& env, Device& device) const override
+        { return mClass->Upload(env, mStyle, device); }
+        virtual void SetCulling(Culling cull) override
+        { mCulling = cull; }
+        virtual void SetStyle(Style style) override
+        { mStyle = style; }
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return mStyle; }
+    private:
+        std::shared_ptr<const SectorClass> mClass;
+        Style mStyle     = Style::Solid;
+        float mLineWidth = 1.0f;
+        Culling mCulling = Culling::Back;
+    };
+
     class RoundRectangleClass : public detail::DrawableClassBase<RoundRectangleClass>
     {
     public:
-        RoundRectangleClass(float radius = 0.05) : mRadius(radius)
-        { mId = base::RandomString(10); }
-        // This ctor can be used (very carefully) to create a "known"
-        // class object with a known (yet unique) class id.
-        RoundRectangleClass(const std::string& id, float radius = 0.05) : mRadius(radius)
-        { mId = id; }
-
-        Shader* GetShader(Device& device) const;
-        Geometry* Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const;
+        RoundRectangleClass(float corner_radius = 0.05)
+          : BaseClass()
+          , mRadius(corner_radius)
+        {}
+        RoundRectangleClass(const std::string& id, float corner_radius = 0.05)
+          : BaseClass(id)
+          , mRadius(corner_radius)
+        {}
 
         float GetRadius() const
         { return mRadius; }
         void SetRadius(float radius)
         { mRadius = radius;}
 
+        Shader* GetShader(Device& device) const;
+        Geometry* Upload(const Drawable::Environment& env, Style style, Device& device) const;
+
         virtual Type GetType() const override
-        { return DrawableClass::Type::RoundRectangle; }
+        { return Type::RoundRectangle; }
         virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
@@ -398,11 +463,19 @@ namespace gfx
     class RoundRectangle : public Drawable
     {
     public:
-        RoundRectangle(std::shared_ptr<const RoundRectangleClass> klass) : mClass(klass) {}
+        RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass)
+          : mClass(klass)
+        {}
+        RoundRectangle(const RoundRectangleClass& klass)
+          : mClass(std::make_shared<RoundRectangleClass>(klass))
+        {}
         RoundRectangle()
-        { mClass = std::make_shared<RoundRectangleClass>(); }
+          : mClass(std::make_shared<RoundRectangleClass>())
+        {}
         RoundRectangle(Style style) : RoundRectangle()
-        { mStyle = style; }
+        {
+            mStyle = style;
+        }
         RoundRectangle(Style style, float linewidth) : RoundRectangle()
         {
             mStyle = style;
@@ -436,10 +509,10 @@ namespace gfx
     class GridClass : public detail::DrawableClassBase<GridClass>
     {
     public:
-        GridClass()
-        { mId = base::RandomString(10); }
-        GridClass(const std::string& id)
-        { mId = id; }
+        GridClass() : BaseClass()
+        {}
+        GridClass(const std::string& id) : BaseClass(id)
+        {}
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Device& device) const;
         void SetNumVerticalLines(unsigned lines)
@@ -448,15 +521,15 @@ namespace gfx
         { mNumHorizontalLines = lines; }
         void SetBorders(bool on_off)
         { mBorderLines = on_off; }
-        int GetNumVerticalLines() const
+        unsigned GetNumVerticalLines() const
         { return mNumVerticalLines; }
-        int GetNumHorizontalLines() const
+        unsigned GetNumHorizontalLines() const
         { return mNumHorizontalLines; }
         bool HasBorderLines() const
         { return mBorderLines; }
 
         virtual Type GetType() const override
-        { return DrawableClass::Type::Grid; }
+        { return Type::Grid; }
         virtual std::size_t GetHash() const override;
         virtual void Pack(Packer* packer) const override;
         virtual void IntoJson(data::Writer& data) const override;
@@ -524,8 +597,10 @@ namespace gfx
 
         using Vertex = gfx::Vertex;
 
-        PolygonClass();
-        PolygonClass(const std::string& id);
+        PolygonClass() : BaseClass()
+        {}
+        PolygonClass(const std::string& id) : BaseClass(id)
+        {}
 
         void Clear();
         void ClearDrawCommands();
@@ -560,9 +635,9 @@ namespace gfx
         // Return whether the polygon's data is considered to be
         // static or not. Static content is not assumed to change
         // often and will map the polygon to a geometry object
-        // based on the polygon's data. Thus each polygon with
+        // based on the polygon's data. Thus, each polygon with
         // different data will have different geometry object.
-        // However If the polygon is updated frequently this would
+        // However, If the polygon is updated frequently this would
         // then lead to the proliferation of excessive geometry objects.
         // In this case static can be set to false and the polygon
         // will map to a (single) dynamic geometry object more optimized
@@ -606,12 +681,12 @@ namespace gfx
     {
     public:
         Polygon(const std::shared_ptr<const PolygonClass>& klass)
-            : mClass(klass)
+          : mClass(klass)
         {}
         Polygon(const PolygonClass& klass)
-        {
-            mClass = std::make_shared<PolygonClass>(klass);
-        }
+          : mClass(std::make_shared<PolygonClass>(klass))
+        {}
+
         virtual void ApplyState(Program& program, RasterState& state) const override
         {
             state.culling = mCulling;
@@ -640,12 +715,16 @@ namespace gfx
             Arrow,
             Block
         };
-        CursorClass(const std::string& id, Shape shape)
-          :  mShape(shape)
-        { mId = id; }
         CursorClass(Shape shape)
-          : mShape(shape)
-        { mId = base::RandomString(10); }
+          : BaseClass()
+          , mShape(shape)
+        {}
+
+        CursorClass(const std::string& id, Shape shape)
+          : BaseClass(id)
+          , mShape(shape)
+        {}
+
         Shape GetShape() const
         { return mShape; }
 
@@ -663,11 +742,16 @@ namespace gfx
     {
     public:
         using Shape = CursorClass::Shape;
-        Cursor(std::shared_ptr<const CursorClass> klass) : mClass(klass) {}
-        Cursor(Shape shape)
-        { mClass = std::make_shared<CursorClass>(shape); }
+
+        Cursor(const std::shared_ptr<const CursorClass>& klass)
+          : mClass(klass)
+        {}
         Cursor(const CursorClass& klass)
-        { mClass = std::make_shared<CursorClass>(klass); }
+          : mClass(std::make_shared<CursorClass>(klass))
+        {}
+        Cursor(Shape shape)
+          : mClass(std::make_shared<CursorClass>(shape))
+        {}
 
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
@@ -827,13 +911,19 @@ namespace gfx
         };
 
         KinematicsParticleEngineClass()
-        { mId = base::RandomString(10); }
+          : BaseClass()
+        {}
         KinematicsParticleEngineClass(const std::string& id)
-        { mId = id; }
-        KinematicsParticleEngineClass(const Params& init) : mParams(init)
-        { mId = base::RandomString(10); }
-        KinematicsParticleEngineClass(const std::string& id, const Params& init) : mParams(init)
-        { mId = id; }
+          : BaseClass(id)
+        {}
+        KinematicsParticleEngineClass(const Params& init)
+          : BaseClass()
+          , mParams(init)
+        {}
+        KinematicsParticleEngineClass(const std::string& id, const Params& init)
+          : BaseClass(id)
+          , mParams(init)
+        {}
 
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
@@ -876,19 +966,19 @@ namespace gfx
     public:
         // Create a new particle engine based on an existing particle engine
         // class definition.
-        KinematicsParticleEngine(std::shared_ptr<const KinematicsParticleEngineClass> klass)
-            : mClass(klass)
+        KinematicsParticleEngine(const std::shared_ptr<const KinematicsParticleEngineClass>& klass)
+          : mClass(klass)
         {
             Restart();
         }
         KinematicsParticleEngine(const KinematicsParticleEngineClass& klass)
+          : mClass(std::make_shared<KinematicsParticleEngineClass>(klass))
         {
-            mClass = std::make_shared<KinematicsParticleEngineClass>(klass);
             Restart();
         }
         KinematicsParticleEngine(const KinematicsParticleEngineClass::Params& params)
+          : mClass(std::make_shared<KinematicsParticleEngineClass>(params))
         {
-            mClass = std::make_shared<KinematicsParticleEngineClass>(params);
             Restart();
         }
         virtual void ApplyState(Program& program, RasterState& state) const override
