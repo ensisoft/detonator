@@ -88,8 +88,8 @@ namespace gui
         void on_initY_valueChanged(double);
         void on_initWidth_valueChanged(double);
         void on_initHeight_valueChanged(double);
-        void on_dirStartAngle_valueChanged(double);
-        void on_dirSizeAngle_valueChanged(double);
+        void on_dirStartAngle_valueChanged();
+        void on_dirSizeAngle_valueChanged();
         void on_minVelocity_valueChanged(double);
         void on_maxVelocity_valueChanged(double);
         void on_minLifetime_valueChanged(double);

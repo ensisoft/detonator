@@ -525,8 +525,8 @@ void ParticleEditorWidget::SetParams()
     params.rate_of_change_in_size_wrt_dist  = GetValue(mUI.distSizeDerivative);
     params.rate_of_change_in_alpha_wrt_time = GetValue(mUI.timeAlphaDerivative);
     params.rate_of_change_in_alpha_wrt_dist = GetValue(mUI.distAlphaDerivative);
-    params.direction_sector_start_angle     = qDegreesToRadians(mUI.dirStartAngle->value());
-    params.direction_sector_size            = qDegreesToRadians(mUI.dirSizeAngle->value());
+    params.direction_sector_start_angle     = qDegreesToRadians((float)mUI.dirStartAngle->value());
+    params.direction_sector_size            = qDegreesToRadians((float)mUI.dirSizeAngle->value());
     if (GetValue(mUI.canExpire))
     {
         params.min_lifetime   = GetValue(mUI.minLifetime);
@@ -693,11 +693,11 @@ void ParticleEditorWidget::on_initHeight_valueChanged(double)
 {
     SetParams();
 }
-void ParticleEditorWidget::on_dirStartAngle_valueChanged(double)
+void ParticleEditorWidget::on_dirStartAngle_valueChanged()
 {
     SetParams();
 }
-void ParticleEditorWidget::on_dirSizeAngle_valueChanged(double)
+void ParticleEditorWidget::on_dirSizeAngle_valueChanged()
 {
     SetParams();
 }
@@ -841,6 +841,38 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         view.Pop();
     }
     view.Pop();
+
+    // Draw the visualization for the particle direction sector
+    // we draw this in the widget/window coordinates in the top right
+    {
+        const float dir_angle_start = GetValue(mUI.dirStartAngle);
+        const float dir_angle_size  = GetValue(mUI.dirSizeAngle);
+
+        gfx::Transform transform;
+        transform.Translate(width - 70.0f, 70.0f);
+        transform.Push();
+            transform.Scale(100.0f, 100.0f);
+            transform.Translate(-50.0f, -50.0f);
+            painter.Draw(gfx::Rectangle(), transform,
+                         gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::Black, 0.6f)));
+        transform.Pop();
+        transform.Push();
+            transform.Rotate(qDegreesToRadians(dir_angle_start));
+            transform.Push();
+                transform.Scale(50.0f, 5.0f);
+                transform.Translate(0.0f, -2.5f);
+                transform.Rotate(qDegreesToRadians(dir_angle_size));
+                painter.Draw(gfx::Rectangle(), transform,
+                             gfx::CreateMaterialFromColor(gfx::Color::Yellow));
+            transform.Pop();
+            transform.Push();
+                transform.Scale(50.0f, 5.0f);
+                transform.Translate(0.0f, -2.5f);
+                painter.Draw(gfx::Arrow(), transform,
+                             gfx::CreateMaterialFromColor(gfx::Color::Green));
+            transform.Pop();
+        transform.Pop();
+    }
 }
 
 void ParticleEditorWidget::MouseMove(QMouseEvent* mickey)

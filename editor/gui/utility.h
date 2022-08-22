@@ -657,6 +657,15 @@ struct ActionValueGetter
     { return action->isChecked(); }
     const QAction* action = nullptr;
 };
+struct SliderValueGetter
+{
+    operator int() const
+    { return slider->value(); }
+    const QSlider* slider = nullptr;
+};
+
+inline SliderValueGetter GetValue(const QSlider* slider)
+{ return SliderValueGetter { slider }; }
 inline ActionValueGetter GetValue(const QAction* action)
 { return ActionValueGetter { action }; }
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
