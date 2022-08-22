@@ -548,6 +548,8 @@ std::unique_ptr<FileResourceLoader> FileResourceLoader::Create()
 class ContentLoaderImpl : public JsonFileClassLoader
 {
 public:
+    ContentLoaderImpl();
+
     // ClassLibrary implementation.
     virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const  override;
     virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
@@ -567,14 +569,10 @@ private:
     // from the resource file.
     std::unordered_map<std::string,
             std::shared_ptr<gfx::MaterialClass>> mMaterials;
-    // These are the particle engine types that have been loaded
+    // These are the drawable types that have been loaded
     // from the resource file.
     std::unordered_map<std::string,
-            std::shared_ptr<gfx::KinematicsParticleEngineClass>> mParticleEngines;
-    // These are the custom shapes (polygons) that have been loaded
-    // from the resource file.
-    std::unordered_map<std::string,
-            std::shared_ptr<gfx::PolygonClass>> mCustomShapes;
+            std::shared_ptr<gfx::DrawableClass>> mDrawables;
     // These are the entities that have been loaded from
     // the resource file.
     std::unordered_map<std::string, std::shared_ptr<game::EntityClass>> mEntities;
@@ -590,6 +588,31 @@ private:
     // Audio graphs
     std::unordered_map<std::string, std::shared_ptr<audio::GraphClass>> mAudioGraphs;
 };
+
+ContentLoaderImpl::ContentLoaderImpl()
+{
+    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
+    for (const auto& val : values)
+    {
+        const std::string color_name(magic_enum::enum_name(val));
+        auto ret = std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color4f(val)));
+        ret->SetId("_" + color_name);
+        mMaterials["_" + color_name] = ret;
+    }
+
+    // these are the current primitive cases that are not packed as part of the resources
+    mDrawables["_rect"]               = std::make_shared<gfx::RectangleClass>("_rect");
+    mDrawables["_isosceles_triangle"] = std::make_shared<gfx::IsoscelesTriangleClass>("_isosceles_triangle");
+    mDrawables["_right_triangle"]     = std::make_shared<gfx::RightTriangleClass>("_right_triangle");
+    mDrawables["_capsule"]            = std::make_shared<gfx::CapsuleClass>("_capsule");
+    mDrawables["_circle"]             = std::make_shared<gfx::CircleClass>("_circle");
+    mDrawables["_semi_circle"]        = std::make_shared<gfx::SemiCircleClass>("_semi_circle");
+    mDrawables["_round_rect"]         = std::make_shared<gfx::RoundRectangleClass>("_round_rect", 0.05f);
+    mDrawables["_trapezoid"]          = std::make_shared<gfx::TrapezoidClass>("_trapezoid");
+    mDrawables["_parallelogram"]      = std::make_shared<gfx::ParallelogramClass>("_parallelogram");
+    mDrawables["_arrow_cursor"]       = std::make_shared<gfx::CursorClass>("_arrow_cursor",gfx::CursorClass::Shape::Arrow);
+    mDrawables["_block_cursor"]       = std::make_shared<gfx::CursorClass>("_block_cursor", gfx::CursorClass::Shape::Block);
+}
 
 ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(const std::string& id) const
 {
@@ -629,67 +652,17 @@ ClassHandle<const uik::Window> ContentLoaderImpl::FindUIById(const std::string& 
 
 ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& name) const
 {
-    constexpr auto& values = magic_enum::enum_values<gfx::Color>();
-    for (const auto& val : values)
-    {
-        const std::string color_name(magic_enum::enum_name(val));
-        if ("_" + color_name == name)
-        {
-            auto ret = std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color4f(val)));
-            ret->SetId("_" + color_name);
-            return ret;
-        }
-    }
-
     auto it = mMaterials.find(name);
     if (it != std::end(mMaterials))
         return it->second;
-
     return nullptr;
 }
 
 ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(const std::string& name) const
 {
-    // these are the current primitive cases that are not packed as part of the resources
-    if (name == "_rect")
-        return std::make_shared<gfx::RectangleClass>();
-    else if (name == "_isosceles_triangle")
-        return std::make_shared<gfx::IsoscelesTriangleClass>();
-    else if (name == "_right_triangle")
-        return std::make_shared<gfx::RightTriangleClass>();
-    else if (name == "_capsule")
-        return std::make_shared<gfx::CapsuleClass>();
-    else if (name == "_circle")
-        return std::make_shared<gfx::CircleClass>();
-    else if (name == "_semi_circle")
-        return std::make_shared<gfx::SemiCircleClass>();
-    else if (name == "_round_rect")
-        return std::make_shared<gfx::RoundRectangleClass>("_round_rect", 0.05f);
-    else if (name == "_trapezoid")
-        return std::make_shared<gfx::TrapezoidClass>();
-    else if (name == "_parallelogram")
-        return std::make_shared<gfx::ParallelogramClass>();
-    else if (name == "_arrow_cursor")
-        return std::make_shared<gfx::CursorClass>(gfx::CursorClass("_arrow_cursor",gfx::CursorClass::Shape::Arrow));
-    else if (name == "_block_cursor")
-        return std::make_shared<gfx::CursorClass>(gfx::CursorClass("_block_cursor", gfx::CursorClass::Shape::Block));
-
-    // todo: perhaps need an identifier for the type of resource in question.
-    // currently there's a name conflict that objects of different types but
-    // with same names cannot be fully resolved by name only.
-
-    {
-        auto it = mParticleEngines.find(name);
-        if (it != std::end(mParticleEngines))
-            return it->second;
-    }
-
-    {
-        auto it = mCustomShapes.find(name);
-        if (it != std::end(mCustomShapes))
-            return it->second;
-    }
-
+    auto it = mDrawables.find(name);
+    if (it != std::end(mDrawables))
+        return it->second;
     return nullptr;
 }
 
@@ -760,9 +733,9 @@ bool ContentLoaderImpl::LoadFromFile(const std::string& file)
 
     if (!LoadMaterials(root, "materials", mMaterials, nullptr))
         return false;
-    if (!LoadContent<gfx::KinematicsParticleEngineClass>(root, "particles", mParticleEngines, nullptr))
+    if (!LoadContent<gfx::DrawableClass, gfx::KinematicsParticleEngineClass>(root, "particles", mDrawables, nullptr))
         return false;
-   if (!LoadContent<gfx::PolygonClass>(root, "shapes", mCustomShapes, nullptr))
+   if (!LoadContent<gfx::DrawableClass, gfx::PolygonClass>(root, "shapes", mDrawables, nullptr))
        return false;
    if (!LoadContent<game::EntityClass>(root, "entities", mEntities, &mEntityNameTable))
        return false;
