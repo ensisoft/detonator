@@ -1086,11 +1086,6 @@ bool GridClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
-PolygonClass::PolygonClass()
-{ mId = base::RandomString(10); }
-PolygonClass::PolygonClass(const std::string& id)
-{ mId = id; }
-
 void PolygonClass::Clear()
 {
     mVertices.clear();
