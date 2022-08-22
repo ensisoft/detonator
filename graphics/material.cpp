@@ -2243,8 +2243,13 @@ void TextMaterial::SetUniforms(const UniformMap& uniforms)
 
 ColorClass CreateMaterialClassFromColor(const Color4f& color)
 {
+    const auto alpha = color.Alpha();
+
     ColorClass material;
     material.SetBaseColor(color);
+    material.SetSurfaceType(alpha == 1.0f
+        ? MaterialClass::SurfaceType::Opaque
+        : MaterialClass::SurfaceType::Transparent);
     return material;
 }
 
