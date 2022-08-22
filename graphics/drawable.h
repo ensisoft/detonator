@@ -56,6 +56,7 @@ namespace gfx
             Arrow,
             Capsule,
             SemiCircle,
+            Sector,
             Cursor,
             Circle,
             Grid,

@@ -1914,6 +1914,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ShapeTest<gfx::RightTriangle>("RightTriangleShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::Trapezoid>("TrapezoidShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::SemiCircle>("SemiCircleShapeTest"));
+    tests.emplace_back(new ShapeTest<gfx::Sector>("SectorTest"));
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
