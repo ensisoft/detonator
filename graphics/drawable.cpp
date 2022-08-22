@@ -752,6 +752,101 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 
 } // detail
 
+Shader* SectorClass::GetShader(Device& device) const
+{
+    return MakeVertexArrayShader(device);
+}
+Geometry* SectorClass::Upload(const Environment& environment, Style style, Device& device) const
+{
+    if (style == Style::Points)
+        return nullptr;
+
+    const auto* name = style == Style::Outline   ? "SectorOutline"   :
+                      (style == Style::Wireframe ? "SectorWireframe" : "Sector");
+    Geometry* geom = device.FindGeometry(name);
+    if (!geom)
+    {
+        std::vector<Vertex> vs;
+
+        // center point for triangle fan.
+        Vertex center;
+        center.aPosition.x =  0.5;
+        center.aPosition.y = -0.5;
+        center.aTexCoord.x =  0.5;
+        center.aTexCoord.y =  0.5;
+        if (style == Style::Solid || style == Style::Outline)
+        {
+            vs.push_back(center);
+        }
+        const auto slices    = 100 * mPercentage;
+        const auto angle_max = math::Pi * 2.0 * mPercentage;
+        const auto angle_inc = angle_max / slices;
+        const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+
+        float angle = 0.0f;
+        for (unsigned i=0; i<max_slice; ++i)
+        {
+            const auto x = std::cos(angle) * 0.5f;
+            const auto y = std::sin(angle) * 0.5f;
+            Vertex v;
+            v.aPosition.x = x + 0.5f;
+            v.aPosition.y = y - 0.5f;
+            v.aTexCoord.x = x + 0.5f;
+            v.aTexCoord.y = 1.0 - (y + 0.5f);
+            vs.push_back(v);
+
+            angle += angle_inc;
+
+            if (style == Style::Wireframe)
+            {
+                const auto x = std::cos(angle) * 0.5f;
+                const auto y = std::sin(angle) * 0.5f;
+                Vertex v;
+                v.aPosition.x = x + 0.5f;
+                v.aPosition.y = y - 0.5f;
+                v.aTexCoord.x = x + 0.5f;
+                v.aTexCoord.y = 1.0 - (y + 0.5f);
+                vs.push_back(v);
+                vs.push_back(center);
+            }
+        }
+        geom = device.MakeGeometry(name);
+        geom->SetVertexBuffer(&vs[0], vs.size());
+    }
+    geom->ClearDraws();
+
+    if (style == Style::Solid)
+        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
+    else if (style == Style::Outline)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+    else if (style == Style::Wireframe)
+        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+    return geom;
+}
+
+std::size_t SectorClass::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mPercentage);
+    return hash;
+}
+void SectorClass::Pack(Packer* packer) const
+{
+    // nothing here.
+}
+void SectorClass::IntoJson(data::Writer& data) const
+{
+    data.Write("id", mId);
+    data.Write("percentage", mPercentage);
+}
+bool SectorClass::LoadFromJson(const data::Reader& data)
+{
+    data.Read("id", &mId);
+    data.Read("percentage", &mPercentage);
+    return true;
+}
+
 Shader* RoundRectangleClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 
@@ -1829,6 +1924,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
         case DrawableClass::Type::Cursor:
             return std::make_unique<Cursor>(std::static_pointer_cast<const CursorClass>(klass));
+        case DrawableClass::Type::Sector:
+            return std::make_unique<Sector>(std::static_pointer_cast<const SectorClass>(klass));
     }
     BUG("Unhandled drawable class type");
     return {};
