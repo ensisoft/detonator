@@ -97,8 +97,11 @@ namespace gfx
              // vertices from the view space into Normalized Device Coordinates.
              const glm::mat4* proj_matrix = nullptr;
              // The current view matrix that will be used to transform the
-             // vertices to the game camera/view space.
+             // vertices from the world space to the camera/view space.
              const glm::mat4* view_matrix = nullptr;
+             // the current model matrix that will be used to transform the
+             // vertices from the local space to the world space.
+             const glm::mat4* model_matrix = nullptr;
          };
 
         virtual ~DrawableClass() = default;

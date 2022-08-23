@@ -230,12 +230,12 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
     const auto max_slice = style == Style::Solid ? slices + 1 : slices;
     const auto angle_increment = math::Pi / slices;
 
-    // try to figure out if the view matrix will distort the
+    // try to figure out if the model matrix will distort the
     // round rectangle out of it's square shape which would then
     // distort the rounded corners out of the shape too.
-    const auto& view_matrix = *env.view_matrix;
-    const auto rect_width   = glm::length(view_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-    const auto rect_height  = glm::length(view_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    const auto& model_matrix = *env.model_matrix;
+    const auto rect_width   = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height  = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
     const auto aspect_ratio = rect_width / rect_height;
     float w = radius;
     float h = radius;
@@ -857,12 +857,12 @@ Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable
     if (style == Style::Points)
         return nullptr;
 
-    // try to figure out if the view matrix will distort the
+    // try to figure out if the model matrix will distort the
     // round rectangle out of it's square shape which would then
     // distort the rounded corners out of the shape too.
-    const auto& view_matrix = *env.view_matrix;
-    const auto rect_width  = glm::length(view_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-    const auto rect_height = glm::length(view_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    const auto& model_matrix = *env.model_matrix;
+    const auto rect_width  = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
     const auto aspect_ratio = rect_width / rect_height;
     float w = mRadius;
     float h = mRadius;
