@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
+#  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -37,6 +38,7 @@
 #include "data/writer.h"
 #include "graphics/geometry.h"
 #include "graphics/device.h"
+#include "graphics/program.h"
 
 namespace gfx
 {
@@ -152,7 +154,7 @@ namespace gfx
         virtual ~Drawable() = default;
         // Apply the drawable's state (if any) on the program
         // and set the rasterizer state.
-        virtual void ApplyState(Program& program, RasterState& state) const {}
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const = 0;
         // Get the device specific shader object.
         // If the shader does not yet exist on the device it's created
         // and compiled.  On any errors nullptr should be returned.
@@ -277,10 +279,16 @@ namespace gfx
             GenericDrawable(float linewidth)
               : mLineWidth(linewidth)
             {}
-            virtual void ApplyState(Program& program, RasterState& state) const override
+            virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
             {
                 state.line_width = mLineWidth;
                 state.culling    = mCulling;
+                const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+                const auto& kProjectionMatrix = *env.proj_matrix;
+                program.SetUniform("kProjectionMatrix",
+                    *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+                program.SetUniform("kModelViewMatrix",
+                   *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
             }
             virtual Shader* GetShader(Device& device) const override
             { return DrawableGeometry::GetShader(device); }
@@ -409,10 +417,16 @@ namespace gfx
             mStyle = style;
             mLineWidth = linewidth;
         }
-        virtual void ApplyState(Program& program, RasterState& state) const override
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.line_width = mLineWidth;
             state.culling    = mCulling;
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+               *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
@@ -486,10 +500,16 @@ namespace gfx
             mLineWidth = linewidth;
         }
 
-        virtual void ApplyState(Program& program, RasterState& state) const override
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.line_width = mLineWidth;
             state.culling    = mCulling;
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+               *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
@@ -566,10 +586,16 @@ namespace gfx
             klass->SetBorders(border_lines);
             mClass = klass;
         }
-        virtual void ApplyState(Program& program, RasterState& state) const override
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.line_width = mLineWidth;
             state.culling    = Culling::None;
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
@@ -691,10 +717,16 @@ namespace gfx
           : mClass(std::make_shared<PolygonClass>(klass))
         {}
 
-        virtual void ApplyState(Program& program, RasterState& state) const override
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.culling = mCulling;
             state.line_width = mLineWidth;
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
         virtual Shader* GetShader(Device& device) const override
         { return mClass->GetShader(device); }
@@ -756,7 +788,15 @@ namespace gfx
         Cursor(Shape shape)
           : mClass(std::make_shared<CursorClass>(shape))
         {}
-
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
+        {
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
+        }
         virtual Shader* GetShader(Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override
@@ -985,10 +1025,16 @@ namespace gfx
         {
             Restart();
         }
-        virtual void ApplyState(Program& program, RasterState& state) const override
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.line_width = 1.0;
             state.culling    = Culling::None;
+            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+            const auto& kProjectionMatrix = *env.proj_matrix;
+            program.SetUniform("kProjectionMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
+            program.SetUniform("kModelViewMatrix",
+                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
         // Drawable implementation. Compile the shader.
         virtual Shader* GetShader(Device& device) const override
