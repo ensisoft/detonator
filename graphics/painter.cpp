@@ -89,15 +89,17 @@ public:
     {
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
+        const auto& kModelMatrix      = transform.GetAsMatrix();
         const auto& kProjectionMatrix = mProjection;
-        const auto& kModelViewMatrix  = mViewMatrix * transform.GetAsMatrix();
+        const auto& kModelViewMatrix  = mViewMatrix * kModelMatrix;
         const auto style = shape.GetStyle();
 
         Drawable::Environment draw_env;
         draw_env.editing_mode = mEditingMode;
         draw_env.pixel_ratio  = mPixelRatio;
-        draw_env.proj_matrix  = &kProjectionMatrix;
-        draw_env.view_matrix  = &kModelViewMatrix;
+        draw_env.proj_matrix  = &mProjection;
+        draw_env.view_matrix  = &mViewMatrix;
+        draw_env.model_matrix = &kModelMatrix;
 
         Geometry* geom = shape.Upload(draw_env, *mDevice);
         Program* prog = GetProgram(shape, mat);
@@ -171,12 +173,15 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
-            const auto& kModelViewMatrix = mViewMatrix * (*mask.transform);
+            const auto& kModelMatrix = (*mask.transform);
+            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
+
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &kModelViewMatrix;
-            draw_env.proj_matrix  = &kProjectionMatrix;
+            draw_env.view_matrix  = &mViewMatrix;
+            draw_env.proj_matrix  = &mProjection;
+            draw_env.model_matrix = &kModelMatrix;
             Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -212,12 +217,14 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
-            const auto& kModelViewMatrix = mViewMatrix * (*draw.transform);
+            const auto& kModelMatrix = (*draw.transform);
+            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &kModelViewMatrix;
-            draw_env.proj_matrix  = &kProjectionMatrix;
+            draw_env.view_matrix  = &mViewMatrix;
+            draw_env.proj_matrix  = &mProjection;
+            draw_env.model_matrix = &kModelMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
@@ -226,7 +233,7 @@ public:
                 continue;
 
             prog->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
+                *(const Program::Matrix4x4*)glm::value_ptr(mProjection));
             prog->SetUniform("kModelViewMatrix",
                *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
@@ -254,12 +261,14 @@ public:
 
         for (const auto& draw : shapes)
         {
-            const auto& kModelViewMatrix = mViewMatrix * (*draw.transform);
+            const auto& kModelMatrix = (*draw.transform);
+            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.proj_matrix  = &kProjectionMatrix;
-            draw_env.view_matrix  = &kModelViewMatrix;
+            draw_env.proj_matrix  = &mProjection;
+            draw_env.view_matrix  = &mViewMatrix;
+            draw_env.model_matrix = &kModelMatrix;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
