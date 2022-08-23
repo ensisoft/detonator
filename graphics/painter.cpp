@@ -85,24 +85,22 @@ public:
         mDevice->ClearColor(color);
     }
 
-    virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) override
+    virtual void Draw(const Drawable& drawable, const Transform& transform, const Material& material) override
     {
         // create simple orthographic projection matrix.
         // 0,0 is the window top left, x grows left and y grows down
-        const auto& kModelMatrix      = transform.GetAsMatrix();
-        const auto& kProjectionMatrix = mProjection;
-        const auto& kModelViewMatrix  = mViewMatrix * kModelMatrix;
-        const auto style = shape.GetStyle();
+        const auto& kModelMatrix = transform.GetAsMatrix();
+        const auto style = drawable.GetStyle();
 
-        Drawable::Environment draw_env;
-        draw_env.editing_mode = mEditingMode;
-        draw_env.pixel_ratio  = mPixelRatio;
-        draw_env.proj_matrix  = &mProjection;
-        draw_env.view_matrix  = &mViewMatrix;
-        draw_env.model_matrix = &kModelMatrix;
+        Drawable::Environment drawable_env;
+        drawable_env.editing_mode = mEditingMode;
+        drawable_env.pixel_ratio  = mPixelRatio;
+        drawable_env.proj_matrix  = &mProjection;
+        drawable_env.view_matrix  = &mViewMatrix;
+        drawable_env.model_matrix = &kModelMatrix;
 
-        Geometry* geom = shape.Upload(draw_env, *mDevice);
-        Program* prog = GetProgram(shape, mat);
+        Geometry* geom = drawable.Upload(drawable_env, *mDevice);
+        Program* prog = GetProgram(drawable, material);
         if (!prog || !geom)
             return;
 
@@ -110,16 +108,10 @@ public:
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
         material_env.render_points = style == Drawable::Style::Points;
-
-        prog->SetUniform("kProjectionMatrix",
-            *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
-        prog->SetUniform("kModelViewMatrix",
-            *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
-
-        mat.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
+        material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
         Drawable::RasterState drawable_raster_state;
-        shape.ApplyState(*prog, drawable_raster_state);
+        drawable.ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
 
         Device::State state;
         state.viewport     = MapToDevice(mViewport);
@@ -158,8 +150,6 @@ public:
     {
         mDevice->ClearStencil(1);
 
-        const auto& kProjectionMatrix = mProjection;
-
         Device::State state;
         state.viewport      = MapToDevice(mViewport);
         state.scissor       = MapToDevice(mScissor);
@@ -173,26 +163,18 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
-            const auto& kModelMatrix = (*mask.transform);
-            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
-
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
             draw_env.view_matrix  = &mViewMatrix;
             draw_env.proj_matrix  = &mProjection;
-            draw_env.model_matrix = &kModelMatrix;
+            draw_env.model_matrix = mask.transform;
             Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* prog = GetProgram(*mask.drawable, mask_material);
             if (prog == nullptr)
                 continue;
-
-            prog->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kProjectionMatrix));
-            prog->SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -201,7 +183,7 @@ public:
             mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
             Drawable::RasterState drawable_raster_state;
-            mask.drawable->ApplyState(*prog, drawable_raster_state);
+            mask.drawable->ApplyDynamicState(draw_env, *prog, drawable_raster_state);
             state.culling     = drawable_raster_state.culling;
             state.line_width  = drawable_raster_state.line_width;
             state.premulalpha = false;
@@ -217,25 +199,18 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
-            const auto& kModelMatrix = (*draw.transform);
-            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
             draw_env.view_matrix  = &mViewMatrix;
             draw_env.proj_matrix  = &mProjection;
-            draw_env.model_matrix = &kModelMatrix;
+            draw_env.model_matrix = draw.transform;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* prog = GetProgram(*draw.drawable, *draw.material);
             if (prog == nullptr)
                 continue;
-
-            prog->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4*)glm::value_ptr(mProjection));
-            prog->SetUniform("kModelViewMatrix",
-               *(const Program::Matrix4x4*)glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -247,7 +222,7 @@ public:
             state.premulalpha = material_raster_state.premultiplied_alpha;
 
             Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyState(*prog, drawable_raster_state);
+            draw.drawable->ApplyDynamicState(draw_env, *prog, drawable_raster_state);
             state.line_width = drawable_raster_state.line_width;
             state.culling    = drawable_raster_state.culling;
 
@@ -257,29 +232,20 @@ public:
 
     virtual void Draw(const std::vector<DrawShape>& shapes) override
     {
-        const auto& kProjectionMatrix = mProjection;
-
         for (const auto& draw : shapes)
         {
-            const auto& kModelMatrix = (*draw.transform);
-            const auto& kModelViewMatrix = mViewMatrix * kModelMatrix;
             Drawable::Environment draw_env;
             draw_env.editing_mode = mEditingMode;
             draw_env.pixel_ratio  = mPixelRatio;
             draw_env.proj_matrix  = &mProjection;
             draw_env.view_matrix  = &mViewMatrix;
-            draw_env.model_matrix = &kModelMatrix;
+            draw_env.model_matrix = draw.transform;
             Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
             if (geom == nullptr)
                 continue;
             Program* program = GetProgram(*draw.drawable, *draw.material);
             if (program == nullptr)
                 continue;
-
-            program->SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program->SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
 
             Material::RasterState material_raster_state;
             Material::Environment material_env;
@@ -288,7 +254,7 @@ public:
             draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
 
             Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyState(*program, drawable_raster_state);
+            draw.drawable->ApplyDynamicState(draw_env, *program, drawable_raster_state);
 
             Device::State state;
             state.viewport     = MapToDevice(mViewport);
