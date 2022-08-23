@@ -57,6 +57,7 @@ public:
         attrs.blue_size        = 8;
         attrs.alpha_size       = 8;
         attrs.stencil_size     = 8;
+        attrs.depth_size       = 24;
         attrs.surfaces.pbuffer = true;
         attrs.double_buffer    = false;
         attrs.sampling         = wdk::Config::Multisampling::MSAA4;
@@ -192,8 +193,7 @@ public:
 private:
 };
 
-// render a scene with multiple entities of the same type.
-class TestRenderArmy : public TestCase
+class TestRenderRobots : public TestCase
 {
 public:
     virtual void Prepare(Engine& engine) override
@@ -208,7 +208,59 @@ public:
             for (int col=0; col<10; ++col)
             {
                 game::SceneNodeClass node;
-                node.SetEntityId(std::to_string(row * 10 + col));
+                node.SetEntityId(std::to_string(row) + ":" + std::to_string(col));
+                node.SetName(std::to_string(row) + ":" + std::to_string(col));
+                node.SetTranslation(col * 60.0f, row * 75.0f);
+                node.SetScale(0.2f, 0.2f);
+                node.SetEntity(engine.classlib->FindEntityClassByName("robot"));
+                klass->LinkChild(nullptr, klass->AddNode(node));
+            }
+        }
+        mScene = game::CreateSceneInstance(klass);
+    }
+    virtual void Execute(Engine& engine) override
+    {
+        TRACE_START();
+        TRACE_ENTER(Execute);
+
+        gfx::Transform transform;
+        transform.Translate(50.0f, 50.0f);
+        engine.graphics_device->BeginFrame();
+        engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
+
+        TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
+        TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter, transform));
+        TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
+
+        engine.graphics_device->EndFrame();
+
+        TRACE_LEAVE(Execute);
+
+        if (engine.trace_logger)
+            engine.trace_logger->Write(*engine.trace_writer);
+    }
+private:
+    std::unique_ptr<game::Scene> mScene;
+};
+
+// render a scene with multiple entities of the same type.
+class TestRenderArmy : public TestCase
+{
+public:
+    virtual void Prepare(Engine& engine) override
+    {
+        if (mScene)
+            return;
+
+        auto klass = std::make_shared<game::SceneClass>();
+
+        for (int row=0; row<15; ++row)
+        {
+            for (int col=0; col<15; ++col)
+            {
+                game::SceneNodeClass node;
+                node.SetEntityId(std::to_string(row * 15 + col));
                 node.SetTranslation(col * 50.0f, row * 50.0f);
                 node.SetName(std::to_string(row) + ":" + std::to_string(col));
                 node.SetScale(1.0f, 1.0f);
@@ -221,13 +273,21 @@ public:
     virtual void Execute(Engine& engine) override
     {
         TRACE_START();
+        TRACE_ENTER(Execute);
 
         gfx::Transform transform;
         transform.Translate(50.0f, 50.0f);
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
-        engine.renderer->Draw(*mScene, *engine.graphics_painter, transform);
+
+        TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
+        TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter, transform));
+        TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
+
         engine.graphics_device->EndFrame();
+
+        TRACE_LEAVE(Execute);
 
         if (engine.trace_logger)
             engine.trace_logger->Write(*engine.trace_writer);
@@ -250,7 +310,8 @@ int test_main(int argc, char* argv[])
         {"audio-decode-mp3", false, new TestAudioFileDecode("assets/sounds/Laser_09.mp3")},
         {"audio-decode-ogg", false, new TestAudioFileDecode("assets/sounds/Laser_09.ogg")},
         {"audio-decode-wav", false, new TestAudioFileDecode("assets/sounds/Laser_09.wav")},
-        { "render-army", true, new TestRenderArmy()}
+        {"render-army",      true,  new TestRenderArmy()},
+        {"render-robots",    true,  new TestRenderRobots()}
     };
 
     base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
@@ -293,7 +354,7 @@ int test_main(int argc, char* argv[])
         if (base::EndsWith(trace_file, ".json"))
             trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
         else trace_writer.reset(new base::TextFileTraceWriter(trace_file));
-        trace_logger.reset(new base::TraceLog(1000));
+        trace_logger.reset(new base::TraceLog(10000));
         base::SetThreadTrace(trace_logger.get());
     }
 
@@ -336,12 +397,14 @@ int test_main(int argc, char* argv[])
     engine.renderer = &renderer;
     engine.classlib = &classlib;
 
+    bool have_test = false;
     const auto iterations = opt.GetValue<unsigned>("--loops");
     for (const auto& spec : tests)
     {
         if (!opt.WasGiven(spec.name))
             continue;
-        INFO("Running test case '%1'. [loops=%2]", spec.name, iterations);
+
+        //INFO("Running test case '%1'. [loops=%2]", spec.name, iterations);
         spec.test->Prepare(engine);
         if (opt.WasGiven("--timing"))
         {
@@ -362,9 +425,16 @@ int test_main(int argc, char* argv[])
             gfx::WritePNG(rgba, name);
             INFO("Wrote screen capture '%1'", name);
         }
+        have_test = true;
     }
     for (const auto& spec: tests)
         delete spec.test;
+
+    if (!have_test)
+    {
+        WARN("No tests were specified on the command line.");
+        WARN("Run again with --help in order to see test names.");
+    }
 
     return 0;
 }
