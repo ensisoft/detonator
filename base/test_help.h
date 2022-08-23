@@ -123,8 +123,13 @@ static TestTimes TimedTest(unsigned iterations, std::function<void()> function)
 
 static void PrintTestTimes(const char* name, const TestTimes& times)
 {
-    std::printf("\nTest='%s' times (s): total=%g, min=%g, max=%g, avg=%g, median=%g\n",
-                name, times.total, times.minimum, times.maximum, times.average, times.median);
+    std::printf("\nTest='%s'\n", name);
+    std::printf("==============================\n");
+    std::printf("total  = %.6f s %6u ms\n", times.total,   unsigned(times.total * 1000u));
+    std::printf("min    = %.6f s %6u ms\n", times.minimum, unsigned(times.minimum * 1000u));
+    std::printf("max    = %.6f s %6u ms\n", times.maximum, unsigned(times.maximum * 1000u));
+    std::printf("avg    = %.6f s %6u ms\n", times.average, unsigned(times.average * 1000u));
+    std::printf("median = %.6f s %6u ms\n", times.median,  unsigned(times.median * 1000u));
 }
 
 } // base
