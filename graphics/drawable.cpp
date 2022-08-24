@@ -1614,7 +1614,7 @@ void KinematicsParticleEngineClass::Pack(Packer* packer) const
 }
 
 // Update the particle simulation.
-void KinematicsParticleEngineClass::Update(InstanceState& state, float dt) const
+void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState& state, float dt) const
 {
     // In case particles become heavy on the CPU here are some ways to try
     // to mitigate the issue:
@@ -1679,7 +1679,7 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
 
 // ParticleEngine implementation. Restart the simulation
 // with the previous parameters.
-void KinematicsParticleEngineClass::Restart(InstanceState& state) const
+void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
 {
     state.particles.clear();
     state.time = 0.0f;

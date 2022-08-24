@@ -183,11 +183,13 @@ void Renderer::UpdateNode(const Node& node, float time, float dt)
     }
     if (paint.drawable)
     {
+        gfx::Drawable::Environment env; // todo:
+
         const auto time_scale = drawable->GetTimeScale();
         if (drawable->TestFlag(DrawableItemType::Flags::UpdateDrawable))
-            paint.drawable->Update(dt * time_scale);
+            paint.drawable->Update(env, dt * time_scale);
         if (drawable->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint.drawable->IsAlive())
-            paint.drawable->Restart();
+            paint.drawable->Restart(env);
     }
 }
 
@@ -362,6 +364,28 @@ void Renderer::DrawEntity(const EntityType& entity,
 
             if (item)
             {
+                mTransform.Push(node->GetModelTransform());
+                if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+                {
+                    mTransform.Push();
+                    mTransform.Scale(-1.0f , 1.0f);
+                    mTransform.Translate(1.0f , 0.0f);
+                }
+                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                {
+                    mTransform.Push();
+                    mTransform.Scale(1.0f, -1.0f);
+                    mTransform.Translate(0.0f, 1.0f);
+                }
+                const auto& transform = mTransform.GetAsMatrix();
+
+                if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+                    mTransform.Pop();
+                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+                    mTransform.Pop();
+                // pop the model transform
+                mTransform.Pop();
+
                 const auto& material = item->GetMaterialId();
                 const auto& drawable = item->GetDrawableId();
                 auto& paint_node = mRenderer.mPaintNodes["item/" + node->GetId()];
@@ -386,6 +410,12 @@ void Renderer::DrawEntity(const EntityType& entity,
                         paint_node.drawable = gfx::CreateDrawableInstance(klass);
                     if (!paint_node.drawable)
                         WARN("No such drawable class '%1' found for '%2/%3'", drawable, mEntity.GetName(), node->GetName());
+                    if (paint_node.drawable)
+                    {
+                        gfx::Drawable::Environment env; // todo:
+                        env.model_matrix = &transform;
+                        paint_node.drawable->Restart(env);
+                    }
                 }
                 if (paint_node.material)
                 {
@@ -417,36 +447,14 @@ void Renderer::DrawEntity(const EntityType& entity,
                 // if it doesn't render then no draw packets are generated
                 if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
                 {
-                    mTransform.Push(node->GetModelTransform());
-                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
-                    {
-                        mTransform.Push();
-                        mTransform.Scale(-1.0f , 1.0f);
-                        mTransform.Translate(1.0f , 0.0f);
-                    }
-                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
-                    {
-                        mTransform.Push();
-                        mTransform.Scale(1.0f, -1.0f);
-                        mTransform.Translate(0.0f, 1.0f);
-                    }
-
                     DrawPacket packet;
                     packet.material  = paint_node.material;
                     packet.drawable  = paint_node.drawable;
                     packet.layer     = item->GetLayer();
                     packet.pass      = item->GetRenderPass();
-                    packet.transform = mTransform.GetAsMatrix();
+                    packet.transform = transform;
                     if (!mHook || (mHook && mHook->InspectPacket(node , packet)))
                         mPackets.push_back(std::move(packet));
-
-                    if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
-                        mTransform.Pop();
-                    if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
-                        mTransform.Pop();
-
-                    // pop the model transform
-                    mTransform.Pop();
                 }
             }
 
