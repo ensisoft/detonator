@@ -1667,6 +1667,8 @@ void Workspace::SaveResource(const Resource& resource)
         res->UpdateFrom(resource);
         emit ResourceUpdated(mResources[i].get());
         emit dataChanged(index(i, 0), index(i, 1));
+        INFO("Saved resource '%1'", resource.GetName());
+        NOTE("Saved resource '%1'", resource.GetName());
         return;
     }
     // if we're here no such resource exists yet.
@@ -1685,6 +1687,8 @@ void Workspace::SaveResource(const Resource& resource)
     auto& back = mResources[mVisibleCount];
     emit NewResourceAvailable(back.get());
 
+    INFO("Saved new resource '%1'", resource.GetName());
+    NOTE("Saved new resource '%1'", resource.GetName());
 }
 
 QString Workspace::MapDrawableIdToName(const QString& id) const

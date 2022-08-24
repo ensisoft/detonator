@@ -997,9 +997,8 @@ void EntityWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.entityName))
         return;
-    const QString& name = GetValue(mUI.entityName);
-    mState.entity->SetName(GetValue(mUI.entityName));
-    app::EntityResource resource(*mState.entity, name);
+
+    app::EntityResource resource(*mState.entity, GetValue(mUI.entityName));
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -1021,10 +1020,7 @@ void EntityWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.entity->GetHash();
-
-    INFO("Saved entity '%1'", name);
-    NOTE("Saved entity '%1'", name);
-    setWindowTitle(name);
+    setWindowTitle(GetValue(mUI.entityName));
 }
 void EntityWidget::on_actionNewRect_triggered()
 {

@@ -388,11 +388,9 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "model", mUI.cmbModel);
     SetUserProperty(resource, "widget", mUI.widget);    
     SetUserProperty(resource, "zoom", mUI.zoom);
+
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
-
-    NOTE("Saved material '%1'", GetValue(mUI.materialName));
-    INFO("Saved material '%1'", GetValue(mUI.materialName));
     setWindowTitle(GetValue(mUI.materialName));
 }
 void MaterialWidget::on_actionRemoveTexture_triggered()

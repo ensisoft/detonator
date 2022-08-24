@@ -890,9 +890,8 @@ void SceneWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.name))
         return;
-    const QString& name = GetValue(mUI.name);
-    mState.scene.SetName(GetValue(mUI.name));
-    app::SceneResource resource(mState.scene, name);
+
+    app::SceneResource resource(mState.scene, GetValue(mUI.name));
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -920,10 +919,7 @@ void SceneWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene.GetHash();
-
-    INFO("Saved scene '%1'", name);
-    NOTE("Saved scene '%1'", name);
-    setWindowTitle(name);
+    setWindowTitle(GetValue(mUI.name));
 }
 
 void SceneWidget::on_actionNodeEdit_triggered()

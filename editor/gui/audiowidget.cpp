@@ -1555,8 +1555,6 @@ void AudioWidget::on_actionSave_triggered()
     mScene->SaveState(resource);
 
     mWorkspace->SaveResource(resource);
-    INFO("Saved audio graph '%1'.", GetValue(mUI.graphName));
-    NOTE("Saved audio graph '%1'.", GetValue(mUI.graphName));
     setWindowTitle(GetValue(mUI.graphName));
     mGraphHash = hash;
 }

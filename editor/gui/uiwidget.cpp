@@ -963,9 +963,7 @@ void UIWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.windowName))
         return;
 
-    const QString& name = GetValue(mUI.windowName);
-    mState.window.SetName(GetValue(mUI.windowName));
-    app::UIResource resource(mState.window, name);
+    app::UIResource resource(mState.window, GetValue(mUI.windowName));
     SetUserProperty(resource, "camera_offset_x", mState.camera_offset_x);
     SetUserProperty(resource, "camera_offset_y", mState.camera_offset_y);
     SetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -980,9 +978,7 @@ void UIWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.window.GetHash();
-    INFO("Saved UI '%1'", name);
-    NOTE("Saved UI '%1'", name);
-    setWindowTitle(name);
+    setWindowTitle(GetValue(mUI.windowName));
 }
 
 void UIWidget::on_actionNewForm_triggered()
