@@ -96,6 +96,8 @@ public:
     { mDrawVectors = on_off; }
     void SetIsPlaying(bool on_off)
     { mPlaying = on_off; }
+    void SetViewMatrix(const glm::mat4& view)
+    { mView = view; }
 
     // EntityNode
     virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
@@ -148,7 +150,7 @@ private:
             return false;
         else if(!mViewRect.IsEmpty())
         {
-            const auto& rect = game::ComputeBoundingRect(packet.transform);
+            const auto& rect = game::ComputeBoundingRect(mView * packet.transform);
             if (!DoesIntersect(mViewRect, rect))
                 return false;
         }
@@ -255,6 +257,7 @@ private:
     bool mDrawSelection  = false;
     bool mDrawIndicators = true;
     bool mDrawVectors    = false;
+    glm::mat4 mView;
 };
 
 } // namespace
