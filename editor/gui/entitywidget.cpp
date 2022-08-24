@@ -575,6 +575,18 @@ void EntityWidget::AddActions(QMenu& menu)
 
 bool EntityWidget::SaveState(Settings& settings) const
 {
+    data::JsonObject json;
+    mState.entity->IntoJson(json);
+    settings.SetValue("Entity", "content", json);
+    settings.SetValue("Entity", "hash", mOriginalHash);
+    settings.SetValue("Entity", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("Entity", "camera_offset_y", mState.camera_offset_y);
+
+    for (const auto& p : mTrackProperties)
+    {
+        settings.SetValue("Entity", app::FromUtf8(p.first), p.second);
+    }
+
     settings.SaveWidget("Entity", mUI.scaleX);
     settings.SaveWidget("Entity", mUI.scaleY);
     settings.SaveWidget("Entity", mUI.rotation);
@@ -585,25 +597,17 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.cmbGrid);
     settings.SaveWidget("Entity", mUI.zoom);
     settings.SaveWidget("Entity", mUI.widget);
-    settings.SetValue("Entity", "camera_offset_x", mState.camera_offset_x);
-    settings.SetValue("Entity", "camera_offset_y", mState.camera_offset_y);
-
-    for (const auto& p : mTrackProperties)
-    {
-        settings.SetValue("Entity", app::FromUtf8(p.first), p.second);
-    }
-
-    // the entity can already serialize into JSON.
-    // so let's use the JSON serialization in the entity
-    // and then convert that into base64 string which we can
-    // stick in the settings data stream.
-    data::JsonObject json;
-    mState.entity->IntoJson(json);
-    settings.SetValue("Entity", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
 {
+    data::JsonObject json;
+    settings.GetValue("Entity", "content", &json);
+    settings.GetValue("Entity", "hash", &mOriginalHash);
+    settings.GetValue("Entity", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("Entity", "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
+
     settings.LoadWidget("Entity", mUI.scaleX);
     settings.LoadWidget("Entity", mUI.scaleY);
     settings.LoadWidget("Entity", mUI.rotation);
@@ -614,27 +618,8 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.cmbGrid);
     settings.LoadWidget("Entity", mUI.zoom);
     settings.LoadWidget("Entity", mUI.widget);
-    settings.GetValue("Entity", "camera_offset_x", &mState.camera_offset_x);
-    settings.GetValue("Entity", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
 
-    std::string base64;
-    settings.GetValue("Entity", "content", &base64);
-
-    data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
-
-    auto ret  = game::EntityClass::FromJson(json);
-    if (!ret.has_value())
-    {
-        ERROR("Failed to load entity widget state.");
-        return false;
-    }
+    auto ret   = game::EntityClass::FromJson(json);
     auto klass = std::move(ret.value());
     auto hash  = klass.GetHash();
     mState.entity = FindSharedEntity(hash);
@@ -643,8 +628,6 @@ bool EntityWidget::LoadState(const Settings& settings)
         mState.entity = std::make_shared<game::EntityClass>(std::move(klass));
         ShareEntity(mState.entity);
     }
-
-    mOriginalHash = mState.entity->GetHash();
 
     for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {

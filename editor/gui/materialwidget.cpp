@@ -221,29 +221,14 @@ void MaterialWidget::AddActions(QMenu& menu)
 
 bool MaterialWidget::LoadState(const Settings& settings)
 {
-    std::string base64;
-    settings.GetValue("Material", "content", &base64);
-
     data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
-    auto ret = gfx::MaterialClass::FromJson(json);
-    if (!ret)
-    {
-        WARN("Failed to load material widget state.");
-        return false;
-    }
-    mMaterial = std::move(ret);
-    mOriginalHash = mMaterial->GetHash();
-
+    settings.GetValue("Material", "content", &json);
+    settings.GetValue("Material", "hash", &mOriginalHash);
     settings.LoadWidget("Material", mUI.materialName);
     settings.LoadWidget("Material", mUI.zoom);
     settings.LoadWidget("Material", mUI.cmbModel);
     settings.LoadWidget("Material", mUI.widget);
+    mMaterial = gfx::MaterialClass::FromJson(json);
 
     ApplyShaderDescription();
     GetMaterialProperties();
@@ -256,12 +241,12 @@ bool MaterialWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
     mMaterial->IntoJson(json);
-
+    settings.SetValue("Material", "content", json);
+    settings.SetValue("Material", "hash", mOriginalHash);
     settings.SaveWidget("Material", mUI.materialName);
     settings.SaveWidget("Material", mUI.zoom);
     settings.SaveWidget("Material", mUI.cmbModel);
     settings.SaveWidget("Material", mUI.widget);
-    settings.SetValue("Material", "content", base64::Encode(json.ToString()));
     return true;
 }
 

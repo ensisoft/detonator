@@ -22,10 +22,12 @@
 #  include <QJsonDocument>
 #  include <QJsonArray>
 #  include <QFile>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
+#include "data/json.h"
 #include "editor/app/eventlog.h"
-#include "settings.h"
+#include "editor/gui/settings.h"
 
 namespace gui
 {
@@ -67,6 +69,20 @@ bool Settings::GetValue(const QString& module, const QString& key, std::string* 
         return false;
     *out = app::ToUtf8(qvariant_cast<QString>(value));
     return true;
+}
+bool Settings::GetValue(const QString& module, const QString& key, data::JsonObject* out) const
+{
+    const auto& value = mSettings->GetValue(module + "/" + key);
+    if (!value.isValid())
+        return false;
+    const std::string& base64 = app::ToUtf8(qvariant_cast<QString>(value));
+    auto [ok, error] = out->ParseString(base64::Decode(base64));
+    return ok;
+}
+
+void Settings::SetValue(const QString& module, const QString& key, const data::JsonObject& json)
+{
+    mSettings->SetValue(module + "/" + key, app::FromUtf8(base64::Encode(json.ToString())));
 }
 
 std::string Settings::GetValue(const QString& module, const QString& key, const std::string& defaultValue) const

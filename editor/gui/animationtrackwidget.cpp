@@ -277,21 +277,18 @@ void AnimationTrackWidget::AddActions(QMenu& menu)
 }
 bool AnimationTrackWidget::SaveState(Settings& settings) const
 {
-    settings.SaveWidget("TrackWidget", mUI.viewScaleX);
-    settings.SaveWidget("TrackWidget", mUI.viewScaleY);
-    settings.SaveWidget("TrackWidget", mUI.viewRotation);
-    settings.SaveWidget("TrackWidget", mUI.zoom);
-    settings.SaveWidget("TrackWidget", mUI.cmbGrid);
-    settings.SaveWidget("TrackWidget", mUI.chkShowOrigin);
-    settings.SaveWidget("TrackWidget", mUI.chkShowGrid);
-    settings.SaveWidget("TrackWidget", mUI.chkShowViewport);
-    settings.SaveWidget("TrackWidget", mUI.chkSnap);
-    settings.SaveAction("TrackWidget", mUI.actionUsePhysics);
+    data::JsonObject entity;
+    data::JsonObject track;
+    mState.entity->IntoJson(entity);
+    mState.track->IntoJson(track);
+    settings.SetValue("TrackWidget", "entity", entity);
+    settings.SetValue("TrackWidget", "track", track);
+    settings.SetValue("TrackWidget", "hash", mOriginalHash);
     settings.SetValue("TrackWidget", "show_bits", mState.show_flags.value());
     settings.SetValue("TrackWidget", "camera_offset_x", mState.camera_offset_x);
     settings.SetValue("TrackWidget", "camera_offset_y", mState.camera_offset_y);
+    settings.SetValue("TrackWidget", "num_timelines", (unsigned)mState.timelines.size());
 
-    settings.SetValue("TrackWidget", "num_timelines", (unsigned) mState.timelines.size());
     for (int i=0; i<(unsigned)mState.timelines.size(); ++i)
     {
         const auto& timeline = mState.timelines[i];
@@ -303,22 +300,44 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
         settings.SetValue("TrackWidget", app::FromUtf8(p.first), p.second);
     }
 
-    // use the entity JSON serialization to save the state.
-    {
-        data::JsonObject json;
-        mState.entity->IntoJson(json);
-        settings.SetValue("TrackWidget", "entity", base64::Encode(json.ToString()));
-    }
-
-    {
-        data::JsonObject json;
-        mState.track->IntoJson(json);
-        settings.SetValue("TrackWidget", "track", base64::Encode(json.ToString()));
-    }
+    settings.SaveWidget("TrackWidget", mUI.viewScaleX);
+    settings.SaveWidget("TrackWidget", mUI.viewScaleY);
+    settings.SaveWidget("TrackWidget", mUI.viewRotation);
+    settings.SaveWidget("TrackWidget", mUI.zoom);
+    settings.SaveWidget("TrackWidget", mUI.cmbGrid);
+    settings.SaveWidget("TrackWidget", mUI.chkShowOrigin);
+    settings.SaveWidget("TrackWidget", mUI.chkShowGrid);
+    settings.SaveWidget("TrackWidget", mUI.chkShowViewport);
+    settings.SaveWidget("TrackWidget", mUI.chkSnap);
+    settings.SaveWidget("TrackWidget", mUI.widget);
+    settings.SaveAction("TrackWidget", mUI.actionUsePhysics);
     return true;
 }
 bool AnimationTrackWidget::LoadState(const Settings& settings)
 {
+    data::JsonObject entity;
+    data::JsonObject track;
+    unsigned num_timelines = 0;
+    unsigned show_bits = ~0u;
+
+    settings.GetValue("TrackWidget", "entity", &entity);
+    settings.GetValue("TrackWidget", "track", &track);
+    settings.GetValue("TrackWidget", "hash", &mOriginalHash);
+    settings.GetValue("TrackWidget", "show_bits", &show_bits);
+    settings.GetValue("TrackWidget", "num_timelines", &num_timelines);
+    settings.GetValue("TrackWidget", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("TrackWidget", "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
+
+    for (unsigned i=0; i<num_timelines; ++i)
+    {
+        Timeline tl;
+        settings.GetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), &tl.selfId);
+        settings.GetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), &tl.nodeId);
+        mState.timelines.push_back(std::move(tl));
+    }
+    mState.show_flags.set_from_value(show_bits);
+
     settings.LoadWidget("TrackWidget", mUI.viewScaleX);
     settings.LoadWidget("TrackWidget", mUI.viewScaleY);
     settings.LoadWidget("TrackWidget", mUI.viewRotation);
@@ -328,80 +347,30 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.LoadWidget("TrackWidget", mUI.chkShowGrid);
     settings.LoadWidget("TrackWidget", mUI.chkShowViewport);
     settings.LoadWidget("TrackWidget", mUI.chkSnap);
+    settings.LoadWidget("TrackWidget", mUI.widget);
     settings.LoadAction("TrackWidget", mUI.actionUsePhysics);
-    settings.GetValue("TrackWidget", "camera_offset_x", &mState.camera_offset_x);
-    settings.GetValue("TrackWidget", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
 
-    unsigned num_timelines = 0;
-    unsigned show_bits = ~0u;
-    settings.GetValue("TrackWidget", "show_bits", &show_bits);
-    settings.GetValue("TrackWidget", "num_timelines", &num_timelines);
-    mState.show_flags.set_from_value(show_bits);
-
-    for (unsigned i=0; i<num_timelines; ++i)
+    // restore entity
     {
-        Timeline tl;
-        settings.GetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), &tl.selfId);
-        settings.GetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), &tl.nodeId);
-        mState.timelines.push_back(std::move(tl));
-    }
-
-    // try to restore the shared entity class object
-    {
-        std::string base64;
-        settings.GetValue("TrackWidget", "entity", &base64);
-
-        data::JsonObject json;
-        auto [ok, error] = json.ParseString(base64::Decode(base64));
-        if (!ok)
-        {
-            ERROR("Failed to parse content JSON. '%1'", error);
-            return false;
-        }
-
-        auto ret = game::EntityClass::FromJson(json);
-        if (!ret.has_value())
-        {
-            ERROR("Failed to load animation track widget state.");
-            return false;
-        }
+        auto ret = game::EntityClass::FromJson(entity);
         auto klass = std::move(ret.value());
-        auto hash  = klass.GetHash();
+        auto hash = klass.GetHash();
         mState.entity = FindSharedEntity(hash);
         if (!mState.entity)
         {
-            auto entity   = std::make_shared<game::EntityClass>(std::move(klass));
-            mState.entity = entity;
-            ShareEntity(entity);
+            auto shared = std::make_shared<game::EntityClass>(std::move(klass));
+            mState.entity = shared;
+            ShareEntity(shared);
         }
     }
-
     // restore the track state.
     {
-        std::string base64;
-        settings.GetValue("TrackWidget", "track", &base64);
-
-        data::JsonObject json;
-        auto [ok, error] = json.ParseString(base64::Decode(base64));
-        if (!ok)
-        {
-            ERROR("Failed to parse content JSON. '%1'", error);
-            return false;
-        }
-        auto ret = game::AnimationClass::FromJson(json);
-        if (!ret.has_value())
-        {
-            ERROR("Failed to load animation track state.");
-            return false;
-        }
+        auto ret = game::AnimationClass::FromJson(track);
         auto klass    = std::move(ret.value());
         mState.track  = std::make_shared<game::AnimationClass>(std::move(klass));
-        mOriginalHash = mState.track->GetHash();
     }
 
     mEntity = game::CreateEntityInstance(mState.entity);
-
     mTreeModel.reset(new TreeModel(*mState.entity));
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
