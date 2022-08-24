@@ -983,8 +983,9 @@ private:
             }
         }
 
+        gfx::Drawable::Environment env; // todo:
         mMouseMaterial->Update(dt);
-        mMouseDrawable->Update(dt);
+        mMouseDrawable->Update(env, dt);
     }
     void PerformGameActions(float dt)
     {

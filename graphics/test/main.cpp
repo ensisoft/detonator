@@ -176,20 +176,40 @@ public:
     }
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Transform transform;
-        transform.Resize(1024, 768);
-        painter.Draw(*mEngine, transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        gfx::Transform model;
+        model.Resize(1024, 768);
+        painter.Draw(*mEngine, model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
     }
     virtual void Update(float dt) override
     {
         if (!mStarted)
             return;
-        mEngine->Update(dt);
+
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        const auto& model = transform.GetAsMatrix();
+
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = &model;
+        mEngine->Update(e, dt);
     }
     virtual void Start() override
-    { mStarted = true; }
+    {
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        const auto& view  = glm::mat4(1.0f);
+        const auto& model = transform.GetAsMatrix();
+
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = &model;
+        mEngine->Restart(e);
+
+        mStarted = true;
+    }
     virtual void End() override
-    { mStarted = false; }
+    {
+        mStarted = false;
+    }
     virtual std::string GetName() const
     { return "MegaParticleTest"; }
     virtual bool IsFeatureTest() const override
@@ -235,16 +255,35 @@ public:
     }
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Transform transform;
-        transform.Resize(1024, 768);
-        painter.Draw(*mEngine[0], transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
-        painter.Draw(*mEngine[1], transform, gfx::CreateMaterialFromColor(gfx::Color::Green));
+        gfx::Transform model;
+        model.Resize(1024, 768);
+        painter.Draw(*mEngine[0], model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        painter.Draw(*mEngine[1], model, gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
     virtual void Update(float dt) override
     {
-        mEngine[0]->Update(dt);
-        mEngine[1]->Update(dt);
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        const auto& model = transform.GetAsMatrix();
+
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = &model;
+
+        mEngine[0]->Update(e, dt);
+        mEngine[1]->Update(e, dt);
     }
+    virtual void Start() override
+    {
+        gfx::Transform transform;
+        transform.Resize(1024, 768);
+        const auto& model = transform.GetAsMatrix();
+
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = &model;
+        mEngine[0]->Restart(e);
+        mEngine[1]->Restart(e);
+    }
+
     virtual std::string GetName() const override
     { return "JankTest"; }
     virtual bool IsFeatureTest() const override
@@ -1150,46 +1189,63 @@ public:
 
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Transform t;
-        t.Resize(300, 300);
-        t.Translate(-150, -150);
-        t.Rotate(math::Pi);
-        t.Translate(150 + 100, 150 + 300);
+        gfx::Transform model;
+        model.Resize(300, 300);
+        model.Translate(-150, -150);
+        model.Rotate(math::Pi);
+        model.Translate(150 + 100, 150 + 300);
 
         gfx::TextureMap2DClass material;
         material.SetTexture(gfx::LoadTextureFromFile("textures/BlackSmoke.png"));
         material.SetBaseColor(gfx::Color4f(35, 35, 35, 20));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        painter.Draw(*mSmoke, t, gfx::MaterialClassInst(material));
+        painter.Draw(*mSmoke, model, gfx::MaterialClassInst(material));
 
         material.SetBaseColor(gfx::Color4f(0x71, 0x38, 0x0, 0xff));
         material.SetTexture(gfx::LoadTextureFromFile("textures/BlackSmoke.png"));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
-        painter.Draw(*mFire, t, gfx::MaterialClassInst(material));
-
+        painter.Draw(*mFire, model, gfx::MaterialClassInst(material));
 
         material.SetBaseColor(gfx::Color4f(234, 5, 3, 255));
         material.SetTexture(gfx::LoadTextureFromFile("textures/RoundParticle.png"));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        t.Translate(500, 0);
-        painter.Draw(*mBlood, t, gfx::MaterialClassInst(material));
+        model.Translate(500, 0);
+        painter.Draw(*mBlood, model, gfx::MaterialClassInst(material));
 
         material.SetBaseColor(gfx::Color4f(224, 224, 224, 255));
         material.SetTexture(gfx::LoadTextureFromFile("textures/WhiteCloud.png"));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
-        t.Reset();
-        t.Resize(2000, 200);
-        t.MoveTo(-100, 100);
-        painter.Draw(*mClouds, t, gfx::MaterialClassInst(material));
+        model.Reset();
+        model.Resize(2000, 200);
+        model.MoveTo(-100, 100);
+        painter.Draw(*mClouds, model, gfx::MaterialClassInst(material));
     }
-    virtual void Update(float dts) override
+    virtual void Update(float dt) override
     {
-        mFire->Update(dts);
-        mSmoke->Update(dts);
-        mBlood->Update(dts);
-        mClouds->Update(dts);
+        // todo: setup the model matrices properly. keep in mind that
+        // the model matrix needs to change per each particle engine
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = nullptr;
+
+        mFire->Update(e, dt);
+        mSmoke->Update(e, dt);
+        mBlood->Update(e, dt);
+        mClouds->Update(e, dt);
     }
+    virtual void Start() override
+    {
+        // todo: setup the model matrices properly. keep in mind that
+        // the model matrix needs to change per each particle engine
+        gfx::DrawableClass::Environment e;
+        e.model_matrix = nullptr;
+
+        mFire->Restart(e);
+        mSmoke->Restart(e);
+        mBlood->Restart(e);
+        mClouds->Restart(e);
+    }
+
     virtual std::string GetName() const override
     { return "ParticleTest"; }
 private:

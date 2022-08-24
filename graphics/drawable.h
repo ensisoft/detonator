@@ -166,7 +166,7 @@ namespace gfx
         virtual Geometry* Upload(const Environment& env, Device& device) const = 0;
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
-        virtual void Update(float dt) {}
+        virtual void Update(const Environment& env, float dt) {}
         // Request a particular line width to be used when style
         // is either Outline or Wireframe.
         virtual void SetLineWidth(float width) {}
@@ -183,7 +183,7 @@ namespace gfx
         virtual bool IsAlive() const
         { return true; }
         // Restart the drawable, if applicable.
-        virtual void Restart() {}
+        virtual void Restart(const Environment& env) {}
         // Get the ID of the drawable shape. Used to map the
         // drawable to a device specific program object.
         inline std::string GetId() const
@@ -972,8 +972,8 @@ namespace gfx
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
 
-        void Update(InstanceState& state, float dt) const;
-        void Restart(InstanceState& state) const;
+        void Update(const Environment& env, InstanceState& state, float dt) const;
+        void Restart(const Environment& env, InstanceState& state) const;
         bool IsAlive(const InstanceState& state) const;
 
         // Get the params.
@@ -1012,19 +1012,13 @@ namespace gfx
         // class definition.
         KinematicsParticleEngine(const std::shared_ptr<const KinematicsParticleEngineClass>& klass)
           : mClass(klass)
-        {
-            Restart();
-        }
+        {}
         KinematicsParticleEngine(const KinematicsParticleEngineClass& klass)
           : mClass(std::make_shared<KinematicsParticleEngineClass>(klass))
-        {
-            Restart();
-        }
+        {}
         KinematicsParticleEngine(const KinematicsParticleEngineClass::Params& params)
           : mClass(std::make_shared<KinematicsParticleEngineClass>(params))
-        {
-            Restart();
-        }
+        {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             state.line_width = 1.0;
@@ -1052,18 +1046,18 @@ namespace gfx
         }
 
         // Update the particle simulation.
-        virtual void Update(float dt) override
+        virtual void Update(const Environment& env, float dt) override
         {
-            mClass->Update(mState, dt);
+            mClass->Update(env, mState, dt);
         }
 
         virtual bool IsAlive() const override
         {
             return mClass->IsAlive(mState);
         }
-        virtual void Restart() override
+        virtual void Restart(const Environment& env) override
         {
-            mClass->Restart(mState);
+            mClass->Restart(env, mState);
         }
         // Get the current number of alive particles.
         size_t GetNumParticlesAlive() const

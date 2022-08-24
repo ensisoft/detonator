@@ -116,6 +116,8 @@ namespace gfx
         // convenience and helper functions.
 
         static glm::mat4 MakeOrthographicProjection(const FRect& rect);
+        static glm::mat4 MakeOrthographicProjection(float left, float top, float width, float height);
+        static glm::mat4 MakeOrthographicProjection(float width, float height);
         // Set the projection matrix of the painter to an orthographic
         // projection matrix. Essentially this creates a logical viewport
         // (and coordinate transformation) into the scene to be rendered

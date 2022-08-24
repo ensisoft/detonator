@@ -344,6 +344,16 @@ glm::mat4 Painter::MakeOrthographicProjection(const FRect& rect)
 }
 
 // static
+glm::mat4 Painter::MakeOrthographicProjection(float left, float top, float width, float height)
+{
+    return glm::ortho(left, left + width, top + height, top);
+}
+glm::mat4 Painter::MakeOrthographicProjection(float width, float height)
+{
+    return glm::ortho(0.0f, width, height, 0.0f);
+}
+
+// static
 std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 {
     return std::make_unique<StandardPainter>(device);

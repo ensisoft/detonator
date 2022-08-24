@@ -381,7 +381,21 @@ void ParticleEditorWidget::Update(double secs)
 
     if (!mPaused)
     {
-        mEngine->Update(secs);
+        const float viz_width  = GetValue(mUI.scaleX);
+        const float viz_height = GetValue(mUI.scaleY);
+        const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
+
+        gfx::Transform model;
+        model.Scale(viz_width, viz_height);
+        model.Translate(-viz_width*0.5, -viz_height*0.5);
+        model.Rotate(viz_rot);
+        const auto& model_matrix = model.GetAsMatrix();
+
+        gfx::Drawable::Environment env;
+        env.model_matrix = &model_matrix;
+        env.editing_mode = true;
+
+        mEngine->Update(env, secs);
         mTime += secs;
         if (mMaterial)
             mMaterial->SetRuntime(mTime);
@@ -545,7 +559,22 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         SetEnabled(mUI.actionPause, true);
         return;
     }
+    const float viz_width  = GetValue(mUI.scaleX);
+    const float viz_height = GetValue(mUI.scaleY);
+    const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
+
+    gfx::Transform model;
+    model.Scale(viz_width, viz_height);
+    model.Translate(-viz_width*0.5, -viz_height*0.5);
+    model.Rotate(viz_rot);
+    const auto& model_matrix = model.GetAsMatrix();
+
+    gfx::Drawable::Environment env;
+    env.model_matrix = &model_matrix;
+    env.editing_mode = true;
+
     mEngine.reset(new gfx::KinematicsParticleEngine(mClass));
+    mEngine->Restart(env);
     mTime   = 0.0f;
     mPaused = false;
     SetEnabled(mUI.actionPause, true);
