@@ -101,7 +101,6 @@ namespace gui
         virtual void Copy(Clipboard& clipboard) const override;
         virtual void Paste(const Clipboard& clipboard) override;
         virtual bool HasUnsavedChanges() const override;
-        virtual bool ConfirmClose() override;
         virtual bool GetStats(Stats* stats) const override;
     private:
         void GetSelectedElementProperties();

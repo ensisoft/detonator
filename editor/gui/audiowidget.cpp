@@ -1385,25 +1385,6 @@ bool AudioWidget::HasUnsavedChanges() const
         return false;
     return GetHash() != mGraphHash;
 }
-bool AudioWidget::ConfirmClose()
-{
-    const auto hash = GetHash();
-    if (hash == mGraphHash)
-        return true;
-
-    QMessageBox msg(this);
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    msg.setIcon(QMessageBox::Question);
-    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-    const auto ret = msg.exec();
-    if (ret == QMessageBox::Cancel)
-        return false;
-    else if (ret == QMessageBox::No)
-        return true;
-
-    on_actionSave_triggered();
-    return true;
-}
 
 bool AudioWidget::GetStats(Stats* stats) const
 {

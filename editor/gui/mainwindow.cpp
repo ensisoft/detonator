@@ -879,9 +879,18 @@ void MainWindow::on_mainTab_currentChanged(int index)
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
     auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
-    if (!widget->ConfirmClose())
-        return;
-
+    if (widget->HasUnsavedChanges())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+        const auto ret = msg.exec();
+        if (ret == QMessageBox::Cancel)
+            return;
+        else if (ret == QMessageBox::Yes)
+            widget->Save();
+    }
     if (widget == mCurrentWidget)
         mCurrentWidget = nullptr;
 

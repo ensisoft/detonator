@@ -193,16 +193,6 @@ namespace gui
         virtual bool ShouldClose() const
         { return false; }
 
-        // Called before the widget is being closed by the user.
-        // If there are any pending/unsaved changes the widget
-        // implementation can ask the user for a confirmation and
-        // then proceed to save/discard such changes.
-        // If true is returned main window will proceed to close the
-        // widget. Otherwise the window is *not* closed and nothing
-        // happens.
-        virtual bool ConfirmClose() // const
-        { return true; }
-
         virtual bool OnEscape()
         { return false; }
 

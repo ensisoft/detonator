@@ -58,7 +58,6 @@ namespace gui
         virtual bool SaveState(Settings& settings) const override;
         virtual bool LoadState(const Settings& settings) override;
         virtual bool HasUnsavedChanges() const override;
-        virtual bool ConfirmClose() override;
         virtual bool OnEscape() override;
 
     private slots:
