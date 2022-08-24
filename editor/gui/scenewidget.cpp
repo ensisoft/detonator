@@ -329,6 +329,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
     mState.view = mUI.tree;
+    mOriginalHash = mState.scene.GetHash();
 
     // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &SceneWidget::TreeCurrentNodeChangedEvent);
@@ -733,16 +734,14 @@ void SceneWidget::Render()
 
 bool SceneWidget::HasUnsavedChanges() const
 {
-    if (!mOriginalHash)
+    if (mOriginalHash == mState.scene.GetHash())
         return false;
-    const auto hash = mState.scene.GetHash();
-    return hash != mOriginalHash;
+    return true;
 }
 
 bool SceneWidget::ConfirmClose()
 {
-    const auto hash = mState.scene.GetHash();
-    if (hash == mOriginalHash)
+    if (mOriginalHash == mState.scene.GetHash())
         return true;
 
     QMessageBox msg(this);

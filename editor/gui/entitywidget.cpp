@@ -387,6 +387,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mState.entity = std::make_shared<game::EntityClass>();
     mState.entity->SetName("My Entity");
+    mOriginalHash = mState.entity->GetHash();
 
     mRenderTree.reset(new TreeModel(*mState.entity));
     mScriptVarModel.reset(new ScriptVarModel(mState));
@@ -896,16 +897,14 @@ void EntityWidget::Render()
 
 bool EntityWidget::HasUnsavedChanges() const
 {
-    if (!mOriginalHash)
+    if (mOriginalHash == mState.entity->GetHash())
         return false;
-    const auto hash = mState.entity->GetHash();
-    return hash != mOriginalHash;
+    return true;
 }
 
 bool EntityWidget::ConfirmClose()
 {
-    const auto hash = mState.entity->GetHash();
-    if (hash == mOriginalHash)
+    if (mOriginalHash == mState.entity->GetHash())
         return true;
 
     QMessageBox msg(this);

@@ -136,6 +136,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     DEBUG("Create MaterialWidget");
     mWorkspace = workspace;
     mMaterial  = std::make_shared<gfx::ColorClass>();
+    mOriginalHash = mMaterial->GetHash();
 
     mUI.setupUi(this);
     mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
@@ -342,17 +343,15 @@ void MaterialWidget::Save()
 
 bool MaterialWidget::HasUnsavedChanges() const
 {
-    if (!mOriginalHash)
-        return false;
-    const auto hash = mMaterial->GetHash();
-    return hash != mOriginalHash;
+    if (mOriginalHash != mMaterial->GetHash())
+        return true;
+    return false;
 }
 
 bool MaterialWidget::ConfirmClose()
 {
     // any unsaved changes ?
-    const auto hash = mMaterial->GetHash();
-    if (hash == mOriginalHash)
+    if (mOriginalHash == mMaterial->GetHash())
         return true;
 
     QMessageBox msg(this);
