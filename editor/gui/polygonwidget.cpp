@@ -74,7 +74,6 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     DEBUG("Create PolygonWidget");
 
     mUI.setupUi(this);
-
     mUI.widget->onPaintScene = std::bind(&ShapeWidget::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onMousePress  = std::bind(&ShapeWidget::OnMousePress,
@@ -87,6 +86,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
         this, std::placeholders::_1);
     mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
         this, std::placeholders::_1);
+
+    mOriginalHash = mPolygon.GetHash();
 
     SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
     SetEnabled(mUI.actionPause, false);
@@ -292,16 +293,14 @@ void ShapeWidget::Save()
 
 bool ShapeWidget::HasUnsavedChanges() const
 {
-    if (!mOriginalHash)
+    if (mOriginalHash == mPolygon.GetHash())
         return false;
-    const auto hash = mPolygon.GetHash();
-    return hash != mOriginalHash;
+    return true;
 }
 
 bool ShapeWidget::ConfirmClose()
 {
-    const auto hash = mPolygon.GetHash();
-    if (hash == mOriginalHash)
+    if (mOriginalHash == mPolygon.GetHash())
         return true;
 
     QMessageBox msg(this);
