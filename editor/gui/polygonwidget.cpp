@@ -115,24 +115,34 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     QString material;
     GetProperty(resource, "material", &material);
+    GetUserProperty(resource, "alpha",        mUI.alpha);
+    GetUserProperty(resource, "grid",         mUI.cmbGrid);
+    GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
+    GetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
+    GetUserProperty(resource, "widget",       mUI.widget);
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
-    GetUserProperty(resource, "alpha", mUI.alpha);
-    GetUserProperty(resource, "grid", mUI.cmbGrid);
-    GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
-    GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
-    GetUserProperty(resource, "widget", mUI.widget);
     setWindowTitle(GetValue(mUI.name));
 
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
 
-    // the material could have been deleted, so create conditionally.
-    if (auto klass = mWorkspace->FindMaterialClassById(app::ToUtf8(material)))
-        mBlueprint = gfx::CreateMaterialInstance(klass);
+    if (!material.isEmpty())
+    {
+        if (mWorkspace->IsValidMaterial(material))
+        {
+            auto klass = mWorkspace->FindMaterialClassById(app::ToUtf8(material));
+            mBlueprint = gfx::CreateMaterialInstance(klass);
+        }
+        else
+        {
+            WARN("Material '%1' is no longer available.", material);
+            SetValue(mUI.blueprints, -1);
+        }
+    }
 }
 
 ShapeWidget::~ShapeWidget()
@@ -332,15 +342,8 @@ void ShapeWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
-    const QString& name = GetValue(mUI.name);
-
-    // update the hash to the new value.
-    mOriginalHash = mPolygon.GetHash();
-
-    app::CustomShapeResource resource(mPolygon, name);
-    QString material = GetItemId(mUI.blueprints);
-    if (!material.isEmpty())
-        SetProperty(resource, "material", material);
+    app::CustomShapeResource resource(mPolygon, GetValue(mUI.name));
+    SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
     SetUserProperty(resource, "alpha",        mUI.alpha);
     SetUserProperty(resource, "grid",         mUI.cmbGrid);
     SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
@@ -348,10 +351,8 @@ void ShapeWidget::on_actionSave_triggered()
     SetUserProperty(resource, "widget",       mUI.widget);
 
     mWorkspace->SaveResource(resource);
-
-    INFO("Saved shape '%1'", name);
-    NOTE("Saved shape '%1'", name);
-    setWindowTitle(name);
+    mOriginalHash = mPolygon.GetHash();
+    setWindowTitle(GetValue(mUI.name));
 }
 
 void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)

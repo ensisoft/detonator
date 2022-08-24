@@ -219,6 +219,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     GetUserProperty(resource, "show_emitter", mUI.chkShowEmitter);
+    GetUserProperty(resource, "widget", mUI.widget);
     if (mWorkspace->IsValidMaterial(material))
     {
         SetValue(mUI.materials, ListItemId(material));
@@ -446,10 +447,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
-    const QString& name = GetValue(mUI.name);
-
-    // setup the resource with the current auxiliary params
-    app::ParticleSystemResource particle_resource(*mClass, name);
+    app::ParticleSystemResource particle_resource(*mClass, GetValue(mUI.name));
     SetProperty(particle_resource, "material", (QString)GetItemId(mUI.materials));
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
@@ -460,12 +458,11 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetUserProperty(particle_resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(particle_resource, "show_bounds", mUI.chkShowBounds);
     SetUserProperty(particle_resource, "show_emitter", mUI.chkShowEmitter);
+    SetUserProperty(particle_resource, "widget", mUI.widget);
+
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass->GetHash();
-
-    INFO("Saved particle system '%1'", name);
-    NOTE("Saved particle system '%1'", name);
-    setWindowTitle(name);
+    setWindowTitle(GetValue(mUI.name));
 }
 
 void ParticleEditorWidget::SetParams()
