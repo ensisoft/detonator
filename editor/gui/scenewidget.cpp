@@ -1483,16 +1483,16 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
 
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
-
     // setup the view transform.
     gfx::Transform view;
-    view.Push();
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    painter.SetViewport(0, 0, width, height);
+    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
+    painter.ResetViewMatrix();
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
@@ -1508,13 +1508,14 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     DrawHook hook(GetCurrentNode(), rect);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
     hook.SetDrawVectors(false);
+    hook.SetViewMatrix(view.GetAsMatrix());
 
-    // begin the animation transformation space
-    view.Push();
-        mState.renderer.BeginFrame();
-        mState.renderer.Draw(mState.scene, painter, view, &hook, &hook);
-        mState.renderer.EndFrame();
-    view.Pop();
+    painter.SetViewMatrix(view.GetAsMatrix());
+    gfx::Transform scene;
+    mState.renderer.BeginFrame();
+    mState.renderer.Draw(mState.scene, painter, scene, &hook, &hook);
+    mState.renderer.EndFrame();
+    painter.ResetViewMatrix();
 
     if (mCurrentTool)
         mCurrentTool->Render(painter, view);
@@ -1534,9 +1535,6 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     PrintMousePos(view, painter, mUI.widget);
-
-    // pop view transformation
-    view.Pop();
 }
 
 void SceneWidget::MouseMove(QMouseEvent* mickey)

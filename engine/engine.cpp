@@ -215,28 +215,33 @@ public:
         if (mScene)
         {
             TRACE_SCOPE("DrawScene");
+
+            gfx::Transform view;
+            // set the game view transform. moving the viewport is the same as
+            // moving the objects in the opposite direction relative to the viewport.
+            view.Translate(-game_view.GetX(), -game_view.GetY());
+
             // low level draw packet filter for culling draw packets
             // that fall outside the current viewport.
             class Culler : public engine::EntityInstanceDrawHook {
             public:
-                Culler(const engine::FRect& view) : mViewRect(view)
+                Culler(const engine::FRect& view_rect,
+                       const glm::mat4& view_matrix)
+                  : mViewRect(view_rect)
+                  , mViewMatrix(view_matrix)
                 {}
                 virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
                 {
-                    const auto& rect = game::ComputeBoundingRect(packet.transform);
+                    const auto& rect = game::ComputeBoundingRect(mViewMatrix * packet.transform);
                     if (!DoesIntersect(rect, mViewRect))
                         return false;
                     return true;
                 }
             private:
                 const engine::FRect mViewRect;
+                const glm::mat4 mViewMatrix;
             };
-            Culler cull(engine::FRect(0.0f, 0.0f, game_view_width, game_view_height));
-
-            gfx::Transform transform;
-            // set the game view transform. moving the viewport is the same as
-            // moving the objects in the opposite direction relative to the viewport.
-            transform.Translate(-game_view.GetX(), -game_view.GetY());
+            Culler cull(engine::FRect(0.0f, 0.0f, game_view_width, game_view_height), view.GetAsMatrix());
 
             // set the actual device viewport for rendering into the window buffer.
             // the device viewport retains the game's logical viewport aspect ratio
@@ -246,7 +251,10 @@ public:
             mPainter->SetOrthographicProjection(0.0f, 0.0f, game_view_width, game_view_height);
             // set the pixel ratio for mapping game units to rendering surface units.
             mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
+            // set the view matrix
+            mPainter->SetViewMatrix(view.GetAsMatrix());
 
+            gfx::Transform transform;
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull));
             if (mDebug.debug_draw && mPhysics.HaveWorld())
@@ -260,11 +268,7 @@ public:
                 {
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
                     {
-                        // map the line end points A and B from the game space
-                        // into view space.
-                        const auto beg = ptr->a - game_view.GetPosition();
-                        const auto end = ptr->b - game_view.GetPosition();
-                        gfx::DrawLine(*mPainter, beg, end, ptr->color, ptr->width);
+                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
                     }
                 }
             );
@@ -290,6 +294,7 @@ public:
             mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
+            mPainter->ResetViewMatrix();
             TRACE_CALL("UI::Paint",ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
         }
 
@@ -299,6 +304,7 @@ public:
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetOrthographicProjection(0, 0, surf_width, surf_height);
             mPainter->SetViewport(0, 0, surf_width, surf_height);
+            mPainter->ResetViewMatrix();
         }
         if (mDebug.debug_show_fps)
         {

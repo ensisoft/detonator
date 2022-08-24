@@ -257,7 +257,7 @@ public:
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
-    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const
+    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
         if (!mEngaged)
             return;
@@ -282,7 +282,7 @@ public:
                      gfx::CreateMaterialFromColor(gfx::Color::Green));
         view.Pop();
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view)
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
         if (!mEngaged)
             return;
@@ -304,7 +304,7 @@ public:
             mEngaged = true;
         }
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view)
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
@@ -816,7 +816,7 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     }
     nodes.clear();
     // walk the tree and link the nodes into the scene.
-    tree.PreOrderTraverseForEach([&nodes, this, &tree](game::EntityNodeClass* node) {
+    tree.PreOrderTraverseForEach([this, &tree](game::EntityNodeClass* node) {
         if (node == nullptr)
             return;
         auto* parent = tree.GetParent(node);
@@ -2228,19 +2228,15 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
 
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
-
-    // apply the view transformation. The view transformation is not part of the
-    // entity per-se, but it's the transformation that transforms the entity
-    // and its nodes from the entity space to the view space, i.e. relative to
-    // the current viewport/view offset
     gfx::Transform view;
-    view.Push();
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
     view.Rotate(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    painter.SetViewport(0, 0, width, height);
+    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
+    painter.ResetViewMatrix();
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
@@ -2252,32 +2248,32 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     hook.SetDrawVectors(true);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
 
-    // begin the entity transformation space
-    view.Push();
-        // Draw entity
-        mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.entity, painter, view, &hook);
-        mState.renderer.EndFrame();
-        // Draw joints, drawn in the entity space.
-        for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
+    // Draw entity
+    painter.SetViewMatrix(view.GetAsMatrix());
+
+    gfx::Transform entity;
+    mState.renderer.BeginFrame();
+    mState.renderer.Draw(*mState.entity, painter, entity, &hook);
+    mState.renderer.EndFrame();
+    // Draw joints, drawn in the entity space.
+    for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
+    {
+        const auto& joint = mState.entity->GetJoint(i);
+        if (joint.type == game::EntityClass::PhysicsJointType::Distance)
         {
-            const auto& joint = mState.entity->GetJoint(i);
-            if (joint.type == game::EntityClass::PhysicsJointType::Distance)
-            {
-                const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
-                const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
-                const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
-                const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
-                const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
-                const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
-                DrawLine(view, src_point, dst_point, painter);
-            }
+            const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
+            const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
+            const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
+            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
+            const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
+            const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
+            DrawLine(entity, src_point, dst_point, painter);
         }
-    view.Pop();
+    }
+    painter.ResetViewMatrix();
 
     if (mCurrentTool)
         mCurrentTool->Render(painter, view);
-
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
@@ -2294,9 +2290,6 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     PrintMousePos(view, painter, mUI.widget);
-
-    // pop view transformation
-    view.Pop();
 }
 
 void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
