@@ -270,8 +270,9 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
     mClass->IntoJson(json);
-    settings.SetValue("Particle", "content", base64::Encode(json.ToString()));
-    settings.SetValue("Particle", "material", (QString) GetItemId(mUI.materials));
+    settings.SetValue("Particle", "content", json);
+    settings.SetValue("Particle", "hash", mOriginalHash);
+    settings.SetValue("Particle", "material", (QString)GetItemId(mUI.materials));
     settings.SaveWidget("Particle", mUI.name);
     settings.SaveWidget("Particle", mUI.scaleX);
     settings.SaveWidget("Particle", mUI.scaleY);
@@ -282,48 +283,34 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Particle", mUI.chkShowEmitter);
     settings.SaveWidget("Particle", mUI.cmbGrid);
     settings.SaveWidget("Particle", mUI.zoom);
+    settings.SaveWidget("Particle", mUI.widget);
     return true;
 }
 
 bool ParticleEditorWidget::LoadState(const Settings& settings)
 {
-    std::string base64;
-    settings.GetValue("Particle", "content", &base64);
-
-    data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
-    auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
-    if (!ret.has_value())
-    {
-        ERROR("Failed to restore class from JSON.");
-        return false;
-    }
-    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(std::move(ret.value()));
-    mOriginalHash = mClass->GetHash();
-    SetValue(mUI.ID, mClass->GetId());
-
     QString material;
+    data::JsonObject json;
+    settings.GetValue("Particle", "content", &json);
+    settings.GetValue("Particle", "hash", &mOriginalHash);
     settings.GetValue("Particle", "material", &material);
     settings.LoadWidget("Particle", mUI.name);
+    settings.LoadWidget("Particle", mUI.scaleX);
+    settings.LoadWidget("Particle", mUI.scaleY);
+    settings.LoadWidget("Particle", mUI.rotation);
+    settings.LoadWidget("Particle", mUI.canExpire);
     settings.LoadWidget("Particle", mUI.chkShowGrid);
     settings.LoadWidget("Particle", mUI.chkShowBounds);
+    settings.LoadWidget("Particle", mUI.chkShowEmitter);
     settings.LoadWidget("Particle", mUI.cmbGrid);
     settings.LoadWidget("Particle", mUI.zoom);
-    settings.LoadWidget("Particle", mUI.canExpire);
-    if (mWorkspace->IsValidMaterial(material))
-    {
-        SetValue(mUI.materials, ListItemId(material));
-    }
-    else
-    {
-        WARN("Material '%1' is no longer available.", material);
-        SetValue(mUI.materials, QString("White"));
-    }
+    settings.LoadWidget("Particle", mUI.widget);
+
+    auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
+    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(std::move(ret.value()));
+
+    SetValue(mUI.ID, mClass->GetId());
+    SetValue(mUI.materials, ListItemId(material));
 
     ShowParams();
     on_motion_currentIndexChanged(0);

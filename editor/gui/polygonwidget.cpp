@@ -176,62 +176,43 @@ void ShapeWidget::AddActions(QMenu& menu)
 
 bool ShapeWidget::SaveState(Settings& settings) const
 {
-    settings.SetValue("Polygon", "material", (QString) GetItemId(mUI.blueprints));
+    data::JsonObject json;
+    mPolygon.IntoJson(json);
+    settings.SetValue("Polygon", "content", json);
+    settings.SetValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
+    settings.SetValue("Polygon", "hash", mOriginalHash);
     settings.SaveWidget("Polygon", mUI.name);
     settings.SaveWidget("Polygon", mUI.alpha);
     settings.SaveWidget("Polygon", mUI.chkShowGrid);
     settings.SaveWidget("Polygon", mUI.chkSnap);
     settings.SaveWidget("Polygon", mUI.cmbGrid);
     settings.SaveWidget("Polygon", mUI.widget);
-
-    // the polygon can already serialize into JSON.
-    // so let's use the JSON serialization in the animation
-    // and then convert that into base64 string which we can
-    // stick in the settings data stream.
-    data::JsonObject json;
-    mPolygon.IntoJson(json);
-    settings.SetValue("Polygon", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool ShapeWidget::LoadState(const Settings& settings)
 {
     QString material;
+    data::JsonObject json;
+    settings.GetValue("Polygon", "content", &json);
     settings.GetValue("Polygon", "material", &material);
+    settings.GetValue("Polygon", "hash", &mOriginalHash);
     settings.LoadWidget("Polygon", mUI.name);
     settings.LoadWidget("Polygon", mUI.alpha);
     settings.LoadWidget("Polygon", mUI.chkShowGrid);
     settings.LoadWidget("Polygon", mUI.chkSnap);
     settings.LoadWidget("Polygon", mUI.cmbGrid);
     settings.LoadWidget("Polygon", mUI.widget);
-    SetValue(mUI.blueprints, ListItemId(material));
-    setWindowTitle(GetValue(mUI.name));
 
-    std::string base64;
-    settings.GetValue("Polygon", "content", &base64);
-
-    data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
-
-    auto ret  = gfx::PolygonClass::FromJson(json);
-    if (!ret.has_value())
-    {
-        WARN("Failed to load polygon widget state.");
-        return false;
-    }
+    auto ret = gfx::PolygonClass::FromJson(json);
     mPolygon = std::move(ret.value());
-    mOriginalHash = mPolygon.GetHash();
-    mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
-                                mPolygon.GetNumDrawCommands());
 
-    SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.ID, mPolygon.GetId());
+    SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    SetValue(mUI.blueprints, ListItemId(material));
+    SetEnabled(mUI.actionClear, mPolygon.GetNumVertices());
 
     on_blueprints_currentIndexChanged(0);
+    setWindowTitle(GetValue(mUI.name));
     return true;
 }
 

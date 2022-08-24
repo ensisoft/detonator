@@ -127,9 +127,6 @@ namespace gui
         std::unique_ptr<UIState> mState;
         bool mPaused = false;
         float mTime  = 0.0f;
-    private:
-        // the original hash value that is used to
-        // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;
     };
 

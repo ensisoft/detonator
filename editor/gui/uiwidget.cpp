@@ -489,6 +489,12 @@ void UIWidget::AddActions(QMenu& menu)
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
+    data::JsonObject json;
+    mState.window.IntoJson(json);
+    settings.SetValue("UI", "content", json);
+    settings.SetValue("UI", "hash", mOriginalHash);
+    settings.SetValue("UI", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("UI", "camera_offset_y", mState.camera_offset_y);
     settings.SaveWidget("UI", mUI.scaleX);
     settings.SaveWidget("UI", mUI.scaleY);
     settings.SaveWidget("UI", mUI.rotation);
@@ -498,15 +504,17 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.cmbGrid);
     settings.SaveWidget("UI", mUI.zoom);
     settings.SaveWidget("UI", mUI.widget);
-    settings.SetValue("UI", "camera_offset_x", mState.camera_offset_x);
-    settings.SetValue("UI", "camera_offset_y", mState.camera_offset_y);
-    data::JsonObject json;
-    mState.window.IntoJson(json);
-    settings.SetValue("UI", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool UIWidget::LoadState(const Settings& settings)
 {
+    data::JsonObject json;
+    settings.GetValue("UI", "content", &json);
+    settings.GetValue("UI", "hash", &mOriginalHash);
+    settings.GetValue("UI", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("UI", "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
+
     settings.LoadWidget("UI", mUI.scaleX);
     settings.LoadWidget("UI", mUI.scaleY);
     settings.LoadWidget("UI", mUI.rotation);
@@ -517,27 +525,8 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.zoom);
     settings.LoadWidget("UI", mUI.widget);
 
-    std::string base64;
-    settings.GetValue("UI", "camera_offset_x", &mState.camera_offset_x);
-    settings.GetValue("UI", "camera_offset_y", &mState.camera_offset_y);
-    settings.GetValue("UI", "content", &base64);
-
-    data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
     auto window = uik::Window::FromJson(json);
-    if (!window.has_value())
-    {
-        ERROR("Failed to load window state from JSON.");
-        return false;
-    }
     mState.window = std::move(window.value());
-    mOriginalHash = mState.window.GetHash();
-    mCameraWasLoaded = true;
 
     if (!LoadStyleQuiet(mState.window.GetStyleName()))
         mState.window.SetStyleName("");
@@ -556,7 +545,6 @@ bool UIWidget::LoadState(const Settings& settings)
     DisplayCurrentWidgetProperties();
 
     mUI.tree->Rebuild();
-    DEBUG("Loaded UI widget state successfully.");
     return true;
 }
 

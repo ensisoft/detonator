@@ -30,6 +30,7 @@
 #include <memory>
 #include <string>
 
+#include "data/fwd.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
@@ -65,6 +66,7 @@ namespace gui
 
         bool GetValue(const QString& module, const QString& key, std::size_t* out) const;
         bool GetValue(const QString& module, const QString& key, std::string* out) const;
+        bool GetValue(const QString& module, const QString& key, data::JsonObject* out) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
@@ -90,6 +92,8 @@ namespace gui
         { SetValue(module, key, app::FromUtf8(value)); }
         void SetValue(const QString& module, const QString& key, std::size_t value)
         { SetValue<quint64>(module, key, quint64(value)); }
+
+        void SetValue(const QString& module, const QString& key, const data::JsonObject& json);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);

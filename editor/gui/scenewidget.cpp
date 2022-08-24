@@ -444,6 +444,12 @@ void SceneWidget::AddActions(QMenu& menu)
 
 bool SceneWidget::SaveState(Settings& settings) const
 {
+    data::JsonObject json;
+    mState.scene.IntoJson(json);
+    settings.SetValue("Scene", "content", json);
+    settings.SetValue("Scene", "hash", mOriginalHash);
+    settings.SetValue("Scene", "camera_offset_x", mState.camera_offset_x);
+    settings.SetValue("Scene", "camera_offset_y", mState.camera_offset_y);
     settings.SaveWidget("Scene", mUI.scaleX);
     settings.SaveWidget("Scene", mUI.scaleY);
     settings.SaveWidget("Scene", mUI.rotation);
@@ -454,19 +460,17 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.cmbGrid);
     settings.SaveWidget("Scene", mUI.zoom);
     settings.SaveWidget("Scene", mUI.widget);
-    settings.SetValue("Scene", "camera_offset_x", mState.camera_offset_x);
-    settings.SetValue("Scene", "camera_offset_y", mState.camera_offset_y);
-    // the scene can already serialize into JSON.
-    // so let's use the JSON serialization in the scene
-    // and then convert that into base64 string which we can
-    // stick in the settings data stream.
-    data::JsonObject json;
-    mState.scene.IntoJson(json);
-    settings.SetValue("Scene", "content", base64::Encode(json.ToString()));
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
 {
+    data::JsonObject json;
+    settings.GetValue("Scene", "content", &json);
+    settings.GetValue("Scene", "hash", &mOriginalHash);
+    settings.GetValue("Scene", "camera_offset_x", &mState.camera_offset_x);
+    settings.GetValue("Scene", "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
+
     settings.LoadWidget("Scene", mUI.scaleX);
     settings.LoadWidget("Scene", mUI.scaleY);
     settings.LoadWidget("Scene", mUI.rotation);
@@ -477,29 +481,9 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.cmbGrid);
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
-    settings.GetValue("Scene", "camera_offset_x", &mState.camera_offset_x);
-    settings.GetValue("Scene", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
 
-    std::string base64;
-    settings.GetValue("Scene", "content", &base64);
-
-    data::JsonObject json;
-    auto [ok, error] = json.ParseString(base64::Decode(base64));
-    if (!ok)
-    {
-        ERROR("Failed to parse content JSON. '%1'", error);
-        return false;
-    }
     auto ret  = game::SceneClass::FromJson(json);
-    if (!ret.has_value())
-    {
-        ERROR("Failed to load scene widget state.");
-        return false;
-    }
-
     mState.scene  = std::move(ret.value());
-    mOriginalHash = mState.scene.GetHash();
 
     UpdateResourceReferences();
     DisplaySceneProperties();
