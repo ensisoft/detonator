@@ -298,25 +298,6 @@ bool ShapeWidget::HasUnsavedChanges() const
     return true;
 }
 
-bool ShapeWidget::ConfirmClose()
-{
-    if (mOriginalHash == mPolygon.GetHash())
-        return true;
-
-    QMessageBox msg(this);
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    msg.setIcon(QMessageBox::Question);
-    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-    const auto ret = msg.exec();
-    if (ret == QMessageBox::Cancel)
-        return false;
-    else if (ret == QMessageBox::No)
-        return true;
-
-    on_actionSave_triggered();
-    return true;
-}
-
 bool ShapeWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;

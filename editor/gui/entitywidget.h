@@ -74,7 +74,6 @@ namespace gui
         virtual void Update(double secs) override;
         virtual void Render() override;
         virtual bool HasUnsavedChanges() const override;
-        virtual bool ConfirmClose() override;
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
         virtual bool OnEscape() override;

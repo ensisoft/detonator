@@ -1862,27 +1862,6 @@ bool ScriptWidget::HasUnsavedChanges() const
     return mFileHash != hash;
 }
 
-bool ScriptWidget::ConfirmClose()
-{
-    const auto& plain = mDocument.toPlainText();
-    const auto hash = qHash(plain);
-    if (mFileHash == hash)
-        return true;
-
-    QMessageBox msg(this);
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    msg.setIcon(QMessageBox::Question);
-    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-    const auto ret = msg.exec();
-    if (ret == QMessageBox::Cancel)
-        return false;
-    else if (ret == QMessageBox::No)
-        return true;
-
-    on_actionSave_triggered();
-    return true;
-}
-
 bool ScriptWidget::OnEscape()
 {
     mUI.find->setVisible(false);

@@ -54,7 +54,6 @@ namespace gui
         virtual void Update(double secs) override;
         virtual void Save() override;
         virtual bool HasUnsavedChanges() const override;
-        virtual bool ConfirmClose() override;
         virtual bool GetStats(Stats* stats) const override;
 
     private slots:

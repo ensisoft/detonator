@@ -536,25 +536,6 @@ bool AnimationTrackWidget::HasUnsavedChanges() const
     return hash != mOriginalHash;
 }
 
-bool AnimationTrackWidget::ConfirmClose()
-{
-    const auto hash = mState.track->GetHash();
-    if (hash == mOriginalHash)
-        return true;
-
-    QMessageBox msg(this);
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    msg.setIcon(QMessageBox::Question);
-    msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-    const auto ret = msg.exec();
-    if (ret == QMessageBox::Cancel)
-        return false;
-    else if (ret == QMessageBox::No)
-        return true;
-
-    on_actionSave_triggered();
-    return true;
-}
 bool AnimationTrackWidget::GetStats(Stats* stats) const
 {
     if (mPlaybackAnimation)
