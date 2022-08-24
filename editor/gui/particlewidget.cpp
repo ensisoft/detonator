@@ -179,7 +179,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     SetValue(mUI.scaleX, 500.0f);
     SetValue(mUI.scaleY, 500.0f);
     SetValue(mUI.rotation, 0.0f);
-    SetValue(mUI.materials, QString("White"));
+    SetValue(mUI.materials, ListItemId(QString("_White")));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
@@ -382,10 +382,7 @@ void ParticleEditorWidget::Update(double secs)
     if (!mPaused)
     {
         mEngine->Update(secs);
-
         mTime += secs;
-
-        // created in paint function.
         if (mMaterial)
             mMaterial->SetRuntime(mTime);
     }
@@ -559,6 +556,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
 void ParticleEditorWidget::on_actionStop_triggered()
 {
     mEngine.reset();
+    mMaterial.reset();
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionPlay, true);
@@ -735,20 +733,14 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(zoom, zoom));
 
     gfx::Transform view;
     view.Scale(zoom, zoom);
     view.Translate(width*0.5, height*0.5);
 
-    // get the material based on the selection in the materials combobox
-    const std::string& id = GetItemId(mUI.materials);
-    if (!mMaterial || mMaterial->GetClassId() != id)
-    {
-        auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.materials));
-        mMaterial  = gfx::CreateMaterialInstance(klass);
-    }
+    painter.SetViewport(0, 0, width, height);
+    painter.SetPixelRatio(glm::vec2(zoom, zoom));
+    painter.ResetViewMatrix();
 
     if (GetValue(mUI.chkShowGrid))
     {
@@ -758,25 +750,32 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
+    painter.SetViewMatrix(view.GetAsMatrix());
+
     const float viz_width  = GetValue(mUI.scaleX);
     const float viz_height = GetValue(mUI.scaleY);
     const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
-    view.Push();
-    view.Scale(viz_width, viz_height);
-    view.Translate(-viz_width*0.5, -viz_height*0.5);
-    view.Rotate(viz_rot);
+
+    gfx::Transform model;
+    model.Scale(viz_width, viz_height);
+    model.Translate(-viz_width*0.5, -viz_height*0.5);
+    model.Rotate(viz_rot);
 
     if (GetValue(mUI.chkShowBounds))
     {
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
                      gfx::CreateMaterialFromColor(gfx::Color::HotPink));
     }
 
     if (mEngine)
     {
-        painter.Draw(*mEngine, view, *mMaterial);
-        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()),
-                    painter, width, height);
+        const auto& id = (std::string)GetItemId(mUI.materials);
+        if (!mMaterial || (mMaterial->GetClassId() != id))
+        {
+            auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.materials));
+            mMaterial = gfx::CreateMaterialInstance(klass);
+        }
+        painter.Draw(*mEngine, model, *mMaterial);
     }
 
     if (GetValue(mUI.chkShowEmitter))
@@ -789,23 +788,24 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         const float emitter_xpos   = GetValue(mUI.initX);
         const float emitter_ypos   = GetValue(mUI.initY);
 
-        view.Push();
-            view.Scale(emitter_width, emitter_height);
-            view.Translate(emitter_xpos, emitter_ypos);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), view,
+        model.Push();
+            model.Scale(emitter_width, emitter_height);
+            model.Translate(emitter_xpos, emitter_ypos);
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
                          gfx::CreateMaterialFromColor(gfx::Color::Green));
 
             const auto scalex = zoom * viz_width * emitter_width;
             const auto scaley = zoom * viz_height * emitter_height;
-            view.Push();
-                view.Scale(10.0f/scalex, 10.0f/scaley);
-                view.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
-                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), view,
+            model.Push();
+                model.Scale(10.0f/scalex, 10.0f/scaley);
+                model.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
+                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
                              gfx::CreateMaterialFromColor(gfx::Color::Green));
-            view.Pop();
-        view.Pop();
+            model.Pop();
+        model.Pop();
     }
-    view.Pop();
+
+    painter.ResetViewMatrix();
 
     // Draw the visualization for the particle direction sector
     // we draw this in the widget/window coordinates in the top right
@@ -837,6 +837,12 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
                              gfx::CreateMaterialFromColor(gfx::Color::Green));
             transform.Pop();
         transform.Pop();
+    }
+
+    if (mEngine)
+    {
+        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()),
+                    painter, width, height);
     }
 }
 
@@ -969,7 +975,7 @@ void ParticleEditorWidget::ResourceToBeDeleted(const app::Resource* resource)
         if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
         {
             mMaterial.reset();
-            SetValue(mUI.materials, QString("White"));
+            SetValue(mUI.materials, ListItemId(QString("_White")));
         }
     }
 }
