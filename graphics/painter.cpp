@@ -272,7 +272,7 @@ public:
 private:
     Program* GetProgram(const Drawable& drawable, const Material& material)
     {
-        const std::string& name = drawable.GetId() + "/" + material.GetProgramId();
+        const std::string& name = drawable.GetProgramId() + "/" + material.GetProgramId();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {

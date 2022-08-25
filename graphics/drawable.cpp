@@ -111,7 +111,8 @@ namespace detail {
 // static
 Shader* GeometryBase::GetShader(Device& device)
 { return MakeVertexArrayShader(device); }
-
+std::string GeometryBase::GetProgramId()
+{ return "generic-vertex-program"; }
 // static
 Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
@@ -752,6 +753,11 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 
 } // detail
 
+std::string SectorClass::GetProgramId() const
+{
+    return "generic-vertex-program";
+}
+
 Shader* SectorClass::GetShader(Device& device) const
 {
     return MakeVertexArrayShader(device);
@@ -846,6 +852,9 @@ bool SectorClass::LoadFromJson(const data::Reader& data)
     data.Read("percentage", &mPercentage);
     return true;
 }
+
+std::string RoundRectangleClass::GetProgramId() const
+{ return "generic-vertex-program"; }
 
 Shader* RoundRectangleClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
@@ -1081,6 +1090,9 @@ bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
+std::string GridClass::GetProgramId() const
+{ return "generic-vertex-program"; }
+
 Shader* GridClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 
@@ -1211,6 +1223,9 @@ void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
 {
     mDrawCommands.push_back(cmd);
 }
+
+std::string PolygonClass::GetProgramId() const
+{ return "generic-vertex-program"; }
 
 Shader* PolygonClass::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
@@ -1474,6 +1489,9 @@ bool CursorClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
+std::string Cursor::GetProgramId() const
+{ return "generic-vertex-program"; }
+
 Shader* Cursor::GetShader(Device& device) const
 { return MakeVertexArrayShader(device); }
 Geometry* Cursor::Upload(const Environment& env, Device& device) const
@@ -1523,6 +1541,11 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
         return geom;
     }
     return nullptr;
+}
+
+std::string KinematicsParticleEngineClass::GetProgramId() const
+{
+    return "particle-program";
 }
 
 Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
