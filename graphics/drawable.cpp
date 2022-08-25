@@ -1770,11 +1770,17 @@ std::size_t KinematicsParticleEngineClass::GetHash() const
 
 void KinematicsParticleEngineClass::InitParticles(InstanceState& state, size_t num) const
 {
+    // the emitter box uses normalized coordinates
+    const auto emitter_width  = mParams.init_rect_width * mParams.max_xpos;
+    const auto emitter_height = mParams.init_rect_height * mParams.max_ypos;
+    const auto emitter_xpos   = mParams.init_rect_xpos * mParams.max_xpos;
+    const auto emitter_ypos   = mParams.init_rect_ypos * mParams.max_ypos;
+
     for (size_t i=0; i<num; ++i)
     {
         const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
-        const auto initx = math::rand(0.0f, mParams.init_rect_width);
-        const auto inity = math::rand(0.0f, mParams.init_rect_height);
+        const auto initx = math::rand(0.0f, emitter_width);
+        const auto inity = math::rand(0.0f, emitter_height);
         const auto angle = math::rand(0.0f, mParams.direction_sector_size) +
             mParams.direction_sector_start_angle;
 
@@ -1782,7 +1788,7 @@ void KinematicsParticleEngineClass::InitParticles(InstanceState& state, size_t n
         p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
         p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
         p.alpha     = math::rand(mParams.min_alpha, mParams.max_alpha);
-        p.position  = glm::vec2(mParams.init_rect_xpos + initx, mParams.init_rect_ypos + inity);
+        p.position  = glm::vec2(emitter_xpos + initx, emitter_ypos + inity);
         // note that the velocity vector is baked into the
         // direction vector in order to save space.
         p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;

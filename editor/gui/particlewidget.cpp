@@ -513,10 +513,6 @@ void ParticleEditorWidget::SetParams()
         params.min_lifetime   = std::numeric_limits<float>::max();
         params.max_lifetime   = std::numeric_limits<float>::max();
     }
-    params.init_rect_xpos *= params.max_xpos;
-    params.init_rect_ypos *= params.max_ypos;
-    params.init_rect_width *= params.max_xpos;
-    params.init_rect_height *=params.max_ypos;
     mClass->SetParams(params);
 }
 
@@ -539,10 +535,10 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.maxAlpha,            params.max_alpha);
     SetValue(mUI.minVelocity,         params.min_velocity);
     SetValue(mUI.maxVelocity,         params.max_velocity);
-    SetValue(mUI.initX,               params.init_rect_xpos / params.max_ypos);
-    SetValue(mUI.initY,               params.init_rect_ypos / params.max_ypos);
-    SetValue(mUI.initWidth,           params.init_rect_width / params.max_xpos);
-    SetValue(mUI.initHeight,          params.init_rect_height / params.max_ypos);
+    SetValue(mUI.initX,               params.init_rect_xpos);
+    SetValue(mUI.initY,               params.init_rect_ypos);
+    SetValue(mUI.initWidth,           params.init_rect_width);
+    SetValue(mUI.initHeight,          params.init_rect_height);
     SetValue(mUI.timeSizeDerivative,  params.rate_of_change_in_size_wrt_time);
     SetValue(mUI.distSizeDerivative,  params.rate_of_change_in_size_wrt_dist);
     SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
