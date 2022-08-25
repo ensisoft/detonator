@@ -184,10 +184,9 @@ namespace gfx
         { return true; }
         // Restart the drawable, if applicable.
         virtual void Restart(const Environment& env) {}
-        // Get the ID of the drawable shape. Used to map the
+        // Get the vertex program ID for shape. Used to map the
         // drawable to a device specific program object.
-        inline std::string GetId() const
-        { return typeid(*this).name(); }
+        virtual std::string GetProgramId() const = 0;
     private:
     };
 
@@ -292,6 +291,8 @@ namespace gfx
             }
             virtual Shader* GetShader(Device& device) const override
             { return DrawableGeometry::GetShader(device); }
+            virtual std::string GetProgramId() const override
+            { return DrawableGeometry::GetProgramId(); }
             virtual Geometry* Upload(const Environment& env, Device& device) const override
             { return DrawableGeometry::Generate(env, mStyle, device); }
             virtual void SetCulling(Culling culling) override
@@ -315,6 +316,7 @@ namespace gfx
             static constexpr Culling InitialCulling = Culling::Back;
             static constexpr Style   InitialStyle   = Style::Solid;
             static Shader* GetShader(Device& device);
+            static std::string GetProgramId();
         };
         struct ArrowGeometry : public GeometryBase {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
@@ -389,6 +391,7 @@ namespace gfx
         {}
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Environment& environment, Style style, Device& device) const;
+        std::string GetProgramId() const;
 
         virtual Type GetType() const override
         { return Type::Sector; }
@@ -440,6 +443,8 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual std::string GetProgramId() const override
+        { return mClass->GetProgramId(); }
     private:
         std::shared_ptr<const SectorClass> mClass;
         Style mStyle     = Style::Solid;
@@ -466,6 +471,7 @@ namespace gfx
 
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, Style style, Device& device) const;
+        std::string GetProgramId() const;
 
         virtual Type GetType() const override
         { return Type::RoundRectangle; }
@@ -523,6 +529,8 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual std::string GetProgramId() const override
+        { return mClass->GetProgramId(); }
     private:
         std::shared_ptr<const RoundRectangleClass> mClass;
         Culling mCulling = Culling::Back;
@@ -539,6 +547,7 @@ namespace gfx
         {}
         Shader* GetShader(Device& device) const;
         Geometry* Upload(Device& device) const;
+        std::string GetProgramId() const;
         void SetNumVerticalLines(unsigned lines)
         { mNumVerticalLines = lines; }
         void SetNumHorizontalLines(unsigned lines)
@@ -605,7 +614,8 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
-
+        virtual std::string GetProgramId() const override
+        { return mClass->GetProgramId(); }
     private:
         std::shared_ptr<const GridClass> mClass;
         float mLineWidth = 1.0f;
@@ -691,6 +701,7 @@ namespace gfx
         { mStatic = !on_off; }
         Shader* GetShader(Device& device) const;
         Geometry* Upload(bool editing_mode, Device& device) const;
+        std::string GetProgramId() const;
 
         virtual Type GetType() const override
         { return Type::Polygon; }
@@ -738,6 +749,8 @@ namespace gfx
         { mCulling = culling;}
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
+        virtual std::string GetProgramId() const override
+        { return mClass->GetProgramId(); }
     private:
         std::shared_ptr<const PolygonClass> mClass;
         Culling mCulling = Culling::Back;
@@ -788,6 +801,9 @@ namespace gfx
         Cursor(Shape shape)
           : mClass(std::make_shared<CursorClass>(shape))
         {}
+        Shape GetShape() const
+        { return mClass->GetShape(); }
+
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
             const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
@@ -801,8 +817,7 @@ namespace gfx
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override
         { return Style::Solid; }
-        Shape GetShape() const
-        { return mClass->GetShape(); }
+        virtual std::string GetProgramId() const override;
     private:
         std::shared_ptr<const CursorClass> mClass;
     };
@@ -972,6 +987,8 @@ namespace gfx
         Shader* GetShader(Device& device) const;
         Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
 
+        std::string GetProgramId() const;
+
         void Update(const Environment& env, InstanceState& state, float dt) const;
         void Restart(const Environment& env, InstanceState& state) const;
         bool IsAlive(const InstanceState& state) const;
@@ -1059,6 +1076,11 @@ namespace gfx
         {
             mClass->Restart(env, mState);
         }
+        virtual std::string GetProgramId() const override
+        {
+            return mClass->GetProgramId();
+        }
+
         // Get the current number of alive particles.
         size_t GetNumParticlesAlive() const
         { return mState.particles.size(); }
