@@ -271,7 +271,7 @@
         <item row="1" column="3">
          <widget class="QDoubleSpinBox" name="initHeight">
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="stepType">
            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -284,10 +284,10 @@
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="initX">
           <property name="minimum">
-           <double>-1000.000000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="stepType">
            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -317,7 +317,10 @@
         <item row="0" column="3">
          <widget class="QDoubleSpinBox" name="initY">
           <property name="minimum">
-           <double>-99.000000000000000</double>
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -334,7 +337,7 @@
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="initWidth">
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="stepType">
            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
