@@ -51,6 +51,8 @@ struct ParticleEditorWidget::UIState {
     float emitter_ypos = 0.0f;
     float emitter_width  = 0.0f;
     float emitter_height = 0.0f;
+    float visualization_xpos   = 0.0f;
+    float visualization_ypos   = 0.0f;
     float visualization_width  = 0.0f;
     float visualization_height = 0.0f;
     float visualization_rotation = 0.0f;
@@ -153,6 +155,68 @@ private:
     glm::vec4 mMousePos;
 };
 
+class ParticleEditorWidget::MoveVizTool : public MouseTool
+{
+public:
+    MoveVizTool(UIState& state) : mState(state)
+    {}
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        const auto& local_to_view  = view.GetAsMatrix();
+        const auto& view_to_local  = glm::inverse(local_to_view);
+        const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
+        const auto& mouse_delta    = coord_in_local - mMousePos;
+        mState.visualization_xpos += mouse_delta.x;
+        mState.visualization_ypos += mouse_delta.y;
+        mMousePos = coord_in_local;
+    }
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        const auto& local_to_view  = view.GetAsMatrix();
+        const auto& view_to_local  = glm::inverse(local_to_view);
+        const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
+        mMousePos = coord_in_local;
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        return true;
+    }
+private:
+    UIState& mState;
+    glm::vec4 mMousePos;
+};
+
+class ParticleEditorWidget::SizeVizTool : public MouseTool
+{
+public:
+    SizeVizTool(UIState& state) : mState(state)
+    {}
+    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        const auto& local_to_view  = view.GetAsMatrix();
+        const auto& view_to_local  = glm::inverse(local_to_view);
+        const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
+        const auto& mouse_delta    = coord_in_local - mMousePos;
+        mState.visualization_width  += (mouse_delta.x * 2.0f);
+        mState.visualization_height += (mouse_delta.y * 2.0f);
+        mMousePos = coord_in_local;
+    }
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        const auto& local_to_view  = view.GetAsMatrix();
+        const auto& view_to_local  = glm::inverse(local_to_view);
+        const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
+        mMousePos = coord_in_local;
+    }
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    {
+        return true;
+    }
+private:
+    UIState& mState;
+    glm::vec4 mMousePos;
+};
+
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 {
@@ -169,6 +233,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.widget->onZoomIn  = std::bind(&ParticleEditorWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::CoordinateSpace>(mUI.space);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
@@ -185,6 +250,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     SetEnabled(mUI.actionStop, false);
     SetParams();
     on_motion_currentIndexChanged(0);
+    on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
 
     // connect workspace signals for resource management
@@ -210,10 +276,16 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
 
     QString material;
     GetProperty(resource, "material", &material);
+    GetProperty(resource, "transform_xpos", mUI.translateX);
+    GetProperty(resource, "transform_ypos", mUI.translateY);
     GetProperty(resource, "transform_width", mUI.scaleX);
     GetProperty(resource, "transform_height", mUI.scaleY);
     GetProperty(resource, "transform_rotation", mUI.rotation);
     GetProperty(resource, "use_lifetime", mUI.canExpire);
+    GetProperty(resource, "local_emitter_x", mUI.initX);
+    GetProperty(resource, "local_emitter_y", mUI.initY);
+    GetProperty(resource, "local_emitter_w", mUI.initWidth);
+    GetProperty(resource, "local_emitter_h", mUI.initHeight);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
@@ -231,6 +303,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     }
     ShowParams();
     on_motion_currentIndexChanged(0);
+    on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     setWindowTitle(name);
 }
@@ -274,7 +347,13 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SetValue("Particle", "content", json);
     settings.SetValue("Particle", "hash", mOriginalHash);
     settings.SetValue("Particle", "material", (QString)GetItemId(mUI.materials));
+    settings.SaveWidget("Particle", mUI.initX);
+    settings.SaveWidget("Particle", mUI.initY);
+    settings.SaveWidget("Particle", mUI.initWidth);
+    settings.SaveWidget("Particle", mUI.initHeight);
     settings.SaveWidget("Particle", mUI.name);
+    settings.SaveWidget("Particle", mUI.translateX);
+    settings.SaveWidget("Particle", mUI.translateY);
     settings.SaveWidget("Particle", mUI.scaleX);
     settings.SaveWidget("Particle", mUI.scaleY);
     settings.SaveWidget("Particle", mUI.rotation);
@@ -295,7 +374,13 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.GetValue("Particle", "content", &json);
     settings.GetValue("Particle", "hash", &mOriginalHash);
     settings.GetValue("Particle", "material", &material);
+    settings.LoadWidget("Particle", mUI.initX);
+    settings.LoadWidget("Particle", mUI.initY);
+    settings.LoadWidget("Particle", mUI.initWidth);
+    settings.LoadWidget("Particle", mUI.initHeight);
     settings.LoadWidget("Particle", mUI.name);
+    settings.LoadWidget("Particle", mUI.translateX);
+    settings.LoadWidget("Particle", mUI.translateY);
     settings.LoadWidget("Particle", mUI.scaleX);
     settings.LoadWidget("Particle", mUI.scaleY);
     settings.LoadWidget("Particle", mUI.rotation);
@@ -315,6 +400,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
 
     ShowParams();
     on_motion_currentIndexChanged(0);
+    on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     setWindowTitle(GetValue(mUI.name));
     return true;
@@ -381,6 +467,8 @@ void ParticleEditorWidget::Update(double secs)
 
     if (!mPaused)
     {
+        const float viz_xpos   = GetValue(mUI.translateX);
+        const float viz_ypos   = GetValue(mUI.translateY);
         const float viz_width  = GetValue(mUI.scaleX);
         const float viz_height = GetValue(mUI.scaleY);
         const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
@@ -389,6 +477,7 @@ void ParticleEditorWidget::Update(double secs)
         model.Scale(viz_width, viz_height);
         model.Translate(-viz_width*0.5, -viz_height*0.5);
         model.Rotate(viz_rot);
+        model.Translate(viz_xpos, viz_ypos);
         const auto& model_matrix = model.GetAsMatrix();
 
         gfx::Drawable::Environment env;
@@ -460,10 +549,16 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     app::ParticleSystemResource particle_resource(*mClass, GetValue(mUI.name));
     SetProperty(particle_resource, "material", (QString)GetItemId(mUI.materials));
+    SetProperty(particle_resource, "transform_xpos", mUI.translateX);
+    SetProperty(particle_resource, "transform_ypos", mUI.translateY);
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
     SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
+    SetProperty(particle_resource, "local_emitter_x", mUI.initX);
+    SetProperty(particle_resource, "local_emitter_y", mUI.initY);
+    SetProperty(particle_resource, "local_emitter_w", mUI.initWidth);
+    SetProperty(particle_resource, "local_emitter_h", mUI.initHeight);
     SetUserProperty(particle_resource, "grid", mUI.cmbGrid);
     SetUserProperty(particle_resource, "zoom", mUI.zoom);
     SetUserProperty(particle_resource, "show_grid", mUI.chkShowGrid);
@@ -479,6 +574,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
 void ParticleEditorWidget::SetParams()
 {
     gfx::KinematicsParticleEngineClass::Params params;
+    params.coordinate_space                 = GetValue(mUI.space);
     params.motion                           = GetValue(mUI.motion);
     params.mode                             = GetValue(mUI.when);
     params.boundary                         = GetValue(mUI.boundary);
@@ -493,10 +589,6 @@ void ParticleEditorWidget::SetParams()
     params.max_velocity                     = GetValue(mUI.maxVelocity);
     params.min_alpha                        = GetValue(mUI.minAlpha);
     params.max_alpha                        = GetValue(mUI.maxAlpha);
-    params.init_rect_xpos                   = GetValue(mUI.initX);
-    params.init_rect_ypos                   = GetValue(mUI.initY);
-    params.init_rect_width                  = GetValue(mUI.initWidth);
-    params.init_rect_height                 = GetValue(mUI.initHeight);
     params.rate_of_change_in_size_wrt_time  = GetValue(mUI.timeSizeDerivative);
     params.rate_of_change_in_size_wrt_dist  = GetValue(mUI.distSizeDerivative);
     params.rate_of_change_in_alpha_wrt_time = GetValue(mUI.timeAlphaDerivative);
@@ -513,12 +605,29 @@ void ParticleEditorWidget::SetParams()
         params.min_lifetime   = std::numeric_limits<float>::max();
         params.max_lifetime   = std::numeric_limits<float>::max();
     }
+
+    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+    if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    {
+        params.init_rect_xpos   = GetValue(mUI.initX);
+        params.init_rect_ypos   = GetValue(mUI.initY);
+        params.init_rect_width  = GetValue(mUI.initWidth);
+        params.init_rect_height = GetValue(mUI.initHeight);
+    }
+    else
+    {
+        params.init_rect_xpos   = 0.0f;
+        params.init_rect_ypos   = 0.0f;
+        params.init_rect_width  = 1.0f;
+        params.init_rect_height = 1.0f;
+    }
     mClass->SetParams(params);
 }
 
 void ParticleEditorWidget::ShowParams()
 {
     const auto& params = mClass->GetParams();
+    SetValue(mUI.space,               params.coordinate_space);
     SetValue(mUI.motion,              params.motion);
     SetValue(mUI.when,                params.mode);
     SetValue(mUI.boundary,            params.boundary);
@@ -535,16 +644,20 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.maxAlpha,            params.max_alpha);
     SetValue(mUI.minVelocity,         params.min_velocity);
     SetValue(mUI.maxVelocity,         params.max_velocity);
-    SetValue(mUI.initX,               params.init_rect_xpos);
-    SetValue(mUI.initY,               params.init_rect_ypos);
-    SetValue(mUI.initWidth,           params.init_rect_width);
-    SetValue(mUI.initHeight,          params.init_rect_height);
     SetValue(mUI.timeSizeDerivative,  params.rate_of_change_in_size_wrt_time);
     SetValue(mUI.distSizeDerivative,  params.rate_of_change_in_size_wrt_dist);
     SetValue(mUI.timeAlphaDerivative, params.rate_of_change_in_alpha_wrt_time);
     SetValue(mUI.distAlphaDerivative, params.rate_of_change_in_alpha_wrt_dist);
     SetValue(mUI.dirStartAngle,       qRadiansToDegrees(params.direction_sector_start_angle));
     SetValue(mUI.dirSizeAngle,        qRadiansToDegrees(params.direction_sector_size));
+
+    if (params.coordinate_space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    {
+        SetValue(mUI.initX,      params.init_rect_xpos);
+        SetValue(mUI.initY,      params.init_rect_ypos);
+        SetValue(mUI.initWidth,  params.init_rect_width);
+        SetValue(mUI.initHeight, params.init_rect_height);
+    }
 }
 
 void ParticleEditorWidget::on_actionPlay_triggered()
@@ -555,6 +668,8 @@ void ParticleEditorWidget::on_actionPlay_triggered()
         SetEnabled(mUI.actionPause, true);
         return;
     }
+    const float viz_xpos   = GetValue(mUI.translateX);
+    const float viz_ypos   = GetValue(mUI.translateY);
     const float viz_width  = GetValue(mUI.scaleX);
     const float viz_height = GetValue(mUI.scaleY);
     const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
@@ -563,6 +678,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     model.Scale(viz_width, viz_height);
     model.Translate(-viz_width*0.5, -viz_height*0.5);
     model.Rotate(viz_rot);
+    model.Translate(viz_xpos, viz_ypos);
     const auto& model_matrix = model.GetAsMatrix();
 
     gfx::Drawable::Environment env;
@@ -588,16 +704,26 @@ void ParticleEditorWidget::on_actionStop_triggered()
     mPaused = false;
 }
 
+void ParticleEditorWidget::on_resetEmitter_clicked()
+{
+    SetValue(mUI.initWidth, 1.0f);
+    SetValue(mUI.initHeight, 1.0f);
+    SetValue(mUI.initX, 0.0f);
+    SetValue(mUI.initY, 0.0f);
+    SetParams();
+}
+
 void ParticleEditorWidget::on_resetTransform_clicked()
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    mUI.scaleX->setValue(width);
-    mUI.scaleY->setValue(height);
-    mUI.rotation->setValue(0);
+    SetValue(mUI.translateX, 0.0f);
+    SetValue(mUI.translateY, 0.0f);
+    SetValue(mUI.scaleX, 500.0f);
+    SetValue(mUI.scaleY, 500.0f);
+    SetValue(mUI.rotation, 0.0f);
 }
 
 void ParticleEditorWidget::on_btnViewPlus90_clicked()
+
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(value + 90.0f);
@@ -615,6 +741,24 @@ void ParticleEditorWidget::on_btnSelectMaterial_clicked()
     if (dlg.exec() == QDialog::Rejected)
         return;
     SetValue(mUI.materials, ListItemId(dlg.GetSelectedMaterialId()));
+}
+
+void ParticleEditorWidget::on_space_currentIndexChanged(int)
+{
+    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+    if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    {
+        SetEnabled(mUI.localEmitter, true);
+        SetEnabled(mUI.localSpace, true);
+        SetEnabled(mUI.chkShowEmitter, true);
+    }
+    else
+    {
+        SetEnabled(mUI.localEmitter, false);
+        SetEnabled(mUI.localSpace, false);
+        SetEnabled(mUI.chkShowEmitter, false);
+    }
+    SetParams();
 }
 
 void ParticleEditorWidget::on_motion_currentIndexChanged(int)
@@ -755,15 +899,15 @@ void ParticleEditorWidget::on_canExpire_stateChanged(int)
 
 void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
 
     gfx::Transform view;
     view.Scale(zoom, zoom);
-    view.Translate(width*0.5, height*0.5);
+    view.Translate(widget_width*0.5, widget_height*0.5);
 
-    painter.SetViewport(0, 0, width, height);
+    painter.SetViewport(0, 0, widget_width, widget_height);
     painter.SetPixelRatio(glm::vec2(zoom, zoom));
     painter.ResetViewMatrix();
 
@@ -772,11 +916,13 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         const float xs = 1.0f;
         const float ys = 1.0f;
         const GridDensity grid = GetValue(mUI.cmbGrid);
-        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, widget_width, widget_height);
     }
 
     painter.SetViewMatrix(view.GetAsMatrix());
 
+    const float viz_xpos   = GetValue(mUI.translateX);
+    const float viz_ypos   = GetValue(mUI.translateY);
     const float viz_width  = GetValue(mUI.scaleX);
     const float viz_height = GetValue(mUI.scaleY);
     const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
@@ -785,11 +931,20 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     model.Scale(viz_width, viz_height);
     model.Translate(-viz_width*0.5, -viz_height*0.5);
     model.Rotate(viz_rot);
+    model.Translate(viz_xpos, viz_ypos);
 
     if (GetValue(mUI.chkShowBounds))
     {
         painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
                      gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        const auto scalex = zoom * viz_width;
+        const auto scaley = zoom * viz_height;
+        model.Push();
+            model.Scale(10.0f/scalex, 10.0f/scaley);
+            model.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
+                         gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        model.Pop();
     }
 
     if (mEngine)
@@ -803,7 +958,9 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         painter.Draw(*mEngine, model, *mMaterial);
     }
 
-    if (GetValue(mUI.chkShowEmitter))
+    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+
+    if (GetValue(mUI.chkShowEmitter) && space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
     {
         // visualize the emitter as a box inside the simulation space.
         // note that these are normalized coordinates that get scaled
@@ -839,7 +996,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         const float dir_angle_size  = GetValue(mUI.dirSizeAngle);
 
         gfx::Transform transform;
-        transform.Translate(width - 70.0f, 70.0f);
+        transform.Translate(widget_width - 70.0f, 70.0f);
         transform.Push();
             transform.Scale(100.0f, 100.0f);
             transform.Translate(-50.0f, -50.0f);
@@ -867,7 +1024,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mEngine)
     {
         ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()),
-                    painter, width, height);
+                    painter, widget_width, widget_height);
     }
 }
 
@@ -889,6 +1046,11 @@ void ParticleEditorWidget::MouseMove(QMouseEvent* mickey)
         SetValue(mUI.initY, mState->emitter_ypos);
         SetValue(mUI.initWidth, mState->emitter_width);
         SetValue(mUI.initHeight, mState->emitter_height);
+
+        SetValue(mUI.scaleX, mState->visualization_width);
+        SetValue(mUI.scaleY, mState->visualization_height);
+        SetValue(mUI.translateX, mState->visualization_xpos);
+        SetValue(mUI.translateY, mState->visualization_ypos);
         // apply changes from UI to the class object
         SetParams();
     }
@@ -896,16 +1058,18 @@ void ParticleEditorWidget::MouseMove(QMouseEvent* mickey)
 
 void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
 
     gfx::Transform view;
     view.Scale(zoom, zoom);
-    view.Translate(width*0.5, height*0.5);
+    view.Translate(widget_width*0.5, widget_height*0.5);
 
     if (!mMouseTool)
     {
+        const float viz_xpos   = GetValue(mUI.translateX);
+        const float viz_ypos   = GetValue(mUI.translateY);
         const float viz_width  = GetValue(mUI.scaleX);
         const float viz_height = GetValue(mUI.scaleY);
         const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
@@ -922,6 +1086,7 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
             view.Scale(viz_width, viz_height);
             view.Translate(-viz_width*0.5, -viz_height*0.5);
             view.Rotate(viz_rot);
+            view.Translate(viz_xpos, viz_ypos);
 
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -930,37 +1095,61 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
 
         const auto local_x = coord_in_local.x;
         const auto local_y = coord_in_local.y;
-        if ((local_x < emitter_left || local_x > emitter_right) || (local_y < emitter_top || local_y > emitter_bottom))
+        if ((local_x < 0.0f || local_x > 1.0f) || (local_y < 0.0f || local_y > 1.0f))
             return;
 
-        mState.reset(new UIState);
-        mState->visualization_width    = viz_width;
-        mState->visualization_height   = viz_height;
-        mState->visualization_rotation = viz_rot;
-        mState->emitter_xpos           = emitter_left;
-        mState->emitter_ypos           = emitter_top;
-        mState->emitter_width          = emitter_width;
-        mState->emitter_height         = emitter_height;
+        auto state = std::make_unique<UIState>();
+        state->visualization_xpos     = viz_xpos;
+        state->visualization_ypos     = viz_ypos;
+        state->visualization_width    = viz_width;
+        state->visualization_height   = viz_height;
+        state->visualization_rotation = viz_rot;
+        state->emitter_xpos           = emitter_left;
+        state->emitter_ypos           = emitter_top;
+        state->emitter_width          = emitter_width;
+        state->emitter_height         = emitter_height;
 
-        const auto scalex = zoom * viz_width * emitter_width;
-        const auto scaley = zoom * viz_height * emitter_height;
-        view.Push();
-            view.Scale(emitter_width, emitter_height);
-            view.Translate(emitter_left, emitter_top);
+        if ((local_x >= emitter_left && local_x <= emitter_right) && (local_y >= emitter_top && local_y <= emitter_bottom))
+        {
+            const auto scalex = zoom * viz_width * emitter_width;
+            const auto scaley = zoom * viz_height * emitter_height;
+            view.Push();
+                view.Scale(emitter_width, emitter_height);
+                view.Translate(emitter_left, emitter_top);
+                view.Push();
+                    view.Scale(10.0f/scalex, 10.0f/scaley);
+                    view.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
+                    const auto& size_box_to_view = view.GetAsMatrix();
+                    const auto& view_to_size_box = glm::inverse(size_box_to_view);
+                    const auto& coord_in_size_box = view_to_size_box * ToVec4(mickey->pos());
+                 view.Pop();
+            view.Pop();
+            //DEBUG("click %1", coord_in_size_box);
+            const bool size_box_click = (coord_in_size_box.x >= 0.0f && coord_in_size_box.x <= 1.0f) &&
+                                        (coord_in_size_box.y >= 0.0f && coord_in_size_box.y <= 1.0f);
+            mState = std::move(state);
+            mMouseTool.reset(size_box_click ? (MouseTool*)new SizeEmitterTool(*mState)
+                                            : (MouseTool*)new MoveEmitterTool(*mState));
+
+        }
+        else if ((local_x >= 0.0f && local_x <= 1.0f) && (local_y >= 0.0f && local_y <= 1.0f))
+        {
+            const auto scalex = zoom * viz_width;
+            const auto scaley = zoom * viz_height;
             view.Push();
                 view.Scale(10.0f/scalex, 10.0f/scaley);
                 view.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
-        const auto& size_box_to_view = view.GetAsMatrix();
-        const auto& view_to_size_box = glm::inverse(size_box_to_view);
-        const auto& coord_in_size_box = view_to_size_box * ToVec4(mickey->pos());
-        //DEBUG("click %1", coord_in_size_box);
-
-        const bool size_box_click = (coord_in_size_box.x >= 0.0f && coord_in_size_box.x <= 1.0f) &&
-                                    (coord_in_size_box.y >= 0.0f && coord_in_size_box.y <= 1.0f);
-        mMouseTool.reset(size_box_click ? (MouseTool*)new SizeEmitterTool(*mState)
-                                        : (MouseTool*)new MoveEmitterTool(*mState));
-        view.Pop();
-        view.Pop();
+                const auto& size_box_to_view = view.GetAsMatrix();
+                const auto& view_to_size_box = glm::inverse(size_box_to_view);
+                const auto& coord_in_size_box = view_to_size_box * ToVec4(mickey->pos());
+            view.Pop();
+            const bool size_box_click = (coord_in_size_box.x >= 0.0f && coord_in_size_box.x <= 1.0f) &&
+                                        (coord_in_size_box.y >= 0.0f && coord_in_size_box.y <= 1.0f);
+            DEBUG("click %1", coord_in_size_box);
+            mState = std::move(state);
+            mMouseTool.reset(size_box_click ? (MouseTool*)new SizeVizTool(*mState)
+                                            : (MouseTool*)new MoveVizTool(*mState));
+        }
         view.Pop();
     }
 
