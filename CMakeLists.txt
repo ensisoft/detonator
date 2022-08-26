@@ -332,6 +332,8 @@ add_executable(GSEditor
     editor/gui/treewidget.cpp
     editor/gui/timelinewidget.h
     editor/gui/timelinewidget.cpp
+    editor/gui/rangewidget.h
+    editor/gui/rangewidget.cpp
     editor/gui/uiwidget.h
     editor/gui/uiwidget.ui
     editor/gui/uiwidget.cpp

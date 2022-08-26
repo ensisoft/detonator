@@ -185,6 +185,91 @@
       </widget>
      </item>
      <item>
+      <widget class="QGroupBox" name="dirSector">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Direction sector</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>Start angle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_16">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(250, 250, 0)</string>
+          </property>
+          <property name="text">
+           <string>Size angle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="dirStartAngle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <number>-180</number>
+          </property>
+          <property name="maximum">
+           <number>180</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="invertedAppearance">
+           <bool>false</bool>
+          </property>
+          <property name="invertedControls">
+           <bool>false</bool>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::NoTicks</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="dirSizeAngle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximum">
+           <number>360</number>
+          </property>
+          <property name="value">
+           <number>360</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="localSpace">
        <property name="title">
         <string>Local simulation space</string>
@@ -728,7 +813,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QGroupBox" name="dirSector">
+      <widget class="QGroupBox" name="groupBox_6">
        <property name="minimumSize">
         <size>
          <width>390</width>
@@ -736,94 +821,35 @@
         </size>
        </property>
        <property name="title">
-        <string>Particle direction</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 200, 0)</string>
-          </property>
-          <property name="text">
-           <string>Start angle</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_16">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(250, 250, 0)</string>
-          </property>
-          <property name="text">
-           <string>Size angle</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QSlider" name="dirStartAngle">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimum">
-           <number>-180</number>
-          </property>
-          <property name="maximum">
-           <number>180</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="invertedAppearance">
-           <bool>false</bool>
-          </property>
-          <property name="invertedControls">
-           <bool>false</bool>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::NoTicks</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QSlider" name="dirSizeAngle">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximum">
-           <number>360</number>
-          </property>
-          <property name="value">
-           <number>360</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_6">
-       <property name="title">
         <string>Initial particle properties (min/max)</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="3" column="0">
+          <item row="6" column="0">
            <widget class="QLabel" name="label_24">
             <property name="text">
              <string>Alpha</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
+           <widget class="gui::RangeWidget" name="pointsize" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Lifetime</string>
             </property>
            </widget>
           </item>
@@ -850,33 +876,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="minVelocity">
-            <property name="suffix">
-             <string> u/s</string>
-            </property>
-            <property name="maximum">
-             <double>1000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Pointsize</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="minLifetime">
             <property name="suffix">
              <string> s</string>
             </property>
             <property name="maximum">
-             <double>1000.000000000000000</double>
+             <double>10.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -886,7 +892,68 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
+          <item row="4" column="2">
+           <widget class="QSpinBox" name="maxPointsize">
+            <property name="suffix">
+             <string> u</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>2048</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="gui::RangeWidget" name="velocity" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="minPointsize">
+            <property name="suffix">
+             <string> u</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>2047</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="minAlpha">
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
            <widget class="QDoubleSpinBox" name="maxAlpha">
             <property name="suffix">
              <string> %</string>
@@ -906,41 +973,12 @@
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QSpinBox" name="maxPointsize">
-            <property name="suffix">
-             <string> u</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>2047</number>
-            </property>
-            <property name="value">
-             <number>10</number>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="minPointsize">
-            <property name="suffix">
-             <string> u</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>2047</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
            <widget class="QDoubleSpinBox" name="maxLifetime">
             <property name="suffix">
              <string> s</string>
             </property>
             <property name="maximum">
-             <double>10000.000000000000000</double>
+             <double>10.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -950,29 +988,49 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="minAlpha">
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Pointsize</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="minVelocity">
             <property name="suffix">
-             <string> %</string>
+             <string> u/s</string>
             </property>
             <property name="maximum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+             <double>1000.000000000000000</double>
             </property>
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
             </property>
-            <property name="value">
-             <double>1.000000000000000</double>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="2">
+           <widget class="gui::RangeWidget" name="lifetime" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Lifetime</string>
+          <item row="7" column="1" colspan="2">
+           <widget class="gui::RangeWidget" name="alpha" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
             </property>
            </widget>
           </item>
@@ -1173,6 +1231,12 @@
    <header>gfxwidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>gui::RangeWidget</class>
+   <extends>QWidget</extends>
+   <header>rangewidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>name</tabstop>
@@ -1184,6 +1248,8 @@
   <tabstop>gravityX</tabstop>
   <tabstop>gravityY</tabstop>
   <tabstop>canExpire</tabstop>
+  <tabstop>dirStartAngle</tabstop>
+  <tabstop>dirSizeAngle</tabstop>
   <tabstop>simWidth</tabstop>
   <tabstop>simHeight</tabstop>
   <tabstop>boundary</tabstop>
@@ -1209,16 +1275,18 @@
   <tabstop>chkShowBounds</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>widgetColor</tabstop>
-  <tabstop>dirStartAngle</tabstop>
-  <tabstop>dirSizeAngle</tabstop>
   <tabstop>minVelocity</tabstop>
   <tabstop>maxVelocity</tabstop>
+  <tabstop>velocity</tabstop>
   <tabstop>minLifetime</tabstop>
   <tabstop>maxLifetime</tabstop>
+  <tabstop>lifetime</tabstop>
   <tabstop>minPointsize</tabstop>
   <tabstop>maxPointsize</tabstop>
+  <tabstop>pointsize</tabstop>
   <tabstop>minAlpha</tabstop>
   <tabstop>maxAlpha</tabstop>
+  <tabstop>alpha</tabstop>
   <tabstop>timeSizeDerivative</tabstop>
   <tabstop>distSizeDerivative</tabstop>
   <tabstop>timeAlphaDerivative</tabstop>

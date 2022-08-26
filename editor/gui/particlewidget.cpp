@@ -241,6 +241,16 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.widget->onZoomIn  = std::bind(&ParticleEditorWidget::ZoomIn, this);
     mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
+    // if you change this change the UI widget values min/max values too!
+    mUI.velocity->SetScale(1000.0f);
+    mUI.velocity->SetExponent(2.2f);
+    mUI.lifetime->SetScale(10.0f);
+    mUI.lifetime->SetExponent(1.0f);
+    mUI.pointsize->SetScale(2048);
+    mUI.pointsize->SetExponent(2.2f);
+    mUI.alpha->SetScale(1.0f);
+    mUI.alpha->SetExponent(1.0f);
+
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::CoordinateSpace>(mUI.space);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
@@ -256,7 +266,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
-    SetParams();
+    SetParams(); // apply the defaults from the UI to the params
+    ShowParams();
+    MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
@@ -265,6 +277,11 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     connect(mWorkspace, &app::Workspace::NewResourceAvailable,this, &ParticleEditorWidget::NewResourceAvailable);
     connect(mWorkspace, &app::Workspace::ResourceToBeDeleted, this, &ParticleEditorWidget::ResourceToBeDeleted);
     connect(mWorkspace, &app::Workspace::ResourceUpdated,     this, &ParticleEditorWidget::ResourceUpdated);
+
+    connect(mUI.velocity,  &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::VelocityChanged);
+    connect(mUI.lifetime,  &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::LifetimeChanged);
+    connect(mUI.pointsize, &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::PointsizeChanged);
+    connect(mUI.alpha,     &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::AlphaChanged);
     setWindowTitle("My Particle System");
     mOriginalHash = mClass->GetHash();
 }
@@ -310,6 +327,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
         SetValue(mUI.materials, QString("White"));
     }
     ShowParams();
+    MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
@@ -407,6 +425,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     SetValue(mUI.materials, ListItemId(material));
 
     ShowParams();
+    MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
@@ -659,6 +678,15 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.dirStartAngle,       qRadiansToDegrees(params.direction_sector_start_angle));
     SetValue(mUI.dirSizeAngle,        qRadiansToDegrees(params.direction_sector_size));
 
+    mUI.velocity->SetLo(params.min_velocity);
+    mUI.velocity->SetHi(params.max_velocity);
+    mUI.lifetime->SetLo(params.min_lifetime);
+    mUI.lifetime->SetHi(params.max_lifetime);
+    mUI.pointsize->SetLo(params.min_point_size);
+    mUI.pointsize->SetHi(params.max_point_size);
+    mUI.alpha->SetLo(params.min_alpha);
+    mUI.alpha->SetHi(params.max_alpha);
+
     if (params.coordinate_space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
     {
         SetValue(mUI.initX,      params.init_rect_xpos);
@@ -667,6 +695,19 @@ void ParticleEditorWidget::ShowParams()
         SetValue(mUI.initHeight, params.init_rect_height);
     }
 }
+
+void ParticleEditorWidget::MinMax()
+{
+    mUI.maxVelocity->setMinimum(mUI.minVelocity->value());
+    mUI.minVelocity->setMaximum(mUI.maxVelocity->value());
+    mUI.maxPointsize->setMinimum(mUI.minPointsize->value());
+    mUI.minPointsize->setMaximum(mUI.maxPointsize->value());
+    mUI.maxLifetime->setMinimum(mUI.minLifetime->value());
+    mUI.minLifetime->setMaximum(mUI.maxLifetime->value());
+    mUI.maxAlpha->setMinimum(mUI.minAlpha->value());
+    mUI.minAlpha->setMaximum(mUI.maxAlpha->value());
+}
+
 void ParticleEditorWidget::on_widgetColor_colorChanged(QColor color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
@@ -734,7 +775,6 @@ void ParticleEditorWidget::on_resetTransform_clicked()
 }
 
 void ParticleEditorWidget::on_btnViewPlus90_clicked()
-
 {
     const auto value = mUI.rotation->value();
     mUI.rotation->setValue(value + 90.0f);
@@ -844,36 +884,52 @@ void ParticleEditorWidget::on_dirSizeAngle_valueChanged()
 {
     SetParams();
 }
-void ParticleEditorWidget::on_minVelocity_valueChanged(double)
+void ParticleEditorWidget::on_minVelocity_valueChanged(double value)
 {
+    mUI.velocity->SetLo(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_maxVelocity_valueChanged(double)
+void ParticleEditorWidget::on_maxVelocity_valueChanged(double value)
 {
+    mUI.velocity->SetHi(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_minLifetime_valueChanged(double)
+void ParticleEditorWidget::on_minLifetime_valueChanged(double value)
 {
+    mUI.lifetime->SetLo(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_maxLifetime_valueChanged(double)
+void ParticleEditorWidget::on_maxLifetime_valueChanged(double value)
 {
+    mUI.lifetime->SetHi(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_minPointsize_valueChanged(int)
+void ParticleEditorWidget::on_minPointsize_valueChanged(int value)
 {
+    mUI.pointsize->SetLo(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_maxPointsize_valueChanged(int)
+void ParticleEditorWidget::on_maxPointsize_valueChanged(int value)
 {
+    mUI.pointsize->SetHi(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_minAlpha_valueChanged(double)
+void ParticleEditorWidget::on_minAlpha_valueChanged(double value)
 {
+    mUI.alpha->SetLo(value);
+    MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_maxAlpha_valueChanged(double)
+void ParticleEditorWidget::on_maxAlpha_valueChanged(double value)
 {
+    mUI.alpha->SetHi(value);
+    MinMax();
     SetParams();
 }
 void ParticleEditorWidget::on_timeSizeDerivative_valueChanged(double)
@@ -1121,7 +1177,10 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
         state->emitter_width          = emitter_width;
         state->emitter_height         = emitter_height;
 
-        if ((local_x >= emitter_left && local_x <= emitter_right) && (local_y >= emitter_top && local_y <= emitter_bottom))
+        const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+        if ((space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local) &&
+            (local_x >= emitter_left && local_x <= emitter_right) &&
+            (local_y >= emitter_top && local_y <= emitter_bottom))
         {
             const auto scalex = zoom * viz_width * emitter_width;
             const auto scaley = zoom * viz_height * emitter_height;
@@ -1173,6 +1232,37 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
 void ParticleEditorWidget::MouseRelease(QMouseEvent* mickey)
 {
     mMouseTool.reset();
+}
+
+void ParticleEditorWidget::VelocityChanged(float min, float max)
+{
+    SetValue(mUI.minVelocity, min);
+    SetValue(mUI.maxVelocity, max);
+    MinMax();
+    SetParams();
+}
+
+void ParticleEditorWidget::LifetimeChanged(float min, float max)
+{
+    SetValue(mUI.minLifetime, min);
+    SetValue(mUI.maxLifetime, max);
+    MinMax();
+    SetParams();
+}
+
+void ParticleEditorWidget::PointsizeChanged(float min, float max)
+{
+    SetValue(mUI.minPointsize, min);
+    SetValue(mUI.maxPointsize, max);
+    MinMax();
+    SetParams();
+}
+void ParticleEditorWidget::AlphaChanged(float min, float max)
+{
+    SetValue(mUI.minAlpha, min);
+    SetValue(mUI.maxAlpha, max);
+    MinMax();
+    SetParams();
 }
 
 void ParticleEditorWidget::NewResourceAvailable(const app::Resource* resource)
