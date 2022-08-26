@@ -73,7 +73,9 @@ namespace gui
 
         bool hasInputFocus() const;
 
-        const gfx::Color4f* getClearColor() const
+        gfx::Color4f GetCurrentClearColor();
+
+        const gfx::Color4f* GetClearColor() const
         {
             if (!mClearColor.has_value())
                 return nullptr;
@@ -91,9 +93,9 @@ namespace gui
             return stats;
         }
 
-        void setClearColor(const gfx::Color4f& color)
+        void SetClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
-        void resetClearColor()
+        void ResetClearColor()
         { mClearColor.reset(); }
 
         bool haveVSYNC() const;
@@ -194,8 +196,11 @@ namespace gui
         float getCurrentFPS() const
         { return mWindow->getCurrentFPS(); }
 
-        const gfx::Color4f* getClearColor() const
-        { return mWindow->getClearColor(); }
+        gfx::Color4f GetCurrentClearColor() const
+        { return mWindow->GetCurrentClearColor(); }
+
+        const gfx::Color4f* GetClearColor() const
+        { return mWindow->GetClearColor(); }
         gfx::Device& getDevice() const
         { return mWindow->getDevice(); }
         gfx::Painter& getPainter() const
@@ -203,8 +208,10 @@ namespace gui
         gfx::Device::ResourceStats getDeviceResourceStats() const
         { return mWindow->getDeviceResourceStats(); }
 
-        void setClearColor(const gfx::Color4f& color)
-        { mWindow->setClearColor(color); }
+        void SetClearColor(const gfx::Color4f& color)
+        { mWindow->SetClearColor(color); }
+        void ResetClearColor()
+        { mWindow->ResetClearColor(); }
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
@@ -229,14 +236,13 @@ namespace gui
         std::function<void ()> onZoomIn;
         std::function<void ()> onZoomOut;
 
+        void ShowColorDialog();
     public slots:
         void dispose();
         void reloadShaders();
         void reloadTextures();
         void triggerPaint();
-
     private:
-        void showColorDialog();
         void translateZoomInOut(QWheelEvent* event);
         void toggleVSync();
 

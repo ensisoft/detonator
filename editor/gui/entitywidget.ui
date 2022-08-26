@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1466</width>
-    <height>1149</height>
+    <height>1169</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -982,6 +982,19 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="color_widgets::ColorSelector" name="widgetColor">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
             </property>
            </widget>
           </item>
@@ -2994,6 +3007,7 @@
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>widgetColor</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeTranslateX</tabstop>

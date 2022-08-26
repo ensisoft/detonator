@@ -82,6 +82,7 @@ namespace gui
         { return mState.entity->GetId(); }
         void SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties);
     private slots:
+        void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

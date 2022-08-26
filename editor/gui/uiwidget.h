@@ -71,6 +71,7 @@ namespace gui
         virtual bool GetStats(Stats* stats) const override;
         virtual void Refresh() override;
     private slots:
+        void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

@@ -806,7 +806,7 @@ inline void SetUserProperty(Resource& res, const QString& name, const color_widg
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const QString& name, const gui::GfxWidget* widget)
 {
-    if (const auto* color = widget->getClearColor())
+    if (const auto* color = widget->GetClearColor())
         res.SetUserProperty(name + "_clear_color", FromGfx(*color));
 }
 template<typename Resource>
@@ -1044,7 +1044,7 @@ inline bool GetUserProperty(const Resource& res, const QString& name, gui::GfxWi
     if (res.GetUserProperty(name + "_clear_color", &color))
     {
         QSignalBlocker s(widget);
-        widget->setClearColor(ToGfx(color));
+        widget->SetClearColor(ToGfx(color));
         return true;
     }
     return false;

@@ -304,8 +304,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>318</width>
-                 <height>74</height>
+                 <width>304</width>
+                 <height>75</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -486,8 +486,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>149</width>
-                 <height>74</height>
+                 <width>142</width>
+                 <height>75</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -553,7 +553,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>348</width>
+                 <width>332</width>
                  <height>106</height>
                 </rect>
                </property>
@@ -1194,6 +1194,19 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="color_widgets::ColorSelector" name="widgetColor">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1766,6 +1779,16 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -1822,6 +1845,7 @@
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>widgetColor</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeEntity</tabstop>

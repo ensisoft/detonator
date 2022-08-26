@@ -702,6 +702,19 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="color_widgets::ColorSelector" name="widgetColor">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1142,6 +1155,16 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -1182,6 +1205,7 @@
   <tabstop>chkShowEmitter</tabstop>
   <tabstop>chkShowBounds</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>widgetColor</tabstop>
   <tabstop>dirStartAngle</tabstop>
   <tabstop>dirSizeAngle</tabstop>
   <tabstop>minVelocity</tabstop>
