@@ -33,6 +33,7 @@
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#include "game/types.h"
 #include "engine/renderer.h"
 
 using namespace game;
@@ -51,7 +52,15 @@ void Renderer::Draw(const Entity& entity,
                     gfx::Transform& transform,
                     EntityInstanceDrawHook* hook)
 {
-    DrawEntity<Entity, EntityNode>(entity, painter, transform, hook);
+    MapEntity<Entity, EntityNode>(entity, transform);
+
+    std::vector<DrawPacket> packets;
+
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        PrimeNode(entity, entity.GetNode(i), transform, packets, hook);
+    }
+    DrawPackets(painter, packets);
 }
 
 void Renderer::Draw(const EntityClass& entity,
@@ -59,7 +68,16 @@ void Renderer::Draw(const EntityClass& entity,
                     gfx::Transform& transform,
                     EntityClassDrawHook* hook)
 {
-    DrawEntity<EntityClass, EntityNodeClass>(entity, painter, transform, hook);
+
+    MapEntity<EntityClass, EntityNodeClass>(entity, transform);
+
+    std::vector<DrawPacket> packets;
+
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        PrimeNode(entity, entity.GetNode(i), transform, packets, hook);
+    }
+    DrawPackets(painter, packets);
 }
 
 void Renderer::Draw(const Scene& scene,
@@ -86,8 +104,7 @@ void Renderer::Update(const EntityClass& entity, float time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        const auto& node = entity.GetNode(i);
-        UpdateNode<EntityNodeClass>(node, time, dt);
+        UpdateNode<EntityNodeClass>(entity.GetNode(i), time, dt);
     }
 }
 
@@ -100,8 +117,7 @@ void Renderer::Update(const Entity& entity, float time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        const auto& node = entity.GetNode(i);
-        UpdateNode<EntityNode>(node, time, dt);
+        UpdateNode<EntityNode>(entity.GetNode(i), time, dt);
     }
 }
 
@@ -165,31 +181,51 @@ void Renderer::ClearPaintState()
 template<typename Node>
 void Renderer::UpdateNode(const Node& node, float time, float dt)
 {
-    const auto* drawable = node.GetDrawable();
-    if (!drawable)
+    const auto* item = node.GetDrawable();
+    const auto* text = node.GetTextItem();
+    if (!item && !text)
         return;
 
     using DrawableItemType = typename Node::DrawableItemType;
 
-    auto it = mPaintNodes.find("item/" + node.GetId());
+    auto it = mPaintNodes.find(node.GetId());
     if (it == mPaintNodes.end())
         return;
-    auto& paint = it->second;
-    if (paint.material)
-    {
-        const auto time_scale = drawable->GetTimeScale();
-        if (drawable->TestFlag(DrawableItemType::Flags::UpdateMaterial))
-            paint.material->Update(dt * time_scale);
-    }
-    if (paint.drawable)
-    {
-        gfx::Drawable::Environment env; // todo:
+    auto& paint_node = it->second;
 
-        const auto time_scale = drawable->GetTimeScale();
-        if (drawable->TestFlag(DrawableItemType::Flags::UpdateDrawable))
-            paint.drawable->Update(env, dt * time_scale);
-        if (drawable->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint.drawable->IsAlive())
-            paint.drawable->Restart(env);
+    gfx::Transform transform;
+    transform.Scale(paint_node.world_size);
+    transform.Rotate(paint_node.world_rotation);
+    transform.Translate(paint_node.world_pos);
+
+    transform.Push(node.GetModelTransform());
+    const auto& model = transform.GetAsMatrix();
+
+    gfx::Drawable::Environment env;
+    env.model_matrix = &model;
+
+    if (item && paint_node.item_material)
+    {
+        const auto time_scale = item->GetTimeScale();
+        if (item->TestFlag(DrawableItemType::Flags::UpdateMaterial))
+            paint_node.item_material->Update(dt * time_scale);
+    }
+    if (item && paint_node.item_drawable)
+    {
+        const auto time_scale = item->GetTimeScale();
+        if (item->TestFlag(DrawableItemType::Flags::UpdateDrawable))
+            paint_node.item_drawable->Update(env, dt * time_scale);
+        if (item->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint_node.item_drawable->IsAlive())
+            paint_node.item_drawable->Restart(env);
+    }
+
+    if (text && paint_node.text_material)
+    {
+        paint_node.text_material->Update(dt);
+    }
+    if (text && paint_node.text_drawable)
+    {
+        paint_node.text_drawable->Update(env, dt);
     }
 }
 
@@ -228,265 +264,264 @@ void Renderer::DrawScene(const SceneType& scene,
     }
 }
 
-template<typename EntityType, typename Node>
-void Renderer::DrawEntity(const EntityType& entity,
-                          gfx::Painter& painter,
-                          gfx::Transform& transform,
-                          EntityDrawHook<Node>* hook)
-
+template<typename EntityType, typename NodeType>
+void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
 {
-    using RenderTree = game::RenderTree<Node>;
-    using DrawPacket = DrawPacket;
-    using DrawHook   = EntityDrawHook<Node>;
-    using DrawableItemType = typename Node::DrawableItemType;
-
-    auto tree = entity.GetRenderTree();
-
-    // here we could apply operations that would apply to the whole
-    // animation but currently we don't need such things.
-    // if we did we could begin new transformation scope for this
-    // by pushing a new scope in the transformation stack.
-    // transfrom.Push();
-
-    std::vector<DrawPacket> packets;
+    using RenderTree = game::RenderTree<NodeType>;
 
     class Visitor : public RenderTree::ConstVisitor {
     public:
-        Visitor(const EntityType& entity, std::vector<DrawPacket>& packets,
-                Renderer& renderer, gfx::Transform& transform, DrawHook* hook)
-            : mEntity(entity)
-            , mPackets(packets)
-            , mRenderer(renderer)
-            , mTransform(transform)
-            , mHook(hook)
+        Visitor(const EntityType& entity, Renderer& renderer, gfx::Transform& transform)
+          : mEntity(entity)
+          , mRenderer(renderer)
+          , mTransform(transform)
         {}
-
-        virtual void EnterNode(const Node* node) override
+        virtual void EnterNode(const NodeType* node) override
         {
             if (!node)
                 return;
 
             // always push the node's transform, it might have children that
-            // do render.
+            // do render even if this node itself doesn't
             mTransform.Push(node->GetNodeTransform());
 
             const auto* item = node->GetDrawable();
             const auto* text = node->GetTextItem();
-            if (!item && !text)
+            if (item || text)
             {
-                if (mHook)
-                {
-                    // Allow the draw hook to append any extra draw packets for this node.
-                    gfx::Transform t(mTransform);
-                    mHook->AppendPackets(node, t, mPackets);
-                }
-                return;
-            }
+                const game::FBox box(mTransform.GetAsMatrix());
 
-            if (text)
-            {
-                const auto& node_size = node->GetSize();
-                const auto text_raster_width  = text->GetRasterWidth();
-                const auto text_raster_height = text->GetRasterHeight();
-                const auto raster_width  = text_raster_width ? text_raster_width : node_size.x;
-                const auto raster_height = text_raster_height ? text_raster_height : node_size.y;
-                auto& paint_node = mRenderer.mPaintNodes["text/" + node->GetId()];
-                paint_node.visited = true;
-                // use the instance hash as a material id to realize whether
-                // we need to re-create the material. (i.e. the text in the text item has changed)
-                // or the rasterization parameters have changed (node size -> raster buffer size)
-                size_t hash = 0;
-                hash = base::hash_combine(hash, raster_width);
-                hash = base::hash_combine(hash, raster_height);
-                // should the changes in the content be reflected or not?
-                if (mRenderer.mEditingMode || !text->IsStatic())
-                    hash = base::hash_combine(hash, text->GetHash());
-
-                const auto& material = std::to_string(hash);
-                if (paint_node.material_class_id != material)
-                {
-                    gfx::TextBuffer::Text text_and_style;
-                    text_and_style.text = text->GetText();
-                    text_and_style.font = text->GetFontName();
-                    text_and_style.fontsize = text->GetFontSize();
-                    text_and_style.lineheight = text->GetLineHeight();
-                    text_and_style.underline  = text->TestFlag(TextItem::Flags::UnderlineText);
-                    gfx::TextBuffer buffer(raster_width, raster_height);
-                    if (text->GetVAlign() == TextItem::VerticalTextAlign::Top)
-                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignTop);
-                    else if (text->GetVAlign() == TextItem::VerticalTextAlign::Center)
-                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignCenter);
-                    else if (text->GetVAlign() == TextItem::VerticalTextAlign::Bottom)
-                        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignBottom);
-                    if (text->GetHAlign() == TextItem::HorizontalTextAlign::Left)
-                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignLeft);
-                    else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Center)
-                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignCenter);
-                    else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Right)
-                        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignRight);
-                    buffer.AddText(std::move(text_and_style));
-
-                    // setup material to shade text.
-                    auto mat = gfx::CreateMaterialInstance(std::move(buffer));
-                    mat->SetColor(text->GetTextColor());
-                    paint_node.material = std::move(mat);
-                    paint_node.material_class_id = material;
-                }
-                bool visible_now = true;
-                if (text->TestFlag(TextItemClass::Flags::BlinkText))
-                {
-                    const auto fps = 1.5;
-                    const auto full_period = 2.0 / fps;
-                    const auto half_period = full_period * 0.5;
-                    const auto time = fmodf(base::GetTime(), full_period);
-                    if (time >= half_period)
-                        visible_now = false;
-                }
-
-                if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
-                {
-                    mTransform.Push(node->GetModelTransform());
-
-                    static auto rect = std::make_shared<gfx::Rectangle>();
-                    DrawPacket packet;
-                    packet.drawable  = rect;
-                    packet.material  = paint_node.material;
-                    packet.transform = mTransform.GetAsMatrix();
-                    packet.pass  = RenderPass::Draw;
-                    packet.layer = text->GetLayer();
-                    if (!mHook || (mHook && mHook->InspectPacket(node, packet)))
-                        mPackets.push_back(std::move(packet));
-
-                    // pop the model transform.
-                    mTransform.Pop();
-                }
-            }
-
-            if (item)
-            {
-                mTransform.Push(node->GetModelTransform());
-                if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
-                {
-                    mTransform.Push();
-                    mTransform.Scale(-1.0f , 1.0f);
-                    mTransform.Translate(1.0f , 0.0f);
-                }
-                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
-                {
-                    mTransform.Push();
-                    mTransform.Scale(1.0f, -1.0f);
-                    mTransform.Translate(0.0f, 1.0f);
-                }
-                const auto& transform = mTransform.GetAsMatrix();
-
-                if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
-                    mTransform.Pop();
-                if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
-                    mTransform.Pop();
-                // pop the model transform
-                mTransform.Pop();
-
-                const auto& material = item->GetMaterialId();
-                const auto& drawable = item->GetDrawableId();
-                auto& paint_node = mRenderer.mPaintNodes["item/" + node->GetId()];
-                paint_node.visited = true;
-                if (item->GetRenderPass() == RenderPass::Draw && paint_node.material_class_id != material)
-                {
-                    paint_node.material.reset();
-                    paint_node.material_class_id = material;
-                    auto klass = mRenderer.mClassLib->FindMaterialClassById(item->GetMaterialId());
-                    if (klass)
-                        paint_node.material = gfx::CreateMaterialInstance(klass);
-                    if (!paint_node.material)
-                        WARN("No such material class '%1' found for '%2/%3')", material, mEntity.GetName(), node->GetName());
-                }
-                if (paint_node.drawable_class_id != drawable)
-                {
-                    paint_node.drawable.reset();
-                    paint_node.drawable_class_id = drawable;
-
-                    auto klass = mRenderer.mClassLib->FindDrawableClassById(item->GetDrawableId());
-                    if (klass)
-                        paint_node.drawable = gfx::CreateDrawableInstance(klass);
-                    if (!paint_node.drawable)
-                        WARN("No such drawable class '%1' found for '%2/%3'", drawable, mEntity.GetName(), node->GetName());
-                    if (paint_node.drawable)
-                    {
-                        gfx::Drawable::Environment env; // todo:
-                        env.model_matrix = &transform;
-                        paint_node.drawable->Restart(env);
-                    }
-                }
-                if (paint_node.material)
-                {
-                    paint_node.material->ResetUniforms();
-                    paint_node.material->SetUniforms(item->GetMaterialParams());
-                }
-                if (paint_node.drawable)
-                {
-                    gfx::Drawable::Style style;
-                    if (item->GetRenderStyle() == RenderStyle::Solid)
-                        style = gfx::Drawable::Style::Solid;
-                    else if (item->GetRenderStyle() == RenderStyle::Wireframe)
-                        style = gfx::Drawable::Style::Wireframe;
-                    else if (item->GetRenderStyle() == RenderStyle::Outline)
-                        style = gfx::Drawable::Style::Outline;
-                    else if (item->GetRenderStyle() == RenderStyle::Points)
-                        style = gfx::Drawable::Style::Points;
-                    else BUG("Unsupported rendering style.");
-
-                    paint_node.drawable->SetStyle(style);
-                    paint_node.drawable->SetLineWidth(item->GetLineWidth());
-                    const auto flip_h = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
-                    const auto flip_v = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-                    if (flip_h ^ flip_v)
-                        paint_node.drawable->SetCulling(gfx::Drawable::Culling::Front);
-                    else paint_node.drawable->SetCulling(gfx::Drawable::Culling::Back);
-                }
-
-                // if it doesn't render then no draw packets are generated
-                if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
-                {
-                    DrawPacket packet;
-                    packet.material  = paint_node.material;
-                    packet.drawable  = paint_node.drawable;
-                    packet.layer     = item->GetLayer();
-                    packet.pass      = item->GetRenderPass();
-                    packet.transform = transform;
-                    if (!mHook || (mHook && mHook->InspectPacket(node , packet)))
-                        mPackets.push_back(std::move(packet));
-                }
-            }
-
-            // append any extra packets if needed.
-            if (mHook)
-            {
-                // Allow the draw hook to append any extra draw packets for this node.
-                gfx::Transform t(mTransform);
-                mHook->AppendPackets(node, t, mPackets);
+                auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
+                paint_node.visited        = true;
+                paint_node.world_pos      = box.GetCenter();
+                paint_node.world_size     = box.GetSize();
+                paint_node.world_rotation = box.GetRotation();
             }
         }
-
-        virtual void LeaveNode(const Node *node) override
+        virtual void LeaveNode(const NodeType* node) override
         {
             if (!node)
                 return;
             mTransform.Pop();
         }
-
     private:
         const EntityType& mEntity;
-        std::vector<DrawPacket>& mPackets;
         Renderer& mRenderer;
         gfx::Transform& mTransform;
-        DrawHook* mHook = nullptr;
-    };
+    } visitor(entity, *this, transform);
 
-    Visitor visitor(entity, packets, *this, transform, hook);
-    TRACE_CALL("Tree::Traverse", tree.PreOrderTraverse(visitor));
+    const auto& tree = entity.GetRenderTree();
+    tree.PreOrderTraverse(visitor);
+}
 
-    TRACE_SCOPE("Renderer::DrawPackets", "packets=%u", packets.size());
+template<typename EntityType, typename NodeType>
+void Renderer::PrimeNode(const EntityType& entity,
+                         const NodeType& node,
+                         gfx::Transform& scene,
+                         std::vector<DrawPacket>& packets,
+                         EntityDrawHook<NodeType>* hook)
+{
+    using DrawableItemType = typename NodeType::DrawableItemType;
 
+    const auto* item = node.GetDrawable();
+    const auto* text = node.GetTextItem();
+    if (!item && !text)
+    {
+        if (hook)
+        {
+            scene.Push(entity.FindNodeTransform(&node));
+            hook->AppendPackets(&node, scene, packets);
+            scene.Pop();
+        }
+        return;
+    }
+    auto& paint_node = mPaintNodes[node.GetId()];
+
+    //gfx::Transform transform(paint_node.transform);
+    gfx::Transform transform;
+    transform.Scale(paint_node.world_size);
+    transform.Rotate(paint_node.world_rotation);
+    transform.Translate(paint_node.world_pos);
+
+    transform.Push(node.GetModelTransform());
+
+    if (text)
+    {
+        const auto& node_size = node.GetSize();
+        const auto text_raster_width  = text->GetRasterWidth();
+        const auto text_raster_height = text->GetRasterHeight();
+        const auto raster_width  = text_raster_width ? text_raster_width : node_size.x;
+        const auto raster_height = text_raster_height ? text_raster_height : node_size.y;
+        // use the instance hash as a material id to realize whether
+        // we need to re-create the material. (i.e. the text in the text item has changed)
+        // or the rasterization parameters have changed (node size -> raster buffer size)
+        size_t hash = 0;
+        hash = base::hash_combine(hash, raster_width);
+        hash = base::hash_combine(hash, raster_height);
+        // should the changes in the content be reflected or not?
+        if (mEditingMode || !text->IsStatic())
+            hash = base::hash_combine(hash, text->GetHash());
+
+        const auto& material = std::to_string(hash);
+        const auto& drawable = "_rect";
+        if (paint_node.text_material_id != material)
+        {
+            gfx::TextBuffer::Text text_and_style;
+            text_and_style.text       = text->GetText();
+            text_and_style.font       = text->GetFontName();
+            text_and_style.fontsize   = text->GetFontSize();
+            text_and_style.lineheight = text->GetLineHeight();
+            text_and_style.underline  = text->TestFlag(TextItem::Flags::UnderlineText);
+            gfx::TextBuffer buffer(raster_width, raster_height);
+            if (text->GetVAlign() == TextItem::VerticalTextAlign::Top)
+                buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignTop);
+            else if (text->GetVAlign() == TextItem::VerticalTextAlign::Center)
+                buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignCenter);
+            else if (text->GetVAlign() == TextItem::VerticalTextAlign::Bottom)
+                buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignBottom);
+            if (text->GetHAlign() == TextItem::HorizontalTextAlign::Left)
+                buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignLeft);
+            else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Center)
+                buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignCenter);
+            else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Right)
+                buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignRight);
+            buffer.AddText(std::move(text_and_style));
+
+            // setup material to shade text.
+            auto mat = gfx::CreateMaterialInstance(std::move(buffer));
+            mat->SetColor(text->GetTextColor());
+            paint_node.text_material = std::move(mat);
+            paint_node.text_material_id = material;
+        }
+        if (!paint_node.text_drawable)
+        {
+            auto klass = mClassLib->FindDrawableClassById(drawable);
+            paint_node.text_drawable = gfx::CreateDrawableInstance(klass);
+        }
+
+        bool visible_now = true;
+        if (text->TestFlag(TextItemClass::Flags::BlinkText))
+        {
+            const auto fps = 1.5;
+            const auto full_period = 2.0 / fps;
+            const auto half_period = full_period * 0.5;
+            const auto time = fmodf(base::GetTime(), full_period);
+            if (time >= half_period)
+                visible_now = false;
+        }
+        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
+        {
+            DrawPacket packet;
+            packet.drawable  = paint_node.text_drawable;
+            packet.material  = paint_node.text_material;
+            packet.transform = transform.GetAsMatrix();
+            packet.pass      = RenderPass::Draw;
+            packet.layer     = text->GetLayer();
+            if (!hook || (hook && hook->InspectPacket(&node, packet)))
+                packets.push_back(std::move(packet));
+        }
+    }
+
+    if (item)
+    {
+        const auto& material = item->GetMaterialId();
+        const auto& drawable = item->GetDrawableId();
+        if (item->GetRenderPass() == RenderPass::Draw && paint_node.item_material_id != material)
+        {
+            paint_node.item_material.reset();
+            paint_node.item_material_id = material;
+            auto klass = mClassLib->FindMaterialClassById(material);
+            if (klass)
+                paint_node.item_material = gfx::CreateMaterialInstance(klass);
+            if (!paint_node.item_material)
+                WARN("No such material class '%1' found for '%2/%3')", material, entity.GetName(), node.GetName());
+        }
+        if (paint_node.item_drawable_id != drawable)
+        {
+            paint_node.item_drawable.reset();
+            paint_node.item_drawable_id = drawable;
+
+            auto klass = mClassLib->FindDrawableClassById(drawable);
+            if (klass)
+                paint_node.item_drawable = gfx::CreateDrawableInstance(klass);
+            if (!paint_node.item_drawable)
+                WARN("No such drawable class '%1' found for '%2/%3'", drawable, entity.GetName(), node.GetName());
+            if (paint_node.item_drawable)
+            {
+                const auto& model = transform.GetAsMatrix();
+                gfx::Drawable::Environment env; // todo:
+                env.model_matrix = &model;
+                paint_node.item_drawable->Restart(env);
+            }
+        }
+        if (paint_node.item_material)
+        {
+            paint_node.item_material->ResetUniforms();
+            paint_node.item_material->SetUniforms(item->GetMaterialParams());
+        }
+        if (paint_node.item_drawable)
+        {
+            gfx::Drawable::Style style;
+            if (item->GetRenderStyle() == RenderStyle::Solid)
+                style = gfx::Drawable::Style::Solid;
+            else if (item->GetRenderStyle() == RenderStyle::Wireframe)
+                style = gfx::Drawable::Style::Wireframe;
+            else if (item->GetRenderStyle() == RenderStyle::Outline)
+                style = gfx::Drawable::Style::Outline;
+            else if (item->GetRenderStyle() == RenderStyle::Points)
+                style = gfx::Drawable::Style::Points;
+            else BUG("Unsupported rendering style.");
+
+            paint_node.item_drawable->SetStyle(style);
+            paint_node.item_drawable->SetLineWidth(item->GetLineWidth());
+            const auto flip_h = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+            const auto flip_v = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+            if (flip_h ^ flip_v)
+                paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Front);
+            else paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Back);
+        }
+        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        {
+            transform.Push();
+            transform.Scale(-1.0f , 1.0f);
+            transform.Translate(1.0f , 0.0f);
+        }
+        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        {
+            transform.Push();
+            transform.Scale(1.0f, -1.0f);
+            transform.Translate(0.0f, 1.0f);
+        }
+        // if it doesn't render then no draw packets are generated
+        if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
+        {
+            DrawPacket packet;
+            packet.material  = paint_node.item_material;
+            packet.drawable  = paint_node.item_drawable;
+            packet.layer     = item->GetLayer();
+            packet.pass      = item->GetRenderPass();
+            packet.transform = transform.GetAsMatrix();
+            if (!hook || (hook && hook->InspectPacket(&node , packet)))
+                packets.push_back(std::move(packet));
+        }
+        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+            transform.Pop();
+        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+            transform.Pop();
+    }
+
+    transform.Pop();
+
+    // append any extra packets if needed.
+    if (hook)
+    {
+        // Allow the draw hook to append any extra draw packets for this node.
+        hook->AppendPackets(&node, transform, packets);
+    }
+}
+
+void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets)
+{
     // the layer value is negative but for the indexing below
     // we must have positive values only.
     int first_layer_index = 0;
@@ -540,9 +575,6 @@ void Renderer::DrawEntity(const EntityType& entity,
             painter.Draw(layer.draw_list);
         else painter.Draw(layer.draw_list, layer.mask_list);
     }
-    // if we used a new transformation scope pop it here.
-    //transform.Pop();
-
 }
 
 } // namespace
