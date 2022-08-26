@@ -26,6 +26,7 @@
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include "base/math.h"
 #include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
@@ -77,8 +78,11 @@ public:
         const auto& view_to_local  = glm::inverse(local_to_view);
         const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
         const auto& mouse_delta    = coord_in_local - mMousePos;
-        mState.emitter_xpos += mouse_delta.x;
-        mState.emitter_ypos += mouse_delta.y;
+
+        const auto max_xpos = 1.0f - mState.emitter_width;
+        const auto max_ypos = 1.0f - mState.emitter_height;
+        mState.emitter_xpos = math::clamp(0.0f, max_xpos, mState.emitter_xpos + mouse_delta.x);
+        mState.emitter_ypos = math::clamp(0.0f, max_ypos, mState.emitter_ypos + mouse_delta.y);
         mMousePos = coord_in_local;
         view.Pop();
     }
@@ -125,8 +129,12 @@ public:
         const auto& view_to_local  = glm::inverse(local_to_view);
         const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
         const auto& mouse_delta    = coord_in_local - mMousePos;
-        mState.emitter_width  += mouse_delta.x;
-        mState.emitter_height += mouse_delta.y;
+
+        const auto max_width  = 1.0f - mState.emitter_xpos;
+        const auto max_height = 1.0f - mState.emitter_ypos;
+
+        mState.emitter_width  = math::clamp(0.0f, max_width, mState.emitter_width + mouse_delta.x);
+        mState.emitter_height = math::clamp(0.0f, max_height, mState.emitter_height + mouse_delta.y);
         mMousePos = coord_in_local;
         view.Pop();
     }
