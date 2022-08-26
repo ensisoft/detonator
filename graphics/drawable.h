@@ -896,7 +896,7 @@ namespace gfx
 
 
         // Control when to spawn particles.
-        enum SpawnPolicy {
+        enum class SpawnPolicy {
             // Spawn only once the initial number of particles
             // and then no more particles.
             Once,
@@ -909,8 +909,20 @@ namespace gfx
             Continuous
         };
 
+        // Control the simulation space for the particles.
+        enum class CoordinateSpace {
+            // Particles are simulated inside a local coordinate space
+            // relative to a local origin which is then transformed
+            // with the model transform to the world (and view) space.
+            Local,
+            // Particles are simulated in the global/world coordinate space
+            // directly and only transformed to view space.
+            Global
+        };
+
         // initial engine configuration params
         struct Params {
+            CoordinateSpace coordinate_space = CoordinateSpace::Local;
             // type of motion for the particles
             Motion motion = Motion::Linear;
             // when to spawn particles.
@@ -985,10 +997,11 @@ namespace gfx
         {}
 
         Shader* GetShader(Device& device) const;
-        Geometry* Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const;
+        Geometry* Upload(const Environment& env, const InstanceState& state, Device& device) const;
 
         std::string GetProgramId() const;
 
+        void ApplyDynamicState(const Environment& env, Program& program) const;
         void Update(const Environment& env, InstanceState& state, float dt) const;
         void Restart(const Environment& env, InstanceState& state) const;
         bool IsAlive(const InstanceState& state) const;
@@ -1009,9 +1022,9 @@ namespace gfx
         // Load from JSON
         static std::optional<KinematicsParticleEngineClass> FromJson(const data::Reader& data);
     private:
-        void InitParticles(InstanceState& state, size_t num) const;
+        void InitParticles(const Environment& env, InstanceState& state, size_t num) const;
         void KillParticle(InstanceState& state, size_t i) const;
-        bool UpdateParticle(InstanceState& state, size_t i, float dt) const;
+        bool UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const;
     private:
         Params mParams;
     };
@@ -1040,12 +1053,7 @@ namespace gfx
         {
             state.line_width = 1.0;
             state.culling    = Culling::None;
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
+            mClass->ApplyDynamicState(env, program);
         }
         // Drawable implementation. Compile the shader.
         virtual Shader* GetShader(Device& device) const override
