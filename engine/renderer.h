@@ -103,13 +103,9 @@ namespace engine
         void Draw(const game::Entity& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityInstanceDrawHook* hook = nullptr);
-        // Draw a representation of the entity class instance.
-        // This functionality is mostly to support editor functionality
-        // and to simplify working with an AnimationClass instance.
         void Draw(const game::EntityClass& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityClassDrawHook* hook = nullptr);
-
         void Draw(const game::Scene& scene,
                   gfx::Painter& painter, gfx::Transform& transform,
                   SceneInstanceDrawHook* scene_hook = nullptr,
@@ -142,17 +138,30 @@ namespace engine
                        EntityDrawHook<NodeType>* entity_hook);
 
         template<typename EntityType, typename NodeType>
-        void DrawEntity(const EntityType& entity,
-                            gfx::Painter& painter, gfx::Transform& transform,
-                            EntityDrawHook<NodeType>* hook);
+        void MapEntity(const EntityType& entity, gfx::Transform& transform);
+
+        template<typename EntityType, typename NodeType>
+        void PrimeNode(const EntityType& entity,
+                       const NodeType& node,
+                       gfx::Transform& transform,
+                       std::vector<DrawPacket>& packets,
+                       EntityDrawHook<NodeType>* hook);
+
+        void DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets);
     private:
         const ClassLibrary* mClassLib = nullptr;
         struct PaintNode {
             bool visited = false;
-            std::shared_ptr<gfx::Material> material;
-            std::shared_ptr<gfx::Drawable> drawable;
-            std::string material_class_id;
-            std::string drawable_class_id;
+            std::string text_material_id;
+            std::string item_material_id;
+            std::string item_drawable_id;
+            std::shared_ptr<gfx::Material> text_material;
+            std::shared_ptr<gfx::Drawable> text_drawable;
+            std::shared_ptr<gfx::Material> item_material;
+            std::shared_ptr<gfx::Drawable> item_drawable;
+            glm::vec2 world_size;
+            glm::vec2 world_pos;
+            float world_rotation = 0.0f;
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
         bool mEditingMode = false;
