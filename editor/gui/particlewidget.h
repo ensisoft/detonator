@@ -71,10 +71,12 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionPause_triggered();
         void on_actionSave_triggered();
+        void on_resetEmitter_clicked();
         void on_resetTransform_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnSelectMaterial_clicked();
+        void on_space_currentIndexChanged(int);
         void on_motion_currentIndexChanged(int);
         void on_boundary_currentIndexChanged(int);
         void on_when_currentIndexChanged(int);
@@ -118,6 +120,8 @@ namespace gui
     private:
         class MoveEmitterTool;
         class SizeEmitterTool;
+        class MoveVizTool;
+        class SizeVizTool;
         struct UIState;
         app::Workspace* mWorkspace = nullptr;
         std::shared_ptr<gfx::KinematicsParticleEngineClass> mClass;

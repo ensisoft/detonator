@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1730</width>
-    <height>951</height>
+    <width>1661</width>
+    <height>929</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,13 +26,47 @@
         <string>Base properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_9">
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="name">
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_23">
+          <property name="text">
+           <string>Gravity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_30">
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="space"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Spawn</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="ID">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>Motion</string>
           </property>
          </widget>
         </item>
@@ -49,23 +83,271 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_30">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_21">
           <property name="text">
-           <string>ID</string>
+           <string>Space</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="ID">
+        <item row="6" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QDoubleSpinBox" name="gravityX">
+            <property name="minimum">
+             <double>-1000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="gravityY">
+            <property name="minimum">
+             <double>-1000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>0.300000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="motion"/>
+        </item>
+        <item row="5" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QComboBox" name="when"/>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="numParticles">
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="name">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="readOnly">
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QCheckBox" name="canExpire">
+          <property name="text">
+           <string>Particles can expire</string>
+          </property>
+          <property name="checked">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="localSpace">
+       <property name="title">
+        <string>Local simulation space</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="simWidth">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>At boundary</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_34">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_33">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QDoubleSpinBox" name="simHeight">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <widget class="QComboBox" name="boundary"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="localEmitter">
+       <property name="title">
+        <string>Local emitter box</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QDoubleSpinBox" name="initHeight">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="initX">
+          <property name="minimum">
+           <double>-1000.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_9">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_11">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Y pos</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QDoubleSpinBox" name="initY">
+          <property name="minimum">
+           <double>-99.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>X pos</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="initWidth">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <widget class="QPushButton" name="resetEmitter">
+          <property name="text">
+           <string>Reset</string>
           </property>
          </widget>
         </item>
@@ -83,95 +365,141 @@
        <property name="checked">
         <bool>false</bool>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <item>
-         <layout class="QGridLayout" name="gridLayout_7">
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string>Rotation</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="rotation">
-            <property name="wrapping">
-             <bool>true</bool>
-            </property>
-            <property name="minimum">
-             <double>-180.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>180.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="btnViewPlus90">
-            <property name="text">
-             <string>+ 90°</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="btnViewMinus90">
-            <property name="text">
-             <string>- 90°</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_20">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 200, 0)</string>
-            </property>
-            <property name="text">
-             <string>Width</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="scaleX">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <double>1000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_19">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(200,0, 0)</string>
-            </property>
-            <property name="text">
-             <string>Height</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QDoubleSpinBox" name="scaleY">
-            <property name="maximum">
-             <double>1000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="scaleX">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+         </widget>
         </item>
-        <item>
+        <item row="1" column="3">
+         <widget class="QDoubleSpinBox" name="scaleY">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_19">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="translateX">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <double>-10000.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_22">
+          <property name="text">
+           <string>Rotation</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_35">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>X pos</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QDoubleSpinBox" name="translateY">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <double>-10000.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>0.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="rotation">
+          <property name="wrapping">
+           <bool>true</bool>
+          </property>
+          <property name="minimum">
+           <double>-180.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>180.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_20">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_36">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Y pos</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
          <widget class="QPushButton" name="resetTransform">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -183,6 +511,36 @@
            <string>Reset</string>
           </property>
          </widget>
+        </item>
+        <item row="2" column="2" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="btnViewPlus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>+ 90°</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnViewMinus90">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>- 90°</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -354,7 +712,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QGroupBox" name="groupBox_5">
+      <widget class="QGroupBox" name="dirSector">
        <property name="minimumSize">
         <size>
          <width>390</width>
@@ -362,336 +720,77 @@
         </size>
        </property>
        <property name="title">
-        <string>Simulation space</string>
+        <string>Particle direction</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>At boundary</string>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
           </property>
-         </widget>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="QComboBox" name="motion"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_12">
           <property name="text">
-           <string>Motion</string>
+           <string>Start angle</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_7">
+         <widget class="QLabel" name="label_16">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(250, 250, 0)</string>
+          </property>
           <property name="text">
-           <string>Height</string>
+           <string>Size angle</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="simWidth">
+         <widget class="QSlider" name="dirStartAngle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <number>-180</number>
+          </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <number>180</number>
           </property>
-          <property name="value">
-           <double>1.000000000000000</double>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="invertedAppearance">
+           <bool>false</bool>
+          </property>
+          <property name="invertedControls">
+           <bool>false</bool>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::NoTicks</enum>
           </property>
          </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Width</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" colspan="2">
-         <widget class="QComboBox" name="boundary"/>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="simHeight">
+         <widget class="QSlider" name="dirSizeAngle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <number>360</number>
           </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <number>360</number>
           </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_23">
-          <property name="text">
-           <string>Gravity (x,y)</string>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </widget>
-        </item>
-        <item row="4" column="1" colspan="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QDoubleSpinBox" name="gravityX">
-            <property name="minimum">
-             <double>-1000.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>1000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="gravityY">
-            <property name="minimum">
-             <double>-1000.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>1000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <double>0.300000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string>Spawning</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>When</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="when"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Num</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="numParticles">
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="minimum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>10000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="initRect">
-          <property name="title">
-           <string>Inside this rectangle</string>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_14">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 200, 0)</string>
-             </property>
-             <property name="text">
-              <string>X pos</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="initX">
-             <property name="minimum">
-              <double>-1000.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="stepType">
-              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_10">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 200, 0)</string>
-             </property>
-             <property name="text">
-              <string>Width</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QDoubleSpinBox" name="initWidth">
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="stepType">
-              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(200,0, 0)</string>
-             </property>
-             <property name="text">
-              <string>Y pos</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="initY">
-             <property name="minimum">
-              <double>-99.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="label_9">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(200,0, 0)</string>
-             </property>
-             <property name="text">
-              <string>Height</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QDoubleSpinBox" name="initHeight">
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="stepType">
-              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="dirSector">
-          <property name="title">
-           <string>Direction sector</string>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_15">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(0, 200, 0)</string>
-             </property>
-             <property name="text">
-              <string>Start angle</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_16">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(250, 250, 0)</string>
-             </property>
-             <property name="text">
-              <string>Size angle</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QSlider" name="dirStartAngle">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimum">
-              <number>-180</number>
-             </property>
-             <property name="maximum">
-              <number>180</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="invertedAppearance">
-              <bool>false</bool>
-             </property>
-             <property name="invertedControls">
-              <bool>false</bool>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::NoTicks</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSlider" name="dirSizeAngle">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximum">
-              <number>360</number>
-             </property>
-             <property name="value">
-              <number>360</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
         </item>
        </layout>
@@ -858,16 +957,6 @@
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>Lifetime</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QCheckBox" name="canExpire">
-            <property name="text">
-             <string>Can expire</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -1062,6 +1151,23 @@
  <tabstops>
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
+  <tabstop>space</tabstop>
+  <tabstop>motion</tabstop>
+  <tabstop>when</tabstop>
+  <tabstop>numParticles</tabstop>
+  <tabstop>gravityX</tabstop>
+  <tabstop>gravityY</tabstop>
+  <tabstop>canExpire</tabstop>
+  <tabstop>simWidth</tabstop>
+  <tabstop>simHeight</tabstop>
+  <tabstop>boundary</tabstop>
+  <tabstop>initX</tabstop>
+  <tabstop>initY</tabstop>
+  <tabstop>initWidth</tabstop>
+  <tabstop>initHeight</tabstop>
+  <tabstop>resetEmitter</tabstop>
+  <tabstop>translateX</tabstop>
+  <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
   <tabstop>rotation</tabstop>
@@ -1076,18 +1182,6 @@
   <tabstop>chkShowEmitter</tabstop>
   <tabstop>chkShowBounds</tabstop>
   <tabstop>chkShowGrid</tabstop>
-  <tabstop>simWidth</tabstop>
-  <tabstop>simHeight</tabstop>
-  <tabstop>motion</tabstop>
-  <tabstop>boundary</tabstop>
-  <tabstop>gravityX</tabstop>
-  <tabstop>gravityY</tabstop>
-  <tabstop>when</tabstop>
-  <tabstop>numParticles</tabstop>
-  <tabstop>initX</tabstop>
-  <tabstop>initY</tabstop>
-  <tabstop>initWidth</tabstop>
-  <tabstop>initHeight</tabstop>
   <tabstop>dirStartAngle</tabstop>
   <tabstop>dirSizeAngle</tabstop>
   <tabstop>minVelocity</tabstop>
@@ -1098,7 +1192,6 @@
   <tabstop>maxPointsize</tabstop>
   <tabstop>minAlpha</tabstop>
   <tabstop>maxAlpha</tabstop>
-  <tabstop>canExpire</tabstop>
   <tabstop>timeSizeDerivative</tabstop>
   <tabstop>distSizeDerivative</tabstop>
   <tabstop>timeAlphaDerivative</tabstop>
