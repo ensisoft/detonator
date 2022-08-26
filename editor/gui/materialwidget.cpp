@@ -354,6 +354,11 @@ void MaterialWidget::Render()
     mUI.widget->triggerPaint();
 }
 
+void MaterialWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;
@@ -1803,6 +1808,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     const auto zoom = mUI.zoom->value();
     const auto content_width  = width * zoom;

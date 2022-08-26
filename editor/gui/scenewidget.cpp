@@ -1192,6 +1192,11 @@ void SceneWidget::on_btnViewReset_clicked()
     mUI.rotation->setValue(0);
 }
 
+void SceneWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void SceneWidget::on_nodeName_textChanged(const QString& text)
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
@@ -1443,6 +1448,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     // setup the view transform.
     gfx::Transform view;

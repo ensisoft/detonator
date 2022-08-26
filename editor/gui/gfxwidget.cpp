@@ -187,6 +187,11 @@ bool GfxWindow::hasInputFocus() const
     return mHasFocus;
 }
 
+gfx::Color4f GfxWindow::GetCurrentClearColor()
+{
+    return mClearColor.value_or(GfxWindow::ClearColor);
+}
+
 void GfxWindow::initializeGL()
 {
 
@@ -537,9 +542,9 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
         // TODO: Ultimately some better UI means are needed for these
         // options.
         if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F2)
-            showColorDialog();
+            ShowColorDialog();
         else if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F3)
-            mWindow->resetClearColor();
+            mWindow->ResetClearColor();
         else if (key->key() == Qt::Key_F3)
             toggleVSync();
 
@@ -615,11 +620,11 @@ void GfxWidget::focusOutEvent(QFocusEvent* focus)
     //DEBUG("GfxWidget lost focus");
 }
 
-void GfxWidget::showColorDialog()
+void GfxWidget::ShowColorDialog()
 {
     gfx::Color4f clear_color;
     bool own_color = false;
-    if (const auto* color = mWindow->getClearColor())
+    if (const auto* color = mWindow->GetClearColor())
     {
         clear_color = *color;
         own_color   = true;
@@ -632,11 +637,11 @@ void GfxWidget::showColorDialog()
     if (dlg.exec() == QDialog::Rejected)
     {
         if (own_color)
-            mWindow->setClearColor(clear_color);
-        else mWindow->resetClearColor();
+            mWindow->SetClearColor(clear_color);
+        else mWindow->ResetClearColor();
         return;
     }
-    mWindow->setClearColor(ToGfx(dlg.color()));
+    mWindow->SetClearColor(ToGfx(dlg.color()));
 }
 
 void GfxWidget::translateZoomInOut(QWheelEvent* wheel)

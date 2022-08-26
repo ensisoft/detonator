@@ -1048,6 +1048,19 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="color_widgets::ColorSelector" name="widgetColor">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1603,6 +1616,7 @@
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbModel</tabstop>
+  <tabstop>widgetColor</tabstop>
   <tabstop>textures</tabstop>
   <tabstop>textureFile</tabstop>
   <tabstop>textureID</tabstop>

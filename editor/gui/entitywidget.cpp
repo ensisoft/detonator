@@ -970,6 +970,11 @@ void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const Q
     DisplayEntityProperties();
 }
 
+void EntityWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void EntityWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -2187,6 +2192,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Transform view;
     view.Scale(xs, ys);

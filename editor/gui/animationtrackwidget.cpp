@@ -589,6 +589,11 @@ void AnimationTrackWidget::RealizeEntityChange(std::shared_ptr<const game::Entit
     mRenderer.ClearPaintState();
 }
 
+void AnimationTrackWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void AnimationTrackWidget::on_actionPlay_triggered()
 {
     if (mPlayState == PlayState::Paused)
@@ -1628,6 +1633,8 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.viewRotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     painter.SetViewport(0, 0, width, height);
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));

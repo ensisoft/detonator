@@ -85,6 +85,7 @@ namespace gui
         void SetGrid(GridDensity grid);
         void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
     private slots:
+        void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

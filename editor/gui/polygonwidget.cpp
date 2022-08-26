@@ -305,6 +305,11 @@ bool ShapeWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void ShapeWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void ShapeWidget::on_actionPlay_triggered()
 {
     if (mPaused)
@@ -425,6 +430,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto height = size;
     painter.SetViewport(xoffset, yoffset, size, size);
     painter.SetOrthographicProjection(width , height);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Transform view;
     // fiddle with the view transform in order to avoid having

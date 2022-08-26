@@ -77,6 +77,7 @@ namespace gui
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
     private slots:
+        void on_widgetColor_colorChanged(QColor color);
         void on_name_textChanged(const QString&);
         void on_cmbScripts_currentIndexChanged(const QString);
         void on_cmbSpatialIndex_currentIndexChanged(const QString&);

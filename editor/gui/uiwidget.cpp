@@ -889,6 +889,11 @@ void UIWidget::Refresh()
     DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
 }
 
+void UIWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void UIWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1576,6 +1581,8 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
     const auto window_width  = form_size.GetWidth();
     const auto window_height = form_size.GetHeight();
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),

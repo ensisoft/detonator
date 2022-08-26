@@ -659,7 +659,10 @@ void ParticleEditorWidget::ShowParams()
         SetValue(mUI.initHeight, params.init_rect_height);
     }
 }
-
+void ParticleEditorWidget::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
 void ParticleEditorWidget::on_actionPlay_triggered()
 {
     if (mPaused)
@@ -902,6 +905,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Transform view;
     view.Scale(zoom, zoom);
