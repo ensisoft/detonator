@@ -20,6 +20,7 @@
 #include <cmath>
 #include <cstdio>
 
+#include "base/logging.h"
 #include "base/utility.h"
 #include "base/math.h"
 #include "data/reader.h"
@@ -29,6 +30,7 @@
 #include "graphics/shader.h"
 #include "graphics/geometry.h"
 #include "graphics/resource.h"
+#include "graphics/transform.h"
 
 namespace {
 float HalfRound(float value)
@@ -1545,18 +1547,20 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
 
 std::string KinematicsParticleEngineClass::GetProgramId() const
 {
-    return "particle-program";
+    if (mParams.coordinate_space == CoordinateSpace::Local)
+        return "local-particle-program";
+    else if (mParams.coordinate_space == CoordinateSpace::Global)
+        return "global-particle-program";
+    else BUG("Unknown particle program coordinate space.");
+    return "";
 }
 
 Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
 {
-    Shader* shader = device.FindShader("particle-shader");
-    if (shader) return shader;
-
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
     // must use gl_PointCoord instead.
-    constexpr auto* src = R"(
+    constexpr auto* local_src = R"(
 #version 100
 attribute vec2 aPosition;
 attribute vec4 aData;
@@ -1570,7 +1574,7 @@ varying float vAlpha;
 
 void main()
 {
-    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 1.0, 1.0);
+    vec4 vertex  = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
     gl_PointSize = aData.x;
     vRandomValue = aData.y;
     vAlpha       = aData.z;
@@ -1578,8 +1582,39 @@ void main()
 }
     )";
 
-    shader = device.MakeShader("particle-shader");
-    shader->CompileSource(src);
+    constexpr auto* global_src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec4 aData;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kViewMatrix;
+
+varying vec2 vTexCoord;
+varying float vRandomValue;
+varying float vAlpha;
+
+void main()
+{
+  vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
+  gl_PointSize = aData.x;
+  vRandomValue = aData.y;
+  vAlpha       = aData.z;
+  gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
+}
+    )";
+
+    const auto* shader_name = mParams.coordinate_space == CoordinateSpace::Local
+            ? "particle-shader-local" : "particle-shader-global";
+    const auto* shader_src = mParams.coordinate_space == CoordinateSpace::Local
+            ? local_src : global_src;
+
+    Shader* shader = device.FindShader(shader_name);
+    if (!shader)
+    {
+        shader = device.MakeShader(shader_name);
+        shader->CompileSource(shader_src);
+    }
     return shader;
 }
 
@@ -1609,11 +1644,14 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
     std::vector<ParticleVertex> verts;
     for (const auto& p : state.particles)
     {
-        // Convert the particle coordinates to lower right
-        // quadrant coordinates.
+        // When using local coordinate space the max x/y should
+        // be the extents of the simulation in which case the
+        // particle x,y become normalized on the [0.0f, 1.0f] range.
+        // when using global coordinate space max x/y should be 1.0f
+        // and particle coordinates are left in the global space
         ParticleVertex v;
         v.aPosition.x = p.position.x / mParams.max_xpos;
-        v.aPosition.y = p.position.y / mParams.max_ypos * -1.0f;
+        v.aPosition.y = p.position.y / mParams.max_ypos;
         // copy the per particle data into the data vector for the fragment shader.
         v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
         // abusing texcoord here to provide per particle random value.
@@ -1636,6 +1674,31 @@ void KinematicsParticleEngineClass::Pack(Packer* packer) const
 {
 }
 
+void KinematicsParticleEngineClass::ApplyDynamicState(const Environment& env, Program& program) const
+{
+    if (mParams.coordinate_space == CoordinateSpace::Global)
+    {
+        // when the coordinate space is global the particles are spawn directly
+        // in the global coordinate space. therefore, no model transformation
+        // is needed but only the view transformation.
+        const auto& kViewMatrix = *env.view_matrix;
+        const auto& kProjectionMatrix = *env.proj_matrix;
+        program.SetUniform("kProjectionMatrix",
+            *(const Program::Matrix4x4*) glm::value_ptr(kProjectionMatrix));
+        program.SetUniform("kViewMatrix",
+            *(const Program::Matrix4x4*) glm::value_ptr(kViewMatrix));
+    }
+    else if (mParams.coordinate_space == CoordinateSpace::Local)
+    {
+        const auto& kModelViewMatrix = (*env.view_matrix) * (*env.model_matrix);
+        const auto& kProjectionMatrix = *env.proj_matrix;
+        program.SetUniform("kProjectionMatrix",
+            *(const Program::Matrix4x4*) glm::value_ptr(kProjectionMatrix));
+        program.SetUniform("kModelViewMatrix",
+            *(const Program::Matrix4x4*) glm::value_ptr(kModelViewMatrix));
+    }
+}
+
 // Update the particle simulation.
 void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState& state, float dt) const
 {
@@ -1644,7 +1707,7 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
     // - Reduce the number of particles in the content (i.e. use less particles
     //   in animations etc.)
     // - Share complete particle engines between assets, i.e. instead of each
-    //   animation (for example space ship) using it's own particle engine
+    //   animation (for example space ship) using its own particle engine
     //   instance each kind of ship could share one particle engine.
     // - Parallelize the particle updates, i.e. try to throw more CPU cores
     //   at the issue.
@@ -1664,7 +1727,7 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
     // update each particle
     for (size_t i=0; i<state.particles.size();)
     {
-        if (UpdateParticle(state, i, dt))
+        if (UpdateParticle(env, state, i, dt))
         {
             ++i;
             continue;
@@ -1678,16 +1741,16 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
         const auto num_particles_always = size_t(mParams.num_particles);
         const auto num_particles_now = state.particles.size();
         const auto num_particles_needed = num_particles_always - num_particles_now;
-        InitParticles(state, num_particles_needed);
+        InitParticles(env, state, num_particles_needed);
     }
     else if (mParams.mode == SpawnPolicy::Continuous)
     {
         // the number of particles is taken as the rate of particles per
-        // second. fractionally cumulate partciles and then
+        // second. fractionally cumulate particles and then
         // spawn when we have some number non-fractional particles.
         state.hatching += mParams.num_particles * dt;
         const auto num = size_t(state.hatching);
-        InitParticles(state, num);
+        InitParticles(env, state, num);
         state.hatching -= num;
     }
 }
@@ -1707,12 +1770,13 @@ void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceStat
     state.particles.clear();
     state.time = 0.0f;
     state.hatching = 0.0f;
-    InitParticles(state, size_t(mParams.num_particles));
+    InitParticles(env, state, size_t(mParams.num_particles));
 }
 
 void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
+    data.Write("coordinate_space", mParams.coordinate_space);
     data.Write("motion", mParams.motion);
     data.Write("mode", mParams.mode);
     data.Write("boundary", mParams.boundary);
@@ -1755,6 +1819,7 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
 {
     KinematicsParticleEngineClass ret;
     data.Read("id",                           &ret.mId);
+    data.Read("coordinate_space",             &ret.mParams.coordinate_space);
     data.Read("motion",                       &ret.mParams.motion);
     data.Read("mode",                         &ret.mParams.mode);
     data.Read("boundary",                     &ret.mParams.boundary);
@@ -1791,33 +1856,62 @@ std::size_t KinematicsParticleEngineClass::GetHash() const
     return hash;
 }
 
-void KinematicsParticleEngineClass::InitParticles(InstanceState& state, size_t num) const
+void KinematicsParticleEngineClass::InitParticles(const Environment& env, InstanceState& state, size_t num) const
 {
-    // the emitter box uses normalized coordinates
-    const auto emitter_width  = mParams.init_rect_width * mParams.max_xpos;
-    const auto emitter_height = mParams.init_rect_height * mParams.max_ypos;
-    const auto emitter_xpos   = mParams.init_rect_xpos * mParams.max_xpos;
-    const auto emitter_ypos   = mParams.init_rect_ypos * mParams.max_ypos;
-
-    for (size_t i=0; i<num; ++i)
+    if (mParams.coordinate_space == CoordinateSpace::Global)
     {
-        const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
-        const auto initx = math::rand(0.0f, emitter_width);
-        const auto inity = math::rand(0.0f, emitter_height);
-        const auto angle = math::rand(0.0f, mParams.direction_sector_size) +
-            mParams.direction_sector_start_angle;
+        Transform transform(*env.model_matrix);
+        transform.Push();
+        transform.Scale(mParams.init_rect_width, mParams.init_rect_height);
+        transform.Translate(mParams.init_rect_xpos, mParams.init_rect_ypos);
+        const auto& particle_to_world = transform.GetAsMatrix();
 
-        Particle p;
-        p.lifetime  = math::rand(mParams.min_lifetime, mParams.max_lifetime);
-        p.pointsize = math::rand(mParams.min_point_size, mParams.max_point_size);
-        p.alpha     = math::rand(mParams.min_alpha, mParams.max_alpha);
-        p.position  = glm::vec2(emitter_xpos + initx, emitter_ypos + inity);
-        // note that the velocity vector is baked into the
-        // direction vector in order to save space.
-        p.direction = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
-        p.randomizer = math::rand(0.0f, 1.0f);
-        state.particles.push_back(p);
+        for (size_t i=0; i<num; ++i)
+        {
+            const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
+            const auto initx    = math::rand(0.0f, 1.0f);
+            const auto inity    = math::rand(0.0f, 1.0f);
+            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+
+            const auto world = particle_to_world * glm::vec4(initx, inity, 0.0f, 1.0f);
+            // note that the velocity vector is baked into the
+            // direction vector in order to save space.
+            Particle p;
+            p.lifetime   = math::rand(mParams.min_lifetime, mParams.max_lifetime);
+            p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
+            p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            p.position   = glm::vec2(world.x, world.y);
+            p.direction  = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
+            p.randomizer = math::rand(0.0f, 1.0f);
+            state.particles.push_back(p);
+        }
     }
+    else if (mParams.coordinate_space == CoordinateSpace::Local)
+    {
+        // the emitter box uses normalized coordinates
+        const auto emitter_width  = mParams.init_rect_width * mParams.max_xpos;
+        const auto emitter_height = mParams.init_rect_height * mParams.max_ypos;
+        const auto emitter_xpos   = mParams.init_rect_xpos * mParams.max_xpos;
+        const auto emitter_ypos   = mParams.init_rect_ypos * mParams.max_ypos;
+
+        for (size_t i = 0; i < num; ++i)
+        {
+            const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
+            const auto initx    = math::rand(0.0f, emitter_width);
+            const auto inity    = math::rand(0.0f, emitter_height);
+            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+            // note that the velocity vector is baked into the
+            // direction vector in order to save space.
+            Particle p;
+            p.lifetime   = math::rand(mParams.min_lifetime, mParams.max_lifetime);
+            p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
+            p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            p.position   = glm::vec2(emitter_xpos + initx, emitter_ypos + inity);
+            p.direction  = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
+            p.randomizer = math::rand(0.0f, 1.0f);
+            state.particles.push_back(p);
+        }
+    } else BUG("Unhandled particle system coordinate space.");
 }
 void KinematicsParticleEngineClass::KillParticle(InstanceState& state, size_t i) const
 {
@@ -1826,7 +1920,7 @@ void KinematicsParticleEngineClass::KillParticle(InstanceState& state, size_t i)
     state.particles.pop_back();
 }
 
-bool KinematicsParticleEngineClass::UpdateParticle(InstanceState& state, size_t i, float dt) const
+bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const
 {
     auto& p = state.particles[i];
 
@@ -1865,6 +1959,10 @@ bool KinematicsParticleEngineClass::UpdateParticle(InstanceState& state, size_t 
 
     // accumulate distance approximation
     p.distance += dd;
+
+    // todo:
+    if (mParams.coordinate_space == CoordinateSpace::Global)
+        return true;
 
     // boundary conditions.
     if (mParams.boundary == BoundaryPolicy::Wrap)
