@@ -1865,13 +1865,18 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
         transform.Scale(mParams.init_rect_width, mParams.init_rect_height);
         transform.Translate(mParams.init_rect_xpos, mParams.init_rect_ypos);
         const auto& particle_to_world = transform.GetAsMatrix();
+        const auto world_direction = glm::normalize(particle_to_world * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+        const auto world_angle_cos = glm::dot(world_direction, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+        const auto world_angle = world_direction.y < 0.0f
+                                 ? -std::acos(world_angle_cos)
+                                 :  std::acos(world_angle_cos);
 
         for (size_t i=0; i<num; ++i)
         {
             const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
             const auto initx    = math::rand(0.0f, 1.0f);
             const auto inity    = math::rand(0.0f, 1.0f);
-            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle + world_angle;
 
             const auto world = particle_to_world * glm::vec4(initx, inity, 0.0f, 1.0f);
             // note that the velocity vector is baked into the
