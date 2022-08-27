@@ -1280,23 +1280,28 @@ void MaterialWidget::SetTextureRect()
 
 void MaterialWidget::SetTextureFlags()
 {
-    const auto row = mUI.textures->currentRow();
-    if (row == -1)
-        return;
-    gfx::TextureSource* source = nullptr;
-    if (auto* texture = mMaterial->AsTexture())
-        source = texture->GetTextureSource();
-    else if (auto* sprite = mMaterial->AsSprite())
-        source = sprite->GetTextureSource(row);
-    else if (auto* custom = mMaterial->AsCustom())
-        source = custom->FindTextureSourceById(GetItemId(mUI.textures));
-    else BUG("Unhandled material type.");
-
-    if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+    const QList<QListWidgetItem*> items = mUI.textures->selectedItems();
+    for (int i=0; i<items.size(); ++i)
     {
-        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
-        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
-        ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
+        const auto* item = items[i];
+        const auto index = mUI.textures->row(item);
+        const auto& data = item->data(Qt::UserRole).toString();
+
+        gfx::TextureSource* source = nullptr;
+        if (auto* texture = mMaterial->AsTexture())
+            source = texture->GetTextureSource();
+        else if (auto* sprite = mMaterial->AsSprite())
+            source = sprite->GetTextureSource(index);
+        else if (auto* custom = mMaterial->AsCustom())
+            source = custom->FindTextureSourceById(app::ToUtf8(data));
+        else BUG("Unhandled material type.");
+
+        if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+        {
+            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
+            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
+            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
+        }
     }
 }
 
