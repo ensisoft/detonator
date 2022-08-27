@@ -46,6 +46,30 @@ size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
     return ret;
 }
 
+template<typename Pixel>
+size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, const gfx::URect& area, gfx::Color color)
+{
+    size_t ret = 0;
+    for (unsigned row=0; row<area.GetHeight(); ++row) {
+        for (unsigned col=0; col<area.GetWidth(); ++col) {
+            const auto& pos = area.MapToGlobal(col, row);
+            if (bmp.GetPixel(pos) == color)
+                ++ret;
+        }
+    }
+    return ret;
+}
+
+template<typename Pixel>
+bool TestPixelCount(const gfx::Bitmap<Pixel>& bmp, const gfx::URect& area, gfx::Color color, float minimum)
+{
+    const double matching_pixels = CountPixels(bmp, area, color);
+    const double  area_size = area.GetWidth() * area.GetHeight();
+    if (matching_pixels / area_size >= minimum)
+        return true;
+    return false;
+}
+
 // setup context for headless rendering.
 class TestContext : public gfx::Device::Context
 {
@@ -236,7 +260,7 @@ void unit_test_drawable_item()
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::HotPink));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::HotPink, 0.95));
 
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, false);
         device->BeginFrame();
@@ -265,8 +289,10 @@ void unit_test_drawable_item()
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 100, 100), gfx::Color::Red));
-        TEST_REQUIRE(bmp.Compare(gfx::URect(100, 0, 100, 100), gfx::Color::Green));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 100, 100), gfx::Color::Red, 0.95));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(100, 0, 100, 100), gfx::Color::Green, 0.95));
+        //TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 100, 100), gfx::Color::Red));
+        //TEST_REQUIRE(bmp.Compare(gfx::URect(100, 0, 100, 100), gfx::Color::Green));
 
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipHorizontally, true);
         device->BeginFrame();
@@ -277,9 +303,8 @@ void unit_test_drawable_item()
         device->EndFrame(true);
 
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 100, 100), gfx::Color::Green));
-        TEST_REQUIRE(bmp.Compare(gfx::URect(100, 0, 100, 100), gfx::Color::Red));
-
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 100, 100), gfx::Color::Green, 0.95));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(100, 0, 100, 100), gfx::Color::Red, 0.95));
     }
 
     // change material at class level to a sprite so that
@@ -299,8 +324,10 @@ void unit_test_drawable_item()
         renderer.EndFrame();
         device->EndFrame(true);
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Red));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Red, 0.95));
 
+        // this will update the material which would update its render color
+        // but the drawable flag to update material is not set, so the material should *NOT* update.
         renderer.Update(*entity, 0.0f, 15.0f);
 
         device->BeginFrame();
@@ -310,10 +337,12 @@ void unit_test_drawable_item()
         renderer.EndFrame();
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Red));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Red, 0.95));
 
+        // enable the material update flag. the material should now change color.
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::UpdateMaterial, true);
         renderer.Update(*entity, 0.0f, 1.5f);
+
         device->BeginFrame();
         device->ClearColor(gfx::Color::Blue);
         renderer.BeginFrame();
@@ -321,7 +350,7 @@ void unit_test_drawable_item()
         renderer.EndFrame();
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Green));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
     }
 
     // change material at class level to a sprite so that
@@ -337,7 +366,8 @@ void unit_test_drawable_item()
         renderer.EndFrame();
         device->EndFrame(true);
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::HotPink));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::HotPink, 0.95));
+
 
         entity->GetNode(0).GetDrawable()->SetMaterialParam("kColor", gfx::Color::Green);
         device->BeginFrame();
@@ -347,7 +377,7 @@ void unit_test_drawable_item()
         renderer.EndFrame();
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Green));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
     }
 
     // change drawable at class level to a sprite so that
@@ -447,7 +477,7 @@ void unit_test_entity_layering()
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Green));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
     }
 
     klass->FindNodeByName("red")->GetDrawable()->SetLayer(2);
@@ -462,7 +492,7 @@ void unit_test_entity_layering()
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Red));
+        TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Red, 0.95));
     }
 }
 
