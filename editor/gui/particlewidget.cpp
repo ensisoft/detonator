@@ -244,7 +244,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     // if you change this change the UI widget values min/max values too!
     mUI.velocity->SetScale(1000.0f);
     mUI.velocity->SetExponent(2.2f);
-    mUI.lifetime->SetScale(10.0f);
+    mUI.lifetime->SetScale(100.0f);
     mUI.lifetime->SetExponent(1.0f);
     mUI.pointsize->SetScale(2048);
     mUI.pointsize->SetExponent(2.2f);
