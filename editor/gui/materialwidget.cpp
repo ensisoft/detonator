@@ -183,6 +183,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "model", mUI.cmbModel);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "widget", mUI.widget);
+    GetUserProperty(resource, "time", mUI.kTime);
 
     ApplyShaderDescription();
     GetMaterialProperties();
@@ -228,6 +229,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.zoom);
     settings.LoadWidget("Material", mUI.cmbModel);
     settings.LoadWidget("Material", mUI.widget);
+    settings.LoadWidget("Material", mUI.kTime);
     mMaterial = gfx::MaterialClass::FromJson(json);
 
     ApplyShaderDescription();
@@ -247,6 +249,7 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Material", mUI.zoom);
     settings.SaveWidget("Material", mUI.cmbModel);
     settings.SaveWidget("Material", mUI.widget);
+    settings.SaveWidget("Material", mUI.kTime);
     return true;
 }
 
@@ -362,25 +365,27 @@ void MaterialWidget::on_widgetColor_colorChanged(QColor color)
 void MaterialWidget::on_actionPlay_triggered()
 {
     mState = PlayState::Playing;
-    mUI.actionPlay->setEnabled(false);
-    mUI.actionPause->setEnabled(true);
-    mUI.actionStop->setEnabled(true);
+    SetEnabled(mUI.actionPlay, false);
+    SetEnabled(mUI.actionPause, true);
+    SetEnabled(mUI.actionStop, true);
+    SetEnabled(mUI.kTime, false);
 }
 
 void MaterialWidget::on_actionPause_triggered()
 {
     mState = PlayState::Paused;
-    mUI.actionPlay->setEnabled(true);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(true);
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, true);
 }
 
 void MaterialWidget::on_actionStop_triggered()
 {
     mState = PlayState::Stopped;
-    mUI.actionPlay->setEnabled(true);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(false);
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop, false);
+    SetEnabled(mUI.kTime, true);
     mTime = 0.0f;
 }
 
@@ -393,6 +398,7 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "model", mUI.cmbModel);
     SetUserProperty(resource, "widget", mUI.widget);    
     SetUserProperty(resource, "zoom", mUI.zoom);
+    SetUserProperty(resource, "time", mUI.kTime);
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
@@ -1894,7 +1900,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     }
 
     gfx::MaterialClassInst material(mMaterial);
-    material.SetRuntime(mTime);
+    const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
+    material.SetRuntime(time);
     painter.Draw(*drawable, transform, material);
 }
 
