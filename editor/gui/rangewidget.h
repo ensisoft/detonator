@@ -73,7 +73,7 @@ namespace gui
         float mLo = 0.0f;
         float mHi = 1.0f;
         enum class Dragging {
-            None, Lo, Hi, Range
+            None, Lo, Hi, Range, NotSure
         };
         QPoint mDragStart;
         Dragging mDragging = Dragging::None;
