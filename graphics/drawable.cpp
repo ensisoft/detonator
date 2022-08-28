@@ -1776,6 +1776,9 @@ void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceStat
 void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
+    data.Write("direction", mParams.direction);
+    data.Write("placement", mParams.placement);
+    data.Write("shape", mParams.shape);
     data.Write("coordinate_space", mParams.coordinate_space);
     data.Write("motion", mParams.motion);
     data.Write("mode", mParams.mode);
@@ -1819,6 +1822,9 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
 {
     KinematicsParticleEngineClass ret;
     data.Read("id",                           &ret.mId);
+    data.Read("direction",                    &ret.mParams.direction);
+    data.Read("placement",                    &ret.mParams.placement);
+    data.Read("shape",                        &ret.mParams.shape);
     data.Read("coordinate_space",             &ret.mParams.coordinate_space);
     data.Read("motion",                       &ret.mParams.motion);
     data.Read("mode",                         &ret.mParams.mode);
@@ -1870,15 +1876,61 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
         const auto world_angle = world_direction.y < 0.0f
                                  ? -std::acos(world_angle_cos)
                                  :  std::acos(world_angle_cos);
+        const auto emitter_radius = 0.5f;
+        const auto emitter_center = glm::vec2(0.5f, 0.5f);
 
         for (size_t i=0; i<num; ++i)
         {
             const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
-            const auto initx    = math::rand(0.0f, 1.0f);
-            const auto inity    = math::rand(0.0f, 1.0f);
-            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle + world_angle;
 
-            const auto world = particle_to_world * glm::vec4(initx, inity, 0.0f, 1.0f);
+            glm::vec2 position;
+            glm::vec2 direction;
+            if (mParams.shape == EmitterShape::Rectangle)
+            {
+                if (mParams.placement == Placement::Inside)
+                    position = glm::vec2(math::rand(0.0f, 1.0f), math::rand(0.0f, 1.0f));
+                else if (mParams.placement == Placement::Edge)
+                {
+                    const auto edge = math::rand(0, 3);
+                    if (edge == 0 || edge == 1)
+                    {
+                        position.x = edge == 0 ? 0.0f : 1.0f;
+                        position.y = math::rand(0.0f, 1.0f);
+                    }
+                    else
+                    {
+                        position.x = math::rand(0.0f, 1.0f);
+                        position.y = edge == 2 ? 0.0f : 1.0f;
+                    }
+                }
+            }
+            else if (mParams.shape == EmitterShape::Circle)
+            {
+                if (mParams.placement == Placement::Inside)
+                {
+                    const auto x = math::rand(-emitter_radius, emitter_radius);
+                    const auto y = math::rand(-emitter_radius, emitter_radius);
+                    const auto r = math::rand(0.0f, 1.0f);
+                    position = glm::normalize(glm::vec2(x, y)) * emitter_radius * r + emitter_center;
+                }
+                else if (mParams.placement == Placement::Edge)
+                {
+                    const auto x = math::rand(-emitter_radius, emitter_radius);
+                    const auto y = math::rand(-emitter_radius, emitter_radius);
+                    position = glm::normalize(glm::vec2(x, y)) * emitter_radius + emitter_center;
+                }
+            }
+            if (mParams.direction == Direction::Sector)
+            {
+                const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle + world_angle;
+                direction = glm::vec2(std::cos(angle), std::sin(angle));
+            }
+            else if (mParams.direction == Direction::Inwards)
+                direction = glm::normalize(emitter_center - position);
+            else if (mParams.direction == Direction::Outwards)
+                direction = glm::normalize(position - emitter_center);
+
+            const auto world = particle_to_world * glm::vec4(position, 0.0f, 1.0f);
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
             Particle p;
@@ -1886,7 +1938,7 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
             p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
             p.position   = glm::vec2(world.x, world.y);
-            p.direction  = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
+            p.direction  = direction * velocity;
             p.randomizer = math::rand(0.0f, 1.0f);
             state.particles.push_back(p);
         }
@@ -1894,25 +1946,105 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
     else if (mParams.coordinate_space == CoordinateSpace::Local)
     {
         // the emitter box uses normalized coordinates
-        const auto emitter_width  = mParams.init_rect_width * mParams.max_xpos;
-        const auto emitter_height = mParams.init_rect_height * mParams.max_ypos;
-        const auto emitter_xpos   = mParams.init_rect_xpos * mParams.max_xpos;
-        const auto emitter_ypos   = mParams.init_rect_ypos * mParams.max_ypos;
+        const auto sim_width  = mParams.max_xpos;
+        const auto sim_height = mParams.max_ypos;
+        const auto emitter_width  = mParams.init_rect_width * sim_width;
+        const auto emitter_height = mParams.init_rect_height * sim_height;
+        const auto emitter_xpos   = mParams.init_rect_xpos * sim_width;
+        const auto emitter_ypos   = mParams.init_rect_ypos * sim_height;
+        const auto emitter_radius = std::min(emitter_width, emitter_height) * 0.5f;
+        const auto emitter_center = glm::vec2(emitter_xpos + emitter_width * 0.5f,
+                                              emitter_ypos + emitter_height * 0.5f);
+        const auto emitter_size  = glm::vec2(emitter_width, emitter_height);
+        const auto emitter_pos   = glm::vec2(emitter_xpos, emitter_ypos);
+        const auto emitter_left  = emitter_xpos;
+        const auto emitter_right = emitter_xpos + emitter_width;
+        const auto emitter_top   = emitter_ypos;
+        const auto emitter_bot   = emitter_ypos + emitter_height;
 
         for (size_t i = 0; i < num; ++i)
         {
             const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
-            const auto initx    = math::rand(0.0f, emitter_width);
-            const auto inity    = math::rand(0.0f, emitter_height);
-            const auto angle    = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+            glm::vec2 position;
+            glm::vec2 direction;
+            if (mParams.shape == EmitterShape::Rectangle)
+            {
+                if (mParams.placement == Placement::Inside)
+                    position = emitter_pos + glm::vec2(math::rand(0.0f, emitter_width),
+                                                       math::rand(0.0f, emitter_height));
+                else if (mParams.placement == Placement::Edge)
+                {
+                    const auto edge = math::rand(0, 3);
+                    if (edge == 0 || edge == 1)
+                    {
+                        position.x = edge == 0 ? emitter_left : emitter_right;
+                        position.y = math::rand(emitter_top, emitter_bot);
+                    }
+                    else
+                    {
+                        position.x = math::rand(emitter_left, emitter_right);
+                        position.y = edge == 2 ? emitter_top : emitter_bot;
+                    }
+                }
+                else if (mParams.placement == Placement::Outside)
+                {
+                    position.x = math::rand(0.0f, sim_width);
+                    position.y = math::rand(0.0f, sim_height);
+                    if (position.y >= emitter_top && position.y <= emitter_bot)
+                    {
+                        if (position.x < emitter_center.x)
+                            position.x = math::clamp(0.0f, emitter_left, position.x);
+                        else position.x = math::clamp(emitter_right, sim_width, position.x);
+                    }
+                }
+            }
+            else if (mParams.shape == EmitterShape::Circle)
+            {
+                if (mParams.placement == Placement::Inside)
+                {
+                    const auto x = math::rand(-1.0f, 1.0f);
+                    const auto y = math::rand(-1.0f, 1.0f);
+                    const auto r = math::rand(0.0f, 1.0f);
+                    const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius * r;
+                    position = p + emitter_pos + emitter_size * 0.5f;
+                }
+                else if (mParams.placement == Placement::Edge)
+                {
+                    const auto x = math::rand(-1.0f, 1.0f);
+                    const auto y = math::rand(-1.0f, 1.0f);
+                    const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius;
+                    position = p + emitter_pos + emitter_size * 0.5f;
+                }
+                else if (mParams.placement == Placement::Outside)
+                {
+                    auto p = glm::vec2(math::rand(0.0f, sim_width),
+                                       math::rand(0.0f, sim_height));
+                    auto v = p - emitter_center;
+                    if (glm::length(v) < emitter_radius)
+                        p = glm::normalize(v) * emitter_radius + emitter_center;
+
+                    position = p;
+                }
+            }
+
+            if (mParams.direction == Direction::Sector)
+            {
+                const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+                direction = glm::vec2(std::cos(angle), std::sin(angle));
+            }
+            else if (mParams.direction == Direction::Inwards)
+                direction = glm::normalize(emitter_center - position);
+            else if (mParams.direction == Direction::Outwards)
+                direction = glm::normalize(position - emitter_center);
+
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
             Particle p;
             p.lifetime   = math::rand(mParams.min_lifetime, mParams.max_lifetime);
             p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
             p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
-            p.position   = glm::vec2(emitter_xpos + initx, emitter_ypos + inity);
-            p.direction  = glm::vec2(std::cos(angle), std::sin(angle)) * velocity;
+            p.position   = position;
+            p.direction  = direction *  velocity;
             p.randomizer = math::rand(0.0f, 1.0f);
             state.particles.push_back(p);
         }

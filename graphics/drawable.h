@@ -920,8 +920,49 @@ namespace gfx
             Global
         };
 
+        // The shape of the area in which the particles are spawned.
+        enum class EmitterShape {
+            // uses the rectangular area derived either from the local
+            // emitter size and position relative to the local simulation
+            // origin or the size and position of the rectangle derived from
+            // the position and size of the drawable in world space.
+            Rectangle,
+            // Uses a circular emitter with the diameter equalling the shortest
+            // side of either the local emitter rectangle or the rectangle
+            // containing the drawable in world space.
+            Circle
+        };
+
+        // Control where the particles are spawned.
+        enum class Placement {
+            // Inside the emitter shape
+            Inside,
+            // On the edge of the emitter shape only
+            Edge,
+            // Outside the emitter shape
+            Outside
+        };
+
+        // Control what is the initial direction of the particles
+        enum class Direction {
+            // Traveling outwards from the center of the emitter
+            // through the initial particle position
+            Outwards,
+            // Traveling inwards from the initial position towards
+            // the center of the emitter
+            Inwards,
+            // Traveling direction according to the direction sector.
+            Sector
+        };
+
         // initial engine configuration params
         struct Params {
+            Direction direction = Direction::Sector;
+            // Placement of particles wrt. the emitter shape
+            Placement placement = Placement::Inside;
+            // the shape of the area inside which the particles are spawned
+            EmitterShape shape = EmitterShape::Rectangle;
+            // The coordinate space in which the emitters are spawned
             CoordinateSpace coordinate_space = CoordinateSpace::Local;
             // type of motion for the particles
             Motion motion = Motion::Linear;
