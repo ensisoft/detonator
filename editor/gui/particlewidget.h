@@ -81,6 +81,9 @@ namespace gui
         void on_motion_currentIndexChanged(int);
         void on_boundary_currentIndexChanged(int);
         void on_when_currentIndexChanged(int);
+        void on_shape_currentIndexChanged(int);
+        void on_placement_currentIndexChanged(int);
+        void on_direction_currentIndexChanged(int);
         void on_simWidth_valueChanged(double);
         void on_simHeight_valueChanged(double);
         void on_gravityX_valueChanged(double);

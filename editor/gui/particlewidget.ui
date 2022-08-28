@@ -26,50 +26,6 @@
         <string>Base properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_9">
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_23">
-          <property name="text">
-           <string>Gravity</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_30">
-          <property name="text">
-           <string>ID</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="space"/>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Spawn</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="ID">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Motion</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_28">
           <property name="sizePolicy">
@@ -83,6 +39,56 @@
           </property>
          </widget>
         </item>
+        <item row="4" column="1">
+         <widget class="QComboBox" name="shape"/>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_23">
+          <property name="text">
+           <string>Gravity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Emission</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QComboBox" name="when"/>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="numParticles">
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>Motion</string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_21">
           <property name="text">
@@ -90,7 +96,24 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
+        <item row="9" column="1">
+         <widget class="QCheckBox" name="canExpire">
+          <property name="text">
+           <string>Particles can expire</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_30">
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QDoubleSpinBox" name="gravityX">
@@ -132,34 +155,11 @@
           </item>
          </layout>
         </item>
-        <item row="3" column="1">
-         <widget class="QComboBox" name="motion"/>
-        </item>
         <item row="5" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QComboBox" name="when"/>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="numParticles">
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="minimum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>10000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QComboBox" name="placement"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="space"/>
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="name">
@@ -171,13 +171,43 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QCheckBox" name="canExpire">
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>Particles can expire</string>
+           <string>Emitter</string>
           </property>
-          <property name="checked">
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="ID">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Placement</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="motion"/>
+        </item>
+        <item row="6" column="1">
+         <widget class="QComboBox" name="direction"/>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Direction</string>
           </property>
          </widget>
         </item>
@@ -1243,6 +1273,9 @@
   <tabstop>ID</tabstop>
   <tabstop>space</tabstop>
   <tabstop>motion</tabstop>
+  <tabstop>shape</tabstop>
+  <tabstop>placement</tabstop>
+  <tabstop>direction</tabstop>
   <tabstop>when</tabstop>
   <tabstop>numParticles</tabstop>
   <tabstop>gravityX</tabstop>

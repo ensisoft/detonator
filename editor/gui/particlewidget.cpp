@@ -255,6 +255,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
     PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::EmitterShape>(mUI.shape);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Placement>(mUI.placement);
+    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Direction>(mUI.direction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetList(mUI.materials, workspace->ListAllMaterials());
     SetValue(mUI.name, QString("My Particle System"));
@@ -271,6 +274,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
+    on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
 
     // connect workspace signals for resource management
@@ -330,6 +334,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
+    on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     setWindowTitle(name);
 }
@@ -428,6 +433,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     MinMax();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
+    on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     setWindowTitle(GetValue(mUI.name));
     return true;
@@ -603,6 +609,9 @@ void ParticleEditorWidget::SetParams()
     gfx::KinematicsParticleEngineClass::Params params;
     params.coordinate_space                 = GetValue(mUI.space);
     params.motion                           = GetValue(mUI.motion);
+    params.shape                            = GetValue(mUI.shape);
+    params.placement                        = GetValue(mUI.placement);
+    params.direction                        = GetValue(mUI.direction);
     params.mode                             = GetValue(mUI.when);
     params.boundary                         = GetValue(mUI.boundary);
     params.num_particles                    = GetValue(mUI.numParticles);
@@ -656,6 +665,9 @@ void ParticleEditorWidget::ShowParams()
     const auto& params = mClass->GetParams();
     SetValue(mUI.space,               params.coordinate_space);
     SetValue(mUI.motion,              params.motion);
+    SetValue(mUI.shape,               params.shape);
+    SetValue(mUI.placement,           params.placement);
+    SetValue(mUI.direction,           params.direction);
     SetValue(mUI.when,                params.mode);
     SetValue(mUI.boundary,            params.boundary);
     SetValue(mUI.numParticles,        params.num_particles);
@@ -835,6 +847,27 @@ void ParticleEditorWidget::on_boundary_currentIndexChanged(int)
 
 void ParticleEditorWidget::on_when_currentIndexChanged(int)
 {
+    SetParams();
+}
+void ParticleEditorWidget::on_shape_currentIndexChanged(int)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_placement_currentIndexChanged(int)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_direction_currentIndexChanged(int)
+{
+    const gfx::KinematicsParticleEngineClass::Direction dir = GetValue(mUI.direction);
+    if (dir == gfx::KinematicsParticleEngineClass::Direction::Sector)
+    {
+        SetEnabled(mUI.dirSector, true);
+    }
+    else
+    {
+        SetEnabled(mUI.dirSector, false);
+    }
     SetParams();
 }
 
