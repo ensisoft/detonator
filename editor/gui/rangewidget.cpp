@@ -151,6 +151,12 @@ void RangeWidget::mouseMoveEvent(QMouseEvent* mickey)
             mHi += dx;
         }
     }
+    else if (mDragging == Dragging::NotSure)
+    {
+        if (dx > 0.0f)
+            mDragging = Dragging::Hi;
+        else mDragging = Dragging::Lo;
+    }
 
     mDragStart = pos;
 
@@ -184,6 +190,7 @@ void RangeWidget::mousePressEvent(QMouseEvent* mickey)
             mDragging = Dragging::Hi;
         else if (math::equals(mHi, 1.0f))
             mDragging = Dragging::Lo;
+        else mDragging = Dragging::NotSure;
     }
     else if (lo_handle.contains(mickey->pos()))
         mDragging = Dragging::Lo;
