@@ -112,6 +112,10 @@ namespace gui
         void on_daPerTime_valueChanged();
         void on_daPerDist_valueChanged();
         void on_canExpire_stateChanged(int);
+        void on_btnResetSizeDerivativeDist_clicked();
+        void on_btnResetSizeDerivativeTime_clicked();
+        void on_btnResetAlphaDerivativeDist_clicked();
+        void on_btnResetAlphaDerivativeTime_clicked();
 
         void VelocityChanged(float min, float max);
         void LifetimeChanged(float min, float max);

@@ -1031,6 +1031,31 @@ void ParticleEditorWidget::on_canExpire_stateChanged(int)
     SetParams();
 }
 
+void ParticleEditorWidget::on_btnResetSizeDerivativeDist_clicked()
+{
+    SetValue(mUI.distSizeDerivative, 0.0f);
+    SetValue(mUI.dsPerDist, 0.0f);
+    SetParams();
+}
+void ParticleEditorWidget::on_btnResetSizeDerivativeTime_clicked()
+{
+    SetValue(mUI.timeSizeDerivative, 0.0f);
+    SetValue(mUI.dsPerTime, 0.0f);
+    SetParams();
+}
+void ParticleEditorWidget::on_btnResetAlphaDerivativeDist_clicked()
+{
+    SetValue(mUI.distAlphaDerivative, 0.0f);
+    SetValue(mUI.daPerDist, 0.0f);
+    SetParams();
+}
+void ParticleEditorWidget::on_btnResetAlphaDerivativeTime_clicked()
+{
+    SetValue(mUI.timeAlphaDerivative, 0.0f);
+    SetValue(mUI.daPerTime, 0.0f);
+    SetParams();
+}
+
 void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto widget_width  = mUI.widget->width();
