@@ -820,14 +820,18 @@ void ParticleEditorWidget::on_space_currentIndexChanged(int)
     if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
     {
         SetEnabled(mUI.localEmitter, true);
-        SetEnabled(mUI.localSpace, true);
         SetEnabled(mUI.chkShowEmitter, true);
+        SetEnabled(mUI.boundary, true);
+        SetEnabled(mUI.simWidth, true);
+        SetEnabled(mUI.simHeight, true);
     }
     else
     {
         SetEnabled(mUI.localEmitter, false);
-        SetEnabled(mUI.localSpace, false);
         SetEnabled(mUI.chkShowEmitter, false);
+        SetEnabled(mUI.boundary, false);
+        SetEnabled(mUI.simWidth, false);
+        SetEnabled(mUI.simHeight, false);
     }
     SetParams();
 }
