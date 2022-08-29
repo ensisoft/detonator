@@ -690,6 +690,11 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.dirStartAngle,       qRadiansToDegrees(params.direction_sector_start_angle));
     SetValue(mUI.dirSizeAngle,        qRadiansToDegrees(params.direction_sector_size));
 
+    SetValue(mUI.dsPerTime, params.rate_of_change_in_size_wrt_time);
+    SetValue(mUI.dsPerDist, params.rate_of_change_in_size_wrt_dist);
+    SetValue(mUI.daPerTime, params.rate_of_change_in_alpha_wrt_time * 100); // scale up the value
+    SetValue(mUI.daPerDist, params.rate_of_change_in_alpha_wrt_dist * 100); // scale up the value
+
     mUI.velocity->SetLo(params.min_velocity);
     mUI.velocity->SetHi(params.max_velocity);
     mUI.lifetime->SetLo(params.min_lifetime);
@@ -965,20 +970,49 @@ void ParticleEditorWidget::on_maxAlpha_valueChanged(double value)
     MinMax();
     SetParams();
 }
-void ParticleEditorWidget::on_timeSizeDerivative_valueChanged(double)
+void ParticleEditorWidget::on_timeSizeDerivative_valueChanged(double value)
 {
+    SetValue(mUI.dsPerTime, value);
     SetParams();
 }
-void ParticleEditorWidget::on_distSizeDerivative_valueChanged(double)
+void ParticleEditorWidget::on_distSizeDerivative_valueChanged(double value)
 {
+    SetValue(mUI.dsPerDist, value);
     SetParams();
 }
-void ParticleEditorWidget::on_timeAlphaDerivative_valueChanged(double)
+void ParticleEditorWidget::on_timeAlphaDerivative_valueChanged(double value)
 {
+    SetValue(mUI.daPerTime, value*100);
     SetParams();
 }
-void ParticleEditorWidget::on_distAlphaDerivative_valueChanged(double)
+void ParticleEditorWidget::on_distAlphaDerivative_valueChanged(double value)
 {
+    SetValue(mUI.daPerDist, value*100);
+    SetParams();
+}
+
+void ParticleEditorWidget::on_dsPerTime_valueChanged()
+{
+    int val = GetValue(mUI.dsPerTime);
+    SetValue(mUI.timeSizeDerivative, val);
+    SetParams();
+}
+void ParticleEditorWidget::on_dsPerDist_valueChanged()
+{
+    int val = GetValue(mUI.dsPerDist);
+    SetValue(mUI.distSizeDerivative, val);
+    SetParams();
+}
+void ParticleEditorWidget::on_daPerTime_valueChanged()
+{
+    int val = GetValue(mUI.daPerTime);
+    SetValue(mUI.timeAlphaDerivative, val / 100.0f); // scale down
+    SetParams();
+}
+void ParticleEditorWidget::on_daPerDist_valueChanged()
+{
+    int val = GetValue(mUI.daPerDist);
+    SetValue(mUI.distAlphaDerivative, val / 100.0f); // scale down
     SetParams();
 }
 
