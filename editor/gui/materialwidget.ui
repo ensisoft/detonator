@@ -394,7 +394,7 @@
                <enum>QToolButton::MenuButtonPopup</enum>
               </property>
               <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonFollowStyle</enum>
+               <enum>Qt::ToolButtonIconOnly</enum>
               </property>
               <property name="autoRaise">
                <bool>false</bool>

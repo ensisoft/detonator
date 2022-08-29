@@ -66,6 +66,8 @@
     <file>16x16_ico_png/style_edit.png</file>
     <file>16x16_ico_png/color_wheel.png</file>
     <file>16x16_ico_png/color_gradient.png</file>
+    <file>16x16_ico_png/image.png</file>
+    <file>16x16_ico_png/bitmap.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
