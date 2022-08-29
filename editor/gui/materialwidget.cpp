@@ -510,6 +510,14 @@ precision highp float;
 // material time in seconds.
 uniform float kTime;
 
+// when rendering particles with points the material
+// shader must sample gl_PointCoord for texture coordinates
+// instead of the texcoord varying from the vertex shader.
+// the value kRenderPoints will be set to 1.0 so for portability
+// the material shader can do:
+//   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+uniform float kRenderPoints;
+
 // custom uniforms that need to match the
 // json description
 uniform float kGamma;
@@ -529,9 +537,10 @@ varying float vParticleRandomValue;
 varying float vParticleTime;
 
 void main() {
-    float a = texture2D(kNoise, vTexCoord).a;
-    float r = vTexCoord.x + a + kTime;
-    float g = vTexCoord.y + a;
+    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    float a = texture2D(kNoise, coords).a;
+    float r = coords.x + a + kTime;
+    float g = coords.y + a;
     float b = kTime;
     vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
     gl_FragColor = vec4(pow(col, vec3(kGamma)), 1.0);
