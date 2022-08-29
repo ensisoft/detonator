@@ -1841,6 +1841,23 @@ void BindBase(sol::state& L)
     base["error"] = [](const std::string& str) { ERROR(str); };
     base["info"]  = [](const std::string& str) { INFO(str); };
 
+    //auto math  = L.create_named_table("math");
+    auto& math = base;
+    math["wrap"] = sol::overload(
+        [](float min, float max, float value) {
+            return math::wrap(min, max, value);
+        },
+        [](int min, int max, int value) {
+            return math::wrap(min, max, value);
+        });
+    math["clamp"] = sol::overload(
+        [](float min, float max, float value) {
+            return math::clamp(min, max, value);
+        },
+        [](int min, int max, int value) {
+            return math::clamp(min, max, value);
+        });
+
     auto trace = L.create_named_table("trace");
     trace["marker"] = sol::overload(
             [](const std::string& str) { base::TraceMarker(str); },
