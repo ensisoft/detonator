@@ -73,10 +73,11 @@ gfx::Shader* MakeVertexArrayShader(gfx::Device& device)
         return shader;
 
     shader = device.MakeShader("vertex-array-shader");
-    // the 2 varyings vRandomValue and vAlpha are used to support
-    // per particle features. This shader doesn't provide that data
-    // but writes these varyings nevertheless so that it's possible to
-    // use a particle shader enabled material also with this shader.
+    // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
+    // are used to support per particle features.
+    // This shader doesn't provide that data but writes these varyings
+    // nevertheless so that it's possible to use a particle shader enabled
+    // material also with this shader.
 
     // the vertex model space  is defined in the lower right quadrant in
     // NDC (normalized device coordinates) (x grows right to 1.0 and
@@ -91,15 +92,18 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 varying vec2 vTexCoord;
-varying float vRandomValue;
-varying float vAlpha;
+
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
+varying float vParticleTime;
 
 void main()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
     vTexCoord    = aTexCoord;
-    vRandomValue = 0.0;
-    vAlpha       = 1.0;
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
@@ -1569,17 +1573,17 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 varying vec2  vTexCoord;
-varying float vRandomValue;
-varying float vAlpha;
-varying float vTime;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
+varying float vParticleTime;
 
 void main()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
     gl_PointSize = aData.x;
-    vRandomValue = aData.y;
-    vAlpha       = aData.z;
-    vTime        = aData.w;
+    vParticleRandomValue = aData.y;
+    vParticleAlpha       = aData.z;
+    vParticleTime        = aData.w;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
     )";
@@ -1593,17 +1597,17 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kViewMatrix;
 
 varying vec2 vTexCoord;
-varying float vRandomValue;
-varying float vAlpha;
-varying float vTime;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
+varying float vParticleTime;
 
 void main()
 {
   vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
   gl_PointSize = aData.x;
-  vRandomValue = aData.y;
-  vAlpha       = aData.z;
-  vTime        = aData.w;
+  vParticleRandomValue = aData.y;
+  vParticleAlpha       = aData.z;
+  vParticleTime        = aData.w;
   gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
 }
     )";

@@ -737,12 +737,12 @@ uniform vec4 kBaseColor;
 uniform float kGamma;
 
 // per vertex alpha.
-varying float vAlpha;
+varying float vParticleAlpha;
 
 void main()
 {
   vec4 color = kBaseColor;
-  color.a *= vAlpha;
+  color.a *= vParticleAlpha;
   gl_FragColor = pow(color, vec4(kGamma));
 }
 )";
@@ -827,8 +827,10 @@ uniform vec2 kOffset;
 uniform float kGamma;
 uniform float kRenderPoints;
 
-varying float vAlpha;
 varying vec2 vTexCoord;
+
+varying float vParticleAlpha;
+
 
 vec4 MixGradient(vec2 coords)
 {
@@ -844,7 +846,7 @@ void main()
   coords = (coords - kOffset) + vec2(0.5, 0.5);
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
-  color.a *= vAlpha;
+  color.a *= vParticleAlpha;
   gl_FragColor = pow(color, vec4(kGamma));
 }
 )";
@@ -981,7 +983,7 @@ uniform vec4 kTextureBox1;
 uniform vec4 kBaseColor;
 uniform float kRenderPoints;
 uniform float kGamma;
-uniform float kRuntime;
+uniform float kTime;
 uniform float kBlendCoeff;
 uniform float kApplyRandomParticleRotation;
 uniform vec2 kTextureScale;
@@ -992,8 +994,8 @@ uniform ivec2 kTextureWrap;
 uniform vec2 kAlphaMask;
 
 varying vec2 vTexCoord;
-varying float vRandomValue;
-varying float vAlpha;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
 
 // Support texture coordinate wrapping (clamp or repeat)
 // for cases when hardware texture sampler setting is
@@ -1022,8 +1024,8 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 
 vec2 RotateCoords(vec2 coords)
 {
-    float random_angle = mix(0.0, vRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
+    float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
+    float angle = kTextureRotation + kTextureVelocityZ * kTime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -1045,7 +1047,7 @@ void main()
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = RotateCoords(coords);
 
-    coords += kTextureVelocityXY * kRuntime;
+    coords += kTextureVelocityXY * kTime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
@@ -1067,7 +1069,7 @@ void main()
     vec4 col1 = mix(kBaseColor * tex1, vec4(kBaseColor.rgb, kBaseColor.a * tex1.a), kAlphaMask[1]);
 
     vec4 color = mix(col0, col1, kBlendCoeff);
-    color.a *= vAlpha;
+    color.a *= vParticleAlpha;
 
     // apply gamma (in)correction.
     gl_FragColor = pow(color, vec4(kGamma));
@@ -1175,7 +1177,7 @@ void SpriteClass::ApplyDynamicState(const State& state, Device& device, Program&
     }
     program.SetTextureCount(2);
     program.SetUniform("kBlendCoeff", mBlendFrames ? binds.blend_coefficient : 0.0f);
-    program.SetUniform("kRuntime", (float)state.material_time);
+    program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetUniform("kAlphaMask", alpha_mask);
     program.SetUniform("kApplyRandomParticleRotation",
@@ -1391,7 +1393,7 @@ uniform float kAlphaMask;
 uniform float kRenderPoints;
 uniform float kGamma;
 uniform float kApplyRandomParticleRotation;
-uniform float kRuntime;
+uniform float kTime;
 uniform vec2 kTextureScale;
 uniform vec2 kTextureVelocityXY;
 uniform float kTextureVelocityZ;
@@ -1401,8 +1403,8 @@ uniform vec4 kBaseColor;
 uniform ivec2 kTextureWrap;
 
 varying vec2 vTexCoord;
-varying float vRandomValue;
-varying float vAlpha;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
 
 // Support texture coordinate wrapping (clamp or repeat)
 // for cases when hardware texture sampler setting is
@@ -1431,8 +1433,8 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 
 vec2 RotateCoords(vec2 coords)
 {
-    float random_angle = mix(0.0, vRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocityZ * kRuntime + random_angle * 3.1415926;
+    float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
+    float angle = kTextureRotation + kTextureVelocityZ * kTime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -1453,7 +1455,7 @@ void main()
     // ranges from 0 to 1 across the point vertically top-to-bottom."
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = RotateCoords(coords);
-    coords += kTextureVelocityXY * kRuntime;
+    coords += kTextureVelocityXY * kTime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
@@ -1471,7 +1473,7 @@ void main()
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
     vec4 col = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
-    col.a *= vAlpha;
+    col.a *= vParticleAlpha;
 
     // apply gamma (in)correction.
     gl_FragColor = pow(col, vec4(kGamma));
@@ -1568,7 +1570,7 @@ void TextureMap2DClass::ApplyDynamicState(const State& state, Device& device, Pr
     program.SetUniform("kApplyRandomParticleRotation",
                     state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
-    program.SetUniform("kRuntime", (float)state.material_time);
+    program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kAlphaMask", binds.textures[0]->GetFormat() == Texture::Format::Grayscale ? 1.0f : 0.0f);
 
     // set software wrap/clamp. 0 = disabled.
@@ -1951,7 +1953,7 @@ void CustomMaterialClass::ApplyDynamicState(const State& state, Device& device, 
             texture_unit++;
         }
     }
-    program.SetUniform("kRuntime", (float)state.material_time);
+    program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetTextureCount(texture_unit);
 }

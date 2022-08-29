@@ -2,7 +2,7 @@
 
 precision highp float;
 
-uniform float kRuntime;
+uniform float kTime;
 
 varying vec2 vTexCoord;
 
@@ -11,7 +11,7 @@ void main()
     vec2 uv = vTexCoord;
 
     float time  = 1.4;
-    float cycle = mod(kRuntime / time, time) / time;
+    float cycle = mod(kTime / time, time) / time;
 
     float glint_width  = 0.8;
     float left  = -1.0 + cycle * 2.0 + uv.y * 0.1;

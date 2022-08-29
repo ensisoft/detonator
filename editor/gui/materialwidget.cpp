@@ -508,7 +508,7 @@ precision highp float;
 
 // build-in uniforms
 // material time in seconds.
-uniform float kRuntime;
+uniform float kTime;
 
 // custom uniforms that need to match the
 // json description
@@ -520,16 +520,19 @@ uniform vec2 kNoiseRect;
 // varyings from vertex stage.
 varying vec2 vTexCoord;
 
-// particle alpha
-varying float vAlpha;
+// per particle data.
+// these are only written when the drawable is a particle engine
+varying float vParticleAlpha;
 // particle random value.
-varying float vRandomValue;
+varying float vParticleRandomValue;
+// normalized particle lifetime.
+varying float vParticleTime;
 
 void main() {
     float a = texture2D(kNoise, vTexCoord).a;
-    float r = vTexCoord.x + a + kRuntime;
+    float r = vTexCoord.x + a + kTime;
     float g = vTexCoord.y + a;
-    float b = kRuntime;
+    float b = kTime;
     vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
     gl_FragColor = vec4(pow(col, vec3(kGamma)), 1.0);
 }

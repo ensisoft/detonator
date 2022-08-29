@@ -543,7 +543,7 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
-        TEST_REQUIRE(program.GetUniform("kRuntime", &runtime));
+        TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
         TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
@@ -591,7 +591,7 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
-        TEST_REQUIRE(program.GetUniform("kRuntime", &runtime));
+        TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));

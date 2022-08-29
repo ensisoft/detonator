@@ -3,7 +3,7 @@
 
 precision highp float;
 
-uniform float kRuntime;
+uniform float kTime;
 uniform float kRenderPoints;
 
 uniform sampler2D kTexture0;
@@ -16,7 +16,7 @@ float SlidingGlint()
 {
     vec2 uv = vTexCoord;
     float time = 1.4;
-    float cycle = mod(kRuntime / time, time) / time;
+    float cycle = mod(kTime / time, time) / time;
     float glint_width = 0.6;
     float left  = -1.0 + cycle * 2.0 + uv.y * -0.1;
     float right = left + glint_width;
@@ -31,7 +31,7 @@ float SlidingGlint()
 void main()
 {
     float time = 1.2;
-    float s = mod(kRuntime, time) / time;
+    float s = mod(kTime, time) / time;
     float p = sin(s*3.147) * 0.5 + 0.5;
     float a = texture2D(kTexture0, vTexCoord).w;
     gl_FragColor = (kBaseColor * a * 0.7) + vec4(0.3) * a * SlidingGlint();

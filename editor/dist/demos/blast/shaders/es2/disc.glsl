@@ -4,8 +4,8 @@
 precision highp float;
 
 // material system will provide these.
-// kRuntime will be the current material instance runtime in second.s
-uniform float kRuntime;
+// kTime will be the current material instance runtime in second.s
+uniform float kTime;
 // If the material is applied on a particle system (i.e. we're rendering points)
 // kRenderPoints will be set to 1.0. When rendering points the shader must use
 // gl_PointCoord instead of vTexCoord. simple way to support both is to
@@ -40,7 +40,7 @@ float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_o
 void main()
 {
     float time = 1.2;
-    float s = mod(kRuntime, time) / time;
+    float s = mod(kTime, time) / time;
     float disc_radius = 0.01 + s * (0.5-0.015);
     disc_radius = clamp(disc_radius, 0.01, 0.45);
 
