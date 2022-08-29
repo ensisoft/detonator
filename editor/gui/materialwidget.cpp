@@ -1907,7 +1907,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             static auto dummy = gfx::CreateMaterialClassFromTexture("app://textures/Checkerboard.png");
             painter.Draw(*drawable, transform, gfx::MaterialClassInst(dummy));
         }
-        ShowMessage(message, painter, width, height);
+        ShowMessage(message, painter);
         return;
     }
 

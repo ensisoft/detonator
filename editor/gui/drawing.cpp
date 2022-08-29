@@ -195,10 +195,15 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
     gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
 }
 
-void ShowMessage(const std::string& msg, gfx::Painter& painter,
-                 unsigned widget_width, unsigned widget_height)
+void ShowMessage(const std::string& msg, gfx::Painter& painter)
 {
     gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
+                      gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+}
+
+void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
+{
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
                       gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
@@ -218,7 +223,7 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
     const auto& mouse_in_scene = view_to_scene * ToVec4(mickey);
     char hallelujah[128] = {};
     std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", mouse_in_scene.x, mouse_in_scene.y);
-    ShowMessage(hallelujah, painter, widget->width(), widget->height());
+    ShowMessage(hallelujah, painter);
 }
 
 } // namespace
