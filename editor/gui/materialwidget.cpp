@@ -1213,12 +1213,12 @@ void MaterialWidget::ApplyShaderDescription()
             // create new texture map and add to the material
             if (type == gfx::TextureMap::Type::Texture2D)
             {
-                std::string sampler_name = "kTexture";
-                std::string texture_rect_uniform_name = "kTextureRect";
+                std::string sampler_name = name; //"kTexture";
+                std::string texture_rect_uniform_name = name + "Rect"; //"kTextureRect";
                 if (!base::JsonReadSafe(json.value(), "sampler", &sampler_name))
-                    WARN("Texture map '%1' has no name for texture sampler.", name);
+                    WARN("Texture map '%1' has no name for texture sampler. Using '%2'", name, sampler_name);
                 if (!base::JsonReadSafe(json.value(), "rect", &texture_rect_uniform_name))
-                    WARN("Texture map '%1' has no name for texture rectangle uniform.", name);
+                    WARN("Texture map '%1' has no name for texture rectangle uniform. Using '%2'.", name, texture_rect_uniform_name);
 
                 auto map = std::make_unique<gfx::TextureMap2D>();
                 map->SetRectUniformName(std::move(texture_rect_uniform_name));
@@ -1227,18 +1227,18 @@ void MaterialWidget::ApplyShaderDescription()
             }
             else if (type == gfx::TextureMap::Type::Sprite)
             {
-                std::string sampler_name0 = "kTexture0";
-                std::string sampler_name1 = "kTexture1";
-                std::string texture_rect_uniform_name0 = "kTextureRect0";
-                std::string texture_rect_uniform_name1 = "kTextureRect1";
+                std::string sampler_name0 = name + "0"; //kTexture0";
+                std::string sampler_name1 = name + "1"; //"kTexture1";
+                std::string texture_rect_uniform_name0 = name + "Rect0";
+                std::string texture_rect_uniform_name1 = name + "Rect1";
                 if (!base::JsonReadSafe(json.value(), "sampler0", &sampler_name0))
-                    WARN("Texture map '%1' has no name for texture sampler 0.", name);
+                    WARN("Texture map '%1' has no name for texture sampler 0. Using '%2'.", name, sampler_name0);
                 if (!base::JsonReadSafe(json.value(), "sampler1", &sampler_name1))
-                    WARN("Texture map '%1' has no name for texture sampler 1.", name);
+                    WARN("Texture map '%1' has no name for texture sampler 1. Using '%2'.", name, sampler_name1);
                 if (!base::JsonReadSafe(json.value(), "rect0", &texture_rect_uniform_name0))
-                    WARN("Texture map '%1' has no name for texture 0 rectangle uniform.", name);
+                    WARN("Texture map '%1' has no name for texture 0 rectangle uniform. Using '%2'.", name, texture_rect_uniform_name0);
                 if (!base::JsonReadSafe(json.value(), "rect1", &texture_rect_uniform_name1))
-                    WARN("Texture map '%1' has no name for texture 1 rectangle uniform.", name);
+                    WARN("Texture map '%1' has no name for texture 1 rectangle uniform. Using '%2'.", name, texture_rect_uniform_name1);
 
                 auto map = std::make_unique<gfx::SpriteMap>();
                 map->SetSamplerName(sampler_name0, 0);
