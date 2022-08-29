@@ -46,6 +46,7 @@ namespace gui
         void on_btnSelectPython_clicked();
         void on_btnSelectEmsdk_clicked();
         void on_btnResetClearColor_clicked();
+        void on_btnResetGridColor_clicked();
 
     private:
         Ui::DlgSettings mUI;

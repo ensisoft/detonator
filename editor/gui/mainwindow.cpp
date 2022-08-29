@@ -67,6 +67,7 @@
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/codewidget.h"
 #include "editor/gui/uiwidget.h"
+#include "editor/gui/drawing.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -264,6 +265,7 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "python_executable", &mSettings.python_executable);
     settings.GetValue("Settings", "emsdk", &mSettings.emsdk);
     settings.GetValue("Settings", "clear_color", &mSettings.clear_color);
+    settings.GetValue("Settings", "grid_color", &mSettings.grid_color);
     settings.GetValue("Settings", "default_grid", (unsigned*)&mUISettings.grid);
     settings.GetValue("Settings", "default_zoom", &mUISettings.zoom);
     settings.GetValue("Settings", "snap_to_grid", &mUISettings.snap_to_grid);
@@ -273,6 +275,7 @@ void MainWindow::loadState()
     settings.GetValue("Settings", "vsync", &mSettings.vsync);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
+    gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     TextEditor::Settings editor_settings;
     settings.GetValue("TextEditor", "font", &editor_settings.font_description);
@@ -1704,6 +1707,7 @@ void MainWindow::on_actionSettings_triggered()
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
+    gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     if (current_style == mSettings.style_name)
         return;
@@ -2566,6 +2570,7 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "python_executable", mSettings.python_executable);
     settings.SetValue("Settings", "emsdk", mSettings.emsdk);
     settings.SetValue("Settings", "clear_color", mSettings.clear_color);
+    settings.SetValue("Settings", "grid_color", mSettings.grid_color);
     settings.SetValue("Settings", "default_grid", (unsigned)mUISettings.grid);
     settings.SetValue("Settings", "default_zoom", mUISettings.zoom);
     settings.SetValue("Settings", "snap_to_grid", mUISettings.snap_to_grid);
