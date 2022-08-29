@@ -107,6 +107,10 @@ namespace gui
         void on_distSizeDerivative_valueChanged(double);
         void on_timeAlphaDerivative_valueChanged(double);
         void on_distAlphaDerivative_valueChanged(double);
+        void on_dsPerTime_valueChanged();
+        void on_dsPerDist_valueChanged();
+        void on_daPerTime_valueChanged();
+        void on_daPerDist_valueChanged();
         void on_canExpire_stateChanged(int);
 
         void VelocityChanged(float min, float max);
