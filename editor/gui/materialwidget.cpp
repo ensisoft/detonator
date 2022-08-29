@@ -139,21 +139,21 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mOriginalHash = mMaterial->GetHash();
 
     mUI.setupUi(this);
-    mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene,
-        this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onZoomIn = std::bind(&MaterialWidget::ZoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&MaterialWidget::ZoomOut, this);
+    mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn     = std::bind(&MaterialWidget::ZoomIn, this);
+    mUI.widget->onZoomOut    = std::bind(&MaterialWidget::ZoomOut, this);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
 
     QMenu* menu  = new QMenu(this);
-    QAction* add_texture_from_file = menu->addAction("File");
-    QAction* add_texture_from_text = menu->addAction("Text");
-    QAction* add_texture_from_bitmap = menu->addAction(("Bitmap"));
+    QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "File");
+    QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "Text");
+    QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "Bitmap");
     connect(add_texture_from_file, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromFile);
     connect(add_texture_from_text, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromText);
     connect(add_texture_from_bitmap, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromBitmap);
+
     mUI.btnAddTextureMap->setMenu(menu);
 
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);

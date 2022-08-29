@@ -38,9 +38,9 @@ namespace gui
         {
             mUI.setupUi(this);
             QMenu* menu  = new QMenu(this);
-            QAction* add_texture_from_file = menu->addAction("File");
-            QAction* add_texture_from_text = menu->addAction("Text");
-            QAction* add_texture_from_bitmap = menu->addAction(("Bitmap"));
+            QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "File");
+            QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "Text");
+            QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "Bitmap");
             connect(add_texture_from_file,   &QAction::triggered, this, &Sampler::AddNewTextureMapFromFile);
             connect(add_texture_from_text,   &QAction::triggered, this, &Sampler::AddNewTextureMapFromText);
             connect(add_texture_from_bitmap, &QAction::triggered, this, &Sampler::AddNewTextureMapFromBitmap);
