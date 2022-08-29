@@ -156,21 +156,22 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     const auto grid_width  = cell_size_units * num_cells;
     const auto grid_height = cell_size_units * num_cells;
 
-    auto drawable = gfx::Grid(num_grid_lines, num_grid_lines);
+    auto grid_0 = gfx::Grid(num_grid_lines, num_grid_lines, true);
+    auto grid_1 = gfx::Grid(num_grid_lines, num_grid_lines, false);
     auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
     //material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
     view.Translate(grid_origin_x, grid_origin_y);
-    painter.Draw(drawable, view, material);
+    painter.Draw(grid_0, view, material);
 
     view.Translate(-grid_width, 0);
-    painter.Draw(drawable, view, material);
+    painter.Draw(grid_1, view, material);
 
     view.Translate(0, -grid_height);
-    painter.Draw(drawable, view, material);
+    painter.Draw(grid_0, view, material);
 
     view.Translate(grid_width, 0);
-    painter.Draw(drawable, view, material);
+    painter.Draw(grid_1, view, material);
 
     view.Pop();
 }
