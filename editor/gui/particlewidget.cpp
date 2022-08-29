@@ -695,6 +695,9 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.daPerTime, params.rate_of_change_in_alpha_wrt_time * 100); // scale up the value
     SetValue(mUI.daPerDist, params.rate_of_change_in_alpha_wrt_dist * 100); // scale up the value
 
+    SetValue(mUI.dirStartAngleSpin, qRadiansToDegrees(params.direction_sector_start_angle));
+    SetValue(mUI.dirSizeAngleSpin, qRadiansToDegrees(params.direction_sector_size));
+
     mUI.velocity->SetLo(params.min_velocity);
     mUI.velocity->SetHi(params.max_velocity);
     mUI.lifetime->SetLo(params.min_lifetime);
@@ -867,11 +870,17 @@ void ParticleEditorWidget::on_direction_currentIndexChanged(int)
     const gfx::KinematicsParticleEngineClass::Direction dir = GetValue(mUI.direction);
     if (dir == gfx::KinematicsParticleEngineClass::Direction::Sector)
     {
-        SetEnabled(mUI.dirSector, true);
+        SetEnabled(mUI.dirSizeAngle, true);
+        SetEnabled(mUI.dirStartAngle, true);
+        SetEnabled(mUI.dirStartAngleSpin, true);
+        SetEnabled(mUI.dirSizeAngleSpin, true);
     }
     else
     {
-        SetEnabled(mUI.dirSector, false);
+        SetEnabled(mUI.dirSizeAngle, false);
+        SetEnabled(mUI.dirStartAngle, false);
+        SetEnabled(mUI.dirStartAngleSpin, false);
+        SetEnabled(mUI.dirSizeAngleSpin, false);
     }
     SetParams();
 }
@@ -916,12 +925,26 @@ void ParticleEditorWidget::on_initHeight_valueChanged(double)
 }
 void ParticleEditorWidget::on_dirStartAngle_valueChanged()
 {
+    SetValue(mUI.dirStartAngleSpin, GetValue(mUI.dirStartAngle));
     SetParams();
 }
 void ParticleEditorWidget::on_dirSizeAngle_valueChanged()
 {
+    SetValue(mUI.dirSizeAngleSpin, GetValue(mUI.dirSizeAngle));
     SetParams();
 }
+
+void ParticleEditorWidget::on_dirStartAngleSpin_valueChanged(double value)
+{
+    SetValue(mUI.dirStartAngle, value);
+    SetParams();
+}
+void ParticleEditorWidget::on_dirSizeAngleSpin_valueChanged(double value)
+{
+    SetValue(mUI.dirSizeAngle, value);
+    SetParams();
+}
+
 void ParticleEditorWidget::on_minVelocity_valueChanged(double value)
 {
     mUI.velocity->SetLo(value);

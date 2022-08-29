@@ -201,16 +201,6 @@
         <item row="3" column="1">
          <widget class="QComboBox" name="motion"/>
         </item>
-        <item row="6" column="1">
-         <widget class="QComboBox" name="direction"/>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Direction</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
      </item>
@@ -223,33 +213,23 @@
         </size>
        </property>
        <property name="title">
-        <string>Direction sector</string>
+        <string>Particle direction</string>
        </property>
        <property name="checkable">
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(0, 200, 0)</string>
-          </property>
-          <property name="text">
-           <string>Start angle</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_16">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(250, 250, 0)</string>
-          </property>
-          <property name="text">
-           <string>Size angle</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
+         <widget class="QComboBox" name="direction">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
          <widget class="QSlider" name="dirStartAngle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -278,6 +258,32 @@
          </widget>
         </item>
         <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="dirStartAngleSpin">
+          <property name="minimum">
+           <double>-180.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>180.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 200, 0)</string>
+          </property>
+          <property name="text">
+           <string>Start angle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
          <widget class="QSlider" name="dirSizeAngle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -296,6 +302,42 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Direction</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="dirSizeAngleSpin">
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_16">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(250, 250, 0)</string>
+          </property>
+          <property name="text">
+           <string>Size angle</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -305,6 +347,9 @@
         <string>Local simulation space</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_10">
+        <item row="2" column="1" colspan="3">
+         <widget class="QComboBox" name="boundary"/>
+        </item>
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="simWidth">
           <property name="maximum">
@@ -312,6 +357,16 @@
           </property>
           <property name="value">
            <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_34">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(200,0, 0)</string>
+          </property>
+          <property name="text">
+           <string>Height</string>
           </property>
          </widget>
         </item>
@@ -328,13 +383,13 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_34">
-          <property name="styleSheet">
-           <string notr="true">color: rgb(200,0, 0)</string>
+        <item row="0" column="3">
+         <widget class="QDoubleSpinBox" name="simHeight">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
           </property>
-          <property name="text">
-           <string>Height</string>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -347,19 +402,6 @@
            <string>Width</string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QDoubleSpinBox" name="simHeight">
-          <property name="maximum">
-           <double>1000.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" colspan="3">
-         <widget class="QComboBox" name="boundary"/>
         </item>
        </layout>
       </widget>
@@ -1453,13 +1495,15 @@
   <tabstop>motion</tabstop>
   <tabstop>shape</tabstop>
   <tabstop>placement</tabstop>
-  <tabstop>direction</tabstop>
   <tabstop>when</tabstop>
   <tabstop>numParticles</tabstop>
   <tabstop>gravityX</tabstop>
   <tabstop>gravityY</tabstop>
   <tabstop>canExpire</tabstop>
+  <tabstop>direction</tabstop>
+  <tabstop>dirStartAngleSpin</tabstop>
   <tabstop>dirStartAngle</tabstop>
+  <tabstop>dirSizeAngleSpin</tabstop>
   <tabstop>dirSizeAngle</tabstop>
   <tabstop>simWidth</tabstop>
   <tabstop>simHeight</tabstop>
