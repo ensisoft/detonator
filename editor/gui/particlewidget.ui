@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1661</width>
-    <height>929</height>
+    <height>976</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,13 +89,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_21">
-          <property name="text">
-           <string>Space</string>
-          </property>
-         </widget>
-        </item>
         <item row="9" column="1">
          <widget class="QCheckBox" name="canExpire">
           <property name="text">
@@ -157,9 +150,6 @@
         </item>
         <item row="5" column="1">
          <widget class="QComboBox" name="placement"/>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="space"/>
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="name">
@@ -344,13 +334,17 @@
      <item>
       <widget class="QGroupBox" name="localSpace">
        <property name="title">
-        <string>Local simulation space</string>
+        <string>Simulation space</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_10">
-        <item row="2" column="1" colspan="3">
-         <widget class="QComboBox" name="boundary"/>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_21">
+          <property name="text">
+           <string>Space</string>
+          </property>
+         </widget>
         </item>
-        <item row="0" column="1">
+        <item row="2" column="1">
          <widget class="QDoubleSpinBox" name="simWidth">
           <property name="maximum">
            <double>1000.000000000000000</double>
@@ -360,7 +354,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item row="2" column="2">
          <widget class="QLabel" name="label_34">
           <property name="styleSheet">
            <string notr="true">color: rgb(200,0, 0)</string>
@@ -370,20 +364,10 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>At boundary</string>
-          </property>
-         </widget>
+        <item row="0" column="1" colspan="3">
+         <widget class="QComboBox" name="space"/>
         </item>
-        <item row="0" column="3">
+        <item row="2" column="3">
          <widget class="QDoubleSpinBox" name="simHeight">
           <property name="maximum">
            <double>1000.000000000000000</double>
@@ -393,13 +377,29 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
+        <item row="2" column="0">
          <widget class="QLabel" name="label_33">
           <property name="styleSheet">
            <string notr="true">color: rgb(0, 200, 0)</string>
           </property>
           <property name="text">
            <string>Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="3">
+         <widget class="QComboBox" name="boundary"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Boundary</string>
           </property>
          </widget>
         </item>
@@ -1491,7 +1491,6 @@
  <tabstops>
   <tabstop>name</tabstop>
   <tabstop>ID</tabstop>
-  <tabstop>space</tabstop>
   <tabstop>motion</tabstop>
   <tabstop>shape</tabstop>
   <tabstop>placement</tabstop>
@@ -1505,9 +1504,10 @@
   <tabstop>dirStartAngle</tabstop>
   <tabstop>dirSizeAngleSpin</tabstop>
   <tabstop>dirSizeAngle</tabstop>
+  <tabstop>space</tabstop>
+  <tabstop>boundary</tabstop>
   <tabstop>simWidth</tabstop>
   <tabstop>simHeight</tabstop>
-  <tabstop>boundary</tabstop>
   <tabstop>initX</tabstop>
   <tabstop>initY</tabstop>
   <tabstop>initWidth</tabstop>
