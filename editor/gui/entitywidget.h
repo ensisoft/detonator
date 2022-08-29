@@ -128,6 +128,7 @@ namespace gui
         void on_btnDeleteJoint_clicked();
         void on_btnSelectMaterial_clicked();
         void on_btnSetMaterialParams_clicked();
+        void on_btnEditDrawable_clicked();
         void on_btnEditMaterial_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);

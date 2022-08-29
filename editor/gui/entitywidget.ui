@@ -1692,16 +1692,6 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="dsDrawable">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="1">
                <widget class="QComboBox" name="dsRenderPass">
                 <property name="sizePolicy">
@@ -1724,6 +1714,40 @@
                  <double>1.000000000000000</double>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <item>
+                 <widget class="QComboBox" name="dsDrawable">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="btnEditDrawable">
+                  <property name="toolTip">
+                   <string>Open the entity for editing</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+                  </property>
+                  <property name="autoRaise">
+                   <bool>false</bool>
+                  </property>
+                  <property name="arrowType">
+                   <enum>Qt::NoArrow</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
@@ -3030,6 +3054,7 @@
   <tabstop>nodeItems</tabstop>
   <tabstop>drawableItem</tabstop>
   <tabstop>dsDrawable</tabstop>
+  <tabstop>btnEditDrawable</tabstop>
   <tabstop>dsMaterial</tabstop>
   <tabstop>btnSelectMaterial</tabstop>
   <tabstop>btnSetMaterialParams</tabstop>
