@@ -1210,8 +1210,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (mEngine)
     {
-        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()),
-                    painter, widget_width, widget_height);
+        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()), painter);
     }
 }
 
