@@ -120,14 +120,42 @@
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
            <layout class="QGridLayout" name="gridLayout_7">
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Default clear color</string>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="cmbGrid">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
              </widget>
             </item>
             <item row="3" column="1">
+             <widget class="QDoubleSpinBox" name="zoom">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimum">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>5.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
              <layout class="QVBoxLayout" name="verticalLayout_12">
               <item>
                <widget class="QCheckBox" name="chkShowGrid">
@@ -183,35 +211,23 @@
               </item>
              </layout>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="label_18">
               <property name="text">
                <string>Default zoom level</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="zoom">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_16">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimum">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>5.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
+              <property name="text">
+               <string>Default grid</string>
               </property>
              </widget>
             </item>
@@ -256,26 +272,58 @@
               </item>
              </layout>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_16">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_22">
               <property name="text">
-               <string>Default grid</string>
+               <string>Default clear color</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="cmbGrid">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="color_widgets::ColorSelector" name="gridColor">
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </property>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="btnResetGridColor">
+                <property name="text">
+                 <string>Browse ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Default grid color</string>
               </property>
              </widget>
             </item>
@@ -748,6 +796,8 @@
   <tabstop>cmbGrid</tabstop>
   <tabstop>clearColor</tabstop>
   <tabstop>btnResetClearColor</tabstop>
+  <tabstop>gridColor</tabstop>
+  <tabstop>btnResetGridColor</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>chkShowGrid</tabstop>
   <tabstop>chkShowOrigin</tabstop>

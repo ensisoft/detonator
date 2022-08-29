@@ -34,6 +34,10 @@
 #include "game/types.h"
 #include "base/math.h"
 
+namespace {
+    gfx::Color4f DefaultGridColor = gfx::Color::LightGray;
+} // namespace
+
 namespace gui
 {
 void DrawLine(const gfx::Transform& view,
@@ -113,6 +117,11 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
     view.Pop();
 }
 
+void SetGridColor(const gfx::Color4f& color)
+{
+    DefaultGridColor = color;
+}
+
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     GridDensity grid,
     float zoom,
@@ -148,7 +157,7 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     const auto grid_height = cell_size_units * num_cells;
 
     auto drawable = gfx::Grid(num_grid_lines, num_grid_lines);
-    auto material = gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray)); //, 0.7f));
+    auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
     //material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
     view.Translate(grid_origin_x, grid_origin_y);

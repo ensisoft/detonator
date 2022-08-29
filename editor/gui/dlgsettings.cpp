@@ -60,6 +60,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.edtPythonExecutable, settings.python_executable);
     SetUIValue(mUI.edtEmscriptenPath, settings.emsdk);
     SetUIValue(mUI.clearColor, settings.clear_color);
+    SetUIValue(mUI.gridColor, settings.grid_color);
 
     SetUIValue(mUI.cmbGrid,         widget.grid);
     SetUIValue(mUI.zoom,            widget.zoom);
@@ -112,6 +113,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtPythonExecutable,       &mSettings.python_executable);
     GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);
     GetUIValue(mUI.clearColor,                &mSettings.clear_color);
+    GetUIValue(mUI.gridColor,                 &mSettings.grid_color);
     // text editor settings.
     GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
@@ -242,6 +244,12 @@ void DlgSettings::on_btnResetClearColor_clicked()
 {
     constexpr QColor color = {int(255*0.2f), int(255*0.3f), int(255*0.4f), 255};
     SetUIValue(mUI.clearColor, color);
+}
+
+void DlgSettings::on_btnResetGridColor_clicked()
+{
+    constexpr QColor color  = {int(255*0.75f), int(255*0.75f), int(255*0.75f), 255};
+    SetUIValue(mUI.gridColor, color);
 }
 
 } // namespace

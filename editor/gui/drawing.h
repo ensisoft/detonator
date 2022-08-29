@@ -49,6 +49,8 @@ enum class GridDensity {
     Grid100x100 = 100
 };
 
+void SetGridColor(const gfx::Color4f& color);
+
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     GridDensity grid,   // grid density setting.
     float zoom,         // overall zoom level
