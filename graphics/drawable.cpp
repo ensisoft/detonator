@@ -1571,6 +1571,7 @@ uniform mat4 kModelViewMatrix;
 varying vec2  vTexCoord;
 varying float vRandomValue;
 varying float vAlpha;
+varying float vTime;
 
 void main()
 {
@@ -1578,6 +1579,7 @@ void main()
     gl_PointSize = aData.x;
     vRandomValue = aData.y;
     vAlpha       = aData.z;
+    vTime        = aData.w;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
     )";
@@ -1593,6 +1595,7 @@ uniform mat4 kViewMatrix;
 varying vec2 vTexCoord;
 varying float vRandomValue;
 varying float vAlpha;
+varying float vTime;
 
 void main()
 {
@@ -1600,6 +1603,7 @@ void main()
   gl_PointSize = aData.x;
   vRandomValue = aData.y;
   vAlpha       = aData.z;
+  vTime        = aData.w;
   gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
 }
     )";
@@ -1660,6 +1664,9 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
         v.aData.y = p.randomizer;
         // Use the particle data to pass the per particle alpha.
         v.aData.z = p.alpha;
+        // use the particle data to pass the per particle time.
+        // note that lifetime counts down!
+        v.aData.w = 1.0f - (p.lifetime / mParams.max_lifetime);
         verts.push_back(v);
     }
 
