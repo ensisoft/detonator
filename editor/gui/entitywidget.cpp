@@ -1525,6 +1525,20 @@ void EntityWidget::on_btnSetMaterialParams_clicked()
     }
 }
 
+void EntityWidget::on_btnEditDrawable_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        const auto& id = (QString)GetItemId(mUI.dsDrawable);
+        if (id.isEmpty())
+            return;
+        auto& resource = mState.workspace->GetResourceById(id);
+        if (resource.IsPrimitive())
+            return;
+        emit OpenResource(id);
+    }
+}
+
 void EntityWidget::on_btnEditMaterial_clicked()
 {
     if (auto* node = GetCurrentNode())
@@ -1626,6 +1640,7 @@ void EntityWidget::on_nodeMinus90_clicked()
 void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
 {
     UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 void EntityWidget::on_dsMaterial_currentIndexChanged(const QString& name)
 {
@@ -2606,8 +2621,14 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
 
-            const auto& resource = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
-            SetEnabled(mUI.btnEditMaterial, !resource.IsPrimitive());
+            const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
+            const auto& drawable = mState.workspace->GetResourceById(GetItemId(mUI.dsDrawable));
+            SetEnabled(mUI.btnEditMaterial, !material.IsPrimitive());
+            SetEnabled(mUI.btnEditDrawable, !drawable.IsPrimitive());
+            if (drawable.GetType() == app::Resource::Type::Shape)
+                mUI.btnEditDrawable->setIcon(QIcon("icons:polygon.png"));
+            else if (drawable.GetType() == app::Resource::Type::ParticleSystem)
+                mUI.btnEditDrawable->setIcon(QIcon("icons:particle.png"));
         }
         if (const auto* body = node->GetRigidBody())
         {
