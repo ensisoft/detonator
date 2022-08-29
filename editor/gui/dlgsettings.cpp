@@ -242,13 +242,13 @@ void DlgSettings::on_btnSelectEmsdk_clicked()
 
 void DlgSettings::on_btnResetClearColor_clicked()
 {
-    constexpr QColor color = {int(255*0.2f), int(255*0.3f), int(255*0.4f), 255};
+    constexpr QColor color = {0x23, 0x23, 0x23, 255};
     SetUIValue(mUI.clearColor, color);
 }
 
 void DlgSettings::on_btnResetGridColor_clicked()
 {
-    constexpr QColor color  = {int(255*0.75f), int(255*0.75f), int(255*0.75f), 255};
+    constexpr QColor color = {0xe3, 0xe3, 0xe3, 50};
     SetUIValue(mUI.gridColor, color);
 }
 
