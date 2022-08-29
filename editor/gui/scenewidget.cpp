@@ -194,6 +194,9 @@ public:
             view.Translate(mWorldPos.x, mWorldPos.y);
             mState.renderer.Draw(*mClass, painter, view, &hook);
         view.Pop();
+
+        ShowMessage(mClass->GetName(), gfx::FRect(40 + mMousePos.x(),
+                                                  40 + mMousePos.y(), 200, 20), painter);
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
@@ -201,6 +204,7 @@ public:
         const auto& mouse_pos_view  = ToVec4(mickey->pos());
         const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
         mWorldPos = mouse_pos_scene;
+        mMousePos = mickey->pos();
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
     {
@@ -288,6 +292,8 @@ private:
     QStringList mEntityIds;
     // the current index into the mEntityIds list.
     unsigned mCurrentEntityIdIndex = 0;
+    // mouse position in window coordinates
+    QPoint mMousePos;
 };
 
 SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
