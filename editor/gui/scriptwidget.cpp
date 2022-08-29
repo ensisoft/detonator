@@ -370,6 +370,10 @@ void InitDoc()
                  "string", "message");
     DOC_FUNCTION_1("void", "info", "Print an information message in the application log.",
                  "string", "message");
+    DOC_FUNCTION_3("float|int", "clamp", "Clamp a value to a min/max range.",
+                   "float|int", "min", "float|int", "max", "float|int", "value");
+    DOC_FUNCTION_3("float|int", "wrap", "Wrap a value from min to max and from max to min.",
+                   "float|int", "min", "float|int", "max", "float|int", "value");
 
     DOC_TABLE("trace");
     DOC_FUNCTION_1("void", "marker", "Set a marker message in the application trace.",

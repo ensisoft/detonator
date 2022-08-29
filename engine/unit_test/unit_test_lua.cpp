@@ -368,6 +368,27 @@ end
         TEST_REQUIRE(ret == base::Intersect(base::FRect(10.0, 10.0, 20.0, 20.0),
                                             base::FRect(-5.0, 3.0, 10.0, 45.0)));
     }
+
+    // test math extension
+    {
+        sol::state L;
+        L.open_libraries();
+        engine::BindBase(L);
+
+        L.script(
+R"(
+function test_builtin()
+    return math.floor(1.5)
+end
+function test_ours()
+    return base.wrap(1, 3, 2)
+end
+)");
+        float floor = L["test_builtin"]();
+        float wrap = L["test_ours"]();
+        TEST_REQUIRE(floor == 1.0);
+        TEST_REQUIRE(wrap == 2.0);
+    }
 }
 
 void unit_test_data()
