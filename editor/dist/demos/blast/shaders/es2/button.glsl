@@ -2,7 +2,7 @@
 
 precision highp float;
 
-uniform float kRuntime;
+uniform float kTime;
 uniform vec4 kTextureRect;
 uniform sampler2D kTexture;
 varying vec2 vTexCoord;
@@ -19,7 +19,7 @@ void main()
     vec2 uv = TransformTexCoords(vTexCoord);
 
     float time  = 2.4;
-    float cycle = mod(kRuntime / time, time) / time;
+    float cycle = mod(kTime / time, time) / time;
     float s  = sin(cycle * 3.14159*2.0);
     vec4 tex = texture2D(kTexture, uv);
 

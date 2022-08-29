@@ -3,7 +3,7 @@
 
 precision highp float;
 
-uniform float kRuntime;
+uniform float kTime;
 uniform float kRenderPoints;
 
 uniform vec4  kBaseColor;
@@ -11,7 +11,7 @@ uniform vec4  kBaseColor;
 void main()
 {
     float time = 1.2;
-    float s = mod(kRuntime, time) / time;
+    float s = mod(kTime, time) / time;
 
     float a = sin(s*3.147) * 0.5 + 0.5;
 
