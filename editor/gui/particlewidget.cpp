@@ -641,6 +641,12 @@ void ParticleEditorWidget::SetParams()
         params.min_lifetime   = std::numeric_limits<float>::max();
         params.max_lifetime   = std::numeric_limits<float>::max();
     }
+    params.min_time = GetValue(mUI.minTime);
+    params.max_time = GetValue(mUI.maxTime);
+    if (params.max_time == 0.0f)
+        params.max_time = std::numeric_limits<float>::max();
+
+    params.delay = GetValue(mUI.delay);
 
     const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
     if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
@@ -714,6 +720,13 @@ void ParticleEditorWidget::ShowParams()
         SetValue(mUI.initWidth,  params.init_rect_width);
         SetValue(mUI.initHeight, params.init_rect_height);
     }
+
+    SetValue(mUI.minTime, params.min_time);
+    if (params.max_time == std::numeric_limits<float>::max())
+        SetValue(mUI.maxTime, 0.0f);
+    else SetValue(mUI.maxTime, params.max_time);
+
+    SetValue(mUI.delay, params.delay);
 }
 
 void ParticleEditorWidget::MinMax()
@@ -904,6 +917,37 @@ void ParticleEditorWidget::on_gravityX_valueChanged(double)
 }
 void ParticleEditorWidget::on_gravityY_valueChanged(double)
 {
+    SetParams();
+}
+
+void ParticleEditorWidget::on_minTime_valueChanged(double)
+{
+    SetParams();
+}
+void ParticleEditorWidget::on_maxTime_valueChanged(double)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_delay_valueChanged(double)
+{
+    SetParams();
+}
+
+void ParticleEditorWidget::on_btnResetMinTime_clicked()
+{
+    SetValue(mUI.minTime, 0.0f);
+    SetParams();
+}
+void ParticleEditorWidget::on_btnResetMaxTime_clicked()
+{
+    SetValue(mUI.maxTime, 0.0f);
+    SetParams();
+}
+
+void ParticleEditorWidget::on_btnResetDelay_clicked()
+{
+    SetValue(mUI.delay, 0.0f);
     SetParams();
 }
 

@@ -88,6 +88,12 @@ namespace gui
         void on_simHeight_valueChanged(double);
         void on_gravityX_valueChanged(double);
         void on_gravityY_valueChanged(double);
+        void on_minTime_valueChanged(double);
+        void on_maxTime_valueChanged(double);
+        void on_delay_valueChanged(double);
+        void on_btnResetMinTime_clicked();
+        void on_btnResetMaxTime_clicked();
+        void on_btnResetDelay_clicked();
         void on_numParticles_valueChanged(double);
         void on_initX_valueChanged(double);
         void on_initY_valueChanged(double);
