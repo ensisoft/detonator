@@ -36,6 +36,8 @@
 #include "graphics/program.h"
 #include "graphics/texture.h"
 #include "graphics/geometry.h"
+#include "graphics/painter.h"
+#include "graphics/transform.h"
 
 class TestShader : public gfx::Shader
 {
@@ -326,11 +328,17 @@ public:
     }
     virtual gfx::Program* FindProgram(const std::string& name) override
     {
-        return nullptr;
+       auto it = mProgramIndexMap.find(name);
+       if (it == mProgramIndexMap.end())
+           return nullptr;
+       return mPrograms[it->second].get();
     }
     virtual gfx::Program* MakeProgram(const std::string& name) override
     {
-        return nullptr;
+       const size_t index = mPrograms.size();
+       mPrograms.emplace_back(new TestProgram);
+       mProgramIndexMap[name] = index;
+       return mPrograms.back().get();
     }
     virtual gfx::Geometry* FindGeometry(const std::string& name) override
     {
@@ -438,6 +446,10 @@ public:
     }
     size_t GetNumTextures() const
     { return mTextures.size(); }
+    size_t GetNumShaders() const
+    { return mShaders.size(); }
+    size_t GetNumPrograms() const
+    { return mPrograms.size(); }
 
 private:
     std::unordered_map<std::string, std::size_t> mTextureIndexMap;
@@ -448,6 +460,9 @@ private:
 
     std::unordered_map<std::string, std::size_t> mShaderIndexMap;
     std::vector<std::unique_ptr<TestShader>> mShaders;
+
+    std::unordered_map<std::string, std::size_t> mProgramIndexMap;
+    std::vector<std::unique_ptr<TestProgram>> mPrograms;
 };
 
 
@@ -1414,6 +1429,38 @@ void unit_test_static_poly()
     TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
 }
 
+// test that new programs are built out of vertex and
+// fragment shaders only when the shaders change not
+// when the high level class types changes. For example
+// a rect and a circle can both use the same vertex shader
+// and when with a single material only a single program
+// needs to be created.
+void unit_test_painter_shape_material_pairing()
+{
+    TestDevice device;
+
+    auto painter = gfx::Painter::Create(&device);
+    auto color = gfx::CreateMaterialFromColor(gfx::Color::Red);
+    gfx::Transform transform;
+
+    painter->Draw(gfx::Rectangle(), transform, color);
+    TEST_REQUIRE(device.GetNumShaders() == 2);
+    TEST_REQUIRE(device.GetNumPrograms() == 1);
+
+    painter->Draw(gfx::Circle(), transform, color);
+    TEST_REQUIRE(device.GetNumShaders() == 2);
+    TEST_REQUIRE(device.GetNumPrograms() == 1);
+
+    auto gradient = gfx::CreateMaterialFromColor(gfx::Color::Red, gfx::Color::Red,
+                                                 gfx::Color::Green, gfx::Color::Green);
+    painter->Draw(gfx::Rectangle(), transform, gradient);
+    TEST_REQUIRE(device.GetNumShaders() == 3);
+    TEST_REQUIRE(device.GetNumPrograms() == 2);
+    painter->Draw(gfx::Circle(), transform, color);
+    TEST_REQUIRE(device.GetNumShaders() == 3);
+    TEST_REQUIRE(device.GetNumPrograms() == 2);
+
+}
 
 // multiple materials with textures should only load the
 // same texture object once onto the device.
@@ -1458,6 +1505,8 @@ int test_main(int argc, char* argv[])
     unit_test_custom_uniforms();
     unit_test_custom_textures();
     unit_test_static_poly();
+
+    unit_test_painter_shape_material_pairing();
 
     unit_test_packed_texture_bug();
     return 0;

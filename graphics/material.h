@@ -1599,6 +1599,11 @@ namespace gfx
         Color4f mColor = Color::White;
         bool mPointSampling = true;
     };
+    // Create gradient material based on 4 colors
+    GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
+                                               const Color4f& top_right,
+                                               const Color4f& bottom_left,
+                                               const Color4f& bottom_right);
 
     // Create material based on a simple color only.
     ColorClass CreateMaterialClassFromColor(const Color4f& color);
@@ -1614,6 +1619,11 @@ namespace gfx
     // Create a material class from a text buffer.
     TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text);
 
+    inline MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
+                                                     const Color4f& top_right,
+                                                     const Color4f& bottom_left,
+                                                     const Color4f& bottom_right)
+    { return MaterialClassInst(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right)); }
     inline MaterialClassInst CreateMaterialFromColor(const Color4f& color)
     { return MaterialClassInst(CreateMaterialClassFromColor(color)); }
     inline MaterialClassInst CreateMaterialFromTexture(const std::string& uri)

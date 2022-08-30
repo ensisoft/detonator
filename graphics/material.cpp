@@ -2243,6 +2243,20 @@ void TextMaterial::ResetUniforms()
 void TextMaterial::SetUniforms(const UniformMap& uniforms)
 {}
 
+
+GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
+                                           const Color4f& top_right,
+                                           const Color4f& bottom_left,
+                                           const Color4f& bottom_right)
+{
+    GradientClass material;
+    material.SetColor(top_left, GradientClass::ColorIndex::TopLeft);
+    material.SetColor(top_right, GradientClass::ColorIndex::TopRight);
+    material.SetColor(bottom_left, GradientClass::ColorIndex::BottomLeft);
+    material.SetColor(bottom_right, GradientClass::ColorIndex::BottomRight);
+    return material;
+}
+
 ColorClass CreateMaterialClassFromColor(const Color4f& color)
 {
     const auto alpha = color.Alpha();
