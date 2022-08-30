@@ -270,8 +270,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetParams(); // apply the defaults from the UI to the params
-    ShowParams();
     MinMax();
+    ShowParams();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
@@ -330,8 +330,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
         WARN("Material '%1' is no longer available.", material);
         SetValue(mUI.materials, QString("White"));
     }
-    ShowParams();
     MinMax();
+    ShowParams();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
@@ -731,14 +731,15 @@ void ParticleEditorWidget::ShowParams()
 
 void ParticleEditorWidget::MinMax()
 {
-    mUI.maxVelocity->setMinimum(mUI.minVelocity->value());
-    mUI.minVelocity->setMaximum(mUI.maxVelocity->value());
-    mUI.maxPointsize->setMinimum(mUI.minPointsize->value());
-    mUI.minPointsize->setMaximum(mUI.maxPointsize->value());
-    mUI.maxLifetime->setMinimum(mUI.minLifetime->value());
-    mUI.minLifetime->setMaximum(mUI.maxLifetime->value());
-    mUI.maxAlpha->setMinimum(mUI.minAlpha->value());
-    mUI.minAlpha->setMaximum(mUI.maxAlpha->value());
+    const auto& params = mClass->GetParams();
+    SetRange(mUI.minVelocity, 0.0f, params.max_velocity);
+    SetRange(mUI.maxVelocity, params.min_velocity, 1000.0f);
+    SetRange(mUI.minPointsize, 1, params.max_point_size);
+    SetRange(mUI.maxPointsize, params.min_point_size, 2048);
+    SetRange(mUI.minLifetime, 0.0f, params.max_lifetime);
+    SetRange(mUI.maxLifetime, params.min_lifetime, 100.0f);
+    SetRange(mUI.minAlpha, 0.0f, params.max_alpha);
+    SetRange(mUI.maxAlpha, params.min_alpha, 1.0f);
 }
 
 void ParticleEditorWidget::on_widgetColor_colorChanged(QColor color)
@@ -996,50 +997,50 @@ void ParticleEditorWidget::on_dirSizeAngleSpin_valueChanged(double value)
 void ParticleEditorWidget::on_minVelocity_valueChanged(double value)
 {
     mUI.velocity->SetLo(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_maxVelocity_valueChanged(double value)
 {
     mUI.velocity->SetHi(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_minLifetime_valueChanged(double value)
 {
     mUI.lifetime->SetLo(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_maxLifetime_valueChanged(double value)
 {
     mUI.lifetime->SetHi(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_minPointsize_valueChanged(int value)
 {
     mUI.pointsize->SetLo(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_maxPointsize_valueChanged(int value)
 {
     mUI.pointsize->SetHi(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_minAlpha_valueChanged(double value)
 {
     mUI.alpha->SetLo(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_maxAlpha_valueChanged(double value)
 {
     mUI.alpha->SetHi(value);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::on_timeSizeDerivative_valueChanged(double value)
 {
@@ -1400,31 +1401,31 @@ void ParticleEditorWidget::VelocityChanged(float min, float max)
 {
     SetValue(mUI.minVelocity, min);
     SetValue(mUI.maxVelocity, max);
-    MinMax();
     SetParams();
+    MinMax();
 }
 
 void ParticleEditorWidget::LifetimeChanged(float min, float max)
 {
     SetValue(mUI.minLifetime, min);
     SetValue(mUI.maxLifetime, max);
-    MinMax();
     SetParams();
+    MinMax();
 }
 
 void ParticleEditorWidget::PointsizeChanged(float min, float max)
 {
     SetValue(mUI.minPointsize, min);
     SetValue(mUI.maxPointsize, max);
-    MinMax();
     SetParams();
+    MinMax();
 }
 void ParticleEditorWidget::AlphaChanged(float min, float max)
 {
     SetValue(mUI.minAlpha, min);
     SetValue(mUI.maxAlpha, max);
-    MinMax();
     SetParams();
+    MinMax();
 }
 
 void ParticleEditorWidget::NewResourceAvailable(const app::Resource* resource)
