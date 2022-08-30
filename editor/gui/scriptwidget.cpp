@@ -1501,9 +1501,9 @@ protected:
         if (mFilter.empty())
             return true;
         const auto& doc = GetLuaMethodDoc(row);
-        if (base::Contains(base::ToUpperUtf8(doc.name), mFilter))
-            return true;
-        else if (base::Contains(base::ToUpperUtf8(doc.desc), mFilter))
+        if (base::Contains(base::ToUpperUtf8(doc.name), mFilter) ||
+            base::Contains(base::ToUpperUtf8(doc.desc), mFilter) ||
+            base::Contains(base::ToUpperUtf8(doc.table), mFilter))
             return true;
         return false;
     }
