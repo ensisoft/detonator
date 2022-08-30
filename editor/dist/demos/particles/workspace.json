@@ -1,0 +1,260 @@
+{
+    "0BT4ANr30T": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.38,
+        "local_emitter_w": 0.38,
+        "local_emitter_x": 0.32,
+        "local_emitter_y": 0.3,
+        "material": "8qJeAKQFtw",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "2JJndZoBDS": {
+        "checked_for_packing": 1
+    },
+    "7D4iRC0ogE": {
+        "checked_for_packing": 1
+    },
+    "8qJeAKQFtw": {
+        "checked_for_packing": 1
+    },
+    "BbEpeqHSYG": {
+        "checked_for_packing": 1
+    },
+    "BkQRl3PzCr": {
+        "checked_for_packing": 1
+    },
+    "BtXKsAOnPr": {
+        "checked_for_packing": 1
+    },
+    "DX5iTPFmEZ": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "8qJeAKQFtw",
+        "transform_height": 73,
+        "transform_rotation": 0,
+        "transform_width": 78,
+        "transform_xpos": 1,
+        "transform_ypos": -1,
+        "use_lifetime": 1
+    },
+    "EJtsMLLYa9": {
+    },
+    "JUOysDXYJL": {
+        "checked_for_packing": 1
+    },
+    "OpgNJAMhhQ": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 38,
+        "transform_rotation": 0,
+        "transform_width": 44,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "R0XaXuWEBU": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.26,
+        "local_emitter_w": 0.25,
+        "local_emitter_x": 0.37,
+        "local_emitter_y": 0.37,
+        "material": "dZDA63fz8X",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "SX0ABkBEq9": {
+        "checked_for_packing": 1
+    },
+    "Xg0GdRiaQU": {
+        "checked_for_packing": 1
+    },
+    "dFl9nHNaNT": {
+    },
+    "dZDA63fz8X": {
+        "checked_for_packing": 1
+    },
+    "nIkywmIbBJ": {
+        "checked_for_packing": 1
+    },
+    "obukJs0rJC": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.01,
+        "local_emitter_w": 0.01,
+        "local_emitter_x": 0.5,
+        "local_emitter_y": 0.5,
+        "material": "EJtsMLLYa9",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "project": {
+        "application_identifier": "3sYD9SAVMDiX",
+        "application_library_lin": "app://libGameEngine.so",
+        "application_library_win": "app://GameEngine.dll",
+        "application_name": "Particles",
+        "application_version": "",
+        "audio_buffer_size": 20,
+        "audio_channels": "Stereo",
+        "audio_sample_rate": 44100,
+        "audio_sample_type": "Float32",
+        "canvas_height": 800,
+        "canvas_mode": "Default",
+        "canvas_width": 1200,
+        "clear_color": "4280492835",
+        "command_line_arguments": "",
+        "config_srgb": true,
+        "debug_draw": false,
+        "debug_font": "",
+        "debug_print_fps": false,
+        "debug_show_fps": false,
+        "debug_show_msg": false,
+        "default_mag_filter": "Linear",
+        "default_min_filter": "Trilinear",
+        "desktop_audio_io_strategy": "Automatic",
+        "enable_audio_pcm_caching": false,
+        "enable_physics": true,
+        "game_script": "game.lua",
+        "game_viewport_height": 800,
+        "game_viewport_width": 1200,
+        "grab_mouse": false,
+        "html5_developer_ui": false,
+        "logging_debug": false,
+        "logging_error": false,
+        "logging_info": false,
+        "logging_warn": false,
+        "mouse_pointer_drawable": "_arrow_cursor",
+        "mouse_pointer_hotspot": {
+            "x": 0,
+            "y": 0
+        },
+        "mouse_pointer_material": "_Silver",
+        "mouse_pointer_size": {
+            "x": 20,
+            "y": 20
+        },
+        "mouse_pointer_units": "Pixels",
+        "mouse_pointer_visible": true,
+        "multisample_sample_count": 4,
+        "num_position_iterations": 3,
+        "num_velocity_iterations": 8,
+        "phys_gravity_x": 0,
+        "phys_gravity_y": 10,
+        "phys_scale_x": 100,
+        "phys_scale_y": 100,
+        "save_window_geometry": false,
+        "ticks_per_second": 1,
+        "updates_per_second": 60,
+        "use_gamehost_process": true,
+        "wasm_audio_io_strategy": "Automatic",
+        "webgl_antialias": true,
+        "webgl_power_preference": "HighPerf",
+        "window_can_resize": true,
+        "window_cursor": false,
+        "window_has_border": true,
+        "window_height": 800,
+        "window_mode": "Windowed",
+        "window_vsync": false,
+        "window_width": 1200,
+        "working_folder": "${workspace}"
+    },
+    "q2YkyQYmdd": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 38,
+        "transform_rotation": 0,
+        "transform_width": 44,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "qOf1KOOSpS": {
+        "checked_for_packing": 1
+    },
+    "vIf7bfadSt": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "8qJeAKQFtw",
+        "transform_height": 38,
+        "transform_rotation": 0,
+        "transform_width": 44,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "w3S1bxiRIU": {
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 30,
+        "transform_rotation": 0,
+        "transform_width": 20,
+        "transform_xpos": -14,
+        "transform_ypos": 77,
+        "use_lifetime": 1
+    },
+    "workspace": {
+        "packing_param_combine_textures": true,
+        "packing_param_copy_html5": true,
+        "packing_param_copy_native": true,
+        "packing_param_delete_prev": true,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
+        "packing_param_max_tex_height": "1024",
+        "packing_param_max_tex_width": "1024",
+        "packing_param_output_dir": "ws://dist",
+        "packing_param_pack_height": "1024",
+        "packing_param_pack_width": "1024",
+        "packing_param_resize_large_textures": true,
+        "packing_param_tex_padding": 2,
+        "packing_param_write_config": true,
+        "packing_param_write_content": true
+    },
+    "y6vxOLdMaI": {
+        "checked_for_packing": 1
+    },
+    "yE2AzTSvif": {
+        "checked_for_packing": 1
+    },
+    "yMhrtzh9Pp": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 10,
+        "transform_rotation": 0,
+        "transform_width": 10,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    }
+}
