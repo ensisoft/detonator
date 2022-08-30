@@ -126,6 +126,18 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
+inline void SetRange(QDoubleSpinBox* spin, double min, double max)
+{
+    QSignalBlocker s(spin);
+    spin->setRange(min, max);
+}
+
+inline void SetRange(QSpinBox* spin, int min, int max)
+{
+    QSignalBlocker s(spin);
+    spin->setRange(min, max);
+}
+
 struct ListItemId {
     QString id;
     ListItemId(QString id) : id(id)
