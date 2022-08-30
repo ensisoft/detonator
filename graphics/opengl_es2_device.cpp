@@ -1717,7 +1717,14 @@ private:
         virtual void Upload(const void* data, size_t bytes, Usage usage) override
         {
             if (data == nullptr || bytes == 0)
+            {
+                if (mBufferSize)
+                    mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
+
+                mBufferSize  = 0;
+                mBufferUsage = usage;
                 return;
+            }
 
             if ((usage != mBufferUsage) || (bytes > mBufferSize))
             {
