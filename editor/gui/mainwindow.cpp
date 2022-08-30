@@ -2090,28 +2090,33 @@ void MainWindow::on_actionProjectPlay_triggered()
     }
 }
 
-void MainWindow::on_btnBandit_clicked()
+void MainWindow::on_btnDemoBandit_clicked()
 {
     LoadDemoWorkspace("demos/bandit");
 }
 
-void MainWindow::on_btnBlast_clicked()
+void MainWindow::on_btnDemoBlast_clicked()
 {
     LoadDemoWorkspace("demos/blast");
 }
-void MainWindow::on_btnBreak_clicked()
+void MainWindow::on_btnDemoBreak_clicked()
 {
     LoadDemoWorkspace("demos/breakout");
 }
-void MainWindow::on_btnPlayground_clicked()
+void MainWindow::on_btnDemoParticles_clicked()
+{
+    LoadDemoWorkspace("demos/particles");
+}
+
+void MainWindow::on_btnDemoPlayground_clicked()
 {
     LoadDemoWorkspace("demos/playground");
 }
-void MainWindow::on_btnUIDemos_clicked()
+void MainWindow::on_btnDemoUI_clicked()
 {
     LoadDemoWorkspace("demos/ui");
 }
-void MainWindow::on_btnDerp_clicked()
+void MainWindow::on_btnDemoDerp_clicked()
 {
     LoadDemoWorkspace("starter/derp");
 }

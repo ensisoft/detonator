@@ -1,0 +1,21 @@
+{
+    "uniforms": [
+        {
+            "name": "kStartColor",
+            "desc": "Start Color",
+            "type": "Color"
+        },
+        {
+            "name": "kEndColor",
+            "desc": "End Color",
+            "type": "Color"
+        }
+    ],
+    "maps": [
+        {
+            "desc": "Mask Texture",
+            "name": "kMask",
+            "type": "Texture2D"
+        }
+    ]
+}
