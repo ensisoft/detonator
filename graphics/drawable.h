@@ -970,10 +970,20 @@ namespace gfx
             SpawnPolicy mode = SpawnPolicy::Maintain;
             // What happens to a particle at the simulation boundary
             BoundaryPolicy boundary = BoundaryPolicy::Clamp;
+            // delay until the particles are spawned after start.
+            float delay = 0.0f;
+            // the maximum time the simulation will ever be alive
+            // regardless of whether there are particles or not.
+            float max_time = std::numeric_limits<float>::max();
+            // the minimum time the simulation will be alive even if
+            // there are no particles.
+            float min_time = 0;
             // the number of particles this engine shall create
             // the behaviour of this parameter depends on the spawn mode.
             float num_particles = 100;
-            // maximum particle lifetime
+            // minimum and maximum particle lifetime.
+            // any particle will have randomly selected lifetime between
+            // the min and max value.
             float min_lifetime = 0.0f;
             float max_lifetime = std::numeric_limits<float>::max();
             // the maximum bounds of travel for each particle.
@@ -1016,10 +1026,13 @@ namespace gfx
         struct InstanceState {
             // the simulation particles.
             std::vector<Particle> particles;
+            // delay until the particles are first initially emitted.
+            float delay = 0.0f;
             // simulation time.
-            float time     = 0.0f;
+            float time = 0.0f;
             // fractional count of new particles being hatched.
             float hatching = 0.0f;
+
         };
 
         KinematicsParticleEngineClass()

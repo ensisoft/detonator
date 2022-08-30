@@ -1734,6 +1734,24 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
     //   Possibly a hybrid solution could be used.
     //   It could also be possible to simulate transform feedback through
     //   texture writes. For example here: https://nullprogram.com/webgl-particles/
+    if (state.time >= mParams.max_time)
+    {
+        state.particles.clear();
+        state.time += dt;
+        return;
+    }
+
+    if (state.time < state.delay)
+    {
+        if (state.time + dt > state.delay)
+        {
+            InitParticles(env, state, state.hatching);
+            state.hatching = 0;
+        }
+        state.time += dt;
+        return;
+    }
+
 
     // update each particle
     for (size_t i=0; i<state.particles.size();)
@@ -1764,13 +1782,19 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
         InitParticles(env, state, num);
         state.hatching -= num;
     }
+    state.time += dt;
 }
 
 // ParticleEngine implementation.
 bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
 {
-    if (mParams.mode == SpawnPolicy::Continuous)
+    if (state.time < mParams.delay)
         return true;
+    else if (state.time < mParams.min_time)
+        return true;
+    else if (state.time > mParams.max_time)
+        return false;
+
     return !state.particles.empty();
 }
 
@@ -1779,9 +1803,12 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
 void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
 {
     state.particles.clear();
-    state.time = 0.0f;
+    state.delay = mParams.delay;
+    state.time  = 0.0f;
     state.hatching = 0.0f;
-    InitParticles(env, state, size_t(mParams.num_particles));
+    if (state.delay != 0.0f)
+        state.hatching = mParams.num_particles;
+    else InitParticles(env, state, size_t(mParams.num_particles));
 }
 
 void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
@@ -1794,6 +1821,9 @@ void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
     data.Write("motion", mParams.motion);
     data.Write("mode", mParams.mode);
     data.Write("boundary", mParams.boundary);
+    data.Write("delay", mParams.delay);
+    data.Write("min_time", mParams.min_time);
+    data.Write("max_time", mParams.max_time);
     data.Write("num_particles", mParams.num_particles);
     data.Write("min_lifetime", mParams.min_lifetime);
     data.Write("max_lifetime", mParams.max_lifetime);
@@ -1840,6 +1870,9 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
     data.Read("motion",                       &ret.mParams.motion);
     data.Read("mode",                         &ret.mParams.mode);
     data.Read("boundary",                     &ret.mParams.boundary);
+    data.Read("delay",                        &ret.mParams.delay);
+    data.Read("min_time",                     &ret.mParams.min_time);
+    data.Read("max_time",                     &ret.mParams.max_time);
     data.Read("num_particles",                &ret.mParams.num_particles);
     data.Read("min_lifetime",                 &ret.mParams.min_lifetime) ;
     data.Read("max_lifetime",                 &ret.mParams.max_lifetime);
