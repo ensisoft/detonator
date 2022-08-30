@@ -400,7 +400,7 @@ void WidgetStyleWidget::SetMaterialColor(const char* key)
     if (auto* widget = mWidget)
     {
         color_widgets::ColorDialog dlg(this);
-        dlg.setAlphaEnabled(false);
+        dlg.setAlphaEnabled(true);
         dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
         if (const auto* material = mStyle->GetMaterialType(widget->GetId() + mSelector + key))
         {

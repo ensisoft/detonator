@@ -789,7 +789,7 @@ void DlgWidgetStyleProperties::SetWidgetColor()
     const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
 
     color_widgets::ColorDialog dlg(this);
-    dlg.setAlphaEnabled(false);
+    dlg.setAlphaEnabled(true);
     dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
     if (const auto* material = mStyle->GetMaterialType(property_key))
     {
