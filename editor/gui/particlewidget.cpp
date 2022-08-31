@@ -344,6 +344,11 @@ ParticleEditorWidget::~ParticleEditorWidget()
     DEBUG("Destroy ParticleEditorWidget");
 }
 
+QString ParticleEditorWidget::GetId() const
+{
+    return GetValue(mUI.ID);
+}
+
 void ParticleEditorWidget::Initialize(const UISettings& settings)
 {
     SetValue(mUI.zoom,        settings.zoom);

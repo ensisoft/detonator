@@ -44,6 +44,7 @@ namespace gui
         ScriptWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ScriptWidget();
 
+        virtual QString GetId() const override;
         virtual bool IsAccelerated() const override
         { return false; }
         virtual bool HasStats() const override

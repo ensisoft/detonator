@@ -440,6 +440,11 @@ UIWidget::~UIWidget()
     DEBUG("Destroy UIWidget");
 }
 
+QString UIWidget::GetId() const
+{
+    return GetValue(mUI.windowID);
+}
+
 void UIWidget::Initialize(const UISettings& settings)
 {
     SetValue(mUI.zoom,          settings.zoom);

@@ -516,6 +516,11 @@ EntityWidget::~EntityWidget()
     DeleteEntityWidget(this);
 }
 
+QString EntityWidget::GetId() const
+{
+    return GetValue(mUI.entityID);
+}
+
 void EntityWidget::Initialize(const UISettings& settings)
 {
     SetValue(mUI.chkSnap,         settings.snap_to_grid);

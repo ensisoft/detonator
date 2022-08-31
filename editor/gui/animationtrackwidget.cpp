@@ -249,6 +249,11 @@ AnimationTrackWidget::~AnimationTrackWidget()
     DeleteTrackWidget(this);
 }
 
+QString AnimationTrackWidget::GetId() const
+{
+    return GetValue(mUI.trackID);
+}
+
 void AnimationTrackWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
