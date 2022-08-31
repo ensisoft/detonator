@@ -179,7 +179,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTemp">
@@ -298,8 +298,11 @@
    <property name="text">
     <string>Pop In</string>
    </property>
+   <property name="toolTip">
+    <string>Pop window back in</string>
+   </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+O</string>
+    <string>Ctrl+Shift+W</string>
    </property>
   </action>
   <action name="actionCut">

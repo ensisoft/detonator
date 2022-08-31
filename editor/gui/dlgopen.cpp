@@ -73,6 +73,16 @@ app::Resource* DlgOpen::GetSelected()
     return &mWorkspace.GetResource(index);
 }
 
+void DlgOpen::SetOpenMode(const QString& mode)
+{
+    SetValue(mUI.cmbOpenMode, mode);
+}
+
+QString DlgOpen::GetOpenMode() const
+{
+    return GetValue(mUI.cmbOpenMode);
+}
+
 void DlgOpen::on_btnAccept_clicked()
 {
     accept();
@@ -131,6 +141,15 @@ bool DlgOpen::eventFilter(QObject* destination, QEvent* event)
 
     const auto* key = static_cast<QKeyEvent*>(event);
     const bool ctrl = key->modifiers() & Qt::ControlModifier;
+    const bool shift = key->modifiers() & Qt::ShiftModifier;
+
+    if (shift)
+    {
+        auto index = mUI.cmbOpenMode->currentIndex();
+        index = math::wrap(0, 1, index + 1);
+        mUI.cmbOpenMode->setCurrentIndex(index);
+        return true;
+    }
 
     int current = mUI.listWidget->currentIndex().row();
     if (current == -1)

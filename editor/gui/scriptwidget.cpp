@@ -2199,9 +2199,9 @@ bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
     // Ctrl+N, Ctrl+P (similar to DlgOpen) don't work here reliable
     // since they are global hot keys which take precedence.
 
-    if (alt && key->key() == Qt::Key_N)
+    if (ctrl && key->key() == Qt::Key_N)
         current = math::wrap(0, count-1, current+1);
-    else if (alt && key->key() == Qt::Key_P)
+    else if (ctrl && key->key() == Qt::Key_P)
         current = math::wrap(0, count-1, current-1);
     else if (key->key() == Qt::Key_Up)
         current = math::wrap(0, count-1, current-1);

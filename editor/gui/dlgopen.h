@@ -35,6 +35,9 @@ namespace gui
 
         app::Resource* GetSelected();
 
+        void SetOpenMode(const QString& mode);
+
+        QString GetOpenMode() const;
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
@@ -46,7 +49,6 @@ namespace gui
         Ui::DlgOpen mUI;
     private:
         app::Workspace& mWorkspace;
-
     };
 } // namespace
 

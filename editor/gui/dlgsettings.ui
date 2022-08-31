@@ -39,7 +39,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Window mode</string>
+               <string>Window open mode</string>
               </property>
              </widget>
             </item>
