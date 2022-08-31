@@ -225,7 +225,7 @@ void MainWindow::LoadSettings()
     mSettings.shader_editor_executable = "/usr/bin/gedit";
     mSettings.script_editor_executable = "/usr/bin/gedit";
     mSettings.audio_editor_executable  = "/usr/bin/audacity";
-    mSettings.python_executable = "/usr/bin/python";
+    mSettings.python_executable        = "/usr/bin/python";
     // no emsdk selected, user has to do that :(
 #elif defined(WINDOWS_OS)
     mSettings.image_editor_executable  = "mspaint.exe";
@@ -269,15 +269,21 @@ void MainWindow::LoadSettings()
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     TextEditor::Settings editor_settings;
-    settings.GetValue("TextEditor", "font", &editor_settings.font_description);
-    settings.GetValue("TextEditor", "font_size", &editor_settings.font_size);
-    settings.GetValue("TextEditor", "theme", &editor_settings.theme);
-    settings.GetValue("TextEditor", "show_line_numbers", &editor_settings.show_line_numbers);
-    settings.GetValue("TextEditor", "highlight_syntax", &editor_settings.highlight_syntax);
+    settings.GetValue("TextEditor", "font",                   &editor_settings.font_description);
+    settings.GetValue("TextEditor", "font_size",              &editor_settings.font_size);
+    settings.GetValue("TextEditor", "theme",                  &editor_settings.theme);
+    settings.GetValue("TextEditor", "show_line_numbers",      &editor_settings.show_line_numbers);
+    settings.GetValue("TextEditor", "highlight_syntax",       &editor_settings.highlight_syntax);
     settings.GetValue("TextEditor", "highlight_current_line", &editor_settings.highlight_current_line);
-    settings.GetValue("TextEditor", "insert_spaces", &editor_settings.insert_spaces);
-    settings.GetValue("TextEditor", "tab_spaces", &editor_settings.tab_spaces);
+    settings.GetValue("TextEditor", "insert_spaces",          &editor_settings.insert_spaces);
+    settings.GetValue("TextEditor", "tab_spaces",             &editor_settings.tab_spaces);
     TextEditor::SetDefaultSettings(editor_settings);
+
+    ScriptWidget::Settings script_widget_settings;
+    settings.GetValue("ScriptWidget", "lua_formatter_exec", &script_widget_settings.lua_formatter_exec);
+    settings.GetValue("ScriptWidget", "lua_formatter_args", &script_widget_settings.lua_formatter_args);
+    settings.GetValue("ScriptWidget", "lua_format_on_save", &script_widget_settings.lua_format_on_save);
+    ScriptWidget::SetDefaultSettings(script_widget_settings);
 
     QStyle* style = QApplication::setStyle(mSettings.style_name);
     if (style == nullptr) {
@@ -1716,13 +1722,16 @@ void MainWindow::on_actionSettings_triggered()
     const QString current_style = mSettings.style_name;
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
+    ScriptWidget::Settings script_widget_settings;
+    ScriptWidget::GetDefaultSettings(&script_widget_settings);
 
-    DlgSettings dlg(this, mSettings, editor_settings, mUISettings);
+    DlgSettings dlg(this, mSettings, editor_settings, script_widget_settings, mUISettings);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
     SaveSettings();
 
+    ScriptWidget::SetDefaultSettings(script_widget_settings);
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
@@ -2593,15 +2602,19 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "vsync", mSettings.vsync);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
-    settings.SetValue("TextEditor", "font", editor_settings.font_description);
-    settings.SetValue("TextEditor", "font_size", editor_settings.font_size);
-    settings.SetValue("TextEditor", "theme", editor_settings.theme);
-    settings.SetValue("TextEditor", "show_line_numbers", editor_settings.show_line_numbers);
-    settings.SetValue("TextEditor", "highlight_syntax", editor_settings.highlight_syntax);
+    settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
+    settings.SetValue("TextEditor", "font_size",              editor_settings.font_size);
+    settings.SetValue("TextEditor", "theme",                  editor_settings.theme);
+    settings.SetValue("TextEditor", "show_line_numbers",      editor_settings.show_line_numbers);
+    settings.SetValue("TextEditor", "highlight_syntax",       editor_settings.highlight_syntax);
     settings.SetValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
-    settings.SetValue("TextEditor", "insert_spaces", editor_settings.insert_spaces);
-    settings.SetValue("TextEditor", "tab_spaces", editor_settings.tab_spaces);
-
+    settings.SetValue("TextEditor", "insert_spaces",          editor_settings.insert_spaces);
+    settings.SetValue("TextEditor", "tab_spaces",             editor_settings.tab_spaces);
+    ScriptWidget::Settings script_widget_settings;
+    ScriptWidget::GetDefaultSettings(&script_widget_settings);
+    settings.SetValue("ScriptWidget", "lua_formatter_exec", script_widget_settings.lua_formatter_exec);
+    settings.SetValue("ScriptWidget", "lua_formatter_args", script_widget_settings.lua_formatter_args);
+    settings.SetValue("ScriptWidget", "lua_format_on_save", script_widget_settings.lua_format_on_save);
     if (settings.Save())
         INFO("Saved application settings.");
     else WARN("Failed to save application settings.");

@@ -39,6 +39,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/app/utility.h"
+#include "editor/app/process.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/scriptwidget.h"
 #include "engine/lua.h"
@@ -1451,6 +1452,9 @@ QString ParseTypeCombo(const QString& str)
 
 namespace gui
 {
+// static
+ScriptWidget::Settings ScriptWidget::mSettings;
+
 class ScriptWidget::TableModel : public QAbstractTableModel
 {
 public:
@@ -1529,6 +1533,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.setupUi(this);
     mUI.actionFindText->setShortcut(QKeySequence::Find);
 
+    mUI.formatter->setVisible(false);
     mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
@@ -1821,7 +1826,7 @@ void ScriptWidget::Save()
     on_actionSave_triggered();
 }
 
-bool ScriptWidget::SaveState(Settings& settings) const
+bool ScriptWidget::SaveState(gui::Settings& settings) const
 {
     // todo: if there are changes that have not been saved
     // to the file they're then lost. options are to either
@@ -1840,7 +1845,7 @@ bool ScriptWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Script", mUI.tableView);
     return true;
 }
-bool ScriptWidget::LoadState(const Settings& settings)
+bool ScriptWidget::LoadState(const gui::Settings& settings)
 {
     settings.GetValue("Script", "resource_id", &mResourceID);
     settings.GetValue("Script", "resource_name", &mResourceName);
@@ -1881,6 +1886,7 @@ bool ScriptWidget::OnEscape()
 void ScriptWidget::on_actionSave_triggered()
 {
     QString filename = mFilename;
+
     if (filename.isEmpty())
     {
         const auto& luadir = app::JoinPath(mWorkspace->GetDir(), "lua");
@@ -1891,27 +1897,81 @@ void ScriptWidget::on_actionSave_triggered()
             return;
         filename = file;
     }
-
-    const QString& text = mDocument.toPlainText();
-    QFile file;
-    file.setFileName(filename);
-    file.open(QIODevice::WriteOnly);
-    if (!file.isOpen())
+    // save file
     {
-        ERROR("Failed to open '%1' for writing. (%2)", filename, file.error());
-        QMessageBox msg(this);
-        msg.setText(tr("There was an error saving the file.\n%1").arg(file.errorString()));
-        msg.setIcon(QMessageBox::Critical);
-        msg.exec();
-        return;
+        const QString& text = mDocument.toPlainText();
+        QFile file;
+        file.setFileName(filename);
+        file.open(QIODevice::WriteOnly);
+        if (!file.isOpen())
+        {
+            ERROR("Failed to open '%1' for writing. (%2)", filename, file.error());
+            QMessageBox msg(this);
+            msg.setText(tr("There was an error saving the file.\n%1").arg(file.errorString()));
+            msg.setIcon(QMessageBox::Critical);
+            msg.exec();
+            return;
+        }
+        QTextStream stream(&file);
+        stream.setCodec("UTF-8");
+        stream << text;
+        INFO("Saved Lua script '%1'", filename);
+        NOTE("Saved Lua script '%1'", filename);
+        mFilename = filename;
+        mFileHash = qHash(text);
     }
-    QTextStream stream(&file);
-    stream.setCodec("UTF-8");
-    stream << text;
-    INFO("Saved Lua script '%1'", filename);
-    NOTE("Saved Lua script '%1'", filename);
-    mFilename = filename;
-    mFileHash = qHash(text);
+
+    if (mSettings.lua_format_on_save)
+    {
+        QTextCursor cursor = mUI.code->textCursor();
+        auto cursor_position = cursor.position();
+        auto scroll_position = mUI.code->verticalScrollBar()->value();
+
+        QSignalBlocker blocker(&mWatcher);
+        QString exec = mSettings.lua_formatter_exec;
+        QString args = mSettings.lua_formatter_args;
+        QStringList arg_list;
+        QStringList tokens = args.split(" ", Qt::SkipEmptyParts);
+        for (auto& token : tokens)
+        {
+            token.replace("${file}", mFilename);
+            token.replace("${install-dir}", app::GetAppInstFilePath(""));
+            arg_list << token;
+        }
+        exec.replace("${install-dir}", app::GetAppInstFilePath(""));
+
+        QStringList stdout_buffer;
+        QStringList stderr_buffer;
+        if (!app::Process::RunAndCapture(exec, "", arg_list, &stdout_buffer, &stderr_buffer))
+        {
+            ERROR("Failed to run Lua code formatter.");
+        }
+        else
+        {
+            for (const auto& line : stdout_buffer)
+                DEBUG("stdout: %1", line);
+
+            QString message;
+            message.append(stderr_buffer.join("\n"));
+            message.append(stdout_buffer.join("\n"));
+            if (!message.isEmpty())
+            {
+                mUI.formatter->setVisible(true);
+                mUI.luaFormatStdErr->setPlainText(message);
+            }
+            else
+            {
+                mUI.formatter->setVisible(false);
+            }
+            LoadDocument(mFilename);
+            cursor = mUI.code->textCursor();
+            cursor.setPosition(cursor_position);
+            mUI.code->setTextCursor(cursor);
+            mUI.code->verticalScrollBar()->setValue(scroll_position);
+            //mUI.code->ensureCursorVisible();
+        }
+    }
+
     // start watching this file if it wasn't being watched before.
     mWatcher.addPath(mFilename);
 
@@ -2172,6 +2232,7 @@ void ScriptWidget::keyPressEvent(QKeyEvent *key)
        (key->key() == Qt::Key_G && key->modifiers() & Qt::ControlModifier))
     {
         mUI.find->setVisible(false);
+        mUI.formatter->setVisible(false);
         mUI.code->setFocus();
         return;
     }
@@ -2214,7 +2275,9 @@ bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
         current = math::wrap(0, count-1, current+1);
     else return false;
 
-    model->setCurrentIndex(mTableModel->index(current, 0),
+    const auto index = selection.isEmpty() ? 0 : current;
+
+    model->setCurrentIndex(mTableModel->index(index, 0),
                            QItemSelectionModel::SelectionFlag::ClearAndSelect |
                            QItemSelectionModel::SelectionFlag::Rows);
     return true;
@@ -2252,6 +2315,17 @@ void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelect
         mUI.textBrowser->scrollToAnchor(name);
         //DEBUG("Scroll to anchor. [anchor='%1']", name);
     }
+}
+
+// static
+void ScriptWidget::SetDefaultSettings(const Settings& settings)
+{
+    mSettings = settings;
+}
+// static
+void ScriptWidget::GetDefaultSettings(Settings* settings)
+{
+    *settings = mSettings;
 }
 
 } // namespace
