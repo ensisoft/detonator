@@ -172,7 +172,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
 {
     mUI.setupUi(this);
     mUI.actionExit->setShortcut(QKeySequence::Quit);
-    mUI.actionWindowClose->setShortcut(QKeySequence::Close);
+    //mUI.actionWindowClose->setShortcut(QKeySequence::Close); // using ours now
     mUI.actionWindowNext->setShortcut(QKeySequence::Forward);
     mUI.actionWindowPrev->setShortcut(QKeySequence::Back);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
@@ -1871,6 +1871,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
         return;
 
     DlgOpen dlg(QApplication::activeWindow(), *mWorkspace);
+    dlg.SetOpenMode(mSettings.default_open_win_or_tab);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1889,7 +1890,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     }
     if (!FocusWidget(resource->GetId()))
     {
-        const auto new_window = mSettings.default_open_win_or_tab == "Window";
+        const auto new_window = dlg.GetOpenMode() == "Window";
         ShowWidget(MakeWidget(resource->GetType(), resource), new_window);
     }
 }
@@ -1900,10 +1901,11 @@ void MainWindow::on_actionNewResource_triggered()
         return;
 
     DlgNew dlg(QApplication::activeWindow());
+    dlg.SetOpenMode(mSettings.default_open_win_or_tab);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    const auto new_window = mSettings.default_open_win_or_tab == "Window";
+    const auto new_window = dlg.GetOpenMode()  == "Window";
     ShowWidget(MakeWidget(dlg.GetType() ), new_window);
 }
 

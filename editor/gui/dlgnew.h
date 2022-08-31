@@ -25,6 +25,7 @@
 
 #include "editor/app/workspace.h"
 #include "editor/app/resource.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -38,6 +39,16 @@ namespace gui
         }
         app::Resource::Type GetType() const
         { return mSelection; }
+
+        void SetOpenMode(const QString& mode)
+        {
+            SetValue(mUI.cmbOpenMode, mode);
+        }
+
+        QString GetOpenMode() const
+        {
+            return GetValue(mUI.cmbOpenMode);
+        }
 
     private slots:
         void on_btnMaterial_clicked()

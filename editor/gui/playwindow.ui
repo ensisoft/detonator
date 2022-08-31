@@ -262,7 +262,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1053</width>
-     <height>26</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -439,6 +439,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="toolTip">
     <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionViewStatusbar">

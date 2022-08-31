@@ -421,7 +421,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     mAppEventLog.setSourceModel(mLogger->GetModel());
 
     mUI.setupUi(this);
-    mUI.actionClose->setShortcut(QKeySequence::Close);
+    //mUI.actionClose->setShortcut(QKeySequence::Close); // use ours
     mUI.log->setModel(&mAppEventLog);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
     mUI.problem->setVisible(false);

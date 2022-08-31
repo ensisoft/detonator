@@ -47,6 +47,20 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QComboBox" name="cmbOpenMode">
+       <item>
+        <property name="text">
+         <string>Window</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tab</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -80,6 +94,7 @@
  <tabstops>
   <tabstop>filter</tabstop>
   <tabstop>listWidget</tabstop>
+  <tabstop>cmbOpenMode</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

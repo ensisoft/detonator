@@ -1612,7 +1612,7 @@
     <string>Edit Resource ...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
   <action name="actionNewResource">
@@ -1624,7 +1624,7 @@
     <string>New ...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+N</string>
+    <string>Ctrl+Shift+N</string>
    </property>
   </action>
   <action name="actionProjectSettings">
@@ -1668,8 +1668,11 @@
    <property name="text">
     <string>Pop Out</string>
    </property>
+   <property name="toolTip">
+    <string>Pop window out</string>
+   </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+O</string>
+    <string>Ctrl+Shift+W</string>
    </property>
   </action>
   <action name="actionDuplicateResource">
