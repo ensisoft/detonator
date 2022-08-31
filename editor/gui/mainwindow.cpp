@@ -1718,6 +1718,8 @@ void MainWindow::on_actionSettings_triggered()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
+    SaveSettings();
+
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
