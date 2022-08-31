@@ -422,13 +422,17 @@ void MainWindow::LoadDemoWorkspace(const QString& which)
 
 bool MainWindow::LoadWorkspace(const QString& dir)
 {
+    ASSERT(!mWorkspace);
+
     auto workspace = std::make_unique<app::Workspace>(dir);
     if (!workspace->LoadWorkspace())
         return false;
 
-    gfx::SetResourceLoader(workspace.get());
+    mWorkspace = std::move(workspace);
 
-    const auto& settings = workspace->GetProjectSettings();
+    gfx::SetResourceLoader(mWorkspace.get());
+
+    const auto& settings = mWorkspace->GetProjectSettings();
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
     format.setSamples(settings.multisample_sample_count);
@@ -453,8 +457,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     unsigned show_resource_bits = ~0u;
     QStringList session;
-    workspace->GetUserProperty("session_files", &session);
-    workspace->GetUserProperty("show_resource_bits", &show_resource_bits);
+    mWorkspace->GetUserProperty("session_files", &session);
+    mWorkspace->GetUserProperty("show_resource_bits", &show_resource_bits);
     for (const auto& file : session)
     {
         Settings settings(file);
@@ -468,23 +472,23 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         const auto& id    = settings.GetValue("MainWindow", "widget_id", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
-            widget = new MaterialWidget(workspace.get());
+            widget = new MaterialWidget(mWorkspace.get());
         else if (klass == ParticleEditorWidget::staticMetaObject.className())
-            widget = new ParticleEditorWidget(workspace.get());
+            widget = new ParticleEditorWidget(mWorkspace.get());
         else if (klass == ShapeWidget::staticMetaObject.className())
-            widget = new ShapeWidget(workspace.get());
+            widget = new ShapeWidget(mWorkspace.get());
         else if (klass == AnimationTrackWidget::staticMetaObject.className())
-            widget = new AnimationTrackWidget(workspace.get());
+            widget = new AnimationTrackWidget(mWorkspace.get());
         else if (klass == EntityWidget::staticMetaObject.className())
-            widget = new EntityWidget(workspace.get());
+            widget = new EntityWidget(mWorkspace.get());
         else if (klass == SceneWidget::staticMetaObject.className())
-            widget = new SceneWidget(workspace.get());
+            widget = new SceneWidget(mWorkspace.get());
         else if (klass == ScriptWidget::staticMetaObject.className())
-            widget = new ScriptWidget(workspace.get());
+            widget = new ScriptWidget(mWorkspace.get());
         else if (klass == UIWidget::staticMetaObject.className())
-            widget = new UIWidget(workspace.get());
+            widget = new UIWidget(mWorkspace.get());
         else if (klass == AudioWidget::staticMetaObject.className())
-            widget = new AudioWidget(workspace.get());
+            widget = new AudioWidget(mWorkspace.get());
         else BUG("Unhandled widget type.");
 
         if (!widget->LoadState(settings))
@@ -514,14 +518,13 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         DEBUG("Loaded widget '%1'", widget->windowTitle());
     }
 
-    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(workspace->GetName()));
-    SetValue(mUI.grpHelp, workspace->GetName());
+    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
+    SetValue(mUI.grpHelp, mWorkspace->GetName());
     mUI.workspace->setModel(&mWorkspaceProxy);
     mUI.actionSaveWorkspace->setEnabled(true);
     mUI.actionCloseWorkspace->setEnabled(true);
     mUI.actionSelectResourceForEditing->setEnabled(true);
     mUI.menuWorkspace->setEnabled(true);
-    mWorkspace = std::move(workspace);
     mWorkspaceProxy.SetModel(mWorkspace.get());
     mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
     mWorkspaceProxy.SetShowBits(show_resource_bits);
@@ -2208,7 +2211,7 @@ void MainWindow::RefreshUI()
         {
             MainWidget* widget = child->TakeWidget();
             // save the child window geometry for later "pop out"
-            mWorkspace->SetUserProperty(widget->GetId(), child->saveGeometry());
+            mWorkspace->SetUserProperty("_child_window_geometry_" + widget->GetId(), child->saveGeometry());
 
             child->close();
             // careful about not fucking up the iteration of this loop
@@ -2645,15 +2648,23 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         ChildWindow* child = new ChildWindow(widget, &mClipboard);
         child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
 
-        // resize and relocate on the desktop, by default the window seems
-        // to be at a position that requires it to be immediately used and
-        // resize by the user. ugh
-        const auto width  = std::max((int)(this->width() * 0.8), child->width());
-        const auto height = std::max((int)(this->height() *0.8), child->height());
-        const auto xpos = x() + (this->width() - width) / 2;
-        const auto ypos = y() + (this->height() - height) / 2;
-        child->resize(width, height);
-        child->move(xpos, ypos);
+        QByteArray geometry;
+        if (mWorkspace->GetUserProperty("_child_window_geometry_" + widget->GetId(), &geometry))
+        {
+            child->restoreGeometry(geometry);
+        }
+        else
+        {
+            // resize and relocate on the desktop, by default the window seems
+            // to be at a position that requires it to be immediately used and
+            // resize by the user. ugh
+            const auto width = std::max((int) (this->width() * 0.8), child->width());
+            const auto height = std::max((int) (this->height() * 0.8), child->height());
+            const auto xpos = x() + (this->width() - width) / 2;
+            const auto ypos = y() + (this->height() - height) / 2;
+            child->resize(width, height);
+            child->move(xpos, ypos);
+        }
         // showing the widget *after* resize/move might produce incorrect
         // results since apparently the window's dimensions are not fully
         // know until it has been show (presumably some layout is done)
