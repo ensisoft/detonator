@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     {
         // prefix with a . to make this a "hidden" dir
         // which is the convention on Linux
-        app::InitializeAppHome("." APP_TITLE);
+        app::InitializeAppHome(".Gamestudio Editor");
 
         // set the logger object for the subsystem to use, we'll
         // direct all this to the terminal for now.
