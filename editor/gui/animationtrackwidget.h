@@ -60,6 +60,7 @@ namespace gui
        ~AnimationTrackWidget();
 
         // MainWidget implementation.
+        virtual QString GetId() const override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;

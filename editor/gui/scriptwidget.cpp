@@ -1748,6 +1748,11 @@ ScriptWidget::~ScriptWidget()
     DEBUG("Destroy ScriptWidget");
 }
 
+QString ScriptWidget::GetId() const
+{
+    return mResourceID;
+}
+
 bool ScriptWidget::CanTakeAction(Actions action, const Clipboard*) const
 {
     // canPaste seems to be broken??

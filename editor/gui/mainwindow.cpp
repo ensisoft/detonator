@@ -486,7 +486,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         else if (klass == AudioWidget::staticMetaObject.className())
             widget = new AudioWidget(workspace.get());
         else BUG("Unhandled widget type.");
-        widget->SetId(id);
+
         if (!widget->LoadState(settings))
         {
             WARN("Widget '%1 failed to load state.", widget->windowTitle());
@@ -2692,14 +2692,8 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource* resource)
 {
     auto* widget = CreateWidget(type, mWorkspace.get(), resource);
-    if (resource)
-    {
-        widget->SetId(resource->GetId());
-    }
-    else
-    {
+    if (!resource)
         widget->Initialize(mUISettings);
-    }
     return widget;
 }
 

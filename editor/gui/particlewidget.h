@@ -50,6 +50,7 @@ namespace gui
         ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ParticleEditorWidget();
 
+        virtual QString GetId() const override;
         virtual void Initialize(const UISettings& settings) override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;

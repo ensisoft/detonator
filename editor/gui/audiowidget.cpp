@@ -1157,6 +1157,11 @@ AudioWidget::~AudioWidget()
     ClearList(mUI.elements);
 }
 
+QString AudioWidget::GetId() const
+{
+    return GetValue(mUI.graphID);
+}
+
 bool AudioWidget::IsAccelerated() const
 { return false; }
 

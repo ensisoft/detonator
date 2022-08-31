@@ -66,6 +66,8 @@ namespace gui
             float zoom = 1.0f;
         };
 
+        virtual QString GetId() const = 0;
+
         // Initialize the widget default UI settings.
         virtual void Initialize(const UISettings& settings)
         {}
@@ -219,11 +221,6 @@ namespace gui
         { return false; }
         virtual bool HasStats() const
         { return true; }
-
-        void SetId(QString id)
-        { mId = id;}
-        QString GetId() const
-        { return mId; }
 
     signals:
         // Request to have the widget (and the MainWindow) refreshed immediately.

@@ -150,6 +150,11 @@ ShapeWidget::~ShapeWidget()
     DEBUG("Destroy PolygonWidget");
 }
 
+QString ShapeWidget::GetId() const
+{
+    return GetValue(mUI.ID);
+}
+
 void ShapeWidget::Initialize(const UISettings& settings)
 {
     SetValue(mUI.cmbGrid,     settings.grid);

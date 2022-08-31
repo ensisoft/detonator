@@ -411,6 +411,11 @@ SceneWidget::~SceneWidget()
     DEBUG("Destroy SceneWidget");
 }
 
+QString SceneWidget::GetId() const
+{
+    return GetValue(mUI.ID);
+}
+
 void SceneWidget::Initialize(const UISettings& settings)
 {
     SetValue(mUI.chkSnap,         settings.snap_to_grid);
