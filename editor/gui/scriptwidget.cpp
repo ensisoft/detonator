@@ -1729,6 +1729,8 @@ R"(<div class="member" name="%1" id="%2">
     stream.flush();
     //mUI.textEdit->setHtml(html);
     mUI.textBrowser->setHtml(html);
+
+    QTimer::singleShot(10, this, &ScriptWidget::SetInitialFocus);
 }
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resource) : ScriptWidget(workspace)
@@ -2315,6 +2317,14 @@ void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelect
         mUI.textBrowser->scrollToAnchor(name);
         //DEBUG("Scroll to anchor. [anchor='%1']", name);
     }
+}
+
+void ScriptWidget::SetInitialFocus()
+{
+    QTextCursor cursor = mUI.code->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    mUI.code->setTextCursor(cursor);
+    mUI.code->setFocus();
 }
 
 // static

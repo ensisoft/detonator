@@ -163,26 +163,65 @@ void TextEditor::keyPressEvent(QKeyEvent* key)
         this->insertPlainText("    ");
         return;
     }
-    // leave the emacs type keybindings for now.
-    // they'd stomp over the default key handling in the QPlainTextEdit
-    // and also collide with the top level keyboard shortcuts.
-    /*
-    if (key->key() == Qt::Key_N && key->modifiers() & Qt::ControlModifier)
+
+    const auto ctrl = key->modifiers() & Qt::ControlModifier;
+    const auto alt  = key->modifiers() & Qt::AltModifier;
+    const auto code = key->key();
+
+    if (ctrl && code == Qt::Key_N)
     {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::MoveOperation::Down);
         setTextCursor(cursor);
-        return;
     }
-    else if (key->key() == Qt::Key_P && key->modifiers() & Qt::ControlModifier)
+    else if (ctrl && code == Qt::Key_P)
     {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::MoveOperation::Up);
         setTextCursor(cursor);
-        return;
     }
-    */
-    QPlainTextEdit::keyPressEvent(key);
+    else if (ctrl && code == Qt::Key_A)
+    {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::MoveOperation::StartOfLine);
+        setTextCursor(cursor);
+    }
+    else if (ctrl && code == Qt::Key_E)
+    {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::MoveOperation::EndOfLine);
+        setTextCursor(cursor);
+    }
+    else if (ctrl && code == Qt::Key_K)
+    {
+        QTextCursor cursor = textCursor();
+        cursor.beginEditBlock();
+        cursor.movePosition(QTextCursor::MoveOperation::StartOfLine, QTextCursor::MoveMode::MoveAnchor);
+        cursor.movePosition(QTextCursor::MoveOperation::EndOfLine, QTextCursor::MoveMode::KeepAnchor);
+        cursor.removeSelectedText();
+        cursor.endEditBlock();
+    }
+    else if (alt && code == Qt::Key_V)
+    {
+        QTextCursor cursor = textCursor();
+        for (int i=0; i<20; ++i)
+        {
+            cursor.movePosition(QTextCursor::MoveOperation::Up);
+            setTextCursor(cursor);
+        }
+    }
+    else if (ctrl && code == Qt::Key_V)
+    {
+        QTextCursor cursor = textCursor();
+        for (int i=0; i<20; ++i)
+        {
+            cursor.movePosition(QTextCursor::MoveOperation::Down);
+            setTextCursor(cursor);
+        }
+        cursor.movePosition(QTextCursor::MoveOperation::NextBlock);
+        setTextCursor(cursor);
+
+    } else  QPlainTextEdit::keyPressEvent(key);
 }
 
 void TextEditor::HighlightCurrentLine()

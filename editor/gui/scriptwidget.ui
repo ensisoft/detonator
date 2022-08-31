@@ -484,6 +484,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>code</tabstop>
   <tabstop>findText</tabstop>
   <tabstop>replaceText</tabstop>
   <tabstop>findBackwards</tabstop>
@@ -493,7 +494,9 @@ p, li { white-space: pre-wrap; }
   <tabstop>btnReplaceNext</tabstop>
   <tabstop>btnReplaceAll</tabstop>
   <tabstop>btnFindClose</tabstop>
-  <tabstop>code</tabstop>
+  <tabstop>btnAcceptReload</tabstop>
+  <tabstop>btnRejectReload</tabstop>
+  <tabstop>luaFormatStdErr</tabstop>
   <tabstop>filter</tabstop>
   <tabstop>tableView</tabstop>
   <tabstop>textBrowser</tabstop>
