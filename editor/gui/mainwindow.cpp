@@ -218,7 +218,7 @@ void MainWindow::closeWidget(MainWidget* widget)
     mUI.mainTab->removeTab(index);
 }
 
-void MainWindow::loadState()
+void MainWindow::LoadSettings()
 {
 #if defined(POSIX_OS)
     mSettings.image_editor_executable  = "/usr/bin/gimp";
@@ -236,43 +236,34 @@ void MainWindow::loadState()
     // emsdk must be selected in any case.
     mSettings.python_executable = app::GetAppInstFilePath("python/python.exe");
 #endif
-
-    // Load master settings.
     Settings settings("Ensisoft", "Gamestudio Editor");
-
-    const auto log_bits       = settings.GetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
-    const auto window_xdim    = settings.GetValue("MainWindow", "width", width());
-    const auto window_ydim    = settings.GetValue("MainWindow", "height", height());
-    const auto window_xpos    = settings.GetValue("MainWindow", "xpos", x());
-    const auto window_ypos    = settings.GetValue("MainWindow", "ypos", y());
-    const auto show_statbar   = settings.GetValue("MainWindow", "show_statusbar", true);
-    const auto show_toolbar   = settings.GetValue("MainWindow", "show_toolbar", true);
-    const auto show_eventlog  = settings.GetValue("MainWindow", "show_event_log", true);
-    const auto show_workspace = settings.GetValue("MainWindow", "show_workspace", true);
-    const auto& dock_state    = settings.GetValue("MainWindow", "toolbar_and_dock_state", QByteArray());
-    settings.GetValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
-    settings.GetValue("Settings", "image_editor_executable", &mSettings.image_editor_executable);
-    settings.GetValue("Settings", "image_editor_arguments", &mSettings.image_editor_arguments);
-    settings.GetValue("Settings", "shader_editor_executable", &mSettings.shader_editor_executable);
-    settings.GetValue("Settings", "shader_editor_arguments", &mSettings.shader_editor_arguments);
-    settings.GetValue("Settings", "script_editor_executable", &mSettings.script_editor_executable);
-    settings.GetValue("Settings", "script_editor_arguments", &mSettings.script_editor_arguments);
-    settings.GetValue("Settings", "audio_editor_executable", &mSettings.audio_editor_executable);
-    settings.GetValue("Settings", "audio_editor_arguments", &mSettings.audio_editor_arguments);
-    settings.GetValue("Settings", "default_open_win_or_tab", &mSettings.default_open_win_or_tab);
-    settings.GetValue("Settings", "style_name", &mSettings.style_name);
+    if (!settings.Load())
+    {
+        ERROR("Failed to load application settings.");
+        return;
+    }
+    settings.GetValue("Settings", "image_editor_executable",    &mSettings.image_editor_executable);
+    settings.GetValue("Settings", "image_editor_arguments",     &mSettings.image_editor_arguments);
+    settings.GetValue("Settings", "shader_editor_executable",   &mSettings.shader_editor_executable);
+    settings.GetValue("Settings", "shader_editor_arguments",    &mSettings.shader_editor_arguments);
+    settings.GetValue("Settings", "script_editor_executable",   &mSettings.script_editor_executable);
+    settings.GetValue("Settings", "script_editor_arguments",    &mSettings.script_editor_arguments);
+    settings.GetValue("Settings", "audio_editor_executable",    &mSettings.audio_editor_executable);
+    settings.GetValue("Settings", "audio_editor_arguments",     &mSettings.audio_editor_arguments);
+    settings.GetValue("Settings", "default_open_win_or_tab",    &mSettings.default_open_win_or_tab);
+    settings.GetValue("Settings", "style_name",                 &mSettings.style_name);
     settings.GetValue("Settings", "save_automatically_on_play", &mSettings.save_automatically_on_play);
-    settings.GetValue("Settings", "python_executable", &mSettings.python_executable);
-    settings.GetValue("Settings", "emsdk", &mSettings.emsdk);
-    settings.GetValue("Settings", "clear_color", &mSettings.clear_color);
-    settings.GetValue("Settings", "grid_color", &mSettings.grid_color);
-    settings.GetValue("Settings", "default_grid", (unsigned*)&mUISettings.grid);
-    settings.GetValue("Settings", "default_zoom", &mUISettings.zoom);
-    settings.GetValue("Settings", "snap_to_grid", &mUISettings.snap_to_grid);
-    settings.GetValue("Settings", "show_viewport", &mUISettings.show_viewport);
-    settings.GetValue("Settings", "show_origin", &mUISettings.show_origin);
-    settings.GetValue("Settings", "show_grid", &mUISettings.show_grid);
-    settings.GetValue("Settings", "vsync", &mSettings.vsync);
+    settings.GetValue("Settings", "python_executable",          &mSettings.python_executable);
+    settings.GetValue("Settings", "emsdk",                      &mSettings.emsdk);
+    settings.GetValue("Settings", "clear_color",                &mSettings.clear_color);
+    settings.GetValue("Settings", "grid_color",                 &mSettings.grid_color);
+    settings.GetValue("Settings", "default_grid",               (unsigned*)&mUISettings.grid);
+    settings.GetValue("Settings", "default_zoom",               &mUISettings.zoom);
+    settings.GetValue("Settings", "snap_to_grid",               &mUISettings.snap_to_grid);
+    settings.GetValue("Settings", "show_viewport",              &mUISettings.show_viewport);
+    settings.GetValue("Settings", "show_origin",                &mUISettings.show_origin);
+    settings.GetValue("Settings", "show_grid",                  &mUISettings.show_grid);
+    settings.GetValue("Settings", "vsync",                      &mSettings.vsync);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
@@ -295,6 +286,30 @@ void MainWindow::loadState()
         QApplication::setPalette(style->standardPalette());
         DEBUG("Application style set to '%1'", mSettings.style_name);
     }
+    DEBUG("Loaded application settings.");
+}
+
+
+void MainWindow::LoadState()
+{
+    const auto& file = app::GetAppHomeFilePath("state.json");
+    Settings settings(file);
+    if (!settings.Load())
+    {
+        ERROR("Failed to load application state.");
+        return;
+    }
+    const auto log_bits       = settings.GetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
+    const auto window_xdim    = settings.GetValue("MainWindow", "width", width());
+    const auto window_ydim    = settings.GetValue("MainWindow", "height", height());
+    const auto window_xpos    = settings.GetValue("MainWindow", "xpos", x());
+    const auto window_ypos    = settings.GetValue("MainWindow", "ypos", y());
+    const auto show_statbar   = settings.GetValue("MainWindow", "show_statusbar", true);
+    const auto show_toolbar   = settings.GetValue("MainWindow", "show_toolbar", true);
+    const auto show_eventlog  = settings.GetValue("MainWindow", "show_event_log", true);
+    const auto show_workspace = settings.GetValue("MainWindow", "show_workspace", true);
+    const auto& dock_state    = settings.GetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
+    settings.GetValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
 
     mEventLog.SetShowBits(log_bits);
     mEventLog.invalidate();
@@ -356,8 +371,7 @@ void MainWindow::loadState()
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("There was a problem loading the previous workspace."
-                                        "\n'%1'\n"
+        msg.setText(tr("There was a problem loading the previous workspace.\n\n"
                         "See the application log for more details.").arg(workspace));
         msg.exec();
     }
@@ -2471,6 +2485,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     event->ignore();
 
+    SaveSettings();
+
     // try to perform an orderly shutdown.
     // first save everything and only if that is successful
     // (or the user don't care) we then close the workspace
@@ -2540,24 +2556,9 @@ void MainWindow::BuildRecentWorkspacesMenu()
     }
 }
 
-bool MainWindow::SaveState()
+void MainWindow::SaveSettings()
 {
     Settings settings("Ensisoft", "Gamestudio Editor");
-    // QMainWindow::SaveState saves the current state of the mainwindow toolbars
-    // and dockwidgets.
-    settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
-    settings.SetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
-    settings.SetValue("MainWindow", "width", width());
-    settings.SetValue("MainWindow", "height", height());
-    settings.SetValue("MainWindow", "xpos", x());
-    settings.SetValue("MainWindow", "ypos", y());
-    settings.SetValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
-    settings.SetValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
-    settings.SetValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
-    settings.SetValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
-    settings.SetValue("MainWindow", "current_workspace", (mWorkspace ? mWorkspace->GetDir() : ""));
-    settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
-
     settings.SetValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
     settings.SetValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
     settings.SetValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
@@ -2580,7 +2581,6 @@ bool MainWindow::SaveState()
     settings.SetValue("Settings", "show_origin", mUISettings.show_origin);
     settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
     settings.SetValue("Settings", "vsync", mSettings.vsync);
-
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
     settings.SetValue("TextEditor", "font", editor_settings.font_description);
@@ -2591,6 +2591,28 @@ bool MainWindow::SaveState()
     settings.SetValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
     settings.SetValue("TextEditor", "insert_spaces", editor_settings.insert_spaces);
     settings.SetValue("TextEditor", "tab_spaces", editor_settings.tab_spaces);
+
+    if (settings.Save())
+        INFO("Saved application settings.");
+    else WARN("Failed to save application settings.");
+}
+
+bool MainWindow::SaveState()
+{
+    const auto& file  = app::GetAppHomeFilePath("state.json");
+    Settings settings(file);
+    settings.SetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
+    settings.SetValue("MainWindow", "width", width());
+    settings.SetValue("MainWindow", "height", height());
+    settings.SetValue("MainWindow", "xpos", x());
+    settings.SetValue("MainWindow", "ypos", y());
+    settings.SetValue("MainWindow", "show_toolbar", mUI.mainToolBar->isVisible());
+    settings.SetValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
+    settings.SetValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
+    settings.SetValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    settings.SetValue("MainWindow", "current_workspace", (mWorkspace ? mWorkspace->GetDir() : ""));
+    settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
+    settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
     return settings.Save();
 }
 

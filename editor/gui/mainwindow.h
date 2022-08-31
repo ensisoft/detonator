@@ -64,8 +64,11 @@ namespace gui
         // then does nothing.
         void focusWidget(const MainWidget* widget);
 
-        // Load the MainWindow and all MainWidget states.
-        void loadState();
+        // Load the main editor settings.
+        void LoadSettings();
+
+        // Load previous application state.
+        void LoadState();
 
         // Prepare (enumerate) the currently open MainWidgets in the window menu
         // and prepare window swapping shortcuts.
@@ -175,6 +178,7 @@ namespace gui
 
     private:
         void BuildRecentWorkspacesMenu();
+        void SaveSettings();
         bool SaveState();
         void LoadDemoWorkspace(const QString& which);
         bool LoadWorkspace(const QString& dir);

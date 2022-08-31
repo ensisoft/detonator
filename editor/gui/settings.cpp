@@ -22,10 +22,13 @@
 #  include <QJsonDocument>
 #  include <QJsonArray>
 #  include <QFile>
+#  include <QByteArray>
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include "base/assert.h"
 #include "data/json.h"
+#include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/settings.h"
 
@@ -80,9 +83,36 @@ bool Settings::GetValue(const QString& module, const QString& key, data::JsonObj
     return ok;
 }
 
+bool Settings::GetValue(const QString& module, const QString& key, QByteArray* out) const
+{
+    const auto& value = mSettings->GetValue(module + "/" + key);
+    if (!value.isValid())
+        return false;
+    const auto& str = value.toString();
+    if (str.isEmpty())
+        return false;
+    *out = QByteArray::fromBase64(str.toLatin1());
+    return true;
+}
+
 void Settings::SetValue(const QString& module, const QString& key, const data::JsonObject& json)
 {
     mSettings->SetValue(module + "/" + key, app::FromUtf8(base64::Encode(json.ToString())));
+}
+
+void Settings::SetValue(const QString& module, const QString& key, const QByteArray& bytes)
+{
+    mSettings->SetValue(module + "/" + key, QString::fromLatin1(bytes.toBase64()));
+}
+QByteArray Settings::GetValue(const QString& module, const QString& key, const QByteArray& defaultValue) const
+{
+    const auto& value = mSettings->GetValue(module + "/" + key);
+    if (!value.isValid())
+        return defaultValue;
+    const auto& str = value.toString();
+    if (str.isEmpty())
+        return defaultValue;
+    return QByteArray::fromBase64(str.toLatin1());
 }
 
 std::string Settings::GetValue(const QString& module, const QString& key, const std::string& defaultValue) const
@@ -277,6 +307,12 @@ void Settings::LoadAction(const QString& module, QAction* action) const
     action->setChecked(val);
 }
 
+void Settings::JsonFileSettingsStorage::SetValue(const QString& key, const QVariant& value)
+{
+    ASSERT(app::ValidateQVariantJsonSupport(value));
+    mValues[key] = value;
+}
+
 bool Settings::JsonFileSettingsStorage::Load()
 {
     QFile file(mFilename);
@@ -306,7 +342,7 @@ bool Settings::JsonFileSettingsStorage::Save()
     }
     const QJsonObject& json = QJsonObject::fromVariantMap(mValues);
     const QJsonDocument docu(json);
-
+    ASSERT(app::ValidateQVariantMapJsonSupport(mValues));
     file.write(docu.toJson());
     file.close();
     return true;

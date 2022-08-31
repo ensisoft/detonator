@@ -67,6 +67,7 @@ namespace gui
         bool GetValue(const QString& module, const QString& key, std::size_t* out) const;
         bool GetValue(const QString& module, const QString& key, std::string* out) const;
         bool GetValue(const QString& module, const QString& key, data::JsonObject* out) const;
+        bool GetValue(const QString& module, const QString& key, QByteArray* out) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
@@ -80,6 +81,7 @@ namespace gui
             return qvariant_cast<T>(value);
         }
 
+        QByteArray GetValue(const QString& mdoule, const QString& key, const QByteArray& defaultValue) const;
         std::string GetValue(const QString& module, const QString& key, const std::string& defaultValue) const;
         std::size_t GetValue(const QString& module, const QString& key, std::size_t defaultValue) const;
 
@@ -94,6 +96,7 @@ namespace gui
         { SetValue<quint64>(module, key, quint64(value)); }
 
         void SetValue(const QString& module, const QString& key, const data::JsonObject& json);
+        void SetValue(const QString& module, const QString& key, const QByteArray& bytes);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);
@@ -133,7 +136,7 @@ namespace gui
             virtual bool Save() = 0;
         private:
         };
-        // Settings storage implementation fro accessing the
+        // Settings storage implementation for accessing the
         // application settings through QSettings.
         class AppSettingsStorage : public StorageImpl
         {
@@ -165,8 +168,7 @@ namespace gui
             {}
             virtual QVariant GetValue(const QString& key) const override
             { return mValues[key]; }
-            virtual void SetValue(const QString& key, const QVariant& value) override
-            { mValues[key] = value; }
+            virtual void SetValue(const QString& key, const QVariant& value) override;
             virtual bool Load() override;
             virtual bool Save() override;
         private:

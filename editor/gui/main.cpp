@@ -231,7 +231,8 @@ int main(int argc, char* argv[])
         // main widgets.
         gui::MainWindow window(app);
 
-        window.loadState();
+        window.LoadSettings();
+        window.LoadState();
         window.showWindow();
 
         // run the mainloop
