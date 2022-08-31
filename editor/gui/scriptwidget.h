@@ -40,6 +40,12 @@ namespace gui
     {
         Q_OBJECT
     public:
+        struct Settings {
+            QString lua_formatter_exec = "${install-dir}/lua-format/lua-format";
+            QString lua_formatter_args = "${file} -i --config=${install-dir}/lua-format/style.yaml";
+            bool lua_format_on_save    = true;
+        };
+
         ScriptWidget(app::Workspace* workspace);
         ScriptWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ScriptWidget();
@@ -56,10 +62,13 @@ namespace gui
         virtual void Copy(Clipboard& clipboard) const override;
         virtual void Paste(const Clipboard& clipboard) override;
         virtual void Save() override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
+        virtual bool SaveState(gui::Settings& settings) const override;
+        virtual bool LoadState(const gui::Settings& settings) override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool OnEscape() override;
+
+        static void SetDefaultSettings(const Settings& settings);
+        static void GetDefaultSettings(Settings* settings);
 
     private slots:
         void on_actionSave_triggered();
@@ -100,6 +109,7 @@ namespace gui
         QString mResourceID;
         QString mResourceName;
         std::size_t mFileHash = 0;
+        static Settings mSettings;
     };
 
 } // namespace

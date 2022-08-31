@@ -37,37 +37,41 @@ namespace gui
 
 DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     TextEditor::Settings& editor,
+    ScriptWidget::Settings& script,
     MainWidget::UISettings& widget)
     : QDialog(parent)
     , mSettings(settings)
     , mEditorSettings(editor)
+    , mScriptSettings(script)
     , mWidgetSettings(widget)
 {
     mUI.setupUi(this);
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
 
-    SetUIValue(mUI.edtImageEditorExecutable, settings.image_editor_executable);
-    SetUIValue(mUI.edtImageEditorArguments, settings.image_editor_arguments);
+    SetUIValue(mUI.edtImageEditorExecutable,  settings.image_editor_executable);
+    SetUIValue(mUI.edtImageEditorArguments,   settings.image_editor_arguments);
     SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
-    SetUIValue(mUI.edtShaderEditorArguments, settings.shader_editor_arguments);
+    SetUIValue(mUI.edtShaderEditorArguments,  settings.shader_editor_arguments);
     SetUIValue(mUI.edtScriptEditorExecutable, settings.script_editor_executable);
-    SetUIValue(mUI.edtScriptEditorArguments, settings.script_editor_arguments);
-    SetUIValue(mUI.edtAudioEditorExecutable, settings.audio_editor_executable);
-    SetUIValue(mUI.edtAudioEditorArguments,  settings.audio_editor_arguments);
-    SetUIValue(mUI.cmbWinOrTab, settings.default_open_win_or_tab);
-    SetUIValue(mUI.chkSaveAutomatically, settings.save_automatically_on_play);
-    SetUIValue(mUI.chkVSYNC, settings.vsync);
-    SetUIValue(mUI.edtPythonExecutable, settings.python_executable);
-    SetUIValue(mUI.edtEmscriptenPath, settings.emsdk);
-    SetUIValue(mUI.clearColor, settings.clear_color);
-    SetUIValue(mUI.gridColor, settings.grid_color);
-
-    SetUIValue(mUI.cmbGrid,         widget.grid);
-    SetUIValue(mUI.zoom,            widget.zoom);
-    SetUIValue(mUI.chkShowGrid,     widget.show_grid);
-    SetUIValue(mUI.chkShowOrigin,   widget.show_origin);
-    SetUIValue(mUI.chkShowViewport, widget.show_viewport);
-    SetUIValue(mUI.chkSnapToGrid,   widget.snap_to_grid);
+    SetUIValue(mUI.edtScriptEditorArguments,  settings.script_editor_arguments);
+    SetUIValue(mUI.edtAudioEditorExecutable,  settings.audio_editor_executable);
+    SetUIValue(mUI.edtAudioEditorArguments,   settings.audio_editor_arguments);
+    SetUIValue(mUI.cmbWinOrTab,               settings.default_open_win_or_tab);
+    SetUIValue(mUI.chkSaveAutomatically,      settings.save_automatically_on_play);
+    SetUIValue(mUI.chkVSYNC,                  settings.vsync);
+    SetUIValue(mUI.edtPythonExecutable,       settings.python_executable);
+    SetUIValue(mUI.edtEmscriptenPath,         settings.emsdk);
+    SetUIValue(mUI.clearColor,                settings.clear_color);
+    SetUIValue(mUI.gridColor,                 settings.grid_color);
+    SetUIValue(mUI.cmbGrid,                   widget.grid);
+    SetUIValue(mUI.zoom,                      widget.zoom);
+    SetUIValue(mUI.chkShowGrid,               widget.show_grid);
+    SetUIValue(mUI.chkShowOrigin,             widget.show_origin);
+    SetUIValue(mUI.chkShowViewport,           widget.show_viewport);
+    SetUIValue(mUI.chkSnapToGrid,             widget.snap_to_grid);
+    SetUIValue(mUI.edtLuaFormatterExec,       mScriptSettings.lua_formatter_exec);
+    SetUIValue(mUI.edtLuaFormatterArgs,       mScriptSettings.lua_formatter_args);
+    SetUIValue(mUI.editorFormatOnSave,        mScriptSettings.lua_format_on_save);
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -87,13 +91,13 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     const auto font_sizes = QFontDatabase::standardSizes();
     for (int size : font_sizes)
         mUI.editorFontSize->addItem(QString::number(size));
-    SetValue(mUI.editorFontSize, QString::number(mEditorSettings.font_size));
-    SetValue(mUI.editorTheme, mEditorSettings.theme);
-    SetValue(mUI.editorShowLineNumbers, mEditorSettings.show_line_numbers);
+    SetValue(mUI.editorFontSize,               QString::number(mEditorSettings.font_size));
+    SetValue(mUI.editorTheme,                 mEditorSettings.theme);
+    SetValue(mUI.editorShowLineNumbers,       mEditorSettings.show_line_numbers);
     SetValue(mUI.editorHightlightCurrentLine, mEditorSettings.highlight_current_line);
-    SetValue(mUI.editorHightlightSyntax, mEditorSettings.highlight_syntax);
-    SetValue(mUI.editorInsertSpaces, mEditorSettings.insert_spaces);
-    SetValue(mUI.editorShowLineNumbers, mEditorSettings.show_line_numbers);
+    SetValue(mUI.editorHightlightSyntax,      mEditorSettings.highlight_syntax);
+    SetValue(mUI.editorInsertSpaces,          mEditorSettings.insert_spaces);
+    SetValue(mUI.editorShowLineNumbers,       mEditorSettings.show_line_numbers);
 }
 
 void DlgSettings::on_btnAccept_clicked()
@@ -130,6 +134,10 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.chkShowOrigin,   &mWidgetSettings.show_origin);
     GetUIValue(mUI.chkShowViewport, &mWidgetSettings.show_viewport);
     GetUIValue(mUI.chkSnapToGrid,   &mWidgetSettings.snap_to_grid);
+
+    GetUIValue(mUI.edtLuaFormatterExec, &mScriptSettings.lua_formatter_exec);
+    GetUIValue(mUI.edtLuaFormatterArgs, &mScriptSettings.lua_formatter_args);
+    GetUIValue(mUI.editorFormatOnSave,  &mScriptSettings.lua_format_on_save);
 
     accept();
 }

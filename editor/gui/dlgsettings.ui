@@ -655,9 +655,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="editorTheme"/>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_9">
               <property name="sizePolicy">
@@ -671,11 +668,31 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QFontComboBox" name="editorFont"/>
+            </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="editorFontSize"/>
             </item>
-            <item row="0" column="1">
-             <widget class="QFontComboBox" name="editorFont"/>
+            <item row="4" column="1">
+             <widget class="QCheckBox" name="editorHightlightSyntax">
+              <property name="text">
+               <string>Highlight syntax</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QCheckBox" name="editorHightlightCurrentLine">
+              <property name="text">
+               <string>Highlight current line</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_10">
@@ -690,25 +707,8 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QCheckBox" name="editorHightlightCurrentLine">
-              <property name="text">
-               <string>Highlight current line</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QCheckBox" name="editorHightlightSyntax">
-              <property name="text">
-               <string>Highlight syntax</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="editorTheme"/>
             </item>
             <item row="5" column="1">
              <widget class="QCheckBox" name="editorInsertSpaces">
@@ -720,7 +720,51 @@
               </property>
              </widget>
             </item>
+            <item row="6" column="1">
+             <widget class="QCheckBox" name="editorFormatOnSave">
+              <property name="text">
+               <string>Lua format on save</string>
+              </property>
+             </widget>
+            </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_10">
+            <property name="title">
+             <string>Lua formatter</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Executable</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="edtLuaFormatterExec">
+               <property name="text">
+                <string>${install-dir}/lua-format/lua-format</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>Arguments</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="edtLuaFormatterArgs">
+               <property name="text">
+                <string>${file} -i --config=${install-dir}/lua-format/style.yaml</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_3">
@@ -826,6 +870,9 @@
   <tabstop>editorHightlightCurrentLine</tabstop>
   <tabstop>editorHightlightSyntax</tabstop>
   <tabstop>editorInsertSpaces</tabstop>
+  <tabstop>editorFormatOnSave</tabstop>
+  <tabstop>edtLuaFormatterExec</tabstop>
+  <tabstop>edtLuaFormatterArgs</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

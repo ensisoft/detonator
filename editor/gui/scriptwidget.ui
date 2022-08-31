@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
-    <height>676</height>
+    <width>1118</width>
+    <height>1102</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,10 +41,7 @@
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <layout class="QGridLayout" name="gridLayout">
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="replaceText"/>
-              </item>
-              <item row="3" column="1">
+              <item row="3" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
                  <widget class="QPushButton" name="btnFindNext">
@@ -105,17 +102,7 @@
                 </item>
                </layout>
               </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="findText"/>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>Find</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
+              <item row="2" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
                  <widget class="QCheckBox" name="findBackwards">
@@ -167,9 +154,19 @@
                </layout>
               </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="label">
+               <widget class="QLineEdit" name="replaceText">
                 <property name="text">
-                 <string>Replace with</string>
+                 <string/>
+                </property>
+                <property name="placeholderText">
+                 <string>Replace text</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLineEdit" name="findText">
+                <property name="placeholderText">
+                 <string>Find text</string>
                 </property>
                </widget>
               </item>
@@ -233,6 +230,52 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QGroupBox" name="formatter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Lua formatter</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPlainTextEdit" name="luaFormatStdErr">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QSplitter" name="helpSplitter">
@@ -272,7 +315,7 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>21</number>
+           <number>24</number>
           </attribute>
          </widget>
         </item>
@@ -298,8 +341,8 @@
            <string notr="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:7pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textInteractionFlags">
            <set>Qt::TextBrowserInteraction</set>
