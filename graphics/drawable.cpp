@@ -1768,8 +1768,11 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
     {
         const auto num_particles_always = size_t(mParams.num_particles);
         const auto num_particles_now = state.particles.size();
-        const auto num_particles_needed = num_particles_always - num_particles_now;
-        InitParticles(env, state, num_particles_needed);
+        if (num_particles_now < num_particles_always)
+        {
+            const auto num_particles_needed = num_particles_always - num_particles_now;
+            InitParticles(env, state, num_particles_needed);
+        }
     }
     else if (mParams.mode == SpawnPolicy::Continuous)
     {
