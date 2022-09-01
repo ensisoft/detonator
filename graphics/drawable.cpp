@@ -1935,6 +1935,8 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             {
                 if (mParams.placement == Placement::Inside)
                     position = glm::vec2(math::rand(0.0f, 1.0f), math::rand(0.0f, 1.0f));
+                else if (mParams.placement == Placement::Center)
+                    position = glm::vec2(0.5f, 0.5f);
                 else if (mParams.placement == Placement::Edge)
                 {
                     const auto edge = math::rand(0, 3);
@@ -1952,7 +1954,9 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             }
             else if (mParams.shape == EmitterShape::Circle)
             {
-                if (mParams.placement == Placement::Inside)
+                if (mParams.placement == Placement::Center)
+                    position = glm::vec2(0.5f, 0.5f);
+                else if (mParams.placement == Placement::Inside)
                 {
                     const auto x = math::rand(-emitter_radius, emitter_radius);
                     const auto y = math::rand(-emitter_radius, emitter_radius);
@@ -1966,10 +1970,16 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
                     position = glm::normalize(glm::vec2(x, y)) * emitter_radius + emitter_center;
                 }
             }
+
             if (mParams.direction == Direction::Sector)
             {
                 const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle + world_angle;
                 direction = glm::vec2(std::cos(angle), std::sin(angle));
+            }
+            else if (mParams.placement == Placement::Center)
+            {
+                direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
+                                                     math::rand(-1.0f, 1.0f)));
             }
             else if (mParams.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
@@ -2019,6 +2029,8 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
                 if (mParams.placement == Placement::Inside)
                     position = emitter_pos + glm::vec2(math::rand(0.0f, emitter_width),
                                                        math::rand(0.0f, emitter_height));
+                else if (mParams.placement == Placement::Center)
+                    position = emitter_center;
                 else if (mParams.placement == Placement::Edge)
                 {
                     const auto edge = math::rand(0, 3);
@@ -2047,7 +2059,9 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             }
             else if (mParams.shape == EmitterShape::Circle)
             {
-                if (mParams.placement == Placement::Inside)
+                if (mParams.placement == Placement::Center)
+                    position  = emitter_center;
+                else if (mParams.placement == Placement::Inside)
                 {
                     const auto x = math::rand(-1.0f, 1.0f);
                     const auto y = math::rand(-1.0f, 1.0f);
@@ -2078,6 +2092,11 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             {
                 const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
                 direction = glm::vec2(std::cos(angle), std::sin(angle));
+            }
+            else if (mParams.placement == Placement::Center)
+            {
+                direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
+                                                     math::rand(-1.0f, 1.0f)));
             }
             else if (mParams.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
