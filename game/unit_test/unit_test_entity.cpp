@@ -294,6 +294,10 @@ void unit_test_entity_class()
 {
     game::EntityClass entity;
     entity.SetName("TestEntityClass");
+    entity.SetLifetime(5.0f);
+    entity.SetFlag(game::EntityClass::Flags::UpdateEntity, false);
+    entity.SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
+    entity.SetSriptFileId("script_123.lua");
     {
         game::EntityNodeClass node;
         node.SetName("root");
@@ -331,6 +335,7 @@ void unit_test_entity_class()
         game::AnimationClass track;
         track.SetName("test2");
         entity.AddAnimation(track);
+        entity.SetIdleTrackId(track.GetId());
     }
 
     {
@@ -361,6 +366,9 @@ void unit_test_entity_class()
         entity.AddJoint(std::move(joint));
     }
 
+    TEST_REQUIRE(entity.GetName() == "TestEntityClass");
+    TEST_REQUIRE(entity.GetLifetime() == real::float32(5.0f));
+    TEST_REQUIRE(entity.GetScriptFileId() == "script_123.lua");
     TEST_REQUIRE(entity.GetNumNodes() == 3);
     TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
     TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");
@@ -375,6 +383,7 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetNumAnimations() == 2);
     TEST_REQUIRE(entity.FindAnimationByName("test1"));
     TEST_REQUIRE(entity.FindAnimationByName("sdgasg") == nullptr);
+    TEST_REQUIRE(entity.GetIdleTrackId() == entity.GetAnimation(1).GetId());
     TEST_REQUIRE(entity.GetNumScriptVars() == 3);
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
     TEST_REQUIRE(entity.GetScriptVar(0).GetValue<int>() == 123);
@@ -465,6 +474,15 @@ void unit_test_entity_class()
     // clone
     {
         auto clone(entity.Clone());
+        TEST_REQUIRE(clone.GetName() == "TestEntityClass");
+        TEST_REQUIRE(clone.GetScriptFileId() == "script_123.lua");
+        TEST_REQUIRE(clone.GetLifetime() == real::float32(5.0f));
+        TEST_REQUIRE(clone.TestFlag(game::EntityClass::Flags::UpdateEntity) == false);
+        TEST_REQUIRE(clone.TestFlag(game::EntityClass::Flags::WantsMouseEvents) == true);
+        TEST_REQUIRE(clone.GetNumAnimations() == 2);
+        TEST_REQUIRE(clone.FindAnimationByName("test1"));
+        TEST_REQUIRE(clone.FindAnimationByName("test2"));
+        TEST_REQUIRE(clone.GetIdleTrackId() == clone.GetAnimation(1).GetId());
         TEST_REQUIRE(clone.GetNumNodes() == 3);
         TEST_REQUIRE(clone.GetNode(0).GetName() == "root");
         TEST_REQUIRE(clone.GetNode(1).GetName() == "child_1");
