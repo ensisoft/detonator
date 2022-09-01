@@ -474,6 +474,8 @@ namespace app
                 mContent->SetName(app::ToUtf8(name));
             else if constexpr (TypeValue == Resource::Type::AudioGraph)
                 mContent->SetName(app::ToUtf8(name));
+            else if constexpr (TypeValue == Resource::Type::UI)
+                mContent->SetName(app::ToUtf8(name));
         }
         virtual void UpdateFrom(const Resource& other) override
         {
