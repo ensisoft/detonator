@@ -9,6 +9,16 @@
             "name": "kEndColor",
             "desc": "End Color",
             "type": "Color"
+        },
+        {
+            "name": "kRotationalVelocity",
+            "desc": "Rotatation Velocity",
+            "type": "Float"
+        },
+        {
+            "name": "kRotate",
+            "desc": "Enable rotation",
+            "type": "Float"
         }
     ],
     "maps": [
