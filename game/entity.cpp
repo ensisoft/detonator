@@ -1352,6 +1352,11 @@ std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
 EntityClass EntityClass::Clone() const
 {
     EntityClass ret;
+    ret.mName = mName;
+    ret.mFlags = mFlags;
+    ret.mLifetime = mLifetime;
+    ret.mScriptFile = mScriptFile;
+
     std::unordered_map<const EntityNodeClass*, const EntityNodeClass*> map;
 
     // make a deep clone of the nodes.
