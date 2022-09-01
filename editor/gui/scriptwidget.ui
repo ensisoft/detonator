@@ -442,7 +442,7 @@ p, li { white-space: pre-wrap; }
     <string>Find text in document</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+F</string>
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
   <action name="actionReplaceText">
@@ -457,7 +457,7 @@ p, li { white-space: pre-wrap; }
     <string>Replace text in document</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Ctrl+Shift+H</string>
    </property>
   </action>
   <action name="actionFindHelp">

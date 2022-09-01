@@ -1531,7 +1531,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     DEBUG("Create ScriptWidget");
 
     mUI.setupUi(this);
-    mUI.actionFindText->setShortcut(QKeySequence::Find);
+    //mUI.actionFindText->setShortcut(QKeySequence::Find); // use custom
 
     mUI.formatter->setVisible(false);
     mUI.modified->setVisible(false);
