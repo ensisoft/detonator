@@ -1669,8 +1669,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
         // Use the particle data to pass the per particle alpha.
         v.aData.z = p.alpha;
         // use the particle data to pass the per particle time.
-        // note that lifetime counts down!
-        v.aData.w = 1.0f - (p.lifetime / mParams.max_lifetime);
+        v.aData.w = p.time / (p.time_scale * mParams.max_lifetime);
         verts.push_back(v);
     }
 
@@ -1978,7 +1977,8 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
             Particle p;
-            p.lifetime   = math::rand(mParams.min_lifetime, mParams.max_lifetime);
+            p.time       = 0.0f;
+            p.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
             p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
             p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
             p.position   = glm::vec2(world.x, world.y);
@@ -2084,7 +2084,8 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
             Particle p;
-            p.lifetime   = math::rand(mParams.min_lifetime, mParams.max_lifetime);
+            p.time       = 0.0f;
+            p.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
             p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
             p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
             p.position   = position;
@@ -2105,9 +2106,8 @@ bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, Insta
 {
     auto& p = state.particles[i];
 
-    // countdown to end of lifetime
-    p.lifetime -= dt;
-    if (p.lifetime <= 0.0f)
+    p.time += dt;
+    if (p.time > p.time_scale * mParams.max_lifetime)
         return false;
 
     const auto p0 = p.position;
@@ -2126,13 +2126,13 @@ bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, Insta
     const auto  dd = glm::length(dp);
 
     // Update particle size with respect to time and distance
-    p.pointsize += (dt * mParams.rate_of_change_in_size_wrt_time);
+    p.pointsize += (dt * mParams.rate_of_change_in_size_wrt_time * p.time_scale);
     p.pointsize += (dd * mParams.rate_of_change_in_size_wrt_dist);
     if (p.pointsize <= 0.0f)
         return false;
 
     // update particle alpha value with respect to time and distance.
-    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_time);
+    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_time * p.time_scale);
     p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_dist);
     if (p.alpha <= 0.0f)
         return false;
