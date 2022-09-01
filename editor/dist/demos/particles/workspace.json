@@ -13,13 +13,53 @@
         "transform_ypos": 0,
         "use_lifetime": 1
     },
+    "1RlBexDBsu": {
+        "checked_for_packing": 1
+    },
     "2JJndZoBDS": {
         "checked_for_packing": 1
+    },
+    "3Y7QCvLmnD": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.13,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "N5AZXzLO89",
+        "transform_height": 762,
+        "transform_rotation": 0,
+        "transform_width": 746,
+        "transform_xpos": 4,
+        "transform_ypos": 30,
+        "use_lifetime": 1
+    },
+    "4POqhfHWQE": {
+        "checked_for_packing": 1
+    },
+    "4ZgNL1JNfD": {
+        "checked_for_packing": 1
+    },
+    "6PwXHnbnzY": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 222,
+        "transform_rotation": 0,
+        "transform_width": 230,
+        "transform_xpos": 43,
+        "transform_ypos": -72,
+        "use_lifetime": 1
     },
     "7D4iRC0ogE": {
         "checked_for_packing": 1
     },
     "8qJeAKQFtw": {
+        "checked_for_packing": 1
+    },
+    "96IAS00DCm": {
         "checked_for_packing": 1
     },
     "BbEpeqHSYG": {
@@ -30,6 +70,20 @@
     },
     "BtXKsAOnPr": {
         "checked_for_packing": 1
+    },
+    "DEnBflg7Re": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.13,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "sv05U2SGGE",
+        "transform_height": 762,
+        "transform_rotation": 0,
+        "transform_width": 746,
+        "transform_xpos": 4,
+        "transform_ypos": 30,
+        "use_lifetime": 1
     },
     "DX5iTPFmEZ": {
         "checked_for_packing": 1,
@@ -46,8 +100,63 @@
         "use_lifetime": 1
     },
     "EJtsMLLYa9": {
+        "checked_for_packing": 1
+    },
+    "HA5M7RGQpK": {
+        "checked_for_packing": 1
+    },
+    "J8J3JM8rC8": {
+        "checked_for_packing": 1
     },
     "JUOysDXYJL": {
+        "checked_for_packing": 1
+    },
+    "K5fmwRUujU": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "eySa2QEq4I",
+        "transform_height": 82,
+        "transform_rotation": 0,
+        "transform_width": 86,
+        "transform_xpos": 0,
+        "transform_ypos": 1,
+        "use_lifetime": 1
+    },
+    "K9D27CRUwq": {
+        "checked_for_packing": 1
+    },
+    "KSwh4OhJxA": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.14,
+        "local_emitter_w": 0.17,
+        "local_emitter_x": 0.42,
+        "local_emitter_y": 0.42,
+        "material": "K9D27CRUwq",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "LnUnRULvIo": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
+    "N5AZXzLO89": {
         "checked_for_packing": 1
     },
     "OpgNJAMhhQ": {
@@ -81,13 +190,51 @@
     "SX0ABkBEq9": {
         "checked_for_packing": 1
     },
+    "SXaZ6dfqlS": {
+        "checked_for_packing": 1
+    },
+    "UEHaD6hTOe": {
+        "checked_for_packing": 1
+    },
+    "X983sNLRSh": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "8qJeAKQFtw",
+        "transform_height": 86,
+        "transform_rotation": 0,
+        "transform_width": 90,
+        "transform_xpos": 16,
+        "transform_ypos": -69,
+        "use_lifetime": 1
+    },
     "Xg0GdRiaQU": {
         "checked_for_packing": 1
     },
     "dFl9nHNaNT": {
+        "checked_for_packing": 1
     },
     "dZDA63fz8X": {
         "checked_for_packing": 1
+    },
+    "eySa2QEq4I": {
+        "checked_for_packing": 1
+    },
+    "n6ykHi9xRi": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 4,
+        "transform_rotation": 0,
+        "transform_width": 220,
+        "transform_xpos": 16,
+        "transform_ypos": -218,
+        "use_lifetime": 1
     },
     "nIkywmIbBJ": {
         "checked_for_packing": 1
@@ -105,6 +252,9 @@
         "transform_xpos": 0,
         "transform_ypos": 0,
         "use_lifetime": 1
+    },
+    "pTbMGuziXE": {
+        "checked_for_packing": 1
     },
     "project": {
         "application_identifier": "3sYD9SAVMDiX",
@@ -190,7 +340,16 @@
         "transform_ypos": 0,
         "use_lifetime": 1
     },
+    "qGhg1ub3rt": {
+        "checked_for_packing": 1
+    },
     "qOf1KOOSpS": {
+        "checked_for_packing": 1
+    },
+    "sv05U2SGGE": {
+        "checked_for_packing": 1
+    },
+    "tyNkXUoRPJ": {
         "checked_for_packing": 1
     },
     "vIf7bfadSt": {
@@ -208,6 +367,7 @@
         "use_lifetime": 1
     },
     "w3S1bxiRIU": {
+        "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -224,7 +384,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
@@ -237,8 +397,36 @@
         "packing_param_write_config": true,
         "packing_param_write_content": true
     },
+    "y0ZBwlFRes": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.35,
+        "local_emitter_w": 0.46,
+        "local_emitter_x": 0.41,
+        "local_emitter_y": 0.3,
+        "material": "HA5M7RGQpK",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": -26,
+        "transform_ypos": -8,
+        "use_lifetime": 1
+    },
     "y6vxOLdMaI": {
         "checked_for_packing": 1
+    },
+    "y7WyC5UeQM": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "8qJeAKQFtw",
+        "transform_height": 46,
+        "transform_rotation": 0,
+        "transform_width": 228,
+        "transform_xpos": 16,
+        "transform_ypos": -69,
+        "use_lifetime": 1
     },
     "yE2AzTSvif": {
         "checked_for_packing": 1

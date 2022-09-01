@@ -119,6 +119,217 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": true
       },
+      "id": "UEHaD6hTOe",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Pixel Flame",
+      "nodes": [
+        {
+          "class": "bidH6CXYrb",
+          "drawable_item": {
+            "drawable": "w3S1bxiRIU",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "SXaZ6dfqlS",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Flame",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          }
+        },
+        {
+          "class": "N2fp3IHYEM",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 57.540000915527344,
+            "y": 50.09000015258789
+          }
+        },
+        {
+          "class": "EFLTpOBTxf",
+          "drawable_item": {
+            "drawable": "OpgNJAMhhQ",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "SXaZ6dfqlS",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Sparks",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 65.80000305175781,
+            "y": 46.029998779296875
+          }
+        },
+        {
+          "class": "wLFbL7zKvp",
+          "drawable_item": {
+            "drawable": "vIf7bfadSt",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "SXaZ6dfqlS",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.0
+                }
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.08390936255455017,
+                  "g": 0.08390936255455017,
+                  "r": 0.08390936255455017
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Smoke",
+          "position": {
+            "x": 3.0,
+            "y": -34.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 87.80000305175781,
+            "y": 40.5
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "bidH6CXYrb"
+                }
+              },
+              {
+                "node": {
+                  "id": "EFLTpOBTxf"
+                }
+              },
+              {
+                "node": {
+                  "id": "wLFbL7zKvp"
+                }
+              }
+            ],
+            "node": {
+              "id": "N2fp3IHYEM"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "UEHaD6hTOe",
+      "resource_name": "Pixel Flame",
+      "script_file": "nIkywmIbBJ",
+      "vars": [
+        {
+          "array": false,
+          "bools": [
+            0
+          ],
+          "id": "aQiDUBhvIu",
+          "name": "dragging",
+          "readonly": false
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": true
+      },
       "id": "SX0ABkBEq9",
       "idle_track": "",
       "lifetime": 0.0,
@@ -680,11 +891,11 @@
     },
     {
       "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
+        "KillAtBoundary": false,
+        "KillAtLifetime": false,
         "LimitLifetime": false,
-        "TickEntity": true,
-        "UpdateEntity": true,
+        "TickEntity": false,
+        "UpdateEntity": false,
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
@@ -887,9 +1098,9 @@
                 "name": "kStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.11949340254068375
+                  "b": 0.9391012191772461,
+                  "g": 0.2361333668231964,
+                  "r": 0.3201342821121216
                 }
               }
             ],
@@ -946,9 +1157,1377 @@
       "resource_id": "7D4iRC0ogE",
       "resource_name": "Energy Explosion",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": true
+      },
+      "id": "4POqhfHWQE",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Magic",
+      "nodes": [
+        {
+          "class": "GUiFWkmvod",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 40.0
+          }
+        },
+        {
+          "class": "prtmyMahzR",
+          "drawable_item": {
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 40.0
+          }
+        },
+        {
+          "class": "IodUr6ANW9",
+          "drawable_item": {
+            "drawable": "6PwXHnbnzY",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.7411764860153198,
+                  "g": 0.0,
+                  "r": 0.399984747171402
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.9192644953727722,
+                  "g": 0.8930953145027161,
+                  "r": 0.8657358884811401
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Core",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 169.8300018310547,
+            "y": 166.32000732421875
+          }
+        },
+        {
+          "class": "POOIwyXizO",
+          "drawable_item": {
+            "drawable": "X983sNLRSh",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8028839826583862,
+                  "g": 0.1413748413324356,
+                  "r": 0.5338674187660217
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.4761425256729126,
+                  "r": 0.4886243939399719
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Smoke",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 77.9726333618164,
+            "y": 77.94207000732422
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "prtmyMahzR"
+                }
+              },
+              {
+                "node": {
+                  "id": "IodUr6ANW9"
+                }
+              },
+              {
+                "node": {
+                  "id": "POOIwyXizO"
+                }
+              }
+            ],
+            "node": {
+              "id": "GUiFWkmvod"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "4POqhfHWQE",
+      "resource_name": "Magic",
+      "script_file": "nIkywmIbBJ",
+      "vars": [
+        {
+          "array": false,
+          "bools": [
+            0
+          ],
+          "id": "gtAlh44Upa",
+          "name": "dragging",
+          "readonly": false
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": true
+      },
+      "id": "1RlBexDBsu",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Dark Magic",
+      "nodes": [
+        {
+          "class": "Q1sAHPvbpB",
+          "drawable_item": {
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "material_params": [
+              {
+                "name": "kRotationalVelocity",
+                "value": 0.10000000149011612
+              },
+              {
+                "name": "kRotate",
+                "value": 1.0
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 175.08273315429688,
+            "y": 183.1043243408203
+          }
+        },
+        {
+          "class": "xigLkRQnix",
+          "drawable_item": {
+            "drawable": "X983sNLRSh",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.32483404874801636
+                }
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.6471656560897827
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Smoke",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 99.94022369384766,
+            "y": 106.98656463623047
+          }
+        },
+        {
+          "class": "Iarx5wGNmB",
+          "drawable_item": {
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "material_params": [
+              {
+                "name": "kRotationalVelocity",
+                "value": -0.10000000149011612
+              },
+              {
+                "name": "kRotate",
+                "value": 1.0
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 88.76000213623047,
+            "y": 95.12000274658203
+          }
+        },
+        {
+          "class": "aHEFYjzLCw",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 93.0,
+            "y": 84.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "Q1sAHPvbpB"
+                }
+              },
+              {
+                "node": {
+                  "id": "Iarx5wGNmB"
+                }
+              },
+              {
+                "node": {
+                  "id": "xigLkRQnix"
+                }
+              }
+            ],
+            "node": {
+              "id": "aHEFYjzLCw"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "1RlBexDBsu",
+      "resource_name": "Dark Magic",
+      "script_file": "nIkywmIbBJ",
+      "vars": [
+        {
+          "array": false,
+          "bools": [
+            0
+          ],
+          "id": "tKvHfmYnJH",
+          "name": "dragging",
+          "readonly": false
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "96IAS00DCm",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Snow + Flakes",
+      "nodes": [
+        {
+          "class": "BxtDTZjfaW",
+          "drawable_item": {
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1242.9920654296875,
+            "y": 835.5192260742188
+          }
+        },
+        {
+          "class": "nu4YHKCyYm",
+          "drawable_item": {
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "FlipHorizontally": true,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Copy of Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1274.970947265625,
+            "y": 1030.6385498046875
+          }
+        },
+        {
+          "class": "qxTtAvSNiB",
+          "drawable_item": {
+            "drawable": "DEnBflg7Re",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "sv05U2SGGE",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1240.3343505859375,
+            "y": 882.1421508789063
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "BxtDTZjfaW"
+            }
+          },
+          {
+            "node": {
+              "id": "nu4YHKCyYm"
+            }
+          },
+          {
+            "node": {
+              "id": "qxTtAvSNiB"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "96IAS00DCm",
+      "resource_name": "Basic Snow + Flakes",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "4ZgNL1JNfD",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Snow",
+      "nodes": [
+        {
+          "class": "dXIJ5XTkCN",
+          "drawable_item": {
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Snow",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1242.9920654296875,
+            "y": 835.5192260742188
+          }
+        },
+        {
+          "class": "NBz08JfnHl",
+          "drawable_item": {
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "FlipHorizontally": true,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Snow",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1274.970947265625,
+            "y": 1030.6385498046875
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "dXIJ5XTkCN"
+            }
+          },
+          {
+            "node": {
+              "id": "NBz08JfnHl"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "4ZgNL1JNfD",
+      "resource_name": "Basic Snow",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "pTbMGuziXE",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Waterfall",
+      "nodes": [
+        {
+          "class": "S3msAki3LW",
+          "drawable_item": {
+            "drawable": "n6ykHi9xRi",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.062424659729003906,
+                  "g": 0.037094682455062866,
+                  "r": 0.0
+                }
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6781567335128784,
+                  "g": 0.4266727566719055,
+                  "r": 0.01492332387715578
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Water",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 147.95272827148438,
+            "y": 21.829843521118164
+          }
+        },
+        {
+          "class": "2dRqezf2Ot",
+          "drawable_item": {
+            "drawable": "y7WyC5UeQM",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.9633325934410095,
+                  "g": 0.5821011662483215,
+                  "r": 0.1104600578546524
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.19736018776893616,
+                  "g": 0.1115434467792511,
+                  "r": 0.06196688860654831
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Mist",
+          "position": {
+            "x": -2.0,
+            "y": -6.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 317.1374206542969,
+            "y": 26.76348114013672
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "S3msAki3LW"
+            }
+          },
+          {
+            "node": {
+              "id": "2dRqezf2Ot"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "pTbMGuziXE",
+      "resource_name": "Basic Waterfall",
+      "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": true
+      },
+      "id": "qGhg1ub3rt",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Summoning Circle",
+      "nodes": [
+        {
+          "class": "8nrJSYACm5",
+          "drawable_item": {
+            "drawable": "y0ZBwlFRes",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HA5M7RGQpK",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 1.0,
+                  "r": 0.3791714310646057
+                }
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": 2.0
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.4903334081172943,
+                  "g": 0.9716029763221741,
+                  "r": 0.7354543209075928
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Circle",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 173.4228057861328,
+            "y": 203.40750122070313
+          }
+        },
+        {
+          "class": "0Un9haOtia",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 68.05929565429688,
+            "y": 69.99932861328125
+          }
+        },
+        {
+          "class": "9U8gNMwG3Q",
+          "drawable_item": {
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.06971847265958786,
+                  "g": 0.8372472524642944,
+                  "r": 0.13124284148216248
+                }
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.29130998253822327,
+                  "g": 0.8361638784408569,
+                  "r": 0.3764858543872833
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic smoke",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 86.32906341552734,
+            "y": 96.7269515991211
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "8nrJSYACm5"
+                }
+              },
+              {
+                "node": {
+                  "id": "9U8gNMwG3Q"
+                }
+              }
+            ],
+            "node": {
+              "id": "0Un9haOtia"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "qGhg1ub3rt",
+      "resource_name": "Summoning Circle",
+      "script_file": "nIkywmIbBJ",
+      "vars": [
+        {
+          "array": false,
+          "bools": [
+            0
+          ],
+          "id": "udJPMW8the",
+          "name": "dragging",
+          "readonly": false
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "tyNkXUoRPJ",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Blood Impact",
+      "nodes": [
+        {
+          "class": "daXCUJOp0z",
+          "drawable_item": {
+            "drawable": "KSwh4OhJxA",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "K9D27CRUwq",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Splatter",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 566.140625,
+            "y": 561.7544555664063
+          }
+        },
+        {
+          "class": "PLozCzYgnd",
+          "drawable_item": {
+            "drawable": "LnUnRULvIo",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.012436103075742722,
+                  "g": 0.012436103075742722,
+                  "r": 0.3170977234840393
+                }
+              },
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.02561989799141884,
+                  "g": 0.02561989799141884,
+                  "r": 0.17975127696990967
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Red Mess",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 350.9735107421875,
+            "y": 332.8275146484375
+          }
+        },
+        {
+          "class": "L30Ob5LLSH",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 78.0,
+            "y": 77.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "daXCUJOp0z"
+                }
+              },
+              {
+                "node": {
+                  "id": "PLozCzYgnd"
+                }
+              }
+            ],
+            "node": {
+              "id": "L30Ob5LLSH"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "tyNkXUoRPJ",
+      "resource_name": "Blood Impact",
+      "script_file": ""
     }
   ],
   "materials": [
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "N5AZXzLO89",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "N5AZXzLO89",
+      "resource_name": "Star Particle",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/ParticlePack/star_05.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "CyJqCj1bBw",
+            "name": "star_05",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 1.0,
+            "g": 1.0,
+            "r": 1.0
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 1.0,
+            "g": 1.0,
+            "r": 1.0
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "eySa2QEq4I",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "eySa2QEq4I",
+      "resource_name": "Magic Particle",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/ParticlePack/flame_03.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "jUQ233OiI3",
+            "name": "flame_03",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.800000011920929,
+            "g": 0.0,
+            "r": 0.37253376841545105
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.800000011920929,
+            "g": 0.0,
+            "r": 0.7921263575553894
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
     {
       "flags": {
         "PremultipliedAlpha": false
@@ -970,7 +2549,7 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rect_name": "kTextureRect",
+          "rect_name": "kMaskRect",
           "sampler_name": "kMask",
           "texture": {
             "colorspace": "Linear",
@@ -999,12 +2578,90 @@
           }
         },
         {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
           "name": "kStartColor",
           "value": {
             "a": 1.0,
             "b": 1.0,
             "g": 1.0,
             "r": 1.0
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "J8J3JM8rC8",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "J8J3JM8rC8",
+      "resource_name": "Water Particle",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/ParticlePack/smoke_03.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "X49GtpyJ1a",
+            "name": "smoke_03",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.9437094926834106,
+            "g": 0.7906004190444946,
+            "r": 0.7819027900695801
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.5527275204658508,
+            "g": 0.08061341196298599,
+            "r": 0.0
           }
         }
       ],
@@ -1032,7 +2689,7 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rect_name": "kTextureRect",
+          "rect_name": "kMaskRect",
           "sampler_name": "kMask",
           "texture": {
             "colorspace": "Linear",
@@ -1061,12 +2718,90 @@
           }
         },
         {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
           "name": "kStartColor",
           "value": {
             "a": 1.0,
             "b": 0.13333334028720856,
             "g": 0.13333334028720856,
             "r": 0.13333334028720856
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "SXaZ6dfqlS",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "resource_id": "SXaZ6dfqlS",
+      "resource_name": "Blocky Particle",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/ParticlePack/square.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "EgPYK052PB",
+            "name": "square",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.01269550621509552,
+            "g": 1.0,
+            "r": 0.10698100179433823
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.13453879952430725,
+            "g": 0.13453879952430725,
+            "r": 0.8406347632408142
           }
         }
       ],
@@ -1094,7 +2829,7 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rect_name": "kTextureRect",
+          "rect_name": "kMaskRect",
           "sampler_name": "kMask",
           "texture": {
             "colorspace": "Linear",
@@ -1104,7 +2839,7 @@
               "AllowResizing": true,
               "PremulAlpha": false
             },
-            "id": "Ki1kkvhZOB",
+            "id": "v7LgEpJ1dg",
             "name": "circle_05",
             "type": "Filesystem"
           },
@@ -1121,6 +2856,14 @@
             "g": 1.0,
             "r": 0.10698100179433823
           }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
         },
         {
           "name": "kStartColor",
@@ -1170,6 +2913,182 @@
         },
         "id": "ahxidE7ZOU",
         "name": "wallpaperflare",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "gamma": 1.0,
+      "id": "sv05U2SGGE",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "sv05U2SGGE",
+      "resource_name": "snowflake",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "colorspace": "Linear",
+        "file": "ws://textures/snowflake.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true,
+          "PremulAlpha": true
+        },
+        "id": "CbYri99zbr",
+        "name": "snowflake",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "HA5M7RGQpK",
+      "mag_filter": "Nearest",
+      "min_filter": "Default",
+      "resource_id": "HA5M7RGQpK",
+      "resource_name": "Summoning Circle",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/circle4a.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "ZIqdW1pzNx",
+            "name": "circle4a",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0003356984816491604,
+            "g": 1.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 1.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 1.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 1.0
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "gamma": 1.0,
+      "id": "K9D27CRUwq",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "K9D27CRUwq",
+      "resource_name": "Blood Splatter",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "colorspace": "Linear",
+        "file": "ws://textures/blood-splatter-png-14061.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true,
+          "PremulAlpha": false
+        },
+        "id": "LwFJ9fmS9O",
+        "name": "blood-splatter-png-14061",
         "type": "Filesystem"
       },
       "texture_mag_filter": "Default",
@@ -1549,6 +3468,406 @@
       "resource_id": "0BT4ANr30T",
       "resource_name": "Energy Explosion Smoke",
       "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.029999999329447746,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 73.0,
+      "id": "K5fmwRUujU",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.28999999165534973,
+      "max_lifetime": 10.0,
+      "max_point_size": 20.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 3.6600000858306885,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.2199999988079071,
+      "min_lifetime": 8.0,
+      "min_point_size": 15.0,
+      "min_time": 0.0,
+      "min_velocity": 3.6600000858306885,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 4.0,
+      "placement": "Edge",
+      "resource_id": "K5fmwRUujU",
+      "resource_name": "Magic",
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": -0.24434609711170197,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "6PwXHnbnzY",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.8399999737739563,
+      "max_lifetime": 1.090000033378601,
+      "max_point_size": 121.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 13.609999656677246,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.7099999785423279,
+      "min_lifetime": 1.090000033378601,
+      "min_point_size": 38.0,
+      "min_time": 0.0,
+      "min_velocity": 1.9199999570846558,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 40.0,
+      "placement": "Center",
+      "resource_id": "6PwXHnbnzY",
+      "resource_name": "Magic Core",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.23999999463558197,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.5410520434379578,
+      "direction_sector_start_angle": -1.7627825736999512,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "y7WyC5UeQM",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.47999998927116394,
+      "max_lifetime": 7.550000190734863,
+      "max_point_size": 126.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 59.04999923706055,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.33000001311302185,
+      "min_lifetime": 7.550000190734863,
+      "min_point_size": 35.0,
+      "min_time": 0.0,
+      "min_velocity": 21.489999771118164,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 50.0,
+      "placement": "Inside",
+      "resource_id": "y7WyC5UeQM",
+      "resource_name": "Water Vapor",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.23999999463558197,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "X983sNLRSh",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.7099999785423279,
+      "max_lifetime": 7.550000190734863,
+      "max_point_size": 126.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 59.04999923706055,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.5600000023841858,
+      "min_lifetime": 7.550000190734863,
+      "min_point_size": 35.0,
+      "min_time": 0.0,
+      "min_velocity": 21.489999771118164,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 10.0,
+      "placement": "Center",
+      "resource_id": "X983sNLRSh",
+      "resource_name": "Magic Smoke",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.3839724361896515,
+      "direction_sector_start_angle": 1.0122909545898438,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.009999999776482582
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "DEnBflg7Re",
+      "init_rect_height": 0.12999999523162842,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.9200000166893005,
+      "max_lifetime": 24.549999237060547,
+      "max_point_size": 12.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.05000000074505806,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.9200000166893005,
+      "min_lifetime": 21.0,
+      "min_point_size": 8.0,
+      "min_time": 0.0,
+      "min_velocity": 0.019999999552965164,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "num_particles": 10.0,
+      "placement": "Inside",
+      "resource_id": "DEnBflg7Re",
+      "resource_name": "Snow Flakes",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.3839724361896515,
+      "direction_sector_start_angle": 1.0122909545898438,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.009999999776482582
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "3Y7QCvLmnD",
+      "init_rect_height": 0.12999999523162842,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 24.549999237060547,
+      "max_point_size": 8.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.05000000074505806,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 21.0,
+      "min_point_size": 3.0,
+      "min_time": 0.0,
+      "min_velocity": 0.009999999776482582,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "placement": "Inside",
+      "resource_id": "3Y7QCvLmnD",
+      "resource_name": "Basic Snow",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.23000000417232513,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.33161255717277527,
+      "direction_sector_start_angle": 1.3613568544387817,
+      "gravity": {
+        "x": 0.0,
+        "y": 300.0
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 52.0,
+      "id": "n6ykHi9xRi",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.3199999928474426,
+      "max_lifetime": 23.18000030517578,
+      "max_point_size": 110.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 122.54000091552734,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.23000000417232513,
+      "min_lifetime": 14.460000038146973,
+      "min_point_size": 104.0,
+      "min_time": 0.0,
+      "min_velocity": 60.779998779296875,
+      "mode": "Continuous",
+      "motion": "Projectile",
+      "num_particles": 1000.0,
+      "placement": "Inside",
+      "resource_id": "n6ykHi9xRi",
+      "resource_name": "Basic Waterfall",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.6100000143051147,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 3.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 99.0,
+      "id": "y0ZBwlFRes",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.20000000298023224,
+      "max_lifetime": 3.0,
+      "max_point_size": 1.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.10000000149011612,
+      "min_lifetime": 3.0,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 0.0,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "num_particles": 1.0,
+      "placement": "Center",
+      "resource_id": "y0ZBwlFRes",
+      "resource_name": "Summoning Circle",
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.5899999737739563,
+      "boundary": "Clamp",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 41.0,
+      "id": "KSwh4OhJxA",
+      "init_rect_height": 0.14000000059604645,
+      "init_rect_width": 0.17000000178813934,
+      "init_rect_xpos": 0.41999998688697815,
+      "init_rect_ypos": 0.41999998688697815,
+      "max_alpha": 1.0,
+      "max_lifetime": 2.0,
+      "max_point_size": 678.0,
+      "max_time": 2.0,
+      "max_velocity": 0.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 2.0,
+      "min_point_size": 678.0,
+      "min_time": 2.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 1.0,
+      "placement": "Inside",
+      "resource_id": "KSwh4OhJxA",
+      "resource_name": "Blood Splatter",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.6000000238418579,
+      "boundary": "Clamp",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "LnUnRULvIo",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.9900000095367432,
+      "max_lifetime": 2.0,
+      "max_point_size": 550.0,
+      "max_time": 2.0,
+      "max_velocity": 0.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.9900000095367432,
+      "min_lifetime": 2.0,
+      "min_point_size": 286.0,
+      "min_time": 2.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 10.0,
+      "placement": "Inside",
+      "resource_id": "LnUnRULvIo",
+      "resource_name": "Blood",
+      "shape": "Rectangle"
     }
   ],
   "scenes": [
