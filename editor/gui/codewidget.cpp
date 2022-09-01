@@ -168,7 +168,19 @@ void TextEditor::keyPressEvent(QKeyEvent* key)
     const auto alt  = key->modifiers() & Qt::AltModifier;
     const auto code = key->key();
 
-    if (ctrl && code == Qt::Key_N)
+    if (ctrl && code == Qt::Key_F)
+    {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::MoveOperation::NextCharacter);
+        setTextCursor(cursor);
+    }
+    else if (ctrl && code == Qt::Key_B)
+    {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::MoveOperation::PreviousCharacter);
+        setTextCursor(cursor);
+    }
+    else if (ctrl && code == Qt::Key_N)
     {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::MoveOperation::Down);
