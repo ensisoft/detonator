@@ -47,11 +47,6 @@ public:
         mSource = source;
         return true;
     }
-    virtual bool CompileFile(const std::string& file) override
-    {
-        mFilename = file;
-        return true;
-    }
     virtual bool IsValid() const override
     { return true; }
 
