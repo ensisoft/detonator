@@ -1221,12 +1221,6 @@ void MaterialWidget::ApplyShaderDescription()
             DEBUG("Read texture map description '%1'", name);
             maps.erase(name);
 
-            // if the texture map already exists and has the matching type
-            // then no need to do anything.
-            if (material->HasTextureMap(name) &&
-                material->FindTextureMap(name)->GetType() == type)
-                continue;
-
             // create new texture map and add to the material
             if (type == gfx::TextureMap::Type::Texture2D)
             {
@@ -1237,10 +1231,19 @@ void MaterialWidget::ApplyShaderDescription()
                 if (!base::JsonReadSafe(json.value(), "rect", &texture_rect_uniform_name))
                     WARN("Texture map '%1' has no name for texture rectangle uniform. Using '%2'.", name, texture_rect_uniform_name);
 
-                auto map = std::make_unique<gfx::TextureMap2D>();
-                map->SetRectUniformName(std::move(texture_rect_uniform_name));
-                map->SetSamplerName(std::move(sampler_name));
-                material->SetTextureMap(name, std::move(map));
+                gfx::TextureMap2D* texture = nullptr;
+                if (auto* map = material->FindTextureMap(name))
+                    texture = map->AsTextureMap2D();
+
+                if (texture == nullptr)
+                {
+                    auto map = std::make_unique<gfx::TextureMap2D>();
+                    texture = map.get();
+                    material->SetTextureMap(name, std::move(map));
+                }
+                texture->SetRectUniformName(std::move(texture_rect_uniform_name));
+                texture->SetSamplerName(std::move(sampler_name));
+                DEBUG("Added material texture map. [type=%1, name='%2']", type, name);
             }
             else if (type == gfx::TextureMap::Type::Sprite)
             {
@@ -1257,12 +1260,21 @@ void MaterialWidget::ApplyShaderDescription()
                 if (!base::JsonReadSafe(json.value(), "rect1", &texture_rect_uniform_name1))
                     WARN("Texture map '%1' has no name for texture 1 rectangle uniform. Using '%2'.", name, texture_rect_uniform_name1);
 
-                auto map = std::make_unique<gfx::SpriteMap>();
-                map->SetSamplerName(sampler_name0, 0);
-                map->SetSamplerName(sampler_name1, 1);
-                map->SetRectUniformName(texture_rect_uniform_name0, 0);
-                map->SetRectUniformName(texture_rect_uniform_name1, 1);
-                material->SetTextureMap(name, std::move(map));
+                gfx::SpriteMap* sprite = nullptr;
+                if (auto* map = material->FindTextureMap(name))
+                    sprite = map->AsSpriteMap();
+
+                if (sprite == nullptr)
+                {
+                    auto map = std::make_unique<gfx::SpriteMap>();
+                    sprite = map.get();
+                    material->SetTextureMap(name, std::move(map));
+                }
+                sprite->SetSamplerName(sampler_name0, 0);
+                sprite->SetSamplerName(sampler_name1, 1);
+                sprite->SetRectUniformName(texture_rect_uniform_name0, 0);
+                sprite->SetRectUniformName(texture_rect_uniform_name1, 1);
+                DEBUG("Added material texture map. [type=%1, name='%2']", type, name);
             }
             else BUG("Unhandled texture map type.");
         }
