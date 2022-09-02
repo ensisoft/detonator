@@ -72,3 +72,4 @@ void main()
     gl_FragColor = mix(kStartColor, kEndColor, vParticleTime);
     gl_FragColor.rgb *= (alpha * vParticleAlpha);
 }
+

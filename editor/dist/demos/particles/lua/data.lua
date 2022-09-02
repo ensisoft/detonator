@@ -11,5 +11,7 @@ Particles = {
     'Basic Snow + Flakes',
     'Basic Waterfall',
     'Summoning Circle',
-    'Blood Impact'
+    'Blood Impact',
+    'Spaceship'
 }
+
