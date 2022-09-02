@@ -62,6 +62,7 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& loader) const
     material->SetColor(mColorMap[1], ColorIndex::TopRight);
     material->SetColor(mColorMap[2], ColorIndex::BottomLeft);
     material->SetColor(mColorMap[3], ColorIndex::BottomRight);
+    material->SetName("UIGradient");
     if (mGamma)
         material->SetGamma(mGamma.value());
     return material;
@@ -93,6 +94,7 @@ UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& loader) const
     auto material = std::make_shared<gfx::ColorClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetBaseColor(mColor);
+    material->SetName("UIColor");
     return material;
 }
 
@@ -136,6 +138,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary&) const
     auto material = std::make_shared<gfx::TextureMap2DClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
+    material->SetName("UITexture");
     return material;
 }
 

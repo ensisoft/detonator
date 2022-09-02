@@ -757,6 +757,7 @@ size_t ColorClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
@@ -793,6 +794,7 @@ void ColorClass::IntoJson(data::Writer& data) const
 {
     data.Write("type", Type::Color);
     data.Write("id",      mClassId);
+    data.Write("name",    mName);
     data.Write("surface", mSurfaceType);
     data.Write("gamma",   mGamma);
     data.Write("static",  mStatic);
@@ -802,6 +804,7 @@ void ColorClass::IntoJson(data::Writer& data) const
 bool ColorClass::FromJson2(const data::Reader& data)
 {
     data.Read("id",      &mClassId);
+    data.Read("name",    &mName);
     data.Read("surface", &mSurfaceType);
     data.Read("gamma",   &mGamma);
     data.Read("static",  &mStatic);
@@ -866,6 +869,7 @@ size_t GradientClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
@@ -921,6 +925,7 @@ void GradientClass::IntoJson(data::Writer& data) const
 {
     data.Write("type",       Type::Gradient);
     data.Write("id",         mClassId);
+    data.Write("name",       mName);
     data.Write("surface",    mSurfaceType);
     data.Write("gamma",      mGamma);
     data.Write("static",     mStatic);
@@ -934,6 +939,7 @@ void GradientClass::IntoJson(data::Writer& data) const
 bool GradientClass::FromJson2(const data::Reader& data)
 {
     data.Read("id",         &mClassId);
+    data.Read("name",       &mName);
     data.Read("surface",    &mSurfaceType);
     data.Read("gamma",      &mGamma);
     data.Read("static",     &mStatic);
@@ -950,6 +956,7 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
    : mSprite(other.mSprite, copy)
 {
     mClassId         = copy ? other.mClassId : base::RandomString(10);
+    mName            = other.mName;
     mSurfaceType     = other.mSurfaceType;
     mGamma           = other.mGamma;
     mStatic          = other.mStatic;
@@ -1089,6 +1096,7 @@ std::size_t SpriteClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
@@ -1219,6 +1227,7 @@ void SpriteClass::IntoJson(data::Writer& data) const
 {
     data.Write("type", Type::Sprite);
     data.Write("id", mClassId);
+    data.Write("name", mName);
     data.Write("surface", mSurfaceType);
     data.Write("gamma", mGamma);
     data.Write("static", mStatic);
@@ -1239,6 +1248,7 @@ void SpriteClass::IntoJson(data::Writer& data) const
 bool SpriteClass::FromJson2(const data::Reader& data)
 {
     data.Read("id", &mClassId);
+    data.Read("name", &mName);
     data.Read("surface", &mSurfaceType);
     data.Read("gamma", &mGamma);
     data.Read("static", &mStatic);
@@ -1339,6 +1349,7 @@ SpriteClass& SpriteClass::operator=(const SpriteClass& other)
         return *this;
     SpriteClass tmp(other, true);
     std::swap(mClassId        , tmp.mClassId);
+    std::swap(mName           , tmp.mName);
     std::swap(mSurfaceType    , tmp.mSurfaceType);
     std::swap(mGamma          , tmp.mGamma);
     std::swap(mStatic         , tmp.mStatic);
@@ -1362,6 +1373,7 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
     : mTexture(other.mTexture, copy)
 {
     mClassId         = copy ? other.mClassId : base::RandomString(10);
+    mName            = other.mName;
     mSurfaceType     = other.mSurfaceType;
     mGamma           = other.mGamma;
     mStatic          = other.mStatic;
@@ -1493,6 +1505,7 @@ std::size_t TextureMap2DClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mGamma);
     hash = base::hash_combine(hash, mStatic);
@@ -1609,6 +1622,7 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
 {
     data.Write("type", Type::Texture);
     data.Write("id", mClassId);
+    data.Write("name", mName);
     data.Write("surface", mSurfaceType);
     data.Write("gamma", mGamma);
     data.Write("static", mStatic);
@@ -1628,6 +1642,7 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
 bool TextureMap2DClass::FromJson2(const data::Reader& data)
 {
     data.Read("id", &mClassId);
+    data.Read("name", &mName);
     data.Read("surface", &mSurfaceType);
     data.Read("gamma", &mGamma);
     data.Read("static", &mStatic);
@@ -1719,6 +1734,7 @@ TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
 
     TextureMap2DClass tmp(other, true);
     std::swap(mClassId        , tmp.mClassId);
+    std::swap(mName           , tmp.mName);
     std::swap(mSurfaceType    , tmp.mSurfaceType);
     std::swap(mGamma          , tmp.mGamma);
     std::swap(mStatic         , tmp.mStatic);
@@ -1739,6 +1755,7 @@ TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
 CustomMaterialClass::CustomMaterialClass(const CustomMaterialClass& other, bool copy)
 {
     mClassId     = copy ? other.mClassId : base::RandomString(10);
+    mName        = other.mName;
     mShaderUri   = other.mShaderUri;
     mShaderSrc   = other.mShaderSrc;
     mUniforms    = other.mUniforms;
@@ -1849,6 +1866,7 @@ std::size_t CustomMaterialClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mShaderUri);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mSurfaceType);
@@ -1967,6 +1985,7 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
 {
     data.Write("type",  Type::Custom);
     data.Write("id",          mClassId);
+    data.Write("name",        mName);
     data.Write("shader_uri",  mShaderUri);
     data.Write("shader_src",  mShaderSrc);
     data.Write("surface",     mSurfaceType);
@@ -2015,6 +2034,7 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
 bool CustomMaterialClass::FromJson2(const data::Reader& data)
 {
     data.Read("id",         &mClassId);
+    data.Read("name",       &mName);
     data.Read("shader_uri", &mShaderUri);
     data.Read("shader_src", &mShaderSrc);
     data.Read("surface",    &mSurfaceType);
@@ -2119,6 +2139,7 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
 
     CustomMaterialClass tmp(other, true);
     std::swap(mClassId, tmp.mClassId);
+    std::swap(mName, tmp.mName);
     std::swap(mShaderUri, tmp.mShaderUri);
     std::swap(mShaderSrc, tmp.mShaderSrc);
     std::swap(mUniforms, tmp.mUniforms);

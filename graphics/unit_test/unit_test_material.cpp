@@ -133,6 +133,7 @@ void unit_test_color()
     klass.SetBaseColor(gfx::Color::DarkGreen);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
     klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
+    klass.SetName("my color");
 
     // serialization
     {
@@ -140,6 +141,7 @@ void unit_test_color()
         klass.IntoJson(json);
         auto ret = gfx::MaterialClass::FromJson(json);
         TEST_REQUIRE(ret);
+        TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         //TEST_REQUIRE(ret->Getshader() == gfx::MaterialClass::Shader::Sprite);
@@ -184,6 +186,7 @@ void unit_test_gradient()
     klass.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
     klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
+    klass.SetName("my gradient");
 
     // serialization
     {
@@ -191,6 +194,7 @@ void unit_test_gradient()
         klass.IntoJson(json);
         auto ret = gfx::MaterialClass::FromJson(json);
         TEST_REQUIRE(ret);
+        TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         //TEST_REQUIRE(ret->Getshader() == gfx::MaterialClass::Shader::Sprite);
@@ -256,12 +260,14 @@ void unit_test_texture()
     klass.SetTextureVelocityZ(-1.0f);
     klass.SetTextureRotation(2.5f);
     klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
+    klass.SetName("my texture");
 
     {
         data::JsonObject json;
         klass.IntoJson(json);
         auto ret = gfx::MaterialClass::FromJson(json);
         TEST_REQUIRE(ret);
+        TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
@@ -343,6 +349,7 @@ void unit_test_sprite()
     klass.SetTextureVelocityZ(-1.0f);
     klass.SetTextureRotation(2.5f);
     klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
+    klass.SetName("my sprite");
 
     gfx::detail::TextureFileSource texture;
     texture.SetFileName("file.png");
@@ -389,6 +396,7 @@ void unit_test_sprite()
         klass.IntoJson(json);
         auto ret = gfx::MaterialClass::FromJson(json);
         TEST_REQUIRE(ret);
+        TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
@@ -500,6 +508,7 @@ void unit_test_custom()
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
     klass.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
     klass.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+    klass.SetName("my material");
 
     {
         gfx::TextureMap2D texture;
@@ -528,6 +537,7 @@ void unit_test_custom()
         klass.IntoJson(json);
         auto ret = gfx::MaterialClass::FromJson(json);
         TEST_REQUIRE(ret);
+        TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(ret->PremultipliedAlpha());

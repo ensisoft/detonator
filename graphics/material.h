@@ -829,6 +829,8 @@ namespace gfx
         virtual ~MaterialClass() = default;
         // Get the material class id.
         virtual std::string GetId() const = 0;
+        // Get the human readable material class name.
+        virtual std::string GetName() const = 0;
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
         virtual std::string GetProgramId() const = 0;
@@ -844,6 +846,8 @@ namespace gfx
         // Set the material class id. Used when creating specific materials with
         // fixed static ids. Todo: refactor away and use constructor.
         virtual void SetId(const std::string& id) = 0;
+        // Set the human-readable material class name.
+        virtual void SetName(const std::string& name) = 0;
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader
         // failed to compile.
@@ -960,8 +964,12 @@ namespace gfx
         { return mGamma; }
         virtual std::string GetId() const override
         { return mClassId; }
+        virtual std::string GetName() const override
+        { return mName; }
         virtual void SetId(const std::string& id) override
         { mClassId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual void SetSurfaceType(SurfaceType surface) override
         { mSurfaceType = surface; }
         virtual SurfaceType GetSurfaceType() const override
@@ -976,6 +984,7 @@ namespace gfx
         { mFlags.set(flag, on_off); }
     protected:
         std::string mClassId;
+        std::string mName;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         float mGamma  = 1.0f;
         bool mStatic = false;
@@ -1419,11 +1428,14 @@ namespace gfx
         { mSurfaceType = surface; }
         virtual void SetId(const std::string& id) override
         { mClassId = id; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual Type GetType() const override { return Type::Custom; }
         virtual SurfaceType GetSurfaceType() const override { return mSurfaceType; }
         virtual gfx::Shader* GetShader(Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetId() const override { return mClassId; }
+        virtual std::string GetName() const override { return mName; }
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
@@ -1440,6 +1452,7 @@ namespace gfx
         CustomMaterialClass& operator=(const CustomMaterialClass& other);
     private:
         std::string mClassId;
+        std::string mName;
         std::string mShaderUri;
         std::string mShaderSrc;
         std::unordered_map<std::string, Uniform> mUniforms;
