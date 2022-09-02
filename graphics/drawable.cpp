@@ -107,6 +107,7 @@ void main()
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
+    shader->SetName("GenericVertexShader");
     shader->CompileSource(src);
     return shader;
 }
@@ -1613,7 +1614,7 @@ void main()
     )";
 
     const auto* shader_name = mParams.coordinate_space == CoordinateSpace::Local
-            ? "particle-shader-local" : "particle-shader-global";
+            ? "LocalParticleShader" : "GlobalParticleShader";
     const auto* shader_src = mParams.coordinate_space == CoordinateSpace::Local
             ? local_src : global_src;
 
@@ -1621,6 +1622,7 @@ void main()
     if (!shader)
     {
         shader = device.MakeShader(shader_name);
+        shader->SetName(shader_name);
         shader->CompileSource(shader_src);
     }
     return shader;

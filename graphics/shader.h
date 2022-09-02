@@ -26,7 +26,6 @@ namespace gfx
     {
     public:
         virtual ~Shader() = default;
-
         // Compile the shader from the given source string.
         // Returns true if compilation was successful, otherwise
         // returns false.
@@ -34,11 +33,13 @@ namespace gfx
         // shader does not change, i.e. the shader will retain
         // any previously compiled state.
         virtual bool CompileSource(const std::string& source) = 0;
-
+        // todo:
         virtual bool CompileFile(const std::string& file) = 0;
-
         // Returns true if the shader has been compiled successfully.
         virtual bool IsValid() const = 0;
+        // Set a (human-readable) name for the shader object.
+        // Used for improved debug/log messages.
+        virtual void SetName(const std::string& name) {}
     private:
     };
 
