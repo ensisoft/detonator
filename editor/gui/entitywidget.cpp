@@ -260,7 +260,12 @@ public:
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
         if (!mEngaged)
+        {
+            ShowMessage("Click + hold to draw!",
+                        gfx::FRect(40 + mMousePos.x(),
+                                   40 + mMousePos.y(), 200, 20), painter);
             return;
+        }
 
         const auto& diff = mCurrent - mStart;
         if (diff.x <= 0.0f || diff.y <= 0.0f)
@@ -284,12 +289,13 @@ public:
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
+        mMousePos =  mickey->pos();
+
         if (!mEngaged)
             return;
 
         const auto& view_to_model = glm::inverse(view.GetAsMatrix());
-        const auto& p = mickey->pos();
-        mCurrent = view_to_model * glm::vec4(p.x(), p.y(), 1.0f, 1.0f);
+        mCurrent = view_to_model * ToVec4(mMousePos);
         mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
@@ -371,6 +377,7 @@ private:
     glm::vec4 mCurrent;
     bool mEngaged = false;
     bool mAlwaysSquare = false;
+    QPoint mMousePos;
 private:
     QString mMaterialId;
     QString mDrawableId;
