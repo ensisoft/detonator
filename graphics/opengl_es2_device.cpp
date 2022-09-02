@@ -655,6 +655,15 @@ public:
     virtual void DeleteTextures() override
     {
         mTextures.clear();
+
+        for (auto& unit : mTextureUnits)
+        {
+            unit.texture = nullptr;
+            unit.mag_filter = GL_NONE;
+            unit.min_filter = GL_NONE;
+            unit.wrap_x     = GL_NONE;
+            unit.wrap_y     = GL_NONE;
+        }
     }
     virtual void DeleteFramebuffers() override
     {
