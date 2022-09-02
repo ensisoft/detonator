@@ -36,6 +36,13 @@ function OnUIAction(ui, action)
         index = base.wrap(1, #Particles, index - 1)
     elseif action.name == 'next' then
         index = base.wrap(1, #Particles, index + 1)
+    elseif action.name == 'background' then
+        local event = game.GameEvent:new()
+        event.from = 'menu'
+        event.to = 'main'
+        event.message = 'background'
+        event.value = action.value
+        Game:PostEvent(event)
     end
     PlayEffect(ui)
 end

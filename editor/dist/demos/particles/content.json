@@ -235,21 +235,21 @@
             "material": "SXaZ6dfqlS",
             "material_params": [
               {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 0.0
-                }
-              },
-              {
                 "name": "kEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.08390936255455017,
                   "g": 0.08390936255455017,
                   "r": 0.08390936255455017
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.0
                 }
               }
             ],
@@ -928,7 +928,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
+          "name": "Background",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -956,7 +956,33 @@
       },
       "resource_id": "JUOysDXYJL",
       "resource_name": "Background",
-      "script_file": ""
+      "script_file": "",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "action": "Toggle",
+                "duration": 1.0,
+                "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "4YB78hLjoJ",
+                "name": "Actuator_0",
+                "node": "lvqGGnspNa",
+                "starttime": 0.0
+              },
+              "type": "SetFlag"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.10000000149011612,
+          "id": "zH8aNnYeSH",
+          "looping": false,
+          "name": "Toggle"
+        }
+      ]
     },
     {
       "flags": {
@@ -1423,12 +1449,12 @@
             "material": "eySa2QEq4I",
             "material_params": [
               {
-                "name": "kRotationalVelocity",
-                "value": 0.10000000149011612
-              },
-              {
                 "name": "kRotate",
                 "value": 1.0
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": 0.10000000149011612
               }
             ],
             "renderpass": "Draw",
@@ -1470,21 +1496,21 @@
             "material": "8qJeAKQFtw",
             "material_params": [
               {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.32483404874801636
-                }
-              },
-              {
                 "name": "kEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
                   "g": 0.0,
                   "r": 0.6471656560897827
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.32483404874801636
                 }
               }
             ],
@@ -1527,12 +1553,12 @@
             "material": "eySa2QEq4I",
             "material_params": [
               {
-                "name": "kRotationalVelocity",
-                "value": -0.10000000149011612
-              },
-              {
                 "name": "kRotate",
                 "value": 1.0
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": -0.10000000149011612
               }
             ],
             "renderpass": "Draw",
@@ -1918,21 +1944,21 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.062424659729003906,
-                  "g": 0.037094682455062866,
-                  "r": 0.0
-                }
-              },
-              {
                 "name": "kEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.6781567335128784,
                   "g": 0.4266727566719055,
                   "r": 0.01492332387715578
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.062424659729003906,
+                  "g": 0.037094682455062866,
+                  "r": 0.0
                 }
               }
             ],
@@ -2069,12 +2095,12 @@
             "material": "HA5M7RGQpK",
             "material_params": [
               {
-                "name": "kStartColor",
+                "name": "kEndColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.0,
-                  "g": 1.0,
-                  "r": 0.3791714310646057
+                  "b": 0.4903334081172943,
+                  "g": 0.9716029763221741,
+                  "r": 0.7354543209075928
                 }
               },
               {
@@ -2082,12 +2108,12 @@
                 "value": 2.0
               },
               {
-                "name": "kEndColor",
+                "name": "kStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.4903334081172943,
-                  "g": 0.9716029763221741,
-                  "r": 0.7354543209075928
+                  "b": 0.0,
+                  "g": 1.0,
+                  "r": 0.3791714310646057
                 }
               }
             ],
@@ -2150,21 +2176,21 @@
             "material": "eySa2QEq4I",
             "material_params": [
               {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.06971847265958786,
-                  "g": 0.8372472524642944,
-                  "r": 0.13124284148216248
-                }
-              },
-              {
                 "name": "kEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.29130998253822327,
                   "g": 0.8361638784408569,
                   "r": 0.3764858543872833
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.06971847265958786,
+                  "g": 0.8372472524642944,
+                  "r": 0.13124284148216248
                 }
               }
             ],
@@ -2299,21 +2325,21 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.012436103075742722,
-                  "g": 0.012436103075742722,
-                  "r": 0.3170977234840393
-                }
-              },
-              {
                 "name": "kEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.02561989799141884,
                   "g": 0.02561989799141884,
                   "r": 0.17975127696990967
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.012436103075742722,
+                  "g": 0.012436103075742722,
+                  "r": 0.3170977234840393
                 }
               }
             ],
@@ -2385,6 +2411,206 @@
       "resource_id": "tyNkXUoRPJ",
       "resource_name": "Blood Impact",
       "script_file": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "rAxSklk4hv",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Spaceship",
+      "nodes": [
+        {
+          "class": "Prgaus7Ure",
+          "drawable_item": {
+            "drawable": "_round_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "pEBDeuBGgb",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Skin",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 181.25205993652344,
+            "y": 85.85218048095703
+          }
+        },
+        {
+          "class": "28sWoyHNTX",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 89.0,
+            "y": 80.0
+          }
+        },
+        {
+          "class": "wz8y0ZBNW1",
+          "drawable_item": {
+            "drawable": "HG7v1manRC",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 0.0,
+                  "b": 0.5213549733161926,
+                  "g": 0.7546654343605042,
+                  "r": 0.7730830907821655
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.24641793966293335,
+                  "g": 0.8145113587379456,
+                  "r": 0.8593575954437256
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Exhaust",
+          "position": {
+            "x": -69.5,
+            "y": -5.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 28.76141357421875,
+            "y": 54.234493255615234
+          }
+        },
+        {
+          "class": "nXDrspw3Nd",
+          "drawable_item": {
+            "drawable": "MSCSkjl4Su",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Stars",
+          "position": {
+            "x": 58.5,
+            "y": 12.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1316.0,
+            "y": 1006.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "Prgaus7Ure"
+                }
+              },
+              {
+                "node": {
+                  "id": "wz8y0ZBNW1"
+                }
+              },
+              {
+                "node": {
+                  "id": "nXDrspw3Nd"
+                }
+              }
+            ],
+            "node": {
+              "id": "28sWoyHNTX"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "rAxSklk4hv",
+      "resource_name": "Spaceship",
+      "script_file": ""
     }
   ],
   "materials": [
@@ -2395,6 +2621,7 @@
       "id": "N5AZXzLO89",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Star Particle",
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
       "shader_src": "",
@@ -2465,6 +2692,7 @@
       "id": "eySa2QEq4I",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
       "shader_src": "",
@@ -2535,6 +2763,7 @@
       "id": "EJtsMLLYa9",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Energy Particle",
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
       "shader_src": "",
@@ -2605,6 +2834,7 @@
       "id": "J8J3JM8rC8",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Water Particle",
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
       "shader_src": "",
@@ -2675,6 +2905,7 @@
       "id": "8qJeAKQFtw",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Smoke Particle",
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
       "shader_src": "",
@@ -2745,6 +2976,7 @@
       "id": "SXaZ6dfqlS",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Blocky Particle",
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
       "shader_src": "",
@@ -2815,6 +3047,7 @@
       "id": "dZDA63fz8X",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "Round Particle",
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
       "shader_src": "",
@@ -2882,14 +3115,15 @@
       "color": {
         "a": 1.0,
         "b": 1.0,
-        "g": 0.9277179837226868,
-        "r": 0.6780346632003784
+        "g": 1.0,
+        "r": 1.0
       },
       "flags": {
         "PremultipliedAlpha": false
       },
       "gamma": 1.0,
       "id": "y6vxOLdMaI",
+      "name": "Background",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2943,6 +3177,7 @@
       },
       "gamma": 1.0,
       "id": "sv05U2SGGE",
+      "name": "snowflake",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2991,6 +3226,7 @@
       "id": "HA5M7RGQpK",
       "mag_filter": "Nearest",
       "min_filter": "Default",
+      "name": "Summoning Circle",
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
       "shader_src": "",
@@ -3066,6 +3302,7 @@
       },
       "gamma": 1.0,
       "id": "K9D27CRUwq",
+      "name": "Blood Splatter",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -3089,6 +3326,60 @@
         },
         "id": "LwFJ9fmS9O",
         "name": "blood-splatter-png-14061",
+        "type": "Filesystem"
+      },
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "gamma": 1.0,
+      "id": "pEBDeuBGgb",
+      "name": "Spaceship",
+      "particle_action": "None",
+      "rect": {
+        "h": 1.0,
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rect_name": "",
+      "resource_id": "pEBDeuBGgb",
+      "resource_name": "Spaceship",
+      "sampler_name": "",
+      "static": false,
+      "surface": "Transparent",
+      "texture": {
+        "colorspace": "Linear",
+        "file": "ws://textures/TM_1.png",
+        "flags": {
+          "AllowPacking": true,
+          "AllowResizing": true,
+          "PremulAlpha": false
+        },
+        "id": "AxFYHkjCan",
+        "name": "TM_1",
         "type": "Filesystem"
       },
       "texture_mag_filter": "Default",
@@ -3868,6 +4159,86 @@
       "resource_id": "LnUnRULvIo",
       "resource_name": "Blood",
       "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": -3.1415927410125732,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": -3.0,
+      "id": "HG7v1manRC",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.6200000047683716,
+      "max_lifetime": 2.450000047683716,
+      "max_point_size": 52.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 636.219970703125,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.41999998688697815,
+      "min_lifetime": 2.450000047683716,
+      "min_point_size": 26.0,
+      "min_time": 0.0,
+      "min_velocity": 484.9200134277344,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "placement": "Center",
+      "resource_id": "HG7v1manRC",
+      "resource_name": "Spaceship Exhaust",
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Wrap",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 3.1415927410125732,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "MSCSkjl4Su",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 3.4028234663852886e+38,
+      "max_point_size": 10.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 1.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 3.4028234663852886e+38,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "placement": "Inside",
+      "resource_id": "MSCSkjl4Su",
+      "resource_name": "Star Field",
+      "shape": "Rectangle"
     }
   ],
   "scenes": [
@@ -4005,8 +4376,8 @@
                     "y": 600.0
                   },
                   "size": {
-                    "h": 100.0,
-                    "w": 600.0
+                    "h": 147.0,
+                    "w": 603.0
                   },
                   "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"},{\"color\":{\"a\":0.16470588743686676,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"key\":\"border\",\"type\":\"Color\"}]}",
                   "text": "GroupBox",
@@ -4072,6 +4443,28 @@
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":24},{\"key\":\"text-size\",\"value\":24}]}",
                       "text": ">",
                       "type": "PushButton"
+                    },
+                    {
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "wMsZuJfM2r",
+                      "name": "background",
+                      "position": {
+                        "x": 200.0,
+                        "y": 100.0
+                      },
+                      "size": {
+                        "h": 23.0,
+                        "w": 211.0
+                      },
+                      "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"check-background\",\"type\":\"Color\"}]}",
+                      "text": "Background image",
+                      "type": "CheckBox"
                     }
                   ]
                 }
