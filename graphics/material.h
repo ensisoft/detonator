@@ -849,9 +849,8 @@ namespace gfx
         // Set the human-readable material class name.
         virtual void SetName(const std::string& name) = 0;
         // Create the shader for this material on the given device.
-        // Returns the new shader object or nullptr if the shader
-        // failed to compile.
-        virtual Shader* GetShader(Device& device) const = 0;
+        // Returns the new shader object or nullptr if the shader fails to compile.
+        virtual Shader* GetShader(const State& state, Device& device) const = 0;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const = 0;
@@ -1008,7 +1007,7 @@ namespace gfx
         const Color4f& GetBaseColor() const
         { return mColor; }
         virtual Type GetType() const override { return Type::Color; }
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override
@@ -1069,7 +1068,7 @@ namespace gfx
         void SetOffset(const glm::vec2& offset)
         { mOffset = offset; }
         virtual Type GetType() const override { return Type::Gradient; }
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override
@@ -1197,7 +1196,7 @@ namespace gfx
         { return mParticleAction; }
 
         virtual Type GetType() const override { return Type::Sprite; }
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
@@ -1302,7 +1301,7 @@ namespace gfx
         ParticleAction GetParticleAction() const
         { return mParticleAction; }
         virtual Type GetType() const override { return Type::Texture; }
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetProgramId() const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
@@ -1432,7 +1431,7 @@ namespace gfx
         { mName = name; }
         virtual Type GetType() const override { return Type::Custom; }
         virtual SurfaceType GetSurfaceType() const override { return mSurfaceType; }
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
         virtual std::string GetId() const override { return mClassId; }
         virtual std::string GetName() const override { return mName; }
@@ -1498,7 +1497,7 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const = 0;
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader failed to compile.
-        virtual Shader* GetShader(Device& device) const = 0;
+        virtual Shader* GetShader(const Environment& env, Device& device) const = 0;
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
         virtual std::string GetProgramId() const = 0;
@@ -1536,11 +1535,9 @@ namespace gfx
 
         // Apply the material properties to the given program object and set the rasterizer state.
         virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
-
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override
         { mClass->ApplyStaticState(device, program); }
-        virtual Shader* GetShader(Device& device) const override
-        { return mClass->GetShader(device); }
         virtual std::string GetProgramId() const override
         { return mClass->GetProgramId(); }
         virtual std::string GetClassId() const override
@@ -1586,7 +1583,7 @@ namespace gfx
         TextMaterial(TextBuffer&& text);
         virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
         virtual void ApplyStaticState(Device& device, Program& program) const override;
-        virtual gfx::Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual std::string GetProgramId() const override;
         virtual std::string GetClassId() const override;
         virtual void Update(float dt) override;

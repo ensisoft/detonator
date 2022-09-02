@@ -98,16 +98,18 @@ public:
         drawable_env.proj_matrix  = &mProjection;
         drawable_env.view_matrix  = &mViewMatrix;
         drawable_env.model_matrix = &kModelMatrix;
-
         Geometry* geom = drawable.Upload(drawable_env, *mDevice);
-        Program* prog = GetProgram(drawable, material);
-        if (!prog || !geom)
+        if (geom == nullptr)
             return;
 
-        Material::RasterState material_raster_state;
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
         material_env.render_points = style == Drawable::Style::Points;
+        Program* prog = GetProgram(drawable, material, drawable_env, material_env);
+        if (prog == nullptr)
+            return;
+
+        Material::RasterState material_raster_state;
         material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
         Drawable::RasterState drawable_raster_state;
@@ -163,31 +165,31 @@ public:
         // do the masking pass
         for (const auto& mask : mask_list)
         {
-            Drawable::Environment draw_env;
-            draw_env.editing_mode = mEditingMode;
-            draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &mViewMatrix;
-            draw_env.proj_matrix  = &mProjection;
-            draw_env.model_matrix = mask.transform;
-            Geometry* geom = mask.drawable->Upload(draw_env, *mDevice);
+            Drawable::Environment drawable_env;
+            drawable_env.editing_mode = mEditingMode;
+            drawable_env.pixel_ratio  = mPixelRatio;
+            drawable_env.view_matrix  = &mViewMatrix;
+            drawable_env.proj_matrix  = &mProjection;
+            drawable_env.model_matrix = mask.transform;
+            Geometry* geom = mask.drawable->Upload(drawable_env, *mDevice);
             if (geom == nullptr)
                 continue;
-            Program* prog = GetProgram(*mask.drawable, mask_material);
+
+            Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
+            material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
+            Program* prog = GetProgram(*mask.drawable, mask_material, drawable_env,material_env);
             if (prog == nullptr)
                 continue;
 
             Material::RasterState material_raster_state;
-            Material::Environment material_env;
-            material_env.editing_mode  = mEditingMode;
-            material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
             mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
 
             Drawable::RasterState drawable_raster_state;
-            mask.drawable->ApplyDynamicState(draw_env, *prog, drawable_raster_state);
+            mask.drawable->ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
             state.culling     = drawable_raster_state.culling;
             state.line_width  = drawable_raster_state.line_width;
             state.premulalpha = false;
-
             mDevice->Draw(*prog, *geom, state);
         }
 
@@ -199,33 +201,32 @@ public:
         // do the render pass.
         for (const auto& draw : draw_list)
         {
-            Drawable::Environment draw_env;
-            draw_env.editing_mode = mEditingMode;
-            draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.view_matrix  = &mViewMatrix;
-            draw_env.proj_matrix  = &mProjection;
-            draw_env.model_matrix = draw.transform;
-            Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
+            Drawable::Environment drawable_env;
+            drawable_env.editing_mode = mEditingMode;
+            drawable_env.pixel_ratio  = mPixelRatio;
+            drawable_env.view_matrix  = &mViewMatrix;
+            drawable_env.proj_matrix  = &mProjection;
+            drawable_env.model_matrix = draw.transform;
+            Geometry* geom = draw.drawable->Upload(drawable_env, *mDevice);
             if (geom == nullptr)
                 continue;
-            Program* prog = GetProgram(*draw.drawable, *draw.material);
+
+            Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
+            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+            Program* prog = GetProgram(*draw.drawable, *draw.material, drawable_env, material_env);
             if (prog == nullptr)
                 continue;
 
             Material::RasterState material_raster_state;
-            Material::Environment material_env;
-            material_env.editing_mode  = mEditingMode;
-            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
-
             draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
             state.blending    = material_raster_state.blending;
             state.premulalpha = material_raster_state.premultiplied_alpha;
 
             Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyDynamicState(draw_env, *prog, drawable_raster_state);
+            draw.drawable->ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
             state.line_width = drawable_raster_state.line_width;
             state.culling    = drawable_raster_state.culling;
-
             mDevice->Draw(*prog, *geom, state);
         }
     }
@@ -234,27 +235,28 @@ public:
     {
         for (const auto& draw : shapes)
         {
-            Drawable::Environment draw_env;
-            draw_env.editing_mode = mEditingMode;
-            draw_env.pixel_ratio  = mPixelRatio;
-            draw_env.proj_matrix  = &mProjection;
-            draw_env.view_matrix  = &mViewMatrix;
-            draw_env.model_matrix = draw.transform;
-            Geometry* geom = draw.drawable->Upload(draw_env, *mDevice);
+            Drawable::Environment drawable_env;
+            drawable_env.editing_mode = mEditingMode;
+            drawable_env.pixel_ratio  = mPixelRatio;
+            drawable_env.proj_matrix  = &mProjection;
+            drawable_env.view_matrix  = &mViewMatrix;
+            drawable_env.model_matrix = draw.transform;
+            Geometry* geom = draw.drawable->Upload(drawable_env, *mDevice);
             if (geom == nullptr)
                 continue;
-            Program* program = GetProgram(*draw.drawable, *draw.material);
+
+            Material::Environment material_env;
+            material_env.editing_mode  = mEditingMode;
+            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+            Program* program = GetProgram(*draw.drawable, *draw.material, drawable_env, material_env);
             if (program == nullptr)
                 continue;
 
             Material::RasterState material_raster_state;
-            Material::Environment material_env;
-            material_env.editing_mode  = mEditingMode;
-            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
             draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
 
             Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyDynamicState(draw_env, *program, drawable_raster_state);
+            draw.drawable->ApplyDynamicState(drawable_env, *program, drawable_raster_state);
 
             Device::State state;
             state.viewport     = MapToDevice(mViewport);
@@ -270,7 +272,10 @@ public:
     }
 
 private:
-    Program* GetProgram(const Drawable& drawable, const Material& material)
+    Program* GetProgram(const Drawable& drawable,
+                        const Material& material,
+                        const Drawable::Environment& drawable_environment,
+                        const Material::Environment& material_environment)
     {
         const std::string& name = drawable.GetProgramId() + "/" + material.GetProgramId();
         Program* prog = mDevice->FindProgram(name);
@@ -279,7 +284,7 @@ private:
             Shader* drawable_shader = drawable.GetShader(*mDevice);
             if (!drawable_shader || !drawable_shader->IsValid())
                 return nullptr;
-            Shader* material_shader = material.GetShader(*mDevice);
+            Shader* material_shader = material.GetShader(material_environment, *mDevice);
             if (!material_shader || !material_shader->IsValid())
                 return nullptr;
 

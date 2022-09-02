@@ -724,7 +724,7 @@ std::unique_ptr<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
     return klass;
 }
 
-Shader* ColorClass::GetShader(Device& device) const
+Shader* ColorClass::GetShader(const State& state, Device& device) const
 {
     if (auto* shader = device.FindShader(GetProgramId()))
         return shader;
@@ -814,7 +814,7 @@ bool ColorClass::FromJson2(const data::Reader& data)
     return true;
 }
 
-Shader* GradientClass::GetShader(Device& device) const
+Shader* GradientClass::GetShader(const State& state, Device& device) const
 {
     if (auto* shader = device.FindShader(GetProgramId()))
         return shader;
@@ -975,7 +975,7 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
     mFlags           = other.mFlags;
 }
 
-Shader* SpriteClass::GetShader(Device& device) const
+Shader* SpriteClass::GetShader(const State& state, Device& device) const
 {
     if (auto* shader = device.FindShader(GetProgramId()))
         return shader;
@@ -1392,7 +1392,7 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
     mFlags           = other.mFlags;
 }
 
-Shader* TextureMap2DClass::GetShader(Device& device) const
+Shader* TextureMap2DClass::GetShader(const State& state, Device& device) const
 {
     if (auto* shader = device.FindShader(GetProgramId()))
         return shader;
@@ -1856,7 +1856,7 @@ std::unordered_set<std::string> CustomMaterialClass::GetTextureMapNames() const
     return set;
 }
 
-gfx::Shader* CustomMaterialClass::GetShader(Device& device) const
+Shader* CustomMaterialClass::GetShader(const State& state, Device& device) const
 {
     if (auto* shader = device.FindShader(mClassId))
         return shader;
@@ -2178,6 +2178,16 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     raster.premultiplied_alpha = mClass->PremultipliedAlpha();
 }
 
+Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) const
+{
+    MaterialClass::State state;
+    state.editing_mode  = env.editing_mode;
+    state.render_points = env.render_points;
+    state.material_time = mRuntime;
+    state.uniforms      = mUniforms;
+    return mClass->GetShader(state, device);
+}
+
 TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
 {}
 TextMaterial::TextMaterial(TextBuffer&& text)
@@ -2234,7 +2244,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
 }
 void TextMaterial::ApplyStaticState(gfx::Device& device, gfx::Program& program) const
 {}
-Shader* TextMaterial::GetShader(gfx::Device& device) const
+Shader* TextMaterial::GetShader(const Environment& env, Device& device) const
 {
 constexpr auto* src = R"(
 #version 100
