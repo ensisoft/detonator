@@ -700,6 +700,7 @@ Workspace::Workspace(const QString& dir)
         const std::string color_name(magic_enum::enum_name(val));
         auto color = gfx::CreateMaterialClassFromColor(gfx::Color4f(val));
         color.SetId("_" + color_name);
+        color.SetName("_" + color_name);
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }
 

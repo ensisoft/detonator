@@ -781,6 +781,11 @@ void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
     menu.exec(QCursor::pos());
 }
 
+void MaterialWidget::on_materialName_textChanged(const QString& text)
+{
+    mMaterial->SetName(GetValue(mUI.materialName));
+}
+
 void MaterialWidget::on_materialType_currentIndexChanged(int)
 {
     // important: make sure not to change the material class id
