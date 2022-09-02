@@ -34,5 +34,5 @@ void main()
     float s = mod(kTime, time) / time;
     float p = sin(s*3.147) * 0.5 + 0.5;
     float a = texture2D(kTexture0, vTexCoord).w;
-    gl_FragColor = (kBaseColor * a * 0.7) + vec4(0.3) * a * SlidingGlint();
+    gl_FragColor.rgb = kBaseColor.rgb * a + vec3(1.0) * SlidingGlint() * a;
 }

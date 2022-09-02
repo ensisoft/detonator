@@ -602,6 +602,7 @@
       "gamma": 1.0,
       "id": "Fj66N4PDUG",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -785,6 +786,7 @@
       },
       "gamma": 1.0,
       "id": "LPH6tgo9eN",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -841,6 +843,7 @@
       "gamma": 1.0,
       "id": "sUAHqYkAPp",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -916,6 +919,7 @@
       },
       "gamma": 1.0,
       "id": "8UZOHE5ijx",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,

@@ -631,6 +631,80 @@
             },
             "shape": "AABB"
           }
+        },
+        {
+          "class": "8HaTDAeRBy",
+          "drawable_item": {
+            "drawable": "7pLg2qp4Pp",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HyJsrevpdz",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Left exhaust particle",
+          "position": {
+            "x": -14.5,
+            "y": 26.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 42.350006103515625,
+            "y": 75.45004272460938
+          }
+        },
+        {
+          "class": "7BCvPF2tI9",
+          "drawable_item": {
+            "drawable": "7pLg2qp4Pp",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "HyJsrevpdz",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Right exhaust particle",
+          "position": {
+            "x": 8.5,
+            "y": 29.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 36.310943603515625,
+            "y": 64.10287475585938
+          }
         }
       ],
       "render_tree": {
@@ -669,6 +743,16 @@
                       {
                         "node": {
                           "id": "MFH7NpW3GP"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "8HaTDAeRBy"
+                        }
+                      },
+                      {
+                        "node": {
+                          "id": "7BCvPF2tI9"
                         }
                       }
                     ],
@@ -1148,54 +1232,6 @@
           }
         },
         {
-          "class": "sWMIUMAUPt",
-          "drawable_item": {
-            "drawable": "hzaCI0I5sF",
-            "flags": {
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "HyJsrevpdz",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.7215686440467834,
-                  "g": 0.4745098054409027,
-                  "r": 0.062745101749897
-                }
-              }
-            ],
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Exhaust",
-          "position": {
-            "x": 0.7083249092102051,
-            "y": 38.20832824707031
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 207.04705810546875,
-            "y": 176.97109985351563
-          }
-        },
-        {
           "class": "2tozdk6Tzf",
           "flags": {
             "VisibleInEditor": true
@@ -1256,11 +1292,6 @@
                   {
                     "node": {
                       "id": "XEEkJGHbxM"
-                    }
-                  },
-                  {
-                    "node": {
-                      "id": "sWMIUMAUPt"
                     }
                   }
                 ],
@@ -2310,75 +2341,6 @@
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
-        "LimitLifetime": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "5697MGBZ5q",
-      "idle_track": "",
-      "lifetime": 0.20000000298023224,
-      "name": "Player Exhaust",
-      "nodes": [
-        {
-          "class": "hXn3pS1JN3",
-          "drawable_item": {
-            "drawable": "XKQ1uRt5ij",
-            "flags": {
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "HyJsrevpdz",
-            "renderpass": "Draw",
-            "renderstyle": "Solid",
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": -0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 416.0,
-            "y": 494.0
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "hXn3pS1JN3"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "5697MGBZ5q",
-      "resource_name": "Player Exhaust",
-      "script_file": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
         "LimitLifetime": false,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -2647,6 +2609,7 @@
       "gamma": 1.0,
       "id": "rrmZfWe97e",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -2776,6 +2739,7 @@
       },
       "gamma": 1.0,
       "id": "4IluygNgeR",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2829,6 +2793,7 @@
       },
       "gamma": 0.800000011920929,
       "id": "nQUmTOnClw",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2882,6 +2847,7 @@
       },
       "gamma": 1.0,
       "id": "lOfMr3YBtI",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2901,7 +2867,7 @@
         "flags": {
           "AllowPacking": true,
           "AllowResizing": true,
-          "PremulAlpha": false
+          "PremulAlpha": true
         },
         "id": "7ozeiqjW51",
         "name": "asteroid_dark",
@@ -2917,7 +2883,7 @@
       "texture_velocity": {
         "x": 0.0,
         "y": 0.0,
-        "z": 2.0
+        "z": 0.0
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
@@ -2938,6 +2904,7 @@
       "gamma": 1.0,
       "id": "TNyQSW6bB6",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -3286,6 +3253,7 @@
       "gamma": 1.0,
       "id": "1lANs9A0yJ",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -3631,6 +3599,7 @@
       },
       "gamma": 1.0,
       "id": "s4zt0bFnAL",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -3687,6 +3656,7 @@
       "gamma": 1.0,
       "id": "vg5yQskPIv",
       "looping": true,
+      "name": "",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -3757,6 +3727,7 @@
       "id": "r9CF1o27zZ",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "r9CF1o27zZ",
       "resource_name": "Shockwave2",
       "shader_src": "",
@@ -3823,6 +3794,7 @@
       "id": "2a488SIQsU",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "2a488SIQsU",
       "resource_name": "Shockwave",
       "shader_src": "",
@@ -3837,7 +3809,7 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rect_name": "",
+          "rect_name": "kTextureRect",
           "sampler_name": "kTexture0",
           "texture": {
             "function": "Noise",
@@ -3901,6 +3873,7 @@
       },
       "gamma": 1.0,
       "id": "CopZZzjQd4",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -3935,7 +3908,7 @@
       },
       "texture_velocity": {
         "x": 0.0,
-        "y": -0.10000000149011612,
+        "y": 0.0,
         "z": 0.0
       },
       "texture_wrap_x": "Repeat",
@@ -3949,6 +3922,7 @@
       "id": "EgsgPADEqi",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "EgsgPADEqi",
       "resource_name": "BluePulse",
       "shader_src": "",
@@ -3976,6 +3950,7 @@
       "id": "HnopPLXPe5",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "HnopPLXPe5",
       "resource_name": "RedPulse",
       "shader_src": "",
@@ -4003,6 +3978,7 @@
       "id": "Kb5sHrP5bL",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "Kb5sHrP5bL",
       "resource_name": "Blast Title",
       "shader_src": "",
@@ -4017,23 +3993,23 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rect_name": "",
+          "rect_name": "kTexture0Rect",
           "sampler_name": "kTexture0",
           "texture": {
             "buffer": {
-              "height": 128,
+              "height": 118,
               "horizontal_alignment": "AlignCenter",
               "texts": [
                 {
                   "font_file": "ws://fonts/MAXI_L_S.TTF",
                   "font_size": 78,
                   "line_height": 1.5,
-                  "string": "Blast!",
+                  "string": "BLAST!",
                   "underline": false
                 }
               ],
               "vertical_alignment": "AlignCenter",
-              "width": 512
+              "width": 635
             },
             "id": "JQw78NDo0F",
             "name": "TextBuffer",
@@ -4048,9 +4024,9 @@
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
-            "b": 0.8901960849761963,
-            "g": 0.607797384262085,
-            "r": 0.05098039284348488
+            "b": 0.0941176488995552,
+            "g": 0.0941176488995552,
+            "r": 0.7647058963775635
           }
         },
         {
@@ -4073,6 +4049,7 @@
       },
       "gamma": 1.0,
       "id": "OFJHLiHeaP",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4126,6 +4103,7 @@
       },
       "gamma": 1.0,
       "id": "AuNZPvQDrI",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4179,6 +4157,7 @@
       },
       "gamma": 1.0,
       "id": "RKmQZx8H1s",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4232,6 +4211,7 @@
       },
       "gamma": 1.0,
       "id": "M0ePA9uzA5",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4285,6 +4265,7 @@
       },
       "gamma": 1.0,
       "id": "pGHzP0FH33",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4333,6 +4314,7 @@
       "id": "Z2vMjFgL9w",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "Z2vMjFgL9w",
       "resource_name": "Credit Button Normal",
       "shader_src": "",
@@ -4375,6 +4357,7 @@
       "id": "IRvSQ66eD6",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "IRvSQ66eD6",
       "resource_name": "Options Button Normal",
       "shader_src": "",
@@ -4417,6 +4400,7 @@
       "id": "2HWYlifK1N",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "2HWYlifK1N",
       "resource_name": "Exit button Normal",
       "shader_src": "",
@@ -4459,6 +4443,7 @@
       "id": "tetreytAkz",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "tetreytAkz",
       "resource_name": "Play Button Normal",
       "shader_src": "",
@@ -4506,6 +4491,7 @@
       },
       "gamma": 1.0,
       "id": "HyJsrevpdz",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4559,6 +4545,7 @@
       },
       "gamma": 1.0,
       "id": "5YQ8ZqObX7",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4612,6 +4599,7 @@
       },
       "gamma": 1.0,
       "id": "lu4EmBCEzh",
+      "name": "",
       "resource_id": "lu4EmBCEzh",
       "resource_name": "Background",
       "static": false,
@@ -4630,6 +4618,7 @@
       },
       "gamma": 1.0,
       "id": "kqbXBoi7yD",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -4677,6 +4666,9 @@
       "alpha_over_dist": -0.30000001192092896,
       "alpha_over_time": 0.0,
       "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
       "direction_sector_size": 0.3490658402442932,
       "direction_sector_start_angle": 1.3962633609771729,
       "gravity": {
@@ -4693,89 +4685,30 @@
       "max_alpha": 1.0,
       "max_lifetime": 10.0,
       "max_point_size": 10.0,
+      "max_time": 3.4028234663852886e+38,
       "max_velocity": 1.0,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
       "min_lifetime": 1.0,
       "min_point_size": 1.0,
+      "min_time": 0.0,
       "min_velocity": 0.0,
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 100.0,
+      "placement": "Inside",
       "resource_id": "qklhbbEm10",
-      "resource_name": "BulletTrail"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -1.0,
-      "boundary": "Kill",
-      "direction_sector_size": 0.3490658402442932,
-      "direction_sector_start_angle": 1.3962633609771729,
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "hzaCI0I5sF",
-      "init_rect_height": 0.0,
-      "init_rect_width": 0.0,
-      "init_rect_xpos": 0.5,
-      "init_rect_ypos": 0.5,
-      "max_alpha": 1.0,
-      "max_lifetime": 10.0,
-      "max_point_size": 20.0,
-      "max_velocity": 0.5,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 1.0,
-      "min_point_size": 10.0,
-      "min_velocity": 0.0,
-      "mode": "Continuous",
-      "motion": "Linear",
-      "num_particles": 40.0,
-      "resource_id": "hzaCI0I5sF",
-      "resource_name": "Ship Exhaust"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -1.0,
-      "boundary": "Kill",
-      "direction_sector_size": 0.3490658402442932,
-      "direction_sector_start_angle": 1.3962633609771729,
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "XKQ1uRt5ij",
-      "init_rect_height": 0.0,
-      "init_rect_width": 0.0,
-      "init_rect_xpos": 0.5,
-      "init_rect_ypos": 0.5,
-      "max_alpha": 1.0,
-      "max_lifetime": 10.0,
-      "max_point_size": 20.0,
-      "max_velocity": 0.5,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 1.0,
-      "min_point_size": 10.0,
-      "min_velocity": 0.0,
-      "mode": "Once",
-      "motion": "Linear",
-      "num_particles": 2.0,
-      "resource_id": "XKQ1uRt5ij",
-      "resource_name": "Player Exhaust"
+      "resource_name": "BulletTrail",
+      "shape": "Rectangle"
     },
     {
       "alpha_over_dist": 0.0,
       "alpha_over_time": 0.0,
       "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
       "direction_sector_size": 6.2831854820251465,
       "direction_sector_start_angle": 0.0,
       "gravity": {
@@ -4792,23 +4725,30 @@
       "max_alpha": 1.0,
       "max_lifetime": 10.0,
       "max_point_size": 40.0,
+      "max_time": 3.4028234663852886e+38,
       "max_velocity": 1.0,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
       "min_lifetime": 1.0,
       "min_point_size": 20.0,
+      "min_time": 0.0,
       "min_velocity": 1.0,
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 500.0,
+      "placement": "Inside",
       "resource_id": "8exJylNDfi",
-      "resource_name": "Shockwave"
+      "resource_name": "Shockwave",
+      "shape": "Rectangle"
     },
     {
       "alpha_over_dist": 0.0,
       "alpha_over_time": 0.0,
       "boundary": "Wrap",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
       "direction_sector_size": 0.0,
       "direction_sector_start_angle": 0.0,
       "gravity": {
@@ -4824,19 +4764,63 @@
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
       "max_lifetime": 3.4028234663852886e+38,
-      "max_point_size": 10.0,
-      "max_velocity": 1.0,
+      "max_point_size": 7.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.1599999964237213,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
       "min_lifetime": 3.4028234663852886e+38,
-      "min_point_size": 1.0,
-      "min_velocity": 0.0,
+      "min_point_size": 2.0,
+      "min_time": 0.0,
+      "min_velocity": 0.03999999910593033,
       "mode": "Once",
       "motion": "Linear",
       "num_particles": 100.0,
+      "placement": "Inside",
       "resource_id": "9o7zbhlIlp",
-      "resource_name": "Stars"
+      "resource_name": "Stars",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 1.5707963705062866,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "7pLg2qp4Pp",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 0.550000011920929,
+      "max_point_size": 31.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 422.57000732421875,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 0.27000001072883606,
+      "min_point_size": 7.0,
+      "min_time": 0.0,
+      "min_velocity": 259.70001220703125,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "num_particles": 100.0,
+      "placement": "Center",
+      "resource_id": "7pLg2qp4Pp",
+      "resource_name": "Exhaust Particles",
+      "shape": "Circle"
     }
   ],
   "scenes": [
