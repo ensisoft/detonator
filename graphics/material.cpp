@@ -750,6 +750,7 @@ void main()
     ShaderData data;
     data.gamma      = mGamma;
     data.base_color = mColor;
+    shader->SetName(mStatic ? mName : "ColorShader");
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -862,6 +863,7 @@ void main()
     data.color_map[2] = mColorMap[2];
     data.color_map[3] = mColorMap[3];
     data.gradient_offset = mOffset;
+    shader->SetName(mStatic ? mName : "GradientShader");
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -1088,6 +1090,7 @@ void main()
     data.texture_scale    = mTextureScale;
     data.texture_velocity = mTextureVelocity;
     data.texture_rotation = mTextureRotation;
+    shader->SetName(mStatic ? mName : "SpriteShader");
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -1498,6 +1501,7 @@ void main()
     data.texture_scale    = mTextureScale;
     data.texture_velocity = mTextureVelocity;
     data.texture_rotation = mTextureRotation;
+    shader->SetName(mStatic ? mName : "Texture2DShader");
     shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
     return shader;
 }
@@ -1857,6 +1861,7 @@ gfx::Shader* CustomMaterialClass::GetShader(Device& device) const
     if (auto* shader = device.FindShader(mClassId))
         return shader;
     auto* shader = device.MakeShader(mClassId);
+    shader->SetName(mName);
     if (!mShaderSrc.empty())
         shader->CompileSource(mShaderSrc);
     else shader->CompileFile(mShaderUri);
@@ -2245,6 +2250,7 @@ void main() {
         )";
     auto* shader = device.MakeShader("text-shader");
     shader->CompileSource(src);
+    shader->SetName("TextShader");
     return shader;
 }
 std::string TextMaterial::GetProgramId() const

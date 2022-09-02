@@ -2158,6 +2158,7 @@ private:
             if (mShader)
             {
                 GL_CALL(glDeleteShader(mShader));
+                DEBUG("Deleted shader object. [name='%1', handle=[%2]", mName, mShader);
             }
         }
         virtual bool CompileFile(const std::string& URI) override
@@ -2222,7 +2223,7 @@ private:
             const auto& buffer = gfx::LoadResource(URI);
             if (!buffer)
             {
-                ERROR("Failed to load shader source: '%1'", URI);
+                ERROR("Failed to load shader source file. [name='%1', uri='%2']", mName, URI);
                 return false;
             }
 
@@ -2230,9 +2231,10 @@ private:
             const char* end = beg + buffer->GetSize();
             if (!CompileSource(std::string(beg, end)))
             {
-                ERROR("Failed to compile shader source file: '%1'", URI);
+                ERROR("Failed to compile shader source file. [name='%1', uri='%2']", mName, URI);
                 return false;
             }
+            DEBUG("Compiled shader source file. [name='%1', uri='%2']", mName, URI);
             return true;
         }
 
@@ -2250,13 +2252,13 @@ private:
             }
             if (type == GL_NONE)
             {
-                ERROR("Failed to identify shader type.");
+                ERROR("Failed to identify shader type. [name='%1']", mName);
                 return false;
             }
 
             GLint status = 0;
             GLint shader = mGL.glCreateShader(type);
-            DEBUG("New shader %1 %2", shader, GLEnumToStr(type));
+            DEBUG("Creating new GL shader object. [name='%1', type='%2']", mName, GLEnumToStr(type));
 
             const char* source_ptr = source.c_str();
             GL_CALL(glShaderSource(shader, 1, &source_ptr, nullptr));
@@ -2273,14 +2275,12 @@ private:
             if (status == 0)
             {
                 GL_CALL(glDeleteShader(shader));
-                ERROR("Shader compile error %1", compile_info);
+                ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
                 return false;
             }
             else
             {
-                DEBUG("Shader was built successfully!");
-                if (!compile_info.empty())
-                    INFO("Shader info: %1", compile_info);
+                DEBUG("Shader was built successfully. [name='%1', info='%2']", mName, compile_info);
             }
 
             if (mShader)
@@ -2293,6 +2293,8 @@ private:
         }
         virtual bool IsValid() const override
         { return mShader != 0; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
 
         GLuint GetName() const
         { return mShader; }
@@ -2303,6 +2305,7 @@ private:
     private:
         GLuint mShader  = 0;
         GLuint mVersion = 0;
+        std::string mName;
     };
     struct Extensions;
 
