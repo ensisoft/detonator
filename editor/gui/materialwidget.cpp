@@ -214,6 +214,9 @@ void MaterialWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionReloadShaders);
+    bar.addAction(mUI.actionReloadTextures);
 }
 void MaterialWidget::AddActions(QMenu& menu)
 {
@@ -442,6 +445,15 @@ void MaterialWidget::on_actionRemoveTexture_triggered()
     qDeleteAll(items);
 
     GetMaterialProperties();
+}
+
+void MaterialWidget::on_actionReloadShaders_triggered()
+{
+    this->ReloadShaders();
+}
+void MaterialWidget::on_actionReloadTextures_triggered()
+{
+    this->ReloadTextures();
 }
 
 void MaterialWidget::on_btnReloadShader_clicked()

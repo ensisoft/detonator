@@ -76,6 +76,8 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionReloadShaders_triggered();
+        void on_actionReloadTextures_triggered();
         void on_actionRemoveTexture_triggered();
         void on_btnReloadShader_clicked();
         void on_btnSelectShader_clicked();
