@@ -272,6 +272,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuApplication">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Application</string>
     </property>
@@ -285,6 +288,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <addaction name="actionFullscreen"/>
     <addaction name="separator"/>
     <addaction name="actionEventLog"/>
+    <addaction name="separator"/>
+    <addaction name="actionReloadShaders"/>
+    <addaction name="actionReloadTextures"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -305,6 +311,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <addaction name="actionLogShowError"/>
    </widget>
    <widget class="QMenu" name="menuSurface">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Surface</string>
     </property>
@@ -323,6 +332,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -345,6 +357,8 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    <addaction name="separator"/>
    <addaction name="actionFullscreen"/>
    <addaction name="actionEventLog"/>
+   <addaction name="actionReloadShaders"/>
+   <addaction name="actionReloadTextures"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="features">
@@ -416,6 +430,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   </widget>
   <action name="actionPause">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -542,6 +559,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
@@ -555,6 +575,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   </action>
   <action name="actionToggleDebugLog">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -584,6 +607,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    </property>
   </action>
   <action name="actionScreenshot">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/32x32_ico_png/camera.png</normaloff>:/32x32_ico_png/camera.png</iconset>
@@ -600,6 +626,9 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     <bool>true</bool>
    </property>
    <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -633,6 +662,36 @@ font: 22pt &quot;Sans Serif&quot;;</string>
   <action name="action1280x720">
    <property name="text">
     <string>1280x720</string>
+   </property>
+  </action>
+  <action name="actionReloadShaders">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Shaders</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionReloadTextures">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload Textures</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+T</string>
    </property>
   </action>
  </widget>
