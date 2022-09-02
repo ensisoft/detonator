@@ -1094,7 +1094,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     connect(mScene.get(), &AudioGraphScene::selectionChanged, this, &AudioWidget::SceneSelectionChanged);
     mUI.view->setScene(mScene.get());
     mUI.view->setInteractive(true);
-    mUI.view->setBackgroundBrush(QBrush(QColor(0.2f*255, 0.3f*255, 0.4f*255)));
+    mUI.view->setBackgroundBrush(QBrush(QColor(0x23, 0x23, 0x23, 0xff)));
 
     // start periodic refresh timer. this is low frequency timer that is used
     // to update the widget UI if needed, such as change the icon/window title
