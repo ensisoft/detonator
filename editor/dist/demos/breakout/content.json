@@ -1722,6 +1722,7 @@
       },
       "gamma": 1.0,
       "id": "Rs00QF2N4E",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1775,6 +1776,7 @@
       },
       "gamma": 1.0,
       "id": "vSs0xqS3fS",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1828,6 +1830,7 @@
       },
       "gamma": 1.0,
       "id": "4zi9n5RIXq",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1881,6 +1884,7 @@
       },
       "gamma": 1.0,
       "id": "KeITJIrx1I",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1934,6 +1938,7 @@
       },
       "gamma": 1.0,
       "id": "EtyRugQve2",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1987,6 +1992,7 @@
       },
       "gamma": 1.0,
       "id": "MUQDA03a25",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2040,6 +2046,7 @@
       },
       "gamma": 1.0,
       "id": "gRY0JNbDCj",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2093,6 +2100,7 @@
       },
       "gamma": 1.0,
       "id": "9wG7A0qhYE",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2146,6 +2154,7 @@
       },
       "gamma": 0.800000011920929,
       "id": "OgRnbBquEI",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2199,6 +2208,7 @@
       },
       "gamma": 1.0,
       "id": "OAFWPyRj28",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2260,6 +2270,7 @@
       },
       "gamma": 1.0,
       "id": "JmwlIMU4Nr",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2321,6 +2332,7 @@
       },
       "gamma": 1.0,
       "id": "7tJg4l9xmT",
+      "name": "",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -2382,6 +2394,7 @@
       },
       "gamma": 1.0,
       "id": "B3ANINBSbA",
+      "name": "",
       "resource_id": "B3ANINBSbA",
       "resource_name": "My Material",
       "static": false,
@@ -2418,6 +2431,7 @@
       },
       "gamma": 0.800000011920929,
       "id": "1Oau6Iem5r",
+      "name": "",
       "offset": {
         "x": 0.5,
         "y": 0.5
@@ -2435,6 +2449,7 @@
       "id": "rAn0G88CKj",
       "mag_filter": "Default",
       "min_filter": "Default",
+      "name": "",
       "resource_id": "rAn0G88CKj",
       "resource_name": "Sliding Glint",
       "shader_src": "",

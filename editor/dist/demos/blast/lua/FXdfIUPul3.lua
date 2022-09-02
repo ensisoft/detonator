@@ -1,9 +1,7 @@
 -- Entity 'Ship2' script.
-
 -- This script will be called for every instance of 'Ship2'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 local tick_counter = 0
 
 BulletAction = {
@@ -57,9 +55,9 @@ end
 
 -- Called on every iteration of game loop.
 function Update(ship2, game_time, dt)
-    --move ship forward
+    -- move ship forward
     local ship_body = ship2:FindNodeByClassName('Body')
-    local ship_pos  = ship_body:GetTranslation()
+    local ship_pos = ship_body:GetTranslation()
     ship_pos.x = ship_pos.x + dt * ship2.velocity.x
     ship_pos.y = ship_pos.y + dt * ship2.velocity.y
     local velocity = ship2.velocity
@@ -67,11 +65,11 @@ function Update(ship2, game_time, dt)
     if ship_pos.x >= 550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = 550
-        ship2:PlayAnimationByName('Turn Exhaust Right')
+        -- ship2:PlayAnimationByName('Turn Exhaust Right')
     elseif ship_pos.x <= -550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = -550
-        ship2:PlayAnimationByName('Turn Exhaust Left')
+        -- ship2:PlayAnimationByName('Turn Exhaust Left')
     end
     ship2.velocity = velocity
     ship_body:SetTranslation(ship_pos)
