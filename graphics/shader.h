@@ -33,8 +33,6 @@ namespace gfx
         // shader does not change, i.e. the shader will retain
         // any previously compiled state.
         virtual bool CompileSource(const std::string& source) = 0;
-        // todo:
-        virtual bool CompileFile(const std::string& file) = 0;
         // Returns true if the shader has been compiled successfully.
         virtual bool IsValid() const = 0;
         // Set a (human-readable) name for the shader object.
