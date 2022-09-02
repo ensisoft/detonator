@@ -364,6 +364,13 @@ namespace engine
         // Returns false if not available.
         virtual bool GetStats(Stats* stats) const { return false; }
 
+        // Ask the engine to reload resources such as shaders, textures etc.
+        enum class ResourceType {
+            Textures = 0x1,
+            Shaders  = 0x2
+        };
+        virtual void ReloadResources(unsigned bits) {};
+
         // Ask the engine to take a screenshot of the current default (window)
         // rendering surface and write it out as an image file.
         virtual void TakeScreenshot(const std::string& filename) const {}

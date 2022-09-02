@@ -533,6 +533,24 @@ public:
         gfx::WritePNG(rgb, filename);
         INFO("Wrote screenshot '%1'", filename);
     }
+    virtual void ReloadResources(unsigned bits) override
+    {
+        // okay a bit weird this function is about "reload"
+        // but we're deleting here.. so for now we just delete
+        // stuff and that will cause reload when stuff is needed
+        // to draw again. this must be done this way since the
+        // device objects (such as textures) don't know where the
+        // data has come from. alternative would be to go over the
+        // materials and their textures/programs etc but that's more work
+
+        if (bits & (unsigned)Engine::ResourceType::Textures)
+            mDevice->DeleteTextures();
+        if (bits & (unsigned)Engine::ResourceType::Shaders)
+        {
+            mDevice->DeleteShaders();
+            mDevice->DeletePrograms();
+        }
+    }
 
     virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {

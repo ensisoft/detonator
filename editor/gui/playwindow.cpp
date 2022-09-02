@@ -287,6 +287,11 @@ public:
             ret += pair.second->GetSize();
         return ret;
     }
+    void BlowCaches()
+    {
+        mGameDataBuffers.clear();
+        mGraphicsBuffers.clear();
+    }
 private:
     QString ResolveURI(const std::string& URI) const
     {
@@ -895,7 +900,7 @@ void PlayWindow::DoAppInit()
 
         if (!mEngine->Load())
         {
-            Barf("Game failed to load. Please see the log for more details.");
+            Barf("Engine failed to load. Please see the log for more details.");
             return;
         }
 
@@ -914,10 +919,14 @@ void PlayWindow::DoAppInit()
 
         mFrameTimer.start();
         mInitDone = true;
+
+        SetEnabled(mUI.toolBar,         true);
+        SetEnabled(mUI.menuApplication, true);
+        SetEnabled(mUI.menuSurface,     true);
     }
     catch (const std::exception& e)
     {
-        DEBUG("Exception in app init.");
+        DEBUG("Exception in engine init.");
         Barf(e.what());
     }
 }
@@ -1020,7 +1029,7 @@ void PlayWindow::on_actionScreenshot_triggered()
     }
     catch (const std::exception& e)
     {
-        ERROR("Exception in App::TakeScreenshot.");
+        ERROR("Exception in Engine::TakeScreenshot.");
         ERROR(e.what());
     }
 }
@@ -1036,6 +1045,21 @@ void PlayWindow::on_actionEventLog_triggered()
     }
     if (!mWinEventLog->isVisible())
         mWinEventLog->show();
+}
+
+void PlayWindow::on_actionReloadShaders_triggered()
+{
+    if (!mEngine || !mInitDone)
+        return;
+    mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Shaders);
+    mResourceLoader->BlowCaches();
+}
+void PlayWindow::on_actionReloadTextures_triggered()
+{
+    if (!mEngine || !mInitDone)
+        return;
+    mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Textures);
+    mResourceLoader->BlowCaches();
 }
 
 void PlayWindow::on_btnApplyFilter_clicked()
@@ -1308,6 +1332,9 @@ void PlayWindow::Barf(const std::string& msg)
     mContainer->setVisible(false);
     mUI.problem->setVisible(true);
     SetValue(mUI.lblError, msg);
+    SetEnabled(mUI.toolBar,         false);
+    SetEnabled(mUI.menuApplication, false);
+    SetEnabled(mUI.menuSurface,     false);
 }
 
 } // namespace

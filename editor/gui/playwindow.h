@@ -101,6 +101,8 @@ namespace gui
         void on_actionFullscreen_triggered();
         void on_actionScreenshot_triggered();
         void on_actionEventLog_triggered();
+        void on_actionReloadShaders_triggered();
+        void on_actionReloadTextures_triggered();
         void on_btnApplyFilter_clicked();
         void on_log_customContextMenuRequested(QPoint point);
 
