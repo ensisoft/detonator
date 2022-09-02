@@ -466,7 +466,7 @@ void GfxWindow::BeginFrame()
     }
 }
 // static
-void GfxWindow::EndFrame()
+void GfxWindow::EndFrame(unsigned sleep)
 {
     bool did_vsync = false;
 
@@ -488,13 +488,13 @@ void GfxWindow::EndFrame()
     if (should_have_vsync && did_vsync)
         return;
 
-    if (should_have_vsync && !did_vsync)
+    if (!did_vsync)
     {
         // this is ugly but is there something else we could do?
         // ideally wait for some time *or* until there's pending user
         // input/message from the underlying OS.
         // Maybe a custom QAbstractEventDispatcher implementation could work.
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
     }
 }
 // static

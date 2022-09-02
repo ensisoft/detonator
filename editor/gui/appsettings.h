@@ -79,6 +79,8 @@ namespace gui
         QColor grid_color  = {0xe3, 0xe3, 0xe3, 50};
         // Whether to try to VSYNC or not.
         bool vsync = false;
+        // Delay in milliseconds between frame swaps when non-vsync
+        unsigned frame_delay = 0u;
     };
 
 } // namespace
