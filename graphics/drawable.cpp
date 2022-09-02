@@ -1799,6 +1799,10 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
     else if (state.time > mParams.max_time)
         return false;
 
+    if (mParams.mode == SpawnPolicy::Continuous ||
+        mParams.mode == SpawnPolicy::Maintain)
+        return true;
+
     return !state.particles.empty();
 }
 
