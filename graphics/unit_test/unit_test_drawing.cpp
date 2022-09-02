@@ -1165,6 +1165,7 @@ void unit_test_material_textures_bind_fail()
 
 void unit_test_material_uniform_folding()
 {
+    gfx::MaterialClass::State state;
 
     // fold uniforms into consts in the GLSL when the material is
     // marked static.
@@ -1175,7 +1176,7 @@ void unit_test_material_uniform_folding()
         klass.SetGamma(0.8f);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
-        klass.GetShader(device);
+        klass.GetShader(state, device);
 
         const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
@@ -1195,7 +1196,7 @@ void unit_test_material_uniform_folding()
         klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
         klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
         klass.SetStatic(true);
-        klass.GetShader(device);
+        klass.GetShader(state, device);
 
         const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
@@ -1223,7 +1224,7 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        klass.GetShader(device);
+        klass.GetShader(state, device);
 
         const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
@@ -1250,7 +1251,7 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        klass.GetShader(device);
+        klass.GetShader(state, device);
 
         const auto& shader = device.GetShader(0);
         const auto& source = shader.GetSource();
