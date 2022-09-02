@@ -264,6 +264,7 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "show_origin",                &mUISettings.show_origin);
     settings.GetValue("Settings", "show_grid",                  &mUISettings.show_grid);
     settings.GetValue("Settings", "vsync",                      &mSettings.vsync);
+    settings.GetValue("Settings", "frame_delay",                &mSettings.frame_delay);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
@@ -794,7 +795,7 @@ void MainWindow::iterateGameLoop()
 
     UpdateStats();
 
-    GfxWindow::EndFrame();
+    GfxWindow::EndFrame(mSettings.frame_delay);
     GfxWindow::CleanGarbage();
     // could be changed through the widget's hotkey handler.
     mSettings.vsync = GfxWindow::GetVSYNC();
@@ -2600,6 +2601,7 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "show_origin", mUISettings.show_origin);
     settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
     settings.SetValue("Settings", "vsync", mSettings.vsync);
+    settings.SetValue("Settings", "frame_delay", mSettings.frame_delay);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
     settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
