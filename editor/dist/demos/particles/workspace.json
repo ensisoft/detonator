@@ -106,6 +106,7 @@
         "checked_for_packing": 1
     },
     "HG7v1manRC": {
+        "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -384,6 +385,7 @@
         "checked_for_packing": 1
     },
     "rAxSklk4hv": {
+        "checked_for_packing": 1
     },
     "sv05U2SGGE": {
         "checked_for_packing": 1
@@ -423,7 +425,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
