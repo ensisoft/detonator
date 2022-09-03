@@ -60,6 +60,7 @@
         "mapping_count": 6
     },
     "2a488SIQsU": {
+        "checked_for_packing": 1
     },
     "4IluygNgeR": {
         "checked_for_packing": 1
@@ -80,8 +81,10 @@
         "checked_for_packing": 1
     },
     "7NAD3QgFlq": {
+        "checked_for_packing": 1
     },
     "7pLg2qp4Pp": {
+        "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -107,6 +110,7 @@
         "use_size_derivatives": true
     },
     "9o7zbhlIlp": {
+        "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -138,6 +142,7 @@
         "checked_for_packing": 1
     },
     "CopZZzjQd4": {
+        "checked_for_packing": 1
     },
     "EgsgPADEqi": {
         "checked_for_packing": 1
@@ -177,6 +182,7 @@
         "mapping_count": 0
     },
     "Kb5sHrP5bL": {
+        "checked_for_packing": 1
     },
     "M0ePA9uzA5": {
         "checked_for_packing": 1
@@ -218,11 +224,13 @@
         "mapping_count": 0
     },
     "T38qa8wN2K": {
+        "checked_for_packing": 1
     },
     "TNyQSW6bB6": {
         "checked_for_packing": 1
     },
     "UWF4u1fYHa": {
+        "checked_for_packing": 1
     },
     "XExwRNFj8H": {
         "checked_for_packing": 1
@@ -253,6 +261,7 @@
         "checked_for_packing": 1
     },
     "diUlEeS5JH": {
+        "checked_for_packing": 1,
         "track_B1wwJqB1NE": {
             "MPkMdJ4HCb": "ZEhllNMgJq",
             "SOys5Ry1kP": "ZEhllNMgJq",
@@ -308,6 +317,7 @@
         "checked_for_packing": 1
     },
     "lOfMr3YBtI": {
+        "checked_for_packing": 1
     },
     "lu4EmBCEzh": {
         "checked_for_packing": 1
@@ -319,6 +329,7 @@
         "checked_for_packing": 1
     },
     "pNT0bA0bpw": {
+        "checked_for_packing": 1,
         "track_Un0uM1aEwa": {
             "fI9qj7Xw9l": "HWByLsQXTa",
             "num_timelines": 8,
@@ -375,7 +386,7 @@
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
         "canvas_height": 800,
-        "canvas_mode": "Default",
+        "canvas_mode": "SoftFullScreen",
         "canvas_width": 1200,
         "clear_color": "4278190080",
         "command_line_arguments": "",

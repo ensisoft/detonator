@@ -4455,7 +4455,7 @@
                       "id": "wMsZuJfM2r",
                       "name": "background",
                       "position": {
-                        "x": 200.0,
+                        "x": 100.0,
                         "y": 100.0
                       },
                       "size": {
@@ -4464,6 +4464,28 @@
                       },
                       "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"check-background\",\"type\":\"Color\"}]}",
                       "text": "Background image",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "check": "Left",
+                      "checked": false,
+                      "flags": {
+                        "Enabled": true,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "JlvbbQtoh7",
+                      "name": "fullscreen",
+                      "position": {
+                        "x": 355.0,
+                        "y": 100.0
+                      },
+                      "size": {
+                        "h": 23.0,
+                        "w": 142.0
+                      },
+                      "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"check-background\",\"type\":\"Color\"}]}",
+                      "text": "Fullscreen",
                       "type": "CheckBox"
                     }
                   ]

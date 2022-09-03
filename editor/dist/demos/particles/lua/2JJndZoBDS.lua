@@ -43,6 +43,8 @@ function OnUIAction(ui, action)
         event.message = 'background'
         event.value = action.value
         Game:PostEvent(event)
+    elseif action.name == 'fullscreen' then
+        Game:SetFullScreen(action.value)
     end
     PlayEffect(ui)
 end
