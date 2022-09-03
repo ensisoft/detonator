@@ -284,9 +284,11 @@ private:
 class UIWidget::ResizeWidgetTool : public MouseTool
 {
 public:
-    ResizeWidgetTool(State& state, uik::Widget* widget)
+    ResizeWidgetTool(State& state, uik::Widget* widget, bool snap = false, unsigned grid = 0)
       : mState(state)
       , mWidget(widget)
+      , mSnapGrid(snap)
+      , mGridSize(grid)
     {}
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
@@ -296,6 +298,7 @@ public:
         const auto& mouse_delta = mouse_pos_scene - mMousePos;
         mWidget->Grow(mouse_delta.x, mouse_delta.y);
         mMousePos = mouse_pos_scene;
+        mWasSized = true;
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
     {
@@ -305,12 +308,39 @@ public:
     }
     virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
     {
+        if (!mWasSized)
+            return true;
+        if (mickey->modifiers() & Qt::ControlModifier)
+            mSnapGrid = !mSnapGrid;
+
+        if (mSnapGrid)
+        {
+            const auto pos  = mWidget->GetPosition();
+            const auto size = mWidget->GetSize();
+            const auto pos_x = pos.GetX();
+            const auto pos_y = pos.GetY();
+            // see where the bottom right corner is right now
+            const auto bottom_right_corner_x = pos_x + size.GetWidth();
+            const auto bottom_right_corner_y = pos_y + size.GetHeight();
+            // snap the bottom right corner to a grid coordinate
+            const auto bottom_aligned_pos_x = std::round(bottom_right_corner_x / mGridSize) * mGridSize;
+            const auto bottom_aligned_pos_y = std::round(bottom_right_corner_y / mGridSize) * mGridSize;
+            // the delta between the position aligned on the grid corner and
+            // the current bottom right corner is the size by which the
+            // widget needs to grow in order to snap to the corner.
+            const auto corner_delta_x = bottom_aligned_pos_x - bottom_right_corner_x;
+            const auto corner_delta_y = bottom_aligned_pos_y - bottom_right_corner_y;
+            mWidget->Grow(corner_delta_x, corner_delta_y);
+        }
         return true;
     }
 private:
     UIWidget::State& mState;
     uik::Widget* mWidget = nullptr;
     glm::vec4 mMousePos;
+    bool mWasSized = false;
+    bool mSnapGrid = false;
+    unsigned mGridSize = 0;
 };
 
 UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
@@ -1760,7 +1790,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
             //DEBUG("Hit pos: %1,%2", widget_hit_point.GetX(), widget_hit_point.GetY());
 
             if (size_box.TestPoint(mouse_in_scene.x, mouse_in_scene.y))
-                mCurrentTool.reset(new ResizeWidgetTool(mState, widget));
+                mCurrentTool.reset(new ResizeWidgetTool(mState, widget, snap, grid_size));
             else mCurrentTool.reset(new MoveWidgetTool(mState, widget, snap, grid_size));
             mUI.tree->SelectItemById(app::FromUtf8(widget->GetId()));
         }
