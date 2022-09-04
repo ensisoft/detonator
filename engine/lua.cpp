@@ -185,13 +185,139 @@ private:
     std::string mMessage;
 };
 
+// data policy class for ArrayInterface below
+// uses a non-owning pointer to data that comes from
+// somewhere else such as ScriptVar
+template<typename T>
+class ArrayDataPointer
+{
+public:
+    ArrayDataPointer(std::vector<T>* array)
+      : mArray(array)
+    {}
+protected:
+    ArrayDataPointer() = default;
+    void CommitChanges()
+    {
+        // do nothing is intentional.
+    }
+    std::vector<T>& GetArray()
+    { return *mArray; }
+    const std::vector<T>& GetArray() const
+    { return *mArray; }
+private:
+    std::vector<T>* mArray = nullptr;
+};
+
+// data policy class for ArrayInterface below.
+// has a copy of the data and then exposes a pointer to it.
+template<typename T>
+class ArrayDataObject
+{
+public:
+    ArrayDataObject(const std::vector<T>& array)
+      : mArrayData(array)
+    {}
+    ArrayDataObject(std::vector<T>&& array)
+      : mArrayData(array)
+    {}
+protected:
+    ArrayDataObject() = default;
+    void CommitChanges()
+    {
+        // do nothing intentional.
+    }
+    std::vector<T>& GetArray()
+    { return mArrayData; }
+    const std::vector<T>& GetArray() const
+    { return mArrayData; }
+private:
+    std::vector<T> mArrayData;
+};
+
+template<typename T>
+class ArrayObjectReference;
+
+template<>
+class ArrayObjectReference<Entity*>
+{
+public:
+    ArrayObjectReference(const ScriptVar* var, Scene* scene)
+      : mVar(var)
+      , mScene(scene)
+    {
+        // resolve object IDs to the actual objects
+        const auto& refs = mVar->GetArray<ScriptVar::EntityReference>();
+        for (const auto& ref : refs)
+            mEntities.push_back(mScene->FindEntityByInstanceId(ref.id));
+    }
+protected:
+    ArrayObjectReference() = default;
+    void CommitChanges()
+    {
+        // resolve entity objects back into their IDs
+        // and store the changes in the script variable.
+        std::vector<ScriptVar::EntityReference> refs;
+        for (auto* entity : mEntities)
+        {
+            ScriptVar::EntityReference ref;
+            ref.id = entity ? entity->GetId() : "";
+        }
+        mVar->SetArray(std::move(refs));
+    }
+    std::vector<Entity*>& GetArray()
+    { return mEntities; }
+    const std::vector<Entity*>& GetArray() const
+    { return mEntities; }
+private:
+    const ScriptVar* mVar = nullptr;
+    Scene* mScene = nullptr;
+    std::vector<Entity*> mEntities;
+};
+
+template<>
+class ArrayObjectReference<EntityNode*>
+{
+public:
+    ArrayObjectReference(const ScriptVar* var, Entity* entity)
+      : mVar(var)
+      , mEntity(entity)
+    {
+        const auto& refs = mVar->GetArray<ScriptVar::EntityNodeReference>();
+        // The entity node instance IDs are dynamic. since the
+        // reference is placed during design time it's based on the class IDs
+        for (const auto& ref : refs)
+            mNodes.push_back(mEntity->FindNodeByClassId(ref.id));
+    }
+protected:
+    ArrayObjectReference() = default;
+    void CommitChanges()
+    {
+        std::vector<ScriptVar::EntityNodeReference> refs;
+        for (auto* node : mNodes)
+        {
+            ScriptVar::EntityNodeReference ref;
+            ref.id = node ? node->GetClassId() : "";
+        }
+        mVar->SetArray(std::move(refs));
+    }
+    std::vector<EntityNode*>& GetArray()
+    { return mNodes; }
+    const std::vector<EntityNode*>& GetArray() const
+    { return mNodes; }
+private:
+    const ScriptVar* mVar = nullptr;
+    Entity* mEntity = nullptr;
+    std::vector<EntityNode*> mNodes;
+};
+
 // template to adapt an underlying std::vector
 // to sol2's Lua container interface. the vector
 // is not owned by the array interface object and
 // may come for example from a scene/entity scripting
 // variable when the variable is an array.
-template<typename T>
-class ArrayInterface {
+template<typename T, template<typename> class DataPolicy = ArrayDataPointer>
+class ArrayInterface : public DataPolicy<T> {
 public:
     using value_type = typename std::vector<T>::value_type;
     // this was using const_iterator and i'm not sure where that
@@ -199,28 +325,41 @@ public:
     // using const_iterator makes emscripten build shit itself.
     using iterator   = typename std::vector<T>::iterator;
     using size_type  = typename std::vector<T>::size_type;
-    ArrayInterface(std::vector<T>* vector, bool read_only)
-      : mArray(vector)
+
+    using BaseClass = DataPolicy<T>;
+
+    template<typename Arg0>
+    ArrayInterface(bool read_only, Arg0&& arg0)
+      : BaseClass(std::forward<Arg0>(arg0))
       , mReadOnly(read_only)
     {}
-    iterator begin() noexcept
-    { return mArray->begin(); }
-    iterator end() noexcept
-    { return mArray->end(); }
-    size_type size() const noexcept
-    { return mArray->size(); }
-    void push_back(const T& value)
-    { mArray->push_back(value); }
-    bool empty() const noexcept
-    { return mArray->empty(); }
+    template<typename Arg0, typename Arg1>
+    ArrayInterface(bool read_only, Arg0&& arg0, Arg1&& arg1)
+      : BaseClass(std::forward<Arg0>(arg0),
+                  std::forward<Arg1>(arg1))
+      , mReadOnly(read_only)
+    {}
 
+    iterator begin() noexcept
+    { return BaseClass::GetArray().begin(); }
+    iterator end() noexcept
+    { return BaseClass::GetArray().end(); }
+    size_type size() const noexcept
+    { return BaseClass::GetArray().size(); }
+    bool empty() const noexcept
+    { return BaseClass::GetArray().empty(); }
+    void push_back(const T& value)
+    {
+        BaseClass::GetArray().push_back(value);
+        BaseClass::CommitChanges();
+    }
     T GetItemFromLua(unsigned index) const
     {
         // lua uses 1 based indexing.
         index = index - 1;
         if (index >= size())
             throw GameError("ArrayInterface access out of bounds.");
-        return (*mArray)[index];
+        return BaseClass::GetArray()[index];
     }
     void SetItemFromLua(unsigned index, const T& item)
     {
@@ -230,31 +369,35 @@ public:
             throw GameError("ArrayInterface access out of bounds.");
         if (IsReadOnly())
             throw GameError("Trying to write to read only array.");
-        (*mArray)[index] = item;
+        BaseClass::GetArray()[index] = item;
+        BaseClass::CommitChanges();
     }
     void PopBack()
     {
         if (IsReadOnly())
             throw GameError("Trying to modify read only array.");
-        auto& arr = *mArray;
+        auto& arr = BaseClass::GetArray();
         if (arr.empty())
             return;
         arr.pop_back();
+        BaseClass::CommitChanges();
     }
     void PopFront()
     {
         if (IsReadOnly())
             throw GameError("Trying to modify read only array.");
-        auto& arr = *mArray;
+        auto& arr = BaseClass::GetArray();
         if (arr.empty())
             return;
         arr.erase(arr.begin());
+        BaseClass::CommitChanges();
     }
     void Clear()
     {
         if (IsReadOnly())
             throw GameError("Trying to modify read only array.");
-        mArray->clear();
+        BaseClass::GetArray().clear();
+        BaseClass::CommitChanges();
     }
 
     T GetFirst() const
@@ -267,20 +410,19 @@ public:
     }
 
     T GetItem(unsigned index) const
-    { return base::SafeIndex(*mArray, index); }
+    { return base::SafeIndex(BaseClass::GetArray(), index); }
 
     bool IsReadOnly() const
     { return mReadOnly; }
 
 private:
-    std::vector<T>* mArray = nullptr;
     bool mReadOnly = false;
 };
 
-template<typename T>
+template<typename T, template<typename> class DataPolicy = ArrayDataPointer>
 void BindArrayInterface(sol::table& table, const char* name)
 {
-    using Type = ArrayInterface<T>;
+    using Type = ArrayInterface<T, DataPolicy>;
 
     // regarding the array indexing for the subscript operator.
     // Lua uses 1 based indexing and allows (with built-in arrays)
@@ -511,53 +653,144 @@ sol::object ObjectFromScriptVarValue(const ScriptVar& var, sol::this_state state
 {
     sol::state_view lua(state);
     const auto type = var.GetType();
+    const auto read_only = var.IsReadOnly();
     if (type == ScriptVar::Type::Boolean)
     {
-        using ArrayType = ArrayInterface<bool>;
+        using ArrayType = ArrayInterface<bool, ArrayDataPointer>;
         if (var.IsArray())
-            return sol::make_object(lua, ArrayType(&var.GetArray<bool>(), var.IsReadOnly()));
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<bool>()));
         return sol::make_object(lua, var.GetValue<bool>());
     }
     else if (type == ScriptVar::Type::Float)
     {
-        using ArrayType = ArrayInterface<float>;
+        using ArrayType = ArrayInterface<float, ArrayDataPointer>;
         if (var.IsArray())
-            return sol::make_object(lua, ArrayType(&var.GetArray<float>(), var.IsReadOnly()));
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<float>()));
         return sol::make_object(lua, var.GetValue<float>());
     }
     else if (type == ScriptVar::Type::String)
     {
-        using ArrayType = ArrayInterface<std::string>;
+        using ArrayType = ArrayInterface<std::string, ArrayDataPointer>;
         if (var.IsArray())
-            return sol::make_object(lua,  ArrayType(&var.GetArray<std::string>(), var.IsReadOnly()));
+            return sol::make_object(lua,  ArrayType(read_only, &var.GetArray<std::string>()));
         return sol::make_object(lua, var.GetValue<std::string>());
     }
     else if (type == ScriptVar::Type::Integer)
     {
-        using ArrayType = ArrayInterface<int>;
+        using ArrayType = ArrayInterface<int, ArrayDataPointer>;
         if (var.IsArray())
-            return sol::make_object(lua, ArrayType(&var.GetArray<int>(), var.IsReadOnly()));
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<int>()));
         return sol::make_object(lua, var.GetValue<int>());
     }
     else if (type == ScriptVar::Type::Vec2)
     {
-        using ArrayType = ArrayInterface<glm::vec2>;
+        using ArrayType = ArrayInterface<glm::vec2, ArrayDataPointer>;
         if (var.IsArray())
-            return sol::make_object(lua, ArrayType(&var.GetArray<glm::vec2>(), var.IsReadOnly()));
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<glm::vec2>()));
         return sol::make_object(lua, var.GetValue<glm::vec2>());
+    } else BUG("Unhandled ScriptVar type.");
+}
+
+template<typename T>
+sol::object ResolveEntityReferences(const T& whatever, const ScriptVar& var, sol::state_view& state)
+{
+    // this is a generic resolver for cases when a reference cannot
+    // be resolved. for example if entity contains entity references
+    // we can't resolve those. only scene can resolve entity references.
+    // this generic resolver will simply just return the string IDs.
+    if (var.IsArray())
+    {
+        using ArrayType = ArrayInterface<std::string, ArrayDataObject>;
+
+        const auto& refs = var.GetArray<ScriptVar::EntityReference>();
+
+        std::vector<std::string> strs;
+        for (const auto& ref : refs)
+            strs.push_back(ref.id);
+
+        return sol::make_object(state, ArrayType(true, std::move(strs)));
     }
-    else BUG("Unhandled ScriptVar type.");
+
+    const auto& ref = var.GetValue<ScriptVar::EntityReference>();
+
+    return sol::make_object(state, ref.id);
+}
+
+sol::object ResolveEntityReferences(game::Scene& scene, const ScriptVar& var, sol::state_view& state)
+{
+    // the reference to the entity is placed during design time
+    // and the scene placement node has an ID which becomes the
+    // entity instance ID when the scene is instantiated.
+    if (var.IsArray())
+    {
+        using ArrayType = ArrayInterface<Entity*, ArrayObjectReference>;
+
+        return sol::make_object(state, ArrayType(var.IsReadOnly(), &var, &scene));
+    }
+    const auto& ref = var.GetValue<ScriptVar::EntityReference>();
+
+    return sol::make_object(state, scene.FindEntityByInstanceId(ref.id));
+}
+
+template<typename T>
+sol::object ResolveNodeReferences(const T& whatever, const ScriptVar& var, sol::state_view& state)
+{
+    // this is a generic resolver for cases when a reference cannot be resolved.
+    // for example if a scene contains entity node references we can't resolve those,
+    // but only entity can resolve entity node references.
+    // this generic resolver will simply just return the string IDs
+    if (var.IsArray())
+    {
+        using ArrayType = ArrayInterface<std::string, ArrayDataObject>;
+
+        const auto& refs = var.GetArray<ScriptVar::EntityNodeReference>();
+
+        std::vector<std::string> strs;
+        for (const auto& ref : refs)
+            strs.push_back(ref.id);
+
+        return sol::make_object(state, ArrayType(true, std::move(strs)));
+    }
+    const auto& ref = var.GetValue<ScriptVar::EntityNodeReference>();
+
+    return sol::make_object(state, ref.id);
+
+}
+
+sol::object ResolveNodeReferences(game::Entity& entity, const ScriptVar& var, sol::state_view& state)
+{
+    // The entity node instance IDs are dynamic. since the
+    // reference is placed during design time it's based on the class IDs
+    if (var.IsArray())
+    {
+        using ArrayType = ArrayInterface<EntityNode*, ArrayObjectReference>;
+
+        return sol::make_object(state, ArrayType(var.IsReadOnly(), &var, &entity));
+    }
+
+    const auto& ref = var.GetValue<ScriptVar::EntityNodeReference>();
+
+    return sol::make_object(state, entity.FindNodeByClassId(ref.id));
 }
 
 template<typename Type>
-sol::object GetScriptVar(const Type& object, const char* key, sol::this_state state)
+sol::object GetScriptVar(Type& object, const char* key, sol::this_state state)
 {
     using namespace engine;
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (!var)
         throw GameError(base::FormatString("No such variable: '%1'", key));
-    return ObjectFromScriptVarValue(*var, state);
+
+    if (var->GetType() == game::ScriptVar::Type::EntityReference)
+    {
+        return ResolveEntityReferences(object, *var, lua);
+    }
+    else if (var->GetType() == game::ScriptVar::Type::EntityNodeReference)
+    {
+        return ResolveNodeReferences(object, *var, lua);
+    }
+    else return ObjectFromScriptVarValue(*var, state);
 }
 template<typename Type>
 void SetScriptVar(Type& object, const char* key, sol::object value)
@@ -579,6 +812,16 @@ void SetScriptVar(Type& object, const char* key, sol::object value)
         var->SetValue(value.as<std::string>());
     else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
         var->SetValue(value.as<glm::vec2>());
+    else if (value.is<game::EntityNode*>() && var->HasType<game::ScriptVar::EntityNodeReference>())
+        var->SetValue(game::ScriptVar::EntityNodeReference{value.as<game::EntityNode*>()->GetClassId()});
+    else if (value.is<game::Entity*>() && var->HasType<game::ScriptVar::EntityReference>())
+        var->SetValue(game::ScriptVar::EntityReference{value.as<game::Entity*>()->GetId()});
+    else if (!value.valid()) {
+        if (var->HasType<game::ScriptVar::EntityNodeReference>())
+            var->SetValue(game::ScriptVar::EntityNodeReference{""});
+        else if (var->HasType<game::ScriptVar::EntityReference>())
+            var->SetValue(game::ScriptVar::EntityReference{""});
+    }
     else throw GameError(base::FormatString("Variable type mismatch. '%1' expects: '%2'", key, var->GetType()));
 }
 
@@ -611,8 +854,8 @@ void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
 
 // WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
 // directly in the call to create new usertype. adding these specializations as a workaround.
-template sol::object GetScriptVar<game::Scene>(const game::Scene&, const char*, sol::this_state);
-template sol::object GetScriptVar<game::Entity>(const game::Entity&, const char*, sol::this_state);
+template sol::object GetScriptVar<game::Scene>(game::Scene&, const char*, sol::this_state);
+template sol::object GetScriptVar<game::Entity>(game::Entity&, const char*, sol::this_state);
 template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object);
 template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object);
 
@@ -1817,11 +2060,16 @@ void BindUtil(sol::state& L)
         return str;
     };
 
-    BindArrayInterface<int>(util, "IntArrayInterface");
-    BindArrayInterface<float>(util, "FloatArrayInterface");
-    BindArrayInterface<bool>(util, "BoolArrayInterface");
-    BindArrayInterface<std::string>(util, "StringArrayInterface");
-    BindArrayInterface<glm::vec2>(util, "Vec2ArrayInterface");
+    BindArrayInterface<int,         ArrayDataPointer>(util, "IntArrayInterface");
+    BindArrayInterface<float,       ArrayDataPointer>(util, "FloatArrayInterface");
+    BindArrayInterface<bool,        ArrayDataPointer>(util, "BoolArrayInterface");
+    BindArrayInterface<std::string, ArrayDataPointer>(util, "StringArrayInterface");
+    BindArrayInterface<glm::vec2,   ArrayDataPointer>(util, "Vec2ArrayInterface");
+
+    BindArrayInterface<std::string, ArrayDataObject>(util, "StringArray");
+
+    BindArrayInterface<Entity*,     ArrayObjectReference>(util, "EntityRefArray");
+    BindArrayInterface<EntityNode*, ArrayObjectReference>(util, "EntityNodeRefArray");
 
     util["Join"] = [](const ArrayInterface<std::string>& array, const std::string& separator) {
         std::string ret;

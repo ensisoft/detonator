@@ -1390,7 +1390,27 @@ EntityClass EntityClass::Clone() const
     // make a deep copy of the scripting variables.
     for (const auto& var : mScriptVars)
     {
-        ret.mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
+        // remap entity node references.
+        if (var->GetType() == ScriptVar::Type::EntityNodeReference)
+        {
+            std::vector<ScriptVar::EntityNodeReference> refs;
+            const auto& src_arr = var->GetArray<ScriptVar::EntityNodeReference>();
+            for (const auto& src_ref : src_arr)
+            {
+                const auto* src_node = FindNodeById(src_ref.id);
+                const auto* dst_node = map[src_node];
+                ScriptVar::EntityNodeReference ref;
+                ref.id = dst_node ? dst_node->GetId() : "";
+                refs.push_back(std::move(ref));
+            }
+            auto clone = std::make_shared<ScriptVar>();
+            clone->SetName(var->GetName());
+            clone->SetReadOnly(var->IsReadOnly());
+            clone->SetArray(var->IsArray());
+            clone->SetNewArrayType(std::move(refs));
+            ret.mScriptVars.push_back(clone);
+        }
+        else ret.mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
     }
 
     // make a deep clone of the joints.

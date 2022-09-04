@@ -107,5 +107,18 @@ int test_main(int argc, char* argv[])
 
     }
 
+    {
+        std::vector<game::ScriptVar::EntityReference> refs;
+        refs.push_back({"1234"});
+        refs.push_back({"abasbs"});
+        game::ScriptVar var("foo", refs, false);
+
+        data::JsonObject json;
+        var.IntoJson(json);
+        auto ret = game::ScriptVar::FromJson(json);
+        TEST_REQUIRE(ret->GetArray<game::ScriptVar::EntityReference>()[0].id == refs[0].id);
+        TEST_REQUIRE(ret->GetArray<game::ScriptVar::EntityReference>()[1].id == refs[1].id);
+    }
+
     return 0;
 }

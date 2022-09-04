@@ -901,19 +901,44 @@ SceneClass SceneClass::Clone() const
         map[node.get()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
-    ret.mScriptVars = mScriptVars;
-    ret.mScriptFile = mScriptFile;
-    ret.mName       = mName;
+
+    // remap entity reference variables
+    for (const auto& var : mScriptVars)
+    {
+        if (var.GetType() == ScriptVar::Type::EntityReference)
+        {
+            std::vector<ScriptVar::EntityReference> refs;
+            const auto& src_arr = var.GetArray<ScriptVar::EntityReference>();
+            for (const auto& src_ref : src_arr)
+            {
+                const auto* src_node = FindNodeById(src_ref.id);
+                const auto* dst_node = map[src_node];
+                ScriptVar::EntityReference ref;
+                ref.id = dst_node ? dst_node->GetId() : "";
+                refs.push_back(std::move(ref));
+
+                ScriptVar v;
+                v.SetName(var.GetName());
+                v.SetReadOnly(var.IsReadOnly());
+                v.SetArray(var.IsArray());
+                v.SetNewArrayType(std::move(refs));
+                ret.mScriptVars.push_back(std::move(v));
+            }
+        } else ret.mScriptVars.push_back(var);
+    }
+
+    ret.mScriptFile              = mScriptFile;
+    ret.mName                    = mName;
+    ret.mDynamicSpatialRect      = mDynamicSpatialRect;
+    ret.mDynamicSpatialIndex     = mDynamicSpatialIndex;
+    ret.mDynamicSpatialIndexArgs = mDynamicSpatialIndexArgs;
+    ret.mLeftBoundary            = mLeftBoundary;
+    ret.mRightBoundary           = mRightBoundary;
+    ret.mTopBoundary             = mTopBoundary;
+    ret.mBottomBoundary          = mBottomBoundary;
     ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
         return map[node];
     });
-    ret.mDynamicSpatialRect = mDynamicSpatialRect;
-    ret.mDynamicSpatialIndex = mDynamicSpatialIndex;
-    ret.mDynamicSpatialIndexArgs = mDynamicSpatialIndexArgs;
-    ret.mLeftBoundary = mLeftBoundary;
-    ret.mRightBoundary = mRightBoundary;
-    ret.mTopBoundary = mTopBoundary;
-    ret.mBottomBoundary = mBottomBoundary;
     return ret;
 }
 
