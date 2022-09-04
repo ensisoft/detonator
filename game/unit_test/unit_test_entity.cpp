@@ -345,6 +345,13 @@ void unit_test_entity_class()
         entity.AddScriptVar(foo);
         entity.AddScriptVar(bar);
         entity.AddScriptVar(arr);
+
+        auto* node = entity.FindNodeByName("child_2");
+        // node reference variable.
+        game::ScriptVar::EntityNodeReference  ref;
+        ref.id = node->GetId();
+        game::ScriptVar var("node", ref, false);
+        entity.AddScriptVar(std::move(var));
     }
 
     // physics joint
@@ -384,7 +391,7 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindAnimationByName("test1"));
     TEST_REQUIRE(entity.FindAnimationByName("sdgasg") == nullptr);
     TEST_REQUIRE(entity.GetIdleTrackId() == entity.GetAnimation(1).GetId());
-    TEST_REQUIRE(entity.GetNumScriptVars() == 3);
+    TEST_REQUIRE(entity.GetNumScriptVars() == 4);
     TEST_REQUIRE(entity.GetScriptVar(0).GetName() == "something");
     TEST_REQUIRE(entity.GetScriptVar(0).GetValue<int>() == 123);
     TEST_REQUIRE(entity.GetScriptVar(0).IsReadOnly() == true);
@@ -424,7 +431,7 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret->GetHash() == entity.GetHash());
         TEST_REQUIRE(ret->GetNumAnimations() == 2);
         TEST_REQUIRE(ret->FindAnimationByName("test1"));
-        TEST_REQUIRE(ret->GetNumScriptVars() == 3);
+        TEST_REQUIRE(ret->GetNumScriptVars() == 4);
         TEST_REQUIRE(ret->GetScriptVar(0).GetName() == "something");
         TEST_REQUIRE(ret->GetScriptVar(0).GetValue<int>() == 123);
         TEST_REQUIRE(ret->GetScriptVar(0).IsReadOnly() == true);
@@ -492,6 +499,11 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetNumAnimations() == 2);
         TEST_REQUIRE(clone.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
+
+        const auto* node = clone.FindNodeByName("child_2");
+        const auto& var = clone.GetScriptVar(3);
+        TEST_REQUIRE(var.GetType() == game::ScriptVar::Type::EntityNodeReference);
+        TEST_REQUIRE(var.GetValue<game::ScriptVar::EntityNodeReference>().id == node->GetId());
     }
 
     // remember, the shape is aligned around the position

@@ -89,6 +89,19 @@ void read_bool_array(const char* array, const data::Reader& reader, game::Script
     *variant = std::move(arr);
 }
 
+template<typename T>
+void read_reference_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
+{
+    std::vector<T> ret;
+    for (unsigned i=0; i<reader.GetNumItems(array); ++i)
+    {
+        T reference;
+        reader.Read(array, i, &reference.id);
+        ret.push_back(std::move(reference));
+    }
+    *variant = std::move(ret);
+}
+
 void write_bool_array(const char* array, const game::ScriptVar::VariantType& variant, data::Writer& writer)
 {
     ASSERT(std::holds_alternative<std::vector<bool>>(variant));
@@ -98,6 +111,19 @@ void write_bool_array(const char* array, const game::ScriptVar::VariantType& var
         tmp.push_back(b ? 1 : 0);
     writer.Write(array, &tmp[0], tmp.size());
 }
+template<typename RefType>
+void write_reference_array(const char* array, const game::ScriptVar::VariantType& variant, data::Writer& writer)
+{
+    ASSERT(std::holds_alternative<std::vector<RefType>>(variant));
+    const auto& values = std::get<std::vector<RefType>>(variant);
+
+    std::vector<std::string> ids;
+    for (const auto& val : values)
+        ids.push_back(val.id);
+
+    writer.Write(array, &ids[0], ids.size());
+}
+
 } // namespace
 
 namespace game
@@ -170,14 +196,20 @@ size_t ScriptVar::GetHash(const VariantType& variant)
     size_t hash = 0;
     std::visit([&hash](const auto& variant_value) {
         // the type of variant_value should be a vector<T>
-        using Type = std::decay_t<decltype(variant_value)>;
+        using VectorType = std::decay_t<decltype(variant_value)>;
 
         for (const auto& val : variant_value)
         {
+            using ValueType = typename VectorType::value_type;
+
             // WAR for emscripten shitting itself with vector<bool>
             // use a temp variable for the actual value.
-            const typename Type::value_type tmp = val;
-            hash = base::hash_combine(hash, tmp);
+            const ValueType tmp = val;
+            if constexpr (std::is_same<ValueType, EntityReference>::value)
+                hash = base::hash_combine(hash, tmp.id);
+            else if constexpr (std::is_same<ValueType, EntityNodeReference>::value)
+                hash = base::hash_combine(hash, tmp.id);
+            else hash = base::hash_combine(hash, tmp);
         }
     }, variant);
     return hash;
@@ -210,6 +242,10 @@ void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
         write_bool_array("bools", variant, writer);
     else if (type == Type::Vec2)
         write_object_array<glm::vec2>("vec2s", variant, writer);
+    else if (type == Type::EntityReference)
+        write_reference_array<EntityReference>("entity_refs", variant, writer);
+    else if (type == Type::EntityNodeReference)
+        write_reference_array<EntityNodeReference>("entity_node_refs", variant, writer);
     else BUG("Unhandled script variable type.");
 }
 // static
@@ -244,6 +280,10 @@ void ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
             read_bool_array("bools", reader, variant);
         else if (reader.HasArray("vec2s"))
             read_object_array<glm::vec2>("vec2s", reader, variant);
+        else if (reader.HasArray("entity_refs"))
+            read_reference_array<EntityReference>("entity_refs", reader, variant);
+        else if (reader.HasArray("entity_node_refs"))
+            read_reference_array<EntityNodeReference>("entity_node_refs", reader, variant);
         else BUG("Unhandled script variable type.");
     }
 }
@@ -272,7 +312,11 @@ ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
         return Type::String;
     else if (std::holds_alternative<std::vector<glm::vec2>>(variant))
         return Type::Vec2;
-    BUG("Unknown ScriptVar type!");
+    else if (std::holds_alternative<std::vector<EntityNodeReference>>(variant))
+        return Type::EntityNodeReference;
+    else if (std::holds_alternative<std::vector<EntityReference>>(variant))
+        return Type::EntityReference;
+    else BUG("Unknown ScriptVar type!");
 }
 
 } // namespace

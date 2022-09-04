@@ -41,6 +41,13 @@ namespace game
         static constexpr bool ReadOnly = true;
         static constexpr bool ReadWrite = false;
 
+        template<size_t Index>
+        struct ObjectReference {
+            std::string id;
+        };
+        using EntityReference = ObjectReference<0>;
+        using EntityNodeReference = ObjectReference<1>;
+
         // So instead of holding a single variant
         // we want to have possibility to store an "array"
         // of variables. And to that extent we have a
@@ -52,7 +59,9 @@ namespace game
                 std::vector<float>,
                 std::vector<int>,
                 std::vector<std::string>,
-                std::vector<glm::vec2>>;
+                std::vector<glm::vec2>,
+                std::vector<EntityReference>,
+                std::vector<EntityNodeReference>>;
 
         // The types of values supported by the ScriptVar.
         enum class Type {
@@ -60,7 +69,9 @@ namespace game
             Integer,
             Float,
             Vec2,
-            Boolean
+            Boolean,
+            EntityReference,
+            EntityNodeReference
         };
         template<typename T>
         ScriptVar(std::string name, T value, bool read_only = true)
@@ -80,6 +91,9 @@ namespace game
         {
               mData = std::move(array);
         }
+        ScriptVar()
+          : mId(base::RandomString(10))
+        {}
 
         // Get whether the variable is considered read-only/constant
         // in the scripting environment.
@@ -201,7 +215,6 @@ namespace game
         }
 
     private:
-        ScriptVar() = default;
         // ID of the script variable.
         std::string mId;
         // name of the variable in the script.

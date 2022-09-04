@@ -530,7 +530,7 @@ void unit_test_scene_interface()
         node.SetTranslation(glm::vec2(50.0f, 60.0f));
         node.SetDrawable(draw);
         node.SetRigidBody(body);
-        entity->LinkChild(nullptr, entity->AddNode(std::move(node)));
+        entity->LinkChild(nullptr, entity->AddNode(node));
 
         // add some entity script vars
         entity->AddScriptVar(game::ScriptVar("int_var", 123, false));
@@ -545,6 +545,17 @@ void unit_test_scene_interface()
         strs.push_back("foo");
         strs.push_back("bar");
         entity->AddScriptVar(game::ScriptVar("str_array", strs, false));
+
+        // node reference
+        game::ScriptVar::EntityNodeReference  ref;
+        ref.id = node.GetId();
+        entity->AddScriptVar(game::ScriptVar("entity_node_var", ref, false));
+
+        // node reference array
+        std::vector<game::ScriptVar::EntityNodeReference> refs;
+        refs.resize(1);
+        refs[0].id = node.GetId();
+        entity->AddScriptVar(game::ScriptVar("entity_node_var_arr", refs, false));
     }
 
     game::SceneClass scene;
@@ -555,6 +566,18 @@ void unit_test_scene_interface()
         scene_node.SetEntity(entity);
         scene_node.SetTranslation(glm::vec2(30.0f, 40.0f));
         scene.LinkChild(nullptr, scene.AddNode(scene_node));
+
+        // add a reference to the entity
+        game::ScriptVar::EntityReference  ref;
+        ref.id = scene_node.GetId();
+        scene.AddScriptVar(game::ScriptVar("entity_var", ref, false));
+
+        // add array reference to the entity
+        std::vector<game::ScriptVar::EntityReference> refs;
+        refs.resize(1);
+        refs[0].id = scene_node.GetId();
+        scene.AddScriptVar(game::ScriptVar("entity_var_arr", refs, false));
+
     }
 
     // add some scripting variable types
@@ -633,6 +656,18 @@ function test(scene)
    test_bool(scene.bool_var,    true)
    test_vec2(scene.vec2_var,    -1.0, -2.0)
 
+   print(tostring(scene.entity_var))
+   if scene.entity_var:GetName() ~= 'test_entity_1' then
+       error('entity variable not set')
+   end
+   -- test assigning to the scene entity reference variable
+   scene.entity_var = scene:GetEntity(0)
+   scene.entity_var = nil
+
+   if scene.entity_var_arr[1]:GetName() ~= 'test_entity_1' then
+      error('entity variable array not set properly.')
+   end
+
    test_int(scene:GetNumEntities(), 1)
    if scene:FindEntityByInstanceId('sdsdfsg') ~= nil then
      error('fail')
@@ -657,6 +692,21 @@ function test(scene)
    test_bool(entity.bool_var,    false)
    test_vec2(entity.vec2_var,    3.0, -1.0)
    test_int(entity.read_only,    43)
+
+   -- test reading the node reference
+   print(tostring(entity_node_var))
+   if entity.entity_node_var:GetName() ~= 'foobar' then
+      error('entity node entity variable reference is not resolved properly.')
+   end
+   -- test assigning to the node reference var
+   entity.entity_node_var = entity:GetNode(0)
+   -- test assigning nil
+   entity.entity_node_var = nil
+
+   if entity.entity_node_var_arr[1]:GetName() ~= 'foobar' then
+       error('entity node entity variable reference is not resolve properly.')
+   end
+
 
    -- writing read-only should raise an error
    if pcall(try_set_read_only, entity) then
