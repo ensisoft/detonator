@@ -342,7 +342,6 @@ bool Settings::JsonFileSettingsStorage::Save()
     }
     const QJsonObject& json = QJsonObject::fromVariantMap(mValues);
     const QJsonDocument docu(json);
-    ASSERT(app::ValidateQVariantMapJsonSupport(mValues));
     file.write(docu.toJson());
     file.close();
     return true;
