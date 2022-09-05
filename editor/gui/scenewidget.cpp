@@ -133,17 +133,37 @@ private:
         switch (var.GetType())
         {
             case game::ScriptVar::Type::Boolean:
-                return var.GetValue<bool>();
+                if (!var.IsArray())
+                    return var.GetValue<bool>();
+                return QString("[0]=%1 ...").arg(var.GetArray<bool>()[0]);
             case game::ScriptVar::Type::String:
-                return app::FromUtf8(var.GetValue<std::string>());
+                if (!var.IsArray())
+                    return app::FromUtf8(var.GetValue<std::string>());
+                return QString("[0]='%1' ...").arg(app::FromUtf8(var.GetArray<std::string>()[0]));
             case game::ScriptVar::Type::Float:
-                return var.GetValue<float>();
+                if (!var.IsArray())
+                    return QString::number(var.GetValue<float>(), 'f', 2);
+                return QString("[0]=%1 ...").arg(QString::number(var.GetArray<float>()[0], 'f', 2));
             case game::ScriptVar::Type::Integer:
-                return var.GetValue<int>();
+                if (!var.IsArray())
+                    return var.GetValue<int>();
+                return QString("[0]=%1 ...").arg(var.GetArray<int>()[0]);
             case game::ScriptVar::Type::Vec2: {
-                const auto& val = var.GetValue<glm::vec2>();
-                return QString("%1,%2").arg(QString::number(val.x, 'f', 2))
-                        .arg(QString::number(val.y, 'f', 2));
+                if (!var.IsArray())
+                {
+                    const auto& val = var.GetValue<glm::vec2>();
+                    return QString("%1,%2")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2));
+                }
+                else
+                {
+                    const auto& val = var.GetArray<glm::vec2>()[0];
+                    return QString("[0]=%1,%2 ...")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2));
+                }
+                break;
             }
         }
         BUG("Unknown ScriptVar type.");
