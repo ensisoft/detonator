@@ -203,7 +203,7 @@ public:
     }
 
 private:
-    static QVariant GetScriptVarData(const game::ScriptVar& var)
+    QVariant GetScriptVarData(const game::ScriptVar& var) const
     {
         switch (var.GetType())
         {
@@ -236,6 +236,26 @@ private:
                             .arg(QString::number(val.y, 'f', 2));
                 }
             }
+            case game::ScriptVar::Type::EntityNodeReference:
+                if (!var.IsArray()) {
+                    const auto& val = var.GetValue<game::ScriptVar::EntityNodeReference>();
+                    if (const auto* node = mState.entity->FindNodeById(val.id))
+                        return app::FromUtf8(node->GetName());
+                    return "Nil";
+                } else {
+                    const auto& val = var.GetArray<game::ScriptVar::EntityNodeReference>()[0];
+                    if (const auto* node = mState.entity->FindNodeById(val.id))
+                        return QString("[0]=%1 ...").arg(app::FromUtf8(node->GetName()));
+                    return "[0]=Nil ...";
+                }
+                break;
+            case game::ScriptVar::Type::EntityReference:
+                if (!var.IsArray()) {
+                    return "Nil";
+                } else {
+                    return "[0]=Nil ...";
+                }
+                break;
         }
         BUG("Unknown ScriptVar type.");
         return QVariant();
@@ -1116,6 +1136,37 @@ void EntityWidget::on_actionNodeDelete_triggered()
         RealizeEntityChange(mState.entity);
     }
 }
+void EntityWidget::on_actionNodeVarRef_triggered()
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        std::vector<ListItem> entities;
+        std::vector<ListItem> nodes;
+        for (size_t i = 0; i < mState.entity->GetNumNodes(); ++i)
+        {
+            const auto& node = mState.entity->GetNode(i);
+            ListItem item;
+            item.name = app::FromUtf8(node.GetName());
+            item.id = app::FromUtf8(node.GetId());
+            nodes.push_back(std::move(item));
+        }
+        QString name = app::FromUtf8(node->GetName());
+        name = name.replace(' ', '_');
+        name = name.toLower();
+        game::ScriptVar::EntityNodeReference  ref;
+        ref.id = node->GetId();
+
+        game::ScriptVar var(app::ToUtf8(name), ref);
+        DlgScriptVar dlg(nodes, entities, this, var);
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        mScriptVarModel->AddVariable(std::move(var));
+        SetEnabled(mUI.btnEditScriptVar, true);
+        SetEnabled(mUI.btnDeleteScriptVar, true);
+    }
+}
+
 void EntityWidget::on_actionNodeMoveUpLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
@@ -1418,8 +1469,18 @@ void EntityWidget::on_btnDeleteTrack_clicked()
 
 void EntityWidget::on_btnNewScriptVar_clicked()
 {
+    std::vector<ListItem> entities;
+    std::vector<ListItem> nodes;
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        const auto& node = mState.entity->GetNode(i);
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        nodes.push_back(std::move(item));
+    }
     game::ScriptVar var("My_Var", std::string(""));
-    DlgScriptVar dlg(this, var);
+    DlgScriptVar dlg(nodes, entities, this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1433,10 +1494,21 @@ void EntityWidget::on_btnEditScriptVar_clicked()
     if (items.isEmpty())
         return;
 
+    std::vector<ListItem> entities;
+    std::vector<ListItem> nodes;
+    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        const auto& node = mState.entity->GetNode(i);
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        nodes.push_back(std::move(item));
+    }
+
     // single selection for now.
     const auto index = items[0];
     game::ScriptVar var = mState.entity->GetScriptVar(index.row());
-    DlgScriptVar dlg(this, var);
+    DlgScriptVar dlg(nodes, entities, this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -2106,12 +2178,15 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     mUI.actionNodeMoveUpLayer->setEnabled(item != nullptr);
     mUI.actionNodeDelete->setEnabled(node != nullptr);
     mUI.actionNodeDuplicate->setEnabled(node != nullptr);
+    mUI.actionNodeVarRef->setEnabled(node != nullptr);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
     menu.addAction(mUI.actionNodeMoveDownLayer);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDuplicate);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeVarRef);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
     menu.exec(QCursor::pos());

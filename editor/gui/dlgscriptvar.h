@@ -24,6 +24,7 @@
 #include "warnpop.h"
 
 #include "game/scriptvar.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -33,13 +34,16 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgScriptVar(QWidget* parent, game::ScriptVar& variable);
-
+        DlgScriptVar(const std::vector<ListItem>& nodes,
+                     const std::vector<ListItem>& entities,
+                     QWidget* parent, game::ScriptVar& variable);
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnAdd_clicked();
         void on_btnDel_clicked();
+        void on_btnResetNodeRef_clicked();
+        void on_btnResetEntityRef_clicked();
         void on_chkArray_stateChanged(int);
         void on_varType_currentIndexChanged(int);
         void on_strValue_textChanged(const QString& text);
@@ -50,6 +54,8 @@ namespace gui
         void on_boolValueTrue_clicked(bool checked);
         void on_boolValueFalse_clicked(bool checked);
         void on_index_valueChanged(int);
+        void on_cmbEntityRef_currentIndexChanged(int);
+        void on_cmbEntityNodeRef_currentIndexChanged(int);
     private:
         void UpdateArrayIndex();
         void UpdateArrayType();
@@ -68,10 +74,14 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value, bool array);
+        DlgScriptVal(const std::vector<ListItem>& nodes,
+                     const std::vector<ListItem>& entities,
+                     QWidget* parent, game::ScriptVar::VariantType& value, bool array);
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnResetNodeRef_clicked();
+        void on_btnResetEntityRef_clicked();
         void on_index_valueChanged(int);
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
@@ -80,6 +90,8 @@ namespace gui
         void on_vec2ValueY_valueChanged(double value);
         void on_boolValueTrue_clicked(bool checked);
         void on_boolValueFalse_clicked(bool checked);
+        void on_cmbEntityRef_currentIndexChanged(int);
+        void on_cmbEntityNodeRef_currentIndexChanged(int);
     private:
         void SetArrayValue(unsigned index);
         void ShowArrayValue(unsigned index);

@@ -98,6 +98,7 @@ namespace gui
         void on_actionNewCapsule_triggered();
         void on_actionNewParallelogram_triggered();
         void on_actionNodeDelete_triggered();
+        void on_actionNodeVarRef_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
         void on_actionNodeDuplicate_triggered();

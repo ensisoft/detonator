@@ -553,8 +553,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>106</height>
+                 <width>149</width>
+                 <height>75</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -1782,6 +1782,18 @@
    </property>
    <property name="toolTip">
     <string>Edit entity instance params</string>
+   </property>
+  </action>
+  <action name="actionEntityVarRef">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Variable ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new entity reference variable.</string>
    </property>
   </action>
  </widget>

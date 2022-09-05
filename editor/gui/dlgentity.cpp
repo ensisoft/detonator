@@ -100,7 +100,7 @@ public:
     }
 
 private:
-    static QVariant GetScriptVarData(const game::SceneNodeClass::ScriptVarValue& value)
+    QVariant GetScriptVarData(const game::SceneNodeClass::ScriptVarValue& value) const
     {
         switch (game::ScriptVar::GetTypeFromVariant(value.value))
         {
@@ -145,6 +145,23 @@ private:
                         .arg(QString::number(vec.y, 'f', 2));
             }
             break;
+            case game::ScriptVar::Type::EntityReference: {
+                const auto& array = std::get<std::vector<game::ScriptVar::EntityReference>>(value.value);
+                if (array.size() == 1)
+                    return "Nil";
+                return "[0]=Nil ...";
+            }
+            break;
+            case game::ScriptVar::Type::EntityNodeReference: {
+                const auto& array = std::get<std::vector<game::ScriptVar::EntityNodeReference>>(value.value);
+                const auto& id = array[0].id;
+                QString name = "Nil";
+                if (const auto* node = mEntity.FindNodeById(id))
+                    name = app::FromUtf8(node->GetName());
+                if (array.size() == 1)
+                    return name;
+                return QString("[0]=%1 ...").arg(name);
+            }
         }
         BUG("Unknown ScriptVar type.");
         return QVariant();
@@ -257,7 +274,18 @@ void DlgEntity::on_btnEditVar_clicked()
     if (const auto* val = mNodeClass.FindScriptVarValueById(value.id))
         value.value = val->value;
 
-    DlgScriptVal dlg(this, value.value, var.IsArray());
+    std::vector<ListItem> entities;
+    std::vector<ListItem> nodes;
+    for (size_t i = 0; i < mEntityClass.GetNumNodes(); ++i)
+    {
+        const auto& node = mEntityClass.GetNode(i);
+        ListItem item;
+        item.name = app::FromUtf8(node.GetName());
+        item.id   = app::FromUtf8(node.GetId());
+        nodes.push_back(std::move(item));
+    }
+
+    DlgScriptVal dlg(nodes, entities, this, value.value, var.IsArray());
     if (dlg.exec() == QDialog::Rejected)
         return;
 
