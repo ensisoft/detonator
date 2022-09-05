@@ -25,7 +25,9 @@
 namespace gui
 {
 
-DlgScriptVar::DlgScriptVar(QWidget* parent, game::ScriptVar& variable)
+DlgScriptVar::DlgScriptVar(const std::vector<ListItem>& nodes,
+                           const std::vector<ListItem>& entities,
+                           QWidget* parent, game::ScriptVar& variable)
   : QDialog(parent)
   , mVar(variable)
 {
@@ -39,6 +41,8 @@ DlgScriptVar::DlgScriptVar(QWidget* parent, game::ScriptVar& variable)
     SetValue(mUI.chkArray,    variable.IsArray());
     SetEnabled(mUI.btnAdd,    variable.IsArray());
     SetEnabled(mUI.btnDel,    variable.IsArray());
+    SetList(mUI.cmbEntityNodeRef, nodes);
+    SetList(mUI.cmbEntityRef, entities);
 
     UpdateArrayType();
     UpdateArrayIndex();
@@ -51,6 +55,7 @@ void DlgScriptVar::on_btnAccept_clicked()
 {
     if (!MustHaveInput(mUI.varName))
         return;
+
     mVar.SetName(GetValue(mUI.varName));
     mVar.SetReadOnly(GetValue(mUI.chkReadOnly));
     accept();
@@ -83,6 +88,18 @@ void DlgScriptVar::on_btnDel_clicked()
     SetValue(mUI.index, next);
     ShowArrayValue(next);
 }
+
+void DlgScriptVar::on_btnResetNodeRef_clicked()
+{
+    SetValue(mUI.cmbEntityNodeRef, -1);
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_btnResetEntityRef_clicked()
+{
+    SetValue(mUI.cmbEntityRef, -1);
+    SetArrayValue(GetValue(mUI.index));
+}
+
 void DlgScriptVar::on_chkArray_stateChanged(int)
 {
     const bool checked = GetValue(mUI.chkArray);
@@ -136,6 +153,21 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
                 mUI.boolValueTrue->setFocus();
             }
             break;
+        case game::ScriptVar::Type::EntityNodeReference:
+            {
+                std::vector<game::ScriptVar::EntityNodeReference> refs;
+                mVar.SetNewArrayType(std::move(refs));
+                mUI.cmbEntityNodeRef->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::EntityReference:
+            {
+                std::vector<game::ScriptVar::EntityReference> refs;
+                mVar.SetNewArrayType(std::move(refs));
+                mUI.cmbEntityRef->setFocus();
+            }
+            break;
+        default: BUG("Unhandled scripting variable type.");
     }
     mVar.Resize(size);
 
@@ -177,39 +209,101 @@ void DlgScriptVar::on_index_valueChanged(int)
     ShowArrayValue(GetValue(mUI.index));
 }
 
+void DlgScriptVar::on_cmbEntityRef_currentIndexChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVar::on_cmbEntityNodeRef_currentIndexChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
 void DlgScriptVar::UpdateArrayType()
 {
-    SetEnabled(mUI.strValue, false);
-    SetEnabled(mUI.intValue, false);
-    SetEnabled(mUI.floatValue, false);
-    SetEnabled(mUI.vec2ValueX, false);
-    SetEnabled(mUI.vec2ValueY, false);
-    SetEnabled(mUI.boolValueTrue, false);
-    SetEnabled(mUI.boolValueFalse, false);
+    SetEnabled(mUI.strValue,         false);
+    SetEnabled(mUI.intValue,         false);
+    SetEnabled(mUI.floatValue,       false);
+    SetEnabled(mUI.vec2ValueX,       false);
+    SetEnabled(mUI.vec2ValueY,       false);
+    SetEnabled(mUI.boolValueTrue,    false);
+    SetEnabled(mUI.boolValueFalse,   false);
+    SetEnabled(mUI.cmbEntityRef,     false);
+    SetEnabled(mUI.cmbEntityNodeRef, false);
+
+    SetVisible(mUI.strValue,         false);
+    SetVisible(mUI.intValue,         false);
+    SetVisible(mUI.floatValue,       false);
+    SetVisible(mUI.vec2ValueX,       false);
+    SetVisible(mUI.vec2ValueY,       false);
+    SetVisible(mUI.boolValueTrue,    false);
+    SetVisible(mUI.boolValueFalse,   false);
+    SetVisible(mUI.cmbEntityRef,     false);
+    SetVisible(mUI.cmbEntityNodeRef, false);
+    SetVisible(mUI.lblEntity,        false);
+    SetVisible(mUI.lblEntityNode,    false);
+    SetVisible(mUI.btnResetNodeRef,  false);
+    SetVisible(mUI.btnResetEntityRef, false);
+
+    SetVisible(mUI.lblString,     false);
+    SetVisible(mUI.lblInteger,    false);
+    SetVisible(mUI.lblFloat,      false);
+    SetVisible(mUI.lblVec2,       false);
+    SetVisible(mUI.lblBool,       false);
+    SetVisible(mUI.lblEntity,     false);
+    SetVisible(mUI.lblEntityNode, false);
 
     const auto type = mVar.GetType();
     if (type == game::ScriptVar::Type::String)
     {
         SetEnabled(mUI.strValue, true);
+        SetVisible(mUI.strValue, true);
+        SetVisible(mUI.lblString, true);
     }
     else if (type == game::ScriptVar::Type::Integer)
     {
         SetEnabled(mUI.intValue, true);
+        SetVisible(mUI.intValue, true);
+        SetVisible(mUI.lblInteger, true);
     }
     else if  (type == game::ScriptVar::Type::Float)
     {
         SetEnabled(mUI.floatValue, true);
+        SetVisible(mUI.floatValue, true);
+        SetVisible(mUI.lblFloat, true);
     }
     else if (type == game::ScriptVar::Type::Vec2)
     {
         SetEnabled(mUI.vec2ValueX, true);
         SetEnabled(mUI.vec2ValueY, true);
+        SetVisible(mUI.vec2ValueX, true);
+        SetVisible(mUI.vec2ValueY, true);
+        SetVisible(mUI.lblVec2, true);
     }
     else if (type  == game::ScriptVar::Type::Boolean)
     {
         SetEnabled(mUI.boolValueTrue, true);
         SetEnabled(mUI.boolValueFalse, true);
+        SetVisible(mUI.boolValueTrue, true);
+        SetVisible(mUI.boolValueFalse, true);
+        SetVisible(mUI.lblBool, true);
+    }
+    else if (type == game::ScriptVar::Type::EntityReference)
+    {
+        SetEnabled(mUI.cmbEntityRef, true);
+        SetVisible(mUI.cmbEntityRef, true);
+        SetVisible(mUI.lblEntity, true);
+        SetVisible(mUI.btnResetEntityRef, true);
+    }
+    else if (type == game::ScriptVar::Type::EntityNodeReference)
+    {
+        SetEnabled(mUI.cmbEntityNodeRef, true);
+        SetVisible(mUI.cmbEntityNodeRef, true);
+        SetVisible(mUI.lblEntityNode, true);
+        SetVisible(mUI.btnResetNodeRef, true);
     } else BUG("Unhandled scripting variable type.");
+
+    adjustSize();
 }
 
 void DlgScriptVar::UpdateArrayIndex()
@@ -265,6 +359,18 @@ void DlgScriptVar::SetArrayValue(unsigned index)
         auto& arr = mVar.GetArray<bool>();
         ASSERT(index < arr.size());
         arr[index] = (bool)GetValue(mUI.boolValueTrue);
+    }
+    else if (type == game::ScriptVar::Type::EntityReference)
+    {
+        auto& arr = mVar.GetArray<game::ScriptVar::EntityReference>();
+        ASSERT(index < arr.size());
+        arr[index].id = app::ToUtf8(GetItemId(mUI.cmbEntityRef));
+    }
+    else if (type == game::ScriptVar::Type::EntityNodeReference)
+    {
+        auto& arr = mVar.GetArray<game::ScriptVar::EntityNodeReference>();
+        ASSERT(index < arr.size());
+        arr[index].id = app::ToUtf8(GetItemId(mUI.cmbEntityNodeRef));
     } else BUG("Unhandled scripting variable type.");
 }
 
@@ -302,15 +408,33 @@ void DlgScriptVar::ShowArrayValue(unsigned index)
         ASSERT(index < arr.size());
         SetValue(mUI.boolValueTrue, arr[index] == true);
         SetValue(mUI.boolValueFalse, arr[index] == false);
-    } else BUG("Unhandled scripting variable type.");
+    }
+    else if (type == game::ScriptVar::Type::EntityReference)
+    {
+        const auto& arr = mVar.GetArray<game::ScriptVar::EntityReference>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.cmbEntityRef, ListItemId(arr[index].id));
+    }
+    else if (type == game::ScriptVar::Type::EntityNodeReference)
+    {
+        const auto& arr = mVar.GetArray<game::ScriptVar::EntityNodeReference>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.cmbEntityNodeRef, ListItemId(arr[index].id));
+    }
+    else BUG("Unhandled scripting variable type.");
 }
 
 
-DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value, bool array)
+DlgScriptVal::DlgScriptVal(const std::vector<ListItem>& nodes,
+                           const std::vector<ListItem>& entities,
+                           QWidget* parent, game::ScriptVar::VariantType& value, bool array)
   : QDialog(parent)
   , mVal(value)
 {
     mUI.setupUi(this);
+    SetList(mUI.cmbEntityNodeRef, nodes);
+    SetList(mUI.cmbEntityRef, entities);
+
     SetVisible(mUI.props, false);
     SetVisible(mUI.value, true);
 
@@ -326,6 +450,12 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value,
     SetVisible(mUI.lblFloat, false);
     SetVisible(mUI.lblVec2, false);
     SetVisible(mUI.lblBool, false);
+    SetVisible(mUI.lblEntityNode, false);
+    SetVisible(mUI.cmbEntityNodeRef, false);
+    SetVisible(mUI.btnResetNodeRef, false);
+    SetVisible(mUI.lblEntity, false);
+    SetVisible(mUI.cmbEntityRef, false);
+    SetVisible(mUI.btnResetEntityRef, false);
 
     SetEnabled(mUI.strValue, true);
     SetEnabled(mUI.intValue, true);
@@ -346,8 +476,7 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value,
         SetVisible(mUI.index, true);
         SetVisible(mUI.lblIndex, true);
         SetValue(mUI.index, 0);
-        mUI.index->setMinimum(0);
-        mUI.index->setMaximum(size-1);
+        SetRange(mUI.index, 0, size-1);
     }
 
     switch (game::ScriptVar::GetTypeFromVariant(value))
@@ -389,6 +518,22 @@ DlgScriptVal::DlgScriptVal(QWidget* parent, game::ScriptVar::VariantType& value,
                 mUI.boolValueTrue->setFocus();
             }
             break;
+        case game::ScriptVar::Type::EntityReference:
+            {
+                SetVisible(mUI.cmbEntityRef, true);
+                SetVisible(mUI.lblEntity, true);
+                SetVisible(mUI.btnResetEntityRef, true);
+                mUI.cmbEntityRef->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::EntityNodeReference:
+            {
+                SetVisible(mUI.cmbEntityNodeRef, true);
+                SetVisible(mUI.lblEntityNode, true);
+                SetVisible(mUI.btnResetNodeRef, true);
+                mUI.cmbEntityNodeRef->setFocus();
+            }
+            break;
         default:  BUG("Unhandled ScriptVar value type.");
     }
     adjustSize();
@@ -404,6 +549,17 @@ void DlgScriptVal::on_btnAccept_clicked()
 void DlgScriptVal::on_btnCancel_clicked()
 {
     reject();
+}
+
+void DlgScriptVal::on_btnResetNodeRef_clicked()
+{
+    SetValue(mUI.cmbEntityNodeRef, -1);
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_btnResetEntityRef_clicked()
+{
+    SetValue(mUI.cmbEntityRef, -1);
+    SetArrayValue(GetValue(mUI.index));
 }
 
 void DlgScriptVal::on_index_valueChanged(int)
@@ -440,6 +596,15 @@ void DlgScriptVal::on_boolValueFalse_clicked(bool checked)
 {
     SetArrayValue(GetValue(mUI.index));
 }
+void DlgScriptVal::on_cmbEntityRef_currentIndexChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVal::on_cmbEntityNodeRef_currentIndexChanged(int)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
 
 void DlgScriptVal::SetArrayValue(unsigned index)
 {
@@ -473,7 +638,19 @@ void DlgScriptVal::SetArrayValue(unsigned index)
     {
         auto& arr = game::ScriptVar::GetVectorFromVariant<bool>(mVal);
         ASSERT(index < arr.size());
-        arr[index] = (bool)GetValue(mUI.boolValueTrue);
+        arr[index] = (bool) GetValue(mUI.boolValueTrue);
+    }
+    else if (type == game::ScriptVar::Type::EntityReference)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<game::ScriptVar::EntityReference>(mVal);
+        ASSERT(index < arr.size());
+        arr[index].id = app::ToUtf8(GetItemId(mUI.cmbEntityRef));
+    }
+    else if (type == game::ScriptVar::Type::EntityNodeReference)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<game::ScriptVar::EntityNodeReference>(mVal);
+        ASSERT(index < arr.size());
+        arr[index].id = app::ToUtf8(GetItemId(mUI.cmbEntityNodeRef));
     } else BUG("Unhandled scripting variable type.");
 }
 
@@ -511,6 +688,18 @@ void DlgScriptVal::ShowArrayValue(unsigned index)
         ASSERT(index < arr.size());
         SetValue(mUI.boolValueTrue, arr[index] == true);
         SetValue(mUI.boolValueFalse, arr[index] == false);
+    }
+    else if (type == game::ScriptVar::Type::EntityReference)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<game::ScriptVar::EntityReference>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.cmbEntityRef, ListItemId(arr[index].id));
+    }
+    else if (type == game::ScriptVar::Type::EntityNodeReference)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<game::ScriptVar::EntityNodeReference>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.cmbEntityNodeRef, ListItemId(arr[index].id));
     } else BUG("Unhandled scripting variable type.");
 }
 

@@ -2737,7 +2737,10 @@
     <string>Delete</string>
    </property>
    <property name="toolTip">
-    <string>Delete animation node</string>
+    <string>Delete entity node</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
    </property>
   </action>
   <action name="actionPlay">
@@ -2966,6 +2969,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+4</string>
+   </property>
+  </action>
+  <action name="actionNodeVarRef">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Variable ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new entity node reference variable.</string>
    </property>
   </action>
  </widget>

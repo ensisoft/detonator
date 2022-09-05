@@ -109,6 +109,7 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
+        void on_actionEntityVarRef_triggered();
         void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
         void on_btnAddScript_clicked();
