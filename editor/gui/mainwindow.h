@@ -176,6 +176,7 @@ namespace gui
         void OpenResource(const QString& id);
         void OpenRecentWorkspace();
         void ToggleShowResource();
+        void CleanGarbage();
 
     private:
         void BuildRecentWorkspacesMenu();

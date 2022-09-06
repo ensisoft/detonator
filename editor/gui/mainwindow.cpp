@@ -796,7 +796,7 @@ void MainWindow::iterateGameLoop()
     UpdateStats();
 
     GfxWindow::EndFrame(mSettings.frame_delay);
-    GfxWindow::CleanGarbage();
+    //GfxWindow::CleanGarbage();
     // could be changed through the widget's hotkey handler.
     mSettings.vsync = GfxWindow::GetVSYNC();
 }
@@ -925,7 +925,6 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     mUI.mainTab->removeTab(index);
 
     widget->Shutdown();
-
     //               !!!!! WARNING !!!!!
     // setParent(nullptr) will cause an OpenGL memory leak
     //
@@ -934,12 +933,12 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     // https://bugreports.qt.io/browse/QTBUG-69429
     //
     //widget->setParent(nullptr);
-
     delete widget;
 
     // rebuild window menu.
     UpdateWindowMenu();
 
+    QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -2205,6 +2204,7 @@ void MainWindow::RefreshUI()
             // https://bugreports.qt.io/browse/QTBUG-69429
             //
             delete widget;
+            QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
         }
         else
         {
@@ -2234,6 +2234,10 @@ void MainWindow::RefreshUI()
             // somewhat fucked up in its appearance. (Layout is off)
             QTimer::singleShot(10, widget, &QWidget::updateGeometry);
             QTimer::singleShot(10, mUI.mainTab, &QWidget::updateGeometry);
+        }
+        if (child->IsClosed())
+        {
+            QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
         }
 
         if (child->IsClosed() || child->ShouldPopIn())
@@ -2476,6 +2480,11 @@ void MainWindow::ToggleShowResource()
     ASSERT(type.has_value());
     mWorkspaceProxy.SetVisible(type.value(), action->isChecked());
     mWorkspaceProxy.invalidate();
+}
+
+void MainWindow::CleanGarbage()
+{
+    GfxWindow::CleanGarbage();
 }
 
 bool MainWindow::event(QEvent* event)
