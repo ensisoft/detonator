@@ -1079,11 +1079,17 @@ public:
     { mBegin = mResult.begin(); }
     ResultSet()
     { mBegin = mResult.begin(); }
-    T GetCurrent() const
+    const T& GetCurrent() const
     {
         if (mBegin == mResult.end())
             throw GameError("ResultSet iteration error.");
         return *mBegin;
+    }
+    const T& GetNext()
+    {
+        if (mBegin == mResult.end())
+            throw GameError("ResultSet iteration error.");
+        return *mBegin++;
     }
     void BeginIteration()
     { mBegin = mResult.begin(); }
@@ -1125,8 +1131,14 @@ public:
     const T& GetCurrent() const
     {
         if (mBegin == mResult.end())
-            throw GameError("ResultSet iteration error.");
+            throw GameError("ResultVector iteration error.");
         return *mBegin;
+    }
+    const T& GetNext()
+    {
+        if (mBegin == mResult.end())
+            throw GameError("ResultVector iteration error.");
+        return *mBegin++;
     }
     const T& GetAt(size_t index) const
     {
@@ -2900,6 +2912,7 @@ void BindGameLib(sol::state& L)
     entity["GetTime"]              = &Entity::GetTime;
     entity["GetLayer"]             = &Entity::GetLayer;
     entity["SetLayer"]             = &Entity::SetLayer;
+    entity["IsVisible"]            = &Entity::IsVisible;
     entity["IsAnimating"]          = &Entity::IsAnimating;
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
@@ -2914,6 +2927,8 @@ void BindGameLib(sol::state& L)
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
     entity["Die"]                  = &Entity::Die;
     entity["TestFlag"]             = &TestFlag<Entity>;
+    entity["SetFlag"]              = &SetFlag<Entity>;
+    entity["SetVisible"]           = &Entity::SetVisible;
     entity["SetTimer"]             = &Entity::SetTimer;
     entity["PostEvent"]            = sol::overload(
         [](Entity* entity, const std::string& message, const std::string& sender, sol::object value) {
@@ -2962,6 +2977,7 @@ void BindGameLib(sol::state& L)
     query_result_set["Next"]    = &DynamicSpatialQueryResultSet::Next;
     query_result_set["Begin"]   = &DynamicSpatialQueryResultSet::BeginIteration;
     query_result_set["Get"]     = &DynamicSpatialQueryResultSet::GetCurrent;
+    query_result_set["GetNext"] = &DynamicSpatialQueryResultSet::GetNext;
 
     auto script_var = table.new_usertype<ScriptVar>("ScriptVar");
     script_var["GetValue"] = ObjectFromScriptVarValue;
@@ -2976,6 +2992,30 @@ void BindGameLib(sol::state& L)
     scene_class["GetScriptVar"]     = (const ScriptVar&(SceneClass::*)(size_t)const)&SceneClass::GetScriptVar;
     scene_class["FindScriptVarById"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarById;
     scene_class["FindScriptVarByName"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarByName;
+    scene_class["GetLeftBoundary"] = [](const SceneClass& klass, sol::this_state state) {
+        const float* val = klass.GetLeftBoundary();
+        sol::state_view lua(state);
+        return val ? sol::make_object(lua, *val)
+                   : sol::make_object(lua, sol::nil);
+    };
+    scene_class["GetRightBoundary"] = [](const SceneClass& klass, sol::this_state state) {
+        const float* val = klass.GetRightBoundary();
+        sol::state_view lua(state);
+        return val ? sol::make_object(lua, *val)
+                   : sol::make_object(lua, sol::nil);
+    };
+    scene_class["GetTopBoundary"]  = [](const SceneClass& klass, sol::this_state state) {
+        const float* val = klass.GetTopBoundary();
+        sol::state_view lua(state);
+        return val ? sol::make_object(lua, *val)
+                   : sol::make_object(lua, sol::nil);
+    };
+    scene_class["GetBottomBoundary"] = [](const SceneClass& klass, sol::this_state state) {
+        const float* val = klass.GetBottomBoundary();
+        sol::state_view lua(state);
+        return val ? sol::make_object(lua, *val)
+                   : sol::make_object(lua, sol::nil);
+    };
 
     using EntityList = ResultVector<Entity*>;
     auto entity_list = table.new_usertype<EntityList>("EntityList");
@@ -2986,6 +3026,7 @@ void BindGameLib(sol::state& L)
     entity_list["Get"]     = &EntityList::GetCurrent;
     entity_list["GetAt"]   = &EntityList::GetAt;
     entity_list["Size"]    = &EntityList::GetSize;
+    entity_list["GetNext"] = &EntityList::GetNext;
 
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
@@ -3098,6 +3139,7 @@ void BindGameLib(sol::state& L)
     ray_cast_result_vector["Get"]     = &RayCastResultVector::GetCurrent;
     ray_cast_result_vector["GetAt"]   = &RayCastResultVector::GetAt;
     ray_cast_result_vector["Size"]    = &RayCastResultVector::GetSize;
+    ray_cast_result_vector["GetNext"] = &RayCastResultVector::GetNext;
 
     physics["RayCast"] = sol::overload(
         [](PhysicsEngine& self, const glm::vec2& start, const glm::vec2& end, const std::string& mode) {

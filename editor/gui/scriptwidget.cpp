@@ -1091,6 +1091,7 @@ void InitDoc()
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
+    DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
     DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
     DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"
@@ -1120,7 +1121,13 @@ void InitDoc()
                                                         "Any current animation is replaced by this new animation.<br>"
                                                         "Returns the animation instance or nil if no such animation could be found.",
                  "string", "id");
-    DOC_METHOD_1("bool", "TestFlag", "Test entity flag.", "string", "flag_name");
+    DOC_METHOD_1("bool", "TestFlag", "Test entity flag.<br>"
+                                     "Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
+                 "string", "flag_name");
+    DOC_METHOD_2("void", "SetFlag", "Set entity flag.<br>"
+                                    "Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
+                 "string", "name", "bool", "on_off");
+    DOC_METHOD_1("void", "SetVisible", "Set entity visibility flag.", "bool", "on_off");
     DOC_METHOD_0("void", "Die", "Let the entity die and be removed from the scene.");
     DOC_METHOD_2("void", "SetTimer", "Set a named timer on the entity.<br>"
                                      "The timer's resolution is based on the game's update resolution configured in the project settings.<br>"
@@ -1164,6 +1171,7 @@ void InitDoc()
                                   "The iteration is already started automatically when the query is created.<br>"
                                   "So this only needs to be called if restarting.");
     DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
+    DOC_METHOD_0("game.EntityNode", "GetNext", "Get the current item and move onto next item in the result set.");
 
     DOC_TABLE("game.ScriptVar");
     DOC_METHOD_0("bool|float|string|int|vec2", "GetValue", "Get the value of the script variable.");
@@ -1184,6 +1192,10 @@ void InitDoc()
     DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable by name.<br>"
                                                           "Returns nil if no such script variable could be found.",
                  "string", "name");
+    DOC_METHOD_0("float|nil", "GetLeftBoundary", "Get the left boundary of the scene if any. If not set then nil is returned.");
+    DOC_METHOD_0("float|nil", "GetRightBoundary", "Get the right boundary of the scene if any. If not set then nil is returned.");
+    DOC_METHOD_0("float|nil", "GetTopBoundary", "Get the top boundary of the scene if any. If not set then nil is returned.");
+    DOC_METHOD_0("float|nil", "GetBottomBoundary", "Get the bottom boundary of the scene if any. If not set then nil is returned.");
 
     DOC_TABLE("game.EntityList");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the entity list is an empty list or not.");
@@ -1195,6 +1207,7 @@ void InitDoc()
                                   "so this only needs to be called if restarting.");
     DOC_METHOD_0("game.Entity", "Get", "Get the current item at this point of iteration over the list.");
     DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index.", "unsigned", "index");
+    DOC_METHOD_0("game.Entity", "GetNext", "Get the current item and move on to the next item.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
 
     DOC_TABLE("game.Scene");
@@ -1270,6 +1283,7 @@ void InitDoc()
                                   "so this only needs to be called if restarting.");
     DOC_METHOD_0("game.RayCastResult", "Get", "Get the current item at this point of iteration over the result vector.");
     DOC_METHOD_1("game.RayCastResult", "GetAt", "Get a result at a given index.", "size_t", "index");
+    DOC_METHOD_0("game.RayCastResult", "GetNext", "Get the current item and move onto next.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the ray cast result vector.");
 
     DOC_TABLE("game.Physics");

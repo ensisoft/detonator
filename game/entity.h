@@ -1879,10 +1879,10 @@ namespace game
         { mLifetime = lifetime; }
         void SetScene(Scene* scene)
         { mScene = scene; }
-
+        void SetVisible(bool on_off)
+        { SetFlag(Flags::VisibleInGame, on_off); }
         void SetTimer(const std::string& name, double when)
         { mTimers.push_back({name, when}); }
-
         void PostEvent(const PostedEvent& event)
         { mEvents.push_back(event); }
         void PostEvent(PostedEvent&& event)
@@ -1930,6 +1930,8 @@ namespace game
         { return mControlFlags.test(flag); }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        bool IsVisible() const
+        { return TestFlag(Flags::VisibleInGame); }
         bool HasIdleTrack() const
         { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
         RenderTree& GetRenderTree()
