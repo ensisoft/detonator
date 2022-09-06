@@ -297,6 +297,9 @@ add_executable(GSEditor
     editor/gui/dlgstyleproperties.h
     editor/gui/dlgstyleproperties.ui
     editor/gui/dlgstyleproperties.cpp
+    editor/gui/dlgstylestring.h
+    editor/gui/dlgstylestring.ui
+    editor/gui/dlgstylestring.cpp
     editor/gui/dlggradient.h
     editor/gui/dlggradient.ui
     editor/gui/dlgnew.h

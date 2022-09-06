@@ -143,7 +143,27 @@
             <item>
              <widget class="QToolButton" name="btnEditWindowStyle">
               <property name="toolTip">
-               <string>Edit widget's style properties</string>
+               <string>Edit style properties</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/style.png</normaloff>:/16x16_ico_png/style.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnEditWindowStyleString">
+              <property name="toolTip">
+               <string>Edit style string</string>
               </property>
               <property name="text">
                <string>...</string>
@@ -917,6 +937,26 @@
           </item>
           <item>
            <widget class="QToolButton" name="btnEditWidgetStyle">
+            <property name="toolTip">
+             <string>Edit widget's style properties</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/style.png</normaloff>:/16x16_ico_png/style.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnEditWidgetStyleString">
             <property name="toolTip">
              <string>Edit widget's style properties</string>
             </property>
@@ -1795,6 +1835,7 @@
   <tabstop>btnSelectStyle</tabstop>
   <tabstop>windowStyleString</tabstop>
   <tabstop>btnEditWindowStyle</tabstop>
+  <tabstop>btnEditWindowStyleString</tabstop>
   <tabstop>btnResetWindowStyle</tabstop>
   <tabstop>windowScriptFile</tabstop>
   <tabstop>btnEditScript</tabstop>
@@ -1821,6 +1862,7 @@
   <tabstop>widgetName</tabstop>
   <tabstop>widgetStyleString</tabstop>
   <tabstop>btnEditWidgetStyle</tabstop>
+  <tabstop>btnEditWidgetStyleString</tabstop>
   <tabstop>btnResetWidgetStyle</tabstop>
   <tabstop>widgetWidth</tabstop>
   <tabstop>widgetHeight</tabstop>
