@@ -696,10 +696,6 @@ void InitDoc()
     DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "bits", "int", "key");
 
     DOC_TABLE("uik");
-    DOC_FUNCTION_2("uik.Widget", "WidgetCast", "Downcast a Widget object to concrete widget type.<br>"
-                                             "Returns nil if the widget doesn't have the right type.",
-                 "uik.Widget", "widget", "string", "downcast_type");
-
     DOC_TABLE("uik.Widget");
     DOC_METHOD_0("string", "GetId", "Get the widget ID.");
     DOC_METHOD_0("string", "GetName", "Get the widget name.");
@@ -771,22 +767,22 @@ void InitDoc()
     DOC_METHOD_0("string", "GetName", "Get the window name.");
     DOC_METHOD_0("int", "GetNumWidgets", "Get the number of widgets in the window.");
     DOC_METHOD_1("uik.Widget", "FindWidgetById", "Find a widget by the given Widget ID.<br>"
-                                                 "Returns nil if there's no such widget.", "string", "id");
-    DOC_METHOD_2("uik.Widget", "FindWidgetById", "Find a widget by the given Widget ID and cast it to a concrete widget type.<br>"
-                                                 "Returns nil if there's no such widget or the widget doesn't have the right type.",
-                 "string", "id", "string", "downcast_type");
+                                                 "The returned widget will already be downcast to the right widget type.<br>"
+                                                 "Returns nil if there's no such widget.",
+                 "string", "id");
     DOC_METHOD_1("uik.Widget", "FindWidgetByName", "Find a widget by the given Widget name.<br>"
                                                    "If there are multiple widgets by the same name it's unspecified which one will be returned.<br>"
+                                                   "The returned widget will already be downcast to the right widget type.<br>"
                                                    "Returns nil if there's no such widget.",
                  "string", "name");
-    DOC_METHOD_2("uik.Widget", "FindWidgetByName", "Find a widget by the given Widget name and cast it to a concrete widget type.<br>"
-                                                   "If there are multiple widgets by the same name it's unspecified which one will be returned.<br>"
-                                                   "Returns nil if there's no such widget or the widget doesn't have the right type.",
-                 "string", "name", "string", "downcast_type");
     DOC_METHOD_1("uik.Widget", "FindWidgetParent", "Find the parent widget of the given widget.<br>"
-                                                   "Returns nil if the widget is the root widget and doesn't have a parent.",
+                                                   "Returns nil if the widget is the root widget and doesn't have a parent."
+                                                   "The returned widget will already be downcast to the right widget type.<br>",
                  "uik.Widget", "widget");
-    DOC_METHOD_1("uik.Widget", "GetWidget", "Get a widget by the given index.", "int", "index");
+    DOC_METHOD_1("uik.Widget", "GetWidget", "Get a widget by the given index."
+                                            "The returned widget will already be downcast to the right widget type.<br>",
+                 "unsigned", "index");
+
     DOC_TABLE("uik.Action");
     DOC_TABLE_PROPERTY("string", "name", "Name of the widget that triggered the action.");
     DOC_TABLE_PROPERTY("string", "id", "ID of the widget that triggered the action.");

@@ -7,7 +7,6 @@
 -- 'Game' is the native instance of *this* game that is running. It provides
 --        the native services for interfacing with the game engine.
 -- 'Scene' is the current scene that is loaded.
-
 local game_tick_count = 0
 local ship_velo_increment = 0
 local prev_formation = -1
@@ -20,16 +19,16 @@ States = {
 Menus = {
     MainMenu = 1,
     GameOver = 2,
-    Options  = 3,
-    Credits  = 4
+    Options = 3,
+    Credits = 4
 }
 
 local GameState = {
     state = States.Menu,
-    menu  = Menus.MainMenu,
-    music_volume   = 1.0,
+    menu = Menus.MainMenu,
+    music_volume = 1.0,
     effects_volume = 1.0,
-    play_music  = true,
+    play_music = true,
     play_effects = true
 }
 
@@ -37,18 +36,18 @@ function SpawnEnemy(x, y, velocity)
     local ship = ClassLib:FindEntityClassByName('Ship2')
     local args = game.EntityArgs:new()
     args.class = ship
-    args.name  = "ship2"
+    args.name = "ship2"
     args.position = glm.vec2:new(x, y)
     local ship = Scene:SpawnEntity(args, true)
     ship.velocity = velocity * ship_velo_increment
-    ship.score    = math.floor(ship.score * ship_velo_increment)
+    ship.score = math.floor(ship.score * ship_velo_increment)
 end
 
 function SpawnWaveLeft()
     local x = -500
     local y = -500
     local velocity = glm.vec2:new(-200.0, 150.0)
-    for i=1, 5, 1 do
+    for i = 1, 5, 1 do
         SpawnEnemy(x, y, velocity)
         x = x + 200
         y = y - 80
@@ -56,10 +55,10 @@ function SpawnWaveLeft()
 end
 
 function SpawnWaveRight()
-    local x =  500
+    local x = 500
     local y = -500
     local velocity = glm.vec2:new(200.0, 150.0)
-    for i=1, 5, 1 do
+    for i = 1, 5, 1 do
         SpawnEnemy(x, y, velocity)
         x = x - 200
         y = y - 80
@@ -70,21 +69,20 @@ function SpawnChevron()
     local velocity = glm.vec2:new(0.0, 150.0)
     SpawnEnemy(-300.0, -650.0, velocity)
     SpawnEnemy(-150.0, -550.0, velocity)
-    SpawnEnemy( 150.0, -550.0, velocity)
-    SpawnEnemy( 300.0, -650.0, velocity)
-    SpawnEnemy(   0.0, -500.0, velocity)
+    SpawnEnemy(150.0, -550.0, velocity)
+    SpawnEnemy(300.0, -650.0, velocity)
+    SpawnEnemy(0.0, -500.0, velocity)
 end
 
 function SpawnRow()
-    local x =  0
+    local x = 0
     local y = -500
     local velocity = glm.vec2:new(0.0, 150.0)
-    for i=1, 5, 1 do
+    for i = 1, 5, 1 do
         SpawnEnemy(x, y, velocity)
         y = y - 180
     end
 end
-
 
 function SpawnSpaceRock()
     local maybe = util.Random(0, 2)
@@ -101,12 +99,12 @@ function SpawnSpaceRock()
         local asteroid = ClassLib:FindEntityClassByName('Asteroid')
         local args = game.EntityArgs:new()
         args.class = asteroid
-        args.name  = 'asteroid'
+        args.name = 'asteroid'
         args.position = glm.vec2:new(util.Random(-550, 550), -500)
-        args.scale    = scale
+        args.scale = scale
         local entity = Scene:SpawnEntity(args, true)
-        local body   = entity:FindNodeByClassName('Body')
-        local item   = body:GetDrawable()
+        local body = entity:FindNodeByClassName('Body')
+        local item = body:GetDrawable()
         item:SetTimeScale(time_scale)
         entity.radius = radius
     end
@@ -143,7 +141,7 @@ end
 function InitGameState()
     ship_velo_increment = 1.0
     game_tick_count = 0
-    prev_formation  = -1
+    prev_formation = -1
     util.RandomSeed(6634)
 end
 
@@ -158,7 +156,7 @@ function LoadGame()
             return false
         end
         State:Restore(json)
-    end 
+    end
     Audio:SetMusicGain(State:GetValue('music_gain', 1.0))
     Audio:SetSoundEffectGain(State:GetValue('effects_gain', 1.0))
     State:InitValue('play_music', true)
@@ -196,7 +194,9 @@ function EndPlay(scene)
 end
 
 function Tick(game_time, dt)
-    if Scene == nil then return end
+    if Scene == nil then
+        return
+    end
 
     -- spawn a space rock even in the menu.
     SpawnSpaceRock()
@@ -230,7 +230,6 @@ end
 function Update(game_time, dt)
 end
 
-
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
@@ -241,9 +240,9 @@ function OnKeyDown(symbol, modifier_bits)
                 Game:Quit(0)
             elseif GameState.menu == Menus.Options then
                 Game:CloseUI(0)
-            elseif GameState.menu == Menus.GameOver then 
+            elseif GameState.menu == Menus.GameOver then
                 EnterMenu()
-            elseif GameState.menu == Menus.Credits then 
+            elseif GameState.menu == Menus.Credits then
                 Game:CloseUI(0)
             end
         end
@@ -255,7 +254,7 @@ function OnKeyDown(symbol, modifier_bits)
                 EnterMenu()
             end
         end
-    elseif symbol == wdk.Keys.F12 then 
+    elseif symbol == wdk.Keys.F12 then
         developer_ui = not developer_ui
         Game:ShowDeveloperUI(developer_ui)
     end
@@ -265,19 +264,19 @@ function OnKeyUp(symbol, modifier_bits)
 end
 
 function OnAudioEvent(event)
-    if event.track == 'Game Music' then 
-        if event.type == 'TrackDone'  and GameState.state == States.Play then
+    if event.track == 'Game Music' then
+        if event.type == 'TrackDone' and GameState.state == States.Play then
             Audio:PlayMusic('Game Music')
         end
-    end 
+    end
 end
 
 function OnUIOpen(ui)
     Game:DebugPrint(ui:GetName() .. ' is open')
     if ui:GetName() == 'MainMenu' then
         GameState.menu = Menus.MainMenu
-        local hiscore = ui:FindWidgetByName('hiscore', 'Label')
-        if State:HasValue('high_score') then 
+        local hiscore = ui:FindWidgetByName('hiscore')
+        if State:HasValue('high_score') then
             hiscore:SetText(string.format('High score %d', State.high_score))
         else
             hiscore:SetText('No highscore set!')
@@ -286,23 +285,23 @@ function OnUIOpen(ui)
         GameState.menu = Menus.GameOver
     elseif ui:GetName() == 'Options' then
         GameState.menu = Menus.Options
-        local play_music = ui:FindWidgetByName('play_music', 'CheckBox')
-        local play_effects = ui:FindWidgetByName('play_effects', 'CheckBox')
-        local music_volume = ui:FindWidgetByName('music_volume', 'Slider')
-        local effects_volume = ui:FindWidgetByName('effects_volume', 'Slider')     
+        local play_music = ui:FindWidgetByName('play_music')
+        local play_effects = ui:FindWidgetByName('play_effects')
+        local music_volume = ui:FindWidgetByName('music_volume')
+        local effects_volume = ui:FindWidgetByName('effects_volume')
 
         play_music:SetChecked(State:GetValue('play_music', true))
         play_effects:SetChecked(State:GetValue('play_effects', true))
         music_volume:SetValue(State:GetValue('music_gain', 1.0))
         effects_volume:SetValue(State:GetValue('effects_gain', 1.0))
     elseif ui:GetName() == 'Credits' then
-        GameState.menu = Menus.Credits        
+        GameState.menu = Menus.Credits
     end
 end
 
 function OnUIClose(ui, result)
     Game:DebugPrint(ui:GetName() .. ' is closed')
-    if ui:GetName() == 'Options' then 
+    if ui:GetName() == 'Options' then
         GameState.menu = Menus.MainMenu
     end
 end
@@ -311,32 +310,31 @@ function OnUIAction(ui, action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
-        if State:GetValue('play_effects', false) then 
+        if State:GetValue('play_effects', false) then
             Audio:PlaySoundEffect('Menu Click', 0)
         end
         EnterGame()
     elseif action.name == 'options' then
         Game:OpenUI('Options')
-    elseif action.name == 'play_music' then 
+    elseif action.name == 'play_music' then
         if action.value == false then
             Audio:KillMusic('Menu Music')
         else
             Audio:PlayMusic('Menu Music')
         end
         State:SetValue('play_music', action.value)
-    elseif action.name == 'play_effects' then 
+    elseif action.name == 'play_effects' then
         State:SetValue('play_effects', action.value)
     elseif action.name == 'music_volume' then
         State:SetValue('music_gain', action.value)
         Audio:SetMusicGain(action.value)
-    elseif action.name == 'effects_volume' then 
+    elseif action.name == 'effects_volume' then
         State:SetValue('effects_gain', action.value)
         Audio:SetSoundEffectGain(action.value)
-    elseif action.name == 'credits' then 
+    elseif action.name == 'credits' then
         Game:OpenUI('Credits')
     end
 end
-
 
 function OnGameEvent(event)
     if event.from == 'player' and event.message == 'dead' then
@@ -347,19 +345,19 @@ function OnGameEvent(event)
         Audio:KillMusic('Game Music')
         local play_music = State:GetValue('play_music', false)
         local play_effects = State:GetValue('play_effects', false)
-        local ui = Game:OpenUI('GameOver')  
+        local ui = Game:OpenUI('GameOver')
         local highscore = ui:FindWidgetByName('highscore')
         local old_score = State:GetValue('high_score', 0)
-        highscore:SetVisible(event.value > old_score)        
-        if event.value > old_score then 
+        highscore:SetVisible(event.value > old_score)
+        if event.value > old_score then
             State.high_score = event.value
-            if play_effects then 
+            if play_effects then
                 Audio:PlaySoundEffect('Victory', 1000)
             end
-            if play_music then 
+            if play_music then
                 Audio:PlayMusic('Ending', 5000)
             end
-        elseif play_music then 
+        elseif play_music then
             Audio:PlayMusic('Ending')
         end
     end
