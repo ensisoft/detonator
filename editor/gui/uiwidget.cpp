@@ -860,7 +860,10 @@ bool UIWidget::HasUnsavedChanges() const
 bool UIWidget::OnEscape()
 {
     if (mCurrentTool)
+    {
         mCurrentTool.reset();
+        UncheckPlacementActions();
+    }
     else mUI.tree->ClearSelection();
     return true;
 }
@@ -1027,6 +1030,8 @@ void UIWidget::on_actionNewForm_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Form>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewForm->setChecked(true);
 }
 
 void UIWidget::on_actionNewLabel_triggered()
@@ -1034,6 +1039,8 @@ void UIWidget::on_actionNewLabel_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Label>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewLabel->setChecked(true);
 }
 
 void UIWidget::on_actionNewPushButton_triggered()
@@ -1041,6 +1048,8 @@ void UIWidget::on_actionNewPushButton_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::PushButton>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewPushButton->setChecked(true);
 }
 
 void UIWidget::on_actionNewCheckBox_triggered()
@@ -1048,6 +1057,8 @@ void UIWidget::on_actionNewCheckBox_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::CheckBox>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewCheckBox->setChecked(true);
 }
 
 void UIWidget::on_actionNewSpinBox_triggered()
@@ -1059,6 +1070,8 @@ void UIWidget::on_actionNewSpinBox_triggered()
     spin->SetMax(100);
     spin->SetValue(GetValue(mUI.spinVal));
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(spin), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewSpinBox->setChecked(true);
 }
 
 void UIWidget::on_actionNewSlider_triggered()
@@ -1066,6 +1079,8 @@ void UIWidget::on_actionNewSlider_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Slider>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewSlider->setChecked(true);
 }
 
 void UIWidget::on_actionNewProgressBar_triggered()
@@ -1076,6 +1091,8 @@ void UIWidget::on_actionNewProgressBar_triggered()
     widget->SetText("%1%");
     widget->SetValue(0.5f);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewProgressBar->setChecked(true);
 }
 
 void UIWidget::on_actionNewRadioButton_triggered()
@@ -1084,6 +1101,8 @@ void UIWidget::on_actionNewRadioButton_triggered()
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     auto widget = std::make_unique<uik::RadioButton>();
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewRadioButton->setChecked(true);
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
@@ -1091,6 +1110,8 @@ void UIWidget::on_actionNewGroupBox_triggered()
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::GroupBox>(), snap, (unsigned)grid));
+    UncheckPlacementActions();
+    mUI.actionNewGroupBox->setChecked(true);
 }
 
 void UIWidget::on_actionWidgetDelete_triggered()
@@ -1898,6 +1919,7 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
     else if (mCurrentTool && mCurrentTool->MouseRelease(mickey, view))
     {
         mCurrentTool.reset();
+        UncheckPlacementActions();
     }
 }
 void UIWidget::MouseDoubleClick(QMouseEvent* mickey)
@@ -1942,7 +1964,10 @@ bool UIWidget::KeyPress(QKeyEvent* key)
             break;
         case Qt::Key_Escape:
             if (mCurrentTool)
+            {
                 mCurrentTool.reset();
+                UncheckPlacementActions();
+            }
             else mUI.tree->ClearSelection();
             break;
         default:
@@ -2244,6 +2269,17 @@ bool UIWidget::LoadStyleQuiet(const std::string& uri)
     mState.window.SetStyleName(uri);
     INFO("Loaded UI style '%1'.", uri);
     return true;
+}
+
+void UIWidget::UncheckPlacementActions()
+{
+    mUI.actionNewForm->setChecked(false);
+    mUI.actionNewLabel->setChecked(false);
+    mUI.actionNewPushButton->setChecked(false);
+    mUI.actionNewCheckBox->setChecked(false);
+    mUI.actionNewSpinBox->setChecked(false);
+    mUI.actionNewSlider->setChecked(false);
+    mUI.actionNewProgressBar->setChecked(false);
 }
 
 void UIWidget::UpdateDeletedResourceReferences()

@@ -157,6 +157,7 @@ namespace gui
         bool LoadStyleVerbose(const QString& name);
         bool LoadStyleQuiet(const std::string& uri);
         void UpdateDeletedResourceReferences();
+        void UncheckPlacementActions();
         uik::FSize GetFormSize() const;
     private:
         Ui::UIWidget mUI;
