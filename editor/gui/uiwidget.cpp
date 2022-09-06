@@ -43,6 +43,7 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgstyleproperties.h"
+#include "editor/gui/dlgstylestring.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/settings.h"
@@ -1347,6 +1348,37 @@ void UIWidget::on_btnEditWidgetStyle_clicked()
         DisplayCurrentWidgetProperties();
     }
 }
+void UIWidget::on_btnEditWidgetStyleString_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        std::string old_style_string = widget->GetStyleString();
+
+        const auto& widget_id = widget->GetId();
+        const auto& style_key = widget_id + "/";
+        boost::erase_all(old_style_string, style_key);
+
+        DlgWidgetStyleString dlg(this, app::FromUtf8(old_style_string));
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        const auto& new_style_string = app::ToUtf8(dlg.GetStyleString());
+
+        mState.style->DeleteMaterials(widget->GetId());
+        mState.style->DeleteProperties(widget->GetId());
+        mState.painter->DeleteMaterialInstances(widget->GetId());
+
+        if (!mState.style->ParseStyleString(widget->GetId(), new_style_string))
+        {
+            ERROR("Widget style string contains errors and cannot be used.[widget='%1']", widget->GetName());
+            mState.style->ParseStyleString(widget->GetId(), old_style_string);
+            return;
+        }
+        widget->SetStyleString(new_style_string);
+        SetValue(mUI.widgetStyleString, new_style_string);
+    }
+}
+
 void UIWidget::on_btnResetWidgetStyle_clicked()
 {
     if (auto* widget = GetCurrentWidget())
@@ -1398,6 +1430,32 @@ void UIWidget::on_btnEditWindowStyle_clicked()
     boost::erase_all(style_string, "window/");
     // set the actual style string.
     mState.window.SetStyleString(std::move(style_string));
+}
+
+void UIWidget::on_btnEditWindowStyleString_clicked()
+{
+    std::string old_style_string = mState.window.GetStyleString();
+
+    boost::erase_all(old_style_string, "window/");
+
+    DlgWidgetStyleString dlg(this, app::FromUtf8(old_style_string));
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    const auto& new_style_string = app::ToUtf8(dlg.GetStyleString());
+
+    mState.style->DeleteMaterials("window");
+    mState.style->DeleteProperties("window");
+    mState.painter->DeleteMaterialInstances("window");
+
+    if (!mState.style->ParseStyleString("window", new_style_string))
+    {
+        ERROR("Window style string contains errors and cannot be used. [window='%1']", mState.window.GetName());
+        mState.style->ParseStyleString("window", old_style_string);
+        return;
+    }
+    mState.window.SetStyleString(new_style_string);
+    SetValue(mUI.windowStyleString, new_style_string);
 }
 
 void UIWidget::on_btnResetWindowStyle_clicked()

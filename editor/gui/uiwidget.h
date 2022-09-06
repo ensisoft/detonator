@@ -120,8 +120,10 @@ namespace gui
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
         void on_btnEditWidgetStyle_clicked();
+        void on_btnEditWidgetStyleString_clicked();
         void on_btnResetWidgetStyle_clicked();
         void on_btnEditWindowStyle_clicked();
+        void on_btnEditWindowStyleString_clicked();
         void on_btnResetWindowStyle_clicked();
         void on_btnEditScript_clicked();
         void on_btnAddScript_clicked();
