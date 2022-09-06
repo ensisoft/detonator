@@ -868,14 +868,10 @@ template<typename Actuator> inline
 Actuator* ActuatorCast(game::Actuator* actuator)
 { return dynamic_cast<Actuator*>(actuator); }
 
-sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget, const std::string& type_string)
+sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget)
 {
     sol::state_view lua(state);
-    const auto type_value = magic_enum::enum_cast<uik::Widget::Type>(type_string);
-    if (!type_value.has_value())
-        throw GameError("No such widget type: " + type_string);
-
-    const auto type = type_value.value();
+    const auto type = widget->GetType();
     if (type == uik::Widget::Type::Form)
         return sol::make_object(lua, uik::WidgetCast<uik::Form>(widget));
     else if (type == uik::Widget::Type::Label)
@@ -2506,7 +2502,6 @@ void BindWDK(sol::state& L)
 void BindUIK(sol::state& L)
 {
     auto table = L["uik"].get_or_create<sol::table>();
-    table["WidgetCast"] = &WidgetObjectCast;
 
     auto widget = table.new_usertype<uik::Widget>("Widget");
     BindWidgetInterface(widget);
@@ -2584,33 +2579,27 @@ void BindUIK(sol::state& L)
     window["GetId"]            = &uik::Window::GetId;
     window["GetName"]          = &uik::Window::GetName;
     window["GetNumWidgets"]    = &uik::Window::GetNumWidgets;
-    window["FindWidgetById"]   = sol::overload(
-        [](uik::Window* window, const std::string& id) {
-            return window->FindWidgetById(id);
-        },
-        [](sol::this_state state, uik::Window* window, const std::string& id,  const std::string& type_string) {
-            sol::state_view lua(state);
-            auto* widget = window->FindWidgetById(id);
-            if (!widget)
-                return sol::make_object(lua, sol::nil);
-            return WidgetObjectCast(state, widget, type_string);
-        });
-    window["FindWidgetByName"] = sol::overload(
-        [](uik::Window* window, const std::string& name) {
-            return window->FindWidgetByName(name);
-        },
-        [](sol::this_state state, uik::Window* window, const std::string& name, const std::string& type_string) {
-            sol::state_view lua(state);
-            auto* widget = window->FindWidgetByName(name);
-            if (!widget)
-                return sol::make_object(lua, sol::nil);
-            return WidgetObjectCast(state, widget, type_string);
-        });
-    window["FindWidgetParent"] = [](uik::Window* window, uik::Widget* child) { return window->FindParent(child); };
-    window["GetWidget"]        = [](uik::Window* window, unsigned index) {
+    window["FindWidgetById"]   = [](sol::this_state state, uik::Window* window, const std::string& id) {
+        sol::state_view lua(state);
+        auto* widget = window->FindWidgetById(id);
+        if (!widget)
+            return sol::make_object(lua, sol::nil);
+        return WidgetObjectCast(state, widget);
+    };
+    window["FindWidgetByName"] =  [](sol::this_state state, uik::Window* window, const std::string& name) {
+        sol::state_view lua(state);
+        auto* widget = window->FindWidgetByName(name);
+        if (!widget)
+            return sol::make_object(lua, sol::nil);
+        return WidgetObjectCast(state, widget);
+    };
+    window["FindWidgetParent"] = [](sol::this_state state, uik::Window* window, uik::Widget* child) {
+        return WidgetObjectCast(state, window->FindParent(child));
+    };
+    window["GetWidget"]        = [](sol::this_state state, uik::Window* window, unsigned index) {
         if (index >= window->GetNumWidgets())
             throw GameError(base::FormatString("Widget index %1 is out of bounds", index));
-        return &window->GetWidget(index);
+        return WidgetObjectCast(state, &window->GetWidget(index));
     };
 
     auto action = table.new_usertype<uik::Window::WidgetAction>("Action",
