@@ -1778,7 +1778,12 @@ sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string
         auto* entity = object.as<game::Entity*>();
         env = GetTypeEnv(entity->GetClass());
     }
-    else throw GameError("Unsupported object type in Lua method call. Only entity or scene object is supported.");
+    else if (object.is<uik::Window*>())
+    {
+        auto* window = object.as<uik::Window*>();
+        env = GetTypeEnv(*window);
+    }
+    else throw GameError("Unsupported object type in Lua method call. Only entity, scene or window object is supported.");
 
     if (env == nullptr)
         throw GameError("Method call target object doesn't have a Lua environment.");

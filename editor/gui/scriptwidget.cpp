@@ -244,6 +244,8 @@ void InitDoc()
     DOC_TABLE_PROPERTY("game.KeyValueStore", "State", "Global key-value store instance.");
     DOC_TABLE_PROPERTY("game.Engine", "Game", "Global game engine instance.");
     DOC_TABLE_PROPERTY("game.Scene", "Scene", "Global scene instance or nil if no scene is being played.");
+    DOC_FUNCTION_3("...", "CallMethod", "Call a method on an entity, scene or UI with variable arguments.",
+                   "game.Entity|game.Scene|uik.Window", "object", "string", "method", "...", "args");
 
     DOC_TABLE("util");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
