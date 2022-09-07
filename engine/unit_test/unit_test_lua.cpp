@@ -826,7 +826,7 @@ end
 
     TestLoader loader;
 
-    engine::ScriptEngine script(".");
+    engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
     script.BeginPlay(&scene);
@@ -927,7 +927,7 @@ end
     TestLoader loader;
 
     game::Scene scene(scene_class);
-    engine::ScriptEngine script(".");
+    engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
     script.BeginPlay(&scene);
@@ -1007,7 +1007,7 @@ end
 
     TestLoader loader;
 
-    engine::ScriptEngine script(".");
+    engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
     script.BeginPlay(&instance);
@@ -1089,7 +1089,7 @@ end
 
     TestLoader loader;
 
-    engine::ScriptEngine script(".");
+    engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
     script.BeginPlay(&instance);
@@ -1158,7 +1158,7 @@ end
 
     TestLoader loader;
 
-    engine::ScriptEngine script(".");
+    engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
     script.BeginPlay(&instance);
@@ -1184,8 +1184,9 @@ end
 
         TestLoader loader;
 
-        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
+        game.Init();
         TEST_REQUIRE(game.LoadGame());
 
         engine::Action action;
@@ -1215,8 +1216,9 @@ end
     )");
         TestLoader loader;
 
-        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
+        game.Init();
         TEST_REQUIRE(game.LoadGame());
 
         engine::Action action;
@@ -1239,17 +1241,17 @@ endkasd
     {
         TestLoader loader;
 
-        engine::LuaGame game("", "this-file-doesnt-exist.lua", "", "");
+        engine::LuaRuntime game("", "this-file-doesnt-exist.lua", "", "");
         game.SetDataLoader(&loader);
-        TEST_REQUIRE(!game.LoadGame());
+        TEST_EXCEPTION(game.Init());
     }
 
     // broken Lua code in file.
     {
         TestLoader loader;
-        engine::LuaGame game("", "broken.lua", "", "");
+        engine::LuaRuntime game("", "broken.lua", "", "");
         game.SetDataLoader(&loader);
-        TEST_EXCEPTION(game.LoadGame());
+        TEST_EXCEPTION(game.Init());
     }
 
     // requires broken lua
@@ -1261,9 +1263,9 @@ function LoadGame()
 end
     )");
         TestLoader loader;
-        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
-        TEST_EXCEPTION(game.LoadGame());
+        TEST_EXCEPTION(game.Init());
 
     }
 
@@ -1276,10 +1278,9 @@ function LoadGame()
 end
     )");
         TestLoader loader;
-        engine::LuaGame game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
-        TEST_EXCEPTION(game.LoadGame());
-
+        TEST_EXCEPTION(game.Init());
     }
 }
 

@@ -483,153 +483,6 @@ void CallLua(const sol::protected_function& func, const Args&... args)
     throw std::runtime_error(err.what());
 }
 
-template<typename LuaGame>
-void BindEngine(sol::usertype<LuaGame>& engine, LuaGame& self)
-{
-    using namespace engine;
-    engine["Play"] = sol::overload(
-        [](LuaGame& self, ClassHandle<SceneClass> klass) {
-            if (!klass)
-                throw GameError("Nil scene class");
-            PlayAction play;
-            play.scene = game::CreateSceneInstance(klass);
-            auto* ret = play.scene.get();
-            self.PushAction(std::move(play));
-            return ret;
-        },
-        [](LuaGame& self, std::string name) {
-            auto klass = self.GetClassLib()->FindSceneClassByName(name);
-            if (!klass)
-                throw GameError("No such scene class: " + name);
-            PlayAction play;
-            play.scene = game::CreateSceneInstance(klass);
-            auto* ret = play.scene.get();
-            self.PushAction(std::move(play));
-            return ret;
-        });
-
-    engine["Suspend"] = [](LuaGame& self) {
-        SuspendAction suspend;
-        self.PushAction(suspend);
-    };
-    engine["EndPlay"] = [](LuaGame& self) {
-        EndPlayAction end;
-        self.PushAction(end);
-    };
-    engine["Resume"] = [](LuaGame& self) {
-        ResumeAction resume;
-        self.PushAction(resume);
-    };
-    engine["Quit"] = [](LuaGame& self, int exit_code) {
-        QuitAction quit;
-        quit.exit_code = exit_code;
-        self.PushAction(quit);
-    };
-    engine["Delay"] = [](LuaGame& self, float value) {
-        DelayAction delay;
-        delay.seconds = value;
-        self.PushAction(delay);
-    };
-    engine["GrabMouse"] = [](LuaGame& self, bool grab) {
-        GrabMouseAction mickey;
-        mickey.grab = grab;
-        self.PushAction(mickey);
-    };
-    engine["ShowMouse"] = [](LuaGame& self, bool show) {
-        ShowMouseAction mickey;
-        mickey.show = show;
-        self.PushAction(mickey);
-    };
-    engine["ShowDebug"] = [](LuaGame& self, bool show) {
-        ShowDebugAction act;
-        act.show = show;
-        self.PushAction(act);
-    };
-    engine["SetFullScreen"] = [](LuaGame& self, bool full_screen) {
-        RequestFullScreenAction fs;
-        fs.full_screen = full_screen;
-        self.PushAction(fs);
-    };
-    engine["BlockKeyboard"] = [](LuaGame& self, bool yes_no) {
-        BlockKeyboardAction block;
-        block.block = yes_no;
-        self.PushAction(block);
-    };
-    engine["BlockMouse"] = [](LuaGame& self, bool yes_no) {
-        BlockMouseAction block;
-        block.block = yes_no;
-        self.PushAction(block);
-    };
-    engine["DebugPrint"] = [](LuaGame& self, std::string message) {
-        DebugPrintAction action;
-        action.message = std::move(message);
-        self.PushAction(std::move(action));
-    };
-    engine["DebugDrawLine"] = sol::overload(
-        [](LuaGame& self, const glm::vec2&  a, const glm::vec2& b, const base::Color4f& color, float width) {
-            DebugDrawLine draw;
-            draw.a = FPoint(a.x, a.y);
-            draw.b = FPoint(b.x, b.y);
-            draw.color = color;
-            draw.width = width;
-            self.PushAction(std::move(draw));
-        },
-        [](LuaGame& self, const base::FPoint& a, const FPoint& b, const base::Color4f& color, float width) {
-            DebugDrawLine draw;
-            draw.a = a;
-            draw.b = b;
-            draw.color = color;
-            draw.width = width;
-            self.PushAction(std::move(draw));
-        },
-        [](LuaGame& self, float x0, float y0, float x1, float y1, const base::Color4f& color, float width) {
-            DebugDrawLine draw;
-            draw.a = base::FPoint(x0, y0);
-            draw.b = base::FPoint(x1, y1);
-            draw.color = color;
-            draw.width = width;
-            self.PushAction(std::move(draw));
-        });
-    engine["DebugClear"] = [](LuaGame& self) {
-        DebugClearAction action;
-        self.PushAction(action);
-    };
-    engine["OpenUI"] = sol::overload(
-        [](LuaGame& self, ClassHandle<uik::Window> model) {
-            if (!model)
-                throw GameError("Nil UI window object.");
-            // there's no "class" object for the UI system so we're just
-            // going to create a mutable copy and put that on the UI stack.
-            OpenUIAction action;
-            action.ui = std::make_shared<uik::Window>(*model);
-            self.PushAction(action);
-            return action.ui.get();
-        },
-        [](LuaGame& self, std::string name) {
-            auto handle = self.GetClassLib()->FindUIByName(name);
-            if (!handle)
-                throw GameError("No such UI: " + name);
-            OpenUIAction action;
-            action.ui = std::make_shared<uik::Window>(*handle);
-            self.PushAction(action);
-            return action.ui.get();
-        });
-    engine["CloseUI"] = [](LuaGame& self, int result) {
-        CloseUIAction action;
-        action.result = result;
-        self.PushAction(std::move(action));
-    };
-    engine["PostEvent"] = [](LuaGame& self, const GameEvent& event) {
-        PostEventAction action;
-        action.event = event;
-        self.PushAction(std::move(action));
-    };
-    engine["ShowDeveloperUI"] = [](LuaGame& self, bool show) {
-        ShowDeveloperUIAction action;
-        action.show = show;
-        self.PushAction(action);
-    };
-}
 template<typename Type>
 bool TestFlag(const Type& object, const std::string& name)
 {
@@ -1154,262 +1007,41 @@ private:
 namespace engine
 {
 
-LuaGame::LuaGame(const std::string& lua_path,
-                 const std::string& game_script,
-                 const std::string& game_home,
-                 const std::string& game_name)
-    : mLuaPath(lua_path)
-    , mGameScript(game_script)
-{
-    mLuaState = std::make_unique<sol::state>();
-    // todo: should this specify which libraries to load?
-    mLuaState->open_libraries();
-
-    mLuaState->clear_package_loaders();
-
-    mLuaState->add_package_loader([this](std::string module) {
-        ASSERT(mLoader);
-        if (!base::EndsWith(module, ".lua"))
-            module += ".lua";
-
-        DEBUG("Loading Lua module. [module=%1]", module);
-        const auto& file = base::JoinPath(mLuaPath, module);
-        const auto& buff = mLoader->LoadGameDataFromFile(file);
-        if (!buff)
-            throw std::runtime_error("can't find lua module: " + module);
-        auto ret = mLuaState->load_buffer((const char*)buff->GetData(), buff->GetSize());
-        if (!ret.valid())
-        {
-            sol::error err = ret;
-            throw std::runtime_error(err.what());
-        }
-        return ret.get<sol::function>(); // hmm??
-    });
-
-    BindBase(*mLuaState);
-    BindUtil(*mLuaState);
-    BindData(*mLuaState);
-    BindGLM(*mLuaState);
-    BindGFX(*mLuaState);
-    BindWDK(*mLuaState);
-    BindUIK(*mLuaState);
-    BindGameLib(*mLuaState);
-
-    // bind engine interface.
-    auto table  = (*mLuaState)["game"].get_or_create<sol::table>();
-    table["home"] = game_home;
-    table["name"] = game_name;
-    table["OS"]   = OS_NAME;
-    auto engine = table.new_usertype<LuaGame>("Engine");
-    BindEngine(engine, *this);
-    engine["SetViewport"] = sol::overload(
-        [](LuaGame& self, const FRect& view) {
-            self.mView = view;
-        },
-        [](LuaGame& self, float x, float y, float width, float height) {
-            self.mView = base::FRect(x, y, width, height);
-        },
-        [](LuaGame& self, float width, float height) {
-            self.mView = base::FRect(0.0f,  0.0f, width, height);
-        });
-    engine["GetTopUI"] = [](LuaGame& self, sol::this_state state) {
-        sol::state_view lua(state);
-        if (self.mWindow == nullptr)
-            return sol::make_object(lua, sol::nil);
-        return sol::make_object(lua, self.mWindow);
-    };
-}
-
-LuaGame::~LuaGame() = default;
-
-void LuaGame::SetStateStore(KeyValueStore* store)
-{
-    mStateStore = store;
-}
-
-void LuaGame::SetPhysicsEngine(const PhysicsEngine* engine)
-{
-    mPhysicsEngine = engine;
-}
-void LuaGame::SetAudioEngine(const AudioEngine* engine)
-{
-    mAudioEngine = engine;
-}
-void LuaGame::SetDataLoader(const Loader* loader)
-{
-    mLoader = loader;
-}
-void LuaGame::SetClassLibrary(const ClassLibrary* classlib)
-{
-    mClasslib = classlib;
-}
-void LuaGame::SetCurrentUI(uik::Window* window)
-{
-    mWindow = window;
-}
-
-bool LuaGame::LoadGame()
-{
-    const auto& main_game_script = base::JoinPath(mLuaPath, mGameScript);
-    DEBUG("Loading main game script. [file='%1']", main_game_script);
-
-    const auto buffer = mLoader->LoadGameDataFromFile(main_game_script);
-    if (!buffer)
-    {
-        ERROR("Failed to load main game script data. [file='%1']", main_game_script);
-        return false;
-    }
-    const auto& view = sol::string_view((const char*)buffer->GetData(), buffer->GetSize());
-    auto result = mLuaState->script(view);
-    if (!result.valid())
-    {
-        const sol::error err = result;
-        ERROR("Lua script error. [file='%1', error='%2']", main_game_script, err.what());
-        // throwing here is just too convenient way to propagate the Lua
-        // specific error message up the stack without cluttering the interface,
-        // and when running the engine inside the editor we really want to
-        // have this lua error propagated all the way to the UI
-        throw std::runtime_error(err.what());
-    }
-
-    (*mLuaState)["Audio"]    = mAudioEngine;
-    (*mLuaState)["Physics"]  = mPhysicsEngine;
-    (*mLuaState)["ClassLib"] = mClasslib;
-    (*mLuaState)["State"]    = mStateStore;
-    (*mLuaState)["Game"]     = this;
-    CallLua((*mLuaState)["LoadGame"]);
-    // tood: return value.
-    return true;
-}
-
-void LuaGame::StartGame()
-{
-    CallLua((*mLuaState)["StartGame"]);
-}
-
-void LuaGame::Tick(double game_time, double dt)
-{
-    CallLua((*mLuaState)["Tick"], game_time, dt);
-}
-void LuaGame::Update(double game_time, double dt)
-{
-    CallLua((*mLuaState)["Update"], game_time, dt);
-}
-void LuaGame::BeginPlay(Scene* scene)
-{
-    mScene = scene;
-    (*mLuaState)["Scene"] = mScene;
-
-    CallLua((*mLuaState)["BeginPlay"], scene);
-}
-void LuaGame::EndPlay(Scene* scene)
-{
-    CallLua((*mLuaState)["EndPlay"], scene);
-    (*mLuaState)["Scene"] = nullptr;
-    mScene = nullptr;
-}
-
-void LuaGame::StopGame()
-{
-    CallLua((*mLuaState)["StopGame"]);
-}
-
-void LuaGame::SaveGame()
-{
-    CallLua((*mLuaState)["SaveGame"]);
-}
-
-bool LuaGame::GetNextAction(Action* out)
-{
-    if (mActionQueue.empty())
-        return false;
-    *out = std::move(mActionQueue.front());
-    mActionQueue.pop();
-    return true;
-}
-
-FRect LuaGame::GetViewport() const
-{ return mView; }
-
-void LuaGame::OnUIOpen(uik::Window* ui)
-{
-    CallLua((*mLuaState)["OnUIOpen"], ui);
-}
-void LuaGame::OnUIClose(uik::Window* ui, int result)
-{
-    CallLua((*mLuaState)["OnUIClose"], ui, result);
-}
-
-void LuaGame::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
-{
-    CallLua((*mLuaState)["OnUIAction"], ui, action);
-}
-
-void LuaGame::OnContactEvent(const ContactEvent& contact)
-{
-    auto* nodeA = contact.nodeA;
-    auto* nodeB = contact.nodeB;
-    auto* entityA = nodeA->GetEntity();
-    auto* entityB = nodeB->GetEntity();
-
-    if (contact.type == ContactEvent::Type::BeginContact)
-    {
-        CallLua((*mLuaState)["OnBeginContact"], entityA, entityB, nodeA, nodeB);
-    }
-    else if (contact.type == ContactEvent::Type::EndContact)
-    {
-        CallLua((*mLuaState)["OnEndContact"], entityA, entityB, nodeA, nodeB);
-    }
-}
-
-void LuaGame::OnAudioEvent(const AudioEvent& event)
-{
-    CallLua((*mLuaState)["OnAudioEvent"], event);
-}
-
-void LuaGame::OnGameEvent(const GameEvent& event)
-{
-    CallLua((*mLuaState)["OnGameEvent"], event);
-}
-
-void LuaGame::OnSceneEvent(const game::Scene::Event& event)
-{
-    // todo: if needed
-}
-
-void LuaGame::OnKeyDown(const wdk::WindowEventKeyDown& key)
-{
-    CallLua((*mLuaState)["OnKeyDown"],
-            static_cast<int>(key.symbol),
-            static_cast<int>(key.modifiers.value()));
-}
-void LuaGame::OnKeyUp(const wdk::WindowEventKeyUp& key)
-{
-    CallLua((*mLuaState)["OnKeyUp"],
-            static_cast<int>(key.symbol),
-            static_cast<int>(key.modifiers.value()));
-}
-void LuaGame::OnChar(const wdk::WindowEventChar& text)
-{
-
-}
-void LuaGame::OnMouseMove(const MouseEvent& mouse)
-{
-    CallLua((*mLuaState)["OnMouseMove"], mouse);
-}
-void LuaGame::OnMousePress(const MouseEvent& mouse)
-{
-    CallLua((*mLuaState)["OnMousePress"], mouse);
-}
-void LuaGame::OnMouseRelease(const MouseEvent& mouse)
-{
-    CallLua((*mLuaState)["OnMouseRelease"], mouse);
-}
-
-ScriptEngine::ScriptEngine(const std::string& lua_path) : mLuaPath(lua_path)
+LuaRuntime::LuaRuntime(const std::string& lua_path,
+                       const std::string& game_script,
+                       const std::string& game_home,
+                       const std::string& game_name)
+  : mLuaPath(lua_path)
+  , mGameScript(game_script)
+  , mGameHome(game_home)
+  , mGameName(game_name)
 {}
 
-void ScriptEngine::Init()
+LuaRuntime::~LuaRuntime()
+{
+    // careful here, make sure to clean up the environment objects
+    // first since they depend on lua state.
+    mEntityEnvs.clear();
+    mWindowEnvs.clear();
+    mSceneEnv.reset();
+    mGameEnv.reset();
+    mLuaState.reset();
+}
+
+void LuaRuntime::SetClassLibrary(const ClassLibrary* classlib)
+{ mClassLib = classlib; }
+void LuaRuntime::SetPhysicsEngine(const PhysicsEngine* engine)
+{ mPhysicsEngine = engine; }
+void LuaRuntime::SetAudioEngine(const AudioEngine* engine)
+{ mAudioEngine = engine; }
+void LuaRuntime::SetDataLoader(const Loader* loader)
+{ mDataLoader = loader; }
+void LuaRuntime::SetStateStore(KeyValueStore* store)
+{ mStateStore = store; }
+void LuaRuntime::SetCurrentUI(uik::Window* window)
+{ mWindow = window; }
+
+void LuaRuntime::Init()
 {
     mLuaState = std::make_unique<sol::state>();
     mLuaState->open_libraries();
@@ -1454,23 +1086,223 @@ void ScriptEngine::Init()
     };
 
     auto table = (*mLuaState)["game"].get_or_create<sol::table>();
-    table["OS"] = OS_NAME;
-    auto engine = table.new_usertype<ScriptEngine>("Engine");
-    BindEngine(engine, *this);
+    table["OS"]   = OS_NAME;
+    table["home"] = mGameHome;
+    table["name"] = mGameName;
+
+    auto engine = table.new_usertype<LuaRuntime>("Engine");
+    engine["Play"] = sol::overload(
+        [](LuaRuntime& self, ClassHandle<SceneClass> klass) {
+            if (!klass)
+                throw GameError("Nil scene class");
+            PlayAction play;
+            play.scene = game::CreateSceneInstance(klass);
+            auto* ret = play.scene.get();
+            self.mActionQueue.push(std::move(play));
+            return ret;
+        },
+        [](LuaRuntime& self, std::string name) {
+            auto klass = self.mClassLib->FindSceneClassByName(name);
+            if (!klass)
+                throw GameError("No such scene class: " + name);
+            PlayAction play;
+            play.scene = game::CreateSceneInstance(klass);
+            auto* ret = play.scene.get();
+            self.mActionQueue.push(std::move(play));
+            return ret;
+        });
+    engine["Suspend"] = [](LuaRuntime& self) {
+        SuspendAction suspend;
+        self.mActionQueue.push(suspend);
+    };
+    engine["EndPlay"] = [](LuaRuntime& self) {
+        EndPlayAction end;
+        self.mActionQueue.push(end);
+    };
+    engine["Resume"] = [](LuaRuntime& self) {
+        ResumeAction resume;
+        self.mActionQueue.push(resume);
+    };
+    engine["Quit"] = [](LuaRuntime& self, int exit_code) {
+        QuitAction quit;
+        quit.exit_code = exit_code;
+        self.mActionQueue.push(quit);
+    };
+    engine["Delay"] = [](LuaRuntime& self, float value) {
+        DelayAction delay;
+        delay.seconds = value;
+        self.mActionQueue.push(delay);
+    };
+    engine["GrabMouse"] = [](LuaRuntime& self, bool grab) {
+        GrabMouseAction mickey;
+        mickey.grab = grab;
+        self.mActionQueue.push(mickey);
+    };
+    engine["ShowMouse"] = [](LuaRuntime& self, bool show) {
+        ShowMouseAction mickey;
+        mickey.show = show;
+        self.mActionQueue.push(mickey);
+    };
+    engine["ShowDebug"] = [](LuaRuntime& self, bool show) {
+        ShowDebugAction act;
+        act.show = show;
+        self.mActionQueue.push(act);
+    };
+    engine["SetFullScreen"] = [](LuaRuntime& self, bool full_screen) {
+        RequestFullScreenAction fs;
+        fs.full_screen = full_screen;
+        self.mActionQueue.push(fs);
+    };
+    engine["BlockKeyboard"] = [](LuaRuntime& self, bool yes_no) {
+        BlockKeyboardAction block;
+        block.block = yes_no;
+        self.mActionQueue.push(block);
+    };
+    engine["BlockMouse"] = [](LuaRuntime& self, bool yes_no) {
+        BlockMouseAction block;
+        block.block = yes_no;
+        self.mActionQueue.push(block);
+    };
+    engine["DebugPrint"] = [](LuaRuntime& self, std::string message) {
+        DebugPrintAction action;
+        action.message = std::move(message);
+        self.mActionQueue.push(std::move(action));
+    };
+    engine["DebugDrawLine"] = sol::overload(
+        [](LuaRuntime& self, const glm::vec2&  a, const glm::vec2& b, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = FPoint(a.x, a.y);
+            draw.b = FPoint(b.x, b.y);
+            draw.color = color;
+            draw.width = width;
+            self.mActionQueue.push(std::move(draw));
+        },
+        [](LuaRuntime& self, const base::FPoint& a, const FPoint& b, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = a;
+            draw.b = b;
+            draw.color = color;
+            draw.width = width;
+            self.mActionQueue.push(std::move(draw));
+        },
+        [](LuaRuntime& self, float x0, float y0, float x1, float y1, const base::Color4f& color, float width) {
+            DebugDrawLine draw;
+            draw.a = base::FPoint(x0, y0);
+            draw.b = base::FPoint(x1, y1);
+            draw.color = color;
+            draw.width = width;
+            self.mActionQueue.push(std::move(draw));
+        });
+    engine["DebugClear"] = [](LuaRuntime& self) {
+        DebugClearAction action;
+        self.mActionQueue.push(action);
+    };
+    engine["SetViewport"] = sol::overload(
+        [](LuaRuntime& self, const FRect& view) {
+            self.mView = view;
+        },
+        [](LuaRuntime& self, float x, float y, float width, float height) {
+            self.mView = base::FRect(x, y, width, height);
+        },
+        [](LuaRuntime& self, float width, float height) {
+            self.mView = base::FRect(0.0f,  0.0f, width, height);
+        });
+    engine["GetTopUI"] = [](LuaRuntime& self, sol::this_state state) {
+        sol::state_view lua(state);
+        if (self.mWindow == nullptr)
+            return sol::make_object(lua, sol::nil);
+        return sol::make_object(lua, self.mWindow);
+    };
+    engine["OpenUI"] = sol::overload(
+        [](LuaRuntime& self, ClassHandle<uik::Window> model) {
+            if (!model)
+                throw GameError("Nil UI window object.");
+            // there's no "class" object for the UI system so we're just
+            // going to create a mutable copy and put that on the UI stack.
+            OpenUIAction action;
+            action.ui = std::make_shared<uik::Window>(*model);
+            self.mActionQueue.push(action);
+            return action.ui.get();
+        },
+        [](LuaRuntime& self, std::string name) {
+            auto handle = self.mClassLib->FindUIByName(name);
+            if (!handle)
+                throw GameError("No such UI: " + name);
+            OpenUIAction action;
+            action.ui = std::make_shared<uik::Window>(*handle);
+            self.mActionQueue.push(action);
+            return action.ui.get();
+        });
+    engine["CloseUI"] = [](LuaRuntime& self, int result) {
+        CloseUIAction action;
+        action.result = result;
+        self.mActionQueue.push(std::move(action));
+    };
+    engine["PostEvent"] = [](LuaRuntime& self, const GameEvent& event) {
+        PostEventAction action;
+        action.event = event;
+        self.mActionQueue.push(std::move(action));
+    };
+    engine["ShowDeveloperUI"] = [](LuaRuntime& self, bool show) {
+        ShowDeveloperUIAction action;
+        action.show = show;
+        self.mActionQueue.push(action);
+    };
+
+    if (!mGameScript.empty())
+    {
+        mGameEnv = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+
+        const auto& main_game_script = base::JoinPath(mLuaPath, mGameScript);
+        DEBUG("Loading main game script. [file='%1']", main_game_script);
+
+        const auto buffer = mDataLoader->LoadGameDataFromFile(main_game_script);
+        if (!buffer)
+        {
+            ERROR("Failed to load main game script data. [file='%1']", main_game_script);
+            throw std::runtime_error("failed to load main game script.");
+        }
+        const auto& view = sol::string_view((const char*) buffer->GetData(), buffer->GetSize());
+        auto result = mLuaState->script(view, *mGameEnv);
+        if (!result.valid())
+        {
+            const sol::error err = result;
+            ERROR("Lua script error. [file='%1', error='%2']", main_game_script, err.what());
+            // throwing here is just too convenient way to propagate the Lua
+            // specific error message up the stack without cluttering the interface,
+            // and when running the engine inside the editor we really want to
+            // have this lua error propagated all the way to the UI
+            throw std::runtime_error(err.what());
+        }
+    }
 }
 
-ScriptEngine::~ScriptEngine()
+bool LuaRuntime::LoadGame()
 {
-    // careful here, make sure to clean up the environment objects
-    // first since they depend on lua state.
-    mEntityEnvs.clear();
-    mWindowEnvs.clear();
-    mSceneEnv.reset();
-
-    mLuaState.reset();
+    if (mGameEnv)
+        CallLua((*mGameEnv)["LoadGame"]);
+    // tood: return value.
+    return true;
 }
 
-void ScriptEngine::BeginPlay(Scene* scene)
+void LuaRuntime::StartGame()
+{
+    if (mGameEnv)
+        CallLua((*mGameEnv)["StartGame"]);
+}
+
+void LuaRuntime::SaveGame()
+{
+    if (mGameEnv)
+        CallLua((*mGameEnv)["SaveGame"]);
+}
+void LuaRuntime::StopGame()
+{
+    if (mGameEnv)
+        CallLua((*mGameEnv)["StopGame"]);
+}
+
+void LuaRuntime::BeginPlay(Scene* scene)
 {
     // table that maps entity types to their scripting
     // environments. then we later invoke the script per
@@ -1562,6 +1394,9 @@ void ScriptEngine::BeginPlay(Scene* scene)
     mScene = scene;
     (*mLuaState)["Scene"] = mScene;
 
+    if (mGameEnv)
+        CallLua((*mGameEnv)["BeginPlay"], scene);
+
     if (mSceneEnv)
         CallLua((*mSceneEnv)["BeginPlay"], scene);
 
@@ -1581,8 +1416,11 @@ void ScriptEngine::BeginPlay(Scene* scene)
     }
 }
 
-void ScriptEngine::EndPlay(Scene* scene)
+void LuaRuntime::EndPlay(Scene* scene)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)["EndPlay"], scene);
+
     if (mSceneEnv)
         CallLua((*mSceneEnv)["EndPlay"], scene);
 
@@ -1592,50 +1430,70 @@ void ScriptEngine::EndPlay(Scene* scene)
     (*mLuaState)["Scene"] = nullptr;
 }
 
-void ScriptEngine::Tick(double game_time, double dt)
+void LuaRuntime::Tick(double game_time, double dt)
 {
-    if (mSceneEnv)
+    if (mGameEnv)
     {
-        TRACE_CALL("Lua::Scene::Tick",
-                   CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt));
+        TRACE_CALL("Lua::Game::Tick",
+                   CallLua((*mGameEnv)["Tick"], game_time, dt));
     }
 
-    TRACE_SCOPE("Lua::Entity::Tick");
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    if (mScene)
     {
-        auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::TickEntity))
-            continue;
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        if (mSceneEnv)
         {
-            CallLua((*env)["Tick"], entity, game_time, dt);
+            TRACE_CALL("Lua::Scene::Tick",
+                       CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt));
         }
-    }
-}
-void ScriptEngine::Update(double game_time, double dt)
-{
-    if (mSceneEnv)
-    {
-        TRACE_CALL("Lua::Scene::Update",
-                   CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
-    }
 
-    TRACE_SCOPE("Lua::Entity::Update");
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
-    {
-        auto* entity = &mScene->GetEntity(i);
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        TRACE_SCOPE("Lua::Entity::Tick");
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
-            if (const auto* anim = entity->GetFinishedAnimation()) {
-                CallLua((*env)["OnAnimationFinished"], entity, anim);
-            }
-            if (entity->TestFlag(Entity::Flags::UpdateEntity)) {
-                CallLua((*env)["Update"], entity, game_time, dt);
+            auto* entity = &mScene->GetEntity(i);
+            if (!entity->TestFlag(Entity::Flags::TickEntity))
+                continue;
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)["Tick"], entity, game_time, dt);
             }
         }
     }
 }
-void ScriptEngine::PostUpdate(double game_time)
+void LuaRuntime::Update(double game_time, double dt)
+{
+    if (mGameEnv)
+    {
+        TRACE_CALL("Lua::Game::Update",
+                   CallLua((*mGameEnv)["Update"], game_time, dt));
+    }
+
+    if (mScene)
+    {
+        if (mSceneEnv)
+        {
+            TRACE_CALL("Lua::Scene::Update",
+                       CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
+        }
+
+        TRACE_SCOPE("Lua::Entity::Update");
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+        {
+            auto* entity = &mScene->GetEntity(i);
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                if (const auto* anim = entity->GetFinishedAnimation())
+                {
+                    CallLua((*env)["OnAnimationFinished"], entity, anim);
+                }
+                if (entity->TestFlag(Entity::Flags::UpdateEntity))
+                {
+                    CallLua((*env)["Update"], entity, game_time, dt);
+                }
+            }
+        }
+    }
+}
+void LuaRuntime::PostUpdate(double game_time)
 {
     TRACE_SCOPE("Lua::Entity::PostUpdate");
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
@@ -1650,7 +1508,7 @@ void ScriptEngine::PostUpdate(double game_time)
     }
 }
 
-void ScriptEngine::BeginLoop()
+void LuaRuntime::BeginLoop()
 {
     // entities spawned in the scene during calls to update/tick
     // have the spawned flag on. Invoke the BeginPlay callbacks
@@ -1670,7 +1528,7 @@ void ScriptEngine::BeginLoop()
     }
 }
 
-void ScriptEngine::EndLoop()
+void LuaRuntime::EndLoop()
 {
      // entities killed in the scene during calls to update/tick
      // have the kill flag on. Invoke the EndPlay callbacks for
@@ -1690,7 +1548,7 @@ void ScriptEngine::EndLoop()
      }
 }
 
-bool ScriptEngine::GetNextAction(Action* out)
+bool LuaRuntime::GetNextAction(Action* out)
 {
     if (mActionQueue.empty())
         return false;
@@ -1699,10 +1557,11 @@ bool ScriptEngine::GetNextAction(Action* out)
     return true;
 }
 
-void ScriptEngine::OnContactEvent(const ContactEvent& contact)
+void LuaRuntime::OnContactEvent(const ContactEvent& contact)
 {
     const auto* function = contact.type == ContactEvent::Type::BeginContact
-            ? "OnBeginContact" : "OnEndContact";
+            ? "OnBeginContact"
+            : "OnEndContact";
 
     auto* nodeA = contact.nodeA;
     auto* nodeB = contact.nodeB;
@@ -1711,6 +1570,9 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
 
     const auto& klassA = entityA->GetClass();
     const auto& klassB = entityB->GetClass();
+
+    if (mGameEnv)
+        CallLua((*mGameEnv)[function], entityA, entityB, nodeA, nodeB);
 
     if (mSceneEnv)
         CallLua((*mSceneEnv)[function](mScene, entityA, nodeA, entityB, nodeB));
@@ -1724,22 +1586,34 @@ void ScriptEngine::OnContactEvent(const ContactEvent& contact)
         CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
     }
 }
-void ScriptEngine::OnGameEvent(const GameEvent& event)
+void LuaRuntime::OnGameEvent(const GameEvent& event)
 {
-    if (mSceneEnv)
-        CallLua((*mSceneEnv)["OnGameEvent"], mScene, event);
+    if (mGameEnv)
+        CallLua((*mGameEnv)["OnGameEvent"], event);
 
-    for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+    if (mScene)
     {
-        auto* entity = &mScene->GetEntity(i);
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)["OnGameEvent"], mScene, event);
+
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
-            CallLua((*env)["OnGameEvent"], entity, event);
+            auto* entity = &mScene->GetEntity(i);
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)["OnGameEvent"], entity, event);
+            }
         }
     }
 }
 
-void ScriptEngine::OnSceneEvent(const game::Scene::Event& event)
+void LuaRuntime::OnAudioEvent(const AudioEvent& event)
+{
+    if (mGameEnv)
+        CallLua((*mGameEnv)["OnAudioEvent"], event);
+}
+
+void LuaRuntime::OnSceneEvent(const game::Scene::Event& event)
 {
     if (const auto* ptr = std::get_if<game::Scene::EntityTimerEvent>(&event))
     {
@@ -1765,47 +1639,56 @@ void ScriptEngine::OnSceneEvent(const game::Scene::Event& event)
     }
 }
 
-void ScriptEngine::OnKeyDown(const wdk::WindowEventKeyDown& key)
+void LuaRuntime::OnKeyDown(const wdk::WindowEventKeyDown& key)
 {
     DispatchKeyboardEvent("OnKeyDown", key);
 }
-void ScriptEngine::OnKeyUp(const wdk::WindowEventKeyUp& key)
+void LuaRuntime::OnKeyUp(const wdk::WindowEventKeyUp& key)
 {
     DispatchKeyboardEvent("OnKeyUp", key);
 }
-void ScriptEngine::OnChar(const wdk::WindowEventChar& text)
+void LuaRuntime::OnChar(const wdk::WindowEventChar& text)
 {
 
 }
-void ScriptEngine::OnMouseMove(const MouseEvent& mouse)
+void LuaRuntime::OnMouseMove(const MouseEvent& mouse)
 {
     DispatchMouseEvent("OnMouseMove", mouse);
 }
-void ScriptEngine::OnMousePress(const MouseEvent& mouse)
+void LuaRuntime::OnMousePress(const MouseEvent& mouse)
 {
     DispatchMouseEvent("OnMousePress", mouse);
 }
-void ScriptEngine::OnMouseRelease(const MouseEvent& mouse)
+void LuaRuntime::OnMouseRelease(const MouseEvent& mouse)
 {
     DispatchMouseEvent("OnMouseRelease", mouse);
 }
 
-void ScriptEngine::OnUIOpen(uik::Window* ui)
+void LuaRuntime::OnUIOpen(uik::Window* ui)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)["OnUIOpen"], ui);
+
     if (auto* env = GetTypeEnv(*ui))
     {
         CallLua((*env)["OnUIOpen"], ui);
     }
 }
-void ScriptEngine::OnUIClose(uik::Window* ui, int result)
+void LuaRuntime::OnUIClose(uik::Window* ui, int result)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)["OnUIClose"], ui, result);
+
     if (auto* env = GetTypeEnv(*ui))
     {
         CallLua((*env)["OnUIClose"], ui, result);
     }
 }
-void ScriptEngine::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
+void LuaRuntime::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)["OnUIAction"], ui, action);
+
     if (auto* env = GetTypeEnv(*ui))
     {
         CallLua((*env)["OnUIAction"], ui, action);
@@ -1813,8 +1696,13 @@ void ScriptEngine::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& 
 }
 
 template<typename KeyEvent>
-void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
+void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)[method],
+                static_cast<int>(key.symbol),
+                static_cast<int>(key.modifiers.value()));
+
     if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsKeyEvents))
     {
         if (auto* env = GetTypeEnv(*mWindow))
@@ -1847,8 +1735,11 @@ void ScriptEngine::DispatchKeyboardEvent(const std::string& method, const KeyEve
     }
 }
 
-void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
+void LuaRuntime::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
 {
+    if (mGameEnv)
+        CallLua((*mGameEnv)[method], mouse);
+
     if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsMouseEvents))
     {
         if (auto* env = GetTypeEnv(*mWindow))
@@ -1875,7 +1766,7 @@ void ScriptEngine::DispatchMouseEvent(const std::string& method, const MouseEven
     }
 }
 
-sol::object ScriptEngine::CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args args)
+sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args args)
 {
     sol::environment* env = nullptr;
     if (object.is<game::Scene*>())
@@ -1911,7 +1802,7 @@ sol::object ScriptEngine::CallCrossEnvMethod(sol::object object, const std::stri
     return sol::make_object(*mLuaState, sol::nil);
 }
 
-sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
+sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
 {
     if (!klass.HasScriptFile())
         return nullptr;
@@ -1947,7 +1838,7 @@ sol::environment* ScriptEngine::GetTypeEnv(const EntityClass& klass)
     return it->second.get();
 }
 
-sol::environment* ScriptEngine::GetTypeEnv(const uik::Window& window)
+sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
 {
     if (!window.HasScriptFile())
         return nullptr;
