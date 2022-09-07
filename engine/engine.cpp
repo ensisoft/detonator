@@ -85,19 +85,13 @@ public:
         mPainter->SetEditingMode(init.editing_mode);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
-        mGame = std::make_unique<engine::LuaGame>("lua", init.game_script, mGameHome, init.application_name);
-        mGame->SetPhysicsEngine(&mPhysics);
-        mGame->SetStateStore(&mStateStore);
-        mGame->SetAudioEngine(mAudio.get());
-        mGame->SetDataLoader(mGameDataLoader);
-        mGame->SetClassLibrary(mClasslib);
-        mScripting = std::make_unique<engine::ScriptEngine>("lua");
-        mScripting->SetClassLibrary(mClasslib);
-        mScripting->SetPhysicsEngine(&mPhysics);
-        mScripting->SetStateStore(&mStateStore);
-        mScripting->SetAudioEngine(mAudio.get());
-        mScripting->SetDataLoader(mGameDataLoader);
-        mScripting->Init();
+        mRuntime = std::make_unique<engine::LuaRuntime>("lua", init.game_script, mGameHome, init.application_name);
+        mRuntime->SetClassLibrary(mClasslib);
+        mRuntime->SetPhysicsEngine(&mPhysics);
+        mRuntime->SetStateStore(&mStateStore);
+        mRuntime->SetAudioEngine(mAudio.get());
+        mRuntime->SetDataLoader(mGameDataLoader);
+        mRuntime->Init();
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
@@ -108,13 +102,14 @@ public:
     virtual bool Load() override
     {
         DEBUG("Loading game state.");
-        return mGame->LoadGame();
+        mRuntime->LoadGame();
+        return true;
     }
 
     virtual void Start() override
     {
         DEBUG("Starting game play.");
-        mGame->StartGame();
+        mRuntime->StartGame();
     }
     virtual void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -203,7 +198,7 @@ public:
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
         // get the game's logical viewport into the game world.
-        const auto& game_view = mGame->GetViewport();
+        const auto& game_view = mRuntime->GetViewport();
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -364,7 +359,7 @@ public:
         TRACE_CALL("Audio::Update", mAudio->Update(&audio_events));
         for (const auto& event : audio_events)
         {
-            mGame->OnAudioEvent(event);
+            mRuntime->OnAudioEvent(event);
         }
     }
 
@@ -392,7 +387,7 @@ public:
             if (mScene)
             {
                 TRACE_CALL("Scene::BeginLoop", mScene->BeginLoop());
-                TRACE_CALL("Scripting:BeginLoop", mScripting->BeginLoop());
+                TRACE_CALL("Runtime:BeginLoop", mRuntime->BeginLoop());
             }
 
             // Call UpdateGame with the *current* time. I.e. the game
@@ -424,7 +419,7 @@ public:
                 TRACE_CALL("Scene::Rebuild", mScene->Rebuild());
                 // using the time we've arrived to now after having taken the previous
                 // delta step forward in game time.
-                TRACE_CALL("Scripting::PostUpdate", mScripting->PostUpdate(mGameTimeTotal));
+                TRACE_CALL("Runtime::PostUpdate", mRuntime->PostUpdate(mGameTimeTotal));
             }
 
             // todo: add mGame->PostUpdate here if needed
@@ -440,14 +435,14 @@ public:
             // move on update when the flag is set and then clear the flag.
             while (mTickAccum >= mGameTickStep)
             {
-                TRACE_CALL("TickGame", TickGame(tick_time, mGameTickStep));
+                TRACE_CALL("Runtime::Tick", mRuntime->Tick(tick_time, mGameTickStep));
                 mTickAccum -= mGameTickStep;
                 tick_time += mGameTickStep;
             }
 
             if (mScene)
             {
-                TRACE_CALL("Scripting::EndLoop", mScripting->EndLoop());
+                TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
                 TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
             }
         }
@@ -458,12 +453,12 @@ public:
 
     virtual void Stop() override
     {
-        mGame->StopGame();
+        mRuntime->StopGame();
     }
 
     virtual void Save() override
     {
-        mGame->SaveGame();
+        mRuntime->SaveGame();
     }
 
     virtual void Shutdown() override
@@ -584,21 +579,19 @@ public:
     {
         if (mBlockKeyboard)
             return;
-        mGame->OnKeyDown(key);
-        mScripting->OnKeyDown(key);
+        mRuntime->OnKeyDown(key);
     }
     virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
         if (mBlockKeyboard)
             return;
-        mGame->OnKeyUp(key);
-        mScripting->OnKeyUp(key);
+        mRuntime->OnKeyUp(key);
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
         if (mBlockKeyboard)
             return;
-        mGame->OnChar(text);
+        mRuntime->OnChar(text);
     }
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
@@ -611,8 +604,7 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseMove);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &engine::Game::OnMouseMove);
-        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMouseMove);
+        SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseMove);
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
@@ -623,8 +615,7 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MousePress);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &engine::Game::OnMousePress);
-        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMousePress);
+        SendGameMouseEvent(mickey, &engine::GameRuntime::OnMousePress);
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
@@ -635,14 +626,13 @@ public:
             SendUIMouseEvent(MapUIMouseEvent(mouse), &uik::Window::MouseRelease);
 
         const auto& mickey = MapGameMouseEvent(mouse);
-        SendGameMouseEvent(mickey, &engine::Game::OnMouseRelease);
-        SendEntityScriptMouseEvent(mickey, &engine::ScriptEngine::OnMouseRelease);
+        SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseRelease);
     }
 private:
     engine::IRect GetViewport() const
     {
         // get the game's logical viewport into the game world.
-        const auto& view = mGame->GetViewport();
+        const auto& view = mRuntime->GetViewport();
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -659,17 +649,11 @@ private:
                              device_viewport_width, device_viewport_height);
     }
 
-    using GameMouseFunc = void (engine::Game::*)(const engine::MouseEvent&);
+    using GameMouseFunc = void (engine::GameRuntime::*)(const engine::MouseEvent&);
     void SendGameMouseEvent(const engine::MouseEvent& mickey, GameMouseFunc which)
     {
-        auto* game = mGame.get();
+        auto* game = mRuntime.get();
         (game->*which)(mickey);
-    }
-    using EntityScriptMouseFunc = void (engine::ScriptEngine::*)(const engine::MouseEvent&);
-    void SendEntityScriptMouseEvent(const engine::MouseEvent& mickey, EntityScriptMouseFunc which)
-    {
-        auto* scripting = mScripting.get();
-        (scripting->*which)(mickey);
     }
 
     template<typename WdkMouseEvent>
@@ -681,7 +665,7 @@ private:
         const auto& point  = viewport.MapToLocal(mickey.window_x, mickey.window_y);
         const auto point_norm_x  =  (point.GetX() / width) * 2.0 - 1.0f;
         const auto point_norm_y  =  (point.GetY() / height) * -2.0 + 1.0f;
-        const auto& projection   = gfx::Painter::MakeOrthographicProjection(mGame->GetViewport());
+        const auto& projection   = gfx::Painter::MakeOrthographicProjection(mRuntime->GetViewport());
         const auto& point_scene  = glm::inverse(projection) * glm::vec4(point_norm_x,
                                                                         point_norm_y, 1.0f, 1.0f);
         engine::MouseEvent event;
@@ -701,8 +685,7 @@ private:
         auto action = (ui->*which)(mickey, mUIState);
         if (action.type == uik::WidgetActionType::None)
             return;
-        mGame->OnUIAction(ui, action);
-        mScripting->OnUIAction(ui, action);
+        mRuntime->OnUIAction(ui, action);
         //DEBUG("Widget action: '%1'", action.type);
     }
     template<typename WdkMouseEvent>
@@ -797,10 +780,8 @@ private:
         mUIState.Clear();
 
         auto* ui = mUIStack.top().get();
-        mGame->OnUIOpen(ui);
-        mGame->SetCurrentUI(ui);
-        mScripting->OnUIOpen(ui);
-        mScripting->SetCurrentUI(ui);
+        mRuntime->OnUIOpen(ui);
+        mRuntime->SetCurrentUI(ui);
     }
     void OnAction(const engine::CloseUIAction& action)
     {
@@ -808,12 +789,10 @@ private:
         // pop it off the UI stack.
         if (auto* ui = GetUI())
         {
-            mGame->OnUIClose(ui, action.result);
-            mScripting->OnUIClose(ui, action.result);
+            mRuntime->OnUIClose(ui, action.result);
             mUIStack.pop();
         }
-        mGame->SetCurrentUI(GetUI());
-        mScripting->SetCurrentUI(GetUI());
+        mRuntime->SetCurrentUI(GetUI());
 
         // If there's another UI in the UI stack then reapply
         // styling information.
@@ -835,8 +814,7 @@ private:
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
         }
-        mScripting->BeginPlay(mScene.get());
-        mGame->BeginPlay(mScene.get());
+        mRuntime->BeginPlay(mScene.get());
     }
     void OnAction(const engine::SuspendAction& action)
     {
@@ -850,8 +828,7 @@ private:
     {
         if (!mScene)
             return;
-        mGame->EndPlay(mScene.get());
-        mScripting->EndPlay(mScene.get());
+        mRuntime->EndPlay(mScene.get());
         mScene.reset();
     }
     void OnAction(const engine::QuitAction& action)
@@ -910,12 +887,7 @@ private:
     }
     void OnAction(const engine::PostEventAction& action)
     {
-        mGame->OnGameEvent(action.event);
-
-        if (mScene)
-        {
-            mScripting->OnGameEvent(action.event);
-        }
+        mRuntime->OnGameEvent(action.event);
     }
     void OnAction(const engine::ShowDeveloperUIAction& action)
     {
@@ -940,14 +912,6 @@ private:
             ret.pop_back();
         return ret;
     }
-    void TickGame(double game_time, double dt)
-    {
-        TRACE_CALL("Game::Tick",mGame->Tick(game_time, dt));
-        if (mScene)
-        {
-            TRACE_CALL("Scripting::Tick", mScripting->Tick(game_time, dt));
-        }
-    }
     void UpdateGame(double game_time,  double dt)
     {
         if (mScene)
@@ -957,8 +921,7 @@ private:
             TRACE_BLOCK("Scene::Events",
                 for (const auto& event : events)
                 {
-                    mGame->OnSceneEvent(event);
-                    mScripting->OnSceneEvent(event);
+                    mRuntime->OnSceneEvent(event);
                 }
             );
             if (mPhysics.HaveWorld())
@@ -977,15 +940,14 @@ private:
                 TRACE_BLOCK("Physics::ContactEvents",
                     for (const auto& contact : contacts)
                     {
-                        mGame->OnContactEvent(contact);
-                        mScripting->OnContactEvent(contact);
+                        mRuntime->OnContactEvent(contact);
                     }
                 );
             }
             TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, game_time, dt));
-            TRACE_CALL("Scripting::Update", mScripting->Update(game_time, dt));
         }
-        TRACE_CALL("Game::Update", mGame->Update(game_time, dt));
+
+        TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
 
         if (auto* ui = GetUI())
         {
@@ -996,8 +958,7 @@ private:
             const auto& actions = ui->PollAction(mUIState, game_time, dt);
             for (const auto& action : actions)
             {
-                mGame->OnUIAction(ui, action);
-                mScripting->OnUIAction(ui, action);
+                mRuntime->OnUIAction(ui, action);
             }
         }
 
@@ -1017,7 +978,7 @@ private:
             return;
 
         engine::Action action;
-        while (mGame->GetNextAction(&action) || mScripting->GetNextAction(&action))
+        while (mRuntime->GetNextAction(&action))
         {
             std::visit([this](auto& variant_value) {
                 this->OnAction(variant_value);
@@ -1067,12 +1028,10 @@ private:
     engine::UIStyle mUIStyle;
     // The audio engine.
     std::unique_ptr<engine::AudioEngine> mAudio;
-    // The scripting subsystem.
-    std::unique_ptr<engine::ScriptEngine> mScripting;
+    // The game runtime that runs the actual game logic.
+    std::unique_ptr<engine::GameRuntime> mRuntime;
     // Current game scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
-    // Game logic implementation.
-    std::unique_ptr<engine::Game> mGame;
     // The UI stack onto which UIs are opened.
     // The top of the stack is the currently "active" UI
     // that gets the mouse/keyboard input events. It's
