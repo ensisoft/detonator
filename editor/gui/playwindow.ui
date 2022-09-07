@@ -37,7 +37,7 @@
            <widget class="QLabel" name="label_2">
             <property name="styleSheet">
              <string notr="true">color: rgb(255, 255, 255);
-font: 22pt &quot;Sans Serif&quot;;</string>
+font: 18pt &quot;Sans Serif&quot;;</string>
             </property>
             <property name="text">
              <string>Oopsie, there was a problem :(</string>
@@ -48,7 +48,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
            <widget class="QLabel" name="lblError">
             <property name="styleSheet">
              <string notr="true">color: rgb(255, 255, 255);
-font: 22pt &quot;Sans Serif&quot;;</string>
+font: 16pt &quot;Sans Serif&quot;;</string>
             </property>
             <property name="text">
              <string/>
@@ -723,7 +723,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     </hint>
     <hint type="destinationlabel">
      <x>529</x>
-     <y>595</y>
+     <y>1033</y>
     </hint>
    </hints>
   </connection>
@@ -739,7 +739,7 @@ font: 22pt &quot;Sans Serif&quot;;</string>
     </hint>
     <hint type="destinationlabel">
      <x>529</x>
-     <y>742</y>
+     <y>1058</y>
     </hint>
    </hints>
   </connection>
@@ -750,12 +750,12 @@ font: 22pt &quot;Sans Serif&quot;;</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>499</y>
+     <x>621</x>
+     <y>825</y>
     </hint>
     <hint type="destinationlabel">
-     <x>997</x>
-     <y>499</y>
+     <x>1039</x>
+     <y>824</y>
     </hint>
    </hints>
   </connection>
