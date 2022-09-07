@@ -2575,7 +2575,14 @@ void BindUIK(sol::state& L)
     radio["GetText"]    = &uik::RadioButton::GetText;
     radio["SetText"]    = &uik::RadioButton::SetText;
 
-    auto window = table.new_usertype<uik::Window>("Window");
+    auto window = table.new_usertype<uik::Window>("Window",
+        sol::meta_function::index, [](sol::this_state state, uik::Window* window, const char* key) {
+                sol::state_view lua(state);
+                auto* widget = window->FindWidgetByName(key);
+                if (!widget)
+                    return sol::make_object(lua, sol::nil);
+                return WidgetObjectCast(state, widget);
+            });
     window["GetId"]            = &uik::Window::GetId;
     window["GetName"]          = &uik::Window::GetName;
     window["GetNumWidgets"]    = &uik::Window::GetNumWidgets;
