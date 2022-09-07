@@ -174,16 +174,7 @@ using namespace game;
 // code turned into "Lua game errors" which is not what we should want to do!!
 
 namespace {
-class GameError : public std::exception {
-public:
-    GameError(std::string&& message)
-      : mMessage(std::move(message))
-    {}
-    virtual const char* what() noexcept
-    { return mMessage.c_str(); }
-private:
-    std::string mMessage;
-};
+using GameError = std::runtime_error;
 
 // data policy class for ArrayInterface below
 // uses a non-owning pointer to data that comes from
