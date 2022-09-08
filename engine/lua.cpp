@@ -739,19 +739,27 @@ sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget)
 template<typename Widget>
 void BindWidgetInterface(sol::usertype<Widget>& widget)
 {
-    widget["GetId"]          = &Widget::GetId;
-    widget["GetName"]        = &Widget::GetName;
-    widget["GetHash"]        = &Widget::GetHash;
-    widget["GetSize"]        = &Widget::GetSize;
-    widget["GetPosition"]    = &Widget::GetPosition;
-    widget["GetType"]        = [](const Widget* widget) { return base::ToString(widget->GetType()); };
-    widget["SetName"]        = &Widget::SetName;
-    widget["TestFlag"]       = &TestFlag<Widget>;
-    widget["SetFlag"]        = &SetFlag<Widget>;
-    widget["IsEnabled"]      = &Widget::IsEnabled;
-    widget["IsVisible"]      = &Widget::IsVisible;
-    widget["Grow"]           = &Widget::Grow;
-    widget["Translate"]      = &Widget::Translate;
+    widget["GetId"]               = &Widget::GetId;
+    widget["GetName"]             = &Widget::GetName;
+    widget["GetHash"]             = &Widget::GetHash;
+    widget["GetSize"]             = &Widget::GetSize;
+    widget["GetPosition"]         = &Widget::GetPosition;
+    widget["GetType"]             = [](const Widget* widget) { return base::ToString(widget->GetType()); };
+    widget["SetName"]             = &Widget::SetName;
+    widget["TestFlag"]            = &TestFlag<Widget>;
+    widget["SetFlag"]             = &SetFlag<Widget>;
+    widget["IsEnabled"]           = &Widget::IsEnabled;
+    widget["IsVisible"]           = &Widget::IsVisible;
+    widget["Grow"]                = &Widget::Grow;
+    widget["Translate"]           = &Widget::Translate;
+    widget["SetStyleProperty"]    = &Widget::SetStyleProperty;
+    widget["DeleteStyleProperty"] = &Widget::DeleteStyleProperty;
+    widget["GetStyleProperty"]    = [](Widget& widget, const std::string& key, sol::this_state state) {
+        sol::state_view lua(state);
+        if (const auto* prop = widget.GetStyleProperty(key))
+            return sol::make_object(lua, *prop);
+        return sol::make_object(lua, sol::nil);
+    };
     widget["SetVisible"]     = [](Widget& widget, bool on_off) {
         widget.SetFlag(Widget::Flags::VisibleInGame, on_off);
     };

@@ -196,6 +196,14 @@ public:
     { return std::make_unique<TestWidget>(); }
     virtual std::unique_ptr<Widget> Clone() const override
     { return std::make_unique<TestWidget>(); }
+    virtual void SetStyleProperty(const std::string& key, const uik::StyleProperty& prop) override
+    {}
+    virtual const uik::StyleProperty* GetStyleProperty(const std::string& key) const override
+    {
+        return nullptr;
+    }
+    virtual void DeleteStyleProperty(const std::string& key) override
+    {}
 private:
 };
 
@@ -219,6 +227,9 @@ void unit_test_widget()
     widget.SetSize(100.0f, 150.0f);
     widget.SetPosition(45.0f, 50.0f);
     widget.SetFlag(uik::Widget::Flags::VisibleInGame, false);
+    widget.SetStyleProperty("flag", true);
+    widget.SetStyleProperty("float", 1.0f);
+    widget.SetStyleProperty("string", "foobar");
 
     data::JsonObject json;
     widget.IntoJson(json);
@@ -233,6 +244,12 @@ void unit_test_widget()
         TEST_REQUIRE(other.GetPosition() == widget.GetPosition());
         TEST_REQUIRE(other.IsEnabled() == widget.IsEnabled());
         TEST_REQUIRE(other.IsVisible() == widget.IsVisible());
+        uik::StyleProperty prop = *other.GetStyleProperty("flag");
+        TEST_REQUIRE(std::get<bool>(prop) == true);
+        prop = *other.GetStyleProperty("float");
+        TEST_REQUIRE(std::get<float>(prop) == real::float32(1.0f));
+        prop = *other.GetStyleProperty("string");
+        TEST_REQUIRE(std::get<std::string>(prop) == "foobar");
     }
 
     // copy

@@ -920,6 +920,35 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
                                         const std::string& key) const
 {
     UIProperty prop;
+
+    if (ps.style_properties)
+    {
+        // if the paint operation has an associated property map with
+        // a specific property value then  that takes precedence over
+        // any other style properties
+        std::string prefix;
+        if (ps.enabled == false)
+            prefix = "disabled/";
+        else if (ps.pressed)
+            prefix = "pressed/";
+        else if (ps.focused)
+            prefix = "focused/";
+        else if (ps.moused)
+            prefix = "mouse-over/";
+
+        if (const auto* val = base::SafeFind(*ps.style_properties, prefix + key))
+        {
+            std::visit([&prop](const auto& variant_value) {
+                prop.SetValue(variant_value);
+            }, *val);
+            return prop;
+        }
+    }
+    // check the properties based on some simple rules.
+    // if the widget is disabled it cannot be pressed, focused or moused.
+    // if the widget is enabled check whether it's
+    //  1. pressed  2. focused, 3. moused
+    // if none of the above rules are hit then the widget is "normal"
     if (ps.enabled == false)
         prop = GetWidgetProperty(id, ps.klass, "disabled/" + key);
     else if (ps.pressed)

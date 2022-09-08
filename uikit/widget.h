@@ -212,6 +212,10 @@ namespace uik
         virtual FRect GetRect() const
         { return FRect(0.0f, 0.0f, GetSize()); }
 
+        virtual void SetStyleProperty(const std::string& key, const StyleProperty& prop) = 0;
+        virtual const StyleProperty* GetStyleProperty(const std::string& key) const = 0;
+        virtual void DeleteStyleProperty(const std::string& key) = 0;
+
         // helpers
         inline bool IsContainer() const
         {
@@ -261,6 +265,7 @@ namespace uik
         struct PaintStruct {
             std::string widgetId;
             std::string widgetName;
+            const StylePropertyMap* style_properties = nullptr;
             Painter* painter = nullptr;
             State* state = nullptr;
         };
@@ -655,6 +660,9 @@ namespace uik
             virtual size_t GetHash() const override;
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
+            virtual void SetStyleProperty(const std::string& key, const StyleProperty& prop) override;
+            virtual const StyleProperty* GetStyleProperty(const std::string& key) const override;
+            virtual void DeleteStyleProperty(const std::string& key) override;
         protected:
             std::string mId;
             std::string mName;
@@ -662,6 +670,7 @@ namespace uik
             uik::FPoint mPosition;
             uik::FSize  mSize;
             base::bitflag<Flags> mFlags;
+            std::optional<StylePropertyMap> mStyleProperties;
         };
 
         template<typename WidgetModel>
@@ -705,6 +714,9 @@ namespace uik
                 ps.widgetName  = mName;
                 ps.painter     = &painter;
                 ps.state       = &state;
+                if (mStyleProperties)
+                    ps.style_properties = &mStyleProperties.value();
+
                 WidgetModel::Paint(paint, ps);
             }
             virtual void Update(State& state, double time, float dt) override

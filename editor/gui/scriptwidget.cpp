@@ -717,6 +717,14 @@ void InitDoc()
     DOC_METHOD_2("void", "Translate", "Translate the widget relative to it's current position.", "float", "dx", "float", "dy");
     DOC_METHOD_1("void", "SetVisible", "Change widget visibility.", "bool", "visible");
     DOC_METHOD_1("void", "Enable", "Enable widget.", "bool", "enable");
+    DOC_METHOD_2("void", "SetStyleProperty", "Set a painter specific styling property value on the widget.<br>"
+                                             "These style properties take precedence over any other styling.",
+                 "string", "key", "int|float|string|base.Color4f", "value");
+    DOC_METHOD_1("void", "DeleteStyleProperty", "Delete a specific styling property by the given key.",
+                 "string", "key");
+    DOC_METHOD_1("int|float|string|base.Color4f", "GetStyleProperty", "Get a styling property by the given key.<br>"
+                                                                          "Returns nil if no such property exists.",
+                 "string", "key");
     DOC_METHOD_0("uik.Label", "AsLabel", "Cast the widget to Label. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.PushButton", "AsPushButton", "Cast the widget to PushButton. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.CheckBox", "AsCheckBox", "Cast the widget to CheckBox. Returns nil if the cast failed.");

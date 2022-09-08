@@ -73,19 +73,21 @@ namespace uik
             // This is used when widgets need to be clipped to stay within the insides
             // of their containing widget. For example when some container widget has
             // child widgets the child widgets are only shown for the part that is within
-            // the container. Any extent that goes outside of this rect needs to be clipped.
+            // the container. Any extent that goes outside this rect needs to be clipped.
             FRect clip;
+            // Optional set of style properties associated with the paint operation.
+            const StylePropertyMap* style_properties = nullptr;
         };
         virtual ~Painter() = default;
 
         // Each of the painting operations take the ID of the widget/window
-        // in question. The ID is unique and thus be used to identify specific
+        // in question. The ID is unique and thus can be used to identify specific
         // widgets for having their styling/painting properties altered in some way.
-        // Each widget can contain conceptually some sub-components such as up/down
+        // Each widget can contain conceptually some subcomponents such as up/down
         // buttons, text strings or item text strings.
-        // For example a spinbox widget might have up/down buttons to change
-        // the value. A combobox might only have a down button for opening the widget
-        // and once it's open it'll show a drop down list with several down down items.
+        // For example a spinbox widget might have up/down buttons to change the value.
+        // A combobox might only have a down button for opening the widget
+        // and once it's open it'll show a drop-down list with several items.
         // The widget paint operations are thus broken down into these primitive operations
         // which the widget implementations can then use to compose the widget.
 
