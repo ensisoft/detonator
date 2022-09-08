@@ -683,7 +683,11 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QFontComboBox" name="editorFont"/>
+             <widget class="QFontComboBox" name="editorFont">
+              <property name="writingSystem">
+               <enum>QFontDatabase::Latin</enum>
+              </property>
+             </widget>
             </item>
             <item row="0" column="2">
              <widget class="QComboBox" name="editorFontSize"/>
