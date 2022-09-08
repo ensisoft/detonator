@@ -113,11 +113,15 @@ namespace app
         virtual void LoadProperties(const QJsonObject& json) = 0;
         // Load the additional properties from the json object.
         virtual void LoadUserProperties(const QJsonObject& json) = 0;
+        // Delete a property by the given key/name.
+        virtual void DeleteProperty(const QString& name) = 0;
+        // Delete a user property by the given key/name.
+        virtual void DeleteUserProperty(const QString& name) = 0;
         // Make an an exact copy of this resource. This means
         // that the copied resource contains all the same properties
         // as this object including the resource id.
         virtual std::unique_ptr<Resource> Copy() const = 0;
-        // Make a duplicate clone of the this resource. This means
+        // Make a duplicate clone of this resource. This means
         // that the duplicated resource contains all the same properties
         // as this object but is a distinct resource object (type) and
         // has a different/unique resource id.
@@ -533,6 +537,10 @@ namespace app
         { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
+        virtual void DeleteProperty(const QString& name) override
+        { mProps.remove(name); }
+        virtual void DeleteUserProperty(const QString& name) override
+        { mUserProps.remove(name); }
         virtual std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
         virtual std::unique_ptr<Resource> Clone() const override
@@ -665,6 +673,10 @@ namespace app
         { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
+        virtual void DeleteProperty(const QString& name) override
+        { mProps.remove(name); }
+        virtual void DeleteUserProperty(const QString& name) override
+        { mUserProps.remove(name); }
         virtual std::unique_ptr<Resource> Copy() const override
         {
             auto ret = std::make_unique<MaterialResource>();
