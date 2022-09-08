@@ -146,6 +146,14 @@ struct ListItemId {
     {}
 };
 
+inline void SetValue(QFontComboBox* combo, const QString& str)
+{
+    QSignalBlocker s(combo);
+    QFont font;
+    if (font.fromString(str))
+        combo->setCurrentFont(font);
+}
+
 inline void SetValue(QComboBox* combo, const QString& str)
 {
     QSignalBlocker s(combo);
@@ -851,9 +859,9 @@ inline void SetUserProperty(Resource& res, const QString& name, quint64 value)
 
 
 template<typename Resource, typename T> inline
-void GetProperty(const Resource& res, const QString& name, T* out)
+bool GetProperty(const Resource& res, const QString& name, T* out)
 {
-    res.GetProperty(name, out);
+    return res.GetProperty(name, out);
 }
 template<typename Resource>
 inline void GetProperty(const Resource& res, const QString& name, QComboBox* cmb)

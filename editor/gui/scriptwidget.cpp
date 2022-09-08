@@ -1545,6 +1545,16 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.setupUi(this);
     //mUI.actionFindText->setShortcut(QKeySequence::Find); // use custom
 
+    const auto font_sizes = QFontDatabase::standardSizes();
+    for (int size : font_sizes)
+    {
+        QSignalBlocker s(mUI.editorFontSize);
+        mUI.editorFontSize->addItem(QString::number(size));
+    }
+    SetValue(mUI.editorFontName, -1);
+    SetValue(mUI.editorFontSize, -1);
+    SetValue(mUI.chkFormatOnSave, Qt::PartiallyChecked);
+
     mUI.formatter->setVisible(false);
     mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
@@ -1759,8 +1769,31 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     LoadDocument(mFilename);
     setWindowTitle(mResourceName);
 
+    bool show_settings = true;
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "help_splitter", mUI.helpSplitter);
+    GetUserProperty(resource, "show_settings", &show_settings);
+    SetVisible(mUI.settings, show_settings);
+
+    QString font_name;
+    if (GetUserProperty(resource, "font_name", &font_name))
+    {
+        mUI.code->SetFontName(font_name);
+        SetValue(mUI.editorFontName, font_name);
+    }
+
+    QString font_size = 0;
+    if (GetUserProperty(resource, "font_size", &font_size))
+    {
+        mUI.code->SetFontSize(font_size.toInt());
+        SetValue(mUI.editorFontSize, font_size);
+    }
+
+    mUI.code->ApplySettings();
+
+    bool format_on_save = false;
+    if (GetProperty(resource, "format_on_save", &format_on_save))
+        SetValue(mUI.chkFormatOnSave, format_on_save);
 }
 ScriptWidget::~ScriptWidget()
 {
@@ -1803,6 +1836,8 @@ void ScriptWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionReplaceText);
     bar.addSeparator();
     bar.addAction(mUI.actionFindHelp);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSettings);
 }
 void ScriptWidget::AddActions(QMenu& menu)
 {
@@ -1814,6 +1849,8 @@ void ScriptWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionFindHelp);
     menu.addSeparator();
     menu.addAction(mUI.actionOpen);
+    menu.addSeparator();
+    menu.addAction(mUI.actionSettings);
 }
 
 void ScriptWidget::Cut(Clipboard&)
@@ -1849,6 +1886,7 @@ bool ScriptWidget::SaveState(gui::Settings& settings) const
     settings.SetValue("Script", "resource_id", mResourceID);
     settings.SetValue("Script", "resource_name", mResourceName);
     settings.SetValue("Script", "filename", mFilename);
+    settings.SetValue("Script", "show_settings", mUI.settings->isVisible());
     settings.SaveWidget("Script", mUI.findText);
     settings.SaveWidget("Script", mUI.replaceText);
     settings.SaveWidget("Script", mUI.findBackwards);
@@ -1857,13 +1895,27 @@ bool ScriptWidget::SaveState(gui::Settings& settings) const
     settings.SaveWidget("Script", mUI.mainSplitter);
     settings.SaveWidget("Script", mUI.helpSplitter);
     settings.SaveWidget("Script", mUI.tableView);
+
+    if (mUI.editorFontName->currentIndex() != -1)
+        settings.SetValue("Script", "font_name", mUI.editorFontName->currentFont().toString());
+    if (mUI.editorFontSize->currentIndex() != -1)
+        settings.SetValue("Script", "font_size", mUI.editorFontSize->currentText());
+
+    const auto format_on_save = mUI.chkFormatOnSave->checkState();
+    if (format_on_save == Qt::Checked)
+        settings.SetValue("Script", "format_on_save", true);
+    else if (format_on_save == Qt::Unchecked)
+        settings.SetValue("Script", "format_on_save", false);
+
     return true;
 }
 bool ScriptWidget::LoadState(const gui::Settings& settings)
 {
+    bool show_settings = true;
     settings.GetValue("Script", "resource_id", &mResourceID);
     settings.GetValue("Script", "resource_name", &mResourceName);
     settings.GetValue("Script", "filename", &mFilename);
+    settings.GetValue("Script", "show_settings", &show_settings);
     settings.LoadWidget("Script", mUI.findText);
     settings.LoadWidget("Script", mUI.replaceText);
     settings.LoadWidget("Script", mUI.findBackwards);
@@ -1872,6 +1924,28 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     settings.LoadWidget("Script", mUI.mainSplitter);
     settings.LoadWidget("Script", mUI.helpSplitter);
     settings.LoadWidget("Script", mUI.tableView);
+    SetVisible(mUI.settings, show_settings);
+
+    QString font_name;
+    if (settings.GetValue("Script", "font_name", &font_name))
+    {
+        mUI.code->SetFontName(font_name);
+        SetValue(mUI.editorFontName, font_name);
+    }
+
+    QString font_size = 0;
+    if (settings.GetValue("Script", "font_size", &font_size))
+    {
+        mUI.code->SetFontSize(font_size.toInt());
+        SetValue(mUI.editorFontSize, font_size);
+    }
+
+    bool format_on_save = false;
+    if (settings.GetValue("Script", "format_on_save", &format_on_save))
+        SetValue(mUI.chkFormatOnSave, format_on_save);
+
+    mUI.code->ApplySettings();
+
     if (!mResourceName.isEmpty())
         setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
@@ -1935,7 +2009,9 @@ void ScriptWidget::on_actionSave_triggered()
         mFileHash = qHash(text);
     }
 
-    if (mSettings.lua_format_on_save)
+    const auto format_on_save = mUI.chkFormatOnSave->checkState();
+    if ((format_on_save == Qt::PartiallyChecked && mSettings.lua_format_on_save) ||
+         format_on_save == Qt::Checked)
     {
         QTextCursor cursor = mUI.code->textCursor();
         auto cursor_position = cursor.position();
@@ -2002,6 +2078,18 @@ void ScriptWidget::on_actionSave_triggered()
         app::ScriptResource resource(script, mResourceName);
         SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
         SetUserProperty(resource, "help_splitter", mUI.helpSplitter);
+        SetUserProperty(resource, "show_settings", mUI.settings->isVisible());
+
+        if (mUI.editorFontName->currentIndex() != -1)
+            SetUserProperty(resource, "font_name", mUI.editorFontName->currentFont().toString());
+        if (mUI.editorFontSize->currentIndex() != -1)
+            SetUserProperty(resource, "font_size", mUI.editorFontSize->currentText());
+
+        if (format_on_save == Qt::Checked)
+            SetProperty(resource, "format_on_save", true);
+        else if (format_on_save == Qt::Unchecked)
+            SetProperty(resource, "format_on_save", false);
+
         mWorkspace->SaveResource(resource);
         setWindowTitle(mResourceName);
         mResourceID = app::FromUtf8(script.GetId());
@@ -2011,6 +2099,21 @@ void ScriptWidget::on_actionSave_triggered()
         auto* resource = mWorkspace->FindResourceById(mResourceID);
         SetUserProperty(*resource, "main_splitter", mUI.mainSplitter);
         SetUserProperty(*resource, "help_splitter", mUI.helpSplitter);
+        SetUserProperty(*resource, "show_settings", mUI.settings->isVisible());
+
+        if (mUI.editorFontName->currentIndex() != -1)
+            SetUserProperty(*resource, "font_name", mUI.editorFontName->currentFont().toString());
+        else resource->DeleteUserProperty("font_name");
+        if (mUI.editorFontSize->currentIndex() != -1)
+            SetUserProperty(*resource, "font_size", mUI.editorFontSize->currentText());
+        else resource->DeleteUserProperty("font_size");
+
+        if (format_on_save == Qt::PartiallyChecked)
+            resource->DeleteProperty("format_on_save");
+        else if (format_on_save == Qt::Checked)
+            resource->SetProperty("format_on_save", true);
+        else if (format_on_save == Qt::Unchecked)
+            resource->SetProperty("format_on_save", false);
     }
 }
 
@@ -2061,6 +2164,11 @@ void ScriptWidget::on_actionReplaceText_triggered()
     SetEnabled(mUI.btnReplaceNext, true);
     SetEnabled(mUI.btnReplaceAll, true);
     SetEnabled(mUI.replaceText, true);
+}
+
+void ScriptWidget::on_actionSettings_triggered()
+{
+    SetVisible(mUI.settings, true);
 }
 
 void ScriptWidget::on_btnFindNext_clicked()
@@ -2178,6 +2286,35 @@ void ScriptWidget::on_btnAcceptReload_clicked()
     SetEnabled(mUI.actionReplaceText, true);
     SetEnabled(mUI.actionSave, true);
     SetVisible(mUI.modified, false);
+}
+
+void ScriptWidget::on_btnResetFont_clicked()
+{
+    SetValue(mUI.editorFontName, -1);
+    SetValue(mUI.editorFontSize, -1);
+    mUI.code->ResetFontSize();
+    mUI.code->ResetFontName();
+    mUI.code->ApplySettings();
+}
+
+void ScriptWidget::on_btnSettingsClose_clicked()
+{
+    SetVisible(mUI.settings, false);
+}
+
+void ScriptWidget::on_editorFontName_currentIndexChanged(int)
+{
+    if (mUI.editorFontName->currentIndex() == -1)
+        mUI.code->ResetFontName();
+    else mUI.code->SetFontName(mUI.editorFontName->currentFont().toString());
+    mUI.code->ApplySettings();
+}
+void ScriptWidget::on_editorFontSize_currentIndexChanged(int)
+{
+    if (mUI.editorFontSize->currentIndex() == -1)
+        mUI.code->ResetFontSize();
+    else mUI.code->SetFontSize(GetValue(mUI.editorFontSize));
+    mUI.code->ApplySettings();
 }
 
 void ScriptWidget::on_filter_textChanged(const QString& text)

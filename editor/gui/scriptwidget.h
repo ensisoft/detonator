@@ -76,6 +76,7 @@ namespace gui
         void on_actionFindHelp_triggered();
         void on_actionFindText_triggered();
         void on_actionReplaceText_triggered();
+        void on_actionSettings_triggered();
         void on_btnFindNext_clicked();
         void on_btnFindClose_clicked();
         void on_btnReplaceNext_clicked();
@@ -84,6 +85,10 @@ namespace gui
         void on_btnNavForward_clicked();
         void on_btnRejectReload_clicked();
         void on_btnAcceptReload_clicked();
+        void on_btnResetFont_clicked();
+        void on_btnSettingsClose_clicked();
+        void on_editorFontName_currentIndexChanged(int);
+        void on_editorFontSize_currentIndexChanged(int);
         void on_filter_textChanged(const QString& text);
         void on_textBrowser_backwardAvailable(bool available);
         void on_textBrowser_forwardAvailable(bool available);

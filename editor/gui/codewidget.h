@@ -22,6 +22,8 @@
 #  include <QPlainTextEdit>
 #include "warnpop.h"
 
+#include <optional>
+
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
@@ -63,9 +65,18 @@ namespace gui
 
         int ComputeLineNumberAreaWidth() const;
 
+        void ApplySettings();
+        void SetFontName(QString font)
+        { mFontName = font; }
+        void ResetFontName()
+        { mFontName.reset(); }
+        void SetFontSize(int size)
+        { mFontSize = size; }
+        void ResetFontSize()
+        { mFontSize.reset(); }
+
         static void SetDefaultSettings(const Settings& settings);
         static void GetDefaultSettings(Settings* settings);
-
     protected:
         virtual void resizeEvent(QResizeEvent *event) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
@@ -77,16 +88,16 @@ namespace gui
         void CopyAvailable(bool yes_no);
         void UndoAvailable(bool yes_no);
     private:
-        void ApplySettings();
-
+        static Settings mSettings;
     private:
         QWidget* mLineNumberArea = nullptr;
         QSyntaxHighlighter* mHighlighter = nullptr;
         QTextDocument* mDocument = nullptr;
-        static Settings mSettings;
         bool mCanCopy = false;
         bool mCanUndo = false;
         QFont mFont;
+        std::optional<QString> mFontName;
+        std::optional<int> mFontSize;
     };
 
 } // namespace
