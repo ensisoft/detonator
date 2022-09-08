@@ -23,6 +23,7 @@
 
 #include <variant>
 #include <string>
+#include <unordered_map>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -58,5 +59,8 @@ namespace uik
     };
 
     using WidgetActionValue = std::variant<int, float, bool, std::string, ListItem>;
+
+    using StyleProperty = std::variant<float, bool, std::string, Color4f>;
+    using StylePropertyMap = std::unordered_map<std::string, StyleProperty>;
 
 } // namespace

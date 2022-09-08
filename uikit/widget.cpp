@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include <set>
+
 #include "base/assert.h"
 #include "base/hash.h"
 #include "base/format.h"
@@ -38,6 +40,19 @@ size_t BaseWidget::GetHash() const
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mFlags);
+    if (mStyleProperties)
+    {
+        std::set<std::string> keys;
+        for (const auto& [key, _] : *mStyleProperties)
+            keys.insert(key);
+
+        for (const auto& key : keys)
+        {
+            const auto* val = base::SafeFind(*mStyleProperties, key);
+            hash = base::hash_combine(hash, key);
+            hash = base::hash_combine(hash, *val);
+        }
+    }
     return hash;
 }
 void BaseWidget::IntoJson(data::Writer& data) const
@@ -48,18 +63,64 @@ void BaseWidget::IntoJson(data::Writer& data) const
     data.Write("position", mPosition);
     data.Write("size",     mSize);
     data.Write("flags",    mFlags);
+    if (mStyleProperties)
+    {
+        for (const auto& [key, val] : *mStyleProperties)
+        {
+            auto chunk = data.NewWriteChunk();
+            chunk->Write("key", key);
+            chunk->Write("val", val);
+            data.AppendChunk("style_properties", std::move(chunk));
+        }
+    }
 }
 
 bool BaseWidget::FromJson(const data::Reader& data)
 {
-    if (!data.Read("id",       &mId) ||
-        !data.Read("name",     &mName) ||
-        !data.Read("style",    &mStyle) ||
-        !data.Read("position", &mPosition) ||
-        !data.Read("size",     &mSize) ||
-        !data.Read("flags",    &mFlags))
-        return false;
+    data.Read("id",       &mId);
+    data.Read("name",     &mName);
+    data.Read("style",    &mStyle);
+    data.Read("position", &mPosition);
+    data.Read("size",     &mSize);
+    data.Read("flags",    &mFlags);
+    if (data.HasArray("style_properties"))
+    {
+        StylePropertyMap props;
+        for (unsigned i=0; i<data.GetNumItems("style_properties"); ++i)
+        {
+            const auto& chunk = data.GetReadChunk("style_properties", i);
+            std::string key;
+            StyleProperty val;
+            chunk->Read("key", &key);
+            chunk->Read("val", &val);
+            props[key] = std::move(val);
+        }
+        mStyleProperties = std::move(props);
+    }
     return true;
+}
+
+void BaseWidget::SetStyleProperty(const std::string& key, const StyleProperty& prop)
+{
+    auto map = mStyleProperties.value_or(StylePropertyMap());
+    map[key] = std::move(prop);
+    mStyleProperties = std::move(map);
+}
+const StyleProperty* BaseWidget::GetStyleProperty(const std::string& key) const
+{
+    if (!mStyleProperties)
+        return nullptr;
+    const auto& map = mStyleProperties.value();
+    const auto* val = base::SafeFind(map, key);
+    return val;
+}
+
+void BaseWidget::DeleteStyleProperty(const std::string& key)
+{
+    if (!mStyleProperties)
+        return;
+    auto& map = mStyleProperties.value();
+    map.erase(key);
 }
 
 void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
@@ -73,6 +134,7 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.rect    = paint.rect;
     p.pressed = false;
     p.klass   = "form";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
@@ -96,6 +158,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.rect    = paint.rect;
     p.pressed = false;
     p.klass   = "progress-bar";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     p.moused = false;
     p.pressed = false;
@@ -143,6 +206,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.rect    = paint.rect;
     p.pressed = false;
     p.klass   = "slider";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect slider;
@@ -255,6 +319,7 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.rect    = paint.rect;
     p.pressed = false;
     p.klass   = "spinbox";
+    p.style_properties = ps.style_properties;
 
     FRect edt, btn_inc, btn_dec;
     ComputeBoxes(paint.rect, &btn_inc, &btn_dec, &edt);
@@ -434,6 +499,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.clip    = paint.clip;
     p.pressed = false;
     p.klass   = "label";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -468,6 +534,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.clip    = paint.clip;
     p.pressed = ps.state->GetValue(ps.widgetId + "/pressed", false);
     p.klass   = "push-button";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
@@ -532,6 +599,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.time    = paint.time;
     p.pressed = false;
     p.klass   = "checkbox";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -647,6 +715,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.time    = paint.time;
     p.pressed = false;
     p.klass   = "radiobutton";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -770,6 +839,7 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.time    = paint.time;
     p.pressed = false;
     p.klass   = "groupbox";
+    p.style_properties = ps.style_properties;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
