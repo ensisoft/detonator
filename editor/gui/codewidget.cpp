@@ -287,9 +287,11 @@ void TextEditor::PaintLineNumbers(const QRect& rect)
 void TextEditor::ApplySettings()
 {
     QFont font;
-    if (font.fromString(mSettings.font_description))
+    const auto font_name = mFontName.value_or(mSettings.font_description);
+    const auto font_size = mFontSize.value_or(mSettings.font_size);
+    if (font.fromString(font_name))
     {
-        font.setPointSize(mSettings.font_size);
+        font.setPointSize(font_size);
         mDocument->setDefaultFont(font);
         mFont = font;
     }
