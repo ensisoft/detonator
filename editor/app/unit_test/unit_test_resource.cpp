@@ -271,6 +271,14 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(other.HasUserProperty("int"));
     }
 
+    // delete.
+    {
+        r.DeleteProperty("int");
+        r.DeleteUserProperty("int");
+        TEST_REQUIRE(r.HasProperty("int") == false);
+        TEST_REQUIRE(r.HasUserProperty("int") == false);
+    }
+
     // clone with a type that returns std::unique_ptr
     {
         using Resource = app::GameResource<BaseResource, TestResource1>;
