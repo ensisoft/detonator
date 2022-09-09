@@ -206,11 +206,22 @@ void TextEditor::keyPressEvent(QKeyEvent* key)
     }
     else if (ctrl && code == Qt::Key_K)
     {
+        // kill semantics.
+        // - if we kill from the middle of the line, the line is killed from cursor until the end
+        // - if we're at the end of the line then we just kill the newline char
         QTextCursor cursor = textCursor();
         cursor.beginEditBlock();
-        cursor.movePosition(QTextCursor::MoveOperation::StartOfLine, QTextCursor::MoveMode::MoveAnchor);
         cursor.movePosition(QTextCursor::MoveOperation::EndOfLine, QTextCursor::MoveMode::KeepAnchor);
-        cursor.removeSelectedText();
+        if (cursor.anchor() == cursor.position())
+        {
+            const auto pos = cursor.position();
+            const auto& txt = this->toPlainText();
+            if (pos < txt.size() && txt[pos] == '\n')
+            {
+                cursor.deleteChar();
+            }
+        }
+        else cursor.removeSelectedText();
         cursor.endEditBlock();
     }
     else if (alt && code == Qt::Key_V)
