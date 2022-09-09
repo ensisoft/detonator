@@ -179,7 +179,7 @@ https://docs.conan.io/en/latest/installation.html
 
 $ conan profile new default --detect
 
-If conan bitches about "ERROR: invalid stting" (for example when GCC major version changes)
+If conan bitches about "ERROR: invalid setting" (for example when GCC major version changes)
 you can try edit ~/.conan/settings.yaml 
 
 - Build the project in RELEASE mode
@@ -190,7 +190,7 @@ you can try edit ~/.conan/settings.yaml
   $ mkdir build
   $ cd build
   $ conan install .. --build missing
-  $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
   $ make -j16 install
   $ ctest -j16
 ```
@@ -203,7 +203,7 @@ you can try edit ~/.conan/settings.yaml
   $ mkdir build_d
   $ cd build_d
   $ conan install .. --build missing
-  $ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
   $ make -j16 install
   $ ctest -j16
 ```
@@ -216,7 +216,7 @@ you can try edit ~/.conan/settings.yaml
   $ mkdir build_profile
   $ cd build_profile
   $ conan install .. --build missing 
-  $ cmake -G "Unix Makefiles" --DCMAKE_BUILD_TYPE=RelWithDebInfo
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
   $ make -j16 install
 ```
 Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
@@ -225,6 +225,22 @@ For example:
   $ cd gamestudio/audio/test/
   $ valgrind --tool=cachegrind ./audio_test --graph
   $ kcaghegrind cachegrind.out.XXXXX
+```
+
+Instructions for build using Ninja, Clang and Mold linker (optional)
+```
+  $ export CC=/usr/bin/clang
+  $ export CXX=/usr/bin/clang++
+  $ conan profile new gamestudio-clang --detect
+  
+  $ git clone https://github.com/ensisoft/gamestudio
+  $ cd gamestudio
+  $ git submodule update --init --recursive
+  $ mkdir build
+  $ cd build
+  $ conan install .. --build missing --profile gamestudio-clang
+  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON 
+  $ ninja -j16 install
 ```
 
 
