@@ -1018,11 +1018,11 @@ end
     TEST_REQUIRE(script.GetNextAction(&action1));
     TEST_REQUIRE(script.GetNextAction(&action2));
 
-    const auto* e1 = std::get_if<engine::PostEventAction>(&action1);
-    const auto* e2 = std::get_if<engine::PostEventAction>(&action2);
+    auto* e1 = std::get_if<engine::PostEventAction>(&action1);
+    auto* e2 = std::get_if<engine::PostEventAction>(&action2);
     TEST_REQUIRE(e1 && e2);
-    TEST_REQUIRE(std::get<int>(e1->event.value) == 123);
-    TEST_REQUIRE(std::get<int>(e2->event.value) == 321);
+    TEST_REQUIRE(std::get<int>(e1->event.values["value"]) == 123);
+    TEST_REQUIRE(std::get<int>(e2->event.values["value"]) == 321);
 
 }
 
@@ -1104,15 +1104,15 @@ end
     TEST_REQUIRE(script.GetNextAction(&action3));
     TEST_REQUIRE(script.GetNextAction(&action4));
 
-    const auto* e1 = std::get_if<engine::PostEventAction>(&action1);
-    const auto* e2 = std::get_if<engine::PostEventAction>(&action2);
-    const auto* e3 = std::get_if<engine::PostEventAction>(&action3);
-    const auto* e4 = std::get_if<engine::PostEventAction>(&action4);
+    auto* e1 = std::get_if<engine::PostEventAction>(&action1);
+    auto* e2 = std::get_if<engine::PostEventAction>(&action2);
+    auto* e3 = std::get_if<engine::PostEventAction>(&action3);
+    auto* e4 = std::get_if<engine::PostEventAction>(&action4);
     TEST_REQUIRE(e1 && e2 && e3 && e4);
-    TEST_REQUIRE(std::get<int>(e1->event.value) == 123);
-    TEST_REQUIRE(std::get<std::string>(e2->event.value) == "huhu");
-    TEST_REQUIRE(std::get<float>(e3->event.value) == real::float32(123.5f));
-    TEST_REQUIRE(std::get<glm::vec2>(e4->event.value) == glm::vec2(45.0f, 80.0f));
+    TEST_REQUIRE(std::get<int>(e1->event.values["value"]) == 123);
+    TEST_REQUIRE(std::get<std::string>(e2->event.values["value"]) == "huhu");
+    TEST_REQUIRE(std::get<float>(e3->event.values["value"]) == real::float32(123.5f));
+    TEST_REQUIRE(std::get<glm::vec2>(e4->event.values["value"]) == glm::vec2(45.0f, 80.0f));
 }
 
 void unit_test_entity_shared_globals()
@@ -1166,9 +1166,9 @@ end
 
     engine::Action action;
     TEST_REQUIRE(script.GetNextAction(&action));
-    const auto* event = std::get_if<engine::PostEventAction>(&action);
+    auto* event = std::get_if<engine::PostEventAction>(&action);
     TEST_REQUIRE(event->event.message == "bar");
-    TEST_REQUIRE(std::get<int>(event->event.value) == 123);
+    TEST_REQUIRE(std::get<int>(event->event.values["value"]) == 123);
 }
 
 void unit_test_game_main_script_load_success()

@@ -25,6 +25,7 @@
 #include "warnpop.h"
 
 #include <variant>
+#include <unordered_map>
 
 #include "base/types.h"
 #include "wdk/keys.h"
@@ -69,7 +70,7 @@ namespace engine
         // name/action/meaning of the event.
         std::string message;
         // the value (if any)
-        GameEventValue value;
+        std::unordered_map<std::string, GameEventValue> values;
     };
 
 } // namespace
