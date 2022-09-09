@@ -3198,9 +3198,10 @@ void BindGameLib(sol::state& L)
                 return sol::make_object(lua, event.to);
             else if (!std::strcmp(key ,"message"))
                 return sol::make_object(lua, event.message);
-            else if (!std::strcmp(key, "value"))
-                return sol::make_object(lua, event.value);
-            throw GameError(base::FormatString("No such game event index: %1", key));
+
+            const auto* val = base::SafeFind(event.values, std::string(key));
+            return val ? sol::make_object(lua, *val)
+                       : sol::make_object(lua, sol::nil);
         },
         sol::meta_function::new_index, [&L](GameEvent& event, const char* key, sol::object value) {
             if (!std::strcmp(key, "from")) {
@@ -3211,8 +3212,7 @@ void BindGameLib(sol::state& L)
                 else if (value.is<game::Entity*>())
                     event.from = value.as<game::Entity*>();
                 else throw GameError("Unsupported game event from field type.");
-            }
-            else if (!std::strcmp(key, "to")) {
+            } else if (!std::strcmp(key, "to")) {
                 if (value.is<std::string>())
                     event.to = value.as<std::string>();
                 else if (value.is<game::Scene*>())
@@ -3220,38 +3220,40 @@ void BindGameLib(sol::state& L)
                 else if (value.is<game::Entity*>())
                     event.to = value.as<game::Entity*>();
                 else throw GameError("Unsupported game event to field type.");
-            }
-            else if (!std::strcmp(key, "message"))
-                event.message = value.as<std::string>();
-            else if (!std::strcmp(key, "value")) {
+            } else if (!std::strcmp(key, "message")) {
+                if (value.is<std::string>())
+                    event.message = value.as<std::string>();
+                else throw GameError("Unsupported game event message field type.");
+            } else {
+                const auto& k = std::string(key);
                 if (value.is<bool>())
-                    event.value = value.as<bool>();
+                    event.values[key] = value.as<bool>();
                 else if (value.is<int>())
-                    event.value = value.as<int>();
+                    event.values[key] = value.as<int>();
                 else if (value.is<float>())
-                    event.value = value.as<float>();
+                    event.values[key] = value.as<float>();
                 else if (value.is<std::string>())
-                    event.value = value.as<std::string>();
+                    event.values[key] = value.as<std::string>();
                 else if(value.is<glm::vec2>())
-                    event.value = value.as<glm::vec2>();
+                    event.values[key] = value.as<glm::vec2>();
                 else if (value.is<glm::vec3>())
-                    event.value = value.as<glm::vec3>();
+                    event.values[key] = value.as<glm::vec3>();
                 else if (value.is<glm::vec4>())
-                    event.value = value.as<glm::vec4>();
+                    event.values[key] = value.as<glm::vec4>();
                 else if (value.is<base::Color4f>())
-                    event.value = value.as<base::Color4f>();
+                    event.values[key] = value.as<base::Color4f>();
                 else if (value.is<base::FSize>())
-                    event.value = value.as<base::FSize>();
+                    event.values[key] = value.as<base::FSize>();
                 else if (value.is<base::FRect>())
-                    event.value = key, value.as<base::FRect>();
+                    event.values[key] = key, value.as<base::FRect>();
                 else if (value.is<base::FPoint>())
-                    event.value = value.as<base::FPoint>();
+                    event.values[key] = value.as<base::FPoint>();
                 else if (value.is<game::Entity*>())
-                    event.value = value.as<game::Entity*>();
+                    event.values[key] = value.as<game::Entity*>();
                 else if (value.is<game::Scene*>())
-                    event.value = value.as<game::Scene*>();
+                    event.values[key] = value.as<game::Scene*>();
                 else throw GameError("Unsupported game event value type.");
-            } else throw GameError(base::FormatString("No such game event index: %1", key));
+            }
         });
 
     auto kvstore = table.new_usertype<KeyValueStore>("KeyValueStore", sol::constructors<KeyValueStore()>(),

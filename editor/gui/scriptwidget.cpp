@@ -1402,6 +1402,8 @@ void InitDoc()
                                        "Indicates whether screen_coords are valid or not.");
 
     DOC_TABLE("game.GameEvent");
+    DOC_META_METHOD_0("...", "index", "Lua index meta method.");
+    DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
     DOC_OBJECT_PROPERTY("string|game.Entity|game.Scene", "from", "Free form name or identifier of the event sender or Scene or Entity object.");
     DOC_OBJECT_PROPERTY("string|game.Entity|game.Scene", "to", "Free form name or identifier of the event receiver or Scene or Entity object.");
     DOC_OBJECT_PROPERTY("string", "message", "Message string.");
