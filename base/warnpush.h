@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+//#pragma once
 
 #include "config.h"
 
@@ -38,6 +38,7 @@
 #elif defined(__CLANG__)
   // for Qt
 #  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #  pragma clang diagnostic ignored "-Wdeprecated-register"
 #  pragma clang diagnostic ignored "-Wuninitialized"
 #  pragma clang diagnostic ignored "-Wc++11-long-long"
