@@ -1090,6 +1090,42 @@ void LuaRuntime::Init()
     table["name"] = mGameName;
 
     auto engine = table.new_usertype<LuaRuntime>("Engine");
+
+    engine["SpawnEntity"] = sol::overload(
+            [](const LuaRuntime& self, const std::string& klass, const sol::table& args_table) {
+                if (!self.mScene)
+                    throw GameError("No scene is currently being played.");
+                game::EntityArgs args;
+                args.klass = self.mClassLib->FindEntityClassByName(klass);
+                if (!args.klass)
+                    throw GameError("No such entity class could be found: " + klass);
+                args.id   = args_table.get_or("id", std::string(""));
+                args.name = args_table.get_or("name", std::string(""));
+                args.scale.x = args_table.get_or("sx", 1.0f);
+                args.scale.y = args_table.get_or("sy", 1.0f);
+                args.position.x = args_table.get_or("x", 0.0f);
+                args.position.y = args_table.get_or("y", 0.0f);
+                args.rotation = args_table.get_or("r", 0.0f);
+                args.enable_logging = args_table.get_or("logging", false);
+                const glm::vec2* pos = nullptr;
+                const glm::vec2* scale = nullptr;
+                if (const auto* ptr = args_table.get_or("pos", pos))
+                    args.position = *ptr;
+                if (const auto* ptr = args_table.get_or("scale", scale))
+                    args.scale = *ptr;
+
+                return self.mScene->SpawnEntity(args);
+            },
+            [](const LuaRuntime& self, const std::string& klass) {
+                if (!self.mScene)
+                    throw GameError("No scene is currently being played.");
+                game::EntityArgs args;
+                args.klass = self.mClassLib->FindEntityClassByName(klass);
+                if (!args.klass)
+                    throw GameError("No such entity class could be found: " + klass);
+                return self.mScene->SpawnEntity(args);
+            }
+    );
     engine["Play"] = sol::overload(
         [](LuaRuntime& self, ClassHandle<SceneClass> klass) {
             if (!klass)
