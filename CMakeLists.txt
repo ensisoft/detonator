@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Gamestudio)
 
+option(USE_MOLD_LINKER "Use mold linker. https://github.com/rui314/mold" OFF)
+
 message(STATUS "
           ~~ Ensisoft GameStudio ~~
 
@@ -46,7 +48,28 @@ endif()
 # https://bugreports.qt.io/browse/QTBUG-53002
 set(CMAKE_CXX_STANDARD 17)
 
-if (MSVC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(STATUS "Building with Clang")
+    # in case of using something like Ninja we need this explicitly.
+    # https://medium.com/@alasher/colored-c-compiler-output-with-ninja-clang-gcc-10bfe7f2b949
+    add_compile_options (-fcolor-diagnostics)
+
+    # neargye magic-enum exceeds maximum expression nesting limit
+    add_compile_options(-fbracket-depth=1024)
+
+    if (USE_MOLD_LINKER)
+        message(STATUS "Using mold linker https://github.com/rui314/mold")
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" "-fuse-ld=/usr/bin/mold")
+        add_link_options(-fuse-ld=mold)
+    endif()
+
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(STATUS "Building with GCC")
+    # in case of using something like Ninja we need this explicitly.
+    # https://medium.com/@alasher/colored-c-compiler-output-with-ninja-clang-gcc-10bfe7f2b949
+    add_compile_options(-fdiagnostics-color=always)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(STATUS "Building with MSVC")
     # /wd4251 Qt dll interface crap
     # /wd4275 Qt dll interface crap again
     # /wd4018 signed/unsigned mismatch
@@ -523,7 +546,7 @@ target_link_libraries(GameEngine PRIVATE wdk_system)
 target_link_libraries(GameEngine PRIVATE Lua)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 # hide symbols on linux
-if (CMAKE_COMPILER_IS_GNUCC)
+if (UNIX)
     target_link_options(GameEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
@@ -539,7 +562,7 @@ target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 
 # hide symbols on linux
-if (CMAKE_COMPILER_IS_GNUCC)
+if (UNIX)
     target_link_options(TestEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
 endif()
 
