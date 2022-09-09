@@ -73,7 +73,7 @@ public:
     }
     virtual std::string GetName() const override
     { return "ScissorTest"; }
-    virtual void Update(float dt)
+    virtual void Update(float dt) override
     {
         mTime += dt;
     }
@@ -97,7 +97,7 @@ public:
     }
     virtual std::string GetName() const override
     { return "ViewportTest"; }
-    virtual void Update(float dt)
+    virtual void Update(float dt) override
     {
         mTime += dt;
     }
@@ -210,7 +210,7 @@ public:
     {
         mStarted = false;
     }
-    virtual std::string GetName() const
+    virtual std::string GetName() const override
     { return "MegaParticleTest"; }
     virtual bool IsFeatureTest() const override
     { return false; }
@@ -626,7 +626,7 @@ public:
             gfx::FillRect(painter, gfx::FRect(750, 450, 128, 128), gfx::MaterialClassInst(material, mTime));
         }
     }
-    virtual void Update(float dt)
+    virtual void Update(float dt) override
     {
         mTime += dt;
     }

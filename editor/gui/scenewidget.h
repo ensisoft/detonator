@@ -55,7 +55,7 @@ namespace gui
        ~SceneWidget();
 
         virtual QString GetId() const override;
-        virtual void Initialize(const UISettings& settings);
+        virtual void Initialize(const UISettings& settings) override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;
         virtual bool SaveState(Settings& settings) const override;

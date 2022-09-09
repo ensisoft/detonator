@@ -30,18 +30,18 @@
 class TestBuffer : public audio::Buffer
 {
 public:
-    virtual void SetFormat(const audio::Format& format)
+    virtual void SetFormat(const audio::Format& format) override
     {
         TEST_REQUIRE(!"not implemented.");
     }
-    virtual Format GetFormat() const
+    virtual Format GetFormat() const override
     {
         Format format;
         return format;
     }
-    virtual const void* GetPtr() const
+    virtual const void* GetPtr() const override
     { return mData.data(); }
-    virtual void* GetPtr()
+    virtual void* GetPtr() override
     { return mData.data(); }
     virtual size_t GetByteSize() const override
     { return mData.size(); }
@@ -175,7 +175,7 @@ public:
     }
     virtual unsigned GetNumOutputPorts() const override
     { return 1; }
-    virtual audio::Port& GetOutputPort(unsigned index)
+    virtual audio::Port& GetOutputPort(unsigned index) override
     { return mOut; }
 private:
     const std::string mId;
@@ -770,7 +770,7 @@ void unit_test_oversized_buffer()
 
         virtual unsigned GetNumOutputPorts() const override
         { return 1; }
-        virtual audio::Port& GetOutputPort(unsigned index)
+        virtual audio::Port& GetOutputPort(unsigned index) override
         { return mOut; }
     private:
         bool mDone = false;

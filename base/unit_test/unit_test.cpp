@@ -286,13 +286,13 @@ void unit_test_trace()
     }
     TEST_REQUIRE(trace.GetNumEntries() == 4);
     TEST_REQUIRE(trace.GetEntry(0).level == 0);
-    TEST_REQUIRE(trace.GetEntry(0).name == "unit_test");
+    TEST_REQUIRE(trace.GetEntry(0).name == std::string("unit_test"));
     TEST_REQUIRE(trace.GetEntry(1).level == 1);
-    TEST_REQUIRE(trace.GetEntry(1).name == "foo");
+    TEST_REQUIRE(trace.GetEntry(1).name == std::string("foo"));
     TEST_REQUIRE(trace.GetEntry(2).level == 2);
-    TEST_REQUIRE(trace.GetEntry(2).name == "bar");
+    TEST_REQUIRE(trace.GetEntry(2).name == std::string("bar"));
     TEST_REQUIRE(trace.GetEntry(3).level == 1);
-    TEST_REQUIRE(trace.GetEntry(3).name == "meh");
+    TEST_REQUIRE(trace.GetEntry(3).name == std::string("meh"));
     TEST_REQUIRE(trace.GetEntry(3).comment == "foo=123");
 
     for (size_t i=0; i<trace.GetNumEntries(); ++i)
