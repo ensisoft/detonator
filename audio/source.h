@@ -210,7 +210,7 @@ namespace audio
           , mLimitDuration(true)
           , mDuration(millisecs)
         {}
-        virtual unsigned GetRateHz() const noexcept
+        virtual unsigned GetRateHz() const noexcept override
         { return 44100; }
         virtual unsigned GetNumChannels() const noexcept override
         { return 1; }
