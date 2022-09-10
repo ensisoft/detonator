@@ -20,6 +20,7 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/math.h"
 #include "graphics/bitmap.h"
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
@@ -57,7 +58,10 @@ void DrawTextRect(Painter& painter,
     unsigned properties,
     float line_height)
 {
-    TextBuffer buff(rect.GetWidth(), rect.GetHeight());
+    auto raster_width  =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetWidth());
+    auto raster_height =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetHeight());
+
+    TextBuffer buff(raster_width, raster_height);
     if ((alignment & 0xf) == AlignTop)
         buff.SetAlignment(TextBuffer::VerticalAlignment::AlignTop);
     else if((alignment & 0xf) == AlignVCenter)
@@ -96,6 +100,20 @@ void DrawTextRect(Painter& painter,
     text_and_style.underline = underline;
     text_and_style.lineheight = line_height;
     buff.AddText(text_and_style);
+
+    // unfortunately if no raster buffer dimensions were
+    // specified the only way to figure them out is to
+    // basically rasterize the text once and then see what
+    // are the dimensions of the bitmap. the other way to
+    // do this would be to add some font metrics. this
+    // code path however should not be something that is
+    // frequently used right now, so we're not doing font
+    // metrics right now.
+    if (raster_width == 0 || raster_height == 0)
+    {
+        buff.ComputeTextMetrics(&raster_width, &raster_height);
+    }
+
     TextMaterial material(std::move(buff));
     material.SetColor(color);
     // todo: we should/could check the painter whether it has a
@@ -107,7 +125,7 @@ void DrawTextRect(Painter& painter,
     material.SetPointSampling(true);
 
     Transform t;
-    t.Resize(rect);
+    t.Resize(raster_width, raster_height);
     t.MoveTo(rect);
     painter.Draw(Rectangle(), t, material);
 }

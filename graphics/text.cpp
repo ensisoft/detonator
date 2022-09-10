@@ -527,6 +527,17 @@ std::shared_ptr<AlphaMask> TextBuffer::TryRasterize() const
     return nullptr;
 }
 
+bool TextBuffer::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
+{
+    // todo: implement better, using font metrics and not using rasterization
+    auto buffer = TryRasterize();
+    if (!buffer)
+        return false;
+    *width  = buffer->GetWidth();
+    *height = buffer->GetHeight();
+    return true;
+}
+
 std::size_t TextBuffer::GetHash() const
 {
     std::size_t hash = 0;
