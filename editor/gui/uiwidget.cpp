@@ -589,18 +589,14 @@ bool UIWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
     switch (action)
     {
         case Actions::CanPaste:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (clipboard->IsEmpty())
+            if (clipboard->IsEmpty())
                 return false;
             else if (clipboard->GetType() != "application/json/ui")
                 return false;
             return true;
         case Actions::CanCut:
         case Actions::CanCopy:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (!GetCurrentWidget())
+            if (!GetCurrentWidget())
                 return false;
             return true;
         case Actions::CanUndo:
@@ -902,6 +898,8 @@ void UIWidget::Refresh()
     // todo: this is probably broken, the widget could have keyboard focus
     // while we edit the scene and then an undo would not be made.
     if (mUI.widgetName->hasFocus())
+        return;
+    if (mUI.windowName->hasFocus())
         return;
 
     // check if any of the style widgets is under a continuous

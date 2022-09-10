@@ -68,6 +68,7 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
 
 void ShowMessage(const std::string& msg, gfx::Painter& painter);
 void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter);
+void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter);
 
 void PrintMousePos(const gfx::Transform& view,
                    gfx::Painter& painter, QWidget* widget);

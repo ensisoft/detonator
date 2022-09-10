@@ -172,6 +172,7 @@ QString GetAppInstFilePath(const QString& name);
 
 bool ValidateQVariantJsonSupport(const QVariant& variant);
 bool ValidateQVariantMapJsonSupport(const QVariantMap& map);
+size_t VariantHash(const QVariant& variant);
 
 template<typename Enum>
 Enum EnumFromString(const QString& str, Enum backup, bool* success = nullptr)

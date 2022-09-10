@@ -19,6 +19,7 @@
 #include "warnpush.h"
 #  include <QDir>
 #  include <QByteArray>
+#  include <QBuffer>
 #  include <QtGlobal>
 #  include <QFile>
 #  include <QFileInfo>
@@ -349,6 +350,23 @@ bool ValidateQVariantMapJsonSupport(const QVariantMap& map)
             return false;
     }
     return true;
+}
+
+size_t VariantHash(const QVariant& variant)
+{
+    QByteArray byte_array;
+
+    QBuffer buffer;
+    buffer.setBuffer(&byte_array);
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream stream(&buffer);
+    stream << variant;
+
+    // the variant should have supported serialized write into a data stream
+    // if not, then we'd have to create a special case for that sucker.
+    ASSERT(byte_array.size() != 0);
+
+    return qHashBits(byte_array.data(), byte_array.size());
 }
 
 } // namespace
