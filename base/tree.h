@@ -71,26 +71,26 @@ namespace base
         }
 
         void PreOrderTraverse(Visitor& visitor, Element* parent = nullptr)
-        { PreOrderTraverse<Element>(visitor, parent); }
+        { preorder_traverse<Element>(visitor, parent); }
 
         void PreOrderTraverse(ConstVisitor& visitor, const Element* parent = nullptr) const
-        { PreOrderTraverse<const Element>(visitor, parent); }
+        { preorder_traverse<const Element>(visitor, parent); }
 
         template<typename Function>
         void PreOrderTraverseForEach(Function callback, Element* parent = nullptr)
-        { PreOrderTraverseForEach<Element>(std::move(callback), parent); }
+        { preorder_traverse_for_each<Element>(std::move(callback), parent); }
 
         template<typename Function>
         void PreOrderTraverseForEach(Function callback, const Element* parent = nullptr) const
-        { PreOrderTraverseForEach<const Element>(std::move(callback), parent); }
+        { preorder_traverse_for_each<const Element>(std::move(callback), parent); }
 
         template<typename Function>
         void ForEachChild(Function callback, const Element* parent = nullptr) const
-        { ForEachChild<const Element>(std::move(callback), parent); }
+        { for_each_child<const Element>(std::move(callback), parent); }
 
         template<typename Function>
         void ForEachChild(Function function, Element* parent = nullptr)
-        { ForEachChild<Element>(std::move(function), parent); }
+        { for_each_child<Element>(std::move(function), parent); }
 
         // Convenience operation for moving a child node to a new parent.
         void ReparentChild(const Element* parent, const Element* child)
@@ -217,7 +217,7 @@ namespace base
         }
     private:
         template<typename T>
-        void PreOrderTraverse(TVisitor<T>& visitor, T* parent = nullptr) const
+        void preorder_traverse(TVisitor<T>& visitor, T* parent = nullptr) const
         {
             visitor.EnterNode(parent);
             auto it = mChildren.find(parent);
@@ -226,7 +226,7 @@ namespace base
                 const auto& children = it->second;
                 for (auto *child : children)
                 {
-                    PreOrderTraverse<T>(visitor, const_cast<Element*>(child));
+                    preorder_traverse<T>(visitor, const_cast<Element*>(child));
                     if (visitor.IsDone())
                         break;
                 }
@@ -234,7 +234,7 @@ namespace base
             visitor.LeaveNode(parent);
         }
         template<typename T, typename Function>
-        void PreOrderTraverseForEach(Function callback, T* parent = nullptr) const
+        void preorder_traverse_for_each(Function callback, T* parent = nullptr) const
         {
             class PrivateVisitor : public TVisitor<T> {
             public:
@@ -246,10 +246,10 @@ namespace base
                 Function mCallback;
             };
             PrivateVisitor visitor(std::move(callback));
-            PreOrderTraverse(visitor, parent);
+            preorder_traverse(visitor, parent);
         }
         template<typename T, typename Function>
-        void ForEachChild(Function callback, T* parent = nullptr) const
+        void for_each_child(Function callback, T* parent = nullptr) const
         {
             auto it = mChildren.find(parent);
             if (it == mChildren.end())
