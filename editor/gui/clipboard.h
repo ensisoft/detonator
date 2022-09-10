@@ -18,9 +18,17 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <QVariant>
+#  include <QVariantMap>
+#include "warnpop.h"
+
 #include <string>
 #include <any>
 #include <memory>
+
+#include "editor/app/utility.h"
+#include "editor/app/types.h"
 
 namespace gui
 {
@@ -43,6 +51,7 @@ namespace gui
         {
             mData.reset();
             mType.clear();
+            mProps.clear();
         }
         const std::string& GetType() const
         { return mType; }
@@ -57,9 +66,93 @@ namespace gui
         template<typename T>
         std::shared_ptr<const T> GetObject() const
         { return std::any_cast<std::shared_ptr<T>>(mData); }
+
+        inline void SetProperty(const app::PropertyKey& name, const QByteArray& bytes)
+        { SetVariantProperty(name, bytes.toBase64()); }
+        inline void SetProperty(const app::PropertyKey& name, const QColor& color)
+        { SetVariantProperty(name, color); }
+        inline void SetProperty(const app::PropertyKey& name, const QString& value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, const std::string& value)
+        { SetVariantProperty(name, app::FromUtf8(value)); }
+        inline void SetProperty(const app::PropertyKey& name, quint64 value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, qint64 value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, unsigned value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, int value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, double value)
+        { SetVariantProperty(name, value); }
+        inline void SetProperty(const app::PropertyKey& name, float value)
+        { SetVariantProperty(name, value); }
+
+        std::string GetProperty(const app::PropertyKey& name, const std::string& def) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            return app::ToUtf8(str);
+        }
+
+        QByteArray GetProperty(const app::PropertyKey& name, const QByteArray& def) const
+        {
+            const auto& ret  = GetVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                return QByteArray::fromBase64(str.toLatin1());
+            return QByteArray();
+        }
+
+        template<typename T>
+        T GetProperty(const app::PropertyKey& name, const T& def) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            return qvariant_cast<T>(ret);
+        }
+
+        template<typename T>
+        bool GetProperty(const app::PropertyKey& name, T* out) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return false;
+            *out = qvariant_cast<T>(ret);
+            return true;
+        }
+        bool GetProperty(const app::PropertyKey& name, QByteArray* out) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return false;
+            const auto& str = ret.toString();
+            if (!str.isEmpty())
+                *out = QByteArray::fromBase64(str.toLatin1());
+            return true;
+        }
+        bool GetProperty(const app::PropertyKey& name, std::string* out) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return false;
+            *out = app::ToUtf8(ret.toString());
+            return true;
+        }
+    private:
+        void SetVariantProperty(const QString& name, const QVariant& value)
+        { mProps[name] = value; }
+        QVariant GetVariantProperty(const QString& name) const
+        { return mProps[name]; }
     private:
         std::any mData;
         std::string mType;
+        QVariantMap mProps;
     };
 
 } //  namespace
