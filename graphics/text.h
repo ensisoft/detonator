@@ -66,6 +66,8 @@ namespace gfx
         // Returns nullptr one error.
         std::shared_ptr<AlphaMask> TryRasterize() const;
 
+        bool ComputeTextMetrics(unsigned* width, unsigned* height) const;
+
         enum class HorizontalAlignment {
             AlignLeft,
             AlignCenter,
