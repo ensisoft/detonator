@@ -2573,7 +2573,7 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
             const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= box_size.x &&
                                              hitpos.y >= 0 && hitpos.y <= box_size.y;
             if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode));
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
             else if (top_left_hitbox_hit)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
             else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
