@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "graphics/painter.h"
@@ -204,6 +205,14 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter)
 
 void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
 {
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
+                      gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+}
+void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter)
+{
+    // using 0 for rect width and height, this will create a raster buffer
+    // with dimensions derived from the rasterized text extents.
+    gfx::FRect rect(pos, 0.0f, 0.0f);
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
                       gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
