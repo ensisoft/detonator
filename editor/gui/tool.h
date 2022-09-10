@@ -255,9 +255,11 @@ namespace gui
     class ResizeRenderTreeNodeTool : public MouseTool
     {
     public:
-        ResizeRenderTreeNodeTool(TreeModel& model, TreeNode* selected)
-                : mModel(model)
-                , mNode(selected)
+        ResizeRenderTreeNodeTool(TreeModel& model, TreeNode* selected, bool snap = false, unsigned grid = 0)
+          : mModel(model)
+          , mNode(selected)
+          , mSnapToGrid(snap)
+          , mGridSize(grid)
         {}
         virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -267,7 +269,7 @@ namespace gui
             const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y,
                                                                       mNode);
             const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
-            const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ControlModifier;
+            const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ShiftModifier;
 
             if (maintain_aspect_ratio)
             {
@@ -287,6 +289,7 @@ namespace gui
                 mNode->SetSize(size);
             }
             mPreviousMousePos = mouse_pos_in_node;
+            mWasMoved = true;
         }
         virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
         {
@@ -297,7 +300,24 @@ namespace gui
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
         {
-            // nothing to be done here.
+            if (!mWasMoved)
+                return true;
+            if (mickey->modifiers() & Qt::ControlModifier)
+                mSnapToGrid = !mSnapToGrid;
+
+            if (mSnapToGrid)
+            {
+                const auto& position = mNode->GetTranslation();
+                const auto& size     = mNode->GetSize();
+                const auto& bottom_right = position + size * 0.5f;
+                const auto& aligned_bottom_right = glm::vec2(
+                        std::round(bottom_right.x / mGridSize) * mGridSize,
+                        std::round(bottom_right.y / mGridSize) * mGridSize);
+                const auto size_delta = aligned_bottom_right - bottom_right;
+                auto next_size = size + size_delta * 2.0f;
+                // don't let snap to 0 size
+                mNode->SetSize(glm::max(next_size, glm::vec2(mGridSize, mGridSize)));
+            }
             return true;
         }
     private:
@@ -306,6 +326,9 @@ namespace gui
         // previous mouse position, for each mouse move we update the objects'
         // position by the delta between previous and current mouse pos.
         glm::vec2 mPreviousMousePos;
+        bool mSnapToGrid = false;
+        bool mWasMoved = false;
+        unsigned mGridSize = 0;
     };
 
     template<typename TreeModel, typename TreeNode>
