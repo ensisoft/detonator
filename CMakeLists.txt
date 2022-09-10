@@ -420,6 +420,11 @@ add_executable(GSEditor
     third_party/Qt-Color-Widgets/include/hue_slider.hpp
     third_party/Qt-Color-Widgets/include/swatch.hpp
 )
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # suppress some noise coming from Qt (Qt-Color-Widgets)
+    target_compile_options(GSEditor PRIVATE -Wno-deprecated-declarations)
+endif()
+
 target_compile_definitions(GSEditor PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
