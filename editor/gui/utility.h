@@ -797,6 +797,9 @@ inline void SetProperty(Resource& res, const QString& name, double value)
 template<typename Resource>
 inline void SetProperty(Resource& res, const QString& name, quint64 value)
 { res.SetProperty(name, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const QString& name, const std::string& value)
+{ res.SetProperty(name, value); }
 
 // user properties.
 template<typename Resource>
@@ -856,7 +859,9 @@ inline void SetUserProperty(Resource& res, const QString& name, double value)
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const QString& name, quint64 value)
 { res.SetUserProperty(name, value); }
-
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const QString& name, const std::string& value)
+{ res.SetUserProperty(name, value); }
 
 template<typename Resource, typename T> inline
 bool GetProperty(const Resource& res, const QString& name, T* out)
@@ -937,7 +942,11 @@ inline void GetProperty(const Resource& res, const QString& name, color_widgets:
     if (res.GetProperty(name, &value))
         color->setColor(value);
 }
-
+template<typename Resource>
+inline void GetProperty(const Resource& res, const QString& name, std::string* str)
+{
+    *str = res.GetProperty(name, std::string(""));
+}
 
 template<typename Resource, typename T> inline
 bool GetUserProperty(const Resource& res, const QString& name, T* out)

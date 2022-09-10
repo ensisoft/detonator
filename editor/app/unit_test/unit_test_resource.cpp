@@ -153,10 +153,12 @@ int test_main(int argc, char* argv[])
     r.SetProperty("longlong", qint64(7879));
     r.SetProperty("bytes", bytes);
     r.SetProperty("color", QColor::fromRgb(100, 120, 120, 200));
+    r.SetProperty("utf8-string", std::string("bla bla"));
 
     r.SetUserProperty("int", 42);
     r.SetUserProperty("bytes", bytes);
     r.SetUserProperty("color", QColor::fromRgb(50, 80, 90, 120));
+    r.SetUserProperty("utf8-string-user", std::string("joojoo"));
     map.clear();
 
     TEST_REQUIRE(r.HasProperty("int"));
@@ -180,6 +182,7 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetProperty("float", 0.0f) == real::float32(123.0f));
     TEST_REQUIRE(r.GetProperty("bytes", QByteArray()) == bytes);
     TEST_REQUIRE(r.GetProperty("color", QColor()) == QColor::fromRgb(100, 120, 120, 200));
+    TEST_REQUIRE(r.GetProperty("utf8-string", std::string()) == "bla bla");
     map = r.GetProperty("variant_map", map);
     TEST_REQUIRE(map["value"].toInt() == 123);
     TEST_REQUIRE(map["string"].toString() == "boo");
@@ -187,7 +190,7 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetUserProperty("int", 0) == 42);
     TEST_REQUIRE(r.GetUserProperty("bytes", QByteArray()) == bytes);
     TEST_REQUIRE(r.GetUserProperty("color", QColor()) == QColor::fromRgb(50, 80, 90, 120));
-
+    TEST_REQUIRE(r.GetUserProperty("utf8-string-user", std::string()) == "joojoo");
 
     QJsonObject props;
     QJsonObject user_props;
@@ -208,9 +211,11 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.HasProperty("float"));
     TEST_REQUIRE(r.HasProperty("double"));
     TEST_REQUIRE(r.HasProperty("longlong"));
+    TEST_REQUIRE(r.GetProperty("utf8-string", std::string()) == "bla bla");
 
     TEST_REQUIRE(r.HasUserProperty("int"));
     TEST_REQUIRE(r.HasUserProperty("bytes"));
+    TEST_REQUIRE(r.GetUserProperty("utf8-string-user", std::string()) == "joojoo");
 
     TestResource0* ptr0 = nullptr;
     TestResource1* ptr1 = nullptr;

@@ -51,7 +51,7 @@ namespace app
     // "resources" that the user has created/imported. This interface
     // creates that base root resource hierarchy that is only available
     // in the editor application.
-    // Additionally it's possible to associate some arbitrary properties
+    // Additionally, it's possible to associate some arbitrary properties
     // with each resource object to support Editor functionality.
     class Resource
     {
@@ -82,7 +82,7 @@ namespace app
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
         virtual QString GetId() const = 0;
-        // Get the human readable name of the resource.
+        // Get the human-readable name of the resource.
         virtual QString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
@@ -117,7 +117,7 @@ namespace app
         virtual void DeleteProperty(const QString& name) = 0;
         // Delete a user property by the given key/name.
         virtual void DeleteUserProperty(const QString& name) = 0;
-        // Make an an exact copy of this resource. This means
+        // Make an exact copy of this resource. This means
         // that the copied resource contains all the same properties
         // as this object including the resource id.
         virtual std::unique_ptr<Resource> Copy() const = 0;
@@ -158,13 +158,15 @@ namespace app
         // serialize correctly. For instance QColor and QByteArray.
 
         // Set a resource specific property value. If the property exists already the previous
-        // value is overwritten. Otherwise it's added.
+        // value is overwritten. Otherwise, it's added.
         inline void SetProperty(const QString& name, const QByteArray& bytes)
         { SetVariantProperty(name, bytes.toBase64()); }
         inline void SetProperty(const QString& name, const QColor& color)
         { SetVariantProperty(name, color); }
         inline void SetProperty(const QString& name, const QString& value)
         { SetVariantProperty(name, value); }
+        inline void SetProperty(const QString& name, const std::string& value)
+        { SetVariantProperty(name, app::FromUtf8(value)); }
         inline void SetProperty(const QString& name, quint64 value)
         { SetVariantProperty(name, value); }
         inline void SetProperty(const QString& name, qint64 value)
@@ -185,6 +187,15 @@ namespace app
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
+        std::string GetProperty(const QString& name, const std::string& def) const
+        {
+            const auto& ret = GetVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            return app::ToUtf8(str);
+        }
+
         QByteArray GetProperty(const QString& name, const QByteArray& def) const
         {
             const auto& ret  = GetVariantProperty(name);
@@ -224,13 +235,15 @@ namespace app
         }
 
         // Set a user specific property value. If the property exists already the previous
-        // value is overwritten. Otherwise it's added.
+        // value is overwritten. Otherwise, it's added.
         inline void SetUserProperty(const QString& name, const QByteArray& bytes)
         { SetUserVariantProperty(name, bytes.toBase64()); }
         inline void SetUserProperty(const QString& name, const QColor& color)
         { SetUserVariantProperty(name, color); }
         inline void SetUserProperty(const QString& name, const QString& value)
         { SetUserVariantProperty(name, value); }
+        inline void SetUserProperty(const QString& name, const std::string& value)
+        { SetUserVariantProperty(name, app::FromUtf8(value)); }
         inline void SetUserProperty(const QString& name, quint64 value)
         { SetUserVariantProperty(name, value); }
         inline void SetUserProperty(const QString& name, qint64 value)
@@ -251,6 +264,15 @@ namespace app
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
+        std::string GetUserProperty(const QString& name, const std::string& def) const
+        {
+            const auto& ret = GetUserVariantProperty(name);
+            if (ret.isNull())
+                return def;
+            const auto& str = ret.toString();
+            return app::ToUtf8(str);
+        }
+
         QByteArray GetUserProperty(const QString& name, const QByteArray& def) const
         {
             const auto& ret  = GetUserVariantProperty(name);
