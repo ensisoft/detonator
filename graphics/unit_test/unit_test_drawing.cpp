@@ -279,6 +279,28 @@ public:
     virtual size_t GetDataHash() const  override
     { return mHash; }
 
+    template<typename T>
+    const T* AsArray() const
+    {
+        TEST_REQUIRE(!mData.empty());
+        return reinterpret_cast<const T*>(mData.data());
+    }
+    template<typename T>
+    size_t Count() const
+    {
+        const auto bytes = mData.size();
+        return bytes / sizeof(T);
+    }
+    template<typename T>
+    const T& GetAt(size_t index) const
+    {
+        const auto offset = sizeof(T) * index;
+        TEST_REQUIRE(offset < mData.size());
+        const void* ptr = &mData[offset];
+        return *static_cast<const T*>(ptr);
+    }
+
+
     bool mUploaded = false;
     gfx::Geometry::Usage mUsage;
     std::vector<char> mData;
@@ -1425,6 +1447,273 @@ void unit_test_static_poly()
     TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
 }
 
+void unit_test_local_particles()
+{
+    using K = gfx::KinematicsParticleEngineClass;
+    using P = gfx::KinematicsParticleEngineClass::Params;
+
+    struct ParticleVertex {
+        gfx::Vec2 aPosition;
+        gfx::Vec4 aData;
+    };
+
+    // emitter position and spawning inside rectangle
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode             = K::SpawnPolicy::Once;
+        p.placement        = K::Placement::Inside;
+        p.shape            = K::EmitterShape::Rectangle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Outwards;
+        p.init_rect_height = 0.5f;
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        auto* geom = (TestGeometry*)eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            TEST_REQUIRE(v.aPosition.x >= 0.25f);
+            TEST_REQUIRE(v.aPosition.y >= 0.25f);
+            TEST_REQUIRE(v.aPosition.x <= 0.25f + 0.5f);
+            TEST_REQUIRE(v.aPosition.y <= 0.25f + 0.5f);
+        }
+    }
+    // emitter position and spawning outside rectangle
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode             = K::SpawnPolicy::Once;
+        p.placement        = K::Placement::Outside;
+        p.shape            = K::EmitterShape::Rectangle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Outwards;
+        p.init_rect_height = 0.5f;
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        auto* geom = (TestGeometry*)eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const bool inside_box = (v.aPosition.x > 0.25f && v.aPosition.x < 0.75f) &&
+                                    (v.aPosition.y > 0.25f && v.aPosition.y < 0.75f);
+            TEST_REQUIRE(!inside_box);
+        }
+    }
+
+    // emitter position and spawning edge of rectangle
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode             = K::SpawnPolicy::Once;
+        p.placement        = K::Placement::Edge;
+        p.shape            = K::EmitterShape::Rectangle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Outwards;
+        p.init_rect_height = 0.5f;
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        auto* geom = (TestGeometry*)eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto on_left_edge   = math::equals(v.aPosition.x, 0.25f)   && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
+            const auto on_right_edge  = math::equals(v.aPosition.x, 0.75f)  && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
+            const auto on_top_edge    = math::equals(v.aPosition.y, 0.25f)    && v.aPosition.x >= 0.25f && v.aPosition.x <= 0.75f;
+            const auto on_bottom_edge = math::equals(v.aPosition.y, 0.75f) && v.aPosition.x >= 0.25f && v.aPosition.x <= 0.75f;
+            TEST_REQUIRE(on_left_edge || on_right_edge || on_top_edge || on_bottom_edge);
+        }
+    }
+
+    // emitter position and spawning center of rectangle
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.mode             = K::SpawnPolicy::Once;
+        p.placement        = K::Placement::Center;
+        p.shape            = K::EmitterShape::Rectangle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Outwards;
+        p.init_rect_height = 0.5f;
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        auto* geom = (TestGeometry*)eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            TEST_REQUIRE(math::equals(v.aPosition.x, 0.5f));
+            TEST_REQUIRE(math::equals(v.aPosition.y, 0.5f));
+        }
+    }
+
+    // emitter position and spawning when using circle
+    {
+        const K::Placement placements[] = {
+            K::Placement::Inside,
+            K::Placement::Center,
+            K::Placement::Edge,
+            K::Placement::Outside
+        };
+        for (auto placement : placements)
+        {
+            gfx::KinematicsParticleEngineClass::Params p;
+            p.placement        = placement;
+            p.mode             = K::SpawnPolicy::Once;
+            p.shape            = K::EmitterShape::Circle;
+            p.coordinate_space = K::CoordinateSpace::Local;
+            p.direction        = K::Direction::Outwards;
+            p.init_rect_height = 0.5f; // radius will be 0.25f
+            p.init_rect_width  = 0.5f;
+            p.init_rect_xpos   = 0.25f;
+            p.init_rect_ypos   = 0.25f;
+            p.num_particles    = 10;
+            gfx::KinematicsParticleEngineClass klass(p);
+            gfx::KinematicsParticleEngine eng(klass);
+
+            TestDevice dev;
+            gfx::DrawableClass::Environment env;
+            eng.Restart(env);
+            auto* geom = (TestGeometry*) eng.Upload(env, dev);
+            TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+            for (size_t i=0; i<p.num_particles; ++i)
+            {
+                const auto& v = geom->GetAt<ParticleVertex>(i);
+                const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
+                if (placement == K::Placement::Inside)
+                    TEST_REQUIRE(math::equals(r, 0.25f) || r < 0.25f);
+                else if (placement == K::Placement::Outside)
+                    TEST_REQUIRE(math::equals(r, 0.25f) || r > 0.25f);
+                else if  (placement == K::Placement::Edge)
+                    TEST_REQUIRE(math::equals(r, 0.25f));
+                else if (placement == K::Placement::Center)
+                    TEST_REQUIRE(math::equals(r, 0.0f));
+            }
+        }
+    }
+
+    // direction of travel outwards from circle edge.
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.placement        = K::Placement::Edge;
+        p.mode             = K::SpawnPolicy::Once;
+        p.shape            = K::EmitterShape::Circle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Outwards;
+        p.boundary         = K::BoundaryPolicy::Clamp;
+        p.init_rect_height = 0.5f; // radius will be 0.25f
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        p.min_velocity     = 1.0f;
+        p.max_velocity     = 1.0f;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        eng.Update(env, 1.0/60.0f);
+        auto* geom = (TestGeometry*) eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
+            TEST_REQUIRE( r > 0.25f);
+        }
+    }
+
+    // direction of travel inwards from circle edge.
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.placement        = K::Placement::Edge;
+        p.mode             = K::SpawnPolicy::Once;
+        p.shape            = K::EmitterShape::Circle;
+        p.coordinate_space = K::CoordinateSpace::Local;
+        p.direction        = K::Direction::Inwards;
+        p.boundary         = K::BoundaryPolicy::Clamp;
+        p.init_rect_height = 0.5f; // radius will be 0.25f
+        p.init_rect_width  = 0.5f;
+        p.init_rect_xpos   = 0.25f;
+        p.init_rect_ypos   = 0.25f;
+        p.num_particles    = 10;
+        p.min_velocity     = 1.0f;
+        p.max_velocity     = 1.0f;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        eng.Restart(env);
+        eng.Update(env, 1.0/60.0f);
+        auto* geom = (TestGeometry*) eng.Upload(env, dev);
+        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
+            TEST_REQUIRE( r < 0.25f);
+        }
+    }
+    // todo: direction of travel with sector
+
+}
+
+void unit_test_global_particles()
+{
+
+}
+
+void unit_test_particles()
+{
+
+    // todo: test the following:
+    // - emission mode
+    // - min and max duration of the simulation
+    // - delay
+    // - min/max properties
+}
+
 // test that new programs are built out of vertex and
 // fragment shaders only when the shaders change not
 // when the high level class types changes. For example
@@ -1501,7 +1790,9 @@ int test_main(int argc, char* argv[])
     unit_test_custom_uniforms();
     unit_test_custom_textures();
     unit_test_static_poly();
-
+    unit_test_local_particles();
+    unit_test_global_particles();
+    unit_test_particles();
     unit_test_painter_shape_material_pairing();
 
     unit_test_packed_texture_bug();
