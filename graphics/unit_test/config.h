@@ -6,3 +6,4 @@
 #include "base/platform.h"
 
 #define GFX_ENABLE_DEVICE_TRACING
+#define MATH_FORCE_DETERMINISTIC_RANDOM
