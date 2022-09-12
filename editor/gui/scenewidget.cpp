@@ -394,6 +394,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplaySceneProperties();
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
+    setWindowTitle("My Scene");
 }
 
 SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -966,7 +967,6 @@ void SceneWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene.GetHash();
-    setWindowTitle(GetValue(mUI.name));
 }
 
 void SceneWidget::on_actionNodeEdit_triggered()
@@ -1949,7 +1949,6 @@ void SceneWidget::DisplaySceneProperties()
         SetValue(mUI.chkBottomBoundary, true);
         SetEnabled(mUI.spinBottomBoundary, true);
     }
-    setWindowTitle(GetValue(mUI.name));
 }
 
 void SceneWidget::DisplayCurrentCameraLocation()

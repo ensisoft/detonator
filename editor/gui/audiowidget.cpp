@@ -1113,6 +1113,8 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     mUI.afDuration->SetEditable(false);
     GetSelectedElementProperties();
     mGraphHash = GetHash();
+
+    setWindowTitle("My Graph");
 }
 AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resource)
   : AudioWidget(workspace)
@@ -1138,7 +1140,6 @@ AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resourc
     on_outElem_currentIndexChanged(0);
     SetValue(mUI.outPort, ListItemId(klass->GetGraphOutputElementPort()));
     GetSelectedElementProperties();
-    setWindowTitle(GetValue(mUI.graphName));
 
     mGraphHash = GetHash();
 }
@@ -1560,7 +1561,6 @@ void AudioWidget::on_actionSave_triggered()
     mScene->SaveState(resource);
 
     mWorkspace->SaveResource(resource);
-    setWindowTitle(GetValue(mUI.graphName));
     mGraphHash = hash;
 }
 

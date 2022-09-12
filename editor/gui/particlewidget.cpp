@@ -336,7 +336,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
-    setWindowTitle(name);
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
@@ -440,7 +439,6 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
-    setWindowTitle(GetValue(mUI.name));
     return true;
 }
 
@@ -606,7 +604,6 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass->GetHash();
-    setWindowTitle(GetValue(mUI.name));
 }
 
 void ParticleEditorWidget::SetParams()

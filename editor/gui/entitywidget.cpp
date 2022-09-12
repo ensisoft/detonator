@@ -488,6 +488,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
+    setWindowTitle("My Entity");
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -1109,7 +1110,6 @@ void EntityWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = ComputeHash();
-    setWindowTitle(GetValue(mUI.entityName));
 }
 void EntityWidget::on_actionNewRect_triggered()
 {
@@ -2729,8 +2729,6 @@ void EntityWidget::DisplayEntityProperties()
         SetEnabled(mUI.btnDeleteTrack, true);
         SetEnabled(mUI.btnEditTrack, true);
     }
-
-    setWindowTitle(GetValue(mUI.entityName));
 }
 
 void EntityWidget::DisplayCurrentNodeProperties()

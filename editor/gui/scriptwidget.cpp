@@ -1777,7 +1777,6 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     mResourceName = resource.GetName();
     mWatcher.addPath(mFilename);
     LoadDocument(mFilename);
-    setWindowTitle(mResourceName);
 
     bool show_settings = true;
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
@@ -1956,8 +1955,6 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
 
     mUI.code->ApplySettings();
 
-    if (!mResourceName.isEmpty())
-        setWindowTitle(mResourceName);
     if (mFilename.isEmpty())
         return true;
     mWatcher.addPath(mFilename);
@@ -2101,7 +2098,6 @@ void ScriptWidget::on_actionSave_triggered()
             SetProperty(resource, "format_on_save", false);
 
         mWorkspace->SaveResource(resource);
-        setWindowTitle(mResourceName);
         mResourceID = app::FromUtf8(script.GetId());
     }
     else

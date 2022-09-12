@@ -187,8 +187,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
 
     ApplyShaderDescription();
     GetMaterialProperties();
-
-    setWindowTitle(resource.GetName());
 }
 
 MaterialWidget::~MaterialWidget()
@@ -242,8 +240,6 @@ bool MaterialWidget::LoadState(const Settings& settings)
 
     ApplyShaderDescription();
     GetMaterialProperties();
-
-    setWindowTitle(mUI.materialName->text());
     return true;
 }
 
@@ -410,8 +406,8 @@ void MaterialWidget::on_actionSave_triggered()
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
-    setWindowTitle(GetValue(mUI.materialName));
 }
+
 void MaterialWidget::on_actionRemoveTexture_triggered()
 {
     // make sure currentRowChanged is blocked while we're deleting shit.
