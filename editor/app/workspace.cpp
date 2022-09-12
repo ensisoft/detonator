@@ -1271,10 +1271,10 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<audio::GraphClass>("audio_graphs", root, mResources);
     LoadResources<uik::Window>("uis", root, mResources);
 
-    // setup an invariant that states that the primitive materials
+    // create an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
-    // this way the the addressing scheme (when user clicks on an item
-    // in the list of resources) doesn't need to change and it's possible
+    // this way the addressing scheme (when user clicks on an item
+    // in the list of resources) doesn't need to change, and it's possible
     // to easily limit the items to be displayed only to those that are
     // user defined.
     auto primitives_start = std::stable_partition(mResources.begin(), mResources.end(),
@@ -1305,7 +1305,7 @@ bool Workspace::SaveContent(const QString& filename) const
     const auto [ok, error] = file.Save(app::ToUtf8(filename));
     if (!ok)
     {
-        ERROR("Failed to save JSON content file '%1'", filename);
+        ERROR("Failed to save JSON content file. [file='%1']", filename);
         return false;
     }
     INFO("Saved workspace content in '%1'", filename);
@@ -1317,7 +1317,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
     {
-        ERROR("Failed to open file: '%1'", filename);
+        ERROR("Failed to open properties file for writing. [file='%1']", filename);
         return false;
     }
 
@@ -1678,14 +1678,16 @@ void Workspace::SaveResource(const Resource& resource)
     // insert at the end of the visible range which is from [0, mVisibleCount)
     mResources.insert(mResources.begin() + mVisibleCount, resource.Copy());
 
-    // careful! endInsertRows will trigger the view proxy to refetch the contents.
-    // make sure to update this property before endInsertRows or otherwise
-    // we'll hit an assert incorrectly in GetUserDefinedProperty.
+    // careful! endInsertRows will trigger the view proxy to re-fetch the contents.
+    // make sure to update this property before endInsertRows otherwise
+    // we'll hit ASSERT incorrectly in GetUserDefinedProperty.
     mVisibleCount++;
 
     endInsertRows();
 
-    auto& back = mResources[mVisibleCount];
+    auto& back = mResources[mVisibleCount-1];
+    ASSERT(back->GetId() == resource.GetId());
+    ASSERT(back->GetName() == resource.GetName());
     emit NewResourceAvailable(back.get());
 
     INFO("Saved new resource '%1'", resource.GetName());
