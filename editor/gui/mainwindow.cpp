@@ -436,6 +436,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         return false;
 
     mWorkspace = std::move(workspace);
+    connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, this, &MainWindow::ResourceUpdated);
+    connect(mWorkspace.get(), &app::Workspace::NewResourceAvailable, this, &MainWindow::ResourceAvailable);
 
     gfx::SetResourceLoader(mWorkspace.get());
 
@@ -471,12 +473,13 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         Settings settings(file);
         if (!settings.Load())
         {
-            WARN("Failed to load session settings file '%1'.", file);
+            WARN("Failed to load session file. [file='%1']", file);
             success = false;
             continue;
         }
         const auto& klass = settings.GetValue("MainWindow", "class_name", QString(""));
         const auto& id    = settings.GetValue("MainWindow", "widget_id", QString(""));
+        const auto& title = settings.GetValue("MainWindow", "widget_title", QString(""));
         MainWidget* widget = nullptr;
         if (klass == MaterialWidget::staticMetaObject.className())
             widget = new MaterialWidget(mWorkspace.get());
@@ -498,9 +501,11 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             widget = new AudioWidget(mWorkspace.get());
         else BUG("Unhandled widget type.");
 
+        widget->setWindowTitle(title);
+
         if (!widget->LoadState(settings))
         {
-            WARN("Widget '%1 failed to load state.", widget->windowTitle());
+            WARN("Failed to load main widget state. [name='%1']", title);
             success = false;
         }
         const bool has_own_window = settings.GetValue("MainWindow", "has_own_window", false);
@@ -515,6 +520,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
                 window->move(xpos, ypos);
 
             window->resize(width, height);
+            window->setWindowTitle(title);
         }
         else
         {
@@ -522,7 +528,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         }
         // remove the file, no longer needed.
         QFile::remove(file);
-        DEBUG("Loaded widget '%1'", widget->windowTitle());
+        DEBUG("Loaded main widget. [name='%1']", title);
     }
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
@@ -566,8 +572,7 @@ bool MainWindow::SaveWorkspace()
     // we generate a temporary json file in which we save the UI state
     // of that widget. When the application is relaunched we use the
     // data in the JSON file to recover the widget and it's contents.
-    const auto tabs = mUI.mainTab->count();
-    for (int i=0; i<tabs; ++i)
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         const auto& temp = app::RandomString();
         const auto& path = app::GetAppHomeFilePath("temp");
@@ -582,22 +587,23 @@ bool MainWindow::SaveWorkspace()
         const auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
 
         Settings settings(file);
-        settings.SetValue("MainWindow", "class_name", widget->metaObject()->className());
-        settings.SetValue("MainWindow", "widget_id", widget->GetId());
+        settings.SetValue("MainWindow", "class_name",   widget->metaObject()->className());
+        settings.SetValue("MainWindow", "widget_id",    widget->GetId());
+        settings.SetValue("MainWindow", "widget_title", widget->windowTitle());
         if (!widget->SaveState(settings))
         {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            ERROR("Failed to save main widget state. [name='%1']", widget->windowTitle());
             success = false;
             continue;
         }
         if (!settings.Save())
         {
-            ERROR("Failed to save widget '%1' settings.",  widget->windowTitle());
+            ERROR("Failed to save main widget settings. [name='%1']",  widget->windowTitle());
             success = false;
             continue;
         }
         session_file_list << file;
-        DEBUG("Saved widget '%1'", widget->windowTitle());
+        DEBUG("Saved main widget. [name='%1']", widget->windowTitle());
     }
 
     // for each widget that is contained inside a window (instead of being in the main tab)
@@ -613,7 +619,7 @@ bool MainWindow::SaveWorkspace()
         QDir dir;
         if (!dir.mkpath(path))
         {
-            ERROR("Failed to create folder: '%1'", path);
+            ERROR("Failed to create folder. [path='%1']", path);
             success = false;
             continue;
         }
@@ -621,6 +627,7 @@ bool MainWindow::SaveWorkspace()
 
         Settings settings(file);
         settings.SetValue("MainWindow", "class_name", widget->metaObject()->className());
+        settings.SetValue("MainWindow", "widget_title", widget->windowTitle());
         settings.SetValue("MainWindow", "has_own_window", true);
         settings.SetValue("MainWindow", "window_xpos", child->x());
         settings.SetValue("MainWindow", "window_ypos", child->y());
@@ -628,17 +635,17 @@ bool MainWindow::SaveWorkspace()
         settings.SetValue("MainWindow", "window_height", child->height());
         if (!widget->SaveState(settings))
         {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            ERROR("Failed to save main widget state. [name='%1']", widget->windowTitle());
             success = false;
             continue;
         }
         if (!settings.Save())
         {
-            ERROR("Failed to save widget '%1' settings.", widget->windowTitle());
+            ERROR("Failed to save main widget settings. [name='%1']", widget->windowTitle());
             success = false;
         }
         session_file_list << file;
-        DEBUG("Saved widget '%1'", widget->windowTitle());
+        DEBUG("Saved main widget. [name='%1']", widget->windowTitle());
     }
     mWorkspace->SetUserProperty("show_resource_bits", mWorkspaceProxy.GetShowBits());
     mWorkspace->SetUserProperty("session_files", session_file_list);
@@ -2487,6 +2494,35 @@ void MainWindow::CleanGarbage()
     GfxWindow::CleanGarbage();
 }
 
+void MainWindow::ResourceUpdated(const app::Resource* resource)
+{
+    // forward to one function for now
+    ResourceAvailable(resource);
+}
+void MainWindow::ResourceAvailable(const app::Resource* resource)
+{
+    for (int i=0; i< GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->GetId() == resource->GetId())
+        {
+            widget->setWindowTitle(resource->GetName());
+            mUI.mainTab->setTabText(i, resource->GetName());
+            return;
+        }
+    }
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        if (widget->GetId() == resource->GetId())
+        {
+            widget->setWindowTitle(resource->GetName());
+            child->setWindowTitle(resource->GetName());
+            return;
+        }
+    }
+}
+
 bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
@@ -2692,7 +2728,7 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         // showing the widget *after* resize/move might produce incorrect
         // results since apparently the window's dimensions are not fully
         // know until it has been show (presumably some layout is done)
-        // however doing the show first and and then move/resize is visually
+        // however doing the show first and then move/resize is visually
         // not very pleasing.
         child->show();
 
@@ -2727,8 +2763,14 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource* resource)
 {
     auto* widget = CreateWidget(type, mWorkspace.get(), resource);
-    if (!resource)
+    if (resource)
+    {
+        widget->setWindowTitle(resource->GetName());
+    }
+    else
+    {
         widget->Initialize(mUISettings);
+    }
     return widget;
 }
 

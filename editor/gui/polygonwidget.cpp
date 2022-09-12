@@ -125,7 +125,6 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
-    setWindowTitle(GetValue(mUI.name));
 
     mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
                                 mPolygon.GetNumDrawCommands());
@@ -227,7 +226,6 @@ bool ShapeWidget::LoadState(const Settings& settings)
     SetEnabled(mUI.actionClear, mPolygon.GetNumVertices());
 
     on_blueprints_currentIndexChanged(0);
-    setWindowTitle(GetValue(mUI.name));
     return true;
 }
 
@@ -362,7 +360,6 @@ void ShapeWidget::on_actionSave_triggered()
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mPolygon.GetHash();
-    setWindowTitle(GetValue(mUI.name));
 }
 
 void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)

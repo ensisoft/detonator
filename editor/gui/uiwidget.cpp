@@ -457,7 +457,6 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, window->HasScriptFile());
-    setWindowTitle(GetValue(mUI.windowName));
 
     UpdateDeletedResourceReferences();
     DisplayCurrentCameraLocation();
@@ -575,7 +574,6 @@ bool UIWidget::LoadState(const Settings& settings)
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
-    setWindowTitle(GetValue(mUI.windowName));
 
     DisplayCurrentCameraLocation();
     DisplayCurrentWidgetProperties();
@@ -1020,7 +1018,6 @@ void UIWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.window.GetHash();
-    setWindowTitle(GetValue(mUI.windowName));
 }
 
 void UIWidget::on_actionNewForm_triggered()

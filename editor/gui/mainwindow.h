@@ -177,6 +177,8 @@ namespace gui
         void OpenRecentWorkspace();
         void ToggleShowResource();
         void CleanGarbage();
+        void ResourceUpdated(const app::Resource* resource);
+        void ResourceAvailable(const app::Resource* resource);
 
     private:
         void BuildRecentWorkspacesMenu();
