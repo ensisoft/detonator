@@ -2080,7 +2080,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         const QFileInfo info(file);
         if (!info.isFile())
         {
-            WARN("File '%1' is not actually a file.", file);
+            WARN("File is not actually a file. [file='%1']", file);
             continue;
         }
         const auto& name   = info.baseName();
@@ -2130,7 +2130,8 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         {
             const auto& uri = MapFileToWorkspace(file);
             DataFile data;
-            data.SetFileURI(ToUtf8(uri));
+            data.SetFileURI(uri);
+            data.SetTypeTag(DataFile::TypeTag::External);
             DataResource res(data, name);
             SaveResource(res);
             INFO("Imported new data file '%1' based on file '%2'", name, info.filePath());

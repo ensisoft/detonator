@@ -2082,6 +2082,7 @@ void ScriptWidget::on_actionSave_triggered()
 
         app::Script script;
         script.SetFileURI(app::ToUtf8(URI));
+        script.SetTypeTag(app::Script::TypeTag::ScriptData);
         app::ScriptResource resource(script, mResourceName);
         SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
         SetUserProperty(resource, "help_splitter", mUI.helpSplitter);
