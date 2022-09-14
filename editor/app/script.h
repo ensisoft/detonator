@@ -31,37 +31,62 @@ namespace app
         class FileResource
         {
         public:
+            enum class TypeTag {
+                Unspecified,
+                External,
+                TilemapData,
+                ScriptData
+            };
+
             FileResource()
             { mId = base::RandomString(10); }
+            TypeTag GetTypeTag() const
+            { return mTypeTag; }
             std::string GetId() const
             { return mId; }
             std::string GetFileURI() const
             { return mFileURI; }
+            std::string GetOwnerId() const
+            { return mOwnerId; }
             void SetFileURI(const std::string& uri)
             { mFileURI = uri; }
+            void SetFileURI(const QString& uri)
+            { mFileURI = ToUtf8(uri); }
+            void SetOwnerId(const std::string& id)
+            { mOwnerId = id; }
+            void SetOwnerId(const QString& id)
+            { mOwnerId = ToUtf8(id); }
+            void SetTypeTag(TypeTag tag)
+            { mTypeTag = tag; }
             void IntoJson(data::Writer& data) const
             {
-                data.Write("id", mId);
-                data.Write("uri", mFileURI);
+                data.Write("id",    mId);
+                data.Write("uri",   mFileURI);
+                data.Write("owner", mOwnerId);
+                data.Write("type",  mTypeTag);
             }
             std::unique_ptr<FileResource> Clone() const
             {
-                FileResource ret;
-                ret.mFileURI = mFileURI;
+                FileResource ret(*this);
+                ret.mId = base::RandomString(10);
                 return std::make_unique<FileResource>(ret);
             }
             static std::optional<FileResource> FromJson(const data::Reader& data)
             {
                 FileResource ret;
-                if (!data.Read("id", &ret.mId) ||
-                    !data.Read("uri", &ret.mFileURI))
-                    return std::nullopt;
+                data.Read("id",    &ret.mId);
+                data.Read("uri",   &ret.mFileURI);
+                data.Read("owner", &ret.mOwnerId);
+                data.Read("type",  &ret.mTypeTag);
                 return ret;
             }
         public:
             std::string mId;
             // UTF8 encoded file URI. (Workspace file mapping).
             std::string mFileURI;
+            // ID of the "owner" resource, i.e. for example tile map layer
+            std::string mOwnerId;
+            TypeTag mTypeTag = TypeTag::Unspecified;
         };
     } // detail
     using Script = detail::FileResource<0>;
