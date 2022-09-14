@@ -54,7 +54,7 @@ namespace gfx
         // Set uniforms in the program object.
         // Uniforms are normally set before using the program to perform
         // any drawing/rendering operations.
-        // Each uniform is identified by it's name in the shader sources.
+        // Each uniform is identified by its name in the shader sources.
         // If the uniform doesn't actually exist in the shader
         // (for example because of dead code elimination) or by user's modification
         // of the shader the call is silently ignored.
@@ -102,6 +102,12 @@ namespace gfx
         // Todo: this api and the SetTexture are potentially bug prone, it'd be better to
         // combine both into a single api call that takes the whole array of textures.
         virtual void SetTextureCount(unsigned count) = 0;
+
+        // Get the number of pending uniforms that have been changed on the
+        // CPU side (i.e. in this program object) but haven't yet been flushed
+        // out onto the GPU program. The uniforms will be set the first time the
+        // program is used to draw.
+        virtual size_t GetPendingUniformCount() const = 0;
 
         // helpers
         inline void SetUniform(const char* name, const glm::vec2& vec)
