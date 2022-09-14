@@ -1096,6 +1096,16 @@ QString Workspace::GetName() const
     return mWorkspaceDir;
 }
 
+QString Workspace::GetDir() const
+{
+    return mWorkspaceDir;
+}
+
+QString Workspace::GetSubDir(const QString& dir) const
+{
+    return app::JoinPath(mWorkspaceDir, dir);
+}
+
 QString Workspace::MapFileToWorkspace(const QString& filepath) const
 {
     // don't remap already mapped files.
@@ -1652,6 +1662,22 @@ Workspace::ResourceList Workspace::ListCursors() const
     block.name = "Block Cursor";
     block.id   = "_block_cursor";
     list.push_back(block);
+    return list;
+}
+
+Workspace::ResourceList Workspace::ListDataFiles() const
+{
+    ResourceList list;
+    for (const auto& resource : mResources)
+    {
+        if (resource->IsDataFile())
+        {
+            ListItem item;
+            item.name = resource->GetName();
+            item.id   = resource->GetId();
+            list.push_back(item);
+        }
+    }
     return list;
 }
 

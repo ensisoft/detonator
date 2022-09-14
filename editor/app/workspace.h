@@ -160,11 +160,13 @@ namespace app
         // the workspace.
         void SaveResource(const Resource& resource);
 
-        // Get human readable name for the workspace.
+        // Get human-readable name for the workspace.
         QString GetName() const;
         // Get current workspace directory
-        QString GetDir() const
-        { return mWorkspaceDir; }
+        QString GetDir() const;
+        // Get a directory within the workspace, for example
+        // data/ or lua/
+        QString GetSubDir(const QString& dir) const;
 
         using ResourceList = std::vector<ListItem>;
 
@@ -193,11 +195,13 @@ namespace app
 
         ResourceList ListCursors() const;
 
-        // Map material id to its human readable name.
+        ResourceList ListDataFiles() const;
+
+        // Map material ID to its human-readable name.
         QString MapMaterialIdToName(const QString& id) const;
         QString MapMaterialIdToName(const std::string& id) const
         { return MapMaterialIdToName(FromUtf8(id)); }
-        // Map drawable id to its human readable name.
+        // Map drawable ID to its human-readable name.
         QString MapDrawableIdToName(const QString& id) const;
         QString MapDrawableIdToName(const std::string& id) const
         { return MapDrawableIdToName(FromUtf8(id)); }
