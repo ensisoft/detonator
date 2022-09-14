@@ -1849,11 +1849,11 @@ void AnimationTrackWidget::UpdateTrackUI()
     SetMinMax(mUI.actuatorEndTime, 0.0, duration);
 
     // list the nodes in the entity class.
-    std::vector<ListItem> items;
+    std::vector<ResourceListItem> items;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         items.push_back(std::move(item));

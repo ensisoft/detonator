@@ -192,11 +192,11 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     SetEnabled(mUI.btnResetVar, false);
     SetEnabled(mUI.btnEditVar, false);
 
-    std::vector<ListItem> tracks;
+    std::vector<ResourceListItem> tracks;
     for (size_t i=0; i< klass.GetNumAnimations(); ++i)
     {
         const auto& track = klass.GetAnimation(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(track.GetName());
         item.id   = app::FromUtf8(track.GetId());
         tracks.push_back(std::move(item));
@@ -274,12 +274,12 @@ void DlgEntity::on_btnEditVar_clicked()
     if (const auto* val = mNodeClass.FindScriptVarValueById(value.id))
         value.value = val->value;
 
-    std::vector<ListItem> entities;
-    std::vector<ListItem> nodes;
+    std::vector<ResourceListItem> entities;
+    std::vector<ResourceListItem> nodes;
     for (size_t i = 0; i < mEntityClass.GetNumNodes(); ++i)
     {
         const auto& node = mEntityClass.GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         nodes.push_back(std::move(item));

@@ -30,13 +30,13 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
 
     PopulateFromEnum<game::EntityClass::PhysicsJointType>(mUI.cmbType);
 
-    std::vector<ListItem> nodes_with_rigid_bodies;
+    std::vector<ResourceListItem> nodes_with_rigid_bodies;
     for (size_t i=0; i<mEntity.GetNumNodes(); ++i)
     {
         const auto& node = mEntity.GetNode(i);
         if (!node.HasRigidBody())
             continue;
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         nodes_with_rigid_bodies.push_back(std::move(item));

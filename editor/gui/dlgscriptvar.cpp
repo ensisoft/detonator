@@ -25,8 +25,8 @@
 namespace gui
 {
 
-DlgScriptVar::DlgScriptVar(const std::vector<ListItem>& nodes,
-                           const std::vector<ListItem>& entities,
+DlgScriptVar::DlgScriptVar(const std::vector<ResourceListItem>& nodes,
+                           const std::vector<ResourceListItem>& entities,
                            QWidget* parent, game::ScriptVar& variable)
   : QDialog(parent)
   , mVar(variable)
@@ -425,8 +425,8 @@ void DlgScriptVar::ShowArrayValue(unsigned index)
 }
 
 
-DlgScriptVal::DlgScriptVal(const std::vector<ListItem>& nodes,
-                           const std::vector<ListItem>& entities,
+DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
+                           const std::vector<ResourceListItem>& entities,
                            QWidget* parent, game::ScriptVar::VariantType& value, bool array)
   : QDialog(parent)
   , mVal(value)

@@ -44,4 +44,21 @@ namespace app
     private:
         QString mKey;
     };
+
+    template<typename Key, typename Value>
+    class KeyValueRange
+    {
+    public:
+        KeyValueRange(const QMap<Key, Value>& map)
+          : mMap(map)
+        {}
+        auto begin()
+        { return mMap.keyValueBegin(); }
+        auto end()
+        { return mMap.keyValueEnd(); }
+    private:
+        const QMap<Key, Value>& mMap;
+    };
+
 } // namespace
+

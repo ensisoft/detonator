@@ -31,7 +31,7 @@
 
 namespace app {
     class Workspace;
-    struct ListItem;
+    struct ResourceListItem;
 } // namespace
 
 namespace uik {
@@ -55,7 +55,7 @@ namespace gui
             app::Workspace* workspace);
        ~DlgWidgetStyleProperties();
 
-        void SetMaterials(const std::vector<app::ListItem>& list);
+        void SetMaterials(const std::vector<app::ResourceListItem>& list);
         void SetPainter(engine::UIPainter* painter)
         { mPainter = painter; }
         // call this to apply the dialog to a specific widget instance

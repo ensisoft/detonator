@@ -1757,11 +1757,11 @@ void AudioWidget::on_outElem_currentIndexChanged(int)
     if(it == mItems.end()) return;
 
     const auto* item = dynamic_cast<const AudioElement*>(*it);
-    std::vector<ListItem> ports;
+    std::vector<ResourceListItem> ports;
     for (unsigned i=0; i<item->GetNumOutputPorts();++i)
     {
         const auto& port = item->GetOutputPort(i);
-        ListItem  li;
+        ResourceListItem  li;
         li.name = app::FromUtf8(port.name);
         li.id   = app::FromUtf8(port.name);
         ports.push_back(li);
@@ -2155,11 +2155,11 @@ void AudioWidget::SetSelectedElementProperties()
 
 void AudioWidget::UpdateElementList()
 {
-    std::vector<ListItem> items;
+    std::vector<ResourceListItem> items;
     for (auto* item : mItems)
     {
         auto* element = dynamic_cast<AudioElement*>(item);
-        ListItem li;
+        ResourceListItem li;
         li.id   = app::FromUtf8(element->GetId());
         li.name = app::FromUtf8(element->GetName());
         li.selected = element->isSelected();

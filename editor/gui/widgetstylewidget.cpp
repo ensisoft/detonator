@@ -70,7 +70,7 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
     PopulateFontSizes(mUI.widgetFontSize);
 }
 
-void WidgetStyleWidget::RebuildMaterialCombos(const std::vector<ListItem>& list)
+void WidgetStyleWidget::RebuildMaterialCombos(const std::vector<ResourceListItem>& list)
 {
     SetList(mUI.widgetBackground, list);
     SetList(mUI.widgetBorder, list);

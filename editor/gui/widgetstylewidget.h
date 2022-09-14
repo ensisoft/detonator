@@ -27,7 +27,7 @@
 
 namespace app {
     class Workspace;
-    struct ListItem;
+    struct ResourceListItem;
 }
 
 namespace uik {
@@ -58,7 +58,7 @@ namespace gui
         { mPainter = painter;}
         void SetPropertySelector(const std::string& prop)
         { mSelector = prop; }
-        void RebuildMaterialCombos(const std::vector<app::ListItem>& list);
+        void RebuildMaterialCombos(const std::vector<app::ResourceListItem>& list);
 
         bool IsUnderEdit() const;
 
