@@ -39,7 +39,7 @@ namespace {
 namespace gui
 {
 
-DlgMaterial::DlgMaterial(QWidget* parent, app::Workspace* workspace, const QString& material)
+DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const QString& material)
   : QDialog(parent)
   , mWorkspace(workspace)
   , mSelectedMaterialId(material)
@@ -74,13 +74,13 @@ DlgMaterial::DlgMaterial(QWidget* parent, app::Workspace* workspace, const QStri
 
 void DlgMaterial::on_btnAccept_clicked()
 {
-    mWorkspace->SetUserProperty("dlg_material_geometry", saveGeometry());
+    const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
 
     accept();
 }
 void DlgMaterial::on_btnCancel_clicked()
 {
-    mWorkspace->SetUserProperty("dlg_material_geometry", saveGeometry());
+    const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
 
     reject();
 }
@@ -176,7 +176,7 @@ void DlgMaterial::MousePress(QMouseEvent* mickey)
 
 void DlgMaterial::MouseDoubleClick(QMouseEvent* mickey)
 {
-    mWorkspace->SetUserProperty("dlg_material_geometry", saveGeometry());
+    const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
 
     MousePress(mickey);
     accept();
