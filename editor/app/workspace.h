@@ -168,7 +168,7 @@ namespace app
         // data/ or lua/
         QString GetSubDir(const QString& dir) const;
 
-        using ResourceList = std::vector<ListItem>;
+        using ResourceList = app::ResourceList;
 
         // Get a list of user defined script resources.
         ResourceList ListUserDefinedScripts() const;

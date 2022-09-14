@@ -1591,7 +1591,7 @@ void MaterialWidget::GetMaterialProperties()
             else BUG("No such uniform in material. UI and material are out of sync.");
         }
 
-        std::vector<ListItem> textures;
+        std::vector<ResourceListItem> textures;
         for (auto* widget : mSamplers)
         {
             widget->SetText("");
@@ -1603,7 +1603,7 @@ void MaterialWidget::GetMaterialProperties()
                 {
                     if (const auto* source = sprite->GetTextureSource(i))
                     {
-                        ListItem item;
+                        ResourceListItem item;
                         item.id   = app::FromUtf8(source->GetId());
                         item.name = app::FromUtf8(source->GetName());
                         textures.push_back(item);
@@ -1619,7 +1619,7 @@ void MaterialWidget::GetMaterialProperties()
             {
                 if (const auto* source = texture->GetTextureSource())
                 {
-                    ListItem item;
+                    ResourceListItem item;
                     item.id   = app::FromUtf8(source->GetId());
                     item.name = app::FromUtf8(source->GetName());
                     textures.push_back(item);
@@ -1691,10 +1691,10 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.velocityY, ptr->GetTextureVelocityY());
         SetValue(mUI.velocityZ, ptr->GetTextureVelocityZ());
 
-        std::vector<ListItem> textures;
+        std::vector<ResourceListItem> textures;
         if (auto* source = ptr->GetTextureSource())
         {
-            ListItem item;
+            ResourceListItem item;
             item.id   = app::FromUtf8(source->GetId());
             item.name = app::FromUtf8(source->GetName());
             textures.push_back(item);
@@ -1747,11 +1747,11 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.chkBlendFrames, ptr->GetBlendFrames());
         SetValue(mUI.chkLooping, ptr->IsLooping());
 
-        std::vector<ListItem> textures;
+        std::vector<ResourceListItem> textures;
         for (size_t i=0; i<ptr->GetNumTextures(); ++i)
         {
             const auto* source = ptr->GetTextureSource(i);
-            ListItem item;
+            ResourceListItem item;
             item.id   = app::FromUtf8(source->GetId());
             item.name = app::FromUtf8(source->GetName());
             textures.push_back(item);

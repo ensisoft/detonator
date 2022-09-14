@@ -463,7 +463,7 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
 
 DlgWidgetStyleProperties::~DlgWidgetStyleProperties() = default;
 
-void DlgWidgetStyleProperties::SetMaterials(const std::vector<app::ListItem>& list)
+void DlgWidgetStyleProperties::SetMaterials(const std::vector<app::ResourceListItem>& list)
 {
     SetList(mUI.widgetMaterial, list);
 }

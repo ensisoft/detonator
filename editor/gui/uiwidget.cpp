@@ -57,15 +57,15 @@
 #include "uikit/window.h"
 
 namespace {
-std::vector<app::ListItem> ListMaterials(const app::Workspace* workspace)
+std::vector<app::ResourceListItem> ListMaterials(const app::Workspace* workspace)
 {
-    std::vector<app::ListItem> materials;
+    std::vector<app::ResourceListItem> materials;
     for (size_t i=0; i<workspace->GetNumResources(); ++i)
     {
         const auto& resource = workspace->GetResource(i);
         if (!resource.IsMaterial())
             continue;
-        app::ListItem item;
+        app::ResourceListItem item;
         item.name = resource.GetName();
         item.id   = resource.GetId();
         materials.push_back(std::move(item));
@@ -76,7 +76,7 @@ std::vector<app::ListItem> ListMaterials(const app::Workspace* workspace)
 
     // little special case in order to be able to have "default", "nothing" and material reference
     // all available in the same UI element.
-    app::ListItem item;
+    app::ResourceListItem item;
 
     item.name = "UI_Gradient";
     item.id   = "_ui_gradient";

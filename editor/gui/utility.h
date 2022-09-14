@@ -198,10 +198,10 @@ inline void SetValue(QComboBox* combo, int index)
         combo->clearEditText();
 }
 
-// type moved from from here to app/utility.h
+// type moved from here to app/utility.h
 // so that the workspace can also use this type.
-using ListItem = app::ListItem;
-
+using ResourceListItem = app::ResourceListItem;
+using ResourceList = app::ResourceList;
 
 inline void ClearList(QListWidget* list)
 {
@@ -209,7 +209,7 @@ inline void ClearList(QListWidget* list)
     list->clear();
 }
 
-inline void SetList(QListWidget* list, const std::vector<ListItem>& items)
+inline void SetList(QListWidget* list, const ResourceList& items)
 {
     // maintain the current/previous selections
     std::unordered_set<QString> selected;
@@ -236,7 +236,7 @@ inline void SetList(QListWidget* list, const std::vector<ListItem>& items)
     }
 }
 
-inline void SetList(QComboBox* combo, const std::vector<ListItem>& items)
+inline void SetList(QComboBox* combo, const ResourceList& items)
 {
     QSignalBlocker s(combo);
     QString current = combo->currentData(Qt::UserRole).toString();

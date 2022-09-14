@@ -24,10 +24,12 @@
 #  include <QVariantMap>
 #  include <QJsonObject>
 #  include <QIcon>
+#  include <boost/logic/tribool.hpp>
 #include "warnpop.h"
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "base/assert.h"
 #include "data/writer.h"
@@ -784,5 +786,15 @@ namespace app
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
+
+    struct ResourceListItem {
+        QString name;
+        QString id;
+        QIcon icon;
+        const Resource* resource = nullptr;
+        boost::tribool selected = boost::indeterminate;
+    };
+
+    using ResourceList = std::vector<ResourceListItem>;
 
 } // namespace

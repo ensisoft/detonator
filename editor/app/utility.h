@@ -26,7 +26,6 @@
 #  include <QVariant>
 #  include <QVariantMap>
 #  include <neargye/magic_enum.hpp>
-#  include <boost/logic/tribool.hpp>
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
@@ -58,14 +57,6 @@ struct Resolution {
 };
 
 std::vector<Resolution> ListResolutions();
-
- // move this somewhere else.
-struct ListItem {
-    QString name;
-    QString id;
-    QIcon icon;
-    boost::tribool selected = boost::indeterminate;
-};
 
 // Compute a file hash based on the contents of the file.
 // Simply returns 0 if the file could not be read.

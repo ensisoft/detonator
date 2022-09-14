@@ -34,8 +34,8 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgScriptVar(const std::vector<ListItem>& nodes,
-                     const std::vector<ListItem>& entities,
+        DlgScriptVar(const std::vector<ResourceListItem>& nodes,
+                     const std::vector<ResourceListItem>& entities,
                      QWidget* parent, game::ScriptVar& variable);
     private slots:
         void on_btnAccept_clicked();
@@ -74,8 +74,8 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgScriptVal(const std::vector<ListItem>& nodes,
-                     const std::vector<ListItem>& entities,
+        DlgScriptVal(const std::vector<ResourceListItem>& nodes,
+                     const std::vector<ResourceListItem>& entities,
                      QWidget* parent, game::ScriptVar::VariantType& value, bool array);
     private slots:
         void on_btnAccept_clicked();

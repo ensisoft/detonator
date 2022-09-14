@@ -1636,9 +1636,10 @@ Workspace::ResourceList Workspace::ListResources(Resource::Type type, bool primi
         if (resource->IsPrimitive() == primitive &&
             resource->GetType() == type)
         {
-            ListItem item;
-            item.name = resource->GetName();
-            item.id   = resource->GetId();
+            ResourceListItem item;
+            item.name     = resource->GetName();
+            item.id       = resource->GetId();
+            item.resource = resource.get();
             list.push_back(item);
         }
     }
@@ -1654,31 +1655,22 @@ Workspace::ResourceList Workspace::ListResources(Resource::Type type, bool primi
 Workspace::ResourceList Workspace::ListCursors() const
 {
     ResourceList list;
-    ListItem arrow;
+    ResourceListItem arrow;
     arrow.name = "Arrow Cursor";
     arrow.id   = "_arrow_cursor";
+    arrow.resource = FindResourceById("_arrow_cursor");
     list.push_back(arrow);
-    ListItem block;
+    ResourceListItem block;
     block.name = "Block Cursor";
     block.id   = "_block_cursor";
+    block.resource = FindResourceById("_block_cursor");
     list.push_back(block);
     return list;
 }
 
 Workspace::ResourceList Workspace::ListDataFiles() const
 {
-    ResourceList list;
-    for (const auto& resource : mResources)
-    {
-        if (resource->IsDataFile())
-        {
-            ListItem item;
-            item.name = resource->GetName();
-            item.id   = resource->GetId();
-            list.push_back(item);
-        }
-    }
-    return list;
+    return ListResources(Resource::Type::DataFile, false, false);
 }
 
 void Workspace::SaveResource(const Resource& resource)

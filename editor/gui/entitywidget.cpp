@@ -1197,12 +1197,12 @@ void EntityWidget::on_actionNodeVarRef_triggered()
 {
     if (const auto* node = GetCurrentNode())
     {
-        std::vector<ListItem> entities;
-        std::vector<ListItem> nodes;
+        std::vector<ResourceListItem> entities;
+        std::vector<ResourceListItem> nodes;
         for (size_t i = 0; i < mState.entity->GetNumNodes(); ++i)
         {
             const auto& node = mState.entity->GetNode(i);
-            ListItem item;
+            ResourceListItem item;
             item.name = app::FromUtf8(node.GetName());
             item.id = app::FromUtf8(node.GetId());
             nodes.push_back(std::move(item));
@@ -1561,12 +1561,12 @@ void EntityWidget::on_btnDeleteTrack_clicked()
 
 void EntityWidget::on_btnNewScriptVar_clicked()
 {
-    std::vector<ListItem> entities;
-    std::vector<ListItem> nodes;
+    std::vector<ResourceListItem> entities;
+    std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         nodes.push_back(std::move(item));
@@ -1586,12 +1586,12 @@ void EntityWidget::on_btnEditScriptVar_clicked()
     if (items.isEmpty())
         return;
 
-    std::vector<ListItem> entities;
-    std::vector<ListItem> nodes;
+    std::vector<ResourceListItem> entities;
+    std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         const auto& node = mState.entity->GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         nodes.push_back(std::move(item));
@@ -2688,11 +2688,11 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
 
 void EntityWidget::DisplayEntityProperties()
 {
-    std::vector<ListItem> tracks;
+    std::vector<ResourceListItem> tracks;
     for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
         const auto& track = mState.entity->GetAnimation(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(track.GetName());
         item.id   = app::FromUtf8(track.GetId());
         item.icon = QIcon("icons:animation_track.png");
@@ -3092,15 +3092,15 @@ void EntityWidget::RebuildCombos()
     SetList(mUI.dsMaterial, mState.workspace->ListAllMaterials());
     SetList(mUI.dsDrawable, mState.workspace->ListAllDrawables());
 
-    std::vector<ListItem> polygons;
-    std::vector<ListItem> scripts;
+    std::vector<ResourceListItem> polygons;
+    std::vector<ResourceListItem> scripts;
     // for the rigid body we need to list the polygonal (custom) shape
     // objects. (note that it's actually possible that these would be concave
     // but this case isn't currently supported)
     for (size_t i=0; i<mState.workspace->GetNumUserDefinedResources(); ++i)
     {
         const auto& res = mState.workspace->GetUserDefinedResource(i);
-        ListItem pair;
+        ResourceListItem pair;
         pair.name = res.GetName();
         pair.id   = res.GetId();
         if (res.GetType() == app::Resource::Type::Shape) {
@@ -3116,14 +3116,14 @@ void EntityWidget::RebuildCombos()
 
 void EntityWidget::RebuildCombosInternal()
 {
-    std::vector<ListItem> bodies;
+    std::vector<ResourceListItem> bodies;
 
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
     {
         auto& node = mState.entity->GetNode(i);
         if (auto* body = node.GetRigidBody())
         {
-            ListItem pair;
+            ResourceListItem pair;
             pair.name = app::FromUtf8(node.GetName());
             pair.id   = app::FromUtf8(node.GetId());
             bodies.push_back(pair);

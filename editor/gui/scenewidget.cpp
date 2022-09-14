@@ -1062,12 +1062,12 @@ void SceneWidget::on_actionEntityVarRef_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        std::vector<ListItem> entities;
-        std::vector<ListItem> nodes;
+        std::vector<ResourceListItem> entities;
+        std::vector<ResourceListItem> nodes;
         for (size_t i = 0; i < mState.scene.GetNumNodes(); ++i)
         {
             const auto& node = mState.scene.GetNode(i);
-            ListItem item;
+            ResourceListItem item;
             item.name = app::FromUtf8(node.GetName());
             item.id   = app::FromUtf8(node.GetId());
             entities.push_back(std::move(item));
@@ -1199,12 +1199,12 @@ void SceneWidget::on_btnAddScript_clicked()
 
 void SceneWidget::on_btnNewScriptVar_clicked()
 {
-    std::vector<ListItem> entities;
-    std::vector<ListItem> nodes;
+    std::vector<ResourceListItem> entities;
+    std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
     {
         const auto& node = mState.scene.GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         entities.push_back(std::move(item));
@@ -1225,12 +1225,12 @@ void SceneWidget::on_btnEditScriptVar_clicked()
     if (items.isEmpty())
         return;
 
-    std::vector<ListItem> entities;
-    std::vector<ListItem> nodes;
+    std::vector<ResourceListItem> entities;
+    std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
     {
         const auto& node = mState.scene.GetNode(i);
-        ListItem item;
+        ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
         entities.push_back(std::move(item));
