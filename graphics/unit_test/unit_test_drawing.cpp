@@ -176,6 +176,10 @@ public:
     {
         mTextures.resize(count);
     }
+    virtual size_t GetPendingUniformCount() const override
+    {
+        return 0;
+    }
 
     template<typename T>
     bool GetUniform(const char* name, T* out) const

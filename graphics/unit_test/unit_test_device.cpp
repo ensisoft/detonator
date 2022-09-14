@@ -1840,6 +1840,72 @@ void main() {
 
 }
 
+
+// When drawing multiple times within a single frame with either
+// a single material or multiple materials that all map to the same
+// underlying GL program object the set of uniforms that need to
+// be set on the program object should only have the uniforms that
+// have actually changed vs. what is the current program state on the GPU.
+// when this test case is written there's a bug that if the same program
+// is used to draw multiple times in a single frame the uniform vector
+// keeps growing incorrectly.
+void unit_test_repeated_uniform_bug()
+{
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+
+    auto* geom = dev->MakeGeometry("geom");
+    const gfx::Vertex verts[] = {
+      { {-1,  1}, {0, 1} },
+      { {-1, -1}, {0, 0} },
+      { { 1, -1}, {1, 0} },
+
+      { {-1,  1}, {0, 1} },
+      { { 1, -1}, {1, 0} },
+      { { 1,  1}, {1, 1} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+    const char* fssrc =
+            R"(#version 100
+precision mediump float;
+uniform vec4 kColor;
+void main() {
+  gl_FragColor = kColor;
+})";
+    const char* vssrc =
+            R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+
+    auto* program = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    program->SetUniform("kColor", gfx::Color4f(gfx::Color::Red));
+    TEST_REQUIRE(program->GetPendingUniformCount() == 1);
+
+    dev->Draw(*program, *geom, state);
+    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+
+    dev->Draw(*program, *geom, state);
+    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+
+    program->SetUniform("kColor", gfx::Color4f(gfx::Color::Green));
+    TEST_REQUIRE(program->GetPendingUniformCount() == 1);
+    dev->Draw(*program, *geom, state);
+    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1865,5 +1931,6 @@ int test_main(int argc, char* argv[])
     unit_test_max_texture_units_many_textures();
     // bugs
     unit_test_empty_draw_lost_uniform_bug();
+    unit_test_repeated_uniform_bug();
     return 0;
 }

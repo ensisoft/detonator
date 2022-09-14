@@ -707,9 +707,8 @@ public:
 
         TRACE_ENTER(SetUniforms);
 
-        // set program uniforms
-        size_t num_uniforms = myprog->GetNumUniformsSet();
-        for (size_t i=0; i<num_uniforms; ++i)
+        // flush pending uniforms onto the GPU program object
+        for (size_t i=0; i<myprog->GetNumUniformsSet(); ++i)
         {
             const auto& uniform = myprog->GetUniformSetting(i);
             const auto& value   = uniform.value;
@@ -738,6 +737,8 @@ public:
         }
 
         TRACE_LEAVE(SetUniforms);
+        // clear pending uniform state after everything has been set.
+        myprog->ClearPendingUniforms();
 
         const auto buffer_byte_size = mygeom->GetByteSize();
         if (buffer_byte_size == 0)
@@ -2061,6 +2062,10 @@ private:
         {
             mSamplers.resize(count);
         }
+        virtual size_t GetPendingUniformCount() const override
+        {
+            return mUniforms.size();
+        }
 
         void BeginFrame()
         {
@@ -2073,6 +2078,11 @@ private:
             // on every frame and require that the material system sets the
             // textures again before every draw.
             mSamplers.clear();
+            mUniforms.clear();
+        }
+
+        void ClearPendingUniforms() const
+        {
             mUniforms.clear();
         }
 
@@ -2143,7 +2153,7 @@ private:
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::vector<Sampler> mSamplers;
-        std::vector<Uniform> mUniforms;
+        mutable std::vector<Uniform> mUniforms;
         mutable std::size_t mFrameNumber = 0;
     };
 
