@@ -251,12 +251,12 @@ public:
 
             gfx::Transform transform;
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull));
+            TRACE_CALL("Renderer::Draw", mRenderer.Draw(*mPainter, &cull));
+            TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
                 TRACE_CALL("Physics::DebugDraw", mPhysics.DebugDrawObjects(*mPainter , transform));
             }
-            TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
 
             TRACE_BLOCK("DebugDraw",
                 for (const auto& draw : mDebugDraws)
@@ -814,6 +814,7 @@ private:
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
         }
+        mRenderer.CreateScene(*mScene);
         mRuntime->BeginPlay(mScene.get());
     }
     void OnAction(const engine::SuspendAction& action)
@@ -927,8 +928,8 @@ private:
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
-                // apply any pending changes such as velocity updates
-                // rigid body flag state changes, static body position
+                // Apply any pending changes such as velocity updates,
+                // rigid body flag state changes, new rigid bodies etc.
                 // changes to the physics world.
                 TRACE_CALL("Physics::UpdateWorld", mPhysics.UpdateWorld(*mScene));
                 // Step the simulation forward.
@@ -944,7 +945,13 @@ private:
                     }
                 );
             }
-            TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, game_time, dt));
+
+            // Update renderers data structures from the scene.
+            // This involves creating new render nodes for new entities
+            // that have been spawned etc.
+            TRACE_CALL("Renderer::UpdateScene", mRenderer.UpdateScene(*mScene));
+            // Update the rendering state, animate materials and drawables.
+            TRACE_CALL("Renderer::Update", mRenderer.Update(game_time, dt));
         }
 
         TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));

@@ -246,6 +246,7 @@ void unit_test_drawable_item()
     DummyClassLib classloader;
 
     engine::Renderer renderer(&classloader);
+    renderer.SetEditingMode(true);
     gfx::Transform transform;
 
     // test visibility flag
@@ -253,10 +254,14 @@ void unit_test_drawable_item()
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, true);
 
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -264,10 +269,14 @@ void unit_test_drawable_item()
 
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, false);
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -282,10 +291,14 @@ void unit_test_drawable_item()
     {
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, true);
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -296,10 +309,14 @@ void unit_test_drawable_item()
 
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipHorizontally, true);
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -318,10 +335,14 @@ void unit_test_drawable_item()
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::FlipHorizontally, false);
 
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Red, 0.95));
@@ -331,10 +352,14 @@ void unit_test_drawable_item()
         renderer.Update(*entity, 0.0f, 15.0f);
 
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Red, 0.95));
@@ -344,10 +369,14 @@ void unit_test_drawable_item()
         renderer.Update(*entity, 0.0f, 1.5f);
 
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
@@ -360,10 +389,14 @@ void unit_test_drawable_item()
     // check material parameter
     {
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::HotPink, 0.95));
@@ -371,10 +404,14 @@ void unit_test_drawable_item()
 
         entity->GetNode(0).GetDrawable()->SetMaterialParam("kColor", gfx::Color::Green);
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
@@ -387,29 +424,41 @@ void unit_test_drawable_item()
     // drawable update
     {
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
-        device->EndFrame(true);
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+            device->EndFrame(true);
+        }
         auto bmp0 = device->ReadColorBuffer(0, 0, 256, 256);
 
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Update(*entity, 0.0f, 1.0f/60.0f);
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         auto bmp1 = device->ReadColorBuffer(0, 0, 256, 256);
 
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::UpdateDrawable, false);
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Update(*entity, 0.0f, 1.0f/60.0f);
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+             renderer.BeginFrame();
+            {
+                renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
         auto bmp2 = device->ReadColorBuffer(0, 0, 256, 256);
 
@@ -465,15 +514,21 @@ void unit_test_entity_layering()
     DummyClassLib classloader;
 
     engine::Renderer renderer(&classloader);
+    renderer.SetEditingMode(true);
+
     gfx::Transform transform;
 
     // green should be on top
     {
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -485,10 +540,14 @@ void unit_test_entity_layering()
     // red should be on top.
     {
         device->BeginFrame();
-        device->ClearColor(gfx::Color::Blue);
-        renderer.BeginFrame();
-        renderer.Draw(*entity, *painter, transform);
-        renderer.EndFrame();
+        {
+            device->ClearColor(gfx::Color::Blue);
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*entity, *painter, transform);
+            }
+            renderer.EndFrame();
+        }
         device->EndFrame(true);
 
         auto bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -501,11 +560,127 @@ void unit_test_scene_layering()
     // todo:
 }
 
+void unit_test_entity_lifecycle()
+{
+    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
+    auto painter = gfx::Painter::Create(device);
+    painter->SetEditingMode(false);
+    painter->SetOrthographicProjection(256, 256);
+    painter->SetViewport(0, 0, 256, 256);
+    painter->SetSurfaceSize(256, 256);
+
+    auto entity_klass = std::make_shared<game::EntityClass>();
+    {
+        game::DrawableItemClass red;
+        red.SetDrawableId("rect");
+        red.SetMaterialId("red");
+        red.SetLayer(0);
+
+        game::EntityNodeClass red_node;
+        red_node.SetName("red");
+        red_node.SetSize(glm::vec2(200.0f, 100.0f));
+        red_node.SetTranslation(glm::vec2(100.0f, 50.0f));
+        red_node.SetDrawable(red);
+
+        entity_klass->LinkChild(nullptr, entity_klass->AddNode(red_node));
+        entity_klass->SetName("entity");
+    }
+
+    auto scene_class = std::make_shared<game::SceneClass>();
+    {
+        game::SceneNodeClass node;
+        node.SetEntity(entity_klass);
+        node.SetName("1");
+        scene_class->LinkChild(nullptr, scene_class->AddNode(node));
+        scene_class->SetName("scene");
+    }
+
+    auto scene = game::CreateSceneInstance(scene_class);
+
+    DummyClassLib classloader;
+    engine::Renderer renderer(&classloader);
+
+    const float dt = 1.0f/60.0f;
+
+    engine::EntityInstanceDrawHook* hook = nullptr;
+
+    renderer.CreateScene(*scene);
+    TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
+
+    // start frame looping
+    {
+        scene->BeginLoop();
+        {
+            scene->Update(dt, nullptr);
+
+            renderer.UpdateScene(*scene);
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
+            renderer.Update(0.0f, dt);
+
+            // simulate game update here. entity gets killed.
+            auto* ent = scene->FindEntityByInstanceName("1");
+            ent->Die();
+
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*painter, hook);
+            }
+            renderer.EndFrame();
+        }
+        scene->EndLoop();
+    }
+
+    // entity 1 was killed, entity 2 gets spawned.
+    {
+        scene->BeginLoop();
+        {
+            scene->Update(dt, nullptr);
+
+            renderer.UpdateScene(*scene);
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
+            renderer.Update(0.0f, dt);
+
+            // simulate game update here, entity gets spawned.
+            game::EntityArgs args;
+            args.klass = entity_klass;
+            args.name = "2";
+            args.id = "2";
+            scene->SpawnEntity(args);
+
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*painter, hook);
+            }
+            renderer.EndFrame();
+        }
+        scene->EndLoop();
+    }
+
+    //
+    {
+        scene->BeginLoop();
+        {
+            scene->Update(dt, nullptr);
+
+            renderer.UpdateScene(*scene);
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
+            renderer.Update(0.0f, dt);
+
+            renderer.BeginFrame();
+            {
+                renderer.Draw(*painter, hook);
+            }
+            renderer.EndFrame();
+        }
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_drawable_item();
     unit_test_text_item();
     unit_test_entity_layering();
     unit_test_scene_layering();
+    unit_test_entity_lifecycle();
     return 0;
 }

@@ -93,7 +93,7 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
         x.transform = view.GetAsMatrix();
         x.material  = green;
         x.drawable  = arrow;
-        x.layer     = layer;
+        x.entity_node_layer = layer;
         packets.push_back(std::move(x));
     view.Pop();
 
@@ -107,7 +107,7 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
         y.transform = view.GetAsMatrix();
         y.material  = red;
         y.drawable  = arrow;
-        y.layer     = layer;
+        y.entity_node_layer = layer;
         packets.push_back(std::move(y));
     view.Pop();
 

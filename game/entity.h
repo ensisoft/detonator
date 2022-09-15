@@ -1547,6 +1547,8 @@ namespace game
         { return !mScriptFile.empty(); }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        int GetLayer() const /* stub*/
+        { return 0; }
 
         RenderTree& GetRenderTree()
         { return mRenderTree; }
@@ -1806,6 +1808,9 @@ namespace game
         bool KillAtBoundary() const;
         // Returns true if the entity did just finish an animation.
         bool DidFinishAnimation() const;
+        // Returns true if the entity contains nodes that have rendering
+        // attachments, i.d. drawables or text items.
+        bool HasRenderableItems() const;
 
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;

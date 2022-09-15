@@ -1845,6 +1845,14 @@ bool Entity::KillAtBoundary() const
 bool Entity::DidFinishAnimation() const
 { return !!mFinishedAnimation; }
 
+bool Entity::HasRenderableItems() const
+{
+    for (auto& node : mNodes)
+        if (node->HasDrawable() || node->HasTextItem())
+            return true;
+    return false;
+}
+
 const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
 {
     return base::SafeIndex(mJoints, index);

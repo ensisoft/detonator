@@ -1076,14 +1076,18 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "hz6w2tG1gv",
+      "owner": "",
       "resource_id": "hz6w2tG1gv",
       "resource_name": "Kenney",
+      "type": "Unspecified",
       "uri": "ws://lua/hz6w2tG1gv.lua"
     }
   ],
