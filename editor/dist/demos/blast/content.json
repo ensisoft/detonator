@@ -5188,50 +5188,66 @@
   "scripts": [
     {
       "id": "OtyRiUrsTd",
+      "owner": "",
       "resource_id": "OtyRiUrsTd",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "rvZg0UT77h",
+      "owner": "",
       "resource_id": "rvZg0UT77h",
       "resource_name": "Player",
+      "type": "Unspecified",
       "uri": "ws://lua/rvZg0UT77h.lua"
     },
     {
       "id": "4KwMiHn2Zz",
+      "owner": "",
       "resource_id": "4KwMiHn2Zz",
       "resource_name": "Bullet",
+      "type": "Unspecified",
       "uri": "ws://lua/4KwMiHn2Zz.lua"
     },
     {
       "id": "FXdfIUPul3",
+      "owner": "",
       "resource_id": "FXdfIUPul3",
       "resource_name": "Ship2",
+      "type": "Unspecified",
       "uri": "ws://lua/FXdfIUPul3.lua"
     },
     {
       "id": "bjZ0TrwuxI",
+      "owner": "",
       "resource_id": "bjZ0TrwuxI",
       "resource_name": "Asteroid",
+      "type": "Unspecified",
       "uri": "ws://lua/bjZ0TrwuxI.lua"
     },
     {
       "id": "QldASNFLIb",
+      "owner": "",
       "resource_id": "QldASNFLIb",
       "resource_name": "RedMine",
+      "type": "Unspecified",
       "uri": "ws://lua/QldASNFLIb.lua"
     },
     {
       "id": "AA5C8qjoDb",
+      "owner": "",
       "resource_id": "AA5C8qjoDb",
       "resource_name": "common",
+      "type": "Unspecified",
       "uri": "ws://lua/common.lua"
     },
     {
       "id": "OiyvAkqpIL",
+      "owner": "",
       "resource_id": "OiyvAkqpIL",
       "resource_name": "Game",
+      "type": "Unspecified",
       "uri": "ws://lua/OiyvAkqpIL.lua"
     }
   ],

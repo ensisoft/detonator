@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <string>
+#include <variant>
 #include <vector>
 #include <unordered_map>
 
@@ -44,8 +45,9 @@ namespace engine
         std::shared_ptr<const gfx::Drawable> drawable;
         // transform that pertains to the draw.
         glm::mat4 transform;
-        // the animation layer this draw belongs to.
-        int layer = 0;
+        // the node layer this draw belongs to.
+        int entity_node_layer = 0;
+        int scene_node_layer = 0;
         // the render pass this draw belongs to.
         game::RenderPass pass = game::RenderPass::Draw;
     };
@@ -96,10 +98,11 @@ namespace engine
 
         void BeginFrame();
 
-        // Draw the entity and its nodes.
-        // Each node is transformed relative to the parent transformation "trans".
-        // Optional draw hook can be used to modify the draw packets before submission to the
-        // paint device.
+        void CreateScene(const game::Scene& scene);
+        void UpdateScene(const game::Scene& scene);
+        void Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook);
+        void Update(float time, float dt);
+
         void Draw(const game::Entity& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityInstanceDrawHook* hook = nullptr);
@@ -127,10 +130,10 @@ namespace engine
         void EndFrame();
 
         void ClearPaintState();
-    private:
-        template<typename NodeType>
-        void UpdateNode(const NodeType& node, float time, float dt);
 
+        size_t GetNumPaintNodes() const
+        { return mPaintNodes.size(); }
+    private:
         template<typename SceneType, typename EntityType, typename NodeType>
         void DrawScene(const SceneType& scene,
                        gfx::Painter& painter, gfx::Transform& transform,
@@ -140,16 +143,28 @@ namespace engine
         template<typename EntityType, typename NodeType>
         void MapEntity(const EntityType& entity, gfx::Transform& transform);
 
-        template<typename EntityType, typename NodeType>
-        void PrimeNode(const EntityType& entity,
-                       const NodeType& node,
-                       gfx::Transform& transform,
+        struct PaintNode;
+        template<typename EntityNodeType>
+        void UpdateNode(PaintNode& paint_node, float time, float dt);
+
+        template<typename EntityType, typename EntityNodeType>
+        void CreateDrawResources(PaintNode& paint_node);
+
+        template<typename EntityType, typename EntityNodeType>
+        void GenerateDrawPackets(PaintNode& paint_node,
                        std::vector<DrawPacket>& packets,
-                       EntityDrawHook<NodeType>* hook);
+                       EntityDrawHook<EntityNodeType>* hook);
 
         void DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets);
     private:
         const ClassLibrary* mClassLib = nullptr;
+        using EntityRef = std::variant<
+                const game::Entity*,
+                const game::EntityClass*>;
+        using EntityNodeRef = std::variant<
+                const game::EntityNode*,
+                const game::EntityNodeClass*>;
+
         struct PaintNode {
             bool visited = false;
             std::string text_material_id;
@@ -162,6 +177,8 @@ namespace engine
             glm::vec2 world_size;
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
+            EntityRef     entity;
+            EntityNodeRef entity_node;
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
         bool mEditingMode = false;

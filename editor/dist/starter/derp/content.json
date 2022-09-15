@@ -1164,14 +1164,18 @@
   "scripts": [
     {
       "id": "SfDYJTRhGz",
+      "owner": "",
       "resource_id": "SfDYJTRhGz",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "zJgI2SZT3X",
+      "owner": "",
       "resource_id": "zJgI2SZT3X",
       "resource_name": "FlappyBird",
+      "type": "Unspecified",
       "uri": "ws://lua/zJgI2SZT3X.lua"
     }
   ],

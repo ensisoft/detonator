@@ -43,8 +43,79 @@ namespace engine
 
 void Renderer::BeginFrame()
 {
-    for (auto& p : mPaintNodes)
-        p.second.visited = false;
+    if (mEditingMode)
+    {
+        for (auto& p: mPaintNodes)
+            p.second.visited = false;
+    }
+}
+
+void Renderer::CreateScene(const game::Scene& scene)
+{
+    mPaintNodes.clear();
+
+    const auto& nodes = scene.CollectNodes();
+
+    gfx::Transform transform;
+
+    for (const auto& p : nodes)
+    {
+        const Entity* entity = p.entity_object;
+        if (!entity->HasRenderableItems())
+            continue;
+        transform.Push(p.node_to_scene);
+            MapEntity<Entity, EntityNode>(*p.entity_object, transform);
+        transform.Pop();
+    }
+
+}
+
+void Renderer::UpdateScene(const game::Scene& scene)
+{
+    const auto& nodes = scene.CollectNodes();
+
+    gfx::Transform transform;
+
+    for (const auto& p : nodes)
+    {
+        const Entity* entity = p.entity_object;
+
+        // either delete dead entites here or create a "BeginLoop" type of function
+        // and do the pruning there.
+        if (entity->HasBeenKilled())
+        {
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                const EntityNode& node = entity->GetNode(i);
+                mPaintNodes.erase(node.GetId());
+            }
+            continue;
+        }
+
+        transform.Push(p.node_to_scene);
+            MapEntity<Entity, EntityNode>(*p.entity_object, transform);
+        transform.Pop();
+    }
+}
+
+void Renderer::Update(float time, float dt)
+{
+    for (auto& [key, node] : mPaintNodes)
+    {
+        UpdateNode<EntityNode>(node, time, dt);
+    }
+}
+
+void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook)
+{
+    std::vector<DrawPacket> packets;
+    for (auto& [key, node] : mPaintNodes)
+    {
+        CreateDrawResources<Entity, EntityNode>(node);
+        GenerateDrawPackets<Entity, EntityNode>(node, packets, hook);
+        node.visited = true;
+    }
+    DrawPackets(painter, packets);
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -58,7 +129,18 @@ void Renderer::Draw(const Entity& entity,
 
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
-        PrimeNode(entity, entity.GetNode(i), transform, packets, hook);
+        const auto& node = entity.GetNode(i);
+        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+        {
+            CreateDrawResources<Entity, EntityNode>(*paint);
+            GenerateDrawPackets<Entity, EntityNode>(*paint, packets, hook);
+        }
+        else if (hook)
+        {
+            transform.Push(entity.FindNodeTransform(&node));
+                hook->AppendPackets(&node, transform, packets);
+            transform.Pop();
+        }
     }
     DrawPackets(painter, packets);
 }
@@ -75,7 +157,18 @@ void Renderer::Draw(const EntityClass& entity,
 
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
-        PrimeNode(entity, entity.GetNode(i), transform, packets, hook);
+        const auto& node = entity.GetNode(i);
+        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+        {
+            CreateDrawResources<EntityClass, EntityNodeClass>(*paint);
+            GenerateDrawPackets<EntityClass, EntityNodeClass>(*paint, packets, hook);
+        }
+        else if (hook)
+        {
+            transform.Push(entity.FindNodeTransform(&node));
+                hook->AppendPackets(&node, transform, packets);
+            transform.Pop();
+        }
     }
     DrawPackets(painter, packets);
 }
@@ -104,26 +197,32 @@ void Renderer::Update(const EntityClass& entity, float time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        UpdateNode<EntityNodeClass>(entity.GetNode(i), time, dt);
+        const auto& node = entity.GetNode(i);
+        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+            UpdateNode<EntityNodeClass>(*paint, time, dt);
     }
 }
 
 void Renderer::Update(const EntityNodeClass& node, float time, float dt)
 {
-    UpdateNode<EntityNodeClass>(node, time, dt);
+    if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+        UpdateNode<EntityNodeClass>(*paint, time, dt);
 }
 
 void Renderer::Update(const Entity& entity, float time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
-        UpdateNode<EntityNode>(entity.GetNode(i), time, dt);
+        const auto& node = entity.GetNode(i);
+        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+            UpdateNode<EntityNode>(*paint, time, dt);
     }
 }
 
 void Renderer::Update(const EntityNode& node, float time, float dt)
 {
-    UpdateNode<EntityNode>(node, time, dt);
+    if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+        UpdateNode<EntityNode>(*paint, time, dt);
 }
 
 void Renderer::Update(const SceneClass& scene, float time, float dt)
@@ -161,15 +260,12 @@ void Renderer::Update(const Scene& scene, float time, float dt)
 
 void Renderer::EndFrame()
 {
-    for (auto it = mPaintNodes.begin(); it != mPaintNodes.end();)
+    if (mEditingMode)
     {
-        auto& p = it->second;
-        if (p.visited)
+        for (auto it = mPaintNodes.begin(); it != mPaintNodes.end();)
         {
-            ++it;
-            continue;
+            it->second.visited ? ++it : it = mPaintNodes.erase(it);
         }
-        it = mPaintNodes.erase(it);
     }
 }
 
@@ -178,20 +274,14 @@ void Renderer::ClearPaintState()
     mPaintNodes.clear();
 }
 
-template<typename Node>
-void Renderer::UpdateNode(const Node& node, float time, float dt)
+template<typename EntityNodeType>
+void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
 {
+    using DrawableItemType = typename EntityNodeType::DrawableItemType;
+
+    const auto& node = *std::get<const EntityNodeType*>(paint_node.entity_node);
     const auto* item = node.GetDrawable();
     const auto* text = node.GetTextItem();
-    if (!item && !text)
-        return;
-
-    using DrawableItemType = typename Node::DrawableItemType;
-
-    auto it = mPaintNodes.find(node.GetId());
-    if (it == mPaintNodes.end())
-        return;
-    auto& paint_node = it->second;
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_size);
@@ -296,6 +386,8 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
                 paint_node.world_pos      = box.GetCenter();
                 paint_node.world_size     = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
+                paint_node.entity_node    = node;
+                paint_node.entity         = &mEntity;
             }
         }
         virtual void LeaveNode(const NodeType* node) override
@@ -314,38 +406,15 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
     tree.PreOrderTraverse(visitor);
 }
 
-template<typename EntityType, typename NodeType>
-void Renderer::PrimeNode(const EntityType& entity,
-                         const NodeType& node,
-                         gfx::Transform& scene,
-                         std::vector<DrawPacket>& packets,
-                         EntityDrawHook<NodeType>* hook)
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreateDrawResources(PaintNode& paint_node)
 {
-    using DrawableItemType = typename NodeType::DrawableItemType;
+    using DrawableItemType = typename EntityNodeType::DrawableItemType;
 
-    const auto* item = node.GetDrawable();
-    const auto* text = node.GetTextItem();
-    if (!item && !text)
-    {
-        if (hook)
-        {
-            scene.Push(entity.FindNodeTransform(&node));
-            hook->AppendPackets(&node, scene, packets);
-            scene.Pop();
-        }
-        return;
-    }
-    auto& paint_node = mPaintNodes[node.GetId()];
+    const auto& entity = *std::get<const EntityType*>(paint_node.entity);
+    const auto& node   = *std::get<const EntityNodeType*>(paint_node.entity_node);
 
-    //gfx::Transform transform(paint_node.transform);
-    gfx::Transform transform;
-    transform.Scale(paint_node.world_size);
-    transform.Rotate(paint_node.world_rotation);
-    transform.Translate(paint_node.world_pos);
-
-    transform.Push(node.GetModelTransform());
-
-    if (text)
+    if (const auto* text = node.GetTextItem())
     {
         const auto& node_size = node.GetSize();
         const auto text_raster_width  = text->GetRasterWidth();
@@ -398,31 +467,8 @@ void Renderer::PrimeNode(const EntityType& entity,
             auto klass = mClassLib->FindDrawableClassById(drawable);
             paint_node.text_drawable = gfx::CreateDrawableInstance(klass);
         }
-
-        bool visible_now = true;
-        if (text->TestFlag(TextItemClass::Flags::BlinkText))
-        {
-            const auto fps = 1.5;
-            const auto full_period = 2.0 / fps;
-            const auto half_period = full_period * 0.5;
-            const auto time = fmodf(base::GetTime(), full_period);
-            if (time >= half_period)
-                visible_now = false;
-        }
-        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
-        {
-            DrawPacket packet;
-            packet.drawable  = paint_node.text_drawable;
-            packet.material  = paint_node.text_material;
-            packet.transform = transform.GetAsMatrix();
-            packet.pass      = RenderPass::Draw;
-            packet.layer     = text->GetLayer();
-            if (!hook || (hook && hook->InspectPacket(&node, packet)))
-                packets.push_back(std::move(packet));
-        }
     }
-
-    if (item)
+    if (const auto* item = node.GetDrawable())
     {
         const auto& material = item->GetMaterialId();
         const auto& drawable = item->GetDrawableId();
@@ -448,6 +494,13 @@ void Renderer::PrimeNode(const EntityType& entity,
                 WARN("No such drawable class '%1' found for '%2/%3'", drawable, entity.GetName(), node.GetName());
             if (paint_node.item_drawable)
             {
+                gfx::Transform transform;
+                transform.Scale(paint_node.world_size);
+                transform.Rotate(paint_node.world_rotation);
+                transform.Translate(paint_node.world_pos);
+
+                transform.Push(node.GetModelTransform());
+
                 const auto& model = transform.GetAsMatrix();
                 gfx::Drawable::Environment env; // todo:
                 env.model_matrix = &model;
@@ -480,6 +533,54 @@ void Renderer::PrimeNode(const EntityType& entity,
                 paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Front);
             else paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Back);
         }
+    }
+}
+
+template<typename EntityType, typename EntityNodeType>
+void Renderer::GenerateDrawPackets(PaintNode& paint_node,
+                                   std::vector<DrawPacket>& packets,
+                                   EntityDrawHook<EntityNodeType>* hook)
+{
+    using DrawableItemType = typename EntityNodeType::DrawableItemType;
+
+    const auto& entity = *std::get<const EntityType*>(paint_node.entity);
+    const auto& node   = *std::get<const EntityNodeType*>(paint_node.entity_node);
+
+    gfx::Transform transform;
+    transform.Scale(paint_node.world_size);
+    transform.Rotate(paint_node.world_rotation);
+    transform.Translate(paint_node.world_pos);
+
+    transform.Push(node.GetModelTransform());
+
+    if (const auto* text = node.GetTextItem())
+    {
+        bool visible_now = true;
+        if (text->TestFlag(TextItemClass::Flags::BlinkText))
+        {
+            const auto fps = 1.5;
+            const auto full_period = 2.0 / fps;
+            const auto half_period = full_period * 0.5;
+            const auto time = fmodf(base::GetTime(), full_period);
+            if (time >= half_period)
+                visible_now = false;
+        }
+        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
+        {
+            DrawPacket packet;
+            packet.drawable  = paint_node.text_drawable;
+            packet.material  = paint_node.text_material;
+            packet.transform = transform.GetAsMatrix();
+            packet.pass      = RenderPass::Draw;
+            packet.entity_node_layer = text->GetLayer();
+            packet.scene_node_layer  = entity.GetLayer();
+            if (!hook || hook->InspectPacket(&node, packet))
+                packets.push_back(std::move(packet));
+        }
+    }
+
+    if (const auto* item = node.GetDrawable())
+    {
         if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
         {
             transform.Push();
@@ -498,10 +599,11 @@ void Renderer::PrimeNode(const EntityType& entity,
             DrawPacket packet;
             packet.material  = paint_node.item_material;
             packet.drawable  = paint_node.item_drawable;
-            packet.layer     = item->GetLayer();
-            packet.pass      = item->GetRenderPass();
             packet.transform = transform.GetAsMatrix();
-            if (!hook || (hook && hook->InspectPacket(&node , packet)))
+            packet.pass      = item->GetRenderPass();
+            packet.entity_node_layer = item->GetLayer();
+            packet.scene_node_layer  = entity.GetLayer();
+            if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
         }
         if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
@@ -524,56 +626,72 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
 {
     // the layer value is negative but for the indexing below
     // we must have positive values only.
-    int first_layer_index = 0;
+    int first_entity_node_layer_index = 0;
+    int first_scene_node_layer_index  = 0;
     for (auto &packet : packets)
     {
-        first_layer_index = std::min(first_layer_index, packet.layer);
+        first_entity_node_layer_index = std::min(first_entity_node_layer_index, packet.entity_node_layer);
+        first_scene_node_layer_index  = std::min(first_scene_node_layer_index, packet.scene_node_layer);
     }
     // offset the layers.
     for (auto &packet : packets)
     {
-        packet.layer += std::abs(first_layer_index);
+        packet.entity_node_layer += std::abs(first_entity_node_layer_index);
+        packet.scene_node_layer  += std::abs(first_scene_node_layer_index);
     }
 
     struct Layer {
         std::vector<gfx::Painter::DrawShape> draw_list;
         std::vector<gfx::Painter::MaskShape> mask_list;
     };
-    std::vector<Layer> layers;
+    // Each entity in the scene is assigned to a scene/entity layer and each
+    // entity node within an entity is assigned to an entity layer.
+    // Thus, to have the right ordering both indices of each
+    // render packet must be considered!
+    std::vector<std::vector<Layer>> layers;
 
-    for (auto &packet : packets)
+    for (auto& packet : packets)
     {
         if (packet.pass == RenderPass::Draw && !packet.material)
             continue;
         else if (!packet.drawable)
             continue;
 
-        const auto layer_index = packet.layer;
-        if (layer_index >= layers.size())
-            layers.resize(layer_index + 1);
+        const auto scene_layer_index = packet.scene_node_layer;
+        if (scene_layer_index >= layers.size())
+            layers.resize(scene_layer_index + 1);
 
-        Layer &layer = layers[layer_index];
+        auto& entity_scene_layer = layers[scene_layer_index];
+
+        const auto entity_node_layer_index = packet.entity_node_layer;
+        if (entity_node_layer_index >= entity_scene_layer.size())
+            entity_scene_layer.resize(entity_node_layer_index + 1);
+
+        Layer& entity_layer = entity_scene_layer[entity_node_layer_index];
         if (packet.pass == RenderPass::Draw)
         {
             gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
             shape.drawable = packet.drawable.get();
             shape.material = packet.material.get();
-            layer.draw_list.push_back(shape);
+            entity_layer.draw_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::Mask)
         {
             gfx::Painter::MaskShape shape;
             shape.transform = &packet.transform;
             shape.drawable = packet.drawable.get();
-            layer.mask_list.push_back(shape);
+            entity_layer.mask_list.push_back(shape);
         }
     }
-    for (const auto &layer : layers)
+    for (const auto& scene_layer : layers)
     {
-        if (layer.mask_list.empty())
-            painter.Draw(layer.draw_list);
-        else painter.Draw(layer.draw_list, layer.mask_list);
+        for (const auto& entity_layer : scene_layer)
+        {
+            entity_layer.mask_list.empty()
+                ? painter.Draw(entity_layer.draw_list)
+                : painter.Draw(entity_layer.draw_list, entity_layer.mask_list);
+        }
     }
 }
 

@@ -5162,7 +5162,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
             "material": "l6vR7abMmW",
             "renderpass": "Draw",
@@ -5199,7 +5199,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 2,
             "linewidth": 1.0,
             "material": "X6Q2aN3uWm",
             "renderpass": "Draw",
@@ -14729,26 +14729,34 @@
   "scripts": [
     {
       "id": "SId1upp3XQ",
+      "owner": "",
       "resource_id": "SId1upp3XQ",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "vq6v6WdXwZ",
+      "owner": "",
       "resource_id": "vq6v6WdXwZ",
       "resource_name": "Player",
+      "type": "Unspecified",
       "uri": "ws://lua/vq6v6WdXwZ.lua"
     },
     {
       "id": "4NMFT9hs0Y",
+      "owner": "",
       "resource_id": "4NMFT9hs0Y",
       "resource_name": "StoneBlock",
+      "type": "Unspecified",
       "uri": "ws://lua/4NMFT9hs0Y.lua"
     },
     {
       "id": "7lSTOyhTqF",
+      "owner": "",
       "resource_id": "7lSTOyhTqF",
       "resource_name": "Coin",
+      "type": "Unspecified",
       "uri": "ws://lua/7lSTOyhTqF.lua"
     }
   ],

@@ -4273,7 +4273,7 @@
           },
           "id": "68rlhp78BA",
           "idle_animation_id": "",
-          "layer": 0,
+          "layer": -1,
           "name": "Background",
           "parent_render_tree_node": "",
           "position": {
@@ -4305,26 +4305,34 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "2JJndZoBDS",
+      "owner": "",
       "resource_id": "2JJndZoBDS",
       "resource_name": "UI",
+      "type": "Unspecified",
       "uri": "ws://lua/2JJndZoBDS.lua"
     },
     {
       "id": "qOf1KOOSpS",
+      "owner": "",
       "resource_id": "qOf1KOOSpS",
       "resource_name": "data",
+      "type": "Unspecified",
       "uri": "ws://lua/data.lua"
     },
     {
       "id": "nIkywmIbBJ",
+      "owner": "",
       "resource_id": "nIkywmIbBJ",
       "resource_name": "Entity Script",
+      "type": "Unspecified",
       "uri": "ws://lua/nIkywmIbBJ.lua"
     }
   ],

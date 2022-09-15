@@ -5533,32 +5533,42 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "9jMLWUyAWj",
+      "owner": "",
       "resource_id": "9jMLWUyAWj",
       "resource_name": "Constant Speed Ball",
+      "type": "Unspecified",
       "uri": "ws://lua/9jMLWUyAWj.lua"
     },
     {
       "id": "kppKkQuA0g",
+      "owner": "",
       "resource_id": "kppKkQuA0g",
       "resource_name": "User Ball",
+      "type": "Unspecified",
       "uri": "ws://lua/kppKkQuA0g.lua"
     },
     {
       "id": "QCSIpWak63",
+      "owner": "",
       "resource_id": "QCSIpWak63",
       "resource_name": "Static Block",
+      "type": "Unspecified",
       "uri": "ws://lua/QCSIpWak63.lua"
     },
     {
       "id": "k4Stm2rLJJ",
+      "owner": "",
       "resource_id": "k4Stm2rLJJ",
       "resource_name": "Phys Test 5",
+      "type": "Unspecified",
       "uri": "ws://lua/k4Stm2rLJJ.lua"
     }
   ],

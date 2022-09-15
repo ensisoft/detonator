@@ -181,7 +181,8 @@ private:
                 box.transform = trans.GetAsMatrix();
                 box.material  = yellow;
                 box.drawable  = rect;
-                box.layer     = 250;
+                box.scene_node_layer = 0;
+                box.entity_node_layer = node->GetLayer() + 1;
                 box.pass      = game::RenderPass::Draw;
                 packets.push_back(box);
             trans.Pop();
@@ -195,7 +196,7 @@ private:
         static const auto rect   = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
         static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
         const auto& size = node->GetSize();
-        const auto layer = 250;
+        const auto layer = node->GetLayer() +1  ;
 
         // draw the selection rectangle.
         trans.Push(node->GetModelTransform());
@@ -203,7 +204,7 @@ private:
             selection.transform = trans.GetAsMatrix();
             selection.material  = green;
             selection.drawable  = rect;
-            selection.layer     = layer;
+            selection.entity_node_layer = layer;
             packets.push_back(selection);
         trans.Pop();
 
@@ -237,7 +238,7 @@ private:
             sizing_box.transform = trans.GetAsMatrix();
             sizing_box.material  = green;
             sizing_box.drawable  = rect;
-            sizing_box.layer     = layer;
+            sizing_box.entity_node_layer = layer;
             packets.push_back(sizing_box);
         trans.Pop();
 
@@ -249,7 +250,7 @@ private:
             rotation_circle.transform = trans.GetAsMatrix();
             rotation_circle.material  = green;
             rotation_circle.drawable  = circle;
-            rotation_circle.layer     = layer;
+            rotation_circle.entity_node_layer = layer;
             packets.push_back(rotation_circle);
         trans.Pop();
     }

@@ -19078,32 +19078,42 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
     {
       "id": "HRXSPeXFUN",
+      "owner": "",
       "resource_id": "HRXSPeXFUN",
       "resource_name": "Paddle",
+      "type": "Unspecified",
       "uri": "ws://lua/HRXSPeXFUN.lua"
     },
     {
       "id": "viXTDKHRIB",
+      "owner": "",
       "resource_id": "viXTDKHRIB",
       "resource_name": "Brick",
+      "type": "Unspecified",
       "uri": "ws://lua/viXTDKHRIB.lua"
     },
     {
       "id": "WGNKEJwulf",
+      "owner": "",
       "resource_id": "WGNKEJwulf",
       "resource_name": "Level",
+      "type": "Unspecified",
       "uri": "ws://lua/WGNKEJwulf.lua"
     },
     {
       "id": "8xZogKY3K1",
+      "owner": "",
       "resource_id": "8xZogKY3K1",
       "resource_name": "Ball",
+      "type": "Unspecified",
       "uri": "ws://lua/8xZogKY3K1.lua"
     }
   ],
