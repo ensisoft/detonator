@@ -527,6 +527,25 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label_27">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to toggle &amp;quot;Snap to grid&amp;quot; when &lt;br/&gt;moving or resizing a widget.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="margin">
+        <number>10</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -1676,7 +1695,7 @@
     <string>Place a new label widget</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+2</string>
+    <string>Ctrl+1</string>
    </property>
   </action>
   <action name="actionNewPushButton">
@@ -1694,7 +1713,7 @@
     <string>Place a new push button widget</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+3</string>
+    <string>Ctrl+2</string>
    </property>
   </action>
   <action name="actionNewCheckBox">
@@ -1712,7 +1731,7 @@
     <string>Place a new check box widget</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+4</string>
+    <string>Ctrl+3</string>
    </property>
   </action>
   <action name="actionWidgetDelete">
@@ -1757,7 +1776,7 @@
     <string>Place a new group box</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+5</string>
+    <string>Ctrl+4</string>
    </property>
   </action>
   <action name="actionNewSpinBox">
@@ -1775,7 +1794,7 @@
     <string>Place a new spinbox</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+6</string>
+    <string>Ctrl+5</string>
    </property>
   </action>
   <action name="actionNewSlider">
@@ -1793,7 +1812,7 @@
     <string>Place a new slider</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+7</string>
+    <string>Ctrl+6</string>
    </property>
   </action>
   <action name="actionNewProgressBar">
@@ -1811,7 +1830,7 @@
     <string>Place new progress bar</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+8</string>
+    <string>Ctrl+7</string>
    </property>
   </action>
   <action name="actionNewForm">
@@ -1829,7 +1848,7 @@
     <string>Place a new background form</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+1</string>
+    <string>Ctrl+9</string>
    </property>
   </action>
   <action name="actionNewRadioButton">
@@ -1847,7 +1866,7 @@
     <string>Place a new radio button</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+9</string>
+    <string>Ctrl+8</string>
    </property>
   </action>
  </widget>
