@@ -145,6 +145,7 @@ namespace gui
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);
         void MouseDoubleClick(QMouseEvent* mickey);
+        void MouseWheel(QWheelEvent* mickey);
         bool KeyPress(QKeyEvent* key);
         void UpdateCurrentWidgetProperties();
         void TranslateCamera(float dx, float dy);
@@ -152,6 +153,7 @@ namespace gui
         void DisplayCurrentWidgetProperties();
         void DisplayCurrentCameraLocation();
         void RebuildCombos();
+        void PlaceNewWidget(unsigned index);
         uik::Widget* GetCurrentWidget();
         const uik::Widget* GetCurrentWidget() const;
         bool LoadStyleVerbose(const QString& name);

@@ -161,10 +161,7 @@ public:
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
-        const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
-        const auto& mouse_pos_view  = ToVec4(mickey->pos());
-        const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
-        mWidgetPos = mouse_pos_scene;
+        UpdateMousePosition(mickey->pos(), view);
     }
 
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
@@ -205,8 +202,20 @@ public:
         }
         mState.tree->Rebuild();
         mState.tree->SelectItemById(app::FromUtf8(child->GetId()));
-        return true;
+        mWidget = child->Clone();
+        return false;
     }
+    void UpdateMousePosition(const QPoint& pos, gfx::Transform& view)
+    {
+        const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
+        const auto& mouse_pos_view  = ToVec4(pos);
+        const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
+        mWidgetPos = mouse_pos_scene;
+    }
+    void SetWidgetIndex(unsigned index)
+    { mWidgetIndex = index; }
+    unsigned GetWidgetIndex() const
+    { return mWidgetIndex; }
 private:
     std::string CreateName() const
     {
@@ -223,6 +232,7 @@ private:
     glm::vec4 mWidgetPos;
     bool mSnapGrid = false;
     unsigned mGridSize = 0;
+    unsigned mWidgetIndex = 0;
 };
 
 class UIWidget::MoveWidgetTool : public MouseTool
@@ -362,6 +372,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onMouseMove    = std::bind(&UIWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&UIWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&UIWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.widget->onMouseWheel   = std::bind(&UIWidget::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&UIWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onZoomIn       = std::bind(&UIWidget::ZoomIn, this);
     mUI.widget->onZoomOut      = std::bind(&UIWidget::ZoomOut, this);
@@ -493,7 +504,6 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
-    bar.addAction(mUI.actionNewForm);
     bar.addAction(mUI.actionNewLabel);
     bar.addAction(mUI.actionNewPushButton);
     bar.addAction(mUI.actionNewCheckBox);
@@ -502,6 +512,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewSlider);
     bar.addAction(mUI.actionNewProgressBar);
     bar.addAction(mUI.actionNewRadioButton);
+    bar.addAction(mUI.actionNewForm);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -512,7 +523,6 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
-    menu.addAction(mUI.actionNewForm);
     menu.addAction(mUI.actionNewLabel);
     menu.addAction(mUI.actionNewPushButton);
     menu.addAction(mUI.actionNewCheckBox);
@@ -521,6 +531,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewSlider);
     menu.addAction(mUI.actionNewProgressBar);
     menu.addAction(mUI.actionNewRadioButton);
+    menu.addAction(mUI.actionNewForm);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -1022,91 +1033,47 @@ void UIWidget::on_actionSave_triggered()
 
 void UIWidget::on_actionNewForm_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Form>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewForm->setChecked(true);
+    PlaceNewWidget(9);
 }
 
 void UIWidget::on_actionNewLabel_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Label>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewLabel->setChecked(true);
+    PlaceNewWidget(1);
 }
 
 void UIWidget::on_actionNewPushButton_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::PushButton>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewPushButton->setChecked(true);
+    PlaceNewWidget(2);
 }
 
 void UIWidget::on_actionNewCheckBox_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::CheckBox>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewCheckBox->setChecked(true);
+    PlaceNewWidget(3);
 }
 
 void UIWidget::on_actionNewSpinBox_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    auto spin = std::make_unique<uik::SpinBox>();
-    spin->SetMin(0);
-    spin->SetMax(100);
-    spin->SetValue(GetValue(mUI.spinVal));
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(spin), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewSpinBox->setChecked(true);
+    PlaceNewWidget(5);
 }
 
 void UIWidget::on_actionNewSlider_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::Slider>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewSlider->setChecked(true);
+    PlaceNewWidget(6);
 }
 
 void UIWidget::on_actionNewProgressBar_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    auto widget = std::make_unique<uik::ProgressBar>();
-    widget->SetText("%1%");
-    widget->SetValue(0.5f);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewProgressBar->setChecked(true);
+    PlaceNewWidget(7);
 }
 
 void UIWidget::on_actionNewRadioButton_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    auto widget = std::make_unique<uik::RadioButton>();
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::move(widget), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewRadioButton->setChecked(true);
+    PlaceNewWidget(8);
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    mCurrentTool.reset(new PlaceWidgetTool(mState, std::make_unique<uik::GroupBox>(), snap, (unsigned)grid));
-    UncheckPlacementActions();
-    mUI.actionNewGroupBox->setChecked(true);
+    PlaceNewWidget(4);
 }
 
 void UIWidget::on_actionWidgetDelete_triggered()
@@ -1917,6 +1884,25 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
         UncheckPlacementActions();
     }
 }
+void UIWidget::MouseWheel(QWheelEvent* wheel)
+{
+    if (auto* place = dynamic_cast<PlaceWidgetTool*>(mCurrentTool.get()))
+    {
+        int widget_index = place->GetWidgetIndex() - 1;
+        const QPoint &num_degrees = wheel->angleDelta() / 8;
+        const QPoint &num_steps = num_degrees / 15;
+        // only consider the wheel scroll steps on the vertical axis.
+        // if steps are positive the wheel is scrolled away from the user
+        // and if steps are negative the wheel is scrolled towards the user.
+        const int num_vertical_steps = num_steps.y();
+        for (int i=0; i<std::abs(num_vertical_steps); ++i)
+        {
+            widget_index = math::wrap(0, 8, widget_index + num_vertical_steps);
+            PlaceNewWidget(widget_index + 1);
+        }
+    }
+}
+
 void UIWidget::MouseDoubleClick(QMouseEvent* mickey)
 {
 
@@ -2183,6 +2169,88 @@ void UIWidget::RebuildCombos()
     SetList(mUI.windowScriptFile, mState.workspace->ListUserDefinedScripts());
 }
 
+void UIWidget::PlaceNewWidget(unsigned int index)
+{
+    UncheckPlacementActions();
+
+    // widget index follows the hotkey indexing. see the .UI in designer
+    std::unique_ptr<uik::Widget> widget;
+    if (index == 1)
+    {
+        widget = std::make_unique<uik::Label>();
+        mUI.actionNewLabel->setChecked(true);
+    }
+    else if (index == 2)
+    {
+        widget = std::make_unique<uik::PushButton>();
+        mUI.actionNewPushButton->setChecked(true);
+    }
+    else if (index == 3)
+    {
+        widget = std::make_unique<uik::CheckBox>();
+        mUI.actionNewCheckBox->setChecked(true);
+    }
+    else if (index == 4)
+    {
+        widget = std::make_unique<uik::GroupBox>();
+        mUI.actionNewGroupBox->setChecked(true);
+    }
+    else if (index == 5)
+    {
+        auto spin = std::make_unique<uik::SpinBox>();
+        spin->SetMin(0);
+        spin->SetMax(100);
+        spin->SetValue(GetValue(mUI.spinVal));
+        widget = std::move(spin);
+        mUI.actionNewSpinBox->setChecked(true);
+    }
+    else if (index == 6)
+    {
+        widget = std::make_unique<uik::Slider>();
+        mUI.actionNewSlider->setChecked(true);
+    }
+    else if (index == 7)
+    {
+        auto prog = std::make_unique<uik::ProgressBar>();
+        prog->SetText("%1%");
+        prog->SetValue(0.5f);
+        widget = std::move(prog);
+        mUI.actionNewProgressBar->setChecked(true);
+    }
+    else if (index == 8)
+    {
+        widget = std::make_unique<uik::RadioButton>();
+        mUI.actionNewRadioButton->setChecked(true);
+    }
+    else if (index == 9)
+    {
+        widget = std::make_unique<uik::Form>();
+        mUI.actionNewForm->setChecked(true);
+    } else BUG("Unhandled widget index.");
+
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    auto tool = std::make_unique<PlaceWidgetTool>(mState, std::move(widget), snap, (unsigned)grid);
+    tool->SetWidgetIndex(index);
+
+    // where's the mouse in the widget
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e. QWindow and Widget as container
+    if (mickey.x() >= 0 && mickey.y() >= 0 &&
+        mickey.x() < mUI.widget->width() &&
+        mickey.y() < mUI.widget->height())
+    {
+        gfx::Transform view;
+        view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+        tool->UpdateMousePosition(mickey, view);
+    }
+    mCurrentTool = std::move(tool);
+}
+
 uik::Widget* UIWidget::GetCurrentWidget()
 {
     if (mPlayState == PlayState::Playing)
@@ -2272,8 +2340,10 @@ void UIWidget::UncheckPlacementActions()
     mUI.actionNewLabel->setChecked(false);
     mUI.actionNewPushButton->setChecked(false);
     mUI.actionNewCheckBox->setChecked(false);
+    mUI.actionNewGroupBox->setChecked(false);
     mUI.actionNewSpinBox->setChecked(false);
     mUI.actionNewSlider->setChecked(false);
+    mUI.actionNewRadioButton->setChecked(false);
     mUI.actionNewProgressBar->setChecked(false);
 }
 
