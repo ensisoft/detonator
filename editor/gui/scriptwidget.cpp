@@ -883,7 +883,7 @@ void InitDoc()
                                                "Returns nil if no such window object could be found.","string", "id");
 
     DOC_TABLE("game.Drawable");
-    DOC_METHOD_0("string", "GetMaterialId", "Get the graphics subsystem material ID.");
+    DOC_METHOD_0("string", "GetPaletteMaterialId", "Get the graphics subsystem material ID.");
     DOC_METHOD_0("string", "GetDrawableId", "Get the graphics subsystem drawable ID.");
     DOC_METHOD_0("int", "GetLayer", "Get the render layer index.");
     DOC_METHOD_0("float", "GetLineWidth", "Get the line width (in pixels) used when when rasterizing the shape using lines.");

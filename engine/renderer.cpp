@@ -34,6 +34,7 @@
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/types.h"
+#include "game/tilemap.h"
 #include "engine/renderer.h"
 
 using namespace game;
@@ -193,6 +194,105 @@ void Renderer::Draw(const SceneClass& scene,
         painter, transform, scene_hook, entity_hook);
 }
 
+void Renderer::Draw(const game::Tilemap& map,
+                    const game::FRect& viewport,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform)
+{
+    for (size_t i=0; i<map.GetNumLayers(); ++i)
+    {
+        const auto& layer = map.GetLayer(i);
+        if (layer.IsVisible() && layer.HasRenderComponent())
+        {
+            constexpr auto draw_render_layer = true;
+            constexpr auto draw_data_layer = false;
+            Draw(map, layer, viewport, painter, transform, i, draw_render_layer,  draw_data_layer);
+        }
+    }
+}
+void Renderer::Draw(const game::Tilemap& map,
+                    const game::TilemapLayer& layer,
+                    const game::FRect& viewport,
+                    gfx::Painter& painter,
+                    gfx::Transform& transform,
+                    std::size_t layer_index,
+                    bool draw_render_layer,
+                    bool draw_data_layer)
+{
+    const auto tile_width = map.GetTileWidth();
+    const auto tile_height = map.GetTileHeight();
+    const auto layer_tile_width  = tile_width * layer.GetTileSizeScaler();
+    const auto layer_tile_height = tile_height * layer.GetTileSizeScaler();
+
+    const unsigned layer_width_tiles  = layer.GetWidth();
+    const unsigned layer_height_tiles = layer.GetHeight();
+    const float layer_width_units  = layer_width_tiles  * layer_tile_width;
+    const float layer_height_units = layer_height_tiles * layer_tile_height;
+
+    const auto& model_to_world = transform.GetAsMatrix();
+    const auto& world_to_view  = painter.GetViewMatrix();
+    const auto& model_to_view  = world_to_view * model_to_world;
+    const auto& map_box  = game::FBox(model_to_view, layer_width_units, layer_height_units);
+    const auto& map_rect = map_box.GetBoundingRect();
+    const auto& view_intersection = Intersect(map_rect, viewport);
+
+    const auto& map_area = TransformRect(view_intersection, glm::inverse(model_to_view));
+
+    const unsigned tile_row = map_area.GetTopLeft().y / layer_tile_height;
+    const unsigned tile_col = map_area.GetTopLeft().x / layer_tile_width;
+    const unsigned num_tile_rows = map_area.GetHeight() / layer_tile_height + 1;
+    const unsigned num_tile_cols = map_area.GetWidth()/ layer_tile_width + 1;
+
+    const unsigned max_draw_cols = std::min(tile_col+num_tile_cols, layer_width_tiles);
+    const unsigned max_draw_rows = std::min(tile_row+num_tile_rows, layer_height_tiles);
+    const auto tile_rect = game::URect(tile_col, tile_row, max_draw_cols, max_draw_rows);
+    const auto tile_size = game::FSize(layer_tile_width, layer_tile_height);
+
+    const auto type = layer.GetType();
+    if (draw_render_layer && layer->HasRenderComponent())
+    {
+        if (type == game::TilemapLayer::Type::Render)
+            DrawRenderLayer<game::TilemapLayer_Render>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt4)
+            DrawRenderLayer<game::TilemapLayer_Render_DataUInt4>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt4)
+            DrawRenderLayer<game::TilemapLayer_Render_DataSInt4>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt8)
+            DrawRenderLayer<game::TilemapLayer_Render_DataSInt8>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt8)
+            DrawRenderLayer<game::TilemapLayer_Render_DataUInt8>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt24)
+            DrawRenderLayer<game::TilemapLayer_Render_DataUInt24>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt24)
+            DrawRenderLayer<game::TilemapLayer_Render_DataSInt24>(map, layer, tile_rect, tile_size, painter, transform, layer_index);
+        else BUG("Unknown render layer type.");
+    }
+    if (draw_data_layer && layer->HasDataComponent())
+    {
+        if (type == game::TilemapLayer::Type::Render_DataUInt4)
+            DrawDataLayer<game::TilemapLayer_Render_DataUInt4>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt4)
+            DrawDataLayer<game::TilemapLayer_Render_DataSInt4>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt8)
+            DrawDataLayer<game::TilemapLayer_Render_DataSInt8>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt8)
+            DrawDataLayer<game::TilemapLayer_Render_DataUInt8>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt24)
+            DrawDataLayer<game::TilemapLayer_Render_DataUInt24>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt24)
+            DrawDataLayer<game::TilemapLayer_Render_DataSInt24>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::DataSInt8)
+            DrawDataLayer<game::TilemapLayer_Data_SInt8>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::DataUInt8)
+            DrawDataLayer<game::TilemapLayer_Data_UInt8>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::DataSInt16)
+            DrawDataLayer<game::TilemapLayer_Data_SInt16>(map, layer, tile_rect, tile_size, painter, transform);
+        else if (type == game::TilemapLayer::Type::DataUInt16)
+            DrawDataLayer<game::TilemapLayer_Data_UInt16>(map, layer, tile_rect, tile_size, painter, transform);
+        else BUG("Unknown data layer type.");
+    }
+}
+
 void Renderer::Update(const EntityClass& entity, float time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
@@ -272,6 +372,7 @@ void Renderer::EndFrame()
 void Renderer::ClearPaintState()
 {
     mPaintNodes.clear();
+    mTilemapPalette.clear();
 }
 
 template<typename EntityNodeType>
@@ -695,4 +796,154 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
     }
 }
 
+template<typename LayerType>
+void Renderer::DrawRenderLayer(const game::Tilemap& map,
+                               const game::TilemapLayer& layer,
+                               const game::URect& tile_rect,
+                               const game::FSize& tile_size,
+                               gfx::Painter& painter,
+                               gfx::Transform& transform,
+                               std::size_t layer_index)
+{
+    using TileType = typename LayerType::TileType;
+    using LayerTraits = game::detail::TilemapLayerTraits<TileType>;
+
+    const auto* ptr = game::TilemapLayerCast<LayerType>(&layer);
+
+    const auto tile_row = tile_rect.GetY();
+    const auto tile_col = tile_rect.GetX();
+    const auto max_row = tile_rect.GetHeight();
+    const auto max_col = tile_rect.GetWidth();
+
+    // batches of tiles are indexed by the tile material.
+    std::vector<gfx::TileBatch> tiles;
+
+    for (unsigned row=tile_row; row<max_row; ++row)
+    {
+        for (unsigned col=tile_col; col<max_col; ++col)
+        {
+            // the tiles index value is an index into the tile map
+            // sprite palette.
+            const auto index = ptr->GetTile(row, col).index;
+            // special index max means "no value". this is needed in order
+            // to be able to have "holes" in some layer and let the layer
+            // below show through. could have used zero but that would
+            // make the palette indexing more inconvenient.
+            if (index == LayerTraits::MaxPaletteIndex)
+                continue;
+
+            gfx::TileBatch::Tile tile;
+            tile.pos.x = col;
+            tile.pos.y = row;
+
+            if (index >= tiles.size())
+                tiles.resize(index+1);
+
+            tiles[index].AddTile(std::move(tile));
+        }
+    }
+
+    if (layer_index >= mTilemapPalette.size())
+        mTilemapPalette.resize(layer_index+1);
+
+    auto& layer_palette = mTilemapPalette[layer_index];
+
+    // the index functions as an index into the layer's
+    // material layer palette.
+    for (size_t i=0; i<tiles.size(); ++i)
+    {
+        // find the material ID for this index from the layer.
+        const auto& material_id = layer.GetPaletteMaterialId(i);
+
+        // allocate new tile map material node.
+        if (i == layer_palette.size())
+            layer_palette.resize(i+1);
+
+        auto& layer_node = layer_palette[i];
+
+        if (layer_node.material_id != material_id)
+        {
+            layer_node.material_id = material_id;
+            layer_node.material.reset();
+            if (layer_node.material_id.empty())
+            {
+                WARN("Tilemap has no material set for layer material palette index. [map='%1', layer='%2', index=%3]",
+                     map.GetClassName(), layer.GetClassName(), i);
+                continue;
+            }
+            auto klass = mClassLib->FindMaterialClassById(material_id);
+            if (!klass)
+            {
+                WARN("No such tilemap material class found. [map='%1', layer='%2', class='%2']",
+                     map.GetClassName(), layer.GetClassName(), material_id);
+                continue;
+            }
+            layer_node.material = gfx::CreateMaterialInstance(klass);
+        }
+        if (!layer_node.material)
+            continue;
+
+        auto& batch = tiles[i];
+        batch.SetTileWidth(tile_size.GetWidth());
+        batch.SetTileHeight(tile_size.GetHeight());
+        painter.Draw(batch, transform, *layer_node.material);
+    }
+}
+
+template<typename LayerType>
+void Renderer::DrawDataLayer(const game::Tilemap& map,
+                             const game::TilemapLayer& layer,
+                             const game::URect& tile_rect,
+                             const game::FSize& tile_size,
+                             gfx::Painter& painter,
+                             gfx::Transform& transform)
+{
+    using TileType = typename LayerType::TileType;
+    using LayerTraits = game::detail::TilemapLayerTraits<TileType>;
+
+    const auto* ptr = game::TilemapLayerCast<LayerType>(&layer);
+
+    const auto tile_row = tile_rect.GetY();
+    const auto tile_col = tile_rect.GetX();
+    const auto max_row = tile_rect.GetHeight();
+    const auto max_col = tile_rect.GetWidth();
+
+    // batches of tiles are indexed by the tile material.
+    std::vector<gfx::TileBatch> tiles;
+
+    for (unsigned row=tile_row; row<max_row; ++row)
+    {
+        for (unsigned col=tile_col; col<max_col; ++col)
+        {
+            // the tiles index value is an index into the tile map
+            // sprite palette.
+            const auto value = NormalizeValue(ptr->GetTile(row, col));
+            const auto index = value * 255u;
+
+            gfx::TileBatch::Tile tile;
+            tile.pos.x = col;
+            tile.pos.y = row;
+
+            if (index >= tiles.size())
+                tiles.resize(index+1);
+            tiles[index].AddTile(std::move(tile));
+        }
+    }
+    for (size_t i=0; i<tiles.size(); ++i)
+    {
+        auto& batch = tiles[i];
+        batch.SetTileWidth(tile_size.GetWidth());
+        batch.SetTileHeight(tile_size.GetHeight());
+
+        const auto color_val = i / 255.0f;
+        const auto r = color_val;
+        const auto g = color_val;
+        const auto b = color_val;
+        const auto a = 1.0f;
+        const gfx::Color4f color(r, g, b, a);
+        painter.Draw(batch, transform, gfx::CreateMaterialFromColor(color));
+    }
+}
+
 } // namespace
+

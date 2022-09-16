@@ -24,6 +24,11 @@
 
 #include "editor/gui/drawing.h"
 
+namespace app {
+    class Resource;
+    class Workspace;
+} // namespace
+
 namespace gui
 {
     class Settings;
@@ -223,6 +228,8 @@ namespace gui
         { return true; }
 
     signals:
+        // refresh the actions for the widget menu and tool bar.
+        void RefreshActions();
         // Request to have the widget (and the MainWindow) refreshed immediately.
         void RefreshRequest();
         // Request to open the given script file in an external script editor.

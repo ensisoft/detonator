@@ -1101,9 +1101,22 @@ QString Workspace::GetDir() const
     return mWorkspaceDir;
 }
 
-QString Workspace::GetSubDir(const QString& dir) const
+QString Workspace::GetSubDir(const QString& dir, bool create) const
 {
-    return app::JoinPath(mWorkspaceDir, dir);
+    const auto& path = app::JoinPath(mWorkspaceDir, dir);
+
+    if (create)
+    {
+        QDir d;
+        d.setPath(path);
+        if (d.exists())
+            return path;
+        if (!d.mkpath(path))
+        {
+            ERROR("Failed to create workspace sub directory. [path='%1']", path);
+        }
+    }
+    return path;
 }
 
 QString Workspace::MapFileToWorkspace(const QString& filepath) const
@@ -1276,6 +1289,7 @@ bool Workspace::LoadContent(const QString& filename)
     LoadResources<gfx::PolygonClass>("shapes", root, mResources);
     LoadResources<game::EntityClass>("entities", root, mResources);
     LoadResources<game::SceneClass>("scenes", root, mResources);
+    LoadResources<game::TilemapClass>("tilemaps", root, mResources);
     LoadResources<Script>("scripts", root, mResources);
     LoadResources<DataFile>("data_files", root, mResources);
     LoadResources<audio::GraphClass>("audio_graphs", root, mResources);
@@ -1939,18 +1953,55 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
     // going to delete the underlying filesystem file as well.
     for (const auto& carcass : graveyard)
     {
-        if (!carcass->IsScript())
-            continue;
-        Script* script = nullptr;
-        carcass->GetContent(&script);
-        const auto& file = MapFileToFilesystem(script->GetFileURI());
-        if (!QFile::remove(file))
+        QString dead_file;
+        if (carcass->IsScript())
         {
-            ERROR("Failed to remove file '%1'", file);
+            Script* script = nullptr;
+            carcass->GetContent(&script);
+            dead_file = MapFileToFilesystem(script->GetFileURI());
+        }
+        else if (carcass->IsDataFile())
+        {
+            DataFile* data = nullptr;
+            carcass->GetContent(&data);
+            if (data->GetTypeTag() == DataFile::TypeTag::TilemapData)
+                dead_file = MapFileToFilesystem(data->GetFileURI());
+        }
+        if (dead_file.isEmpty())
+            continue;
+
+        if (!QFile::remove(dead_file))
+        {
+            ERROR("Failed to delete file. [file='%1']", dead_file);
         }
         else
         {
-            INFO("Deleted '%1'", file);
+            INFO("Deleted file '%1'.", dead_file);
+        }
+    }
+}
+
+void Workspace::DeleteResource(const std::string& id)
+{
+    for (size_t i=0; i<GetNumUserDefinedResources(); ++i)
+    {
+        const auto& res = GetUserDefinedResource(i);
+        if (res.GetIdUtf8() == id)
+        {
+            DeleteResource(i);
+            return;
+        }
+    }
+}
+void Workspace::DeleteResource(const QString& id)
+{
+    for (size_t i=0; i<GetNumUserDefinedResources(); ++i)
+    {
+        const auto& res = GetUserDefinedResource(i);
+        if (res.GetId() == id)
+        {
+            DeleteResource(i);
+            return;
         }
     }
 }
@@ -2052,6 +2103,7 @@ bool Workspace::ImportResources(const QString& filename, std::vector<std::unique
     success = success && LoadResources<gfx::PolygonClass>("shapes", root, resources);
     success = success && LoadResources<game::EntityClass>("entities", root, resources);
     success = success && LoadResources<game::SceneClass>("scenes", root, resources);
+    success = success && LoadResources<game::TilemapClass>("tilemaps", root, resources);
     success = success && LoadResources<Script>("scripts", root, resources);
     success = success && LoadResources<DataFile>("data_files", root, resources);
     success = success && LoadResources<audio::GraphClass>("audio_graphs", root, resources);

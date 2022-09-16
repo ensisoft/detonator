@@ -35,6 +35,12 @@
 namespace base
 {
 
+template<typename T>
+T EvenMultiple(T value, T multiple)
+{
+    return ((value + multiple - 1) / multiple) * multiple;
+}
+
 template<typename T, size_t N> inline
 size_t ArraySize(const T (&array)[N])
 { return N; }

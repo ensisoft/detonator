@@ -23,6 +23,7 @@
 #include "warnpop.h"
 
 #include <cmath>
+#include <algorithm> // for min, max
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -32,6 +33,8 @@ namespace game
     // type aliases for base types
     using FRect = base::FRect;
     using IRect = base::IRect;
+    using URect = base::URect;
+    using USize = base::USize;
     using IPoint = base::IPoint;
     using FPoint = base::FPoint;
     using FSize  = base::FSize;
@@ -44,20 +47,41 @@ namespace game
     class FBox
     {
     public:
+        FBox() = default;
+
+        FBox(const glm::mat4& mat)
+        {
+            Transform(mat);
+        }
+
         // Create a new unit box by default.
-        FBox(float w = 1.0f, float h = 1.0f)
+        FBox(float w, float h)
         {
             mTopLeft  = glm::vec2(0.0f, 0.0f);
-            mTopRight = glm::vec2(w, 0.0f);
+            mTopRight = glm::vec2(w,    0.0f);
             mBotLeft  = glm::vec2(0.0f, h);
-            mBotRight = glm::vec2(w, h);
+            mBotRight = glm::vec2(w,    h);
         }
-        FBox(const glm::mat4& mat, float w = 1.0f, float h = 1.0f)
+        FBox(float x, float y, float w, float h)
+        {
+            mTopLeft  = glm::vec2(x,     y);
+            mTopRight = glm::vec2(x + w, y);
+            mBotLeft  = glm::vec2(x,     y + h);
+            mBotRight = glm::vec2(x + w, y + h);
+        }
+        FBox(const glm::mat4& mat, float x, float y, float w, float h)
+        {
+            mTopLeft  = ToVec2(mat * ToVec4(glm::vec2(x,     y    )));
+            mTopRight = ToVec2(mat * ToVec4(glm::vec2(x + w, y    )));
+            mBotLeft  = ToVec2(mat * ToVec4(glm::vec2(x,     y + h)));
+            mBotRight = ToVec2(mat * ToVec4(glm::vec2(x + w, y + h)));
+        }
+        FBox(const glm::mat4& mat, float w, float h)
         {
             mTopLeft  = ToVec2(mat * ToVec4(glm::vec2(0.0f, 0.0f)));
-            mTopRight = ToVec2(mat * ToVec4(glm::vec2(w, 0.0f)));
+            mTopRight = ToVec2(mat * ToVec4(glm::vec2(w,    0.0f)));
             mBotLeft  = ToVec2(mat * ToVec4(glm::vec2(0.0f, h)));
-            mBotRight = ToVec2(mat * ToVec4(glm::vec2(w, h)));
+            mBotRight = ToVec2(mat * ToVec4(glm::vec2(w,    h)));
         }
         void Transform(const glm::mat4& mat)
         {
@@ -100,6 +124,26 @@ namespace game
             mBotLeft  = glm::vec2(0.0f, h);
             mBotRight = glm::vec2(w, h);
         }
+        FRect GetBoundingRect() const
+        {
+            // for each corner of a bounding rect compute new positions per
+            // the transformation matrix and then choose the min/max on each axis.
+            const auto& top_left  = GetTopLeft();
+            const auto& top_right = GetTopRight();
+            const auto& bot_left  = GetBotLeft();
+            const auto& bot_right = GetBotRight();
+
+            // choose min/max on each axis.
+            const auto left = std::min(std::min(top_left.x, top_right.x),
+                                       std::min(bot_left.x, bot_right.x));
+            const auto right = std::max(std::max(top_left.x, top_right.x),
+                                        std::max(bot_left.x, bot_right.x));
+            const auto top = std::min(std::min(top_left.y, top_right.y),
+                                      std::min(bot_left.y, bot_right.y));
+            const auto bottom = std::max(std::max(top_left.y, top_right.y),
+                                         std::max(bot_left.y, bot_right.y));
+            return FRect(left, top, right - left, bottom - top);
+        }
     private:
         static glm::vec4 ToVec4(const glm::vec2& vec)
         { return glm::vec4(vec.x, vec.y, 1.0f, 1.0f); }
@@ -111,10 +155,10 @@ namespace game
         // there are alternative ways too, such as
         // position + dim vectors and rotation
         // but this representation is quite simple.
-        glm::vec2 mTopLeft;
-        glm::vec2 mTopRight;
-        glm::vec2 mBotLeft;
-        glm::vec2 mBotRight;
+        glm::vec2 mTopLeft  = {0.0f, 0.0f};
+        glm::vec2 mTopRight = {1.0f, 0.0f};
+        glm::vec2 mBotLeft  = {0.0f, 1.0f};
+        glm::vec2 mBotRight = {1.0f, 1.0};
     };
 
     inline FBox TransformBox(const FBox& box, const glm::mat4& mat)

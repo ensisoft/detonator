@@ -80,6 +80,34 @@ inline QColor FromGfx(const gfx::Color4f& color)
     return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
+inline QModelIndexList GetSelection(QTableView* view)
+{
+    return view->selectionModel()->selectedRows();
+}
+
+inline void SelectRow(QTableView* view, int row)
+{
+    QSignalBlocker s(view);
+    if (row == -1)
+        view->clearSelection();
+    else view->selectRow(row);
+}
+inline void SelectLastRow(QTableView* view)
+{
+    QSignalBlocker s(view);
+    const auto count = view->model()->rowCount();
+    view->selectRow(count-1);
+}
+inline void ClearSelection(QTableView* view)
+{
+    QSignalBlocker s(view);
+    view->clearSelection();
+}
+inline int GetCurrentRow(QTableView* view)
+{
+    return view->currentIndex().row();
+}
+
 inline void SetEnabled(QWidget* widget, bool enabled)
 {
     QSignalBlocker s(widget);
@@ -126,6 +154,12 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
+inline void SetPlaceholderText(QComboBox* cmb, const QString& text)
+{
+    QSignalBlocker s(cmb);
+    cmb->setPlaceholderText(text);
+}
+
 inline void SetRange(QDoubleSpinBox* spin, double min, double max)
 {
     QSignalBlocker s(spin);
@@ -169,7 +203,7 @@ void SetValue(QComboBox* combo, T value)
     SetValue(combo, app::toString(value));
 }
 
-inline void SetValue(QComboBox* combo, const ListItemId& id)
+inline bool SetValue(QComboBox* combo, const ListItemId& id)
 {
     QSignalBlocker s(combo);
     combo->setCurrentIndex(-1);
@@ -184,10 +218,11 @@ inline void SetValue(QComboBox* combo, const ListItemId& id)
             combo->setCurrentIndex(i);
             if (combo->isEditable())
                 combo->setEditText(combo->itemText(i));
-            return;
+            return true;
         }
     }
     combo->setCurrentIndex(-1);
+    return false;
 }
 
 inline void SetValue(QComboBox* combo, int index)
@@ -244,13 +279,14 @@ inline void SetList(QListWidget* list, const ResourceList& items)
     }
 }
 
-inline void SetList(QComboBox* combo, const ResourceList& items)
+template<typename Type>
+void SetList(QComboBox* combo, const std::vector<Type>& list)
 {
     QSignalBlocker s(combo);
     QString current = combo->currentData(Qt::UserRole).toString();
 
     combo->clear();
-    for (const auto& item : items)
+    for (const auto& item : list)
     {
         combo->addItem(item.name, item.id);
     }
@@ -268,6 +304,17 @@ inline void SetList(QComboBox* combo, const ResourceList& items)
             return;
         }
     }
+}
+
+inline void SetIndex(QComboBox* combo, int index)
+{
+    QSignalBlocker s(combo);
+    combo->setCurrentIndex(index);
+}
+
+inline int GetIndex(QComboBox* combo)
+{
+    return combo->currentIndex();
 }
 
 inline void SetList(QComboBox* combo, const QStringList& items)
@@ -337,6 +384,13 @@ inline void SetValue(QLineEdit* line, double val)
 {
     QSignalBlocker s(line);
     line->setText(QString::number(val));
+    line->setCursorPosition(0);
+}
+
+inline void SetValue(QLineEdit* line, const app::Bytes& bytes)
+{
+    QSignalBlocker s(line);
+    line->setText(app::toString(bytes));
     line->setCursorPosition(0);
 }
 
@@ -782,6 +836,9 @@ template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QString& value)
 { res.SetProperty(key, value); }
 template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const QJsonObject& json)
+{ res.SetProperty(key, json); }
+template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QByteArray& value)
 { res.SetProperty(key, value); }
 template<typename Resource>
@@ -808,6 +865,14 @@ inline void SetProperty(Resource& res, const PropertyKey& key, quint64 value)
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const std::string& value)
 { res.SetProperty(key, value); }
+
+#if !defined(__MSVC__)
+// this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
+// is the same as quint64
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, size_t value)
+{ res.SetProperty(key, quint64(value)); }
+#endif
 
 // user properties.
 template<typename Resource>
@@ -844,6 +909,9 @@ template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QString& value)
 { res.SetUserProperty(key, value); }
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const QJsonObject& json)
+{ res.SetUserProperty(key, json); }
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QByteArray& value)
 { res.SetUserProperty(key, value); }
 template<typename Resource>
@@ -870,6 +938,14 @@ inline void SetUserProperty(Resource& res, const PropertyKey& key, quint64 value
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const std::string& value)
 { res.SetUserProperty(key, value); }
+
+#if !defined(__MSVC__)
+// this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
+// is the same as quint64
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, size_t value)
+{ res.SetUserProperty(key, quint64(value)); }
+#endif
 
 template<typename Resource, typename T> inline
 bool GetProperty(const Resource& res, const PropertyKey& key, T* out)
@@ -954,6 +1030,18 @@ template<typename Resource>
 inline void GetProperty(const Resource& res, const PropertyKey& key, std::string* str)
 {
     *str = res.GetProperty(key, std::string(""));
+}
+
+template<typename Resource>
+inline void GetProperty(const Resource& res, const PropertyKey& key, size_t* value)
+{
+    *value = res.GetProperty(key, quint64(0));
+}
+
+template<typename Resource>
+inline void GetUserProperty(const Resource& res, const PropertyKey& key, size_t* value)
+{
+    *value = res.GetUserProperty(key, quint64(0));
 }
 
 template<typename Resource, typename T> inline
@@ -1124,6 +1212,24 @@ inline bool MustHaveNumber(QComboBox* box)
     bool ok = false;
     str.toInt(&ok);
     return ok;
+}
+
+template<typename UI, typename State>
+void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view)
+{
+    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
+    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
+    view.Rotate(qDegreesToRadians(ui.rotation->value()));
+    view.Translate(state.camera_offset_x, state.camera_offset_y);
+}
+
+template<typename UI, typename State>
+void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, float rotation)
+{
+    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
+    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
+    view.Rotate(qDegreesToRadians(rotation));
+    view.Translate(state.camera_offset_x, state.camera_offset_y);
 }
 
 // List the font's installed with the application.

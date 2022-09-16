@@ -118,6 +118,14 @@ void ChildWindow::RefreshUI()
     }
 }
 
+void ChildWindow::RefreshActions()
+{
+    mUI.toolBar->clear();
+    mUI.menuTemp->clear();
+    mWidget->AddActions(*mUI.toolBar);
+    mWidget->AddActions(*mUI.menuTemp);
+}
+
 void ChildWindow::Update(double secs)
 {
     if (mPopInRequested || mClosed)

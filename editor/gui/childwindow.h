@@ -46,7 +46,7 @@ namespace gui
         ChildWindow(MainWidget* widget, Clipboard* clipboard);
        ~ChildWindow();
 
-        // Returns true if the widget requires accelerated
+        // Returns true if the widget requires an accelerated
         // update and render loop.
         bool IsAccelerated() const;
 
@@ -65,6 +65,9 @@ namespace gui
 
         // Do the periodic UI refresh.
         void RefreshUI();
+        // Refresh the actions in main toolbar and widget menu.
+        void RefreshActions();
+
         // Animate/update the underlying widget and it's simulations
         // if any.
         void Update(double dt);

@@ -174,6 +174,7 @@ add_library(EngineLib
     game/entity.cpp
     game/scriptvar.cpp
     game/scene.cpp
+    game/tilemap.cpp
     engine/audio.cpp
     engine/renderer.cpp
     engine/physics.cpp
@@ -327,6 +328,8 @@ add_executable(GSEditor
     editor/gui/dlggradient.ui
     editor/gui/dlgnew.h
     editor/gui/dlgnew.ui
+    editor/gui/dlgtilelayer.h
+    editor/gui/dlgtilelayer.ui
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h
@@ -363,9 +366,15 @@ add_executable(GSEditor
     editor/gui/uiwidget.h
     editor/gui/uiwidget.ui
     editor/gui/uiwidget.cpp
+    editor/gui/tilemapwidget.h
+    editor/gui/tilemapwidget.ui
+    editor/gui/tilemapwidget.cpp
     editor/gui/uniform.h
     editor/gui/uniform.ui
     editor/gui/uniform.cpp
+    editor/gui/palettematerial.h
+    editor/gui/palettematerial.ui
+    editor/gui/palettematerial.cpp
     editor/gui/sampler.h
     editor/gui/sampler.ui
     editor/gui/widgetstylewidget.h
@@ -652,7 +661,8 @@ add_library(GameLibTesting
     game/entity.cpp
     game/scriptvar.cpp
     game/animation.cpp
-    game/scene.cpp)
+    game/scene.cpp
+    game/tilemap.cpp)
 add_library(EngineLibTesting
     engine/audio.cpp
     engine/physics.cpp
@@ -672,6 +682,7 @@ add_executable(unit_test_anim      game/unit_test/unit_test_animation.cpp)
 add_executable(unit_test_entity    game/unit_test/unit_test_entity.cpp)
 add_executable(unit_test_scene     game/unit_test/unit_test_scene.cpp)
 add_executable(unit_test_scriptvar game/unit_test/unit_test_scriptvar.cpp)
+add_executable(unit_test_tilemap   game/unit_test/unit_test_tilemap.cpp)
 
 # engine tests
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
@@ -680,6 +691,7 @@ add_executable(unit_test_renderer engine/unit_test/unit_test_renderer.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
+target_link_libraries(unit_test_tilemap   GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_scriptvar GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_entity    GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_scene     GameLibTesting DataLib BaseLib)
@@ -689,6 +701,7 @@ target_link_libraries(unit_test_lua       EngineLibTesting GameLibTesting DataLi
 target_link_libraries(unit_test_settings  EngineLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_renderer  EngineLibTesting GameLibTesting GfxLib DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
 
+target_include_directories(unit_test_tilemap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_scriptvar PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_tree      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_anim      PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
@@ -705,6 +718,7 @@ add_test(NAME unit_test_scene     COMMAND unit_test_scene)
 add_test(NAME unit_test_lua       COMMAND unit_test_lua)
 add_test(NAME unit_test_rend      COMMAND unit_test_renderer)
 add_test(NAME unit_test_scriptvar COMMAND unit_test_scriptvar)
+add_test(NAME unit_test_tilemap   COMMAND unit_test_tilemap)
 
 #UI kit tests
 add_executable(unit_test_uikit

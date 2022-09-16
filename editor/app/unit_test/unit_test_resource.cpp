@@ -154,6 +154,7 @@ int test_main(int argc, char* argv[])
     r.SetProperty("bytes", bytes);
     r.SetProperty("color", QColor::fromRgb(100, 120, 120, 200));
     r.SetProperty("utf8-string", std::string("bla bla"));
+    r.SetProperty("big_value", quint64(2129019692383711403));
     QJsonObject json;
     app::JsonWrite(json, "foo", QString("foobar"));
     app::JsonWrite(json, "int", 123);
@@ -189,6 +190,7 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetProperty("bytes", QByteArray()) == bytes);
     TEST_REQUIRE(r.GetProperty("color", QColor()) == QColor::fromRgb(100, 120, 120, 200));
     TEST_REQUIRE(r.GetProperty("utf8-string", std::string()) == "bla bla");
+    TEST_REQUIRE(r.GetProperty("big_value", quint64(0)) == 2129019692383711403);
     map = r.GetProperty("variant_map", map);
     TEST_REQUIRE(map["value"].toInt() == 123);
     TEST_REQUIRE(map["string"].toString() == "boo");

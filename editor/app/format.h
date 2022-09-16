@@ -37,7 +37,7 @@
 
 #include "audio/format.h"
 #include "base/format.h"
-#include "editor/app/utility.h"
+#include "editor/app/types.h"
 
 namespace app
 {
@@ -62,6 +62,8 @@ namespace app
     { return QString("%1,%2").arg(vec.x).arg(vec.y); }
     inline QString toString(const glm::vec4& vec)
     { return QString("%1,%2,%3,%4").arg(vec.x).arg(vec.y).arg(vec.z).arg(vec.w); }
+
+    QString toString(const Bytes& b);
 
     template<typename T>
     QString toString(const T& val)

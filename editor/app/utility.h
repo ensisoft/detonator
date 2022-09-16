@@ -40,7 +40,6 @@
 #include <tuple>
 
 #include "base/assert.h"
-
 #include "base/snafu.h"
 
 // general dumping ground for utility type of functionality

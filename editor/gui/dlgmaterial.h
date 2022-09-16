@@ -42,6 +42,8 @@ namespace gui
         DlgMaterial(QWidget* parent, const app::Workspace* workspace, const QString& material);
         QString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
+        std::string GetSelectedMaterialIdUtf8() const
+        { return app::ToUtf8(mSelectedMaterialId); }
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
