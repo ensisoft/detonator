@@ -91,6 +91,11 @@ namespace gui
             mSelection = app::Resource::Type::AudioGraph;
             accept();
         }
+        void on_btnTilemap_clicked()
+        {
+            mSelection = app::Resource::Type::Tilemap;
+            accept();
+        }
         void on_btnCancel_clicked()
         {
             reject();

@@ -29,7 +29,7 @@
 #include <unordered_map>
 
 #include "graphics/fwd.h"
-#include "game/animation.h"
+#include "game/tilemap.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tree.h"
@@ -118,6 +118,19 @@ namespace engine
                   SceneClassDrawHook* scene_hook = nullptr,
                   EntityClassDrawHook* hook = nullptr);
 
+        void Draw(const game::Tilemap& map,
+                  const game::FRect& viewport,
+                  gfx::Painter& painter,
+                  gfx::Transform& transform);
+        void Draw(const game::Tilemap& map,
+                  const game::TilemapLayer& layer,
+                  const game::FRect& viewport,
+                  gfx::Painter& painter,
+                  gfx::Transform& transform,
+                  std::size_t layer_index,
+                  bool draw_render_layer,
+                  bool draw_data_layer);
+
         // Update the visual representation of the renderer's paint node
         // based on the given animation node.
         void Update(const game::EntityNodeClass& node, float time, float dt);
@@ -152,10 +165,27 @@ namespace engine
 
         template<typename EntityType, typename EntityNodeType>
         void GenerateDrawPackets(PaintNode& paint_node,
-                       std::vector<DrawPacket>& packets,
-                       EntityDrawHook<EntityNodeType>* hook);
+                                 std::vector<DrawPacket>& packets,
+                                 EntityDrawHook<EntityNodeType>* hook);
 
         void DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets);
+
+        template<typename LayerType>
+        void DrawRenderLayer(const game::Tilemap& map,
+                             const game::TilemapLayer& layer,
+                             const game::URect& tile_rect,
+                             const game::FSize& tile_size,
+                             gfx::Painter& painter,
+                             gfx::Transform& transform,
+                             std::size_t layer_index);
+        template<typename LayerType>
+        void DrawDataLayer(const game::Tilemap& map,
+                           const game::TilemapLayer& layer,
+                           const game::URect& tile_rect,
+                           const game::FSize& tile_size,
+                           gfx::Painter& painter,
+                           gfx::Transform& transform);
+
     private:
         const ClassLibrary* mClassLib = nullptr;
         using EntityRef = std::variant<
@@ -181,6 +211,14 @@ namespace engine
             EntityNodeRef entity_node;
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
+
+        struct TilemapNode {
+            std::string material_id;
+            std::shared_ptr<gfx::Material> material;
+            std::shared_ptr<gfx::Drawable> drawable;
+        };
+        using LayerPalette = std::vector<TilemapNode>;
+        std::vector<LayerPalette> mTilemapPalette;
         bool mEditingMode = false;
     };
 

@@ -1227,6 +1227,49 @@
             "x": 200.0,
             "y": 23.940000534057617
           }
+        },
+        {
+          "class": "uNSbgrIAfJ",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -50.0
+          },
+          "rotation": -0.00855211354792118,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 100.0
+          },
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/karmatic_arcade.ttf",
+            "font_size": 28,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "weird\nwidget",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
         }
       ],
       "render_tree": {
@@ -1234,6 +1277,13 @@
           {
             "children": [
               {
+                "children": [
+                  {
+                    "node": {
+                      "id": "uNSbgrIAfJ"
+                    }
+                  }
+                ],
                 "node": {
                   "id": "SGHkKNqZ8G"
                 }

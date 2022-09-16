@@ -79,6 +79,9 @@ namespace gfx
         // is useful when using some drawing system that doesn't support arbitrary
         // transformations.
         virtual void SetViewMatrix(const glm::mat4& view) = 0;
+        // Get the current view matrix if any.
+        virtual const glm::mat4& GetViewMatrix() const = 0;
+
         // Clear the render target with the given clear color.
         // You probably want to do this as the first step before
         // doing any other drawing.

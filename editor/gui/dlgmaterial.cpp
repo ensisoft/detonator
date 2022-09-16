@@ -72,6 +72,7 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
         this->restoreGeometry(geometry);
 }
 
+
 void DlgMaterial::on_btnAccept_clicked()
 {
     const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());

@@ -2224,6 +2224,89 @@ bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, Insta
     return true;
 }
 
+void TileBatch::ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const
+{
+    const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
+
+    program.SetUniform("kTileSize",       mTileWidth);
+    program.SetUniform("kTileRasterSize", mTileWidth * pixel_scale);
+    program.SetUniform("kProjectionMatrix",
+        *(const Program::Matrix4x4*)glm::value_ptr(*env.proj_matrix));
+    program.SetUniform("kModelViewMatrix",
+        *(const Program::Matrix4x4*)glm::value_ptr(*env.view_matrix * *env.model_matrix));
+}
+Shader* TileBatch::GetShader(Device& device) const
+{
+    // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
+    // and vTexCoord. Even though we're now rendering GL_POINTS this isnt
+    // a particle vertex shader. However, if a material shader refers to those
+    // varyings we might get GLSL program build errors on some platforms. 
+    constexpr auto*  src = R"(
+#version 100
+attribute vec2 aTilePosition;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kModelViewMatrix;
+
+uniform vec2  kBasePosition;
+uniform float kTileSize;
+uniform float kTileRasterSize;
+
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying vec2 vTexCoord;
+
+void main()
+{
+  vec2 tile = aTilePosition*kTileSize + vec2(0.5)*kTileSize;
+
+  vec4 vertex = vec4(tile.xy, 0.0, 1.0);
+  gl_Position = kProjectionMatrix * kModelViewMatrix * vertex;
+  gl_PointSize = kTileRasterSize;
+  vParticleAlpha = 1.0;
+  vParticleRandomValue = 1.0;
+}
+)";
+    constexpr auto* name = "TileBatchShader";
+
+    auto* shader = device.FindShader(name);
+    if (!shader)
+    {
+        shader = device.MakeShader(name);
+        shader->SetName(name);
+        shader->CompileSource(src);
+    }
+    return shader;
+}
+
+Geometry* TileBatch::Upload(const Environment& env, Device& device) const
+{
+    Geometry* geom = device.FindGeometry("tile-buffer");
+    if (!geom)
+        geom = device.MakeGeometry("tile-buffer");
+
+    using TileVertex = Tile;
+
+    static const VertexLayout layout(sizeof(TileVertex), {
+        {"aTilePosition", 0, 2, 0, offsetof(TileVertex, pos)},
+    });
+
+    geom->SetVertexBuffer(mTiles.data(), mTiles.size(), Geometry::Usage::Stream);
+    geom->SetVertexLayout(layout);
+    geom->ClearDraws();
+    geom->AddDrawCmd(Geometry::DrawType::Points);
+    return geom;
+
+}
+Drawable::Style TileBatch::GetStyle() const
+{
+    return Style::Points;
+}
+std::string TileBatch::GetProgramId() const
+{
+    return "tile-batch-program";
+}
+
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)
 {
     // factory function based on type switching.
@@ -2268,6 +2351,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<Cursor>(std::static_pointer_cast<const CursorClass>(klass));
         case DrawableClass::Type::Sector:
             return std::make_unique<Sector>(std::static_pointer_cast<const SectorClass>(klass));
+        case DrawableClass::Type::TileBatch:
+            return std::make_unique<TileBatch>();
     }
     BUG("Unhandled drawable class type");
     return {};

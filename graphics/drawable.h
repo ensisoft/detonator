@@ -71,6 +71,7 @@ namespace gfx
             RightTriangle,
             RoundRectangle,
             Trapezoid,
+            TileBatch
         };
          // Style of the drawable's geometry determines how the geometry
          // is to be rasterized.
@@ -1157,6 +1158,42 @@ namespace gfx
         std::shared_ptr<const KinematicsParticleEngineClass> mClass;
         // this is this particle engine's state.
         KinematicsParticleEngineClass::InstanceState mState;
+    };
+
+
+    class TileBatch : public Drawable
+    {
+    public:
+        struct Tile {
+            Vec2 pos;
+        };
+        TileBatch(float tile_width, float tile_height)
+          : mTileWidth(tile_width)
+          , mTileHeight(tile_height)
+        {}
+        TileBatch() = default;
+
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
+        virtual Shader* GetShader(Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual Style GetStyle() const override;
+        virtual std::string GetProgramId() const override;
+
+        void AddTile(const Tile& tile)
+        { mTiles.push_back(tile); }
+        void AddTile(Tile&& tile)
+        { mTiles.push_back(std::move(tile));}
+        void ClearTiles()
+        { mTiles.clear(); }
+
+        void SetTileWidth(float width)
+        { mTileWidth = width; }
+        void SetTileHeight(float height)
+        { mTileWidth = height; }
+    private:
+        std::vector<Tile> mTiles;
+        float mTileWidth  = 0.0f;
+        float mTileHeight = 0.0f;
     };
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);

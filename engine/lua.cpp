@@ -2581,7 +2581,7 @@ void BindGameLib(sol::state& L)
     classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
-    drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
+    drawable["GetPaletteMaterialId"] = &DrawableItem::GetMaterialId;
     drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;
     drawable["GetLayer"]      = &DrawableItem::GetLayer;
     drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;

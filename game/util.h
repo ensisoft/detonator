@@ -91,4 +91,13 @@ inline glm::vec2 RotateVector(const glm::vec2& vec, float angle)
     return glm::vec2(ret.x, ret.y);
 }
 
+inline FBox TransformRect(const FRect& rect, const glm::mat4& mat)
+{
+    const auto x = rect.GetX();
+    const auto y = rect.GetY();
+    const auto w = rect.GetWidth();
+    const auto h = rect.GetHeight();
+    return FBox(mat, x, y, w, h);
+}
+
 } // namespace

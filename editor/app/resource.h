@@ -38,6 +38,7 @@
 #include "graphics/material.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#include "game/tilemap.h"
 #include "uikit/window.h"
 #include "editor/app/utility.h"
 #include "editor/app/script.h"
@@ -80,7 +81,9 @@ namespace app
             // it's an arbitrary application/game data file
             DataFile,
             // it's a UI / window description
-            UI
+            UI,
+            // It's a tilemap
+            Tilemap
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -155,6 +158,8 @@ namespace app
         { return GetType() == Type::DataFile; }
         inline bool IsUI() const
         { return GetType() == Type::UI; }
+        inline bool IsTilemap() const
+        { return GetType() == Type::Tilemap; }
 
         // property helpers.
         // There's a lot of stuff that goes into QVariant but then doesn't
@@ -368,6 +373,8 @@ namespace app
                     return QIcon("icons:database.png");
                 case Resource::Type::UI:
                     return QIcon("icons:ui.png");
+                case Resource::Type::Tilemap:
+                    return QIcon("icons:tilemap.png");
                 default: break;
             }
             return QIcon();
@@ -404,6 +411,10 @@ namespace app
         struct ResourceTypeTraits<game::SceneClass> {
             static constexpr auto Type = app::Resource::Type::Scene;
         };
+        template<>
+        struct ResourceTypeTraits<game::TilemapClass> {
+            static constexpr auto Type = app::Resource::Type::Tilemap;
+        };
 
         template<>
         struct ResourceTypeTraits<gfx::PolygonClass> {
@@ -429,6 +440,7 @@ namespace app
         struct ResourceTypeTraits<uik::Window> {
             static constexpr auto Type = app::Resource::Type::UI;
         };
+
     } // detail
 
     template<typename BaseTypeContent>
@@ -511,6 +523,8 @@ namespace app
                 mContent->SetName(app::ToUtf8(name));
             else if constexpr (TypeValue == Resource::Type::Material)
                 mContent->SetName(app::ToUtf8(name));
+            else if constexpr (TypeValue == Resource::Type::Tilemap)
+                mContent->SetName(app::ToUtf8(name));
         }
         virtual void UpdateFrom(const Resource& other) override
         {
@@ -553,6 +567,8 @@ namespace app
                 data.AppendChunk("data_files", std::move(chunk));
             else if (TypeValue == Resource::Type::UI)
                 data.AppendChunk("uis", std::move(chunk));
+            else if (TypeValue == Resource::Type::Tilemap)
+                data.AppendChunk("tilemaps", std::move(chunk));
         }
         virtual void SaveProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
@@ -784,6 +800,7 @@ namespace app
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;
+    using TilemapResource        = GameResource<game::TilemapClass>;
     using AudioResource          = GameResource<audio::GraphClass>;
     using ScriptResource         = GameResource<Script>;
     using DataResource           = GameResource<DataFile>;

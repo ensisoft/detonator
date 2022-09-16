@@ -407,6 +407,46 @@ private:
     gfx::PolygonClass mPoly;
 };
 
+class TileBatchTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto tile_size = 50.0f;
+
+        {
+            gfx::TileBatch tiles;
+            tiles.SetTileWidth(tile_size);
+            tiles.SetTileHeight(tile_size);
+            for (unsigned row=0; row<10; ++row)
+            {
+                for (unsigned col=0; col<10; ++col)
+                {
+                    gfx::TileBatch::Tile tile;
+                    tile.pos.y = row;
+                    tile.pos.x = col;
+                    tiles.AddTile(std::move(tile));
+                }
+            }
+            gfx::Transform trans;
+            trans.MoveTo(100, 100);
+            trans.Resize(1.0f, 1.0f);
+            painter.Draw(tiles, trans, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+        }
+
+        {
+
+            gfx::Transform trans;
+            trans.MoveTo(100, 100);
+            trans.Resize(tile_size * 10, tile_size * 10);
+            painter.Draw(gfx::Grid(10, 10, true), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
+        }
+    }
+    virtual std::string GetName() const override
+    { return "TileBatchTest"; }
+private:
+};
+
 class StencilTest : public GraphicsTest
 {
 public:
@@ -1976,6 +2016,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new StencilTest);
     tests.emplace_back(new PolygonTest);
+    tests.emplace_back(new TileBatchTest);
     tests.emplace_back(new JankTest);
     tests.emplace_back(new MegaParticleTest);
     tests.emplace_back(new VSyncTest);

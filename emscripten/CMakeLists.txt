@@ -48,6 +48,7 @@ add_executable(GameEngine
     ../game/entity.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
+    ../game/tilemap.cpp
     ../engine/audio.cpp
     ../engine/engine.cpp
     ../engine/loader.cpp

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>581</width>
-    <height>687</height>
+    <width>924</width>
+    <height>534</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,10 +30,10 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item row="3" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPushButton" name="btnParticle">
+         <widget class="QPushButton" name="btnEntity">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -47,18 +47,55 @@
            </size>
           </property>
           <property name="text">
-           <string>Particle Engine</string>
+           <string>Entity</string>
           </property>
           <property name="icon">
            <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+            <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Display kinematic particles in motion based on velocity etc. parameters.</string>
+           <string>Combine shapes into a hierarchy of nodes with various properties.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QPushButton" name="btnScript">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Script</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Scripts allow you to implement your actual game logic.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -122,7 +159,44 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
+      <item row="0" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QPushButton" name="btnParticle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Particle Engine</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Display kinematic particles in motion based on velocity etc. parameters.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="0">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QPushButton" name="btnScene">
@@ -159,10 +233,10 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item row="3" column="2">
+       <layout class="QVBoxLayout" name="verticalLayout_10">
         <item>
-         <widget class="QPushButton" name="btnCustomShape">
+         <widget class="QPushButton" name="btnTilemap">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -176,18 +250,18 @@
            </size>
           </property>
           <property name="text">
-           <string>Shape</string>
+           <string>Tilemap</string>
           </property>
           <property name="icon">
            <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
+            <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="label_10">
           <property name="text">
-           <string>Create a new custom shape using draw primitives.</string>
+           <string>Create a new tilemap with different layers of data.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -196,81 +270,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QPushButton" name="btnEntity">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Entity</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Combine shapes into a hierarchy of nodes with various properties.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <item>
-         <widget class="QPushButton" name="btnScript">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Script</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Scripts allow you to implement your actual game logic.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <widget class="QPushButton" name="btnUI">
@@ -307,7 +307,7 @@
         </item>
        </layout>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="2">
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
          <widget class="QPushButton" name="btnAudio">
@@ -336,6 +336,43 @@
          <widget class="QLabel" name="label_9">
           <property name="text">
            <string>Create a new audio graph for game music and effects</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="2">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="btnCustomShape">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Shape</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Create a new custom shape using draw primitives.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -391,10 +428,11 @@
   <tabstop>btnMaterial</tabstop>
   <tabstop>btnParticle</tabstop>
   <tabstop>btnCustomShape</tabstop>
-  <tabstop>btnEntity</tabstop>
   <tabstop>btnScene</tabstop>
-  <tabstop>btnScript</tabstop>
+  <tabstop>btnEntity</tabstop>
+  <tabstop>btnTilemap</tabstop>
   <tabstop>btnUI</tabstop>
+  <tabstop>btnScript</tabstop>
   <tabstop>btnAudio</tabstop>
   <tabstop>cmbOpenMode</tabstop>
   <tabstop>btnCancel</tabstop>

@@ -26,17 +26,34 @@
 
 namespace app
 {
+    struct Bytes {
+        quint64 bytes = 0;
+    };
+
     // Facilitate implicit conversion from different
-    // types into a property key value.
+    // types into a property key string.
     class PropertyKey
     {
     public:
+        PropertyKey(const char* key)
+          : mKey(key)
+        {}
         PropertyKey(const QString& key)
           : mKey(key)
         {}
         PropertyKey(const std::string& key)
-          : mKey(app::FromUtf8(key))
+          : mKey(FromUtf8(key))
         {}
+        PropertyKey(const char* key, size_t index)
+          : mKey(QString("%1:%2").arg(key).arg(index))
+        {}
+        PropertyKey(const QString& key, size_t index)
+          : mKey(QString("%1:%2").arg(key).arg(index))
+        {}
+        PropertyKey(const std::string& key, size_t index)
+          : mKey(QString("%1:%2").arg(FromUtf8(key), index))
+        {}
+
         operator const QString& () const
         { return mKey; }
         const QString& key() const
@@ -59,6 +76,5 @@ namespace app
     private:
         const QMap<Key, Value>& mMap;
     };
-
 } // namespace
 

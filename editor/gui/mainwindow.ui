@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1542</width>
-    <height>1129</height>
+    <width>1853</width>
+    <height>1468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -227,32 +227,56 @@
              </item>
              <item>
               <layout class="QGridLayout" name="gridLayout">
-               <item row="1" column="2">
-                <widget class="QLabel" name="label_9">
-                 <property name="text">
-                  <string>Display kinematic particles in motion based on velocity etc. parameters.</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                 </property>
-                 <property name="wordWrap">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_8">
+               <item row="6" column="0">
+                <widget class="QPushButton" name="btnUI">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="text">
-                  <string>Materials define how objecs look. Materials are applied on shapes and particles.</string>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
                  </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 <property name="text">
+                  <string>UI</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QPushButton" name="btnEntity">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Entity</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Create a new UI for in-game menus, HUDs etc.</string>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
@@ -279,6 +303,39 @@
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="2">
+                <widget class="QPushButton" name="btnAudio">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Audio</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="2">
+                <widget class="QLabel" name="label_15">
+                 <property name="text">
+                  <string>Create a new audio graph for game music and effects</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -317,52 +374,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="2">
-                <widget class="QPushButton" name="btnEntity">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>100</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>Entity</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QPushButton" name="btnScene">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>100</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>Scene</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
-                 </property>
-                </widget>
-               </item>
                <item row="3" column="2">
                 <widget class="QLabel" name="label_11">
                  <property name="text">
@@ -376,56 +387,16 @@
                  </property>
                 </widget>
                </item>
-               <item row="6" column="0">
-                <widget class="QPushButton" name="btnUI">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_8">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>100</height>
-                  </size>
-                 </property>
                  <property name="text">
-                  <string>UI</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QPushButton" name="btnScript">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>100</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>Script</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="2">
-                <widget class="QLabel" name="label_13">
-                 <property name="text">
-                  <string>Scripts allow you to implement your actual game logic.</string>
+                  <string>Materials define how objecs look. Materials are applied on shapes and particles.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -435,10 +406,10 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_10">
+               <item row="1" column="2">
+                <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Create a new custom shape using draw primitives.</string>
+                  <string>Display kinematic particles in motion based on velocity etc. parameters.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -448,20 +419,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="label_12">
-                 <property name="text">
-                  <string>Build a new game world using entities.</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                 </property>
-                 <property name="wordWrap">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
+               <item row="0" column="3">
                 <widget class="QPushButton" name="btnShape">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -484,18 +442,21 @@
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0">
-                <widget class="QLabel" name="label_14">
+               <item row="1" column="3">
+                <widget class="QLabel" name="label_10">
                  <property name="text">
-                  <string>Create a new UI for in-game menus, HUDs etc.</string>
+                  <string>Create a new custom shape using draw primitives.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
                  </property>
                 </widget>
                </item>
-               <item row="6" column="2">
-                <widget class="QPushButton" name="btnAudio">
+               <item row="2" column="0">
+                <widget class="QPushButton" name="btnScene">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -509,18 +470,90 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>Audio</string>
+                  <string>Scene</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
+                   <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="2">
-                <widget class="QLabel" name="label_15">
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_12">
                  <property name="text">
-                  <string>Create a new audio graph for game music and effects</string>
+                  <string>Build a new game world using entities.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="3">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Scripts allow you to implement your actual game logic.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="3">
+                <widget class="QPushButton" name="btnScript">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Script</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="3">
+                <widget class="QPushButton" name="btnTilemap">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Tilemap</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="3">
+                <widget class="QLabel" name="label_20">
+                 <property name="text">
+                  <string>Create a new tilemap with different layers of data.</string>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
@@ -1165,7 +1198,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1542</width>
+     <width>1853</width>
      <height>28</height>
     </rect>
    </property>
@@ -1256,9 +1289,10 @@
     <addaction name="actionNewCustomShape"/>
     <addaction name="actionNewEntity"/>
     <addaction name="actionNewScene"/>
-    <addaction name="actionNewScript"/>
     <addaction name="actionNewUI"/>
+    <addaction name="actionNewTilemap"/>
     <addaction name="actionNewAudioGraph"/>
+    <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
     <addaction name="actionImportFiles"/>
@@ -2025,6 +2059,15 @@
     <string>Create new UI script</string>
    </property>
   </action>
+  <action name="actionNewTilemap">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Tilemap</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>btnDemoBandit</tabstop>
@@ -2033,22 +2076,23 @@
   <tabstop>btnDemoParticles</tabstop>
   <tabstop>btnDemoPlayground</tabstop>
   <tabstop>btnDemoUI</tabstop>
-  <tabstop>btnScript</tabstop>
-  <tabstop>mainTab</tabstop>
-  <tabstop>eventlist</tabstop>
-  <tabstop>workspace</tabstop>
-  <tabstop>statVBO</tabstop>
-  <tabstop>statTime</tabstop>
-  <tabstop>statFps</tabstop>
-  <tabstop>statVsync</tabstop>
-  <tabstop>btnShape</tabstop>
-  <tabstop>btnEntity</tabstop>
-  <tabstop>btnScene</tabstop>
+  <tabstop>btnDemoDerp</tabstop>
   <tabstop>btnMaterial</tabstop>
   <tabstop>btnParticle</tabstop>
-  <tabstop>btnAudio</tabstop>
+  <tabstop>btnShape</tabstop>
+  <tabstop>btnScene</tabstop>
+  <tabstop>btnEntity</tabstop>
+  <tabstop>btnTilemap</tabstop>
   <tabstop>btnUI</tabstop>
-  <tabstop>btnDemoDerp</tabstop>
+  <tabstop>btnAudio</tabstop>
+  <tabstop>btnScript</tabstop>
+  <tabstop>statFps</tabstop>
+  <tabstop>statVsync</tabstop>
+  <tabstop>mainTab</tabstop>
+  <tabstop>eventlist</tabstop>
+  <tabstop>statVBO</tabstop>
+  <tabstop>workspace</tabstop>
+  <tabstop>statTime</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

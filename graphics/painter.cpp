@@ -80,6 +80,10 @@ public:
     {
         mViewMatrix = view;
     }
+    virtual const glm::mat4& GetViewMatrix() const override
+    {
+        return mViewMatrix;
+    }
     virtual void Clear(const Color4f& color) override
     {
         mDevice->ClearColor(color);

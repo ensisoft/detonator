@@ -54,6 +54,7 @@
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/polygonwidget.h"
+#include "editor/gui/tilemapwidget.h"
 #include "editor/gui/dlgabout.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
@@ -119,6 +120,10 @@ gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspac
             if (resource)
                 return new gui::SceneWidget(workspace, *resource);
             return new gui::SceneWidget(workspace);
+        case app::Resource::Type::Tilemap:
+            if (resource)
+                return new gui::TilemapWidget(workspace, *resource);
+            return new gui::TilemapWidget(workspace);
         case app::Resource::Type::Script:
             if (resource)
                 return new gui::ScriptWidget(workspace, *resource);
@@ -378,7 +383,7 @@ void MainWindow::LoadState()
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("There was a problem loading the previous workspace.\n\n"
+        msg.setText(tr("There was a problem loading the previous workspace.\n\n%1"
                         "See the application log for more details.").arg(workspace));
         msg.exec();
     }
@@ -463,72 +468,85 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     // Load workspace windows and their content.
     bool success = true;
+    bool load_session = true;
+
+    const QStringList& args = QCoreApplication::arguments();
+    for (const QString& arg : args)
+    {
+        if (arg == "--no-session")
+            load_session = false;
+    }
 
     unsigned show_resource_bits = ~0u;
     QStringList session;
     mWorkspace->GetUserProperty("session_files", &session);
     mWorkspace->GetUserProperty("show_resource_bits", &show_resource_bits);
-    for (const auto& file : session)
+
+    if (load_session)
     {
-        Settings settings(file);
-        if (!settings.Load())
+        for (const auto& file: session)
         {
-            WARN("Failed to load session file. [file='%1']", file);
-            success = false;
-            continue;
-        }
-        const auto& klass = settings.GetValue("MainWindow", "class_name", QString(""));
-        const auto& id    = settings.GetValue("MainWindow", "widget_id", QString(""));
-        const auto& title = settings.GetValue("MainWindow", "widget_title", QString(""));
-        MainWidget* widget = nullptr;
-        if (klass == MaterialWidget::staticMetaObject.className())
-            widget = new MaterialWidget(mWorkspace.get());
-        else if (klass == ParticleEditorWidget::staticMetaObject.className())
-            widget = new ParticleEditorWidget(mWorkspace.get());
-        else if (klass == ShapeWidget::staticMetaObject.className())
-            widget = new ShapeWidget(mWorkspace.get());
-        else if (klass == AnimationTrackWidget::staticMetaObject.className())
-            widget = new AnimationTrackWidget(mWorkspace.get());
-        else if (klass == EntityWidget::staticMetaObject.className())
-            widget = new EntityWidget(mWorkspace.get());
-        else if (klass == SceneWidget::staticMetaObject.className())
-            widget = new SceneWidget(mWorkspace.get());
-        else if (klass == ScriptWidget::staticMetaObject.className())
-            widget = new ScriptWidget(mWorkspace.get());
-        else if (klass == UIWidget::staticMetaObject.className())
-            widget = new UIWidget(mWorkspace.get());
-        else if (klass == AudioWidget::staticMetaObject.className())
-            widget = new AudioWidget(mWorkspace.get());
-        else BUG("Unhandled widget type.");
+            Settings settings(file);
+            if (!settings.Load())
+            {
+                WARN("Failed to load session file. [file='%1']", file);
+                success = false;
+                continue;
+            }
+            const auto& klass = settings.GetValue("MainWindow", "class_name", QString(""));
+            const auto& id = settings.GetValue("MainWindow", "widget_id", QString(""));
+            const auto& title = settings.GetValue("MainWindow", "widget_title", QString(""));
+            MainWidget* widget = nullptr;
+            if (klass == MaterialWidget::staticMetaObject.className())
+                widget = new MaterialWidget(mWorkspace.get());
+            else if (klass == ParticleEditorWidget::staticMetaObject.className())
+                widget = new ParticleEditorWidget(mWorkspace.get());
+            else if (klass == ShapeWidget::staticMetaObject.className())
+                widget = new ShapeWidget(mWorkspace.get());
+            else if (klass == AnimationTrackWidget::staticMetaObject.className())
+                widget = new AnimationTrackWidget(mWorkspace.get());
+            else if (klass == EntityWidget::staticMetaObject.className())
+                widget = new EntityWidget(mWorkspace.get());
+            else if (klass == SceneWidget::staticMetaObject.className())
+                widget = new SceneWidget(mWorkspace.get());
+            else if (klass == TilemapWidget::staticMetaObject.className())
+                widget = new TilemapWidget(mWorkspace.get());
+            else if (klass == ScriptWidget::staticMetaObject.className())
+                widget = new ScriptWidget(mWorkspace.get());
+            else if (klass == UIWidget::staticMetaObject.className())
+                widget = new UIWidget(mWorkspace.get());
+            else if (klass == AudioWidget::staticMetaObject.className())
+                widget = new AudioWidget(mWorkspace.get());
+            else BUG("Unhandled widget type.");
 
-        widget->setWindowTitle(title);
+            widget->setWindowTitle(title);
 
-        if (!widget->LoadState(settings))
-        {
-            WARN("Failed to load main widget state. [name='%1']", title);
-            success = false;
-        }
-        const bool has_own_window = settings.GetValue("MainWindow", "has_own_window", false);
-        if (has_own_window)
-        {
-            ChildWindow* window = ShowWidget(widget , true);
-            const auto xpos  = settings.GetValue("MainWindow", "window_xpos", window->x());
-            const auto ypos  = settings.GetValue("MainWindow", "window_ypos", window->y());
-            const auto width = settings.GetValue("MainWindow", "window_width", window->width());
-            const auto height = settings.GetValue("MainWindow", "window_height", window->height());
-            if (xpos < size.width() && ypos < size.height())
-                window->move(xpos, ypos);
+            if (!widget->LoadState(settings))
+            {
+                WARN("Failed to load main widget state. [name='%1']", title);
+                success = false;
+            }
+            const bool has_own_window = settings.GetValue("MainWindow", "has_own_window", false);
+            if (has_own_window)
+            {
+                ChildWindow* window = ShowWidget(widget, true);
+                const auto xpos = settings.GetValue("MainWindow", "window_xpos", window->x());
+                const auto ypos = settings.GetValue("MainWindow", "window_ypos", window->y());
+                const auto width = settings.GetValue("MainWindow", "window_width", window->width());
+                const auto height = settings.GetValue("MainWindow", "window_height", window->height());
+                if (xpos < size.width() && ypos < size.height())
+                    window->move(xpos, ypos);
 
-            window->resize(width, height);
-            window->setWindowTitle(title);
+                window->resize(width, height);
+                window->setWindowTitle(title);
+            } else
+            {
+                ShowWidget(widget, false);
+            }
+            // remove the file, no longer needed.
+            QFile::remove(file);
+            DEBUG("Loaded main widget. [name='%1']", title);
         }
-        else
-        {
-            ShowWidget(widget, false);
-        }
-        // remove the file, no longer needed.
-        QFile::remove(file);
-        DEBUG("Loaded main widget. [name='%1']", title);
     }
 
     setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
@@ -1384,6 +1402,11 @@ void MainWindow::on_actionNewUIScript_triggered()
     emit OpenNewWidget(widget);
 }
 
+void MainWindow::on_actionNewTilemap_triggered()
+{
+    OpenNewWidget(new TilemapWidget(mWorkspace.get()));
+}
+
 void MainWindow::on_actionNewUI_triggered()
 {
     OpenNewWidget(new UIWidget(mWorkspace.get()));
@@ -1870,6 +1893,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewEntity);
     menu.addAction(mUI.actionNewScene);
     menu.addAction(mUI.actionNewUI);
+    menu.addAction(mUI.actionNewTilemap);
     menu.addAction(mUI.actionNewAudioGraph);
     menu.addMenu(&script);
     menu.addSeparator();
@@ -2174,6 +2198,11 @@ void MainWindow::on_btnAudio_clicked()
     OpenNewWidget(MakeWidget(app::Resource::Type::AudioGraph));
 }
 
+void MainWindow::on_btnTilemap_clicked()
+{
+    OpenNewWidget(MakeWidget(app::Resource::Type::Tilemap));
+}
+
 void MainWindow::RefreshUI()
 {
     if (mPlayWindow)
@@ -2408,6 +2437,26 @@ void MainWindow::RefreshWidget()
         return;
 
     UpdateStats();
+}
+
+void MainWindow::RefreshWidgetActions()
+{
+    auto* widget = dynamic_cast<MainWidget*>(sender());
+    if (widget == mCurrentWidget)
+    {
+        mUI.mainToolBar->clear();
+        mUI.menuTemp->clear();
+        widget->AddActions(*mUI.mainToolBar);
+        widget->AddActions(*mUI.menuTemp);
+    }
+    else
+    {
+        for (auto* child : mChildWindows)
+        {
+            if (child->GetWidget() == widget)
+                child->RefreshActions();
+        }
+    }
 }
 
 void MainWindow::OpenResource(const QString& id)
@@ -2692,13 +2741,14 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 
     if (!widget->property("_main_window_connected_").toBool())
     {
-        connect(widget, &MainWidget::OpenExternalImage, this, &MainWindow::OpenExternalImage);
+        connect(widget, &MainWidget::OpenExternalImage,  this, &MainWindow::OpenExternalImage);
         connect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
         connect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
-        connect(widget, &MainWidget::OpenExternalAudio, this, &MainWindow::OpenExternalAudio);
-        connect(widget, &MainWidget::OpenNewWidget, this, &MainWindow::OpenNewWidget);
-        connect(widget, &MainWidget::RefreshRequest, this, &MainWindow::RefreshWidget);
-        connect(widget, &MainWidget::OpenResource, this, &MainWindow::OpenResource);
+        connect(widget, &MainWidget::OpenExternalAudio,  this, &MainWindow::OpenExternalAudio);
+        connect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
+        connect(widget, &MainWidget::RefreshRequest,     this, &MainWindow::RefreshWidget);
+        connect(widget, &MainWidget::OpenResource,       this, &MainWindow::OpenResource);
+        connect(widget, &MainWidget::RefreshActions,     this, &MainWindow::RefreshWidgetActions);
         widget->setProperty("_main_window_connected_", true);
     }
 
@@ -2801,6 +2851,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewScene);
         mUI.mainToolBar->addAction(mUI.actionNewScript);
         mUI.mainToolBar->addAction(mUI.actionNewUI);
+        mUI.mainToolBar->addAction(mUI.actionNewTilemap);
         mUI.mainToolBar->addAction(mUI.actionNewAudioGraph);
         mUI.mainToolBar->addSeparator();
         mUI.mainToolBar->addAction(mUI.actionImportFiles);
@@ -2892,9 +2943,7 @@ void MainWindow::UpdateStats()
     const auto vbo_alloc = stats.device.static_vbo_mem_alloc +
                            stats.device.streaming_vbo_mem_alloc +
                            stats.device.dynamic_vbo_mem_alloc;
-    SetValue(mUI.statVBO, QString("%1/%2 kB")
-            .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
-
+    SetValue(mUI.statVBO, app::toString("%1/%2", app::Bytes{vbo_use}, app::Bytes{vbo_alloc}));
     SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
     SetValue(mUI.statVsync, GfxWindow::GetVSYNC() ? QString("ON") : QString("OFF"));
 }

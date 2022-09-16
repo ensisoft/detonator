@@ -121,6 +121,7 @@ namespace gui
         void on_actionNewSceneScript_triggered();
         void on_actionNewUIScript_triggered();
         void on_actionNewUI_triggered();
+        void on_actionNewTilemap_triggered();
         void on_actionNewAudioGraph_triggered();
         void on_actionImportFiles_triggered();
         void on_actionExportJSON_triggered();
@@ -164,6 +165,7 @@ namespace gui
         void on_btnScript_clicked();
         void on_btnUI_clicked();
         void on_btnAudio_clicked();
+        void on_btnTilemap_clicked();
         void actionWindowFocus_triggered();
         void RefreshUI();
         void ShowNote(const app::Event& event);
@@ -173,6 +175,7 @@ namespace gui
         void OpenExternalAudio(const QString& file);
         void OpenNewWidget(MainWidget* widget);
         void RefreshWidget();
+        void RefreshWidgetActions();
         void OpenResource(const QString& id);
         void OpenRecentWorkspace();
         void ToggleShowResource();

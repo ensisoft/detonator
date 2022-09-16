@@ -166,7 +166,7 @@ namespace app
         QString GetDir() const;
         // Get a directory within the workspace, for example
         // data/ or lua/
-        QString GetSubDir(const QString& dir) const;
+        QString GetSubDir(const QString& dir, bool create = true) const;
 
         using ResourceList = app::ResourceList;
 
@@ -274,6 +274,8 @@ namespace app
         void DeleteResources(const QModelIndexList& list);
         void DeleteResources(std::vector<size_t> indices);
         void DeleteResource(size_t index);
+        void DeleteResource(const std::string& id);
+        void DeleteResource(const QString& id);
         // Create duplicate copies of the selected resources.
         void DuplicateResources(const QModelIndexList& list);
         void DuplicateResources(std::vector<size_t> indices);

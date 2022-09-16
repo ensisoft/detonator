@@ -108,4 +108,25 @@ QString toString(const base::Color4f& color)
     return app::FromUtf8(base::ToString(color));
 }
 
+QString toString(const Bytes& bytes)
+{
+    // use floating points here so we get automatic
+    // promotion, and no need to cast in format funcs
+    const double GB = 1024 * 1024 * 1024;
+    const double MB = 1024 * 1024;
+    const double KB = 1024;
+
+    // SI units use kB, MB and GB for base of 1000
+    // using base of 1024 gives kibibyes, mebibytes and gibibytes
+
+    if (bytes.bytes >= GB)
+        return QString("%1 GiB").arg(bytes.bytes / GB, 0, 'f', 1, ' ');
+    else if (bytes.bytes >= MB)
+        return QString("%1 MiB").arg(bytes.bytes / MB, 0, 'f', 1, ' ');
+    else if (bytes.bytes >= KB)
+        return QString("%1 KiB").arg(bytes.bytes / KB, 0, 'f', 1, ' ');
+
+    return QString("%1 b").arg(bytes.bytes, 0, 'f', 1, ' ');
+}
+
 } // app
