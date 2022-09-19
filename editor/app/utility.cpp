@@ -243,7 +243,7 @@ std::ifstream OpenBinaryIStream(const QString& file)
 
 }
 
-bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes)
+bool WriteBinaryFile(const QString& file, const void* data, std::size_t bytes)
 {
     std::ofstream out = OpenBinaryOStream(file);
     if (!out.is_open())
