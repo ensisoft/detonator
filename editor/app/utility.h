@@ -106,21 +106,21 @@ std::ofstream OpenBinaryOStream(const QString& file);
 std::ifstream OpenBinaryIStream(const QString& file);
 
 // Simple helper function to quickly dump binary data to a file.
-// Returns true if succesful, otherwise false.
-bool WriteAsBinary(const QString& file, const void* data, std::size_t bytes);
+// Returns true if successful, otherwise false.
+bool WriteBinaryFile(const QString& file, const void* data, std::size_t bytes);
 
 // Simple helper function to write the contents of vector<T>
 // in binary to a file.
 template<typename T>
-bool WriteAsBinary(const QString& file, const std::vector<T>& data)
+bool WriteBinaryFile(const QString& file, const std::vector<T>& data)
 {
-    return WriteAsBinary(file, (const void*)data.data(),
-        sizeof(T) * data.size());
+    return WriteBinaryFile(file, (const void*) data.data(),
+                           sizeof(T) * data.size());
 }
 
 // Read the contents of a file into a vector of some generic type T
 template<typename T>
-bool ReadAsBinary(const QString& file, std::vector<T>& data)
+bool ReadBinaryFile(const QString& file, std::vector<T>& data)
 {
     std::ifstream in = OpenBinaryIStream(file);
     if (!in.is_open())

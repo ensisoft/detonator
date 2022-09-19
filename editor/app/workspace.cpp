@@ -259,7 +259,7 @@ public:
             // somehow wrong but an image that should have 24 bits for depth gets
             // reported as 32bit when QImage loads it.
             std::vector<char> img_data;
-            if (!app::ReadAsBinary(src_file, img_data))
+            if (!app::ReadBinaryFile(src_file, img_data))
             {
                 ERROR("Failed to open image file. [file='%1']", src_file);
                 mNumErrors++;
