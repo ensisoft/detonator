@@ -140,14 +140,14 @@ namespace base
                     mBlue  = 0.0f;
                     break;
                 case Color::Silver:
-                    mRed = 0.752941;
-                    mGreen = 0.752941;
-                    mBlue = 0.752941;
+                    mRed   = 0.752941f;
+                    mGreen = 0.752941f;
+                    mBlue  = 0.752941f;
                     break;
                 case Color::Bronze:
-                    mRed = 0.804;
-                    mGreen = 0.498;
-                    mBlue = 0.196;
+                    mRed   = 0.804f;
+                    mGreen = 0.498f;
+                    mBlue  = 0.196f;
                     break;
             }
         }
