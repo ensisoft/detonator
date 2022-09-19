@@ -95,6 +95,19 @@ bool Settings::GetValue(const QString& module, const QString& key, QByteArray* o
     return true;
 }
 
+bool Settings::GetValue(const QString& module, const QString& key, QJsonObject* out) const
+{
+    QByteArray buff;
+    if (!GetValue(module, key, &buff))
+        return false;
+
+    QJsonDocument doc = QJsonDocument::fromJson(buff);
+    if (doc.isNull())
+        return false;
+    *out = doc.object();
+    return true;
+}
+
 void Settings::SetValue(const QString& module, const QString& key, const data::JsonObject& json)
 {
     mSettings->SetValue(module + "/" + key, app::FromUtf8(base64::Encode(json.ToString())));
@@ -104,6 +117,14 @@ void Settings::SetValue(const QString& module, const QString& key, const QByteAr
 {
     mSettings->SetValue(module + "/" + key, QString::fromLatin1(bytes.toBase64()));
 }
+
+void Settings::SetValue(const QString& module, const QString& key, const QJsonObject& json)
+{
+    QJsonDocument doc(json);
+    const QByteArray& bytes = doc.toJson();
+    SetValue(module, key, bytes);
+}
+
 QByteArray Settings::GetValue(const QString& module, const QString& key, const QByteArray& defaultValue) const
 {
     const auto& value = mSettings->GetValue(module + "/" + key);

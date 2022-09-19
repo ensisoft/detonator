@@ -24,6 +24,7 @@
 #  include <QString>
 #  include <QtWidgets>
 #  include <QSignalBlocker>
+#  include <QJsonObject>
 #  include <color_selector.hpp> // from Qt color widgets
 #include "warnpop.h"
 
@@ -68,6 +69,7 @@ namespace gui
         bool GetValue(const QString& module, const QString& key, std::string* out) const;
         bool GetValue(const QString& module, const QString& key, data::JsonObject* out) const;
         bool GetValue(const QString& module, const QString& key, QByteArray* out) const;
+        bool GetValue(const QString& module, const QString& key, QJsonObject* json) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
@@ -81,7 +83,7 @@ namespace gui
             return qvariant_cast<T>(value);
         }
 
-        QByteArray GetValue(const QString& mdoule, const QString& key, const QByteArray& defaultValue) const;
+        QByteArray GetValue(const QString& module, const QString& key, const QByteArray& defaultValue) const;
         std::string GetValue(const QString& module, const QString& key, const std::string& defaultValue) const;
         std::size_t GetValue(const QString& module, const QString& key, std::size_t defaultValue) const;
 
@@ -97,6 +99,7 @@ namespace gui
 
         void SetValue(const QString& module, const QString& key, const data::JsonObject& json);
         void SetValue(const QString& module, const QString& key, const QByteArray& bytes);
+        void SetValue(const QString& module, const QString& key, const QJsonObject& json);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);
