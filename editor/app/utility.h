@@ -202,9 +202,13 @@ inline void JsonWrite(QJsonObject& object, const char* name, unsigned value)
 {
     object[name] = static_cast<int>(value);
 }
-inline void JsonWrite(QJsonObject& object, const char* name, QString value)
+inline void JsonWrite(QJsonObject& object, const char* name, const QString& value)
 {
     object[name] = value;
+}
+inline void JsonWrite(QJsonObject& object, const char* name, const std::string& value)
+{
+    object[name] = FromUtf8(value);
 }
 inline void JsonWrite(QJsonObject& object, const char* name, bool value)
 {
@@ -278,6 +282,15 @@ inline bool JsonReadSafe(const QJsonObject& object, const char* name, QString* o
     *out = object[name].toString();
     return true;
 }
+inline bool JsonReadSafe(const QJsonObject& object, const char* name, std::string* out)
+{
+    if (!object.contains(name) || !object[name].isString())
+        return false;
+    QString str = object[name].toString();
+    *out = ToUtf8(str);
+    return true;
+}
+
 inline bool JsonReadSafe(const QJsonObject& object, const char* name, bool* out)
 {
     if (!object.contains(name) || !object[name].isBool())
