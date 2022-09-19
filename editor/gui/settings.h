@@ -33,6 +33,7 @@
 
 #include "data/fwd.h"
 #include "editor/app/utility.h"
+#include "editor/app/types.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 
@@ -56,7 +57,7 @@ namespace gui
         bool Save();
 
         template<typename T>
-        bool GetValue(const QString& module, const QString& key, T* out) const
+        bool GetValue(const QString& module, const app::PropertyKey& key, T* out) const
         {
             const auto& value = mSettings->GetValue(module + "/" + key);
             if (!value.isValid())
@@ -65,17 +66,17 @@ namespace gui
             return true;
         }
 
-        bool GetValue(const QString& module, const QString& key, std::size_t* out) const;
-        bool GetValue(const QString& module, const QString& key, std::string* out) const;
-        bool GetValue(const QString& module, const QString& key, data::JsonObject* out) const;
-        bool GetValue(const QString& module, const QString& key, QByteArray* out) const;
-        bool GetValue(const QString& module, const QString& key, QJsonObject* json) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, std::size_t* out) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, std::string* out) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, data::JsonObject* out) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, QByteArray* out) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, QJsonObject* json) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
         // then the default value is returned.
         template<typename T>
-        T GetValue(const QString& module, const QString& key, const T& defaultValue) const
+        T GetValue(const QString& module, const app::PropertyKey& key, const T& defaultValue) const
         {
             const auto& value = mSettings->GetValue(module + "/" + key);
             if (!value.isValid())
@@ -83,23 +84,23 @@ namespace gui
             return qvariant_cast<T>(value);
         }
 
-        QByteArray GetValue(const QString& module, const QString& key, const QByteArray& defaultValue) const;
-        std::string GetValue(const QString& module, const QString& key, const std::string& defaultValue) const;
-        std::size_t GetValue(const QString& module, const QString& key, std::size_t defaultValue) const;
+        QByteArray GetValue(const QString& module,  const app::PropertyKey& key, const QByteArray& defaultValue) const;
+        std::string GetValue(const QString& module, const app::PropertyKey& key, const std::string& defaultValue) const;
+        std::size_t GetValue(const QString& module, const app::PropertyKey& key, std::size_t defaultValue) const;
 
 
         // Set a value in the settings object under the specific module/key
         template<typename T>
-        void SetValue(const QString& module, const QString& key, const T& value)
+        void SetValue(const QString& module, const app::PropertyKey& key, const T& value)
         { mSettings->SetValue(module + "/" + key, value); }
-        void SetValue(const QString& module, const QString& key, const std::string& value)
+        void SetValue(const QString& module, const app::PropertyKey& key, const std::string& value)
         { SetValue(module, key, app::FromUtf8(value)); }
-        void SetValue(const QString& module, const QString& key, std::size_t value)
+        void SetValue(const QString& module, const app::PropertyKey& key, std::size_t value)
         { SetValue<quint64>(module, key, quint64(value)); }
 
-        void SetValue(const QString& module, const QString& key, const data::JsonObject& json);
-        void SetValue(const QString& module, const QString& key, const QByteArray& bytes);
-        void SetValue(const QString& module, const QString& key, const QJsonObject& json);
+        void SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json);
+        void SetValue(const QString& module, const app::PropertyKey& key, const QByteArray& bytes);
+        void SetValue(const QString& module, const app::PropertyKey& key, const QJsonObject& json);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);
