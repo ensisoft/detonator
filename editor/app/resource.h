@@ -41,6 +41,7 @@
 #include "uikit/window.h"
 #include "editor/app/utility.h"
 #include "editor/app/script.h"
+#include "editor/app/types.h"
 
 namespace app
 {
@@ -108,17 +109,17 @@ namespace app
         // user defined.
         virtual bool IsPrimitive() const = 0;
         // Returns true if resource has a property by the given name.
-        virtual bool HasProperty(const QString& name) const = 0;
+        virtual bool HasProperty(const PropertyKey& key) const = 0;
         // returns true if the resource as a user property by the given name.
-        virtual bool HasUserProperty(const QString& name) const = 0;
+        virtual bool HasUserProperty(const PropertyKey& name) const = 0;
         // Load the additional properties from the json object.
         virtual void LoadProperties(const QJsonObject& json) = 0;
         // Load the additional properties from the json object.
         virtual void LoadUserProperties(const QJsonObject& json) = 0;
         // Delete a property by the given key/name.
-        virtual void DeleteProperty(const QString& name) = 0;
+        virtual void DeleteProperty(const PropertyKey& key) = 0;
         // Delete a user property by the given key/name.
-        virtual void DeleteUserProperty(const QString& name) = 0;
+        virtual void DeleteUserProperty(const PropertyKey& key) = 0;
         // Make an exact copy of this resource. This means
         // that the copied resource contains all the same properties
         // as this object including the resource id.
@@ -161,46 +162,46 @@ namespace app
 
         // Set a resource specific property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
-        inline void SetProperty(const QString& name, const QByteArray& bytes)
-        { SetVariantProperty(name, bytes.toBase64()); }
-        inline void SetProperty(const QString& name, const QColor& color)
-        { SetVariantProperty(name, color); }
-        inline void SetProperty(const QString& name, const QString& value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, const std::string& value)
-        { SetVariantProperty(name, app::FromUtf8(value)); }
-        inline void SetProperty(const QString& name, quint64 value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, qint64 value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, unsigned value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, int value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, double value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, float value)
-        { SetVariantProperty(name, value); }
-        inline void SetProperty(const QString& name, const QVariantMap& map)
+        inline void SetProperty(const PropertyKey& key, const QByteArray& bytes)
+        { SetVariantProperty(key, bytes.toBase64()); }
+        inline void SetProperty(const PropertyKey& key, const QColor& color)
+        { SetVariantProperty(key, color); }
+        inline void SetProperty(const PropertyKey& key, const QString& value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, const std::string& value)
+        { SetVariantProperty(key, app::FromUtf8(value)); }
+        inline void SetProperty(const PropertyKey& key, quint64 value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, qint64 value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, unsigned value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, int value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, double value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, float value)
+        { SetVariantProperty(key, value); }
+        inline void SetProperty(const PropertyKey& key, const QVariantMap& map)
         {
             ASSERT(ValidateQVariantMapJsonSupport(map));
-            SetVariantProperty(name, map);
+            SetVariantProperty(key, map);
         }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
-        std::string GetProperty(const QString& name, const std::string& def) const
+        std::string GetProperty(const PropertyKey& key, const std::string& def) const
         {
-            const auto& ret = GetVariantProperty(name);
+            const auto& ret = GetVariantProperty(key);
             if (ret.isNull())
                 return def;
             const auto& str = ret.toString();
             return app::ToUtf8(str);
         }
 
-        QByteArray GetProperty(const QString& name, const QByteArray& def) const
+        QByteArray GetProperty(const PropertyKey& key, const QByteArray& def) const
         {
-            const auto& ret  = GetVariantProperty(name);
+            const auto& ret  = GetVariantProperty(key);
             if (ret.isNull())
                 return def;
             const auto& str = ret.toString();
@@ -208,9 +209,9 @@ namespace app
                 return QByteArray::fromBase64(str.toLatin1());
             return QByteArray();
         }
-        bool GetProperty(const QString& name, QByteArray* out) const
+        bool GetProperty(const PropertyKey& key, QByteArray* out) const
         {
-            const auto& ret = GetVariantProperty(name);
+            const auto& ret = GetVariantProperty(key);
             if (ret.isNull())
                 return false;
             const auto& str = ret.toString();
@@ -219,65 +220,65 @@ namespace app
             return true;
         }
         template<typename T>
-        T GetProperty(const QString& name, const T& def) const
+        T GetProperty(const PropertyKey& key, const T& def) const
         {
-            if (!HasProperty(name))
+            const auto& ret = GetVariantProperty(key);
+            if (ret.isNull())
                 return def;
-            const auto& ret = GetVariantProperty(name);
             return qvariant_cast<T>(ret);
         }
         template<typename T>
-        bool GetProperty(const QString& name, T* out) const
+        bool GetProperty(const PropertyKey& key, T* out) const
         {
-            if (!HasProperty(name))
+            const auto& ret = GetVariantProperty(key);
+            if (ret.isNull())
                 return false;
-            const auto& ret = GetVariantProperty(name);
             *out = qvariant_cast<T>(ret);
             return true;
         }
 
         // Set a user specific property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
-        inline void SetUserProperty(const QString& name, const QByteArray& bytes)
-        { SetUserVariantProperty(name, bytes.toBase64()); }
-        inline void SetUserProperty(const QString& name, const QColor& color)
-        { SetUserVariantProperty(name, color); }
-        inline void SetUserProperty(const QString& name, const QString& value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, const std::string& value)
-        { SetUserVariantProperty(name, app::FromUtf8(value)); }
-        inline void SetUserProperty(const QString& name, quint64 value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, qint64 value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, unsigned value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, int value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, double value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, float value)
-        { SetUserVariantProperty(name, value); }
-        inline void SetUserProperty(const QString& name, const QVariantMap& map)
+        inline void SetUserProperty(const PropertyKey& key, const QByteArray& bytes)
+        { SetUserVariantProperty(key, bytes.toBase64()); }
+        inline void SetUserProperty(const PropertyKey& key, const QColor& color)
+        { SetUserVariantProperty(key, color); }
+        inline void SetUserProperty(const PropertyKey& key, const QString& value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, const std::string& value)
+        { SetUserVariantProperty(key, app::FromUtf8(value)); }
+        inline void SetUserProperty(const PropertyKey& key, quint64 value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, qint64 value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, unsigned value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, int value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, double value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, float value)
+        { SetUserVariantProperty(key, value); }
+        inline void SetUserProperty(const PropertyKey& key, const QVariantMap& map)
         {
             ASSERT(ValidateQVariantMapJsonSupport(map));
-            SetVariantProperty(name, map);
+            SetVariantProperty(key, map);
         }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
-        std::string GetUserProperty(const QString& name, const std::string& def) const
+        std::string GetUserProperty(const PropertyKey& key, const std::string& def) const
         {
-            const auto& ret = GetUserVariantProperty(name);
+            const auto& ret = GetUserVariantProperty(key);
             if (ret.isNull())
                 return def;
             const auto& str = ret.toString();
             return app::ToUtf8(str);
         }
 
-        QByteArray GetUserProperty(const QString& name, const QByteArray& def) const
+        QByteArray GetUserProperty(const PropertyKey& key, const QByteArray& def) const
         {
-            const auto& ret  = GetUserVariantProperty(name);
+            const auto& ret  = GetUserVariantProperty(key);
             if (ret.isNull())
                 return def;
             const auto& str = ret.toString();
@@ -285,9 +286,9 @@ namespace app
                 return QByteArray::fromBase64(str.toLatin1());
             return QByteArray();
         }
-        bool GetUserProperty(const QString& name, QByteArray* out) const
+        bool GetUserProperty(const PropertyKey& key, QByteArray* out) const
         {
-            const auto& ret = GetUserVariantProperty(name);
+            const auto& ret = GetUserVariantProperty(key);
             if (ret.isNull())
                 return false;
             const auto& str = ret.toString();
@@ -296,19 +297,19 @@ namespace app
             return true;
         }
         template<typename T>
-        T GetUserProperty(const QString& name, const T& def) const
+        T GetUserProperty(const PropertyKey& key, const T& def) const
         {
-            if (!HasUserProperty(name))
+            const auto& ret = GetUserVariantProperty(key);
+            if (ret.isNull())
                 return def;
-            const auto& ret = GetUserVariantProperty(name);
             return qvariant_cast<T>(ret);
         }
         template<typename T>
-        bool GetUserProperty(const QString& name, T* out) const
+        bool GetUserProperty(const PropertyKey& key, T* out) const
         {
-            if (!HasUserProperty(name))
+            if (!HasUserProperty(key))
                 return false;
-            const auto& ret = GetUserVariantProperty(name);
+            const auto& ret = GetUserVariantProperty(key);
             *out = qvariant_cast<T>(ret);
             return true;
         }
@@ -370,10 +371,10 @@ namespace app
     protected:
         virtual void* GetIf(const std::type_info& expected_type) = 0;
         virtual const void* GetIf(const std::type_info& expected_type) const = 0;
-        virtual void SetVariantProperty(const QString& name, const QVariant& value) = 0;
-        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) = 0;
-        virtual QVariant GetVariantProperty(const QString& name) const = 0;
-        virtual QVariant GetUserVariantProperty(const QString& name) const = 0;
+        virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) = 0;
+        virtual void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) = 0;
+        virtual QVariant GetVariantProperty(const PropertyKey& key) const = 0;
+        virtual QVariant GetUserVariantProperty(const PropertyKey& key) const = 0;
     private:
     };
 
@@ -553,18 +554,18 @@ namespace app
         { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
         virtual void SaveUserProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
-        virtual bool HasProperty(const QString& name) const override
-        { return mProps.contains(name); }
-        virtual bool HasUserProperty(const QString& name) const override
-        { return mUserProps.contains(name); }
+        virtual bool HasProperty(const PropertyKey& key) const override
+        { return mProps.contains(key); }
+        virtual bool HasUserProperty(const PropertyKey& key) const override
+        { return mUserProps.contains(key); }
         virtual void LoadProperties(const QJsonObject& object) override
         { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void DeleteProperty(const QString& name) override
-        { mProps.remove(name); }
-        virtual void DeleteUserProperty(const QString& name) override
-        { mUserProps.remove(name); }
+        virtual void DeleteProperty(const PropertyKey& key) override
+        { mProps.remove(key); }
+        virtual void DeleteUserProperty(const PropertyKey& key) override
+        { mUserProps.remove(key); }
         virtual std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
         virtual std::unique_ptr<Resource> Clone() const override
@@ -612,14 +613,14 @@ namespace app
                 return (const void*)mContent.get();
             return nullptr;
         }
-        virtual void SetVariantProperty(const QString& name, const QVariant& value) override
-        { mProps[name] = value; }
-        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) override
-        { mUserProps[name] = value; }
-        virtual QVariant GetVariantProperty(const QString& name) const override
-        { return mProps[name]; }
-        virtual QVariant GetUserVariantProperty(const QString& name) const override
-        { return mUserProps[name]; }
+        virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
+        { mProps[key] = value; }
+        virtual void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) override
+        { mUserProps[key] = value; }
+        virtual QVariant GetVariantProperty(const PropertyKey& key) const override
+        { return mProps[key]; }
+        virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
+        { return mUserProps[key]; }
     private:
         std::shared_ptr<Content> mContent;
         QString mName;
@@ -689,18 +690,18 @@ namespace app
         { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
         virtual void SaveUserProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
-        virtual bool HasProperty(const QString& name) const override
-        { return mProps.contains(name); }
-        virtual bool HasUserProperty(const QString& name) const override
-        { return mUserProps.contains(name); }
+        virtual bool HasProperty(const PropertyKey& key) const override
+        { return mProps.contains(key); }
+        virtual bool HasUserProperty(const PropertyKey& key) const override
+        { return mUserProps.contains(key); }
         virtual void LoadProperties(const QJsonObject& object) override
         { mProps = object[GetId()].toObject().toVariantMap(); }
         virtual void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void DeleteProperty(const QString& name) override
-        { mProps.remove(name); }
-        virtual void DeleteUserProperty(const QString& name) override
-        { mUserProps.remove(name); }
+        virtual void DeleteProperty(const PropertyKey& key) override
+        { mProps.remove(key); }
+        virtual void DeleteUserProperty(const PropertyKey& key) override
+        { mUserProps.remove(key); }
         virtual std::unique_ptr<Resource> Copy() const override
         {
             auto ret = std::make_unique<MaterialResource>();
@@ -741,14 +742,14 @@ namespace app
                 return (const void*)mKlass.get();
             return nullptr;
         }
-        virtual void SetVariantProperty(const QString& name, const QVariant& value) override
-        { mProps[name] = value; }
-        virtual void SetUserVariantProperty(const QString& name, const QVariant& value) override
-        { mUserProps[name] = value; }
-        virtual QVariant GetVariantProperty(const QString& name) const override
-        { return mProps[name]; }
-        virtual QVariant GetUserVariantProperty(const QString& name) const override
-        { return mUserProps[name]; }
+        virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
+        { mProps[key] = value; }
+        virtual void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) override
+        { mUserProps[key] = value; }
+        virtual QVariant GetVariantProperty(const PropertyKey& key) const override
+        { return mProps[key]; }
+        virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
+        { return mUserProps[key]; }
     private:
         QString mName;
         std::shared_ptr<gfx::MaterialClass> mKlass;
