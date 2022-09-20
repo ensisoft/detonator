@@ -162,6 +162,8 @@ namespace app
 
         // Set a resource specific property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
+        inline void SetProperty(const PropertyKey& key, const QJsonObject& json)
+        { SetVariantProperty(key, json); }
         inline void SetProperty(const PropertyKey& key, const QByteArray& bytes)
         { SetVariantProperty(key, bytes.toBase64()); }
         inline void SetProperty(const PropertyKey& key, const QColor& color)
@@ -239,6 +241,8 @@ namespace app
 
         // Set a user specific property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
+        inline void SetUserProperty(const PropertyKey& key, const QJsonObject& json)
+        { SetUserVariantProperty(key, json); }
         inline void SetUserProperty(const PropertyKey& key, const QByteArray& bytes)
         { SetUserVariantProperty(key, bytes.toBase64()); }
         inline void SetUserProperty(const PropertyKey& key, const QColor& color)
