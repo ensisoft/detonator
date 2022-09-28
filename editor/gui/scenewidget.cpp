@@ -1014,11 +1014,8 @@ void SceneWidget::on_actionNodePlace_triggered()
     auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
 
     gfx::Transform view;
-    view.Push();
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    MakeViewTransform(mUI, mState, view);
+
     tool->AdjustPlacementPosition(mUI.widget->mapFromGlobal(QCursor::pos()), view);
 
     mCurrentTool = std::move(tool);
@@ -2001,6 +1998,8 @@ void SceneWidget::RebuildMenus()
             connect(action, &QAction::triggered, this, &SceneWidget::PlaceNewEntity);
         }
     }
+    SetEnabled(mEntities, !mEntities->isEmpty());
+    SetEnabled(mUI.actionNodePlace, !mEntities->isEmpty());
 }
 
 void SceneWidget::RebuildCombos()
