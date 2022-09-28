@@ -59,10 +59,15 @@ bool Settings::Save()
 
 bool Settings::GetValue(const QString& module, const app::PropertyKey& key, std::size_t* out) const
 {
-    const auto& value = mSettings->GetValue(module + "/" + key);
-    if (!value.isValid())
+    const auto& lo_var = mSettings->GetValue(module + "/" + key + "_lo");
+    const auto& hi_var = mSettings->GetValue(module + "/" + key + "_hi");
+    if (!lo_var.isValid()  || !hi_var.isValid())
         return false;
-    *out = qvariant_cast<quint64>(value);
+
+    static_assert(sizeof(uint) == 4);
+    const uint hi = hi_var.toUInt();
+    const uint lo = lo_var.toUInt();
+    *out = size_t(hi) << 32 | size_t(lo);
     return true;
 }
 bool Settings::GetValue(const QString& module, const app::PropertyKey& key, std::string* out) const
@@ -106,6 +111,23 @@ bool Settings::GetValue(const QString& module, const app::PropertyKey& key, QJso
         return false;
     *out = doc.object();
     return true;
+}
+
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const std::string& value)
+{
+    SetValue(module, key, app::FromUtf8(value));
+}
+
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, std::size_t value)
+{
+    static_assert(sizeof(value) == 8);
+    static_assert(sizeof(uint) == 4);
+    uint hi = 0;
+    uint lo = 0;
+    hi = (value >> 32) & 0xffffffff;
+    lo = (value >> 0)  & 0xffffffff;
+    mSettings->SetValue(module + "/" + key + "_lo", lo);
+    mSettings->SetValue(module + "/" + key + "_hi", hi);
 }
 
 void Settings::SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json)

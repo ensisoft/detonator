@@ -93,11 +93,8 @@ namespace gui
         template<typename T>
         void SetValue(const QString& module, const app::PropertyKey& key, const T& value)
         { mSettings->SetValue(module + "/" + key, value); }
-        void SetValue(const QString& module, const app::PropertyKey& key, const std::string& value)
-        { SetValue(module, key, app::FromUtf8(value)); }
-        void SetValue(const QString& module, const app::PropertyKey& key, std::size_t value)
-        { SetValue<quint64>(module, key, quint64(value)); }
-
+        void SetValue(const QString& module, const app::PropertyKey& key, const std::string& value);
+        void SetValue(const QString& module, const app::PropertyKey& key, std::size_t value);
         void SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json);
         void SetValue(const QString& module, const app::PropertyKey& key, const QByteArray& bytes);
         void SetValue(const QString& module, const app::PropertyKey& key, const QJsonObject& json);
