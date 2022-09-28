@@ -232,6 +232,54 @@ endif()
 
 target_link_libraries(EngineLib INTERFACE box2d)
 
+add_library(QtColorWidgets
+        third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
+        third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
+        third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
+        third_party/Qt-Color-Widgets/src/color_delegate.cpp
+        third_party/Qt-Color-Widgets/src/color_dialog.cpp
+        third_party/Qt-Color-Widgets/src/color_dialog.ui
+        third_party/Qt-Color-Widgets/src/color_line_edit.cpp
+        third_party/Qt-Color-Widgets/src/color_list_widget.cpp
+        third_party/Qt-Color-Widgets/src/color_names.cpp
+        third_party/Qt-Color-Widgets/src/color_palette.cpp
+        third_party/Qt-Color-Widgets/src/color_palette_model.cpp
+        third_party/Qt-Color-Widgets/src/color_palette_widget.cpp
+        third_party/Qt-Color-Widgets/src/color_palette_widget.ui
+        third_party/Qt-Color-Widgets/src/color_preview.cpp
+        third_party/Qt-Color-Widgets/src/color_selector.cpp
+        third_party/Qt-Color-Widgets/src/color_utils.cpp
+        third_party/Qt-Color-Widgets/src/color_wheel.cpp
+        third_party/Qt-Color-Widgets/src/color_widgets.qrc
+        third_party/Qt-Color-Widgets/src/gradient_slider.cpp
+        third_party/Qt-Color-Widgets/src/hue_slider.cpp
+        third_party/Qt-Color-Widgets/src/swatch.cpp
+        third_party/Qt-Color-Widgets/include/abstract_widget_list.hpp
+        third_party/Qt-Color-Widgets/include/bound_color_selector.hpp
+        third_party/Qt-Color-Widgets/include/color_2d_slider.hpp
+        third_party/Qt-Color-Widgets/include/color_delegate.hpp
+        third_party/Qt-Color-Widgets/include/color_dialog.hpp
+        third_party/Qt-Color-Widgets/include/color_line_edit.hpp
+        third_party/Qt-Color-Widgets/include/color_list_widget.hpp
+        third_party/Qt-Color-Widgets/include/color_names.hpp
+        third_party/Qt-Color-Widgets/include/color_palette.hpp
+        third_party/Qt-Color-Widgets/include/color_palette_model.hpp
+        third_party/Qt-Color-Widgets/include/color_palette_widget.hpp
+        third_party/Qt-Color-Widgets/include/color_preview.hpp
+        third_party/Qt-Color-Widgets/include/color_selector.hpp
+        third_party/Qt-Color-Widgets/include/color_wheel.hpp
+        third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
+        third_party/Qt-Color-Widgets/include/gradient_slider.hpp
+        third_party/Qt-Color-Widgets/include/hue_slider.hpp
+        third_party/Qt-Color-Widgets/include/swatch.hpp)
+target_include_directories(QtColorWidgets PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+target_compile_definitions(QtColorWidgets PRIVATE "QTCOLORWIDGETS_LIBRARY")
+target_link_libraries(QtColorWidgets Qt5::Widgets Qt5::Core Qt5::CorePrivate)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # suppress some noise coming from Qt (Qt-Color-Widgets)
+    target_compile_options(QtColorWidgets PRIVATE -Wno-deprecated-declarations)
+endif()
+
 # Editor application.
 add_executable(GSEditor
     editor/app/event.h
@@ -389,45 +437,6 @@ add_executable(GSEditor
     third_party/QSourceHighlight/languagedata.cpp
     third_party/QSourceHighlight/qsourcehighliter.cpp
     third_party/QSourceHighlight/qsourcehighliterthemes.cpp
-    third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
-    third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
-    third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
-    third_party/Qt-Color-Widgets/src/color_delegate.cpp
-    third_party/Qt-Color-Widgets/src/color_dialog.cpp
-    third_party/Qt-Color-Widgets/src/color_dialog.ui
-    third_party/Qt-Color-Widgets/src/color_line_edit.cpp
-    third_party/Qt-Color-Widgets/src/color_list_widget.cpp
-    third_party/Qt-Color-Widgets/src/color_names.cpp
-    third_party/Qt-Color-Widgets/src/color_palette.cpp
-    third_party/Qt-Color-Widgets/src/color_palette_model.cpp
-    third_party/Qt-Color-Widgets/src/color_palette_widget.cpp
-    third_party/Qt-Color-Widgets/src/color_palette_widget.ui
-    third_party/Qt-Color-Widgets/src/color_preview.cpp
-    third_party/Qt-Color-Widgets/src/color_selector.cpp
-    third_party/Qt-Color-Widgets/src/color_utils.cpp
-    third_party/Qt-Color-Widgets/src/color_wheel.cpp
-    third_party/Qt-Color-Widgets/src/color_widgets.qrc
-    third_party/Qt-Color-Widgets/src/gradient_slider.cpp
-    third_party/Qt-Color-Widgets/src/hue_slider.cpp
-    third_party/Qt-Color-Widgets/src/swatch.cpp
-    third_party/Qt-Color-Widgets/include/abstract_widget_list.hpp
-    third_party/Qt-Color-Widgets/include/bound_color_selector.hpp
-    third_party/Qt-Color-Widgets/include/color_2d_slider.hpp
-    third_party/Qt-Color-Widgets/include/color_delegate.hpp
-    third_party/Qt-Color-Widgets/include/color_dialog.hpp
-    third_party/Qt-Color-Widgets/include/color_line_edit.hpp
-    third_party/Qt-Color-Widgets/include/color_list_widget.hpp
-    third_party/Qt-Color-Widgets/include/color_names.hpp
-    third_party/Qt-Color-Widgets/include/color_palette.hpp
-    third_party/Qt-Color-Widgets/include/color_palette_model.hpp
-    third_party/Qt-Color-Widgets/include/color_palette_widget.hpp
-    third_party/Qt-Color-Widgets/include/color_preview.hpp
-    third_party/Qt-Color-Widgets/include/color_selector.hpp
-    third_party/Qt-Color-Widgets/include/color_wheel.hpp
-    third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
-    third_party/Qt-Color-Widgets/include/gradient_slider.hpp
-    third_party/Qt-Color-Widgets/include/hue_slider.hpp
-    third_party/Qt-Color-Widgets/include/swatch.hpp
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # suppress some noise coming from Qt (Qt-Color-Widgets)
@@ -444,6 +453,7 @@ target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_
 target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(GSEditor EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
 target_link_libraries(GSEditor Lua)
+target_link_libraries(GSEditor QtColorWidgets)
 target_link_libraries(GSEditor ${CONAN_LIBS})
 install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
@@ -640,16 +650,36 @@ add_executable(unit_test_workspace
 add_executable(unit_test_event_log
         editor/app/unit_test/unit_test_window-eventlog.cpp
         editor/app/window-eventlog.cpp)
+
+add_executable(unit_test_gui
+        base/assert.cpp
+        base/json.cpp
+        base/utility.cpp
+        data/json.cpp
+        editor/app/utility.cpp
+        editor/app/eventlog.cpp
+        editor/gui/settings.cpp
+        editor/gui/unit_test/unit_test.cpp
+        third_party/base64/base64.cpp)
+target_compile_definitions(unit_test_gui PRIVATE "QTCOLORWIDGETS_LIBRARY")
+target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+# add this include for the promoted widgets
+target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+
+add_test(NAME unit_test_gui       COMMAND unit_test_gui)
 add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
 add_test(NAME unit_test_resource  COMMAND unit_test_resource)
 add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
 add_test(NAME unit_test_event_log COMMAND unit_test_event_log)
+target_include_directories(unit_test_gui       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
