@@ -26,6 +26,9 @@
 #include "warnpop.h"
 
 #include "graphics/material.h"
+namespace app {
+    class Workspace;
+} // namespace
 
 namespace gui
 {
@@ -33,7 +36,7 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgTextureRect(QWidget* parent, const gfx::FRect& rect,
+        DlgTextureRect(QWidget* parent, app::Workspace* workspace, const gfx::FRect& rect,
             std::unique_ptr<gfx::TextureSource> texture);
 
         const gfx::FRect& GetRect() const
@@ -42,9 +45,17 @@ namespace gui
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_X_valueChanged(int);
+        void on_Y_valueChanged(int);
+        void on_W_valueChanged(int);
+        void on_H_valueChanged(int);
+        void on_widgetColor_colorChanged(QColor color);
         void finished();
         void timer();
     private:
+        void LoadState();
+        void SaveState();
+        void UpdateRect();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
@@ -54,6 +65,7 @@ namespace gui
     private:
         QTimer mTimer;
     private:
+        app::Workspace* mWorkspace = nullptr;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
         std::unique_ptr<gfx::Material> mMaterial;
@@ -61,7 +73,12 @@ namespace gui
     private:
         QPoint mStartPoint;
         QPoint mCurrentPoint;
-        bool mDragging = false;
+        QPoint mTrackingOffset;
+        enum class State {
+            Nada, Selecting, Tracking
+        };
+        State mState = State::Nada;
+
     };
 
 } // namespace

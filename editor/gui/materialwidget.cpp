@@ -751,7 +751,7 @@ void MaterialWidget::on_btnSelectTextureRect_clicked()
         rect   = custom->FindTextureSourceRect(source);
     }
 
-    DlgTextureRect dlg(this, rect, source->Clone());
+    DlgTextureRect dlg(this, mWorkspace, rect, source->Clone());
     if (dlg.exec() == QDialog::Rejected)
         return;
 
