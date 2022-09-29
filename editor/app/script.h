@@ -44,10 +44,14 @@ namespace app
             { return mTypeTag; }
             std::string GetId() const
             { return mId; }
+            std::string GetName() const
+            { return mName; }
             std::string GetFileURI() const
             { return mFileURI; }
             std::string GetOwnerId() const
             { return mOwnerId; }
+            void SetName(const std::string& name)
+            { mName = name; }
             void SetFileURI(const std::string& uri)
             { mFileURI = uri; }
             void SetFileURI(const QString& uri)
@@ -61,6 +65,7 @@ namespace app
             void IntoJson(data::Writer& data) const
             {
                 data.Write("id",    mId);
+                data.Write("name",  mName);
                 data.Write("uri",   mFileURI);
                 data.Write("owner", mOwnerId);
                 data.Write("type",  mTypeTag);
@@ -75,13 +80,17 @@ namespace app
             {
                 FileResource ret;
                 data.Read("id",    &ret.mId);
+                data.Read("name",  &ret.mName);
                 data.Read("uri",   &ret.mFileURI);
                 data.Read("owner", &ret.mOwnerId);
                 data.Read("type",  &ret.mTypeTag);
                 return ret;
             }
         public:
+            // ID of the resource.
             std::string mId;
+            // Human-readable name of the resource.
+            std::string mName;
             // UTF8 encoded file URI. (Workspace file mapping).
             std::string mFileURI;
             // ID of the "owner" resource, i.e. for example tile map layer

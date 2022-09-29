@@ -461,41 +461,40 @@ namespace app
         GameResource(const Content& content, const QString& name)
         {
             mContent = std::make_shared<Content>(content);
-            mName = name;
+            SetName(name);
         }
         GameResource(Content&& content, const QString& name)
         {
             mContent = std::make_shared<Content>(std::move(content));
-            mName    = name;
+            SetName(name);
         }
         GameResource(std::shared_ptr<Content> content, const QString& name)
         {
             mContent = content;
-            mName    = name;
+            SetName(name);
         }
         template<typename T>
         GameResource(std::unique_ptr<T> content, const QString& name)
         {
             std::shared_ptr<T> shared(std::move(content));
             mContent = std::static_pointer_cast<Content>(shared);
-            mName    = name;
+            SetName(name);
         }
         template<typename T>
         GameResource(std::shared_ptr<T> content, const QString& name)
         {
             mContent = std::static_pointer_cast<Content>(content);
-            mName    = name;
+            SetName(name);
         }
         GameResource(const QString& name)
         {
             mContent = std::make_shared<Content>();
-            mName = name;
+            SetName(name);
         }
         GameResource(const GameResource& other)
         {
             mContent   = std::make_shared<Content>(*other.mContent);
             mProps     = other.mProps;
-            mName      = other.mName;
             mUserProps = other.mUserProps;
             mPrimitive = other.mPrimitive;
         }
@@ -503,34 +502,16 @@ namespace app
         virtual QString GetId() const override
         { return app::FromUtf8(mContent->GetId());  }
         virtual QString GetName() const override
-        { return mName; }
+        { return app::FromUtf8(mContent->GetName()); }
         virtual Resource::Type GetType() const override
         { return TypeValue; }
         virtual void SetName(const QString& name) override
-        {
-            mName = name;
-            // not all underlying resource types have the name
-            // property. so hence this mess here.
-            if constexpr (TypeValue == Resource::Type::Entity)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::Scene)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::UI)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::AudioGraph)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::UI)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::Material)
-                mContent->SetName(app::ToUtf8(name));
-            else if constexpr (TypeValue == Resource::Type::Tilemap)
-                mContent->SetName(app::ToUtf8(name));
-        }
+        { mContent->SetName(app::ToUtf8(name)); }
+
         virtual void UpdateFrom(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const GameResource*>(&other);
             ASSERT(ptr != nullptr);
-            mName  = ptr->mName;
             mProps = ptr->mProps;
             mUserProps = ptr->mUserProps;
             *mContent  = *ptr->mContent;
@@ -546,8 +527,8 @@ namespace app
             // tag some additional data with the content's JSON
             //ASSERT(chunk->HasValue("resource_name") == false);
             //ASSERT(chunk->HasValue("resource_id") == false);
-            chunk->Write("resource_name", app::ToUtf8(mName));
-            chunk->Write("resource_id",   app::ToUtf8(GetId()));
+            chunk->Write("resource_name", mContent->GetName());
+            chunk->Write("resource_id",   mContent->GetId());
 
             if constexpr (TypeValue == Resource::Type::Material)
                 data.AppendChunk("materials", std::move(chunk));
@@ -590,8 +571,8 @@ namespace app
         { return std::make_unique<GameResource>(*this); }
         virtual std::unique_ptr<Resource> Clone() const override
         {
-            auto ret = std::make_unique<GameResource>(mContent->Clone(), mName);
-            ret->mProps = mProps;
+            auto ret = std::make_unique<GameResource>(mContent->Clone(), GetName());
+            ret->mProps     = mProps;
             ret->mUserProps = mUserProps;
             ret->mPrimitive = mPrimitive;
             return ret;
@@ -643,7 +624,6 @@ namespace app
         { return mUserProps[key]; }
     private:
         std::shared_ptr<Content> mContent;
-        QString mName;
         QVariantMap mProps;
         QVariantMap mUserProps;
         bool mPrimitive = false;
@@ -655,42 +635,38 @@ namespace app
         MaterialResource() = default;
         MaterialResource(const gfx::MaterialClass& klass, const QString& name)
         {
-            mKlass = klass.Copy();
-            mName  = name;
+            mClass = klass.Copy();
+            SetName(name);
         }
         MaterialResource(std::shared_ptr<gfx::MaterialClass> klass, const QString& name)
         {
-            mKlass = klass;
-            mName  = name;
+            mClass = klass;
+            SetName(name);
         }
         MaterialResource(std::unique_ptr<gfx::MaterialClass> klass, const QString& name)
         {
-            mKlass = std::move(klass);
-            mName  = name;
+            mClass = std::move(klass);
+            SetName(name);
         }
-        MaterialResource(const QString& name)
-        { mName = name; }
         MaterialResource(const MaterialResource& other)
         {
-            mKlass = other.mKlass->Copy();
-            mName  = other.mName;
+            mClass = other.mClass->Copy();
             mProps = other.mProps;
             mUserProps = other.mUserProps;
         }
         virtual QString GetId() const override
-        { return app::FromUtf8(mKlass->GetId());  }
+        { return app::FromUtf8(mClass->GetId());  }
         virtual QString GetName() const override
-        { return mName; }
+        { return app::FromUtf8(mClass->GetName()); }
         virtual Resource::Type GetType() const override
         { return Resource::Type::Material; }
         virtual void SetName(const QString& name) override
-        { mName = name; }
+        { mClass->SetName(app::ToUtf8(name));  }
         virtual void UpdateFrom(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const MaterialResource*>(&other);
             ASSERT(ptr != nullptr);
-            mKlass     = ptr->mKlass->Copy();
-            mName      = ptr->mName;
+            mClass     = ptr->mClass->Copy();
             mProps     = ptr->mProps;
             mUserProps = ptr->mUserProps;
         }
@@ -701,9 +677,9 @@ namespace app
         virtual void Serialize(data::Writer& data) const override
         {
             auto chunk = data.NewWriteChunk();
-            mKlass->IntoJson(*chunk);
-            chunk->Write("resource_name", app::ToUtf8(mName));
-            chunk->Write("resource_id", mKlass->GetId());
+            mClass->IntoJson(*chunk);
+            chunk->Write("resource_name", mClass->GetName());
+            chunk->Write("resource_id",   mClass->GetId());
             data.AppendChunk("materials", std::move(chunk));
         }
         virtual void SaveProperties(QJsonObject& json) const override
@@ -725,8 +701,7 @@ namespace app
         virtual std::unique_ptr<Resource> Copy() const override
         {
             auto ret = std::make_unique<MaterialResource>();
-            ret->mKlass     = mKlass->Copy();
-            ret->mName      = mName;
+            ret->mClass     = mClass->Copy();
             ret->mProps     = mProps;
             ret->mUserProps = mUserProps;
             ret->mPrimitive = mPrimitive;
@@ -735,8 +710,7 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const override
         {
             auto ret = std::make_unique<MaterialResource>();
-            ret->mKlass = mKlass->Clone();
-            ret->mName  = mName;
+            ret->mClass = mClass->Clone();
             ret->mProps = mProps;
             ret->mUserProps = mUserProps;
             ret->mPrimitive = mPrimitive;
@@ -745,21 +719,21 @@ namespace app
 
         // GameResourceBase
         virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override
-        { return mKlass; }
+        { return mClass; }
         virtual std::shared_ptr<gfx::MaterialClass> GetSharedResource() override
-        { return mKlass; }
+        { return mClass; }
         MaterialResource& operator=(const MaterialResource&) = delete;
     protected:
         virtual void* GetIf(const std::type_info& expected_type) override
         {
             if (typeid(gfx::MaterialClass) == expected_type)
-                return (void*)mKlass.get();
+                return (void*)mClass.get();
             return nullptr;
         }
         virtual const void* GetIf(const std::type_info& expected_type) const override
         {
             if (typeid(gfx::MaterialClass) == expected_type)
-                return (const void*)mKlass.get();
+                return (const void*)mClass.get();
             return nullptr;
         }
         virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
@@ -771,8 +745,7 @@ namespace app
         virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
         { return mUserProps[key]; }
     private:
-        QString mName;
-        std::shared_ptr<gfx::MaterialClass> mKlass;
+        std::shared_ptr<gfx::MaterialClass> mClass;
         QVariantMap mProps;
         QVariantMap mUserProps;
         bool mPrimitive = false;
