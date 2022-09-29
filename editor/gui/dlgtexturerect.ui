@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
-    <height>697</height>
+    <width>847</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,6 +46,45 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Zoom</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="zoom">
+       <property name="minimum">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>5.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="stepType">
+        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>X</string>
@@ -53,21 +92,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="edtX">
+      <widget class="QSpinBox" name="X">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="maximum">
+        <number>16384</number>
        </property>
       </widget>
      </item>
@@ -79,15 +112,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="edtY">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
+      <widget class="QSpinBox" name="Y">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="maximum">
+        <number>16384</number>
        </property>
       </widget>
      </item>
@@ -99,15 +132,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="edtW">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
+      <widget class="QSpinBox" name="W">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="maximum">
+        <number>16384</number>
        </property>
       </widget>
      </item>
@@ -119,15 +152,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="edtH">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
+      <widget class="QSpinBox" name="H">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="maximum">
+        <number>16384</number>
        </property>
       </widget>
      </item>
@@ -146,6 +179,19 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="color_widgets::ColorSelector" name="widgetColor">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -184,12 +230,32 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>zoom</tabstop>
+  <tabstop>X</tabstop>
+  <tabstop>Y</tabstop>
+  <tabstop>W</tabstop>
+  <tabstop>H</tabstop>
+  <tabstop>widgetColor</tabstop>
+  <tabstop>btnAccept</tabstop>
+  <tabstop>btnCancel</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
