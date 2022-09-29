@@ -193,7 +193,7 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
         PremultiplyAlpha(ret->GetPixelWriteView(), view, true /* srgb */);
         return ret;
     }
-    else WARN("Unexpected texture bit depth.", mFile);
+    else ERROR("Unexpected texture bit depth. [file='%1']", mFile);
 
     ERROR("Failed to load texture. [file='%1']", mFile);
     return nullptr;
