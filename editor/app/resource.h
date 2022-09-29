@@ -441,6 +441,21 @@ namespace app
             static constexpr auto Type = app::Resource::Type::UI;
         };
 
+        template<typename ResourceType> inline
+        QVariantMap DuplicateResourceProperties(const ResourceType& src, const ResourceType& dupe, const QVariantMap& props)
+        {
+            // generic shim function, simply return a copy of the original source properties.
+            return props;
+        }
+        template<typename ResourceType> inline
+        QVariantMap DuplicateUserResourceProperties(const ResourceType& src, const ResourceType& dupe, const QVariantMap& props)
+        {
+            // generic shim function, simply return a copy of the original source properties.
+            return props;
+        }
+
+        QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game::EntityClass& dupe, const QVariantMap& props);
+
     } // detail
 
     template<typename BaseTypeContent>
@@ -572,8 +587,8 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const override
         {
             auto ret = std::make_unique<GameResource>(mContent->Clone(), GetName());
-            ret->mProps     = mProps;
-            ret->mUserProps = mUserProps;
+            ret->mProps     = detail::DuplicateResourceProperties(*mContent, *ret->mContent, mProps);
+            ret->mUserProps = detail::DuplicateUserResourceProperties(*mContent, *ret->mContent, mUserProps);
             ret->mPrimitive = mPrimitive;
             return ret;
         }
