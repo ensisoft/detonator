@@ -60,9 +60,12 @@ public:
         data.Write("string", mStringProp);
     }
     void SetName(const std::string& name)
-    {}
+    { mName = name; }
+    std::string GetName() const
+    { return mName; }
 private:
     std::string mClassId;
+    std::string mName;
     float mFloatProp1 = 0.0f;
     float mFloatProp2 = 0.0;
     std::string mStringProp;
@@ -89,8 +92,13 @@ public:
     void IntoJson(data::Writer&) const
     {
     }
+    void SetName(const std::string& name)
+    { mName = name; }
+    std::string GetName() const
+    { return mName; }
 private:
     std::string mClassId;
+    std::string mName;
 };
 
 namespace app {
