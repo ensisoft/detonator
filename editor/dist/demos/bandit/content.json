@@ -5801,7 +5801,7 @@
       },
       "gamma": 1.0,
       "id": "gzjp7PwMQd",
-      "name": "",
+      "name": "StoneBlock",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -5855,7 +5855,7 @@
       },
       "gamma": 1.0,
       "id": "ezvBTHxrAX",
-      "name": "",
+      "name": "tile1",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -5909,7 +5909,7 @@
       },
       "gamma": 1.0,
       "id": "tdYbKt5I5Q",
-      "name": "",
+      "name": "tile2",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -5963,7 +5963,7 @@
       },
       "gamma": 1.0,
       "id": "WTNfneUmHx",
-      "name": "",
+      "name": "tile3",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6017,7 +6017,7 @@
       },
       "gamma": 1.0,
       "id": "NY4Of7DfnI",
-      "name": "",
+      "name": "tile4",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6071,7 +6071,7 @@
       },
       "gamma": 1.0,
       "id": "PiCFlSf9Gm",
-      "name": "",
+      "name": "tile5",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6125,7 +6125,7 @@
       },
       "gamma": 1.0,
       "id": "5GPKkIzzUf",
-      "name": "",
+      "name": "tile6",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6179,7 +6179,7 @@
       },
       "gamma": 1.0,
       "id": "uLZlHEU5XW",
-      "name": "",
+      "name": "tile7",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6233,7 +6233,7 @@
       },
       "gamma": 1.0,
       "id": "7uTDp9S0mt",
-      "name": "",
+      "name": "tile8",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6287,7 +6287,7 @@
       },
       "gamma": 1.0,
       "id": "kyLTH2YAJY",
-      "name": "",
+      "name": "tile9",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6341,7 +6341,7 @@
       },
       "gamma": 1.0,
       "id": "FW5N4w5d3Z",
-      "name": "",
+      "name": "tile10",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6395,7 +6395,7 @@
       },
       "gamma": 1.0,
       "id": "jqIuU0kASH",
-      "name": "",
+      "name": "tile11",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6449,7 +6449,7 @@
       },
       "gamma": 1.0,
       "id": "sX94tG9WhR",
-      "name": "",
+      "name": "tile12",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6503,7 +6503,7 @@
       },
       "gamma": 1.0,
       "id": "MBEoxQ9SGX",
-      "name": "",
+      "name": "tile13",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6557,7 +6557,7 @@
       },
       "gamma": 1.0,
       "id": "UJKQNRymuO",
-      "name": "",
+      "name": "tile14",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6611,7 +6611,7 @@
       },
       "gamma": 1.0,
       "id": "UTfmL76ml0",
-      "name": "",
+      "name": "tile15",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6665,7 +6665,7 @@
       },
       "gamma": 1.0,
       "id": "QCvtiZTp3b",
-      "name": "",
+      "name": "tile16",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6719,7 +6719,7 @@
       },
       "gamma": 1.0,
       "id": "zgwqXHtABU",
-      "name": "",
+      "name": "Bush (1)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6773,7 +6773,7 @@
       },
       "gamma": 1.0,
       "id": "MYaj1na7M4",
-      "name": "",
+      "name": "Bush (2)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6827,7 +6827,7 @@
       },
       "gamma": 1.0,
       "id": "wrSRezqUfj",
-      "name": "",
+      "name": "Cactus (1)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6881,7 +6881,7 @@
       },
       "gamma": 1.0,
       "id": "QR14nEb7T3",
-      "name": "",
+      "name": "Cactus (2)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6935,7 +6935,7 @@
       },
       "gamma": 1.0,
       "id": "IPqp1SooOX",
-      "name": "",
+      "name": "Cactus (3)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -6989,7 +6989,7 @@
       },
       "gamma": 1.0,
       "id": "RhslGRtQQR",
-      "name": "",
+      "name": "Crate",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7043,7 +7043,7 @@
       },
       "gamma": 1.0,
       "id": "bvJqe9fGu5",
-      "name": "",
+      "name": "Grass (1)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7097,7 +7097,7 @@
       },
       "gamma": 1.0,
       "id": "IM3dwFG7wS",
-      "name": "",
+      "name": "Grass (2)",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7151,7 +7151,7 @@
       },
       "gamma": 1.0,
       "id": "bBSpmT5CN0",
-      "name": "",
+      "name": "Sign",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7205,7 +7205,7 @@
       },
       "gamma": 1.0,
       "id": "MDomkaGQRL",
-      "name": "",
+      "name": "SignArrow",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7259,7 +7259,7 @@
       },
       "gamma": 1.0,
       "id": "Ca4GgRWjP2",
-      "name": "",
+      "name": "Skeleton",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7313,7 +7313,7 @@
       },
       "gamma": 1.0,
       "id": "xrUzM3pdBZ",
-      "name": "",
+      "name": "Stone",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7367,7 +7367,7 @@
       },
       "gamma": 1.0,
       "id": "pQ2O7Ekypd",
-      "name": "",
+      "name": "Tree",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7421,7 +7421,7 @@
       },
       "gamma": 1.0,
       "id": "AgxrO05Kqg",
-      "name": "",
+      "name": "BG_Layer_0",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -7478,7 +7478,7 @@
       "gamma": 1.0,
       "id": "RnL44evfW5",
       "looping": true,
-      "name": "",
+      "name": "Bandit Idle",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -7737,7 +7737,7 @@
       "gamma": 1.0,
       "id": "w26YsP04pJ",
       "looping": true,
-      "name": "",
+      "name": "Bandit Walk",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -7924,7 +7924,7 @@
       "gamma": 1.0,
       "id": "f2rOXhvzDy",
       "looping": true,
-      "name": "",
+      "name": "Bandit Jump",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -8111,7 +8111,7 @@
       "gamma": 1.0,
       "id": "mgo2XI2toK",
       "looping": true,
-      "name": "",
+      "name": "Bandit Attack",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -8298,7 +8298,7 @@
       "gamma": 1.0,
       "id": "90E8gRgYDP",
       "looping": true,
-      "name": "",
+      "name": "Bandit Fall",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -8485,7 +8485,7 @@
       "gamma": 1.0,
       "id": "fmxJ24RhUE",
       "looping": true,
-      "name": "",
+      "name": "Bandit Hurt",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -8672,7 +8672,7 @@
       "gamma": 1.0,
       "id": "9aRwE7zov7",
       "looping": false,
-      "name": "",
+      "name": "Bandit Die",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -8856,7 +8856,7 @@
       },
       "gamma": 1.0,
       "id": "l6vR7abMmW",
-      "name": "",
+      "name": "BG_Layer_1",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -8910,7 +8910,7 @@
       },
       "gamma": 1.0,
       "id": "X6Q2aN3uWm",
-      "name": "",
+      "name": "BG_Layer_2",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -8967,7 +8967,7 @@
       "gamma": 1.0,
       "id": "2ynNMbWOK3",
       "looping": true,
-      "name": "",
+      "name": "Coin Spin",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -9115,7 +9115,7 @@
       },
       "gamma": 1.0,
       "id": "nLUoQRjXrg",
-      "name": "",
+      "name": "Violet Diamond",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -9169,7 +9169,7 @@
       },
       "gamma": 1.0,
       "id": "oTLKJxJ07d",
-      "name": "",
+      "name": "Background",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -9247,6 +9247,7 @@
       "min_velocity": 0.0,
       "mode": "Once",
       "motion": "Projectile",
+      "name": "Coins",
       "num_particles": 5.0,
       "placement": "Inside",
       "resource_id": "nnXiuEEnwL",
@@ -14729,6 +14730,7 @@
   "scripts": [
     {
       "id": "SId1upp3XQ",
+      "name": "game",
       "owner": "",
       "resource_id": "SId1upp3XQ",
       "resource_name": "game",
@@ -14737,6 +14739,7 @@
     },
     {
       "id": "vq6v6WdXwZ",
+      "name": "Player",
       "owner": "",
       "resource_id": "vq6v6WdXwZ",
       "resource_name": "Player",
@@ -14745,6 +14748,7 @@
     },
     {
       "id": "4NMFT9hs0Y",
+      "name": "StoneBlock",
       "owner": "",
       "resource_id": "4NMFT9hs0Y",
       "resource_name": "StoneBlock",
@@ -14753,6 +14757,7 @@
     },
     {
       "id": "7lSTOyhTqF",
+      "name": "Coin",
       "owner": "",
       "resource_id": "7lSTOyhTqF",
       "resource_name": "Coin",
@@ -14770,6 +14775,7 @@
         }
       ],
       "id": "JQAP7v0ZUJ",
+      "name": "StoneBlock",
       "resource_id": "JQAP7v0ZUJ",
       "resource_name": "StoneBlock",
       "static": true,
@@ -14851,6 +14857,7 @@
         }
       ],
       "id": "oNJA4jNZF9",
+      "name": "Tree",
       "resource_id": "oNJA4jNZF9",
       "resource_name": "Tree",
       "static": true,
@@ -15034,6 +15041,7 @@
         }
       ],
       "id": "gUmNEBelRm",
+      "name": "Sign",
       "resource_id": "gUmNEBelRm",
       "resource_name": "Sign",
       "static": true,
@@ -15115,6 +15123,7 @@
         }
       ],
       "id": "oDE09YOPk9",
+      "name": "Bush (1)",
       "resource_id": "oDE09YOPk9",
       "resource_name": "Bush (1)",
       "static": true,
@@ -15236,6 +15245,7 @@
         }
       ],
       "id": "fW1kOmDCo0",
+      "name": "Cactus (1)",
       "resource_id": "fW1kOmDCo0",
       "resource_name": "Cactus (1)",
       "static": true,
@@ -15437,6 +15447,7 @@
         }
       ],
       "id": "IfEi7dQdbW",
+      "name": "Cactus (2)",
       "resource_id": "IfEi7dQdbW",
       "resource_name": "Cactus (2)",
       "static": true,
@@ -15540,6 +15551,7 @@
         }
       ],
       "id": "l9oab5XQTK",
+      "name": "Cactus (3)",
       "resource_id": "l9oab5XQTK",
       "resource_name": "Cactus (3)",
       "static": true,
@@ -15753,6 +15765,7 @@
         }
       ],
       "id": "EXQWh9Zz2B",
+      "name": "Bush (2)",
       "resource_id": "EXQWh9Zz2B",
       "resource_name": "Bush (2)",
       "static": true,
@@ -15888,6 +15901,7 @@
         }
       ],
       "id": "QwLaM5bEqx",
+      "name": "Grass (2)",
       "resource_id": "QwLaM5bEqx",
       "resource_name": "Grass (2)",
       "static": true,
@@ -16041,6 +16055,7 @@
         }
       ],
       "id": "FgJP6uJzoG",
+      "name": "Grass (1)",
       "resource_id": "FgJP6uJzoG",
       "resource_name": "Grass (1)",
       "static": true,
@@ -16194,6 +16209,7 @@
         }
       ],
       "id": "dWDAODzq3M",
+      "name": "Skeleton",
       "resource_id": "dWDAODzq3M",
       "resource_name": "Skeleton",
       "static": true,
@@ -16299,6 +16315,7 @@
         }
       ],
       "id": "YkK6SEnX2R",
+      "name": "Stone",
       "resource_id": "YkK6SEnX2R",
       "resource_name": "Stone",
       "static": true,
@@ -16386,6 +16403,7 @@
         }
       ],
       "id": "8636ofEjei",
+      "name": "Bandit Idle",
       "resource_id": "8636ofEjei",
       "resource_name": "Bandit Idle",
       "static": true,
@@ -16515,6 +16533,7 @@
         }
       ],
       "id": "26DgI88X5u",
+      "name": "Bandit Walk",
       "resource_id": "26DgI88X5u",
       "resource_name": "Bandit Walk",
       "static": true,
@@ -16632,6 +16651,7 @@
         }
       ],
       "id": "zoqnFP5Gvz",
+      "name": "Bandit Attack",
       "resource_id": "zoqnFP5Gvz",
       "resource_name": "Bandit Attack",
       "static": true,
@@ -16743,6 +16763,7 @@
         }
       ],
       "id": "W27ZFgJKAJ",
+      "name": "Bandit Jump",
       "resource_id": "W27ZFgJKAJ",
       "resource_name": "Bandit Jump",
       "static": true,
@@ -16872,6 +16893,7 @@
         }
       ],
       "id": "YFMYNa7lU4",
+      "name": "Bandit",
       "resource_id": "YFMYNa7lU4",
       "resource_name": "Bandit",
       "static": true,
@@ -16923,6 +16945,7 @@
         }
       ],
       "id": "4rBCnTGuXK",
+      "name": "Bandit Fall",
       "resource_id": "4rBCnTGuXK",
       "resource_name": "Bandit Fall",
       "static": true,
@@ -17052,6 +17075,7 @@
         }
       ],
       "id": "PBPIRCm9MB",
+      "name": "Bandit Die",
       "resource_id": "PBPIRCm9MB",
       "resource_name": "Bandit Die",
       "static": true,
@@ -17193,6 +17217,7 @@
         }
       ],
       "id": "XJz8lK4sSZ",
+      "name": "Diamond",
       "resource_id": "XJz8lK4sSZ",
       "resource_name": "Diamond",
       "static": true,
