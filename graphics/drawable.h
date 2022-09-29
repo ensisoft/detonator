@@ -112,6 +112,10 @@ namespace gfx
         virtual Type GetType() const = 0;
         // Get the class ID.
         virtual std::string GetId() const = 0;
+        // Get the human-readable class name.
+        virtual std::string GetName() const = 0;
+        // Set the human-readable class name.
+        virtual void SetName(const std::string& name) = 0;
         // Create a copy of this drawable class object but with unique id.
         virtual std::unique_ptr<DrawableClass> Clone() const = 0;
         // Create an exact copy of this drawable object.
@@ -202,6 +206,10 @@ namespace gfx
 
             virtual std::string GetId() const override
             { return mId; }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
             virtual std::unique_ptr<DrawableClass> Clone() const override
             {
                 auto ret = std::make_unique<Class>(*static_cast<const Class*>(this));
@@ -219,6 +227,7 @@ namespace gfx
             {}
         protected:
             std::string mId;
+            std::string mName;
         };
 
         // helper class template to stomp out generic class type that
@@ -237,6 +246,10 @@ namespace gfx
             { return DrawableType; }
             virtual std::string GetId() const override
             { return mId; }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
             virtual std::unique_ptr<DrawableClass> Clone() const override
             {
                 auto ret = std::make_unique<GenericDrawableClass>(*this);
@@ -250,15 +263,18 @@ namespace gfx
             virtual void Pack(Packer*) const override {}
             virtual void IntoJson(data::Writer& writer) const override
             {
-                writer.Write("id", mId);
+                writer.Write("id",   mId);
+                writer.Write("name", mName);
             }
             virtual bool LoadFromJson(const data::Reader& reader) override
             {
-                reader.Read("id", &mId);
+                reader.Read("id",   &mId);
+                reader.Read("name", &mName);
                 return true;
             }
         protected:
             std::string mId;
+            std::string mName;
         };
 
 
