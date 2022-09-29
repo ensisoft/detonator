@@ -301,6 +301,7 @@ add_executable(GSEditor
     editor/app/process.h
     editor/app/process.cpp
     editor/app/ipc.cpp
+    editor/app/resource.cpp
     editor/gui/audiowidget.h
     editor/gui/audiowidget.ui
     editor/gui/audiowidget.cpp
@@ -467,6 +468,7 @@ add_executable(EditorGameHost
     editor/app/packing.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
+    editor/app/resource.cpp
     editor/app/buffer.cpp
     editor/app/window-eventlog.cpp
     editor/app/ipc.h
@@ -629,6 +631,7 @@ add_executable(unit_test_ipc
         editor/app/format.cpp
         editor/app/utility.cpp
         editor/app/workspace.cpp
+        editor/app/resource.cpp
         editor/app/buffer.cpp
         editor/app/ipc.cpp
         editor/app/packing.cpp
@@ -644,6 +647,7 @@ add_executable(unit_test_workspace
         editor/app/format.cpp
         editor/app/eventlog.cpp
         editor/app/workspace.cpp
+        editor/app/resource.cpp
         editor/app/buffer.cpp
         editor/app/packing.cpp
         editor/app/process.cpp)
