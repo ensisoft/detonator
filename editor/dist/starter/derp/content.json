@@ -602,7 +602,7 @@
       "gamma": 1.0,
       "id": "Fj66N4PDUG",
       "looping": true,
-      "name": "",
+      "name": "FlappyBird Flying",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -786,7 +786,7 @@
       },
       "gamma": 1.0,
       "id": "LPH6tgo9eN",
-      "name": "",
+      "name": "Background",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -843,7 +843,7 @@
       "gamma": 1.0,
       "id": "sUAHqYkAPp",
       "looping": true,
-      "name": "",
+      "name": "FlappyBird Hurt",
       "particle_action": "None",
       "rect_name0": "",
       "rect_name1": "",
@@ -919,7 +919,7 @@
       },
       "gamma": 1.0,
       "id": "8UZOHE5ijx",
-      "name": "",
+      "name": "Spike",
       "particle_action": "None",
       "rect": {
         "h": 1.0,
@@ -1164,6 +1164,7 @@
   "scripts": [
     {
       "id": "SfDYJTRhGz",
+      "name": "game",
       "owner": "",
       "resource_id": "SfDYJTRhGz",
       "resource_name": "game",
@@ -1172,6 +1173,7 @@
     },
     {
       "id": "zJgI2SZT3X",
+      "name": "FlappyBird",
       "owner": "",
       "resource_id": "zJgI2SZT3X",
       "resource_name": "FlappyBird",
@@ -1189,6 +1191,7 @@
         }
       ],
       "id": "e1zlPY8HTm",
+      "name": "FlappyBird",
       "resource_id": "e1zlPY8HTm",
       "resource_name": "FlappyBird",
       "static": true,

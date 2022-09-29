@@ -5583,6 +5583,7 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "name": "game",
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
@@ -5591,6 +5592,7 @@
     },
     {
       "id": "9jMLWUyAWj",
+      "name": "Constant Speed Ball",
       "owner": "",
       "resource_id": "9jMLWUyAWj",
       "resource_name": "Constant Speed Ball",
@@ -5599,6 +5601,7 @@
     },
     {
       "id": "kppKkQuA0g",
+      "name": "User Ball",
       "owner": "",
       "resource_id": "kppKkQuA0g",
       "resource_name": "User Ball",
@@ -5607,6 +5610,7 @@
     },
     {
       "id": "QCSIpWak63",
+      "name": "Static Block",
       "owner": "",
       "resource_id": "QCSIpWak63",
       "resource_name": "Static Block",
@@ -5615,6 +5619,7 @@
     },
     {
       "id": "k4Stm2rLJJ",
+      "name": "Phys Test 5",
       "owner": "",
       "resource_id": "k4Stm2rLJJ",
       "resource_name": "Phys Test 5",
@@ -5632,6 +5637,7 @@
         }
       ],
       "id": "Kv8Ml9IlfK",
+      "name": "My Shape",
       "resource_id": "Kv8Ml9IlfK",
       "resource_name": "My Shape",
       "static": true,
