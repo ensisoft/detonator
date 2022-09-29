@@ -1911,14 +1911,57 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
 {
     RECURSION_GUARD(this, "ResourceList");
 
+    std::vector<size_t> relatives;
+    // scan the list of indices for associated data resources. 
+    for (auto i : indices)
+    { 
+        // for each tilemap resource
+        // look for the data resources associated with the map layers.
+        // Add any data object IDs to the list of new indices of resources
+        // to be deleted additionally.
+        const auto& res = mResources[i];
+        if (res->IsTilemap())
+        {
+            const game::TilemapClass* map = nullptr;
+            res->GetContent(&map);
+            for (unsigned i = 0; i < map->GetNumLayers(); ++i)
+            {
+                const auto& layer = map->GetLayer(i);
+                for (size_t j = 0; j < mVisibleCount; ++j)
+                {
+                    const auto& res = mResources[j];
+                    if (!res->IsDataFile())
+                        continue;
+
+                    const app::DataFile* data = nullptr;
+                    res->GetContent(&data);
+                    if (data->GetTypeTag() == DataFile::TypeTag::TilemapData &&
+                        data->GetOwnerId() == layer.GetId())
+                    {
+                        relatives.push_back(j);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    // combine the original indicies together with the associated
+    // resource indices.
+    base::AppendVector(indices, relatives);
+
     std::sort(indices.begin(), indices.end(), std::less<size_t>());
+    // remove dupes. dupes could happen if the resource was already
+    // in the original indices list and then was added for the second
+    // time when scanning resources mentioned in the indices list for
+    // associated resources that need to be deleted.
+    indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
 
     // because the high probability of unwanted recursion
     // messing this iteration up (for example by something
     // calling back to this workspace from Resource
     // deletion signal handler and adding a new resource) we
     // must take some special care here.
-    // So therefore first put the resources to be deleted into
+    // So, therefore first put the resources to be deleted into
     // a separate container while iterating and removing from the
     // removing from the primary list and only then invoke the signal
     // for each resource.
