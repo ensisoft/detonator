@@ -841,6 +841,7 @@ std::size_t SectorClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mPercentage);
     return hash;
 }
@@ -850,12 +851,14 @@ void SectorClass::Pack(Packer* packer) const
 }
 void SectorClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
+    data.Write("id",         mId);
+    data.Write("name",       mName);
     data.Write("percentage", mPercentage);
 }
 bool SectorClass::LoadFromJson(const data::Reader& data)
 {
-    data.Read("id", &mId);
+    data.Read("id",         &mId);
+    data.Read("name",       &mName);
     data.Read("percentage", &mPercentage);
     return true;
 }
@@ -1077,6 +1080,7 @@ std::size_t RoundRectangleClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mRadius);
     return hash;
 }
@@ -1086,13 +1090,15 @@ void RoundRectangleClass::Pack(Packer* packer) const
 }
 void RoundRectangleClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
+    data.Write("id",     mId);
+    data.Write("name",   mName);
     data.Write("radius", mRadius);
 }
 
 bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
 {
-    data.Read("id", &mId);
+    data.Read("id",     &mId);
+    data.Read("name",   &mName);
     data.Read("radius", &mRadius);
     return true;
 }
@@ -1173,6 +1179,7 @@ std::size_t GridClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNumHorizontalLines);
     hash = base::hash_combine(hash, mNumVerticalLines);
     hash = base::hash_combine(hash, mBorderLines);
@@ -1185,18 +1192,20 @@ void GridClass::Pack(Packer* packer) const
 
 void GridClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
-    data.Write("vertical_lines", mNumVerticalLines);
+    data.Write("id",               mId);
+    data.Write("name",             mName);
+    data.Write("vertical_lines",   mNumVerticalLines);
     data.Write("horizontal_lines", mNumHorizontalLines);
-    data.Write("border_lines", mBorderLines);
+    data.Write("border_lines",     mBorderLines);
 }
 
 bool GridClass::LoadFromJson(const data::Reader& data)
 {
-    data.Read("id", &mId);
-    data.Read("vertical_lines", &mNumVerticalLines);
+    data.Read("id",               &mId);
+    data.Read("name",             &mName);
+    data.Read("vertical_lines",   &mNumVerticalLines);
     data.Read("horizontal_lines", &mNumHorizontalLines);
-    data.Read("border_lines", &mBorderLines);
+    data.Read("border_lines",     &mBorderLines);
     return true;
 }
 
@@ -1303,6 +1312,7 @@ std::size_t PolygonClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStatic);
     for (const auto& vertex : mVertices)
     {
@@ -1322,7 +1332,8 @@ std::size_t PolygonClass::GetHash() const
 
 void PolygonClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
+    data.Write("id",     mId);
+    data.Write("name",   mName);
     data.Write("static", mStatic);
     for (const auto& v : mVertices)
     {
@@ -1360,19 +1371,19 @@ bool PolygonClass::LoadFromJson(const data::Reader& data)
 std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
 {
     PolygonClass ret;
-    if (!data.Read("id", &ret.mId) ||
-        !data.Read("static", &ret.mStatic))
-        return std::nullopt;
+    data.Read("id",     &ret.mId);
+    data.Read("name",   &ret.mName);
+    data.Read("static", &ret.mStatic);
 
     for (unsigned i=0; i<data.GetNumChunks("vertices"); ++i)
     {
         const auto& chunk = data.GetReadChunk("vertices", i);
         float x, y, s, t;
-        if (!chunk->Read("x", &x) ||
-            !chunk->Read("y", &y) ||
-            !chunk->Read("s", &s) ||
-            !chunk->Read("t", &t))
-            return std::nullopt;
+        chunk->Read("x", &x);
+        chunk->Read("y", &y);
+        chunk->Read("s", &s);
+        chunk->Read("t", &t);
+
         Vertex vertex;
         vertex.aPosition.x = x;
         vertex.aPosition.y = y;
@@ -1386,10 +1397,10 @@ std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
         unsigned offset = 0;
         unsigned count  = 0;
         DrawCommand cmd;
-        if (!chunk->Read("type", &cmd.type) ||
-            !chunk->Read("offset", &offset) ||
-            !chunk->Read("count",  &count))
-            return std::nullopt;
+        chunk->Read("type",   &cmd.type);
+        chunk->Read("offset", &offset);
+        chunk->Read("count",  &count);
+
         cmd.offset = offset;
         cmd.count  = count;
         ret.mDrawCommands.push_back(cmd);
@@ -1476,6 +1487,7 @@ std::size_t CursorClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mShape);
     return hash;
 }
@@ -1486,12 +1498,14 @@ void CursorClass::Pack(Packer* packer) const
 }
 void CursorClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
+    data.Write("id",    mId);
+    data.Write("name",  mName);
     data.Write("shape", mShape);
 }
 bool CursorClass::LoadFromJson(const data::Reader& data)
 {
-    data.Read("id", &mId);
+    data.Read("id",    &mId);
+    data.Read("name",  &mName);
     data.Read("shape", &mShape);
     return true;
 }
@@ -1828,6 +1842,7 @@ void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceStat
 void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
+    data.Write("name", mName);
     data.Write("direction", mParams.direction);
     data.Write("placement", mParams.placement);
     data.Write("shape", mParams.shape);
@@ -1877,6 +1892,7 @@ std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::From
 {
     KinematicsParticleEngineClass ret;
     data.Read("id",                           &ret.mId);
+    data.Read("name",                         &ret.mName);
     data.Read("direction",                    &ret.mParams.direction);
     data.Read("placement",                    &ret.mParams.placement);
     data.Read("shape",                        &ret.mParams.shape);
@@ -1916,6 +1932,7 @@ std::size_t KinematicsParticleEngineClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mParams);
     return hash;
 }
