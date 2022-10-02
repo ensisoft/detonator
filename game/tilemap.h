@@ -821,6 +821,11 @@ namespace game
         Tilemap(const std::shared_ptr<const TilemapClass>& klass);
         Tilemap(const TilemapClass& klass);
 
+        // Load the contents of the tilemap instance layers.
+        // Returns true if all layers loaded successfully or
+        // false if a layer failed to load.
+        bool Load(const Loader& loader, unsigned default_tile_cache_size = 1024);
+
         void AddLayer(std::unique_ptr<TilemapLayer> layer);
         void DeleteLayer(std::size_t index);
 

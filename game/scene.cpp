@@ -255,10 +255,11 @@ SceneClass::SceneClass(const SceneClass& other)
 
     mClassId    = other.mClassId;
     mName       = other.mName;
+    mTilemap    = other.mTilemap;
     mScriptFile = other.mScriptFile;
     mScriptVars = other.mScriptVars;
-    mDynamicSpatialIndex = other.mDynamicSpatialIndex;
-    mDynamicSpatialRect  = other.mDynamicSpatialRect;
+    mDynamicSpatialIndex     = other.mDynamicSpatialIndex;
+    mDynamicSpatialRect      = other.mDynamicSpatialRect;
     mDynamicSpatialIndexArgs = other.mDynamicSpatialIndexArgs;
     mLeftBoundary   = other.mLeftBoundary;
     mRightBoundary  = other.mRightBoundary;
@@ -666,6 +667,7 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mScriptFile);
+    hash = base::hash_combine(hash, mTilemap);
     hash = base::hash_combine(hash, mDynamicSpatialIndex);
     hash = base::hash_combine(hash, mDynamicSpatialRect.has_value());
     hash = base::hash_combine(hash, mDynamicSpatialIndexArgs.has_value());
@@ -793,6 +795,7 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("id", mClassId);
     data.Write("name", mName);
     data.Write("script_file", mScriptFile);
+    data.Write("tilemap", mTilemap);
     data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
     if (const auto* ptr = GetDynamicSpatialRect())
     {
@@ -834,11 +837,12 @@ void SceneClass::IntoJson(data::Writer& data) const
 std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
 {
     SceneClass ret;
-    if (!data.Read("id", &ret.mClassId) ||
-        !data.Read("name", &ret.mName) ||
-        !data.Read("script_file", &ret.mScriptFile) ||
-        !data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex))
-        return std::nullopt;
+    data.Read("id", &ret.mClassId);
+    data.Read("name", &ret.mName);
+    data.Read("script_file", &ret.mScriptFile);
+    data.Read("tilemap", &ret.mTilemap);
+    data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex);
+
     if (data.HasValue("dynamic_spatial_rect"))
     {
         base::FRect rect;
@@ -928,6 +932,7 @@ SceneClass SceneClass::Clone() const
     }
 
     ret.mScriptFile              = mScriptFile;
+    ret.mTilemap                 = mTilemap;
     ret.mName                    = mName;
     ret.mDynamicSpatialRect      = mDynamicSpatialRect;
     ret.mDynamicSpatialIndex     = mDynamicSpatialIndex;
@@ -950,6 +955,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     SceneClass tmp(other);
     mClassId                 = std::move(tmp.mClassId);
     mScriptFile              = std::move(tmp.mScriptFile);
+    mTilemap                 = std::move(tmp.mTilemap);
     mName                    = std::move(tmp.mName);
     mNodes                   = std::move(tmp.mNodes);
     mScriptVars              = std::move(tmp.mScriptVars);

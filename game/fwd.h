@@ -19,6 +19,8 @@
 #include "config.h"
 
 namespace game {
+    class TilemapClass;
+    class Tilemap;
     class EntityNodeClass;
     class EntityNode;
     class EntityClass;

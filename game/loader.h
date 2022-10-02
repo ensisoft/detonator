@@ -35,12 +35,14 @@ namespace game
     private:
     };
 
-    using TilemapDataHandle = std::shared_ptr<const TilemapData>;
+    using TilemapDataHandle = std::shared_ptr<TilemapData>;
 
     class Loader
     {
     public:
         virtual ~Loader() = default;
+
+        virtual TilemapDataHandle LoadTilemapData(const std::string& id, bool read_only) const = 0;
 
     private:
 

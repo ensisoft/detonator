@@ -1173,6 +1173,27 @@ Tilemap::Tilemap(const TilemapClass& klass)
   : Tilemap(std::make_shared<const TilemapClass>(klass))
 {}
 
+bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
+{
+    for (auto& layer : mLayers)
+    {
+        const auto& klass = layer->GetClass();
+        auto data = loader.LoadTilemapData(layer->GetClassId(), layer->IsReadOnly());
+        if (data)
+        {
+            layer->Load(data, default_tile_cache_size);
+            DEBUG("Loaded tilemap layer. [layer='%1']", klass.GetName());
+        }
+        else
+        {
+            ERROR("Failed to load tilemap layer data. [layer='%1']", klass.GetName());
+            return false;
+        }
+    }
+    DEBUG("Loaded tilemap successfully. [map='%1', layers=%2]", mClass->GetName(), mClass->GetNumLayers());
+    return true;
+}
+
 void Tilemap::AddLayer(std::unique_ptr<TilemapLayer> layer)
 {
     mLayers.push_back(std::move(layer));
