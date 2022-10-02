@@ -1517,20 +1517,23 @@ void AudioWidget::on_actionSave_triggered()
 
     mScene->invalidate();
     if  (!mScene->ValidateGraphContent())
-        errors << "The audio graph has invalid elements.";
+    {
+        errors << "* The audio graph has invalid elements.";
+    }
 
     const std::string& src_elem = GetItemId(mUI.outElem);
     const std::string& src_port = GetItemId(mUI.outPort);
     if (src_elem.empty() || src_port.empty())
-        errors << "The audio graph has no output element/port selected.";
+    {
+        errors << "* The audio graph has no output element/port selected.";
+    }
 
     audio::Graph graph(std::move(klass));
     audio::Graph::PrepareParams p;
     p.enable_pcm_caching = false;
     if (!graph.Prepare(*mWorkspace, p))
     {
-        errors << "The audio graph failed to prepare "
-                  "(please see the application log for details).\n";
+        errors << "* The audio graph failed to prepare.\n";
     }
     else
     {
@@ -1541,9 +1544,9 @@ void AudioWidget::on_actionSave_triggered()
         format.channel_count = static_cast<int>(settings.audio_channels);
         const auto& port = graph.GetOutputPort(0);
         if (port.GetFormat() != format)
-            errors << app::toString(
-                    "The audio graph output format %1 is not compatible with current audio settings %2.\n",
-                    port.GetFormat(), format);
+        {
+            errors << app::toString("* The audio graph output format %1 is not compatible with current audio settings %2.\n", port.GetFormat(), format);
+        }
     }
 
     if (!errors.isEmpty())
@@ -1551,8 +1554,8 @@ void AudioWidget::on_actionSave_triggered()
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setIcon(QMessageBox::Warning);
-        msg.setText(tr("The following problems were detected\n\n%1"
-                       "\nAre you sure you want to continue?").arg(errors.join("\n\n")));
+        msg.setText(tr("The following problems were detected\n\n%1\n"
+                       "Are you sure you want to continue?").arg(errors.join("\n")));
         if (msg.exec() == QMessageBox::No)
             return;
     }
