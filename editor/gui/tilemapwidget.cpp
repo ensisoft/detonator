@@ -902,6 +902,26 @@ bool TilemapWidget::OnEscape()
     }
     return false;
 }
+bool TilemapWidget::OnKeyDown(QKeyEvent* key)
+{
+    if (key->key() != Qt::Key_Space)
+        return false;
+
+    if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
+    {
+        if (auto* tool = GetCurrentTool())
+        {
+            DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
+            if (dlg.exec() == QDialog::Rejected)
+                return true;
+            SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+            ModifyCurrentTool();
+            return true;
+        }
+    }
+    return false;
+}
+
 bool TilemapWidget::GetStats(Stats* stats) const
 {
     stats->time  = 0.0f;

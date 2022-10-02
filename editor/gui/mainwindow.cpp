@@ -2587,12 +2587,20 @@ bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
     {
-        const auto* key = static_cast<QKeyEvent*>(event);
-        if (key->key() != Qt::Key_Escape)
-            return QMainWindow::event(event);
-        else if (!mCurrentWidget)
-            return false;
-        mCurrentWidget->OnEscape();
+        auto* key = static_cast<QKeyEvent*>(event);
+        if (mCurrentWidget)
+        {
+            if (key->key() == Qt::Key_Escape)
+            {
+                if (mCurrentWidget->OnEscape())
+                    return true;
+            }
+            else
+            {
+                if (mCurrentWidget->OnKeyDown(key))
+                    return true;
+            }
+        }
     }
     else if (event->type() == IterateGameLoopEvent::GetIdentity())
     {
