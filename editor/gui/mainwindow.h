@@ -124,6 +124,7 @@ namespace gui
         void on_actionNewTilemap_triggered();
         void on_actionNewAudioGraph_triggered();
         void on_actionImportFiles_triggered();
+        void on_actionImportTiles_triggered();
         void on_actionExportJSON_triggered();
         void on_actionImportJSON_triggered();
         void on_actionEditResource_triggered();

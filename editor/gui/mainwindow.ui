@@ -2068,6 +2068,18 @@
     <string>New Tilemap</string>
    </property>
   </action>
+  <action name="actionImportTiles">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import Tiles</string>
+   </property>
+   <property name="toolTip">
+    <string>Import new tiles from a packed tilemap</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>btnDemoBandit</tabstop>
