@@ -406,6 +406,8 @@ namespace game
         // Get the associated script file ID.
         std::string GetScriptFileId() const
         { return mScriptFile; }
+        std::string GetTilemapId() const
+        { return mTilemap; }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
@@ -440,8 +442,12 @@ namespace game
         { mName = name; }
         void SetScriptFileId(const std::string& file)
         { mScriptFile = file; }
+        void SetTilemapId(const std::string& map)
+        { mTilemap = map; }
         bool HasScriptFile() const
         { return !mScriptFile.empty(); }
+        bool HasTilemap() const
+        { return !mTilemap.empty(); }
         bool IsDynamicSpatialIndexEnabled() const
         { return mDynamicSpatialIndex != SpatialIndex::Disabled; }
         bool HasLeftBoundary() const
@@ -454,6 +460,8 @@ namespace game
         { return mBottomBoundary.has_value(); }
         void ResetScriptFile()
         { mScriptFile.clear(); }
+        void ResetTilemap()
+        { mTilemap.clear(); }
         void ResetLeftBoundary()
         { mLeftBoundary.reset(); }
         void ResetRightBoundary()
@@ -482,8 +490,10 @@ namespace game
         std::string mClassId;
         // the human-readable name of the class.
         std::string mName;
-        // the id of the associated script file (if any)
+        // the ID of the associated script file (if any)
         std::string mScriptFile;
+        // the ID of the associated tilemap (if any)
+        std::string mTilemap;
         // storing by unique ptr so that the pointers
         // given to the render tree don't become invalid
         // when new nodes are added to the scene.
