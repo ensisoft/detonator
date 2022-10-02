@@ -38,7 +38,7 @@
 namespace engine
 {
     class ClassLibrary;
-    class GameData;
+    class EngineData;
 
     // Interface for abstracting away how UI materials are sourced
     // or created.
@@ -444,7 +444,7 @@ namespace engine
         const UIMaterial* GetMaterialType(const std::string& key) const;
         // Load style properties and materials based on the JSON.
         bool LoadStyle(const nlohmann::json& json);
-        bool LoadStyle(const GameData& data);
+        bool LoadStyle(const EngineData& data);
         // Collect the properties and materials that match the given filter
         // into a style string. The style string is in a format supported by
         // ParseStyleString.

@@ -2274,10 +2274,9 @@ const uik::Widget* UIWidget::GetCurrentWidget() const
 
 bool UIWidget::LoadStyleVerbose(const QString& name)
 {
-    const auto& data = mState.workspace->LoadGameData(app::ToUtf8(name));
+    const auto& data = mState.workspace->LoadEngineData(app::ToUtf8(name));
     if (!data)
     {
-        ERROR("Failed to load style file: '%1'.", name);
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
@@ -2290,7 +2289,6 @@ bool UIWidget::LoadStyleVerbose(const QString& name)
     style->SetClassLibrary(mState.workspace);
     if (!style->LoadStyle(*data))
     {
-        WARN("Errors were found while parsing the style.");
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setIcon(QMessageBox::Warning);
@@ -2312,17 +2310,17 @@ bool UIWidget::LoadStyleVerbose(const QString& name)
 
 bool UIWidget::LoadStyleQuiet(const std::string& uri)
 {
-    const auto& data = mState.workspace->LoadGameData(uri);
+    const auto& data = mState.workspace->LoadEngineData(uri);
     if (!data)
     {
-        ERROR("Failed to load style file: '%1'.", uri);
+        ERROR("Failed to load style file. [file='%1']", uri);
         return false;
     }
     auto style = std::make_unique<engine::UIStyle>();
     style->SetClassLibrary(mState.workspace);
     if (!style->LoadStyle(*data))
     {
-        ERROR("Errors were found while parsing the style '%1'.", uri);
+        ERROR("Errors were found while parsing the style [file='%1']", uri);
         return false;
     }
     mState.style = std::move(style);

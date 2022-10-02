@@ -34,23 +34,25 @@ namespace engine
     // those deps in any case. This means that GameMain doesn't need to
     // link against all the various libs such as GfxLib, AudioLib etc.
 
-    class GameData;
-    using GameDataHandle = std::shared_ptr<const GameData>;
+    class EngineData;
+    using EngineDataHandle = std::shared_ptr<const EngineData>;
 
-    // Interface for accessing game objects' data packaged with the game.
+    // Interface for letting the engine load data associated and
+    // packaged with the game resources. This includes data such
+    // as UI style JSON files, entity/scene Lua script files etc.
     class Loader
     {
     public:
-        using GameDataHandle = engine::GameDataHandle;
+        using EngineDataHandle = engine::EngineDataHandle;
 
         virtual ~Loader() = default;
         // Load game data based on a URI. The URI undergoes a resolution
         // and the content may be loaded from a resource pack etc.
         // Returns a null handle if no such data could be loaded.
-        virtual GameDataHandle LoadGameData(const std::string& uri) const = 0;
+        virtual EngineDataHandle LoadEngineData(const std::string& uri) const = 0;
         // Load game data from a file on the file system.
         // Returns a null handle if no such data could be loaded.
-        virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const = 0;
+        virtual EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const = 0;
     };
 
     // Loader implementation for loading all kinds of subsystem

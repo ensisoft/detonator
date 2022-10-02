@@ -23,7 +23,7 @@
 
 namespace engine
 {
-    class GameData
+    class EngineData
     {
     public:
         enum class DataFormat {
@@ -33,7 +33,7 @@ namespace engine
             UIStyle
         };
 
-        virtual ~GameData() = default;
+        virtual ~EngineData() = default;
         virtual const void* GetData() const = 0;
         virtual std::size_t GetSize() const = 0;
         virtual std::string GetName() const = 0;

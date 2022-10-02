@@ -1053,7 +1053,7 @@ void LuaRuntime::Init()
 
         DEBUG("Loading Lua module. [module=%1]", module);
         const auto& file = base::JoinPath(mLuaPath, module);
-        const auto& buff = mDataLoader->LoadGameDataFromFile(file);
+        const auto& buff = mDataLoader->LoadEngineDataFromFile(file);
         if (!buff)
             throw std::runtime_error("can't find lua module: " + module);
         auto ret = mLuaState->load_buffer((const char*)buff->GetData(), buff->GetSize());
@@ -1291,7 +1291,7 @@ void LuaRuntime::Init()
         const auto& main_game_script = base::JoinPath(mLuaPath, mGameScript);
         DEBUG("Loading main game script. [file='%1']", main_game_script);
 
-        const auto buffer = mDataLoader->LoadGameDataFromFile(main_game_script);
+        const auto buffer = mDataLoader->LoadEngineDataFromFile(main_game_script);
         if (!buffer)
         {
             ERROR("Failed to load main game script data. [file='%1']", main_game_script);
@@ -1366,7 +1366,7 @@ void LuaRuntime::BeginPlay(Scene* scene)
         if (it == script_env_map.end())
         {
             const auto& script_file = base::JoinPath(mLuaPath, script + ".lua");
-            const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+            const auto& script_buff = mDataLoader->LoadEngineDataFromFile(script_file);
             if (!script_buff)
             {
                 ERROR("Failed to load entity class script file. [class='%1', file='%2']", klass.GetName(), script_file);
@@ -1398,7 +1398,7 @@ void LuaRuntime::BeginPlay(Scene* scene)
         const auto& klass = scene->GetClass();
         const auto& script = klass.GetScriptFileId();
         const auto& script_file = base::JoinPath(mLuaPath, script + ".lua");
-        const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+        const auto& script_buff = mDataLoader->LoadEngineDataFromFile(script_file);
         if (!script_buff)
         {
             ERROR("Failed to load scene class script file. [class='%1', file='%2']", klass.GetName(), script_file);
@@ -1853,7 +1853,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
 
     const auto& script_id   = klass.GetScriptFileId();
     const auto& script_file = base::JoinPath(mLuaPath, script_id + ".lua");
-    const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+    const auto& script_buff = mDataLoader->LoadEngineDataFromFile(script_file);
     if (!script_buff)
     {
         ERROR("Failed to load entity class script file. [class='%1', file='%2']", klass.GetName(), script_file);
@@ -1889,7 +1889,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
 
     const auto& script_id   = window.GetScriptFile();
     const auto& script_file = base::JoinPath(mLuaPath, script_id + ".lua");
-    const auto& script_buff = mDataLoader->LoadGameDataFromFile(script_file);
+    const auto& script_buff = mDataLoader->LoadEngineDataFromFile(script_file);
     if (!script_buff)
     {
         ERROR("Failed to load UiKit window script file. [class='%1', file='%2']", window.GetName(), script_file);

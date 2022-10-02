@@ -91,9 +91,9 @@ namespace app
         virtual engine::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual engine::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
         virtual engine::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
-        // game::GameDataLoader implementation.
-        virtual engine::GameDataHandle LoadGameData(const std::string& URI) const override;
-        virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override;
+        // engine::EngineDataLoader implementation.
+        virtual engine::EngineDataHandle LoadEngineData(const std::string& URI) const override;
+        virtual engine::EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override;
         // gfx::ResourceLoader implementation
         virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
         // audio::Loader implementation
