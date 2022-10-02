@@ -56,6 +56,7 @@
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/tilemapwidget.h"
 #include "editor/gui/dlgabout.h"
+#include "editor/gui/dlgtileimport.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
 #include "editor/gui/dlgpackage.h"
@@ -1424,6 +1425,15 @@ void MainWindow::on_actionImportFiles_triggered()
     ImportFiles(files);
 }
 
+void MainWindow::on_actionImportTiles_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    DlgTileImport dlg(this, mWorkspace.get());
+    dlg.exec();
+}
+
 void MainWindow::on_actionExportJSON_triggered()
 {
     if (!mWorkspace)
@@ -1898,6 +1908,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addMenu(&script);
     menu.addSeparator();
     menu.addAction(mUI.actionImportFiles);
+    menu.addAction(mUI.actionImportTiles);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
@@ -2855,6 +2866,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewAudioGraph);
         mUI.mainToolBar->addSeparator();
         mUI.mainToolBar->addAction(mUI.actionImportFiles);
+        mUI.mainToolBar->addAction(mUI.actionImportTiles);
     }
     else
     {

@@ -379,6 +379,9 @@ add_executable(GSEditor
     editor/gui/dlgnew.ui
     editor/gui/dlgtilelayer.h
     editor/gui/dlgtilelayer.ui
+    editor/gui/dlgtileimport.h
+    editor/gui/dlgtileimport.ui
+    editor/gui/dlgtileimport.cpp
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h

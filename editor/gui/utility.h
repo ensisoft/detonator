@@ -80,6 +80,28 @@ inline QColor FromGfx(const gfx::Color4f& color)
     return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
+inline void Increment(QSpinBox* spin, int value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(spin->value() + value);
+}
+inline void Increment(QDoubleSpinBox* spin, float value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(spin->value() + value);
+}
+
+inline void Decrement(QSpinBox* spin, int value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(spin->value() - value);
+}
+inline void Decrement(QDoubleSpinBox* spin, float value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(spin->value() - value);
+}
+
 inline QModelIndexList GetSelection(QTableView* view)
 {
     return view->selectionModel()->selectedRows();
