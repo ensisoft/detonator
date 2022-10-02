@@ -203,6 +203,9 @@ namespace gui
         virtual bool OnEscape()
         { return false; }
 
+        virtual bool OnKeyDown(QKeyEvent* key)
+        { return false; }
+
         struct Stats {
             double time = 0.0;
             struct {
