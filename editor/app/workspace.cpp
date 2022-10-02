@@ -1021,16 +1021,16 @@ engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const 
     return ret;
 }
 
-engine::GameDataHandle Workspace::LoadGameData(const std::string& URI) const
+engine::EngineDataHandle Workspace::LoadEngineData(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
-    return GameDataFileBuffer::LoadFromFile(file);
+    return EngineBuffer::LoadFromFile(file);
 }
 
-engine::GameDataHandle Workspace::LoadGameDataFromFile(const std::string& filename) const
+engine::EngineDataHandle Workspace::LoadEngineDataFromFile(const std::string& filename) const
 {
-    return GameDataFileBuffer::LoadFromFile(app::FromUtf8(filename));
+    return EngineBuffer::LoadFromFile(app::FromUtf8(filename));
 }
 
 gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
@@ -1038,7 +1038,7 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
     // static map of resources that are part of the application, i.e.
     // app://something. They're not expected to change.
     static std::unordered_map<std::string,
-            std::shared_ptr<const GraphicsFileBuffer>> application_resources;
+            std::shared_ptr<const GraphicsBuffer>> application_resources;
     if (base::StartsWith(URI, "app://")) {
         auto it = application_resources.find(URI);
         if (it != application_resources.end())
@@ -1046,7 +1046,7 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
     }
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
-    auto ret = GraphicsFileBuffer::LoadFromFile(file);
+    auto ret = GraphicsBuffer::LoadFromFile(file);
     if (base::StartsWith(URI, "app://")) {
         application_resources[URI] = ret;
     }
@@ -2371,7 +2371,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             uik::Window* window = nullptr;
             resource->GetContent(&window);
             // package the style resources. currently this is only the font files.
-            auto style_data = LoadGameData(window->GetStyleName());
+            auto style_data = LoadEngineData(window->GetStyleName());
             if (!style_data)
             {
                 ERROR("Failed to open UI style file. [UI='%1', style='%2']", window->GetName(), window->GetStyleName());

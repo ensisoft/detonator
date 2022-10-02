@@ -298,7 +298,7 @@ public:
         engine::Engine::Environment env;
         env.classlib = mContentLoader.get();
         env.graphics_loader  = mResourceLoader.get();
-        env.game_data_loader = mResourceLoader.get();
+        env.engine_loader    = mResourceLoader.get();
         env.audio_loader     = mResourceLoader.get();
         env.directory        = "/";
         env.user_home        = ""; // todo:

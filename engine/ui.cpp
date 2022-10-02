@@ -288,7 +288,7 @@ bool UIStyle::LoadStyle(const nlohmann::json& json)
     }
     return true;
 }
-bool UIStyle::LoadStyle(const GameData& data)
+bool UIStyle::LoadStyle(const EngineData& data)
 {
     const auto* beg = (const char*)data.GetData();
     const auto* end = beg + data.GetSize();

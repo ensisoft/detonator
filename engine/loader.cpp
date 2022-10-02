@@ -305,7 +305,7 @@ private:
     std::uint64_t mSize = 0;
 };
 
-using GameDataFileBuffer = FileBuffer<GameData>;
+using GameDataFileBuffer = FileBuffer<EngineData>;
 using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
 
 class FileResourceLoaderImpl : public FileResourceLoader
@@ -328,7 +328,7 @@ public:
         return buff;
     }
     // GameDataLoader impl
-    virtual GameDataHandle LoadGameData(const std::string& uri) const override
+    virtual EngineDataHandle LoadEngineData(const std::string& uri) const override
     {
         const auto& filename = ResolveURI(uri);
         auto it = mGameDataBufferCache.find(filename);
@@ -343,7 +343,7 @@ public:
         mGameDataBufferCache[filename] = buff;
         return buff;
     }
-    virtual GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    virtual EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override
     {
         // expect this to be a path relative to the content path
         // this loading function is only used to load the Lua files

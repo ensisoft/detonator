@@ -244,23 +244,23 @@ public:
 
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        auto buffer = app::GraphicsFileBuffer::LoadFromFile(file);
+        auto buffer = app::GraphicsBuffer::LoadFromFile(file);
         mGraphicsBuffers[URI] = buffer;
         return buffer;
     }
-    virtual engine::GameDataHandle LoadGameData(const std::string& URI) const override
+    virtual engine::EngineDataHandle LoadEngineData(const std::string& URI) const override
     {
-        auto it = mGameDataBuffers.find(URI);
-        if (it != mGameDataBuffers.end())
+        auto it = mEngineDataBuffers.find(URI);
+        if (it != mEngineDataBuffers.end())
             return it->second;
 
         const auto& file = ResolveURI(URI);
         DEBUG("URI '%1' => '%2'", URI, file);
-        auto buffer = app::GameDataFileBuffer::LoadFromFile(file);
-        mGameDataBuffers[URI] = buffer;
+        auto buffer = app::EngineBuffer::LoadFromFile(file);
+        mEngineDataBuffers[URI] = buffer;
         return buffer;
     }
-    virtual engine::GameDataHandle LoadGameDataFromFile(const std::string& filename) const override
+    virtual engine::EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override
     {
         // expect this to be a path relative to the content path
         // (which is the workspace path here)
@@ -269,7 +269,7 @@ public:
         // this function can go away!
         const auto& file = app::JoinPath(mWorkspace.GetDir(), app::FromUtf8(filename));
 
-        return app::GameDataFileBuffer::LoadFromFile(file);
+        return app::EngineBuffer::LoadFromFile(file);
     }
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
         AudioIOStrategy strategy, bool enable_file_caching) const override
@@ -281,7 +281,7 @@ public:
     std::size_t GetBufferCacheSize() const
     {
         size_t ret = 0;
-        for (const auto& pair : mGameDataBuffers)
+        for (const auto& pair : mEngineDataBuffers)
             ret += pair.second->GetSize();
         for (const auto& pair : mGraphicsBuffers)
             ret += pair.second->GetSize();
@@ -289,7 +289,7 @@ public:
     }
     void BlowCaches()
     {
-        mGameDataBuffers.clear();
+        mEngineDataBuffers.clear();
         mGraphicsBuffers.clear();
     }
 private:
@@ -326,7 +326,7 @@ private:
     const QString mGameDir;
     const QString mHostDir;
     mutable std::unordered_map<std::string, QString> mFileMaps;
-    mutable std::unordered_map<std::string, engine::GameDataHandle> mGameDataBuffers;
+    mutable std::unordered_map<std::string, engine::EngineDataHandle> mEngineDataBuffers;
     mutable std::unordered_map<std::string, gfx::ResourceHandle> mGraphicsBuffers;
 };
 
@@ -853,7 +853,7 @@ void PlayWindow::DoAppInit()
         app::MakePath(app::JoinPath(user_home, game_home));
         engine::Engine::Environment env;
         env.classlib  = &mWorkspace;
-        env.game_data_loader   = mResourceLoader.get();
+        env.engine_loader   = mResourceLoader.get();
         env.graphics_loader    = mResourceLoader.get();
         env.audio_loader       = mResourceLoader.get();
         env.directory          = app::ToUtf8(mGameWorkingDir);

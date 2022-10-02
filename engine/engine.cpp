@@ -90,7 +90,7 @@ public:
         mRuntime->SetPhysicsEngine(&mPhysics);
         mRuntime->SetStateStore(&mStateStore);
         mRuntime->SetAudioEngine(mAudio.get());
-        mRuntime->SetDataLoader(mGameDataLoader);
+        mRuntime->SetDataLoader(mEngineDataLoader);
         mRuntime->Init();
         mUIStyle.SetClassLibrary(mClasslib);
         mUIPainter.SetPainter(mPainter.get());
@@ -130,7 +130,7 @@ public:
     virtual void SetEnvironment(const Environment& env) override
     {
         mClasslib       = env.classlib;
-        mGameDataLoader = env.game_data_loader;
+        mEngineDataLoader = env.engine_loader;
         mAudioLoader    = env.audio_loader;
         mDirectory      = env.directory;
         mGameHome       = env.game_home;
@@ -750,7 +750,7 @@ private:
         mUIStyle.ClearMaterials();
         mUIState.Clear();
 
-        auto data = mGameDataLoader->LoadGameData(name);
+        auto data = mEngineDataLoader->LoadEngineData(name);
         if (!data)
         {
             ERROR("Failed to load UI style '%1' data.", name);
@@ -1018,8 +1018,9 @@ private:
     // Interface for accessing the game classes and resources
     // such as animations, materials etc.
     engine::ClassLibrary* mClasslib = nullptr;
-    // Game data/content loader.
-    engine::Loader* mGameDataLoader = nullptr;
+    // Engine data loader for the engine and the for
+    // the subsystems that don't have their own specific loader.
+    engine::Loader* mEngineDataLoader = nullptr;
     // audio stream loader
     audio::Loader* mAudioLoader = nullptr;
     // The graphics painter device.

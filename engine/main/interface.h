@@ -164,9 +164,9 @@ namespace engine
             // Interface for accessing resource classes such as scenes, entities
             // materials etc.
             engine::ClassLibrary* classlib = nullptr;
-            // Interface for accessing game data packaged with the game.
+            // Interface for accessing engine data packaged with the game.
             // Not the data *generated* by the game such as save games.
-            engine::Loader* game_data_loader = nullptr;
+            engine::Loader* engine_loader = nullptr;
             // Interface for accessing low level graphics resources such as shaders
             // textures and fonts.
             gfx::Loader* graphics_loader = nullptr;
