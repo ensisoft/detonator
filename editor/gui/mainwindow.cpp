@@ -2476,6 +2476,8 @@ void MainWindow::OpenResource(const QString& id)
         return;
     if (auto* resource = mWorkspace->FindResourceById(id))
     {
+        if (resource->IsPrimitive())
+            return;
         const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
 
         if (!FocusWidget(id))
