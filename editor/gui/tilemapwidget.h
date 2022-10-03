@@ -74,6 +74,7 @@ namespace gui
         void on_mapWidth_valueChanged(int);
         void on_btnApplyMapSize_clicked();
         void on_actionSave_triggered();
+        void on_actionPalette_triggered();
         void on_btnNewLayer_clicked();
         void on_btnDeleteLayer_clicked();
         void on_btnEditLayer_clicked();
@@ -87,6 +88,7 @@ namespace gui
         void on_btnDelTool_clicked();
         void on_btnSelectToolMaterial_clicked();
         void on_btnSetToolMaterialParams_clicked();
+        void on_btnEditToolMaterial_clicked();
         void on_btnResetPaletteIndex_clicked();
         void on_cmbToolFunction_currentIndexChanged(int);
         void on_cmbToolShape_currentIndexChanged(int);
@@ -97,6 +99,7 @@ namespace gui
         void on_toolValue_valueChanged(int);
         void on_chkToolMaterial_stateChanged(int);
         void on_chkToolValue_stateChanged(int);
+        void on_layers_doubleClicked(const QModelIndex& index);
         void on_layerName_textChanged();
         void on_cmbLayerCache_currentIndexChanged(int);
         void on_chkLayerVisible_stateChanged(int);
@@ -105,10 +108,10 @@ namespace gui
         void on_cmbTileMaterial_currentIndexChanged(int);
         void on_btnSelectTileMaterial_clicked();
         void on_btnDeleteTileMaterial_clicked();
+        void on_btnEditTileMaterial_clicked();
         void on_tileValue_valueChanged(int);
 
         void StartTool();
-
         void NewResourceAvailable(const app::Resource* resource);
         void ResourceToBeDeleted(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
@@ -129,6 +132,7 @@ namespace gui
         void MouseRelease(QMouseEvent* mickey);
         void MouseDoubleClick(QMouseEvent* mickey);
         void MouseWheel(QWheelEvent* wheel);
+        void MouseZoom(std::function<void(void)> zoom_function);
         bool KeyPress(QKeyEvent* key);
         game::TilemapLayerClass* GetCurrentLayer();
         game::TilemapLayer* GetCurrentLayerInstance();
@@ -150,6 +154,8 @@ namespace gui
         void ToolFromJson(Tool& tool, const QJsonObject& json) const;
         void ReplaceDeletedResources();
         void ClearUnusedPaletteEntries();
+        bool OpenMaterialPaletteOnCurrentTool();
+        bool SelectLayerOnKey(unsigned index);
     private:
         Ui::Tilemap mUI;
     private:
@@ -198,6 +204,7 @@ namespace gui
         } mState;
 
         std::unique_ptr<MouseTool> mCurrentTool;
+        std::unique_ptr<MouseTool> mCameraTool;
         std::unique_ptr<LayerModel> mModel;
         std::unordered_map<std::string,
             std::shared_ptr<LayerData>> mLayerData;

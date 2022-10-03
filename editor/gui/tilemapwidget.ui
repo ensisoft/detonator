@@ -415,6 +415,23 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="btnEditToolMaterial">
+            <property name="toolTip">
+             <string>Edit tool material</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/material_go.png</normaloff>:/16x16_ico_png/material_go.png</iconset>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="7" column="0">
@@ -1345,6 +1362,23 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="btnEditTileMaterial">
+            <property name="toolTip">
+             <string>Select tile material</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/material_go.png</normaloff>:/16x16_ico_png/material_go.png</iconset>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="1" column="0">
@@ -1401,6 +1435,21 @@
     <string>Ctrl+S</string>
    </property>
   </action>
+  <action name="actionPalette">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+   </property>
+   <property name="text">
+    <string>Palette</string>
+   </property>
+   <property name="toolTip">
+    <string>Open material palette</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1438,6 +1487,7 @@
   <tabstop>cmbToolMaterial</tabstop>
   <tabstop>btnSelectToolMaterial</tabstop>
   <tabstop>btnSetToolMaterialParams</tabstop>
+  <tabstop>btnEditToolMaterial</tabstop>
   <tabstop>toolPaletteIndex</tabstop>
   <tabstop>btnResetPaletteIndex</tabstop>
   <tabstop>toolValue</tabstop>
@@ -1480,6 +1530,7 @@
   <tabstop>cmbTileMaterial</tabstop>
   <tabstop>btnSelectTileMaterial</tabstop>
   <tabstop>btnDeleteTileMaterial</tabstop>
+  <tabstop>btnEditTileMaterial</tabstop>
   <tabstop>tileValue</tabstop>
  </tabstops>
  <resources>
