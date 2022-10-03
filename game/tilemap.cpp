@@ -299,8 +299,10 @@ public:
 
         for (size_t i=0; i<max_tiles; ++i)
         {
-            if (cache[i] == default_tile)
-                continue;
+            // this optimization breaks when the intention is to actually
+            // "remove" the value previously written to a tile.
+            //if (cache[i] == default_tile)
+            //    continue;
 
             // index of the tile in the layer
             const auto tile_index  = cache_index_tiles + i;
@@ -331,6 +333,10 @@ public:
                     [](const TileBlock& block, size_t index) {
                         return block.block_index < index;
                     });
+                
+                if (it == mBlocks.end() && cache[i] == default_tile)
+                    continue;
+
                 if (it == mBlocks.end() || (*it).block_index != block_index)
                 {
                     const auto block_size_bytes = mBlockHeight * mBlockWidth * sizeof(Tile);
