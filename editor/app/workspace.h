@@ -228,6 +228,9 @@ namespace app
         bool IsValidScript(const std::string& id) const
         { return IsValidScript(FromUtf8(id)); }
 
+        bool IsUserDefinedResource(const QString& id) const;
+        bool IsUserDefinedResource(const std::string& id) const;
+
         // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)
         QAbstractTableModel* GetResourceModel()

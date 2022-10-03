@@ -366,6 +366,8 @@ namespace game
         { return mFlags.test(Flags::Visible); }
         bool IsEnabled() const
         { return mFlags.test(Flags::Enabled); }
+        bool TestFlag(Flags flag) const
+        { return mFlags.test(flag); }
         Cache GetCache() const
         { return mCache; }
         Resolution GetResolution() const

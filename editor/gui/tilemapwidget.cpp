@@ -238,15 +238,24 @@ public:
     {}
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
+        const auto col = index.column();
+        const auto row = index.row();
+        const auto& layer = mState.klass->GetLayer(row);
+
         if (role == Qt::DisplayRole)
         {
-            const auto col = index.column();
-            const auto row = index.row();
-            const auto& layer = mState.klass->GetLayer(row);
-
-            if (col == 0) return app::toString(layer.GetName());
-            else if (col == 1) return app::toString(layer.GetType());
+            if (col == 0) return app::toString(layer.GetType());
+            else if (col == 1) return app::toString(layer.GetName());
             else BUG("Missing layer table column index.");
+        }
+        else if (role == Qt::DecorationRole)
+        {
+            if (col == 0)
+            {
+                if (layer.TestFlag(game::TilemapLayerClass::Flags::VisibleInEditor))
+                    return QIcon("icons:eye.png");
+                else return QIcon("icons:crossed_eye.png");
+            }
         }
         return QVariant();
     }
@@ -254,8 +263,8 @@ public:
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
-            if (section == 0) return "Name";
-            else if (section == 1) return "Type";
+            if (section == 0) return "Type";
+            else if (section == 1) return "Name";
             else BUG("Missing layer table column index.");
         }
         return QVariant();
@@ -422,8 +431,10 @@ public:
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
     {
-        if (mickey->button() == Qt::LeftButton)
-            mActive = true;
+        if (mickey->button() != Qt::LeftButton)
+            return;
+
+        mActive = true;
 
         if (mLayer->HasRenderComponent() && mTool.apply_material)
         {
@@ -521,8 +532,8 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mUI.widget->onKeyPress     = std::bind(&TilemapWidget::KeyPress,     this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&TilemapWidget::PaintScene,   this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onInitScene    = std::bind(&TilemapWidget::InitScene,    this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onZoomIn       = std::bind(&TilemapWidget::ZoomIn,       this);
-    mUI.widget->onZoomOut      = std::bind(&TilemapWidget::ZoomOut,      this);
+    mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&TilemapWidget::ZoomIn, this)); };
+    mUI.widget->onZoomOut      = [this]() { MouseZoom(std::bind(&TilemapWidget::ZoomOut, this)); };
 
     connect(mUI.layers->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &TilemapWidget::LayerSelectionChanged);
@@ -544,6 +555,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     SetList(mUI.cmbTileMaterial, materials);
     SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
     SetRange(mUI.tileValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
+    SetEnabled(mUI.actionPalette, false);
 
     // generate a list of widgets for the layer color palette.
     for (int i=0; i<256; ++i)
@@ -674,6 +686,8 @@ void TilemapWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     for (auto* action : mToolActions)
         bar.addAction(action);
+    bar.addSeparator();
+    bar.addAction(mUI.actionPalette);
 
 }
 void TilemapWidget::AddActions(QMenu& menu)
@@ -682,6 +696,8 @@ void TilemapWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     for (auto* action : mToolActions)
         menu.addAction(action);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPalette);
 }
 bool TilemapWidget::SaveState(Settings& settings) const
 {
@@ -830,6 +846,23 @@ bool TilemapWidget::LoadState(const Settings& settings)
 }
 bool TilemapWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
 {
+    switch (action)
+    {
+        case Actions::CanZoomIn: {
+            const auto max = mUI.zoom->maximum();
+            const auto val = mUI.zoom->value();
+            return val < max;
+        }
+        break;
+        case Actions::CanZoomOut: {
+            const auto min = mUI.zoom->minimum();
+            const auto val = mUI.zoom->value();
+            return val > min;
+        } break;
+        case Actions::CanReloadShaders:
+        case Actions::CanReloadTextures:
+            return true;
+    }
     return false;
 }
 void TilemapWidget::Cut(Clipboard& clipboard)
@@ -879,12 +912,20 @@ bool TilemapWidget::HasUnsavedChanges() const
 {
     size_t hash = 0;
     hash = mState.klass->GetHash();
-    for (const auto& [key, data] : mLayerData)
-        hash = base::hash_combine(hash, data->GetHash());
+
+    for (size_t i=0; i<mState.map->GetNumLayers(); ++i)
+    {
+        auto& layer = mState.map->GetLayer(i);
+        layer.FlushCache();
+        const auto* data = base::SafeFind(mLayerData, layer.GetClassId());
+        hash = base::hash_combine(hash, (*data)->GetHash());
+    }
     return mHash != hash;
 }
 bool TilemapWidget::OnEscape()
 {
+     mCameraTool.reset();
+
     if (mCurrentTool)
     {
         mCurrentTool.reset();
@@ -904,21 +945,26 @@ bool TilemapWidget::OnEscape()
 }
 bool TilemapWidget::OnKeyDown(QKeyEvent* key)
 {
-    if (key->key() != Qt::Key_Space)
-        return false;
-
-    if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
-    {
-        if (auto* tool = GetCurrentTool())
-        {
-            DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
-            if (dlg.exec() == QDialog::Rejected)
-                return true;
-            SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-            ModifyCurrentTool();
-            return true;
-        }
-    }
+    if (key->key() == Qt::Key_Space)
+        return OpenMaterialPaletteOnCurrentTool();
+    else if (key->key() == Qt::Key_1)
+        return SelectLayerOnKey(0);
+    else if (key->key() == Qt::Key_2)
+        return SelectLayerOnKey(1);
+    else if (key->key() == Qt::Key_3)
+        return SelectLayerOnKey(2);
+    else if (key->key() == Qt::Key_4)
+        return SelectLayerOnKey(3);
+    else if (key->key() == Qt::Key_5)
+        return SelectLayerOnKey(4);
+    else if (key->key() == Qt::Key_6)
+        return SelectLayerOnKey(5);
+    else if (key->key() == Qt::Key_7)
+        return SelectLayerOnKey(6);
+    else if (key->key() == Qt::Key_8)
+        return SelectLayerOnKey(7);
+    else if (key->key() == Qt::Key_9)
+        return SelectLayerOnKey(8);
     return false;
 }
 
@@ -980,6 +1026,8 @@ void TilemapWidget::on_btnApplyMapSize_clicked()
     if ((new_map_width != old_map_width) ||
         (new_map_height != old_map_height))
     {
+        mState.selection.reset();
+
         mState.klass->SetMapWidth(new_map_width);
         mState.klass->SetMapHeight(new_map_height);
 
@@ -1059,6 +1107,11 @@ void TilemapWidget::on_actionSave_triggered()
 
     DisplayLayerProperties();
     mHash = hash;
+}
+
+void TilemapWidget::on_actionPalette_triggered()
+{
+    OpenMaterialPaletteOnCurrentTool();
 }
 
 void TilemapWidget::on_btnNewLayer_clicked()
@@ -1251,6 +1304,13 @@ void TilemapWidget::on_btnSetToolMaterialParams_clicked()
 {
 
 }
+
+void TilemapWidget::on_btnEditToolMaterial_clicked()
+{
+    const QString materialId = GetItemId(mUI.cmbToolMaterial);
+    emit OpenResource(materialId);
+}
+
 void TilemapWidget::on_btnResetPaletteIndex_clicked()
 {
     SetValue(mUI.toolPaletteIndex, -1);
@@ -1278,6 +1338,7 @@ void TilemapWidget::on_toolHeight_valueChanged(int)
 void TilemapWidget::on_cmbToolMaterial_currentIndexChanged(int)
 {
     ModifyCurrentTool();
+    ShowCurrentTool();
 }
 
 void TilemapWidget::on_toolPaletteIndex_valueChanged(int)
@@ -1296,6 +1357,21 @@ void TilemapWidget::on_chkToolMaterial_stateChanged(int)
 void TilemapWidget::on_chkToolValue_stateChanged(int)
 {
     ModifyCurrentTool();
+}
+
+void TilemapWidget::on_layers_doubleClicked(const QModelIndex& index)
+{
+    const auto row = index.row();
+    const auto col = index.column();
+    if (col == 0)
+    {
+        auto& layer = mState.klass->GetLayer(row);
+        const bool visible = layer.TestFlag(game::TilemapLayerClass::Flags::VisibleInEditor);
+        layer.SetFlag(game::TilemapLayerClass::Flags::VisibleInEditor, !visible);
+        DEBUG("Toggle layer visibility. [layer='%1']", layer.GetName());
+        mModel->Refresh();
+
+    }
 }
 
 void TilemapWidget::on_layerName_textChanged()
@@ -1436,6 +1512,35 @@ void TilemapWidget::on_btnDeleteTileMaterial_clicked()
     DisplaySelection();
 }
 
+void TilemapWidget::on_btnEditTileMaterial_clicked()
+{
+    if (!mState.selection.has_value())
+        return;
+
+    const auto& selection = mState.selection.value();
+
+    auto* klass = GetCurrentLayer();
+    auto* layer = GetCurrentLayerInstance();
+    if (!klass || !layer || !layer->HasRenderComponent())
+        return;
+
+    const auto nothing_index = layer->GetMaxPaletteIndex();
+    for (unsigned row=0; row<selection.height; ++row)
+    {
+        for (unsigned col=0; col<selection.width; ++col)
+        {
+            const auto tile_row = selection.start_row + row;
+            const auto tile_col = selection.start_col + col;
+            uint8_t palette_index = 0;
+            ASSERT(layer->GetTilePaletteIndex(&palette_index, tile_row, tile_col));
+            if (palette_index == layer->GetMaxPaletteIndex())
+                continue;
+            const auto& materialId = klass->GetPaletteMaterialId(palette_index);
+            emit OpenResource(app::FromUtf8(materialId));
+        }
+    }
+}
+
 void TilemapWidget::on_tileValue_valueChanged(int)
 {
     if (!mState.selection.has_value())
@@ -1491,6 +1596,7 @@ void TilemapWidget::StartTool()
         mouse_tool->SetToolIndex(tool_index);
         mCurrentTool = std::move(mouse_tool);
     }
+    SetEnabled(mUI.actionPalette, true);
 }
 
 void TilemapWidget::NewResourceAvailable(const app::Resource* resource)
@@ -1540,12 +1646,15 @@ void TilemapWidget::ResourceUpdated(const app::Resource* resource)
 
 void TilemapWidget::LayerSelectionChanged(const QItemSelection, const QItemSelection)
 {
-    mCurrentTool.reset();
-    UncheckTools();
+    const auto* current = GetCurrentLayer();
+    if (!current)
+    {
+        mCurrentTool.reset();
+        UncheckTools();
+    }
     DisplayLayerProperties();
     DisplaySelection();
 
-    const auto* current = GetCurrentLayer();
     for (auto* action : mToolActions)
         SetEnabled(action, current != nullptr);
 }
@@ -1688,6 +1797,7 @@ void TilemapWidget::DisplaySelection()
     SetEnabled(mUI.selection, false);
     SetEnabled(mUI.cmbTileMaterial, false);
     SetEnabled(mUI.btnDeleteTileMaterial, false);
+    SetEnabled(mUI.btnEditTileMaterial, false);
     SetValue(mUI.cmbTileMaterial, -1);
     SetPlaceholderText(mUI.cmbTileMaterial, "");
 
@@ -1709,15 +1819,16 @@ void TilemapWidget::DisplaySelection()
     {
         SetEnabled(mUI.cmbTileMaterial, true);
         SetEnabled(mUI.btnDeleteTileMaterial, true);
+        SetEnabled(mUI.btnEditTileMaterial, true);
         std::set<uint8_t> indices;
         for (unsigned row=0; row<selection.height; ++row)
         {
             for  (unsigned col=0; col<selection.width; ++col)
             {
                 uint8_t palette_index = 0;
-                ASSERT(layer->GetTilePaletteIndex(&palette_index,
-                                                  selection.start_row + row,
-                                                  selection.start_col + col));
+                const auto tile_row = selection.start_row + row;
+                const auto tile_col = selection.start_col + col;
+                ASSERT(layer->GetTilePaletteIndex(&palette_index, tile_row, tile_col));
                 indices.insert(palette_index);
                 if (indices.size() > 1)
                     break;
@@ -1811,6 +1922,25 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const auto& map_to_view = view.GetAsMatrix();
         painter.SetViewMatrix(map_to_view);
 
+        const bool show_render_layers = GetValue(mUI.chkShowRenderLayers);
+        const bool show_data_layers   = GetValue(mUI.chkShowDataLayers);
+
+        gfx::Transform model;
+        mRenderer.BeginFrame();
+        for (size_t index=0; index<mState.map->GetNumLayers(); ++index)
+        {
+            const auto& layer = mState.map->GetLayer(index);
+            const auto& klass = layer.GetClass();
+            if (klass.TestFlag(game::TilemapLayerClass::Flags::VisibleInEditor) &&
+                klass.TestFlag(game::TilemapLayerClass::Flags::Visible))
+            {
+                mRenderer.Draw(*mState.map, layer, viewport, painter, model, index,
+                               show_render_layers, show_data_layers);
+            }
+        }
+        mRenderer.EndFrame();
+
+
         if (const auto* layer = GetCurrentLayerInstance())
         {
             const auto layer_index = GetCurrentLayerIndex();
@@ -1819,14 +1949,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             const auto tile_scaler = layer->GetTileSizeScaler();
             const auto layer_tile_width = tile_width * tile_scaler;
             const auto layer_tile_height = tile_height * tile_scaler;
-
-            const bool show_render_layers = GetValue(mUI.chkShowRenderLayers);
-            const bool show_data_layers   = GetValue(mUI.chkShowDataLayers);
-
-            gfx::Transform model;
-            mRenderer.BeginFrame();
-            mRenderer.Draw(*mState.map, *layer, viewport, painter, model, layer_index, show_render_layers, show_data_layers);
-            mRenderer.EndFrame();
 
             // draw the map boundary
             {
@@ -1873,21 +1995,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 }
             }
         }
-        else
-        {
-            const bool show_render_layers = GetValue(mUI.chkShowRenderLayers);
-            const bool show_data_layers   = GetValue(mUI.chkShowDataLayers);
-
-            gfx::Transform model;
-            mRenderer.BeginFrame();
-            for (size_t i=0; i<mState.map->GetNumLayers(); ++i)
-            {
-                const auto& layer = mState.map->GetLayer(i);
-                mRenderer.Draw(*mState.map, layer, viewport, painter, model, i, show_render_layers,
-                               show_data_layers);
-            }
-            mRenderer.EndFrame();
-        }
         painter.ResetViewMatrix();
         PrintMousePos(view, painter, mUI.widget);
     }
@@ -1912,14 +2019,20 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
 void TilemapWidget::MouseMove(QMouseEvent* mickey)
 {
-    if (!mCurrentTool)
+    if (!mCurrentTool && !mCameraTool)
         return;
 
     gfx::Transform view;
     MakeViewTransform(mUI, mState, view);
 
-    mCurrentTool->MouseMove(mickey, view);
-    DisplayCurrentCameraLocation();
+    if (mCurrentTool)
+        mCurrentTool->MouseMove(mickey, view);
+
+    if (mCameraTool)
+    {
+        mCameraTool->MouseMove(mickey, view);
+        DisplayCurrentCameraLocation();
+    }
 }
 
 void TilemapWidget::MousePress(QMouseEvent* mickey)
@@ -1933,43 +2046,55 @@ void TilemapWidget::MousePress(QMouseEvent* mickey)
         if (auto* layer = GetCurrentLayerInstance())
             mCurrentTool.reset(new TileSelectTool(*mState.map, *layer,  mState));
     }
-    else if(!mCurrentTool &&  (mickey->button() == Qt::RightButton))
+    else if(!mCameraTool &&  (mickey->button() == Qt::RightButton))
     {
-        mCurrentTool.reset(new MoveCameraTool(mState));
+        mCameraTool.reset(new MoveCameraTool(mState));
     }
 
-    if (const auto* brush = dynamic_cast<const TileBrushTool*>(mCurrentTool.get()))
+    if (mCurrentTool && mickey->button() == Qt::LeftButton)
     {
-        const auto* layer = GetCurrentLayerInstance();
-        const auto& tool  = mTools[brush->GetToolIndex()];
-        if (!ValidateToolAgainstLayer(tool, *layer))
+        if (const auto* brush = dynamic_cast<const TileBrushTool*>(mCurrentTool.get()))
         {
-            mCurrentTool.reset();
-            UncheckTools();
+            const auto* layer = GetCurrentLayerInstance();
+            const auto& tool = mTools[brush->GetToolIndex()];
+            if (!ValidateToolAgainstLayer(tool, *layer))
+            {
+                mCurrentTool.reset();
+                UncheckTools();
+            }
         }
-    }
-
-    if (mCurrentTool)
-    {
         mCurrentTool->MousePress(mickey, view);
         UpdateLayerPalette();
-        return;
+    }
+    if (mCameraTool && mickey->button() == Qt::RightButton)
+    {
+        mCameraTool->MousePress(mickey, view);
     }
 }
 void TilemapWidget::MouseRelease(QMouseEvent* mickey)
 {
-    if (!mCurrentTool)
+    if (!mCurrentTool && !mCameraTool)
         return;
 
     gfx::Transform view;
     MakeViewTransform(mUI, mState, view);
 
-    if (mCurrentTool->MouseRelease(mickey, view))
+    if (mickey->button() == Qt::LeftButton)
     {
-        mCurrentTool.reset();
-        DisplaySelection();
-        DisplayLayerProperties();
-        DisplayMapProperties();
+        if (mCurrentTool->MouseRelease(mickey, view))
+        {
+            mCurrentTool.reset();
+            DisplaySelection();
+            DisplayLayerProperties();
+            DisplayMapProperties();
+        }
+    }
+    else if (mickey->button() == Qt::RightButton)
+    {
+        if (mCameraTool->MouseRelease(mickey, view))
+        {
+            mCameraTool.reset();
+        }
     }
 }
 void TilemapWidget::MouseDoubleClick(QMouseEvent* mickey)
@@ -2027,14 +2152,53 @@ void TilemapWidget::MouseWheel(QWheelEvent* wheel)
             mToolActions[next_tool_index]->setChecked(true);
             SetCurrentTool(mTools[next_tool_index].id);
             ShowCurrentTool();
+            SetEnabled(mUI.actionPalette, true);
         }
     }
+}
+
+void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
+{
+    // where's the mouse in the widget
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > mUI.widget->width() ||
+        mickey.y() > mUI.widget->height())
+        return;
+
+    glm::vec4 mickey_pos_in_world;
+    glm::vec4 mickey_pos_in_widget;
+
+    {
+        gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
+
+        const auto& mat = glm::inverse(view.GetAsMatrix());
+        mickey_pos_in_world = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
+    }
+
+    zoom_function();
+
+    {
+        gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
+
+        const auto& mat = view.GetAsMatrix();
+        mickey_pos_in_widget = mat * mickey_pos_in_world;
+    }
+    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
+    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+    DisplayCurrentCameraLocation();
 }
 
 bool TilemapWidget::KeyPress(QKeyEvent* key)
 {
     if (key->key() == Qt::Key_Escape)
     {
+        mCameraTool.reset();
+
         if (mCurrentTool)
         {
             mCurrentTool.reset();
@@ -2053,24 +2217,27 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
         return true;
     }
     else if (key->key() == Qt::Key_Delete)
-    {
         on_btnDeleteTileMaterial_clicked();
-    }
     else if (key->key() == Qt::Key_Space)
-    {
-        if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
-        {
-            if (auto* tool = GetCurrentTool())
-            {
-                DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
-                if (dlg.exec() == QDialog::Rejected)
-                    return true;
-                SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-                ModifyCurrentTool();
-            }
-        }
-    }
-
+        return OpenMaterialPaletteOnCurrentTool();
+    else if (key->key() == Qt::Key_1)
+        return SelectLayerOnKey(0);
+    else if (key->key() == Qt::Key_2)
+        return SelectLayerOnKey(1);
+    else if (key->key() == Qt::Key_3)
+        return SelectLayerOnKey(2);
+    else if (key->key() == Qt::Key_4)
+        return SelectLayerOnKey(3);
+    else if (key->key() == Qt::Key_5)
+        return SelectLayerOnKey(4);
+    else if (key->key() == Qt::Key_6)
+        return SelectLayerOnKey(5);
+    else if (key->key() == Qt::Key_7)
+        return SelectLayerOnKey(6);
+    else if (key->key() == Qt::Key_8)
+        return SelectLayerOnKey(7);
+    else if (key->key() == Qt::Key_9)
+        return SelectLayerOnKey(8);
     return false;
 }
 
@@ -2315,6 +2482,7 @@ void TilemapWidget::ModifyCurrentTool()
                 mouse_tool->SetToolIndex(tool_index);
                 mCurrentTool = std::move(mouse_tool);
                 mToolActions[tool_index]->setChecked(true);
+                SetEnabled(mUI.actionPalette, true);
             }
         }
     }
@@ -2324,6 +2492,8 @@ void TilemapWidget::UncheckTools()
 {
     for (auto* action : mToolActions)
         action->setChecked(false);
+
+    SetEnabled(mUI.actionPalette, false);
 }
 
 void TilemapWidget::ShowCurrentTool()
@@ -2338,6 +2508,7 @@ void TilemapWidget::ShowCurrentTool()
         SetEnabled(mUI.cmbToolMaterial,          true);
         SetEnabled(mUI.btnSelectToolMaterial,    true);
         SetEnabled(mUI.btnSetToolMaterialParams, false);
+        SetEnabled(mUI.btnEditToolMaterial,      true);
         SetEnabled(mUI.chkToolMaterial,          true);
         SetEnabled(mUI.chkToolValue,             true);
 
@@ -2350,6 +2521,10 @@ void TilemapWidget::ShowCurrentTool()
         SetValue(mUI.toolValue,        tool->value);
         SetValue(mUI.chkToolMaterial,  tool->apply_material);
         SetValue(mUI.chkToolValue,     tool->apply_value);
+
+        if (mState.workspace->IsUserDefinedResource(tool->material))
+            SetEnabled(mUI.btnEditToolMaterial, true);
+        else SetEnabled(mUI.btnEditToolMaterial, false);
     }
     else
     {
@@ -2362,6 +2537,7 @@ void TilemapWidget::ShowCurrentTool()
         SetEnabled(mUI.cmbToolMaterial,          false);
         SetEnabled(mUI.btnSelectToolMaterial,    false);
         SetEnabled(mUI.btnSetToolMaterialParams, false);
+        SetEnabled(mUI.btnEditToolMaterial,      false);
         SetEnabled(mUI.toolValue,                false);
         SetEnabled(mUI.chkToolMaterial,          false);
         SetEnabled(mUI.chkToolValue,             false);
@@ -2411,6 +2587,7 @@ void TilemapWidget::ModifyCurrentLayer()
         auto* instance = GetCurrentLayerInstance();
         instance->SetFlags(layer->GetFlags());
         instance->FlushCache();
+        instance->Save();
         instance->Load(mLayerData[layer->GetId()], 1024);
     }
 }
@@ -2526,6 +2703,34 @@ void TilemapWidget::ClearUnusedPaletteEntries()
     {
         klass->ClearMaterialId(i);
     }
+}
+
+bool TilemapWidget::OpenMaterialPaletteOnCurrentTool()
+{
+    if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
+    {
+        if (auto* tool = GetCurrentTool())
+        {
+            DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
+            if (dlg.exec() == QDialog::Rejected)
+                return false;
+            SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+            ModifyCurrentTool();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool TilemapWidget::SelectLayerOnKey(unsigned int index)
+{
+    if (index < mState.klass->GetNumLayers())
+    {
+        SelectRow(mUI.layers, index);
+        DisplayLayerProperties();
+        return true;
+    }
+    return false;
 }
 
 } // namespace

@@ -1786,6 +1786,23 @@ bool Workspace::IsValidScript(const QString& id) const
     return false;
 }
 
+bool Workspace::IsUserDefinedResource(const QString& id) const
+{
+    for (const auto& res : mResources)
+    {
+        if (res->GetId() == id)
+        {
+            return !res->IsPrimitive();
+        }
+    }
+    BUG("No such material was found.");
+    return false;
+}
+bool Workspace::IsUserDefinedResource(const std::string& id) const
+{
+    return IsUserDefinedResource(FromUtf8(id));
+}
+
 Resource& Workspace::GetResource(size_t index)
 {
     ASSERT(index < mResources.size());

@@ -23,12 +23,32 @@
 #  include <QStringList>
 #  include <QDir>
 #  include <QCoreApplication>
+#  include <QIcon>
+#  include <QPixmap>
 #include "warnpop.h"
 
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 
 namespace gui {
+
+
+QPixmap ToGrayscale(QPixmap p)
+{
+    QImage img = p.toImage();
+    const int width  = img.width();
+    const int height = img.height();
+    for (int i=0; i<width; ++i)
+    {
+        for (int j=0; j<height; ++j)
+        {
+            const auto pix = img.pixel(i, j);
+            const auto val = qGray(pix);
+            img.setPixel(i, j, qRgba(val, val, val, (pix >> 24 & 0xff)));
+        }
+    }
+    return QPixmap::fromImage(img);
+}
 
 std::vector<QString> ListAppFonts()
 {

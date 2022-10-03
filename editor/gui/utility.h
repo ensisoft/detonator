@@ -1254,6 +1254,8 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, f
     view.Translate(state.camera_offset_x, state.camera_offset_y);
 }
 
+QPixmap ToGrayscale(QPixmap pixmap);
+
 // List the font's installed with the application.
 // returns a list of font uris, i.e. app://fonts/foo.otf
 std::vector<QString> ListAppFonts();
