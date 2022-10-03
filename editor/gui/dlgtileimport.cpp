@@ -61,6 +61,11 @@ QString ImportedTile::GetName() const
     return GetValue(mUI.name);
 }
 
+void ImportedTile::SetName(const QString& name)
+{
+    SetValue(mUI.name, name);
+}
+
 DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
   : QDialog(parent)
   , mWorkspace(workspace)
@@ -279,6 +284,8 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
             widget->SetPreview(pixmap.copy(x, y, tile_width, tile_height));
         }
     }
+
+    SetValue(mUI.renameTiles, QString(""));
 }
 
 void DlgTileImport::on_tileWidth_valueChanged(int)
@@ -297,6 +304,15 @@ void DlgTileImport::on_offsetX_valueChanged(int)
 void DlgTileImport::on_offsetY_valueChanged(int)
 {
     SplitIntoTiles();
+}
+
+void DlgTileImport::on_renameTiles_textChanged(const QString& name)
+{
+    for (auto& tile : mTiles)
+    {
+        if (tile.widget)
+            tile.widget->SetName(name);
+    }
 }
 
 void DlgTileImport::on_widgetColor_colorChanged(QColor color)
