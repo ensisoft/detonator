@@ -49,6 +49,7 @@ namespace gui
         void SetPreview(QPixmap pix);
 
         QString GetName() const;
+        void SetName(const QString& name);
 
     private:
         Ui::ImportedTile mUI;
@@ -74,6 +75,7 @@ namespace gui
         void on_tileHeight_valueChanged(int);
         void on_offsetX_valueChanged(int);
         void on_offsetY_valueChanged(int);
+        void on_renameTiles_textChanged(const QString& name);
         void on_widgetColor_colorChanged(QColor color);
         void finished();
         void timer();
