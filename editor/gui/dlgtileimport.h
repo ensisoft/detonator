@@ -77,6 +77,9 @@ namespace gui
         void on_offsetY_valueChanged(int);
         void on_renameTiles_textChanged(const QString& name);
         void on_widgetColor_colorChanged(QColor color);
+        void on_materialType_currentIndexChanged(int);
+        void on_cmbColorSpace_currentIndexChanged(int);
+        void on_cmbCutting_currentIndexChanged(int);
         void finished();
         void timer();
     private:

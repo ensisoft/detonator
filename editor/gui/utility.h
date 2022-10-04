@@ -51,6 +51,46 @@
 namespace gui
 {
 
+class AutoHider  {
+public:
+    AutoHider(QWidget* widget)
+      : mWidget(widget)
+    {
+        QSignalBlocker s(mWidget);
+        mWidget->setVisible(true);
+    }
+   ~AutoHider()
+    {
+        QSignalBlocker s(mWidget);
+        mWidget->setVisible(false);
+    }
+
+    AutoHider(const AutoHider&) = delete;
+    AutoHider& operator=(const AutoHider&) = delete;
+private:
+    QWidget* mWidget = nullptr;
+};
+
+class AutoEnabler {
+public:
+    AutoEnabler(QWidget* widget)
+      : mWidget(widget)
+    {
+        QSignalBlocker s(widget);
+        widget->setEnabled(false);
+    }
+    ~AutoEnabler()
+    {
+        QSignalBlocker s(mWidget);
+        mWidget->setEnabled(true);
+    }
+    AutoEnabler(const AutoEnabler&) = delete;
+    AutoEnabler& operator=(const AutoEnabler&) = delete;
+private:
+    QWidget* mWidget = nullptr;
+
+};
+
 inline glm::vec4 ToVec4(const QPoint& point)
 { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
 inline glm::vec2 ToVec2(const QPoint& point)
@@ -80,23 +120,31 @@ inline QColor FromGfx(const gfx::Color4f& color)
     return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
-inline void Increment(QSpinBox* spin, int value)
+inline int Increment(QProgressBar* bar, int value = 1)
+{
+    QSignalBlocker s(bar);
+    int val = bar->value() + value;
+    bar->setValue(val);
+    return val;
+}
+
+inline void Increment(QSpinBox* spin, int value = 1)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() + value);
 }
-inline void Increment(QDoubleSpinBox* spin, float value)
+inline void Increment(QDoubleSpinBox* spin, float value = 1.0f)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() + value);
 }
 
-inline void Decrement(QSpinBox* spin, int value)
+inline void Decrement(QSpinBox* spin, int value = 1.0)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() - value);
 }
-inline void Decrement(QDoubleSpinBox* spin, float value)
+inline void Decrement(QDoubleSpinBox* spin, float value = 1.0f)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() - value);
@@ -170,6 +218,18 @@ EnumT EnumFromCombo(const QComboBox* combo)
     return val.value();
 }
 
+inline void SetValue(QProgressBar* bar, int value)
+{
+    QSignalBlocker s(bar);
+    bar->setValue(value);
+}
+inline void SetValue(QProgressBar* bar, QString fmt)
+{
+    QSignalBlocker s(bar);
+    bar->setTextVisible(true);
+    bar->setFormat(fmt);
+}
+
 inline void SetValue(QAction* action, bool on_off)
 {
     QSignalBlocker s(action);
@@ -192,6 +252,12 @@ inline void SetRange(QSpinBox* spin, int min, int max)
 {
     QSignalBlocker s(spin);
     spin->setRange(min, max);
+}
+
+inline void SetRange(QProgressBar* bar, int min, int max)
+{
+    QSignalBlocker s(bar);
+    bar->setRange(min, max);
 }
 
 struct ListItemId {
