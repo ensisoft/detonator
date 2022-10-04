@@ -286,6 +286,12 @@ void GfxWindow::CreateRenderingSurface(bool vsync)
 
 void GfxWindow::doInit()
 {
+    // WAR on Qt!
+    // There's weird issue that sometimes the cursor changes to IBeam.
+    // Somehow I feel that this bug comes from the QWindow + what's underneath + X11.
+    // Trying to work around here by explicitly setting the cursor an Arrow.
+    setCursor(Qt::ArrowCursor);
+
     if (should_have_vsync)
     {
         bool have_vsync = false;
