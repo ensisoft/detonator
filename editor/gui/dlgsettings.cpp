@@ -47,6 +47,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
 {
     mUI.setupUi(this);
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
+    PopulateFromEnum<GfxWindow::MouseCursor>(mUI.cmbMouseCursor);
 
     SetUIValue(mUI.edtImageEditorExecutable,  settings.image_editor_executable);
     SetUIValue(mUI.edtImageEditorArguments,   settings.image_editor_arguments);
@@ -58,6 +59,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.edtAudioEditorArguments,   settings.audio_editor_arguments);
     SetUIValue(mUI.cmbWinOrTab,               settings.default_open_win_or_tab);
     SetUIValue(mUI.spinFrameDelay,            settings.frame_delay);
+    SetUIValue(mUI.cmbMouseCursor,            settings.mouse_cursor);
     SetUIValue(mUI.chkSaveAutomatically,      settings.save_automatically_on_play);
     SetUIValue(mUI.chkVSYNC,                  settings.vsync);
     SetUIValue(mUI.edtPythonExecutable,       settings.python_executable);
@@ -115,6 +117,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
     GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
     GetUIValue(mUI.spinFrameDelay,            &mSettings.frame_delay);
+    GetUIValue(mUI.cmbMouseCursor,            &mSettings.mouse_cursor);
     GetUIValue(mUI.chkVSYNC,                  &mSettings.vsync);
     GetUIValue(mUI.edtPythonExecutable,       &mSettings.python_executable);
     GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);

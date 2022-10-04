@@ -107,6 +107,9 @@ gfx::Device::MagFilter GfxWindow::DefaultMagFilter =
 // static
 gfx::Color4f GfxWindow::ClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
 
+// static
+GfxWindow::MouseCursor GfxWindow::WindowMouseCursor = GfxWindow::MouseCursor::Native;
+
 GfxWindow::~GfxWindow()
 {
     surfaces.erase(this);
@@ -259,6 +262,29 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->Draw(rect, transform, gfx::MaterialClassInst(material));
     }
 
+    if (WindowMouseCursor == MouseCursor::Custom)
+    {
+        static std::shared_ptr<gfx::ColorClass> cursor_material;
+        if (!cursor_material)
+        {
+            cursor_material = std::make_shared<gfx::ColorClass>();
+            cursor_material->SetBaseColor(gfx::Color::Silver);
+        }
+
+        const auto& mickey = mapFromGlobal(QCursor::pos());
+        const auto width = this->width();
+        const auto height = this->height();
+        if (mickey.x() >= 0 && mickey.x() <= width &&
+            mickey.y() >= 0 && mickey.y() < height)
+        {
+            gfx::Transform transform;
+            transform.Resize(20.0f, 20.0f);
+            transform.MoveTo(mickey.x(), mickey.y());
+            mCustomGraphicsPainter->Draw(gfx::Cursor(gfx::Cursor::Shape::Arrow), transform,
+                                         gfx::MaterialClassInst(cursor_material));
+        }
+    }
+
     mContext->swapBuffers(this);
 
     mCustomGraphicsDevice->EndFrame(false /*display*/);
@@ -286,11 +312,18 @@ void GfxWindow::CreateRenderingSurface(bool vsync)
 
 void GfxWindow::doInit()
 {
-    // WAR on Qt!
-    // There's weird issue that sometimes the cursor changes to IBeam.
-    // Somehow I feel that this bug comes from the QWindow + what's underneath + X11.
-    // Trying to work around here by explicitly setting the cursor an Arrow.
-    setCursor(Qt::ArrowCursor);
+    if (WindowMouseCursor == MouseCursor::Native)
+    {
+        // WAR on Qt!
+        // There's weird issue that sometimes the cursor changes to IBeam.
+        // Somehow I feel that this bug comes from the QWindow + what's underneath + X11.
+        // Trying to work around here by explicitly setting the cursor an Arrow.
+        setCursor(Qt::ArrowCursor);
+    }
+    else
+    {
+        setCursor(Qt::BlankCursor);
+    }
 
     if (should_have_vsync)
     {
@@ -513,6 +546,17 @@ void GfxWindow::SetVSYNC(bool on_off)
 bool GfxWindow::GetVSYNC()
 {
     return should_have_vsync;
+}
+
+void GfxWindow::SetMouseCursor(MouseCursor cursor)
+{
+    WindowMouseCursor = cursor;
+    for (auto* window : surfaces)
+    {
+        if (cursor == MouseCursor::Native)
+            window->setCursor(Qt::ArrowCursor);
+        else window->setCursor(Qt::BlankCursor);
+    }
 }
 
 GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
