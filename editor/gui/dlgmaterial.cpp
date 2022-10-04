@@ -41,8 +41,8 @@ namespace gui
 
 DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const QString& material)
   : QDialog(parent)
-  , mWorkspace(workspace)
   , mSelectedMaterialId(material)
+  , mWorkspace(workspace)
 {
     mUI.setupUi(this);
 
@@ -70,8 +70,9 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
     QByteArray geometry;
     if (mWorkspace->GetUserProperty("dlg_material_geometry", &geometry))
         this->restoreGeometry(geometry);
-}
 
+    mMaterials = mWorkspace->ListAllMaterials();
+}
 
 void DlgMaterial::on_btnAccept_clicked()
 {
@@ -100,20 +101,44 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
 
     const auto num_visible_cols = width / (BoxSize + BoxMargin);
     const auto num_visible_rows = height / (BoxSize + BoxMargin);
+
+    if (mFirstPaint)
+    {
+        if (!mSelectedMaterialId.isEmpty())
+        {
+            size_t selected_material_row = 0;
+            size_t selected_material_col = 0;
+
+            for (size_t i=0; i<mMaterials.size(); ++i)
+            {
+                selected_material_col = i % num_visible_cols;
+                selected_material_row = i / num_visible_cols;
+                if (mMaterials[i].id == mSelectedMaterialId)
+                    break;
+            }
+            const auto row_height = BoxSize + BoxMargin;
+            const auto row_ypos   = (selected_material_row + 1 ) * row_height;
+            if (row_ypos > height)
+            {
+                mScrollOffsetRow = (row_ypos - height) / row_height + 1;
+                QSignalBlocker s(mUI.vScroll);
+                mUI.vScroll->setValue(mScrollOffsetRow);
+            }
+        }
+        mFirstPaint = false;
+    }
+
     const auto xoffset  = (width - ((BoxSize + BoxMargin) * num_visible_cols)) / 2;
     const auto yoffset  = -mScrollOffsetRow * (BoxSize + BoxMargin);
     unsigned index = 0;
 
-    mMaterialIds.clear();
     SetValue(mUI.groupBox, "Material Library");
 
-    for (size_t i=0; i<mWorkspace->GetNumResources(); ++i)
+    for (index=0; index<mMaterials.size(); ++index)
     {
-        const auto& resource = mWorkspace->GetResource(i);
-        if (!resource.IsMaterial())
-            continue;
-        mMaterialIds.push_back(resource.GetId());
-        auto klass = app::ResourceCast<gfx::MaterialClass>(resource).GetSharedResource();
+        const auto* resource = mMaterials[index].resource;
+
+        auto klass = app::ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
 
         const auto col = index % num_visible_cols;
         const auto row = index / num_visible_cols;
@@ -124,16 +149,18 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
         rect.Resize(BoxSize, BoxSize);
         rect.Move(xpos, ypos);
         rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
+        if (!DoesIntersect(rect, gfx::FRect(0.0f, 0.0f, width, height)))
+            continue;
+
         gfx::MaterialClassInst material(klass);
         material.SetRuntime(time_milliseconds / 1000.0);
         gfx::FillRect(painter, rect, material);
 
-        if (resource.GetId() == mSelectedMaterialId)
-        {
-            gfx::DrawRectOutline(painter, rect, gfx::Color::Green, 2.0f);
-            SetValue(mUI.groupBox, tr("Material Library - %1").arg(resource.GetName()));
-        }
-        ++index;
+        if (mMaterials[index].id != mSelectedMaterialId)
+            continue;
+
+        gfx::DrawRectOutline(painter, rect, gfx::Color::Green, 2.0f);
+        SetValue(mUI.groupBox, app::toString("Material Library - %1", mMaterials[index].name));
     }
 
     const auto num_total_rows = index / num_visible_cols + 1;
@@ -170,9 +197,9 @@ void DlgMaterial::MousePress(QMouseEvent* mickey)
     const auto row = (widget_ypos + yoffset) / (BoxSize + BoxMargin);
     const auto index = row * num_cols + col;
 
-    if (index >= mMaterialIds.size())
+    if (index >= mMaterials.size())
         return;
-    mSelectedMaterialId = mMaterialIds[index];
+    mSelectedMaterialId = mMaterials[index].id;
 }
 
 void DlgMaterial::MouseDoubleClick(QMouseEvent* mickey)
