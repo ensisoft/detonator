@@ -62,7 +62,14 @@ namespace gui
             const auto& value = mSettings->GetValue(module + "/" + key);
             if (!value.isValid())
                 return false;
-            *out = qvariant_cast<T>(value);
+            if constexpr (std::is_enum<T>::value)
+            {
+                const auto& str = value.toString();
+                T foo;
+                bool success = false;
+                *out = app::EnumFromString(str, foo, &success);
+                return success;
+            } else  *out = qvariant_cast<T>(value);
             return true;
         }
 
@@ -81,7 +88,12 @@ namespace gui
             const auto& value = mSettings->GetValue(module + "/" + key);
             if (!value.isValid())
                 return defaultValue;
-            return qvariant_cast<T>(value);
+            if constexpr (std::is_enum<T>::value)
+            {
+                const auto& str = value.toString();
+                return app::EnumFromString(str, defaultValue);
+            }
+            else return qvariant_cast<T>(value);
         }
 
         QByteArray GetValue(const QString& module,  const app::PropertyKey& key, const QByteArray& defaultValue) const;
@@ -92,7 +104,12 @@ namespace gui
         // Set a value in the settings object under the specific module/key
         template<typename T>
         void SetValue(const QString& module, const app::PropertyKey& key, const T& value)
-        { mSettings->SetValue(module + "/" + key, value); }
+        {
+            if constexpr (std::is_enum<T>::value)
+                mSettings->SetValue(module + "/" + key, app::EnumToString(value));
+            else  mSettings->SetValue(module + "/" + key, value);
+        }
+
         void SetValue(const QString& module, const app::PropertyKey& key, const std::string& value);
         void SetValue(const QString& module, const app::PropertyKey& key, std::size_t value);
         void SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json);

@@ -24,6 +24,10 @@
 
 void unit_test_settings_json()
 {
+    enum class Fruits {
+        Bananana, Kiwi, Watermelon
+    };
+
     {
         gui::Settings s("gui-settings.json");
         s.SetValue("foo", "string", QString("jeesus ajaa mopolla"));
@@ -31,6 +35,7 @@ void unit_test_settings_json()
         s.SetValue("foo", "float", float(1.0f));
         s.SetValue("foo", "utf8-string", std::string("joo joo €€"));
         s.SetValue("foo", "uint64", size_t(0xffffffffffffffff));
+        s.SetValue("foo", "fruit", Fruits::Kiwi);
         TEST_REQUIRE(s.Save());
     }
 
@@ -52,6 +57,10 @@ void unit_test_settings_json()
         size_t val;
         TEST_REQUIRE(s.GetValue("foo", "uint64", &val));
         TEST_REQUIRE(val == size_t(0xffffffffffffffff));
+
+        Fruits f;
+        TEST_REQUIRE(s.GetValue("foo", "fruit", &f));
+        TEST_REQUIRE(f == Fruits::Kiwi);
     }
 }
 
