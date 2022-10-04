@@ -47,6 +47,10 @@ namespace gui
         GfxWindow();
        ~GfxWindow();
 
+        enum class MouseCursor {
+            Native, Custom
+        };
+
         // Important to call dispose to cleanly dispose of all the graphics
         // resources while the Qt's OpenGL context is still valid,
         // I.e the window still exists and hasn't been closed or anything.
@@ -138,6 +142,9 @@ namespace gui
 
         static void SetVSYNC(bool on_off);
         static bool GetVSYNC();
+
+        static void SetMouseCursor(MouseCursor cursor);
+        static MouseCursor GetMouseCursor();
     public slots:
         void clearColorChanged(QColor color);
     private slots:
@@ -174,7 +181,7 @@ namespace gui
         static gfx::Device::MinFilter DefaultMinFilter;
         static gfx::Device::MagFilter DefaultMagFilter;
         static gfx::Color4f ClearColor;
-
+        static MouseCursor WindowMouseCursor;
     };
 
     // This is now a "widget shim" that internally creates a QOpenGLWindow

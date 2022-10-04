@@ -271,8 +271,10 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "show_grid",                  &mUISettings.show_grid);
     settings.GetValue("Settings", "vsync",                      &mSettings.vsync);
     settings.GetValue("Settings", "frame_delay",                &mSettings.frame_delay);
+    settings.GetValue("Settings", "mouse_cursor",               &mSettings.mouse_cursor);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
+    GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     TextEditor::Settings editor_settings;
@@ -1775,6 +1777,7 @@ void MainWindow::on_actionSettings_triggered()
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
+    GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     if (current_style == mSettings.style_name)
@@ -2717,6 +2720,7 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
     settings.SetValue("Settings", "vsync", mSettings.vsync);
     settings.SetValue("Settings", "frame_delay", mSettings.frame_delay);
+    settings.SetValue("Settings", "mouse_cursor", mSettings.mouse_cursor);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
     settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
