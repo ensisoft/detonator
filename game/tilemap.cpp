@@ -1184,7 +1184,7 @@ bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
     for (auto& layer : mLayers)
     {
         const auto& klass = layer->GetClass();
-        auto data = loader.LoadTilemapData(layer->GetClassId(), layer->IsReadOnly());
+        auto data = loader.LoadTilemapData(klass.GetId(), klass.GetDataUri(), klass.IsReadOnly());
         if (data)
         {
             layer->Load(data, default_tile_cache_size);

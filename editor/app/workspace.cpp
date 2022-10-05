@@ -906,6 +906,25 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
+std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Tilemap)
+            continue;
+        else if (resource->GetId() != id)
+            continue;
+        return ResourceCast<game::TilemapClass>(*resource).GetSharedResource();
+    }
+    BUG("No such tilemap class.");
+    return nullptr;
+}
+
+std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const std::string& id) const
+{
+    return GetTilemapClassById(FromUtf8(id));
+}
+
 engine::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassById(const std::string& id) const
 {
     return FindClassHandleById<audio::GraphClass>(id, Resource::Type::AudioGraph);
@@ -1021,6 +1040,11 @@ engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const 
     return ret;
 }
 
+engine::ClassHandle<const game::TilemapClass> Workspace::FindTilemapClassById(const std::string& id) const
+{
+    return FindClassHandleById<game::TilemapClass>(id, Resource::Type::Tilemap);
+}
+
 engine::EngineDataHandle Workspace::LoadEngineData(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
@@ -1059,6 +1083,16 @@ audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI,
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
     return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
+}
+
+game::TilemapDataHandle Workspace::LoadTilemapData(const std::string& ID, const std::string& URI, bool read_only) const
+{
+    const auto& file = MapFileToFilesystem(URI);
+    DEBUG("URI '%1' => '%2'", URI, file);
+    if (read_only)
+        return TilemapMemoryMap::OpenFilemap(file);
+
+    return TilemapBuffer::LoadFromFile(file);
 }
 
 bool Workspace::LoadWorkspace()
@@ -1581,6 +1615,11 @@ Workspace::ResourceList Workspace::ListPrimitiveMaterials() const
     return ListResources(Resource::Type::Material, true, true);
 }
 
+Workspace::ResourceList Workspace::ListUserDefinedMaps() const
+{
+    return ListResources(Resource::Type::Tilemap, false, true);
+}
+
 Workspace::ResourceList Workspace::ListUserDefinedScripts() const
 {
     return ListResources(Resource::Type::Script, false, true);
@@ -1775,12 +1814,21 @@ bool Workspace::IsValidDrawable(const QString& klass) const
     return false;
 }
 
+bool Workspace::IsValidTilemap(const QString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == id &&  resource->IsTilemap())
+            return true;
+    }
+    return false;
+}
+
 bool Workspace::IsValidScript(const QString& id) const
 {
     for (const auto& resource : mResources)
     {
-        if (resource->GetId() == id &&
-            resource->IsScript())
+        if (resource->GetId() == id && resource->IsScript())
             return true;
     }
     return false;
@@ -2485,6 +2533,16 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
                     continue;
                 auto* text = node.GetTextItem();
                 text->SetFontName(packer.CopyFile(text->GetFontName(), "fonts/"));
+            }
+        }
+        else if (resource->IsTilemap())
+        {
+            game::TilemapClass* map = nullptr;
+            resource->GetContent(&map);
+            for (size_t i=0; i<map->GetNumLayers(); ++i)
+            {
+                auto& layer = map->GetLayer(i);
+                layer.SetDataUri(base::FormatString("pck://data/%1.bin", layer.GetId()));
             }
         }
     }

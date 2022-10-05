@@ -42,6 +42,7 @@
 #include "editor/gui/tool.h"
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/scriptwidget.h"
+#include "editor/gui/tilemapwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
@@ -430,8 +431,9 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "right_boundary", mUI.spinRightBoundary);
     GetUserProperty(resource, "top_boundary", mUI.spinTopBoundary);
     GetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
-    mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
-                       GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
+    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
 
     UpdateResourceReferences();
     DisplayCurrentNodeProperties();
@@ -827,13 +829,19 @@ void SceneWidget::on_name_textChanged(const QString&)
     mState.scene.SetName(GetValue(mUI.name));
 }
 
-void SceneWidget::on_cmbScripts_currentIndexChanged(const QString)
+void SceneWidget::on_cmbScripts_currentIndexChanged(int)
 {
     mState.scene.SetScriptFileId(GetItemId(mUI.cmbScripts));
     SetEnabled(mUI.btnEditScript, true);
 }
 
-void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(const QString&)
+void SceneWidget::on_cmbTilemaps_currentIndexChanged(int)
+{
+    mState.scene.SetTilemapId(GetItemId(mUI.cmbTilemaps));
+    SetEnabled(mUI.btnEditMap, true);
+}
+
+void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(int)
 {
     // Set the values based on what is currently in UI
     SetSpatialIndexParams();
@@ -1194,6 +1202,34 @@ void SceneWidget::on_btnAddScript_clicked()
     SetEnabled(mUI.btnEditScript, true);
 }
 
+void SceneWidget::on_btnEditMap_clicked()
+{
+    const auto& id = (QString)GetItemId(mUI.cmbTilemaps);
+    if (id.isEmpty())
+        return;
+
+    emit OpenResource(id);
+}
+void SceneWidget::on_btnAddMap_clicked()
+{
+    auto* widget = new TilemapWidget(mState.workspace);
+    widget->Save();
+    emit OpenNewWidget(widget);
+
+    QString id = widget->GetId();
+    mState.scene.SetTilemapId(app::ToUtf8(id));
+    SetValue(mUI.cmbTilemaps, ListItemId(id));
+    SetEnabled(mUI.btnEditMap, true);
+}
+
+void SceneWidget::on_btnResetMap_clicked()
+{
+    mState.scene.ResetTilemap();
+    SetValue(mUI.cmbTilemaps, -1);
+    SetEnabled(mUI.btnEditMap, false);
+    mTilemap.reset();
+}
+
 void SceneWidget::on_btnNewScriptVar_clicked()
 {
     std::vector<ResourceListItem> entities;
@@ -1524,6 +1560,20 @@ void SceneWidget::ResourceUpdated(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
+
+    if (!resource->IsTilemap())
+        return;
+
+    if (!mState.scene.HasTilemap())
+        return;
+
+    const auto& mapId = mState.scene.GetTilemapId();
+    if (mapId != resource->GetIdUtf8())
+        return;
+
+    // if the tilemap this scene refers to was just modified
+    // then force a re-load by resetting the map object.
+    mTilemap.reset();
 }
 void SceneWidget::InitScene(unsigned width, unsigned height)
 {
@@ -1571,16 +1621,33 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // setup a viewport rect for culling draw packets against
     // draw packets which don't intersect with the viewrect are culled
     // for improved perf.
-    const game::FRect rect(0, 0, width, height);
+    const game::FRect viewport(0, 0, width, height);
 
-    DrawHook hook(GetCurrentNode(), rect);
+    DrawHook hook(GetCurrentNode(), viewport);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
     hook.SetDrawVectors(false);
     hook.SetViewMatrix(view.GetAsMatrix());
 
+    if (mState.scene.HasTilemap())
+    {
+        const auto& mapId = mState.scene.GetTilemapId();
+        if (!mTilemap || mTilemap->GetClassId() != mapId)
+        {
+            auto klass = mState.workspace->GetTilemapClassById(mapId);
+            mTilemap = game::CreateTilemap(klass);
+            mTilemap->Load(*mState.workspace, 1024);
+        }
+    }
+
     painter.SetViewMatrix(view.GetAsMatrix());
     gfx::Transform scene;
     mState.renderer.BeginFrame();
+
+    if (mTilemap)
+    {
+        mState.renderer.Draw(*mTilemap, viewport, painter, scene);
+    }
+
     mState.renderer.Draw(mState.scene, painter, scene, &hook, &hook);
     mState.renderer.EndFrame();
     painter.ResetViewMatrix();
@@ -1868,8 +1935,10 @@ void SceneWidget::DisplaySceneProperties()
     SetValue(mUI.name, mState.scene.GetName());
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.cmbScripts, ListItemId(mState.scene.GetScriptFileId()));
+    SetValue(mUI.cmbTilemaps, ListItemId(mState.scene.GetTilemapId()));
     SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
     SetEnabled(mUI.btnEditScript, mState.scene.HasScriptFile());
+    SetEnabled(mUI.btnEditMap, mState.scene.HasTilemap());
 
     const auto index = mState.scene.GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
@@ -2006,6 +2075,7 @@ void SceneWidget::RebuildCombos()
 {
     SetList(mUI.nodeEntity, mState.workspace->ListUserDefinedEntities());
     SetList(mUI.cmbScripts, mState.workspace->ListUserDefinedScripts());
+    SetList(mUI.cmbTilemaps, mState.workspace->ListUserDefinedMaps());
 }
 
 void SceneWidget::UpdateResourceReferences()
@@ -2032,9 +2102,19 @@ void SceneWidget::UpdateResourceReferences()
         const auto& scriptId = mState.scene.GetScriptFileId();
         if (!mState.workspace->IsValidScript(scriptId))
         {
-            WARN("Scene '%1' script is no longer available.", mState.scene.GetName());
+            WARN("Scene script is no longer available. [script='%1']", scriptId);
             mState.scene.ResetScriptFile();
             SetEnabled(mUI.btnEditScript, false);
+        }
+    }
+    if (mState.scene.HasTilemap())
+    {
+        const auto& mapId = mState.scene.GetTilemapId();
+        if (!mState.workspace->IsValidTilemap(mapId))
+        {
+            WARN("Scene tilemap is no longer available. [map='%1']", mapId);
+            mState.scene.ResetTilemap();
+            SetEnabled(mUI.btnEditMap, false);
         }
     }
 }

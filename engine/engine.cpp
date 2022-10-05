@@ -32,6 +32,7 @@
 #include "base/trace.h"
 #include "game/entity.h"
 #include "game/treeop.h"
+#include "game/tilemap.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
@@ -129,11 +130,12 @@ public:
 
     virtual void SetEnvironment(const Environment& env) override
     {
-        mClasslib       = env.classlib;
+        mClasslib         = env.classlib;
         mEngineDataLoader = env.engine_loader;
-        mAudioLoader    = env.audio_loader;
-        mDirectory      = env.directory;
-        mGameHome       = env.game_home;
+        mAudioLoader      = env.audio_loader;
+        mGameLoader       = env.game_loader;
+        mDirectory        = env.directory;
+        mGameHome         = env.game_home;
 
         // set the unfortunate global gfx loader
         gfx::SetResourceLoader(env.graphics_loader);
@@ -236,7 +238,8 @@ public:
                 const engine::FRect mViewRect;
                 const glm::mat4 mViewMatrix;
             };
-            Culler cull(engine::FRect(0.0f, 0.0f, game_view_width, game_view_height), view.GetAsMatrix());
+            const gfx::FRect viewport(0.0f, 0.0f, game_view_width, game_view_height);
+            Culler cull(viewport, view.GetAsMatrix());
 
             // set the actual device viewport for rendering into the window buffer.
             // the device viewport retains the game's logical viewport aspect ratio
@@ -251,7 +254,11 @@ public:
 
             gfx::Transform transform;
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::Draw", mRenderer.Draw(*mPainter, &cull));
+            if (mTilemap)
+            {
+                TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
+            }
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             if (mDebug.debug_draw && mPhysics.HaveWorld())
             {
@@ -815,6 +822,23 @@ private:
             mPhysics.CreateWorld(*mScene);
         }
         mRenderer.CreateScene(*mScene);
+
+        const auto& klass = mScene->GetClass();
+        if (klass.HasTilemap())
+        {
+            const auto& mapId = klass.GetTilemapId();
+            const auto& map   = mClasslib->FindTilemapClassById(mapId);
+            if (map == nullptr)
+            {
+                ERROR("Failed to load tilemap class object. [id='%1']", mapId);
+            }
+            else
+            {
+                mTilemap = game::CreateTilemap(map);              
+                mTilemap->Load(*mGameLoader, 1024); // todo:
+            }
+        }
+
         mRuntime->BeginPlay(mScene.get());
     }
     void OnAction(const engine::SuspendAction& action)
@@ -831,6 +855,7 @@ private:
             return;
         mRuntime->EndPlay(mScene.get());
         mScene.reset();
+        mTilemap.reset();
     }
     void OnAction(const engine::QuitAction& action)
     {
@@ -1023,6 +1048,8 @@ private:
     engine::Loader* mEngineDataLoader = nullptr;
     // audio stream loader
     audio::Loader* mAudioLoader = nullptr;
+    // Game data loader.
+    game::Loader* mGameLoader = nullptr;
     // The graphics painter device.
     std::unique_ptr<gfx::Painter> mPainter;
     // The graphics device.
@@ -1040,6 +1067,8 @@ private:
     std::unique_ptr<engine::GameRuntime> mRuntime;
     // Current game scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
+    // Current tilemap or nullptr if no map.
+    std::unique_ptr<game::Tilemap> mTilemap;
     // The UI stack onto which UIs are opened.
     // The top of the stack is the currently "active" UI
     // that gets the mouse/keyboard input events. It's

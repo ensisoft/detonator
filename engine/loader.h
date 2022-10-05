@@ -24,6 +24,7 @@
 #include "engine/data.h"
 #include "audio/loader.h"
 #include "graphics/loader.h"
+#include "game/loader.h"
 
 namespace engine
 {
@@ -59,7 +60,8 @@ namespace engine
     // resources and game data.
     class FileResourceLoader : public gfx::Loader,
                                public engine::Loader,
-                               public audio::Loader
+                               public audio::Loader,
+                               public game::Loader
     {
     public:
         enum class DefaultAudioIOStrategy {

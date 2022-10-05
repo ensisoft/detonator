@@ -22,13 +22,16 @@
   #include <QFile>
 #include "warnpop.h"
 
+#include <cstring>
+
+#include "base/assert.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/buffer.h"
+#include "editor/app/types.h"
 
-namespace app
-{
-// static
-bool detail::FileBufferImpl::LoadData(const QString& file, QByteArray* data)
+namespace app {
+namespace detail {
+bool LoadArrayBuffer(const QString& file, QByteArray* data)
 {
     QFile io;
     io.setFileName(file);
@@ -39,8 +42,107 @@ bool detail::FileBufferImpl::LoadData(const QString& file, QByteArray* data)
         return false;
     }
     *data = io.readAll();
-    DEBUG("File load done. [file='%1', bytes=%2]", file, data->size());
+    const auto size = data->size();
+    DEBUG("File load done. [file='%1', size=%2]", file, Bytes{(quint64)size});
     return true;
+}
+} // namespace
+
+void TilemapBuffer::Write(const void* ptr, size_t bytes, size_t offset)
+{
+    ASSERT(offset + bytes <= mBytes.size());
+    auto* buff = mBytes.data();
+    std::memcpy(&buff[offset], ptr, bytes);
+}
+void TilemapBuffer::Read(void* ptr, size_t bytes, size_t offset) const
+{
+    ASSERT(offset + bytes <= mBytes.size());
+    const auto* buff = mBytes.data();
+    std::memcpy(ptr, &buff[offset], bytes);
+}
+
+size_t TilemapBuffer::AppendChunk(size_t bytes)
+{
+    const auto offset = mBytes.size();
+    mBytes.resize(offset + bytes);
+    return offset;
+}
+size_t TilemapBuffer::GetByteCount() const
+{
+    return mBytes.size();
+}
+void TilemapBuffer::Resize(size_t bytes)
+{
+    mBytes.resize(bytes);
+}
+
+void TilemapBuffer::ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values)
+{
+    ASSERT(offset + value_size * num_values <= mBytes.size());
+
+    for (size_t i=0; i<num_values; ++i)
+    {
+        const auto buffer_offset = offset + i * value_size;
+        auto* buff = mBytes.data();
+        std::memcpy(&buff[buffer_offset], value, value_size);
+    }
+}
+
+// static
+std::shared_ptr<TilemapBuffer> TilemapBuffer::LoadFromFile(const QString& file)
+{
+    QByteArray data;
+    if (!detail::LoadArrayBuffer(file, &data))
+        return nullptr;
+    return std::make_shared<TilemapBuffer>(file, data);
+}
+
+void TilemapMemoryMap::Write(const void* ptr, size_t bytes, size_t offset)
+{
+    BUG("Trying to modify read-only tilemap layer data.");
+}
+void TilemapMemoryMap::Read(void* ptr, size_t bytes, size_t offset) const
+{
+    ASSERT(mMapAddr);
+    ASSERT(offset + bytes <= mSize);
+    std::memcpy(ptr, &mMapAddr[offset], bytes);
+}
+size_t TilemapMemoryMap::AppendChunk(size_t bytes)
+{
+    BUG("Trying to modify read-only tilemap layer data.");
+}
+size_t TilemapMemoryMap::GetByteCount() const
+{
+    return mSize;
+}
+void TilemapMemoryMap::Resize(size_t bytes)
+{
+    BUG("Trying to modify read-only tilemap layer data.");
+}
+void TilemapMemoryMap::ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values)
+{
+    BUG("Trying to modify read-only tilemap layer data.");
+}
+
+// static
+std::shared_ptr<TilemapMemoryMap> TilemapMemoryMap::OpenFilemap(const QString& file)
+{
+    auto io = std::make_unique<QFile>();
+    io->setFileName(file);
+    io->open(QIODevice::ReadOnly);
+    if (!io->isOpen())
+    {
+        ERROR("File open error. [file='%1', error='%2']", file, io->errorString());
+        return nullptr;
+    }
+    uchar* addr = io->map(0, io->size());
+    if (addr == nullptr)
+    {
+        ERROR("Failed to create memory mapping. [file='%1']", file, io->errorString());
+        return nullptr;
+    }
+    auto ret = std::make_shared<TilemapMemoryMap>(addr, io->size(), std::move(io));
+    return ret;
 }
 
 } // namespace

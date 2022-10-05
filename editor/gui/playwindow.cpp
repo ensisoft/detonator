@@ -225,7 +225,8 @@ private:
 // the current workspace instead of from a file.
 class PlayWindow::ResourceLoader : public gfx::Loader,
                                    public engine::Loader,
-                                   public audio::Loader
+                                   public audio::Loader,
+                                   public game::Loader
 {
 public:
     ResourceLoader(const app::Workspace& workspace,
@@ -278,6 +279,17 @@ public:
         DEBUG("URI '%1' => '%2'", URI, file);
         return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
     }
+    // game::Loader implementation
+    virtual game::TilemapDataHandle LoadTilemapData(const std::string& ID, const std::string& URI, bool read_only) const override
+    {
+        const auto& file = ResolveURI(URI);
+        DEBUG("URI '%1' => '%2'", URI, file);
+        if (read_only)
+            return app::TilemapMemoryMap::OpenFilemap(file);
+
+        return app::TilemapBuffer::LoadFromFile(file);
+    }
+
     std::size_t GetBufferCacheSize() const
     {
         size_t ret = 0;
@@ -311,7 +323,7 @@ private:
             mFileMaps[URI]  = ret;
             return ret;
         }
-        WARN("Unmapped resource URI '%1'", URI);
+        WARN("Unmapped resource URI. [uri='%1']", URI);
 
         // What to do with paths such as "textures/UFO/ufo.png" ?
         // the application expects this to be relative and to be resolved
@@ -852,10 +864,11 @@ void PlayWindow::DoAppInit()
         app::MakePath(app::JoinPath(user_home, ".GameStudio"));
         app::MakePath(app::JoinPath(user_home, game_home));
         engine::Engine::Environment env;
-        env.classlib  = &mWorkspace;
-        env.engine_loader   = mResourceLoader.get();
+        env.classlib           = &mWorkspace;
+        env.engine_loader      = mResourceLoader.get();
         env.graphics_loader    = mResourceLoader.get();
         env.audio_loader       = mResourceLoader.get();
+        env.game_loader        = mResourceLoader.get();
         env.directory          = app::ToUtf8(mGameWorkingDir);
         env.user_home          = app::ToUtf8(QDir::toNativeSeparators(user_home));
         env.game_home          = app::ToUtf8(app::JoinPath(user_home, game_home));
