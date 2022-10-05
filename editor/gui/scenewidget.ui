@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1522</width>
-    <height>1274</height>
+    <width>1911</width>
+    <height>1242</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Base  properties</string>
+        <string>Base properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
@@ -1305,6 +1305,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>390</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="title">
         <string>Scene graph</string>
