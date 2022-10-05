@@ -103,6 +103,7 @@ void unit_test_ipc_send_recv()
             gfx::ColorClass test;
             test.SetBaseColor(gfx::Color::DarkGreen);
             test.SetGamma(4.0f);
+            test.SetName("foobar1234");
             id = test.GetId();
             hash = test.GetHash();
             app::MaterialResource resource(std::move(test), "foobar1234");
