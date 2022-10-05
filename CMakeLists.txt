@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 
 project(Gamestudio)
 
@@ -18,6 +18,15 @@ https://github.com/ensisoft/gamestudio
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+
+# https://cmake.org/cmake/help/latest/module/FetchContent.html#examples
+# https://jonathanhamberg.com/post/cmake-embedding-git-hash/
+include(FetchContent)
+FetchContent_Declare(cmake_git_version_tracking
+  GIT_REPOSITORY https://github.com/ensisoft/cmake-git-version-tracking.git
+  GIT_TAG 7b0d0fcb7e6f5fcadd238dd1292350e9e1363d36
+)
+FetchContent_MakeAvailable(cmake_git_version_tracking)
 
 # wdk
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wdk)
@@ -459,6 +468,7 @@ target_link_libraries(GSEditor EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
 target_link_libraries(GSEditor Lua)
 target_link_libraries(GSEditor QtColorWidgets)
 target_link_libraries(GSEditor ${CONAN_LIBS})
+target_link_libraries(GSEditor cmake_git_version_tracking)
 install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # game host application which provides a host process to load the game
@@ -495,6 +505,7 @@ target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/E
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(EditorGameHost EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(EditorGameHost ${CONAN_LIBS})
+target_link_libraries(EditorGameHost cmake_git_version_tracking)
 install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # audio test application. Simple console application that plays
@@ -556,6 +567,7 @@ install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/te
 add_executable(GameMain engine/main/main.cpp)
 target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameMain DataLib BaseLib wdk_system wdk_desktop_gl)
+target_link_libraries(GameMain cmake_git_version_tracking)
 if (UNIX)
     target_link_libraries(GameMain dl pthread)
 endif()

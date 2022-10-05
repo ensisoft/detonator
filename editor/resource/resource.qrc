@@ -108,6 +108,7 @@
 
     <file>texture.png</file>
     <file>music.png</file>
+    <file>about.gif</file>
 
     <file>fonts/orbitron-medium.otf</file>
   </qresource>

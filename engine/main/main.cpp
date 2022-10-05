@@ -59,6 +59,8 @@
 #include "wdk/system.h"
 #include "interface.h"
 
+#include "git.h"
+
 // this application will read the given JSON file and
 // create window and open gl rendering context based on
 // the parameters in the config file.
@@ -462,9 +464,10 @@ int main(int argc, char* argv[])
 
         DEBUG("It's alive!");
         INFO("Ensisoft Gamestudio 2D");
-        INFO("Copyright (c) 2010-2020 Sami Vaisanen");
+        INFO("Copyright (c) 2010-2022 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
         INFO("http://github.com/ensisoft/gamestudio");
+        INFO("Built on branch '%1' with commit %2", git_Branch(), git_CommitSHA1());
 
         std::unique_ptr<base::TraceWriter> trace_writer;
         std::unique_ptr<base::TraceLog> trace_logger;
