@@ -41,6 +41,7 @@
 #include "graphics/device.h"
 #include "engine/classlib.h"
 #include "engine/loader.h"
+#include "game/loader.h"
 #include "resource.h"
 #include "utility.h"
 
@@ -60,7 +61,8 @@ namespace app
                       public engine::ClassLibrary,
                       public engine::Loader,
                       public gfx::Loader,
-                      public audio::Loader
+                      public audio::Loader,
+                      public game::Loader
 
     {
         Q_OBJECT
@@ -91,6 +93,7 @@ namespace app
         virtual engine::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
         virtual engine::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
         virtual engine::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        virtual engine::ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
         // engine::EngineDataLoader implementation.
         virtual engine::EngineDataHandle LoadEngineData(const std::string& URI) const override;
         virtual engine::EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override;
@@ -99,6 +102,8 @@ namespace app
         // audio::Loader implementation
         virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
             AudioIOStrategy strategy, bool enable_file_caching) const override;
+        // game::Loader implementation
+        virtual game::TilemapDataHandle LoadTilemapData(const std::string& id, const std::string& uri, bool read_only) const override;
 
         template<typename T>
         engine::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
@@ -139,6 +144,8 @@ namespace app
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassById(const QString& id) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
         std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
+        std::shared_ptr<const game::TilemapClass> GetTilemapClassById(const QString& id) const;
+        std::shared_ptr<const game::TilemapClass> GetTilemapClassById(const std::string& id) const;
 
         // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
@@ -169,7 +176,8 @@ namespace app
         QString GetSubDir(const QString& dir, bool create = true) const;
 
         using ResourceList = app::ResourceList;
-
+        // Get a list of user defined tile map resources.
+        ResourceList ListUserDefinedMaps() const;
         // Get a list of user defined script resources.
         ResourceList ListUserDefinedScripts() const;
         // Get a list of user defined material names in the workspace.
@@ -227,6 +235,10 @@ namespace app
         bool IsValidScript(const QString& id) const;
         bool IsValidScript(const std::string& id) const
         { return IsValidScript(FromUtf8(id)); }
+
+        bool IsValidTilemap(const QString& id) const;
+        bool IsValidTilemap(const std::string& id) const
+        { return IsValidTilemap(FromUtf8(id)); }
 
         bool IsUserDefinedResource(const QString& id) const;
         bool IsUserDefinedResource(const std::string& id) const;

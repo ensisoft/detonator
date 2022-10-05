@@ -268,5 +268,7 @@ public:
     { return nullptr; }
     virtual std::shared_ptr<const game::SceneClass> FindSceneClassById(const std::string&) const override
     { return nullptr; }
+    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override
+    { return nullptr;}
 private:
 };

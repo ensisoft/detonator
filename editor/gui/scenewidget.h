@@ -30,6 +30,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "game/scene.h"
+#include "game/fwd.h"
 #include "engine/renderer.h"
 
 namespace gfx {
@@ -80,8 +81,9 @@ namespace gui
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_name_textChanged(const QString&);
-        void on_cmbScripts_currentIndexChanged(const QString);
-        void on_cmbSpatialIndex_currentIndexChanged(const QString&);
+        void on_cmbScripts_currentIndexChanged(int);
+        void on_cmbTilemaps_currentIndexChanged(int);
+        void on_cmbSpatialIndex_currentIndexChanged(int);
         void on_spRectX_valueChanged(double value);
         void on_spRectY_valueChanged(double value);
         void on_spRectW_valueChanged(double value);
@@ -113,6 +115,9 @@ namespace gui
         void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
         void on_btnAddScript_clicked();
+        void on_btnEditMap_clicked();
+        void on_btnAddMap_clicked();
+        void on_btnResetMap_clicked();
         void on_btnNewScriptVar_clicked();
         void on_btnEditScriptVar_clicked();
         void on_btnDeleteScriptVar_clicked();
@@ -199,7 +204,7 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
         bool mCameraWasLoaded = false;
-
+        std::unique_ptr<game::Tilemap> mTilemap;
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::SceneClass> mUndoStack;

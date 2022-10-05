@@ -356,7 +356,7 @@ namespace game
         { return mId; }
         std::string GetName() const
         { return mName; }
-        std::string GetDataFile() const
+        std::string GetDataUri() const
         { return mDataFile; }
         base::bitflag<Flags> GetFlags() const
         { return mFlags; }
@@ -378,9 +378,9 @@ namespace game
         { mId = id; }
         void SetName(const std::string& name)
         { mName = name; }
-        void SetDataFile(const std::string& file)
-        { mDataFile = file; }
-        void ResetDataFile()
+        void SetDataUri(const std::string& uri)
+        { mDataFile = uri; }
+        void ResetDataUri()
         { mDataFile.clear(); }
         void SetStorage(Storage storage)
         { mStorage = storage; }

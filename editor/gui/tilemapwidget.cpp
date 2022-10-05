@@ -215,7 +215,7 @@ public:
         app::DataResource  resource(res, resource_name);
         workspace.SaveResource(resource);
         // save the data file URI mapping into the layer object.
-        layer.SetDataFile(app::ToUtf8(uri));
+        layer.SetDataUri(app::ToUtf8(uri));
         return true;
     }
     size_t GetHash() const
@@ -607,7 +607,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
             layer.Initialize(mState.klass->GetMapWidth(),
                              mState.klass->GetMapHeight(),
                              *data);
-            layer.ResetDataFile();
+            layer.ResetDataUri();
             WARN("Tilemap layer data buffer was re-created. [layer='%1']", layer.GetName());
         }
         mLayerData[layer.GetId()] = data;
@@ -1752,7 +1752,7 @@ void TilemapWidget::DisplayLayerProperties()
 
         SetValue(mUI.layerName,          layer->GetName());
         SetValue(mUI.layerID,            layer->GetId());
-        SetValue(mUI.layerFileName,      layer->GetDataFile());
+        SetValue(mUI.layerFileName,      layer->GetDataUri());
         SetValue(mUI.cmbLayerType,       layer->GetType());
         SetValue(mUI.cmbLayerStorage,    layer->GetStorage());
         SetValue(mUI.cmbLayerCache,      layer->GetCache());

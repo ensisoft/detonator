@@ -53,6 +53,7 @@
 #include "graphics/drawable.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#include "game/tilemap.h"
 #include "engine/loader.h"
 #include "uikit/window.h"
 #include "audio/graph.h"
@@ -82,6 +83,62 @@ bool LoadFileBufferFromDisk(const std::string& filename, std::vector<char>* buff
     DEBUG("Loaded file buffer. [file='%1', bytes=%2]", filename, buffer->size());
     return true;
 }
+
+class TilemapDataBuffer : public game::TilemapData
+{
+public:
+    TilemapDataBuffer(const std::string& filename, bool read_only, std::vector<char>&& data)
+      : mFileName(filename)
+      , mReadonly(read_only)
+      , mFileData(std::move(data))
+    {}
+
+    virtual void Write(const void* ptr, size_t bytes, size_t offset) override
+    {
+        ASSERT(offset + bytes <= mFileData.size());
+        ASSERT(mReadonly == false);
+        std::memcpy(&mFileData[offset], ptr, bytes);
+    }
+    virtual void Read(void* ptr, size_t bytes, size_t offset) const override
+    {
+        ASSERT(offset + bytes <= mFileData.size());
+        std::memcpy(ptr, &mFileData[offset], bytes);
+    }
+
+    virtual size_t AppendChunk(size_t bytes) override
+    {
+        ASSERT(mReadonly == false);
+        const auto offset = mFileData.size();
+        mFileData.resize(offset + bytes);
+        return offset;
+    }
+    virtual size_t GetByteCount() const override
+    {
+        return mFileData.size();
+    }
+    virtual void Resize(size_t bytes) override
+    {
+        ASSERT(mReadonly == false);
+        mFileData.resize(bytes);
+    }
+
+    virtual void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
+    {
+        ASSERT(mReadonly == false);
+        ASSERT(offset + value_size * num_values <= mFileData.size());
+
+        for (size_t i=0; i<num_values; ++i)
+        {
+            const auto buffer_offset = offset + i * value_size;
+            std::memcpy(&mFileData[buffer_offset], value, value_size);
+        }
+    }
+private:
+    const std::string mFileName;
+    const bool mReadonly = false;
+    std::vector<char> mFileData;
+};
+
 template<typename Interface>
 class FileBuffer : public Interface
 {
@@ -104,6 +161,10 @@ private:
     const std::string mFileName;
     const std::vector<char> mFileData;
 };
+
+using GameDataFileBuffer = FileBuffer<EngineData>;
+using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
+
 #if defined(POSIX_OS)
 class AudioFileMap : public audio::SourceStream
 {
@@ -305,9 +366,6 @@ private:
     std::uint64_t mSize = 0;
 };
 
-using GameDataFileBuffer = FileBuffer<EngineData>;
-using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
-
 class FileResourceLoaderImpl : public FileResourceLoader
 {
 public:
@@ -443,6 +501,18 @@ public:
         return ret;
     }
 
+    // game::Loader impl
+    virtual game::TilemapDataHandle LoadTilemapData(const std::string& id, const std::string& uri, bool read_only) const override
+    {
+        const auto& filename = ResolveURI(uri);
+
+        std::vector<char> buffer;
+        if (!LoadFileBuffer(filename, &buffer))
+            return nullptr;
+
+        return std::make_shared<TilemapDataBuffer>(uri, read_only, std::move(buffer));
+    }
+
     // FileResourceLoader impl
     virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) override
     { mDefaultAudioIO = strategy; }
@@ -486,7 +556,7 @@ private:
         auto it = mPreloadedFiles.find(filename);
         if (it == mPreloadedFiles.end())
         {
-            WARN("Missed preloaded file buffer. entry. [file='%1']", filename);
+            WARN("Missed preloaded file buffer entry. [file='%1']", filename);
             return LoadFileBufferFromDisk(filename, buffer);
         }
         // ditch the preloaded buffer since it'll be now cached in a higher
@@ -561,18 +631,17 @@ public:
     virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
     virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
     virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
     // ContentLoader impl
     virtual bool LoadFromFile(const std::string& file) override;
 private:
     std::string mResourceFile;
     // These are the material types that have been loaded
     // from the resource file.
-    std::unordered_map<std::string,
-            std::shared_ptr<gfx::MaterialClass>> mMaterials;
+    std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>> mMaterials;
     // These are the drawable types that have been loaded
     // from the resource file.
-    std::unordered_map<std::string,
-            std::shared_ptr<gfx::DrawableClass>> mDrawables;
+    std::unordered_map<std::string, std::shared_ptr<gfx::DrawableClass>> mDrawables;
     // These are the entities that have been loaded from
     // the resource file.
     std::unordered_map<std::string, std::shared_ptr<game::EntityClass>> mEntities;
@@ -587,6 +656,8 @@ private:
     std::unordered_map<std::string, std::shared_ptr<uik::Window>> mWindows;
     // Audio graphs
     std::unordered_map<std::string, std::shared_ptr<audio::GraphClass>> mAudioGraphs;
+    // Tilemaps
+    std::unordered_map<std::string, std::shared_ptr<game::TilemapClass>> mMaps;
 };
 
 ContentLoaderImpl::ContentLoaderImpl()
@@ -746,6 +817,8 @@ bool ContentLoaderImpl::LoadFromFile(const std::string& file)
        return false;
    if (!LoadContent<audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr))
         return false;
+   if (!LoadContent<game::TilemapClass>(root, "tilemaps", mMaps, nullptr))
+       return false;
 
     // need to resolve the entity references.
     for (auto& p : mScenes)
@@ -800,6 +873,14 @@ ClassHandle<const game::SceneClass> ContentLoaderImpl::FindSceneClassById(const 
 {
     auto it = mScenes.find(id);
     if (it != mScenes.end())
+        return it->second;
+
+    return nullptr;
+}
+ClassHandle<const game::TilemapClass> ContentLoaderImpl::FindTilemapClassById(const std::string& id) const
+{
+    auto it = mMaps.find(id);
+    if (it != mMaps.end())
         return it->second;
 
     return nullptr;

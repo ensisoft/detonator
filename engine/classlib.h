@@ -39,7 +39,7 @@ namespace engine
     // instance of the class object. The class objects should be treated as immutable
     // resources created by the asset pipeline and loaded from the descriptor file(s).
     // Note about user defined resource names:
-    // If a resource has it's name changed you will need to remember to update your code that
+    // If a resource has its name changed you will need to remember to update your code that
     // calls some method to look up the resource by its name such as FindEntityClassByName.
     // For robustness against name changes a better option is to use the class object IDs which
     // are immutable.
@@ -80,6 +80,9 @@ namespace engine
         // Find a scene class object by the given id.
         // if not found will return a nullptr.
         virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const = 0;
+        // Find a tilemap class object by the given ID.
+        // If no such tilemap could be found returns nullptr.
+        virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const = 0;
     private:
     };
 } // namespace

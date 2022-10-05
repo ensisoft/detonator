@@ -214,6 +214,8 @@ void main() {
     { return nullptr; }
     virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override
     { return nullptr; }
+    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override
+    { return nullptr; }
 private:
 };
 

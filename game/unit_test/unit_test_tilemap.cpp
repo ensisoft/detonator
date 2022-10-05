@@ -306,7 +306,7 @@ void test_tilemap_layer()
     klass.SetCache(game::TilemapLayerClass::Cache::Cache128);
     klass.SetResolution(game::TilemapLayerClass::Resolution::DownScale8);
     klass.SetDefaultTileValue(game::detail::Data_Tile_UInt16 {5});
-    klass.SetDataFile("data.bin");
+    klass.SetDataUri("pck://foobar/data.bin");
     klass.SetPaletteMaterialId("some_material", 0);
     klass.SetPaletteMaterialId("other_material", 1);
 
@@ -325,7 +325,7 @@ void test_tilemap_layer()
         TEST_REQUIRE(ret.GetCache() == game::TilemapLayerClass::Cache::Cache128);
         TEST_REQUIRE(ret.GetResolution() == game::TilemapLayerClass::Resolution::DownScale8);
         TEST_REQUIRE(ret.GetDefaultTileValue<game::detail::Data_Tile_UInt16>().data == 5);
-        TEST_REQUIRE(ret.GetDataFile() == "data.bin");
+        TEST_REQUIRE(ret.GetDataUri() == "pck://foobar/data.bin");
         TEST_REQUIRE(ret.GetPaletteMaterialId(0) == "some_material");
         TEST_REQUIRE(ret.GetPaletteMaterialId(1) == "other_material");
     }

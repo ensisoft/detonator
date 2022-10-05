@@ -534,6 +534,7 @@ int main(int argc, char* argv[])
         env.graphics_loader  = loaders.ResourceLoader.get();
         env.engine_loader    = loaders.ResourceLoader.get();
         env.audio_loader     = loaders.ResourceLoader.get();
+        env.game_loader      = loaders.ResourceLoader.get();
         env.directory        = GetPath();
         env.user_home        = DiscoverUserHome();
         env.game_home        = GenerateGameHome(env.user_home, identifier);
