@@ -28,8 +28,14 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>390</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
-        <string>Base  properties</string>
+        <string>Base properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="10" column="1">
