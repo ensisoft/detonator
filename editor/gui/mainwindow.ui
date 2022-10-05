@@ -1295,6 +1295,7 @@
     <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
+    <addaction name="actionImportTiles"/>
     <addaction name="actionImportFiles"/>
     <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
@@ -1921,7 +1922,7 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string>Import File(s)</string>
+    <string>Import Files ...</string>
    </property>
    <property name="toolTip">
     <string>Import files as resources</string>
@@ -2074,10 +2075,13 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string>Import Tiles</string>
+    <string>Import Tiles ...</string>
    </property>
    <property name="toolTip">
     <string>Import new tiles from a packed tilemap</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+T</string>
    </property>
   </action>
  </widget>
