@@ -1302,12 +1302,12 @@ void unit_test_json_export_import()
         resource.SetProperty("int", 123);
         resource.SetProperty("str", QString("hello"));
         workspace.SaveResource(resource);
-        workspace.ExportResources(std::vector<size_t>{0}, "test_export_import_content.json");
+        workspace.ExportResourceJson(std::vector<size_t>{0}, "test_export_import_content.json");
     }
 
     {
         std::vector<std::unique_ptr<app::Resource>> resources;
-        TEST_REQUIRE(app::Workspace::ImportResources("test_export_import_content.json",resources));
+        TEST_REQUIRE(app::Workspace::ImportResourcesFromJson("test_export_import_content.json", resources));
         TEST_REQUIRE(resources.size() == 1);
         TEST_REQUIRE(resources[0]->GetId() == "foo123");
         TEST_REQUIRE(resources[0]->GetProperty("int", 0) == 123);
