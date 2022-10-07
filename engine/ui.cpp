@@ -350,6 +350,17 @@ std::string UIStyle::MakeStyleString(const std::string& filter) const
     return json.dump();
 }
 
+void UIStyle::ListMaterials(std::vector<MaterialEntry>* list) const
+{
+    for (const auto& [key, material] : mMaterials)
+    {
+        MaterialEntry me;
+        me.key = key;
+        me.material = material.get();
+        list->push_back(std::move(me));
+    }
+}
+
 bool UIStyle::PurgeUnavailableMaterialReferences()
 {
     bool purged = false;

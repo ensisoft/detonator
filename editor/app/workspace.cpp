@@ -43,6 +43,7 @@
 #include <memory>
 #include <unordered_map>
 #include <set>
+#include <stack>
 #include <functional>
 
 #include "editor/app/eventlog.h"
@@ -1724,6 +1725,81 @@ Workspace::ResourceList Workspace::ListCursors() const
 Workspace::ResourceList Workspace::ListDataFiles() const
 {
     return ListResources(Resource::Type::DataFile, false, false);
+}
+
+ResourceList Workspace::ListDependencies(const QModelIndexList& list) const
+{
+    std::vector<size_t> indices;
+    for (const auto& index : list)
+        indices.push_back(index.row());
+
+    return ListDependencies(std::move(indices));
+}
+ResourceList Workspace::ListDependencies(std::vector<size_t> indices) const
+{
+    std::unordered_map<QString, Resource*> resource_map;
+    for (size_t i=0; i<mVisibleCount; ++i)
+    {
+        auto& res = mResources[i];
+        resource_map[res->GetId()] = res.get();
+    }
+
+    std::unordered_set<QString> unique_ids;
+
+    for (size_t index : indices)
+    {
+        const auto& res = mResources[index];
+        QStringList deps = res->ListDependencies();
+
+        std::stack<QString> stack;
+        for (auto id : deps)
+            stack.push(id);
+
+        while (!stack.empty())
+        {
+            auto top_id = stack.top();
+            auto* resource = resource_map[top_id];
+            // if it's a primitive resource then we're not going to find it here
+            // and there's no need to explore it
+            if (resource == nullptr)
+            {
+                stack.pop();
+                continue;
+            }
+            // if we've already seen this resource we can skip
+            // exploring from here.
+            if (base::Contains(unique_ids, top_id))
+            {
+                stack.pop();
+                continue;
+            }
+
+            unique_ids.insert(top_id);
+
+            deps = resource->ListDependencies();
+            for (auto id : deps)
+                stack.push(id);
+        }
+    }
+
+    ResourceList ret;
+    for (const auto& id : unique_ids)
+    {
+        auto* res = resource_map[id];
+
+        ResourceListItem item;
+        item.name = res->GetName();
+        item.id   = res->GetId();
+        item.icon = res->GetIcon();
+        item.resource = res;
+        ret.push_back(item);
+    }
+    return ret;
+}
+
+ResourceList Workspace::ListDependencies(std::size_t index) const
+{
+    return ListDependencies(std::vector<size_t>{index});
 }
 
 void Workspace::SaveResource(const Resource& resource)

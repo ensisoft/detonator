@@ -132,6 +132,8 @@ namespace app
         // as this object but is a distinct resource object (type) and
         // has a different/unique resource id.
         virtual std::unique_ptr<Resource> Clone() const = 0;
+        // List the IDs of resources that this resource depends on.
+        virtual QStringList ListDependencies() const = 0;
 
         // helpers
         inline std::string GetNameUtf8() const
@@ -456,6 +458,19 @@ namespace app
 
         QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game::EntityClass& dupe, const QVariantMap& props);
 
+        template<typename ResourceType> inline
+        QStringList ListResourceDependencies(const ResourceType& res, const QVariantMap& props)
+        {
+            return QStringList();
+        }
+
+        QStringList ListResourceDependencies(const gfx::PolygonClass& poly, const QVariantMap& props);
+        QStringList ListResourceDependencies(const gfx::KinematicsParticleEngineClass& particles, const QVariantMap& props);
+
+        QStringList ListResourceDependencies(const game::EntityClass& entity, const QVariantMap& props);
+        QStringList ListResourceDependencies(const game::SceneClass& scene, const QVariantMap& props);
+        QStringList ListResourceDependencies(const game::TilemapClass& map, const QVariantMap& props);
+        QStringList ListResourceDependencies(const uik::Window& window, const QVariantMap& props);
     } // detail
 
     template<typename BaseTypeContent>
@@ -592,6 +607,8 @@ namespace app
             ret->mPrimitive = mPrimitive;
             return ret;
         }
+        virtual QStringList ListDependencies() const override
+        { return detail::ListResourceDependencies(*mContent, mProps); }
 
         // GameResourceBase
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
@@ -731,6 +748,8 @@ namespace app
             ret->mPrimitive = mPrimitive;
             return ret;
         }
+        virtual QStringList ListDependencies() const override
+        { return detail::ListResourceDependencies(*mClass, mProps); }
 
         // GameResourceBase
         virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override
