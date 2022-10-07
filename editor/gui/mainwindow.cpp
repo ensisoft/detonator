@@ -1450,7 +1450,7 @@ void MainWindow::on_actionExportJSON_triggered()
     if (filename.isEmpty())
         return;
 
-    if (!mWorkspace->ExportResources(indices, filename))
+    if (!mWorkspace->ExportResourceJson(indices, filename))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
@@ -1479,7 +1479,7 @@ void MainWindow::on_actionImportJSON_triggered()
         return;
 
     std::vector<std::unique_ptr<app::Resource>> resources;
-    if (!app::Workspace::ImportResources(filename, resources))
+    if (!app::Workspace::ImportResourcesFromJson(filename, resources))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);

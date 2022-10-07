@@ -2234,15 +2234,15 @@ void Workspace::DuplicateResource(size_t index)
     DuplicateResources(std::vector<size_t>{index});
 }
 
-bool Workspace::ExportResources(const QModelIndexList& list, const QString& filename) const
+bool Workspace::ExportResourceJson(const QModelIndexList& list, const QString& filename) const
 {
     std::vector<size_t> indices;
     for (const auto& index : list)
         indices.push_back(index.row());
-    return ExportResources(indices, filename);
+    return ExportResourceJson(indices, filename);
 }
 
-bool Workspace::ExportResources(const std::vector<size_t>& indices, const QString& filename) const
+bool Workspace::ExportResourceJson(const std::vector<size_t>& indices, const QString& filename) const
 {
     data::JsonObject json;
     for (size_t index : indices)
@@ -2270,7 +2270,7 @@ bool Workspace::ExportResources(const std::vector<size_t>& indices, const QStrin
 }
 
 // static
-bool Workspace::ImportResources(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources)
+bool Workspace::ImportResourcesFromJson(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources)
 {
     data::JsonFile file;
     auto [success, error] = file.Load(ToUtf8(filename));
