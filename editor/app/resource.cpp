@@ -19,8 +19,22 @@
 #include <unordered_map>
 
 #include "base/assert.h"
+#include "engine/ui.h"
 #include "editor/app/utility.h"
 #include "editor/app/resource.h"
+
+namespace {
+    void PushBack(QStringList& list, const QString& id)
+    {
+        if (!id.isEmpty())
+            list.push_back(id);
+    }
+    void PushBack(QStringList& list, const std::string& id)
+    {
+        if (!id.empty())
+            list.push_back(app::FromUtf8(id));
+    }
+} // namespace
 
 namespace app {
 namespace detail {
@@ -108,5 +122,106 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
     return ret;
 }
 
+QStringList ListResourceDependencies(const gfx::PolygonClass& poly, const QVariantMap& props)
+{
+    // soft dependency
+    QStringList ret;
+    PushBack(ret, props["material"].toString());
+    return ret;
+
+}
+QStringList ListResourceDependencies(const gfx::KinematicsParticleEngineClass& particles, const QVariantMap& props)
+{
+    // soft dependency
+    QStringList ret;
+    PushBack(ret, props["material"].toString());
+    return ret;
+}
+
+QStringList ListResourceDependencies(const game::EntityClass& entity, const QVariantMap& props)
+{
+    QStringList ret;
+    PushBack(ret, entity.GetScriptFileId());
+
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+        if (const auto* ptr = node.GetDrawable())
+        {
+            PushBack(ret, ptr->GetMaterialId());
+            PushBack(ret, ptr->GetDrawableId());
+        }
+        if (const auto* ptr = node.GetRigidBody())
+        {
+            PushBack(ret, ptr->GetPolygonShapeId());
+        }
+    }
+    return ret;
+}
+
+QStringList ListResourceDependencies(const game::SceneClass& scene, const QVariantMap& props)
+{
+    QStringList ret;
+    PushBack(ret, scene.GetScriptFileId());
+    PushBack(ret, scene.GetTilemapId());
+    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    {
+        const auto& node = scene.GetNode(i);
+        PushBack(ret, node.GetEntityId());
+    }
+
+    return ret;
+}
+QStringList ListResourceDependencies(const game::TilemapClass& map, const QVariantMap& props)
+{
+    QStringList ret;
+
+    for (size_t i=0; i<map.GetNumLayers(); ++i)
+    {
+        const auto& layer = map.GetLayer(i);
+        PushBack(ret, layer.GetDataId());
+
+        if (!layer.HasRenderComponent())
+            continue;
+
+        for (size_t j=0; j<layer.GetMaxPaletteIndex(); ++j)
+        {
+            PushBack(ret, layer.GetPaletteMaterialId(j));
+        }
+    }
+    return ret;
+}
+
+QStringList ListResourceDependencies(const uik::Window& window, const QVariantMap& props)
+{
+    QStringList ret;
+
+    PushBack(ret, window.GetScriptFile());
+
+    engine::UIStyle style;
+    std::string style_string;
+    style_string = window.GetStyleString();
+    if (!style_string.empty())
+        style.ParseStyleString("window", window.GetStyleString());
+
+    for (size_t i=0; i<window.GetNumWidgets(); ++i)
+    {
+        const auto& widget = window.GetWidget(i);
+        style_string = widget.GetStyleString();
+        if (!style_string.empty())
+            style.ParseStyleString(widget.GetId(), style_string);
+    }
+
+    std::vector<engine::UIStyle::MaterialEntry> materials;
+    style.ListMaterials(&materials);
+    for (const auto& material : materials)
+    {
+        if (const auto* ptr = dynamic_cast<const engine::detail::UIMaterialReference*>(material.material))
+        {
+            PushBack(ret, ptr->GetMaterialId());
+        }
+    }
+    return ret;
+}
 } // namespace
 } // namespace

@@ -205,6 +205,11 @@ namespace app
 
         ResourceList ListDataFiles() const;
 
+        // List user defined resource dependencies.
+        ResourceList ListDependencies(const QModelIndexList& list) const;
+        ResourceList ListDependencies(std::vector<size_t> indices) const;
+        ResourceList ListDependencies(std::size_t index) const;
+
         // Map material ID to its human-readable name.
         QString MapMaterialIdToName(const QString& id) const;
         QString MapMaterialIdToName(const std::string& id) const

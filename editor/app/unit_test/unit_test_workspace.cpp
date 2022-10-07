@@ -1288,7 +1288,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     }
 }
 
-void unit_test_export_import()
+void unit_test_json_export_import()
 {
     DeleteDir("TestWorkspace");
     MakeDir("TestWorkspace"); // initially empty workspace folder.
@@ -1315,6 +1315,203 @@ void unit_test_export_import()
     }
 }
 
+app::ResourceListItem* FindResourceItem(const QString& name, app::ResourceList& list)
+{
+    for (auto& item : list)
+    {
+        if (item.name == name)
+            return &item;
+    }
+    return nullptr;
+}
+
+void unit_test_list_deps()
+{
+    // material depends on nothing
+    // polygon depends on material (for display only)
+    // particle engine depends on material (for display only)
+    // entity depends on script, drawable (polygon/particle), material
+    // scene depends on script, entity
+    // tilemap depends on material, data
+    // audio depends on nothing
+    // script depends on nothing
+
+    app::Workspace workspace("TestWorkspace");
+
+    {
+        gfx::ColorClass material;
+        app::MaterialResource material_resource(material, "mat1");
+        workspace.SaveResource(material_resource);
+    }
+
+    // this is a red-herring and not actually used!
+    {
+        gfx::ColorClass material;
+        app::MaterialResource material_resource(material, "mat2");
+        workspace.SaveResource(material_resource);
+    }
+
+    {
+        gfx::PolygonClass poly;
+        app::CustomShapeResource shape_resource(poly, "poly");
+        workspace.SaveResource(shape_resource);
+    }
+
+    {
+        gfx::KinematicsParticleEngineClass particles;
+        app::ParticleSystemResource  particle_resource(particles, "particles");
+        workspace.SaveResource(particle_resource);
+    }
+
+    {
+        app::Script script;
+        app::ScriptResource script_resource(script, "EntityScript");
+        workspace.SaveResource(script_resource);
+
+        game::EntityClass entity;
+        entity.SetName("entity");
+        entity.SetSriptFileId(script_resource.GetIdUtf8());
+
+        {
+            const auto* material = workspace.FindResourceByName("mat1", app::Resource::Type::Material);
+            const auto* drawable = workspace.FindResourceByName("poly", app::Resource::Type::Shape);
+
+            game::DrawableItemClass draw;
+            draw.SetMaterialId(material->GetIdUtf8());
+            draw.SetDrawableId(drawable->GetIdUtf8());
+            game::EntityNodeClass node;
+            node.SetName("node1");
+            node.SetDrawable(draw);
+            entity.AddNode(node);
+        }
+        {
+            const auto* material = workspace.FindResourceByName("Red", app::Resource::Type::Material);
+            const auto* drawable = workspace.FindResourceByName("particles", app::Resource::Type::ParticleSystem);
+            game::DrawableItemClass draw;
+            draw.SetMaterialId(material->GetIdUtf8());
+            draw.SetDrawableId(drawable->GetIdUtf8());
+            game::EntityNodeClass node;
+            node.SetName("node2");
+            node.SetDrawable(draw);
+            entity.AddNode(node);
+        }
+
+        app::EntityResource resource(entity, "entity");
+        workspace.SaveResource(resource);
+    }
+
+    {
+        game::TilemapClass map;
+        map.SetName("map");
+
+        const auto* material = workspace.FindResourceByName("mat1", app::Resource::Type::Material);
+
+        game::TilemapLayerClass layer;
+        layer.SetName("layer");
+        layer.SetType(game::TilemapLayerClass::Type::Render);
+        layer.SetPaletteMaterialId(material->GetIdUtf8(), 0);
+        map.AddLayer(layer);
+
+        app::TilemapResource resource(map, "map");
+        workspace.SaveResource(resource);
+    }
+
+    {
+        const auto* map = workspace.FindResourceByName("map", app::Resource::Type::Tilemap);
+
+        app::Script script;
+        app::ScriptResource script_resource(script, "SceneScript");
+        workspace.SaveResource(script_resource);
+
+        game::SceneClass scene;
+        scene.SetName("scene");
+        scene.SetScriptFileId(script_resource.GetIdUtf8());
+        scene.SetTilemapId(map->GetIdUtf8());
+
+        const auto* entity = workspace.FindResourceByName("entity", app::Resource::Type::Entity);
+
+        {
+            game::SceneNodeClass node;
+            node.SetName("node");
+            node.SetEntityId(entity->GetIdUtf8());
+            scene.AddNode(node);
+        }
+        app::SceneResource  resource(scene, "scene");
+        workspace.SaveResource(resource);
+    }
+
+    {
+        TEST_REQUIRE(workspace.GetUserDefinedResource(0).GetName() == "mat1");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(1).GetName() == "mat2");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(2).GetName() == "poly");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(3).GetName() == "particles");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(4).GetName() == "EntityScript");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(5).GetName() == "entity");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(6).GetName() == "map");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(7).GetName() == "SceneScript");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(8).GetName() == "scene");
+
+        // material
+        {
+            auto list = workspace.ListDependencies(0);
+            TEST_REQUIRE(list.empty());
+        }
+        // entity
+        {
+            auto list = workspace.ListDependencies(5);
+            TEST_REQUIRE(list.size() == 4);
+            TEST_REQUIRE(FindResourceItem("mat1", list));
+            TEST_REQUIRE(FindResourceItem("particles", list));
+            TEST_REQUIRE(FindResourceItem("poly", list));
+            TEST_REQUIRE(FindResourceItem("EntityScript", list));
+            // red herring
+            TEST_REQUIRE(FindResourceItem("mat2", list) == nullptr);
+        }
+        // tilemap
+        {
+            auto list = workspace.ListDependencies(6);
+            TEST_REQUIRE(list.size() == 1);
+            TEST_REQUIRE(FindResourceItem("mat1", list));
+        }
+        // scene
+        {
+            auto list = workspace.ListDependencies(8);
+            TEST_REQUIRE(list.size() == 7);
+            TEST_REQUIRE(FindResourceItem("mat1", list));
+            TEST_REQUIRE(FindResourceItem("particles", list));
+            TEST_REQUIRE(FindResourceItem("poly", list));
+            TEST_REQUIRE(FindResourceItem("EntityScript", list));
+            TEST_REQUIRE(FindResourceItem("SceneScript", list));
+            TEST_REQUIRE(FindResourceItem("entity", list));
+            TEST_REQUIRE(FindResourceItem("map", list));
+        }
+
+        // scene + entity
+        {
+            auto list = workspace.ListDependencies(std::vector<size_t>{5, 8});
+            TEST_REQUIRE(list.size() == 7);
+            TEST_REQUIRE(FindResourceItem("mat1", list));
+            TEST_REQUIRE(FindResourceItem("particles", list));
+            TEST_REQUIRE(FindResourceItem("poly", list));
+            TEST_REQUIRE(FindResourceItem("EntityScript", list));
+            TEST_REQUIRE(FindResourceItem("SceneScript", list));
+            TEST_REQUIRE(FindResourceItem("entity", list));
+            TEST_REQUIRE(FindResourceItem("map", list));
+        }
+
+        // tilemap + entity
+        {
+            auto list = workspace.ListDependencies(std::vector<size_t>{5, 6});
+            TEST_REQUIRE(list.size() == 4);
+            TEST_REQUIRE(FindResourceItem("mat1", list));
+            TEST_REQUIRE(FindResourceItem("particles", list));
+            TEST_REQUIRE(FindResourceItem("poly", list));
+            TEST_REQUIRE(FindResourceItem("EntityScript", list));
+        }
+    }
+
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -1339,6 +1536,7 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_name_collision();
     unit_test_packing_ui_style_resources();
     unit_test_packing_texture_name_collision_resample_bug();
-    unit_test_export_import();
+    unit_test_json_export_import();
+    unit_test_list_deps();
     return 0;
 }
