@@ -1085,11 +1085,11 @@ audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI,
     return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
 }
 
-game::TilemapDataHandle Workspace::LoadTilemapData(const std::string& ID, const std::string& URI, bool read_only) const
+game::TilemapDataHandle Workspace::LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const
 {
-    const auto& file = MapFileToFilesystem(URI);
-    DEBUG("URI '%1' => '%2'", URI, file);
-    if (read_only)
+    const auto& file = MapFileToFilesystem(desc.uri);
+    DEBUG("URI '%1' => '%2'", desc.uri, file);
+    if (desc.read_only)
         return TilemapMemoryMap::OpenFilemap(file);
 
     return TilemapBuffer::LoadFromFile(file);

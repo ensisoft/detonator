@@ -103,7 +103,7 @@ namespace app
         virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
             AudioIOStrategy strategy, bool enable_file_caching) const override;
         // game::Loader implementation
-        virtual game::TilemapDataHandle LoadTilemapData(const std::string& id, const std::string& uri, bool read_only) const override;
+        virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override;
 
         template<typename T>
         engine::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const

@@ -357,7 +357,9 @@ namespace game
         std::string GetName() const
         { return mName; }
         std::string GetDataUri() const
-        { return mDataFile; }
+        { return mDataUri; }
+        std::string GetDataId() const
+        { return mDataId; }
         base::bitflag<Flags> GetFlags() const
         { return mFlags; }
         bool IsReadOnly() const
@@ -379,9 +381,13 @@ namespace game
         void SetName(const std::string& name)
         { mName = name; }
         void SetDataUri(const std::string& uri)
-        { mDataFile = uri; }
+        { mDataUri = uri; }
+        void SetDataId(const std::string& id)
+        { mDataId = id; }
+        void ResetDataId()
+        { mDataId.clear(); }
         void ResetDataUri()
-        { mDataFile.clear(); }
+        { mDataUri.clear(); }
         void SetStorage(Storage storage)
         { mStorage = storage; }
         void SetCache(Cache cache)
@@ -483,7 +489,8 @@ namespace game
     private:
         std::string mId;
         std::string mName;
-        std::string mDataFile;
+        std::string mDataUri;
+        std::string mDataId;
         base::bitflag<Flags> mFlags;
         std::unordered_map<std::size_t, std::string> mPalette;
         Storage mStorage = Storage::Dense;
