@@ -216,6 +216,7 @@ public:
         workspace.SaveResource(resource);
         // save the data file URI mapping into the layer object.
         layer.SetDataUri(app::ToUtf8(uri));
+        layer.SetDataId(res.GetId());
         return true;
     }
     size_t GetHash() const
@@ -604,10 +605,9 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
         auto data = std::make_shared<LayerData>();
         if (!data->Load(*mState.klass, layer, *mState.workspace))
         {
-            layer.Initialize(mState.klass->GetMapWidth(),
-                             mState.klass->GetMapHeight(),
-                             *data);
+            layer.Initialize(mState.klass->GetMapWidth(), mState.klass->GetMapHeight(), *data);
             layer.ResetDataUri();
+            layer.ResetDataId();
             WARN("Tilemap layer data buffer was re-created. [layer='%1']", layer.GetName());
         }
         mLayerData[layer.GetId()] = data;

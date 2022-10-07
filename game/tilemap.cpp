@@ -539,7 +539,8 @@ std::size_t TilemapLayerClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mDataFile);
+    hash = base::hash_combine(hash, mDataUri);
+    hash = base::hash_combine(hash, mDataId);
     hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mStorage);
     hash = base::hash_combine(hash, GetType());
@@ -706,7 +707,8 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
     const auto type = GetType();
     data.Write("id",       mId);
     data.Write("name",     mName);
-    data.Write("data",     mDataFile);
+    data.Write("data_uri", mDataUri);
+    data.Write("data_id",  mDataId);
     data.Write("flags",    mFlags);
     data.Write("storage",  mStorage);
     data.Write("type",     type);
@@ -745,7 +747,8 @@ TilemapLayerClass TilemapLayerClass::FromJson(const data::Reader& data)
     data.Read("type",     &type);
     data.Read("id",       &ret.mId);
     data.Read("name",     &ret.mName);
-    data.Read("data",     &ret.mDataFile);
+    data.Read("data_uri", &ret.mDataUri);
+    data.Read("data_id",  &ret.mDataId);
     data.Read("flags",    &ret.mFlags);
     data.Read("storage",  &ret.mStorage);
     data.Read("cache",    &ret.mCache);
@@ -1184,7 +1187,12 @@ bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
     for (auto& layer : mLayers)
     {
         const auto& klass = layer->GetClass();
-        auto data = loader.LoadTilemapData(klass.GetId(), klass.GetDataUri(), klass.IsReadOnly());
+        Loader::TilemapDataDesc desc;
+        desc.layer     = klass.GetId();
+        desc.data      = klass.GetDataId();
+        desc.uri       = klass.GetDataUri();
+        desc.read_only = klass.IsReadOnly();
+        auto data = loader.LoadTilemapData(desc);
         if (data)
         {
             layer->Load(data, default_tile_cache_size);

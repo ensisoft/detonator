@@ -280,11 +280,11 @@ public:
         return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
     }
     // game::Loader implementation
-    virtual game::TilemapDataHandle LoadTilemapData(const std::string& ID, const std::string& URI, bool read_only) const override
+    virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override
     {
-        const auto& file = ResolveURI(URI);
-        DEBUG("URI '%1' => '%2'", URI, file);
-        if (read_only)
+        const auto& file = ResolveURI(desc.uri);
+        DEBUG("URI '%1' => '%2'", desc.uri, file);
+        if (desc.read_only)
             return app::TilemapMemoryMap::OpenFilemap(file);
 
         return app::TilemapBuffer::LoadFromFile(file);

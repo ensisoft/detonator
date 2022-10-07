@@ -502,15 +502,15 @@ public:
     }
 
     // game::Loader impl
-    virtual game::TilemapDataHandle LoadTilemapData(const std::string& id, const std::string& uri, bool read_only) const override
+    virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override
     {
-        const auto& filename = ResolveURI(uri);
+        const auto& filename = ResolveURI(desc.uri);
 
         std::vector<char> buffer;
         if (!LoadFileBuffer(filename, &buffer))
             return nullptr;
 
-        return std::make_shared<TilemapDataBuffer>(uri, read_only, std::move(buffer));
+        return std::make_shared<TilemapDataBuffer>(desc.uri, desc.read_only, std::move(buffer));
     }
 
     // FileResourceLoader impl

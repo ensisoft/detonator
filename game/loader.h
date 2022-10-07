@@ -63,12 +63,22 @@ namespace game
     public:
         virtual ~Loader() = default;
 
+        // Descriptor for loading tilemap layer data.
+        struct TilemapDataDesc {
+            // the layer ID
+            std::string layer;
+            // the data object ID.
+            std::string data;
+            // data object URI.
+            std::string uri;
+            bool read_only = false;
+        };
         // Load the data for a tilemap layer based on the layer ID and the
         // associated data file URI. The read only flag indicates whether
         // the map is allowed to be modified by the running game itself.
         // Returns a handle to the tilemap data object or nullptr if the
         // loading fails.
-        virtual TilemapDataHandle LoadTilemapData(const std::string& id, const std::string& uri, bool read_only) const = 0;
+        virtual TilemapDataHandle LoadTilemapData(const TilemapDataDesc& desc) const = 0;
     private:
 
     };
