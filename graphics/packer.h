@@ -24,10 +24,9 @@
 
 namespace gfx
 {
-    // Collect and combine resources (such as textures, fonts
-    // and shaders) into a single "package". What the package
-    // means or how it's implemented is left for the implementation.
-    // It is expected that the packing is a two step process.
+    // Collect and combine texture resources  into a single "package".
+    // What the package means or how it's implemented is left for the
+    // implementation. It is expected that the packing is a two-step process.
     // First the graphics objects are visited in some order/manner
     // and each object that supports/needs packing will call the appropriate
     // packing function for the type of resource they need.
@@ -38,7 +37,7 @@ namespace gfx
     // After this processing is done the graphics objects are visited
     // again and this time they will request back the information that
     // is then used to identify their resources in the packed form.
-    class Packer
+    class TexturePacker
     {
     public:
         // opaque handle type for identifying and mapping objects
@@ -48,8 +47,6 @@ namespace gfx
         // to let the objects identify their new resource (file) handles
         // after the packing has been completed.
         using ObjectHandle = const void*;
-        // Pack the shader resource identified by file.
-        virtual void PackShader(ObjectHandle instance, const std::string& file) = 0;
         // Pack the texture resource identified by file. Box is the actual
         // sub-rectangle within the texture object.
         virtual void PackTexture(ObjectHandle instance, const std::string& file) = 0;
@@ -65,19 +62,14 @@ namespace gfx
         };
         // Set the texture flags that impact how the texture can be packed
         virtual void SetTextureFlag(ObjectHandle instance, TextureFlags flag, bool on_off) = 0;
-        // Pack the font resource identified by file.
-        virtual void PackFont(ObjectHandle instance, const std::string& file) = 0;
-
         // The resource packer may assign new URIs to the
         // resources that are packed. These APIs are used to fetch
         // the new identifiers that will be used to identify the
         // resources after packing.
-        virtual std::string GetPackedShaderId(ObjectHandle instance) const = 0;
         virtual std::string GetPackedTextureId(ObjectHandle instance) const = 0;
         virtual gfx::FRect  GetPackedTextureBox(ObjectHandle instance) const = 0;
-        virtual std::string GetPackedFontId(ObjectHandle instance) const = 0;
     protected:
-        ~Packer() = default;
+        ~TexturePacker() = default;
     };
 
 } // namespace

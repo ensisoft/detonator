@@ -96,10 +96,10 @@ QString FixWorkspacePath(QString path)
     return path;
 }
 
-class GfxResourcePacker : public gfx::Packer
+class GfxResourcePacker : public gfx::TexturePacker
 {
 public:
-    using ObjectHandle = gfx::Packer::ObjectHandle;
+    using ObjectHandle = gfx::TexturePacker::ObjectHandle;
 
     GfxResourcePacker(const QString& outdir,
                       unsigned max_width, unsigned max_height,
@@ -114,12 +114,6 @@ public:
         , kResizeLargeTextures(resize_large)
         , kPackSmallTextures(pack_small)
     {}
-
-    virtual void PackShader(ObjectHandle instance, const std::string& file) override
-    {
-        // todo: the shader type/path (es2 or 3)
-        mShaderMap[instance] = CopyFile(file, "shaders/es2");
-    }
     virtual void PackTexture(ObjectHandle instance, const std::string& file) override
     {
         mTextureMap[instance].file = file;
@@ -128,38 +122,21 @@ public:
     {
         mTextureMap[instance].rect = box;
     }
-    virtual void SetTextureFlag(ObjectHandle instance, gfx::Packer::TextureFlags flags, bool on_off) override
+    virtual void SetTextureFlag(ObjectHandle instance, gfx::TexturePacker::TextureFlags flags, bool on_off) override
     {
-        if (flags == gfx::Packer::TextureFlags::CanCombine)
+        if (flags == gfx::TexturePacker::TextureFlags::CanCombine)
             mTextureMap[instance].can_be_combined = on_off;
-        else if (flags == gfx::Packer::TextureFlags::AllowedToPack)
+        else if (flags == gfx::TexturePacker::TextureFlags::AllowedToPack)
             mTextureMap[instance].allowed_to_combine = on_off;
-        else if (flags == gfx::Packer::TextureFlags::AllowedToResize)
+        else if (flags == gfx::TexturePacker::TextureFlags::AllowedToResize)
             mTextureMap[instance].allowed_to_resize = on_off;
         else BUG("Unhandled texture packing flag.");
-    }
-    virtual void PackFont(ObjectHandle instance, const std::string& file) override
-    {
-        mFontMap[instance] = CopyFile(file, "fonts");
-    }
-
-    virtual std::string GetPackedShaderId(ObjectHandle instance) const override
-    {
-        auto it = mShaderMap.find(instance);
-        ASSERT(it != std::end(mShaderMap));
-        return it->second;
     }
     virtual std::string GetPackedTextureId(ObjectHandle instance) const override
     {
         auto it = mTextureMap.find(instance);
         ASSERT(it != std::end(mTextureMap));
         return it->second.file;
-    }
-    virtual std::string GetPackedFontId(ObjectHandle instance) const override
-    {
-        auto it = mFontMap.find(instance);
-        ASSERT(it != std::end(mFontMap));
-        return it->second;
     }
     virtual gfx::FRect GetPackedTextureBox(ObjectHandle instance) const override
     {
@@ -650,11 +627,6 @@ private:
     const bool kPackSmallTextures = true;
     std::size_t mNumErrors = 0;
     std::size_t mNumFilesCopied = 0;
-
-    // maps from object to shader.
-    std::unordered_map<ObjectHandle, std::string> mShaderMap;
-    // maps from object to font.
-    std::unordered_map<ObjectHandle, std::string> mFontMap;
 
     struct TextureSource {
         std::string file;
@@ -2571,18 +2543,6 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             const gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
             material->BeginPacking(&packer);
-        }
-        else if (resource->IsParticleEngine())
-        {
-            const gfx::KinematicsParticleEngineClass* engine = nullptr;
-            resource->GetContent(&engine);
-            engine->Pack(&packer);
-        }
-        else if (resource->IsCustomShape())
-        {
-            const gfx::PolygonClass* polygon = nullptr;
-            resource->GetContent(&polygon);
-            polygon->Pack(&packer);
         }
     }
 

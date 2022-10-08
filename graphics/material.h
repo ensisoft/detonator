@@ -108,10 +108,10 @@ namespace gfx
         // otherwise false.
         virtual bool FromJson(const data::Reader& data) = 0;
         // Begin packing the texture source into the packer.
-        virtual void BeginPacking(Packer* packer) const {}
+        virtual void BeginPacking(TexturePacker* packer) const {}
         // Finish packing the texture source into the packer.
         // Update the state with the details from the packer.
-        virtual void FinishPacking(const Packer* packer) {}
+        virtual void FinishPacking(const TexturePacker* packer) {}
     private:
     };
 
@@ -181,15 +181,15 @@ namespace gfx
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
 
-            virtual void BeginPacking(Packer* packer) const override
+            virtual void BeginPacking(TexturePacker* packer) const override
             {
                 packer->PackTexture(this, mFile);
-                packer->SetTextureFlag(this, Packer::TextureFlags::AllowedToPack,
-                    TestFlag(Flags::AllowPacking));
-                packer->SetTextureFlag(this, Packer::TextureFlags::AllowedToResize,
-                    TestFlag(Flags::AllowResizing));
+                packer->SetTextureFlag(this, TexturePacker::TextureFlags::AllowedToPack,
+                                       TestFlag(Flags::AllowPacking));
+                packer->SetTextureFlag(this, TexturePacker::TextureFlags::AllowedToResize,
+                                       TestFlag(Flags::AllowResizing));
             }
-            virtual void FinishPacking(const Packer* packer) override
+            virtual void FinishPacking(const TexturePacker* packer) override
             {
                 mFile = packer->GetPackedTextureId(this);
             }
@@ -425,25 +425,6 @@ namespace gfx
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
-
-            virtual void BeginPacking(Packer* packer) const override
-            {
-                const size_t num_texts = mTextBuffer.GetNumTexts();
-                for (size_t i=0; i<num_texts; ++i)
-                {
-                    const auto& text = mTextBuffer.GetText(i);
-                    packer->PackFont(&text, text.font);
-                }
-            }
-            virtual void FinishPacking(const Packer* packer) override
-            {
-                const size_t num_texts = mTextBuffer.GetNumTexts();
-                for (size_t i=0; i<num_texts; ++i)
-                {
-                    auto& text = mTextBuffer.GetText(i);
-                    text.font  = packer->GetPackedFontId(&text);
-                }
-            }
 
             gfx::TextBuffer& GetTextBuffer()
             { return mTextBuffer; }
@@ -868,10 +849,10 @@ namespace gfx
         // Begin the packing process by going over the associated resources
         // in the material and invoking the packer methods to pack
         // those resources.
-        virtual void BeginPacking(Packer* packer) const = 0;
+        virtual void BeginPacking(TexturePacker* packer) const = 0;
         // Finish the packing process by retrieving the new updated resource
         // information the packer and updating the material's state.
-        virtual void FinishPacking(const Packer* packer) = 0;
+        virtual void FinishPacking(const TexturePacker* packer) = 0;
         // Test a material flag. Returns true if the flag is set, otherwise false.
         virtual bool TestFlag(Flags flag) const = 0;
         // Set a material flag to on or off.
@@ -973,9 +954,9 @@ namespace gfx
         { mSurfaceType = surface; }
         virtual SurfaceType GetSurfaceType() const override
         { return mSurfaceType; }
-        virtual void BeginPacking(Packer* packer) const override
+        virtual void BeginPacking(TexturePacker* packer) const override
         { /* empty */ }
-        virtual void FinishPacking(const Packer* packer) override
+        virtual void FinishPacking(const TexturePacker* packer) override
         { /*empty */ }
         virtual bool TestFlag(Flags flag) const override
         { return mFlags.test(flag); }
@@ -1205,8 +1186,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(Packer* packer) const override;
-        virtual void FinishPacking(const Packer* packer) override;
+        virtual void BeginPacking(TexturePacker* packer) const override;
+        virtual void FinishPacking(const TexturePacker* packer) override;
         SpriteClass& operator=(const SpriteClass&);
     private:
         bool mBlendFrames = true;
@@ -1310,8 +1291,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(Packer* packer) const override;
-        virtual void FinishPacking(const Packer* packer) override;
+        virtual void BeginPacking(TexturePacker* packer) const override;
+        virtual void FinishPacking(const TexturePacker* packer) override;
         TextureMap2DClass& operator=(const TextureMap2DClass&);
     private:
         gfx::Color4f mBaseColor;
@@ -1442,8 +1423,8 @@ namespace gfx
         virtual void ApplyStaticState(Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
-        virtual void BeginPacking(Packer* packer) const override;
-        virtual void FinishPacking(const Packer* packer) override;
+        virtual void BeginPacking(TexturePacker* packer) const override;
+        virtual void FinishPacking(const TexturePacker* packer) override;
         virtual bool TestFlag(Flags flag) const override
         { return mFlags.test(flag); }
         virtual void SetFlag(Flags flag, bool on_off) override
