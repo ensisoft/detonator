@@ -16,10 +16,16 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <boost/algorithm/string/erase.hpp>
+#include "warnpop.h"
+
 #include <unordered_map>
 
 #include "base/assert.h"
 #include "engine/ui.h"
+#include "editor/app/buffer.h"
+#include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/resource.h"
 
@@ -223,5 +229,153 @@ QStringList ListResourceDependencies(const uik::Window& window, const QVariantMa
     }
     return ret;
 }
+
+void PackResource(const app::Script& script, ResourcePacker& packer)
+{
+    packer.CopyFile(script.GetFileURI(), "lua/");
+}
+
+void PackResource(const app::DataFile& data, ResourcePacker& packer)
+{
+    packer.CopyFile(data.GetFileURI(), "data/");
+}
+
+void PackResource(audio::GraphClass& audio, ResourcePacker& packer)
+{
+    // todo: this audio packing sucks a little bit since it needs
+    // to know about the details of elements now. maybe this
+    // should be refactored into the audio/ subsystem.. ?
+    for (size_t i=0; i<audio.GetNumElements(); ++i)
+    {
+        auto& elem = audio.GetElement(i);
+        for (auto& p : elem.args)
+        {
+            const auto& name = p.first;
+            if (name != "file") continue;
+
+            auto* file_uri = std::get_if<std::string>(&p.second);
+            ASSERT(file_uri && "Missing audio element 'file' parameter.");
+            if (file_uri->empty())
+            {
+                WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio.GetName(), name);
+                continue;
+            }
+            *file_uri = packer.CopyFile(*file_uri, "audio/");
+        }
+    }
+}
+
+void PackResource(game::EntityClass& entity, ResourcePacker& packer)
+{
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        auto& node = entity.GetNode(i);
+        if (!node.HasTextItem())
+            continue;
+        auto* text = node.GetTextItem();
+        text->SetFontName(packer.CopyFile(text->GetFontName(), "fonts/"));
+    }
+}
+void PackResource(game::TilemapClass& map, ResourcePacker& packer)
+{
+    for (size_t i=0; i<map.GetNumLayers(); ++i)
+    {
+        auto& layer = map.GetLayer(i);
+        // todo: maybe fix this implicit assumption here regarding where the
+        // data file goes when packing.
+        layer.SetDataUri(base::FormatString("pck://data/%1.bin", layer.GetId()));
+    }
+}
+
+void PackResource(uik::Window& window, ResourcePacker& packer)
+{
+    engine::UIStyle style;
+
+    // package the style resources. currently this is only the font files.
+    const auto& style_uri  = window.GetStyleName();
+    const auto& style_file = packer.ResolveUri(style_uri);
+
+    auto style_data = app::EngineBuffer::LoadFromFile(app::FromUtf8(style_file));
+    if (!style_data)
+    {
+        ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_file);
+    }
+    else if (!style.LoadStyle(*style_data))
+    {
+        ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_file);
+    }
+    std::vector<engine::UIStyle::PropertyKeyValue> props;
+    style.GatherProperties("-font", &props);
+    for (auto& p : props)
+    {
+        std::string src_font_uri;
+        std::string dst_font_uri;
+        p.prop.GetValue(&src_font_uri);
+        dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+        p.prop.SetValue(dst_font_uri);
+        style.SetProperty(p.key, p.prop);
+    }
+    window.SetStyleName(packer.CopyFile(style_uri, "ui"));
+    // for each widget, parse the style string and see if there are more font-name props.
+    window.ForEachWidget([&style, &packer](uik::Widget* widget) {
+        auto style_string = widget->GetStyleString();
+        if (style_string.empty())
+            return;
+        DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+        style.ClearProperties();
+        style.ClearMaterials();
+        style.ParseStyleString(widget->GetId(), style_string);
+        std::vector<engine::UIStyle::PropertyKeyValue> props;
+        style.GatherProperties("-font", &props);
+        for (auto& p : props)
+        {
+            std::string src_font_uri;
+            std::string dst_font_uri;
+            p.prop.GetValue(&src_font_uri);
+            dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+            p.prop.SetValue(dst_font_uri);
+            style.SetProperty(p.key, p.prop);
+        }
+        style_string = style.MakeStyleString(widget->GetId());
+        // this is a bit of a hack but we know that the style string
+        // contains the widget id for each property. removing the
+        // widget id from the style properties:
+        // a) saves some space
+        // b) makes the style string copyable from one widget to another as-s
+        boost::erase_all(style_string, widget->GetId() + "/");
+        DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+        widget->SetStyleString(std::move(style_string));
+    });
+    auto window_style_string = window.GetStyleString();
+    if (!window_style_string.empty())
+    {
+        DEBUG("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+        style.ClearProperties();
+        style.ClearMaterials();
+        style.ParseStyleString("window", window_style_string);
+        std::vector<engine::UIStyle::PropertyKeyValue> props;
+        style.GatherProperties("-font", &props);
+        for (auto& p : props)
+        {
+            std::string src_font_uri;
+            std::string dst_font_uri;
+            p.prop.GetValue(&src_font_uri);
+            dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+            p.prop.SetValue(dst_font_uri);
+            style.SetProperty(p.key, p.prop);
+        }
+        window_style_string = style.MakeStyleString("window");
+        // this is a bit of a hack but we know that the style string
+        // contains the prefix "window" for each property. removing the
+        // prefix from the style properties:
+        // a) saves some space
+        // b) makes the style string copyable from one widget to another as-s
+        boost::erase_all(window_style_string, "window/");
+        // set the actual style string.
+        DEBUG("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+        window.SetStyleString(std::move(window_style_string));
+    }
+}
+
 } // namespace
 } // namespace

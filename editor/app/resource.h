@@ -46,6 +46,15 @@
 
 namespace app
 {
+    class ResourcePacker
+    {
+    public:
+        virtual ~ResourcePacker() = default;
+        virtual std::string CopyFile(const std::string& uri, const std::string& dir) = 0;
+        virtual std::string ResolveUri(const std::string& uri) const = 0;
+    private:
+    };
+
     // Editor app resource object. These are objects that the user
     // manipulates and manages through the Editor application's UI.
     // Each resource contains the actual underlying resource object
@@ -134,6 +143,8 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const = 0;
         // List the IDs of resources that this resource depends on.
         virtual QStringList ListDependencies() const = 0;
+
+        virtual void Pack(ResourcePacker& packer) = 0;
 
         // helpers
         inline std::string GetNameUtf8() const
@@ -471,6 +482,17 @@ namespace app
         QStringList ListResourceDependencies(const game::SceneClass& scene, const QVariantMap& props);
         QStringList ListResourceDependencies(const game::TilemapClass& map, const QVariantMap& props);
         QStringList ListResourceDependencies(const uik::Window& window, const QVariantMap& props);
+
+        template<typename ResourceType>
+        void PackResource(const ResourceType&, const ResourcePacker&)
+        {}
+
+        void PackResource(const app::Script& script, ResourcePacker& packer);
+        void PackResource(const app::DataFile& data, ResourcePacker& packer);
+        void PackResource(audio::GraphClass& audio, ResourcePacker& packer);
+        void PackResource(game::EntityClass& entity, ResourcePacker& packer);
+        void PackResource(game::TilemapClass& map, ResourcePacker& packer);
+        void PackResource(uik::Window& window, ResourcePacker& packer);
     } // detail
 
     template<typename BaseTypeContent>
@@ -609,6 +631,8 @@ namespace app
         }
         virtual QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mContent, mProps); }
+        virtual void Pack(ResourcePacker& packer) override
+        { detail::PackResource(*mContent, packer); }
 
         // GameResourceBase
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
@@ -750,6 +774,8 @@ namespace app
         }
         virtual QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mClass, mProps); }
+        virtual void Pack(ResourcePacker& packer) override
+        { detail::PackResource(*mClass, packer); }
 
         // GameResourceBase
         virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override
