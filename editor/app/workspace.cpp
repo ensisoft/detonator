@@ -19,7 +19,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <boost/algorithm/string/erase.hpp>
 #  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
 #  include <private/qfsfileengine_p.h> // private in Qt5
@@ -97,15 +96,15 @@ QString FixWorkspacePath(QString path)
     return path;
 }
 
-class ResourcePacker : public gfx::Packer
+class GfxResourcePacker : public gfx::Packer
 {
 public:
     using ObjectHandle = gfx::Packer::ObjectHandle;
 
-    ResourcePacker(const QString& outdir,
-                   unsigned max_width, unsigned max_height,
-                   unsigned pack_width, unsigned pack_height, unsigned padding,
-                   bool resize_large, bool pack_small)
+    GfxResourcePacker(const QString& outdir,
+                      unsigned max_width, unsigned max_height,
+                      unsigned pack_width, unsigned pack_height, unsigned padding,
+                      bool resize_large, bool pack_small)
         : kOutDir(outdir)
         , kMaxTextureWidth(max_width)
         , kMaxTextureHeight(max_height)
@@ -671,6 +670,132 @@ private:
     // filenames of files we've written.
     std::unordered_set<QString> mFileNames;
 };
+
+class MyResourcePacker : public app::ResourcePacker
+{
+public:
+    MyResourcePacker(const QString& package_dir, const QString& workspace_dir)
+      : mPackageDir(package_dir)
+      , mWorkspaceDir(workspace_dir)
+    {}
+    virtual std::string CopyFile(const std::string& uri, const std::string& dir) override
+    {
+        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
+        const auto& dst_uri  = MapFileToPackage(dst_file);
+        return app::ToUtf8(dst_uri);
+    }
+    virtual std::string ResolveUri(const std::string& uri) const override
+    {
+        return app::ToUtf8(MapFileToFilesystem(app::FromUtf8(uri)));
+    }
+
+    QString CopyFile(const QString& src_file, const QString& dst_dir)
+    {
+        if (const auto* old = base::SafeFind(mFileMap, src_file))
+        {
+            DEBUG("Skipping duplicate file copy. [file='%1']", src_file);
+            return *old;
+        }
+        if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
+        {
+            ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
+            mNumErrors++;
+            return "";
+        }
+
+        const auto& src_info = QFileInfo(src_file);
+        if (!src_info.exists())
+        {
+            ERROR("Could not find file. [file='%1']", src_file);
+            mNumErrors++;
+            // todo: what to return on error ?
+            return "";
+        }
+        const auto& src_path = src_info.absoluteFilePath();
+        const auto& src_name = src_info.fileName();
+        const auto& dst_path = app::JoinPath(mPackageDir, dst_dir);
+        QString dst_name = src_name;
+        QString dst_file = app::JoinPath(dst_path, dst_name);
+
+        // use a silly race-condition laden loop trying to figure out whether
+        // a file with this name already exists or not and if so then generate
+        // a different output name for the file
+        for (unsigned i=0; i<10000; ++i)
+        {
+            const QFileInfo dst_info(dst_file);
+            if (!dst_info.exists())
+                break;
+            // if the destination file exists *from before* we're
+            // going to overwrite it. The user should have been confirmed
+            // for this and it should be fine at this point.
+            // So only try to resolve a name collision if we're trying to
+            // write an output file by the same name multiple times
+            if (mFileMap.find(dst_file) == mFileMap.end())
+                break;
+            // generate a new name.
+            dst_name = QString("%1_%2").arg(src_name).arg(i);
+            dst_file = app::JoinPath(dst_path, dst_name);
+        }
+        CopyFileBuffer(src_file, dst_file);
+        mFileMap[src_file] = dst_file;
+        return dst_file;
+    }
+
+private:
+    QString MapFileToFilesystem(const QString& uri) const
+    {
+        // see comments in AddFileToWorkspace.
+        // this is basically the same as MapFilePath except this API
+        // is internal to only this application whereas MapFilePath is part of the
+        // API exposed to the graphics/ subsystem.
+        QString ret = uri;
+        if (ret.startsWith("ws://"))
+            ret = app::CleanPath(ret.replace("ws://", mWorkspaceDir));
+        else if (uri.startsWith("app://"))
+            ret = app::CleanPath(ret.replace("app://", GetAppDir()));
+        else if (uri.startsWith("fs://"))
+            ret.remove(0, 5);
+        // return as is
+        return ret;
+    }
+    QString MapFileToPackage(const QString& file) const
+    {
+        ASSERT(file.startsWith(mPackageDir));
+        QString ret = file;
+        ret.remove(0, mPackageDir.count());
+        if (ret.startsWith("/") || ret.startsWith("\\"))
+            ret.remove(0, 1);
+        ret = ret.replace("\\", "/");
+        return QString("pck://%1").arg(ret);
+    }
+
+    void CopyFileBuffer(const QString& src, const QString& dst)
+    {
+        // if src equals dst then we can actually skip the copy, no?
+        if (src == dst)
+        {
+            DEBUG("Skipping copy of file onto itself. [src='%1', dst='%2']", src, dst);
+            return;
+        }
+        auto [success, error] = app::CopyFile(src, dst);
+        if (!success)
+        {
+            ERROR("Failed to copy file. [src='%1', dst='%2' error=%3]", src, dst, error);
+            mNumErrors++;
+            return;
+        }
+        mNumCopies++;
+        DEBUG("File copy done. [src='%1', dst='%2']", src, dst);
+    }
+private:
+    const QString mPackageDir;
+    const QString mWorkspaceDir;
+    unsigned mNumErrors = 0;
+    unsigned mNumCopies = 0;
+    std::unordered_map<QString, QString> mFileMap;
+};
+
 
 } // namespace
 
@@ -2426,7 +2551,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     DEBUG("Pack size. [width=%1, height=%2]", options.texture_pack_width, options.texture_pack_height);
     DEBUG("Pack flags. [resize=%1, combine=%2]", options.resize_textures, options.combine_textures);
 
-    ResourcePacker packer(outdir,
+    GfxResourcePacker packer(outdir,
         options.max_texture_width,
         options.max_texture_height,
         options.texture_pack_width,
@@ -2461,6 +2586,8 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
+    MyResourcePacker foo(outdir, mWorkspaceDir);
+
     unsigned errors = 0;
 
     // copy some file based content around.
@@ -2468,159 +2595,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     // resolution and mapping functionality.
     for (int i=0; i<mutable_copies.size(); ++i)
     {
-        const auto& resource = mutable_copies[i];
-        if (resource->IsScript())
-        {
-            const Script* script = nullptr;
-            resource->GetContent(&script);
-            packer.CopyFile(script->GetFileURI(), "lua/");
-        }
-        else if (resource->IsDataFile())
-        {
-            const DataFile* datafile = nullptr;
-            resource->GetContent(&datafile);
-            packer.CopyFile(datafile->GetFileURI(), "data/");
-        }
-        else if (resource->IsAudioGraph())
-        {
-            // todo: this audio packing sucks a little bit since it needs
-            // to know about the details of elements now. maybe this
-            // should be refactored into the audio/ subsystem.. ?
-            audio::GraphClass* audio = nullptr;
-            resource->GetContent(&audio);
-            for (size_t i=0; i<audio->GetNumElements(); ++i)
-            {
-                auto& elem = audio->GetElement(i);
-                for (auto& p : elem.args)
-                {
-                    const auto& name = p.first;
-                    if (name != "file") continue;
-
-                    auto* file_uri = std::get_if<std::string>(&p.second);
-                    ASSERT(file_uri && "Missing audio element 'file' parameter.");
-                    if (file_uri->empty())
-                    {
-                        WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio->GetName(), name);
-                        continue;
-                    }
-                    *file_uri = packer.CopyFile(*file_uri, "audio");
-                }
-            }
-        }
-        else if (resource->IsUI())
-        {
-            uik::Window* window = nullptr;
-            resource->GetContent(&window);
-            // package the style resources. currently this is only the font files.
-            auto style_data = LoadEngineData(window->GetStyleName());
-            if (!style_data)
-            {
-                ERROR("Failed to open UI style file. [UI='%1', style='%2']", window->GetName(), window->GetStyleName());
-                errors++;
-                continue;
-            }
-            engine::UIStyle style;
-            if (!style.LoadStyle(*style_data))
-            {
-                ERROR("Failed to load UI style. [UI='%1', style='%2']", window->GetName(), window->GetStyleName());
-                errors++;
-                continue;
-            }
-            std::vector<engine::UIStyle::PropertyKeyValue> props;
-            style.GatherProperties("-font", &props);
-            for (auto& p : props)
-            {
-                std::string src_font_uri;
-                std::string dst_font_uri;
-                p.prop.GetValue(&src_font_uri);
-                dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
-                p.prop.SetValue(dst_font_uri);
-                style.SetProperty(p.key, p.prop);
-            }
-            window->SetStyleName(packer.CopyFile(window->GetStyleName(), "ui"));
-            // for each widget, parse the style string and see if there are more font-name props.
-            window->ForEachWidget([&style, &packer](uik::Widget* widget) {
-                auto style_string = widget->GetStyleString();
-                if (style_string.empty())
-                    return;
-                DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
-                style.ClearProperties();
-                style.ClearMaterials();
-                style.ParseStyleString(widget->GetId(), style_string);
-                std::vector<engine::UIStyle::PropertyKeyValue> props;
-                style.GatherProperties("-font", &props);
-                for (auto& p : props)
-                {
-                    std::string src_font_uri;
-                    std::string dst_font_uri;
-                    p.prop.GetValue(&src_font_uri);
-                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
-                    p.prop.SetValue(dst_font_uri);
-                    style.SetProperty(p.key, p.prop);
-                }
-                style_string = style.MakeStyleString(widget->GetId());
-                // this is a bit of a hack but we know that the style string
-                // contains the widget id for each property. removing the
-                // widget id from the style properties:
-                // a) saves some space
-                // b) makes the style string copyable from one widget to another as-s
-                boost::erase_all(style_string, widget->GetId() + "/");
-                DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
-                widget->SetStyleString(std::move(style_string));
-            });
-            auto window_style_string = window->GetStyleString();
-            if (!window_style_string.empty())
-            {
-                DEBUG("Original window style string. [window='%1', style='%2']", window->GetName(), window_style_string);
-                style.ClearProperties();
-                style.ClearMaterials();
-                style.ParseStyleString("window", window_style_string);
-                std::vector<engine::UIStyle::PropertyKeyValue> props;
-                style.GatherProperties("-font", &props);
-                for (auto& p : props)
-                {
-                    std::string src_font_uri;
-                    std::string dst_font_uri;
-                    p.prop.GetValue(&src_font_uri);
-                    dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
-                    p.prop.SetValue(dst_font_uri);
-                    style.SetProperty(p.key, p.prop);
-                }
-                window_style_string = style.MakeStyleString("window");
-                // this is a bit of a hack but we know that the style string
-                // contains the prefix "window" for each property. removing the
-                // prefix from the style properties:
-                // a) saves some space
-                // b) makes the style string copyable from one widget to another as-s
-                boost::erase_all(window_style_string, "window/");
-                // set the actual style string.
-                DEBUG("Updated window style string. [window='%1', style='%2']", window->GetName(), window_style_string);
-                window->SetStyleString(std::move(window_style_string));
-            }
-        }
-        else if (resource->IsEntity())
-        {
-            game::EntityClass* entity = nullptr;
-            resource->GetContent(&entity);
-            for (size_t i=0; i<entity->GetNumNodes(); ++i)
-            {
-                auto& node = entity->GetNode(i);
-                if (!node.HasTextItem())
-                    continue;
-                auto* text = node.GetTextItem();
-                text->SetFontName(packer.CopyFile(text->GetFontName(), "fonts/"));
-            }
-        }
-        else if (resource->IsTilemap())
-        {
-            game::TilemapClass* map = nullptr;
-            resource->GetContent(&map);
-            for (size_t i=0; i<map->GetNumLayers(); ++i)
-            {
-                auto& layer = map->GetLayer(i);
-                layer.SetDataUri(base::FormatString("pck://data/%1.bin", layer.GetId()));
-            }
-        }
+        mutable_copies[i]->Pack(foo);
     }
 
     packer.PackTextures([this](const std::string& action, int step, int max) {
