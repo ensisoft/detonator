@@ -377,5 +377,81 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     }
 }
 
+void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
+{
+    if (auto* sprite = material.AsSprite())
+    {
+        for (size_t i=0; i<sprite->GetNumTextures(); ++i)
+        {
+            auto* texture_source = sprite->GetTextureSource(i);
+            if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
+            {
+                auto& text_buffer = text_source->GetTextBuffer();
+                for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
+                {
+                    auto& text = text_buffer.GetText(j);
+                    text.font  = packer.CopyFile(text.font, "fonts/");
+                }
+            }
+        }
+    }
+    else if (auto* texture = material.AsTexture())
+    {
+        auto* texture_source = texture->GetTextureSource();
+        if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
+        {
+            auto& text_buffer = text_source->GetTextBuffer();
+            for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
+            {
+                auto& text = text_buffer.GetText(j);
+                text.font  = packer.CopyFile(text.font, "fonts/");
+            }
+        }
+    }
+    else if (auto* custom = material.AsCustom())
+    {
+        auto texture_maps = custom->GetTextureMapNames();
+        for (const auto& name : texture_maps)
+        {
+            auto* texture_map = custom->FindTextureMap(name);
+            if (auto* sprite = texture_map->AsSpriteMap())
+            {
+                for (size_t i=0; i<sprite->GetNumTextures(); ++i)
+                {
+                    auto* texture_source = sprite->GetTextureSource(i);
+                    if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
+                    {
+                        auto& text_buffer = text_source->GetTextBuffer();
+                        for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
+                        {
+                            auto& text = text_buffer.GetText(j);
+                            text.font  = packer.CopyFile(text.font, "fonts/");
+                        }
+                    }
+                }
+            }
+            else if (auto* texture = texture_map->AsTextureMap2D())
+            {
+                auto* texture_source = texture->GetTextureSource();
+                if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
+                {
+                    auto& text_buffer = text_source->GetTextBuffer();
+                    for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
+                    {
+                        auto& text = text_buffer.GetText(j);
+                        text.font  = packer.CopyFile(text.font, "fonts/");
+                    }
+                }
+            }
+        }
+        std::string shader_uri = custom->GetShaderUri();
+        if (shader_uri.empty())
+            return;
+
+        shader_uri = packer.CopyFile(shader_uri, "shaders/es2");
+        custom->SetShaderUri(shader_uri);
+    }
+}
+
 } // namespace
 } // namespace

@@ -493,6 +493,7 @@ namespace app
         void PackResource(game::EntityClass& entity, ResourcePacker& packer);
         void PackResource(game::TilemapClass& map, ResourcePacker& packer);
         void PackResource(uik::Window& window, ResourcePacker& packer);
+        void PackResource(gfx::MaterialClass& material, ResourcePacker& packer);
     } // detail
 
     template<typename BaseTypeContent>

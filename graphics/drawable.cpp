@@ -845,10 +845,7 @@ std::size_t SectorClass::GetHash() const
     hash = base::hash_combine(hash, mPercentage);
     return hash;
 }
-void SectorClass::Pack(Packer* packer) const
-{
-    // nothing here.
-}
+
 void SectorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",         mId);
@@ -1085,9 +1082,7 @@ std::size_t RoundRectangleClass::GetHash() const
     return hash;
 }
 
-void RoundRectangleClass::Pack(Packer* packer) const
-{
-}
+
 void RoundRectangleClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",     mId);
@@ -1186,10 +1181,6 @@ std::size_t GridClass::GetHash() const
     return hash;
 }
 
-void GridClass::Pack(Packer* packer) const
-{
-}
-
 void GridClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",               mId);
@@ -1283,10 +1274,6 @@ Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
         content_hash = GetContentHash();
     geom->SetDataHash(content_hash);
     return geom;
-}
-
-void PolygonClass::Pack(Packer* packer) const
-{
 }
 
 std::size_t PolygonClass::GetContentHash() const
@@ -1492,10 +1479,6 @@ std::size_t CursorClass::GetHash() const
     return hash;
 }
 
-void CursorClass::Pack(Packer* packer) const
-{
-
-}
 void CursorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",    mId);
@@ -1694,10 +1677,6 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Points);
     return geom;
-}
-
-void KinematicsParticleEngineClass::Pack(Packer* packer) const
-{
 }
 
 void KinematicsParticleEngineClass::ApplyDynamicState(const Environment& env, Program& program) const
