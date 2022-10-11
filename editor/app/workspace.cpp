@@ -96,15 +96,147 @@ QString FixWorkspacePath(QString path)
     return path;
 }
 
-class GfxResourcePacker : public gfx::TexturePacker
+
+class MyResourcePacker : public app::ResourcePacker
+{
+public:
+    MyResourcePacker(const QString& package_dir, const QString& workspace_dir)
+      : mPackageDir(package_dir)
+      , mWorkspaceDir(workspace_dir)
+    {}
+    virtual std::string CopyFile(const std::string& uri, const std::string& dir) override
+    {
+        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
+        const auto& dst_uri  = MapFileToPackage(dst_file);
+        return app::ToUtf8(dst_uri);
+    }
+    virtual std::string ResolveUri(const std::string& uri) const override
+    {
+        return app::ToUtf8(MapFileToFilesystem(app::FromUtf8(uri)));
+    }
+
+    QString CopyFile(const QString& src_file, const QString& dst_dir, const QString& filename = QString(""))
+    {
+        if (const auto* dupe = base::SafeFind(mFileMap, src_file))
+        {
+            DEBUG("Skipping duplicate file copy. [file='%1']", src_file);
+            return *dupe;
+        }
+        if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
+        {
+            ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
+            mNumErrors++;
+            return "";
+        }
+
+        const auto& src_info = QFileInfo(src_file);
+        if (!src_info.exists())
+        {
+            ERROR("Could not find source file. [file='%1']", src_file);
+            mNumErrors++;
+            // todo: what to return on error ?
+            return "";
+        }
+        const auto& src_path = src_info.absoluteFilePath();
+        const auto& src_name = src_info.fileName();
+        const auto& dst_path = app::JoinPath(mPackageDir, dst_dir);
+        QString dst_name = filename.isEmpty() ? src_name : filename;
+        QString dst_file = app::JoinPath(dst_path, dst_name);
+
+        // use a silly race-condition laden loop trying to figure out whether
+        // a file with this name already exists or not and if so then generate
+        // a different output name for the file
+        for (unsigned i=0; i<10000; ++i)
+        {
+            const QFileInfo dst_info(dst_file);
+            if (!dst_info.exists())
+                break;
+            // if the destination file exists *from before* we're
+            // going to overwrite it. The user should have been confirmed
+            // for this, and it should be fine at this point.
+            // So only try to resolve a name collision if we're trying to
+            // write an output file by the same name multiple times
+            if (mFileNames.find(dst_file) == mFileNames.end())
+                break;
+            // generate a new name.
+            dst_name = filename.isEmpty()
+                    ? QString("%1_%2").arg(src_name).arg(i)
+                    : QString("%1_%2").arg(filename).arg(i);
+            dst_file = app::JoinPath(dst_path, dst_name);
+        }
+        CopyFileBuffer(src_file, dst_file);
+        mFileMap[src_file] = dst_file;
+        mFileNames.insert(dst_file);
+        return dst_file;
+    }
+    QString MapFileToFilesystem(const QString& uri) const
+    {
+        // see comments in AddFileToWorkspace.
+        // this is basically the same as MapFilePath except this API
+        // is internal to only this application whereas MapFilePath is part of the
+        // API exposed to the graphics/ subsystem.
+        QString ret = uri;
+        if (ret.startsWith("ws://"))
+            ret = app::CleanPath(ret.replace("ws://", mWorkspaceDir));
+        else if (uri.startsWith("app://"))
+            ret = app::CleanPath(ret.replace("app://", GetAppDir()));
+        else if (uri.startsWith("fs://"))
+            ret.remove(0, 5);
+        // return as is
+        return ret;
+    }
+    QString MapFileToPackage(const QString& file) const
+    {
+        ASSERT(file.startsWith(mPackageDir));
+        QString ret = file;
+        ret.remove(0, mPackageDir.count());
+        if (ret.startsWith("/") || ret.startsWith("\\"))
+            ret.remove(0, 1);
+        ret = ret.replace("\\", "/");
+        return QString("pck://%1").arg(ret);
+    }
+    unsigned GetNumErrors() const
+    { return mNumErrors; }
+    unsigned GetNumFilesCopied() const
+    { return mNumCopies; }
+private:
+    void CopyFileBuffer(const QString& src, const QString& dst)
+    {
+        // if src equals dst then we can actually skip the copy, no?
+        if (src == dst)
+        {
+            DEBUG("Skipping copy of file onto itself. [src='%1', dst='%2']", src, dst);
+            return;
+        }
+        auto [success, error] = app::CopyFile(src, dst);
+        if (!success)
+        {
+            ERROR("Failed to copy file. [src='%1', dst='%2' error=%3]", src, dst, error);
+            mNumErrors++;
+            return;
+        }
+        mNumCopies++;
+        DEBUG("File copy done. [src='%1', dst='%2']", src, dst);
+    }
+private:
+    const QString mPackageDir;
+    const QString mWorkspaceDir;
+    unsigned mNumErrors = 0;
+    unsigned mNumCopies = 0;
+    std::unordered_map<QString, QString> mFileMap;
+    std::unordered_set<QString> mFileNames;
+};
+
+class GfxTexturePacker : public gfx::TexturePacker
 {
 public:
     using ObjectHandle = gfx::TexturePacker::ObjectHandle;
 
-    GfxResourcePacker(const QString& outdir,
-                      unsigned max_width, unsigned max_height,
-                      unsigned pack_width, unsigned pack_height, unsigned padding,
-                      bool resize_large, bool pack_small)
+    GfxTexturePacker(const QString& outdir,
+                     unsigned max_width, unsigned max_height,
+                     unsigned pack_width, unsigned pack_height, unsigned padding,
+                     bool resize_large, bool pack_small)
         : kOutDir(outdir)
         , kMaxTextureWidth(max_width)
         , kMaxTextureHeight(max_height)
@@ -147,7 +279,7 @@ public:
 
     using TexturePackingProgressCallback = std::function<void (std::string, int, int)>;
 
-    void PackTextures(TexturePackingProgressCallback  progress)
+    void PackTextures(TexturePackingProgressCallback  progress, MyResourcePacker& packer)
     {
         if (mTextureMap.empty())
             return;
@@ -185,7 +317,7 @@ public:
         };
 
         struct GeneratedTextureEntry {
-            QString  texture_file;
+            QString uri;
             // box of the texture that was packed
             // now inside the texture_file
             float xpos   = 0;
@@ -229,7 +361,7 @@ public:
             else if (auto it = image_map.find(tex.file) != image_map.end())
                 continue;
 
-            const QFileInfo info(app::FromUtf8(tex.file));
+            const QFileInfo info(app::FromUtf8(packer.ResolveUri(tex.file)));
             const QString src_file = info.absoluteFilePath();
             //const QImage src_pix(src_file);
             // QImage seems to lie about something or then the test pngs are produced
@@ -364,7 +496,7 @@ public:
                 self.height = 1.0f;
                 self.xpos   = 0.0f;
                 self.ypos   = 0.0f;
-                self.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(img_file), "textures", img_name));
+                self.uri    = packer.MapFileToPackage(packer.CopyFile(img_file, "textures", img_name));
                 relocation_map[tex.file] = std::move(self);
             }
         } // for
@@ -404,11 +536,11 @@ public:
                     QString file = image_map[rc.cookie];
 
                     GeneratedTextureEntry gen;
-                    gen.texture_file = app::FromUtf8(CopyFile(app::ToUtf8(file), "textures"));
-                    gen.width = 1.0f;
+                    gen.uri    = packer.MapFileToPackage(packer.CopyFile(file, "textures"));
+                    gen.width  = 1.0f;
                     gen.height = 1.0f;
-                    gen.xpos = 0.0f;
-                    gen.ypos = 0.0f;
+                    gen.xpos   = 0.0f;
+                    gen.ypos   = 0.0f;
                     relocation_map[rc.cookie] = gen;
                     sources.erase(first_success);
                     continue;
@@ -445,7 +577,8 @@ public:
                     {
                         ERROR("Failed to open texture packing image. [file='%1']", file);
                         mNumErrors++;
-                    } else
+                    }
+                    else
                     {
                         painter.drawPixmap(dst, img, src);
                     }
@@ -478,13 +611,13 @@ public:
                     const auto xpos = rc.xpos + kTexturePadding;
                     const auto ypos = rc.ypos + kTexturePadding;
                     GeneratedTextureEntry gen;
-                    gen.texture_file = QString("pck://textures/%1").arg(name);
-                    gen.width = (float) width / pack_width;
-                    gen.height = (float) height / pack_height;
-                    gen.xpos = (float) xpos / pack_width;
-                    gen.ypos = (float) ypos / pack_height;
+                    gen.uri    = app::toString("pck://textures/%1", name);
+                    gen.width  = (float)width / pack_width;
+                    gen.height = (float)height / pack_height;
+                    gen.xpos   = (float)xpos / pack_width;
+                    gen.ypos   = (float)ypos / pack_height;
                     relocation_map[rc.cookie] = gen;
-                    DEBUG("New image packing entry. [id='%1', dst='%2']", rc.cookie, gen.texture_file);
+                    DEBUG("New image packing entry. [id='%1', dst='%2']", rc.cookie, gen.uri);
                 }
 
                 // done with these.
@@ -518,104 +651,15 @@ public:
             const auto original_rect_width  = original_rect.GetWidth();
             const auto original_rect_height = original_rect.GetHeight();
 
-            tex.file = app::ToUtf8(relocation.texture_file);
+            tex.file = app::ToUtf8(relocation.uri);
             tex.rect = gfx::FRect(relocation.xpos + original_rect_x * relocation.width,
                                   relocation.ypos + original_rect_y * relocation.height,
                                   relocation.width * original_rect_width,
                                   relocation.height * original_rect_height);
         }
     }
-
-
-    size_t GetNumErrors() const
+    unsigned GetNumErrors() const
     { return mNumErrors; }
-    size_t GetNumFilesCopied() const
-    { return mNumFilesCopied; }
-
-    std::string CopyFile(const std::string& file, const QString& where, const QString& name = "")
-    {
-        auto it = mResourceMap.find(file);
-        if (it != std::end(mResourceMap))
-        {
-            DEBUG("Skipping duplicate file copy. [file='%1']", file);
-            return it->second;
-        }
-
-        if (!app::MakePath(app::JoinPath(kOutDir, where)))
-        {
-            ERROR("Failed to create directory. [dir='%1/%2']", kOutDir, where);
-            mNumErrors++;
-            // todo: what to return on error ?
-            return "";
-        }
-
-        // this will actually resolve the file path.
-        // using the resolution scheme in Workspace.
-        const QFileInfo src_info(app::FromUtf8(file));
-        if (!src_info.exists())
-        {
-            ERROR("Could not find file. [file='%1']", file);
-            mNumErrors++;
-            // todo: what to return on error ?
-            return "";
-        }
-
-        const QString& src_file = src_info.absoluteFilePath(); // resolved path.
-        const QString& src_name = src_info.fileName();
-        QString dst_name = name;
-        if (dst_name.isEmpty())
-            dst_name = src_name;
-        QString dst_file = app::JoinPath(kOutDir, app::JoinPath(where, dst_name));
-        // try to generate a different name for the file when a file
-        // by the same name already exists.
-        unsigned attempt = 0;
-        while (true)
-        {
-            const QFileInfo dst_info(dst_file);
-            // if there's no file by this name we're good to go
-            if (!dst_info.exists())
-                break;
-            // if the destination file exists *from before* we're
-            // going to overwrite it. The user should have been confirmed
-            // for this and it should be fine at this point.
-            // So only try to resolve a name collision if we're trying to
-            // write an output file by the same name multiple times
-            if (mFileNames.find(dst_file) == mFileNames.end())
-                break;
-            // generate a new name.
-            dst_name = QString("%1_%2").arg(attempt).arg(src_name);
-            dst_file = app::JoinPath(kOutDir, app::JoinPath(where, dst_name));
-            attempt++;
-        }
-        CopyFileBuffer(src_file, dst_file);
-        // keep track of which files we wrote.
-        mFileNames.insert(dst_file);
-
-        // generate the resource identifier
-        const auto& pckid = app::ToUtf8(QString("pck://%1/%2").arg(where).arg(dst_name));
-
-        mResourceMap[file] = pckid;
-        return pckid;
-    }
-private:
-    void CopyFileBuffer(const QString& src, const QString& dst)
-    {
-        // if src equals dst then we can actually skip the copy, no?
-        if (src == dst)
-        {
-            DEBUG("Skipping copy of file onto itself. [src='%1', dst='%2']", src, dst);
-            return;
-        }
-        auto [success, error] = app::CopyFile(src, dst);
-        if (!success)
-        {
-            ERROR("Failed to copy file. [src='%1', dst='%2' error=%3]", src, dst, error);
-            mNumErrors++;
-            return;
-        }
-        mNumFilesCopied++;
-        DEBUG("File copy done. [src='%1', dst='%2']", src, dst);
-    }
 private:
     const QString kOutDir;
     const unsigned kMaxTextureHeight = 0;
@@ -625,8 +669,7 @@ private:
     const unsigned kTexturePadding = 0;
     const bool kResizeLargeTextures = true;
     const bool kPackSmallTextures = true;
-    std::size_t mNumErrors = 0;
-    std::size_t mNumFilesCopied = 0;
+    unsigned mNumErrors = 0;
 
     struct TextureSource {
         std::string file;
@@ -636,136 +679,6 @@ private:
         bool allowed_to_combine = true;
     };
     std::unordered_map<ObjectHandle, TextureSource> mTextureMap;
-
-    // resource mapping from source to packed resource id.
-    std::unordered_map<std::string, std::string> mResourceMap;
-    // filenames of files we've written.
-    std::unordered_set<QString> mFileNames;
-};
-
-class MyResourcePacker : public app::ResourcePacker
-{
-public:
-    MyResourcePacker(const QString& package_dir, const QString& workspace_dir)
-      : mPackageDir(package_dir)
-      , mWorkspaceDir(workspace_dir)
-    {}
-    virtual std::string CopyFile(const std::string& uri, const std::string& dir) override
-    {
-        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
-        const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
-        const auto& dst_uri  = MapFileToPackage(dst_file);
-        return app::ToUtf8(dst_uri);
-    }
-    virtual std::string ResolveUri(const std::string& uri) const override
-    {
-        return app::ToUtf8(MapFileToFilesystem(app::FromUtf8(uri)));
-    }
-
-    QString CopyFile(const QString& src_file, const QString& dst_dir)
-    {
-        if (const auto* old = base::SafeFind(mFileMap, src_file))
-        {
-            DEBUG("Skipping duplicate file copy. [file='%1']", src_file);
-            return *old;
-        }
-        if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
-        {
-            ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
-            mNumErrors++;
-            return "";
-        }
-
-        const auto& src_info = QFileInfo(src_file);
-        if (!src_info.exists())
-        {
-            ERROR("Could not find file. [file='%1']", src_file);
-            mNumErrors++;
-            // todo: what to return on error ?
-            return "";
-        }
-        const auto& src_path = src_info.absoluteFilePath();
-        const auto& src_name = src_info.fileName();
-        const auto& dst_path = app::JoinPath(mPackageDir, dst_dir);
-        QString dst_name = src_name;
-        QString dst_file = app::JoinPath(dst_path, dst_name);
-
-        // use a silly race-condition laden loop trying to figure out whether
-        // a file with this name already exists or not and if so then generate
-        // a different output name for the file
-        for (unsigned i=0; i<10000; ++i)
-        {
-            const QFileInfo dst_info(dst_file);
-            if (!dst_info.exists())
-                break;
-            // if the destination file exists *from before* we're
-            // going to overwrite it. The user should have been confirmed
-            // for this and it should be fine at this point.
-            // So only try to resolve a name collision if we're trying to
-            // write an output file by the same name multiple times
-            if (mFileMap.find(dst_file) == mFileMap.end())
-                break;
-            // generate a new name.
-            dst_name = QString("%1_%2").arg(src_name).arg(i);
-            dst_file = app::JoinPath(dst_path, dst_name);
-        }
-        CopyFileBuffer(src_file, dst_file);
-        mFileMap[src_file] = dst_file;
-        return dst_file;
-    }
-
-private:
-    QString MapFileToFilesystem(const QString& uri) const
-    {
-        // see comments in AddFileToWorkspace.
-        // this is basically the same as MapFilePath except this API
-        // is internal to only this application whereas MapFilePath is part of the
-        // API exposed to the graphics/ subsystem.
-        QString ret = uri;
-        if (ret.startsWith("ws://"))
-            ret = app::CleanPath(ret.replace("ws://", mWorkspaceDir));
-        else if (uri.startsWith("app://"))
-            ret = app::CleanPath(ret.replace("app://", GetAppDir()));
-        else if (uri.startsWith("fs://"))
-            ret.remove(0, 5);
-        // return as is
-        return ret;
-    }
-    QString MapFileToPackage(const QString& file) const
-    {
-        ASSERT(file.startsWith(mPackageDir));
-        QString ret = file;
-        ret.remove(0, mPackageDir.count());
-        if (ret.startsWith("/") || ret.startsWith("\\"))
-            ret.remove(0, 1);
-        ret = ret.replace("\\", "/");
-        return QString("pck://%1").arg(ret);
-    }
-
-    void CopyFileBuffer(const QString& src, const QString& dst)
-    {
-        // if src equals dst then we can actually skip the copy, no?
-        if (src == dst)
-        {
-            DEBUG("Skipping copy of file onto itself. [src='%1', dst='%2']", src, dst);
-            return;
-        }
-        auto [success, error] = app::CopyFile(src, dst);
-        if (!success)
-        {
-            ERROR("Failed to copy file. [src='%1', dst='%2' error=%3]", src, dst, error);
-            mNumErrors++;
-            return;
-        }
-        mNumCopies++;
-        DEBUG("File copy done. [src='%1', dst='%2']", src, dst);
-    }
-private:
-    const QString mPackageDir;
-    const QString mWorkspaceDir;
-    unsigned mNumErrors = 0;
-    unsigned mNumCopies = 0;
-    std::unordered_map<QString, QString> mFileMap;
 };
 
 
@@ -2523,7 +2436,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     DEBUG("Pack size. [width=%1, height=%2]", options.texture_pack_width, options.texture_pack_height);
     DEBUG("Pack flags. [resize=%1, combine=%2]", options.resize_textures, options.combine_textures);
 
-    GfxResourcePacker packer(outdir,
+    GfxTexturePacker texture_packer(outdir,
         options.max_texture_width,
         options.max_texture_height,
         options.texture_pack_width,
@@ -2542,11 +2455,11 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             // todo: maybe move to Resource interface ?
             const gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
-            material->BeginPacking(&packer);
+            material->BeginPacking(&texture_packer);
         }
     }
 
-    MyResourcePacker foo(outdir, mWorkspaceDir);
+    MyResourcePacker file_packer(outdir, mWorkspaceDir);
 
     unsigned errors = 0;
 
@@ -2555,12 +2468,12 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     // resolution and mapping functionality.
     for (int i=0; i<mutable_copies.size(); ++i)
     {
-        mutable_copies[i]->Pack(foo);
+        mutable_copies[i]->Pack(file_packer);
     }
 
-    packer.PackTextures([this](const std::string& action, int step, int max) {
+    texture_packer.PackTextures([this](const std::string& action, int step, int max) {
         emit ResourcePackingUpdate(FromLatin(action), step, max);
-    });
+    }, file_packer);
 
     for (int i=0; i<mutable_copies.size(); ++i)
     {
@@ -2571,7 +2484,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
             // todo: maybe move to resource interface ?
             gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
-            material->FinishPacking(&packer);
+            material->FinishPacking(&texture_packer);
         }
     }
 
@@ -2580,7 +2493,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         // todo: should change the font URI.
         // but right now this still also works since there's a hack for this
         // in the loader in engine/ (Also same app:// thing applies to the UI style files)
-        packer.CopyFile(app::ToUtf8(mSettings.debug_font), "fonts/");
+        file_packer.CopyFile(app::ToUtf8(mSettings.debug_font), "fonts/");
     }
 
     // write content file ?
@@ -2819,8 +2732,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
         }
     }
 
-    const auto total_errors = errors + packer.GetNumErrors();
-    if (total_errors)
+    if (const auto total_errors = errors + texture_packer.GetNumErrors() + file_packer.GetNumErrors())
     {
         WARN("Resource packing completed with errors (%1).", total_errors);
         WARN("Please see the log file for details.");

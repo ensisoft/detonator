@@ -102,6 +102,15 @@ QString JoinPath(const QString& lhs, const QString& rhs)
     return ToNativeSeparators(QDir::cleanPath(p));
 }
 
+QString JointPath(std::initializer_list<QString> parts)
+{
+    QString ret;
+    for (const auto& str : parts)
+        ret = JoinPath(ret, str);
+
+    return ret;
+}
+
 QString CleanPath(const QString& path)
 {
     return ToNativeSeparators(QDir::cleanPath(path));
