@@ -65,6 +65,8 @@ std::uint64_t GetFileHash(const QString& file);
 // Returns the path formatted with native separators.
 QString JoinPath(const QString& lhs, const QString& rhs);
 
+QString JoinPath(std::initializer_list<QString> parts);
+
 // Clean the path string. Returns with native separators.
 QString CleanPath(const QString& path);
 
