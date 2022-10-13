@@ -445,6 +445,8 @@ namespace engine
         // Load style properties and materials based on the JSON.
         bool LoadStyle(const nlohmann::json& json);
         bool LoadStyle(const EngineData& data);
+        // Save the current style properties into a JSON object.
+        void SaveStyle(nlohmann::json& json) const;
         // Collect the properties and materials that match the given filter
         // into a style string. The style string is in a format supported by
         // ParseStyleString.

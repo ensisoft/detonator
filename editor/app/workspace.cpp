@@ -106,8 +106,26 @@ public:
     {}
     virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
+        if (const auto* dupe = base::SafeFind(mUriMapping, uri))
+        {
+            DEBUG("Skipping duplicate file copy. [file='%1']", uri);
+            return;
+        }
+
         const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
+        const auto& dst_uri  = MapFileToPackage(dst_file);
+        mUriMapping[uri] = app::ToUtf8(dst_uri);
+    }
+    virtual void ReplaceFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    {
+        if (const auto* dupe = base::SafeFind(mUriMapping, uri))
+        {
+            DEBUG("Skipping duplicate file replace. [file='%1']", uri);
+            return;
+        }
+        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& dst_file = WriteFile(src_file, app::FromUtf8(dir), data, len);
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = app::ToUtf8(dst_uri);
     }
@@ -120,6 +138,29 @@ public:
         if (const auto* found = base::SafeFind(mUriMapping, uri))
             return *found;
         BUG("No such URI mapping.");
+    }
+    QString WriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len)
+    {
+        if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
+        {
+            ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
+            return "";
+        }
+        const auto& dst_file = CreateFileName(src_file, dst_dir, QString(""));
+        if (dst_file.isEmpty())
+            return "";
+
+        QFile file;
+        file.setFileName(dst_file);
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        if (!file.isOpen())
+        {
+            ERROR("Failed to open file for writing. [file='%1', error='%2']", dst_file, file.errorString());
+            return "";
+        }
+        file.write((const char*)data, len);
+        file.close();
+        return dst_file;
     }
 
     QString CopyFile(const QString& src_file, const QString& dst_dir, const QString& filename = QString(""))
@@ -135,13 +176,24 @@ public:
             mNumErrors++;
             return "";
         }
+        const auto& dst_file = CreateFileName(src_file, dst_dir, filename);
+        if (dst_file.isEmpty())
+        {
+            mNumErrors++;
+            return "";
+        }
 
+        CopyFileBuffer(src_file, dst_file);
+        mFileMap[src_file] = dst_file;
+        mFileNames.insert(dst_file);
+        return dst_file;
+    }
+    QString CreateFileName(const QString& src_file, const QString& dst_dir, const QString& filename) const
+    {
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
             ERROR("Could not find source file. [file='%1']", src_file);
-            mNumErrors++;
-            // todo: what to return on error ?
             return "";
         }
         const auto& src_path = src_info.absoluteFilePath();
@@ -167,13 +219,10 @@ public:
                 break;
             // generate a new name.
             dst_name = filename.isEmpty()
-                    ? QString("%1_%2").arg(src_name).arg(i)
-                    : QString("%1_%2").arg(filename).arg(i);
+                       ? QString("%1_%2").arg(src_name).arg(i)
+                       : QString("%1_%2").arg(filename).arg(i);
             dst_file = app::JoinPath(dst_path, dst_name);
         }
-        CopyFileBuffer(src_file, dst_file);
-        mFileMap[src_file] = dst_file;
-        mFileNames.insert(dst_file);
         return dst_file;
     }
     QString MapFileToFilesystem(const QString& uri) const
