@@ -447,7 +447,12 @@ R"(
     // Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/font.otf") == "font.otf");
     // UI style files should be copied into ui/
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
+    // the UI style is rewritten when the resource references are re-mapped and thus
+    // may not be the exact same string as what was originally written.
+    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style.json");
+    TEST_REQUIRE(style_string.contains("materials"));
+    TEST_REQUIRE(style_string.contains("widget/background"));
+    TEST_REQUIRE(style_string.contains("widget/border-width"));
 
     auto loader = engine::JsonFileClassLoader::Create();
     loader->LoadFromFile("TestPackage/test/content.json");
@@ -1201,7 +1206,13 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(workspace.PackContent(resources, options));
 
     // UI style files should be copied into ui/
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/style.json") == style);
+    // the UI style is rewritten when the resource references are re-mapped and thus
+    // may not be the exact same string as what was originally written.
+    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style.json");
+    TEST_REQUIRE(style_string.contains("properties"));
+    TEST_REQUIRE(style_string.contains("materials"));
+    TEST_REQUIRE(style_string.contains("pck://fonts/style_font.otf"));
+    TEST_REQUIRE(!style_string.contains("ws://fonts/style_font.otf"));
     // UI Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/widget_font.otf") == "widget_font.otf");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/window_font.otf") == "window_font.otf");
