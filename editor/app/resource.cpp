@@ -230,14 +230,18 @@ QStringList ListResourceDependencies(const uik::Window& window, const QVariantMa
     return ret;
 }
 
-void PackResource(const app::Script& script, ResourcePacker& packer)
+void PackResource(app::Script& script, ResourcePacker& packer)
 {
-    packer.CopyFile(script.GetFileURI(), "lua/");
+    const auto& uri = script.GetFileURI();
+    packer.CopyFile(uri, "lua/");
+    script.SetFileURI(packer.MapUri(uri));
 }
 
-void PackResource(const app::DataFile& data, ResourcePacker& packer)
+void PackResource(app::DataFile& data, ResourcePacker& packer)
 {
-    packer.CopyFile(data.GetFileURI(), "data/");
+    const auto& uri = data.GetFileURI();
+    packer.CopyFile(uri, "data/");
+    data.SetFileURI(packer.MapUri(uri));
 }
 
 void PackResource(audio::GraphClass& audio, ResourcePacker& packer)
@@ -260,7 +264,8 @@ void PackResource(audio::GraphClass& audio, ResourcePacker& packer)
                 WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio.GetName(), name);
                 continue;
             }
-            *file_uri = packer.CopyFile(*file_uri, "audio/");
+            packer.CopyFile(*file_uri, "audio/");
+            *file_uri = packer.MapUri(*file_uri);
         }
     }
 }
@@ -273,7 +278,9 @@ void PackResource(game::EntityClass& entity, ResourcePacker& packer)
         if (!node.HasTextItem())
             continue;
         auto* text = node.GetTextItem();
-        text->SetFontName(packer.CopyFile(text->GetFontName(), "fonts/"));
+        const auto& uri = text->GetFontName();
+        packer.CopyFile(uri, "fonts/");
+        text->SetFontName(packer.MapUri(uri));
     }
 }
 void PackResource(game::TilemapClass& map, ResourcePacker& packer)
@@ -311,11 +318,13 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         std::string src_font_uri;
         std::string dst_font_uri;
         p.prop.GetValue(&src_font_uri);
-        dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+        packer.CopyFile(src_font_uri, "fonts");
+        dst_font_uri = packer.MapUri(src_font_uri);
         p.prop.SetValue(dst_font_uri);
         style.SetProperty(p.key, p.prop);
     }
-    window.SetStyleName(packer.CopyFile(style_uri, "ui"));
+    packer.CopyFile(style_uri, "ui");
+    window.SetStyleName(packer.MapUri(style_uri));
     // for each widget, parse the style string and see if there are more font-name props.
     window.ForEachWidget([&style, &packer](uik::Widget* widget) {
         auto style_string = widget->GetStyleString();
@@ -332,7 +341,8 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+            packer.CopyFile(src_font_uri, "fonts");
+            dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
         }
@@ -360,7 +370,8 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            dst_font_uri = packer.CopyFile(src_font_uri, "fonts");
+            packer.CopyFile(src_font_uri, "fonts");
+            dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
         }
@@ -390,7 +401,8 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                 for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
                 {
                     auto& text = text_buffer.GetText(j);
-                    text.font  = packer.CopyFile(text.font, "fonts/");
+                    packer.CopyFile(text.font, "fonts/");
+                    text.font = packer.MapUri(text.font);
                 }
             }
         }
@@ -404,7 +416,8 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
             for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
             {
                 auto& text = text_buffer.GetText(j);
-                text.font  = packer.CopyFile(text.font, "fonts/");
+                packer.CopyFile(text.font, "fonts/");
+                text.font = packer.MapUri(text.font);
             }
         }
     }
@@ -425,7 +438,8 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                         for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
                         {
                             auto& text = text_buffer.GetText(j);
-                            text.font  = packer.CopyFile(text.font, "fonts/");
+                            packer.CopyFile(text.font, "fonts/");
+                            text.font  = packer.MapUri(text.font);
                         }
                     }
                 }
@@ -439,7 +453,8 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                     for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
                     {
                         auto& text = text_buffer.GetText(j);
-                        text.font  = packer.CopyFile(text.font, "fonts/");
+                        packer.CopyFile(text.font, "fonts/");
+                        text.font = packer.MapUri(text.font);
                     }
                 }
             }
@@ -447,8 +462,8 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
         std::string shader_uri = custom->GetShaderUri();
         if (shader_uri.empty())
             return;
-
-        shader_uri = packer.CopyFile(shader_uri, "shaders/es2");
+        packer.CopyFile(shader_uri, "shaders/es2");
+        shader_uri = packer.MapUri(shader_uri);
         custom->SetShaderUri(shader_uri);
     }
 }
