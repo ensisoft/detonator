@@ -4,3 +4,6 @@
 [submodule "third_party/QSourceHighlight"]
 	path = third_party/QSourceHighlight
 	url = https://github.com/ensisoft/QSourceHighlite
+[submodule "third_party/quazip"]
+	path = third_party/quazip
+	url = https://github.com/ensisoft/quazip

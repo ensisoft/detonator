@@ -610,6 +610,16 @@ namespace app
         void SetProjectId(const QString& id)
         { mSettings.application_identifier = id; }
 
+        struct ExportOptions {
+            QString zip_file;
+        };
+        bool ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options);
+
+        struct ImportOptions {
+            QString zip_file;
+        };
+        bool ImportContent(const ImportOptions& options);
+
         struct ContentPackingOptions {
             // the output directory into which place the packed content.
             QString directory;

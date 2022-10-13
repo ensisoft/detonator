@@ -301,16 +301,15 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
 
     // package the style resources. currently, this is only the font files.
     const auto& style_uri  = window.GetStyleName();
-    const auto& style_file = packer.ResolveUri(style_uri);
 
-    auto style_data = app::EngineBuffer::LoadFromFile(app::FromUtf8(style_file));
-    if (!style_data)
+    QByteArray style_array;
+    if (!packer.ReadFile(style_uri, &style_array))
     {
-        ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_file);
+        ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_uri);
     }
-    else if (!style.LoadStyle(*style_data))
+    if (!style.LoadStyle(app::EngineBuffer("style", std::move(style_array))))
     {
-        ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_file);
+        ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_uri);
     }
     std::vector<engine::UIStyle::PropertyKeyValue> props;
     style.GatherProperties("-font", &props);
@@ -319,7 +318,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         std::string src_font_uri;
         std::string dst_font_uri;
         p.prop.GetValue(&src_font_uri);
-        packer.CopyFile(src_font_uri, "fonts");
+        packer.CopyFile(src_font_uri, "fonts/");
         dst_font_uri = packer.MapUri(src_font_uri);
         p.prop.SetValue(dst_font_uri);
         style.SetProperty(p.key, p.prop);
@@ -327,7 +326,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     nlohmann::json style_json;
     style.SaveStyle(style_json);
     const auto& style_string_json = style_json.dump(2);
-    packer.ReplaceFile(style_uri, "ui", style_string_json.data(), style_string_json.size());
+    packer.WriteFile(style_uri, "ui/", style_string_json.data(), style_string_json.size());
 
     window.SetStyleName(packer.MapUri(style_uri));
 
@@ -346,7 +345,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            packer.CopyFile(src_font_uri, "fonts");
+            packer.CopyFile(src_font_uri, "fonts/");
             dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
@@ -376,7 +375,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            packer.CopyFile(src_font_uri, "fonts");
+            packer.CopyFile(src_font_uri, "fonts/");
             dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
@@ -468,7 +467,7 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
         std::string shader_uri = custom->GetShaderUri();
         if (shader_uri.empty())
             return;
-        packer.CopyFile(shader_uri, "shaders/es2");
+        packer.CopyFile(shader_uri, "shaders/es2/");
         shader_uri = packer.MapUri(shader_uri);
         custom->SetShaderUri(shader_uri);
     }

@@ -19,6 +19,8 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <quazip/quazip.h>
+#  include <quazip/quazipfile.h>
 #  include <nlohmann/json.hpp>
 #  include <neargye/magic_enum.hpp>
 #  include <private/qfsfileengine_p.h> // private in Qt5
@@ -95,7 +97,329 @@ QString FixWorkspacePath(QString path)
 #endif
     return path;
 }
+QString MapWorkspaceUri(const QString& uri, const QString& workspace)
+{
+    // see comments in AddFileToWorkspace.
+    // this is basically the same as MapFilePath except this API
+    // is internal to only this application whereas MapFilePath is part of the
+    // API exposed to the graphics/ subsystem.
+    QString ret = uri;
+    if (ret.startsWith("ws://"))
+        ret = app::CleanPath(ret.replace("ws://", workspace));
+    else if (uri.startsWith("app://"))
+        ret = app::CleanPath(ret.replace("app://", GetAppDir()));
+    else if (uri.startsWith("fs://"))
+        ret.remove(0, 5);
+    // return as is
+    return ret;
+}
 
+class ImportZipArchive : public app::ResourcePacker
+{
+public:
+    ImportZipArchive(const QString& zip_file, const QString& zip_dir, const QString& workspace_dir)
+       : mZipFile(zip_file)
+       , mZipDir(zip_dir)
+       , mWorkspaceDir(workspace_dir)
+    {
+        mZip.setAutoClose(true);
+        mZip.setFileNameCodec("UTF-8");
+        mZip.setUtf8Enabled(true);
+        mZip.setZip64Enabled(true);
+    }
+    virtual void CopyFile(const std::string& uri, const std::string& dir) override
+    {
+        // copy file from the zip into the workspace directory.
+        const auto& src_file = MapUriToZipFile(uri);
+        if (!FindZipFile(src_file))
+            return;
+
+        QuaZipFileInfo info;
+        QByteArray bytes;
+
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::ReadOnly);
+        zip_file.getFileInfo(&info);
+        bytes = zip_file.readAll();
+
+        // the dir part of the filepath should already have been baked in the zip
+        // when exporting and the filename already contains the directory/path
+        const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
+        const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
+
+        if (!app::MakePath(dst_dir))
+        {
+            ERROR("Failed to create directory. [dir='%1']", dst_dir);
+            return;
+        }
+        QFile file;
+        file.setFileName(dst_file);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            ERROR("Failed to open file for writing. [file='%1', error='%2']]", dst_file, file.errorString());
+            return;
+        }
+        file.write(bytes);
+        file.close();
+        auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(info.name));
+        DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
+        mUriMapping[uri] = std::move(mapping);
+    }
+    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    {
+        // write the file contents into the workspace directory.
+
+        const auto& src_file = MapUriToZipFile(uri);
+        if (!FindZipFile(src_file))
+            return;
+
+        QuaZipFileInfo info;
+        mZip.getCurrentFileInfo(&info);
+
+        // the dir part of the filepath should already have been baked in the zip
+        // when exporting and the filename already contains the directory/path
+        const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
+        const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
+
+        if (!app::MakePath(dst_dir))
+        {
+            ERROR("Failed to create directory. [dir='%1']", dst_dir);
+            return;
+        }
+
+        QFile file;
+        file.setFileName(dst_file);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            ERROR("Failed to open file for writing. [file='%1', error='%2']", dst_file, file.errorString());
+            return;
+        }
+        file.write((const char*)data, len);
+        file.close();
+        auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(info.name));
+        DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
+        mUriMapping[uri] = std::move(mapping);
+    }
+
+    virtual bool ReadFile(const std::string& uri, QByteArray* array) const override
+    {
+        const auto& src_file = MapUriToZipFile(uri);
+        if (!FindZipFile(src_file))
+            return false;
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::ReadOnly);
+        *array = zip_file.readAll();
+        zip_file.close();
+        return true;
+    }
+    virtual std::string MapUri(const std::string& uri) const override
+    {
+        DEBUG("%1", uri);
+
+        const auto* mapping = base::SafeFind(mUriMapping, uri);
+        ASSERT(mapping);
+        return *mapping;
+    }
+    bool Open()
+    {
+        mFile.setFileName(mZipFile);
+        if (!mFile.open(QIODevice::ReadOnly))
+        {
+            ERROR("Failed to open zip file for reading. [file='%1', error='%2']", mZipFile, mFile.errorString());
+            return false;
+        }
+        mZip.setIoDevice(&mFile);
+        if (!mZip.open(QuaZip::mdUnzip))
+        {
+            ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
+            return false;
+        }
+        DEBUG("QuaZip open successful. [file='%1']", mZipFile);
+        return true;
+    }
+private:
+    QString MapUriToZipFile(const std::string& uri) const
+    {
+        ASSERT(base::StartsWith(uri, "zip://"));
+        const auto& rest = uri.substr(6);
+        return app::FromUtf8(rest);
+    }
+
+    bool FindZipFile(QString name) const
+    {
+        if (!mZip.goToFirstFile())
+            return false;
+        do
+        {
+            QuaZipFileInfo info;
+            if (!mZip.getCurrentFileInfo(&info))
+                return false;
+
+            DEBUG("Zip contains file: '%1'", info.name);
+
+            if (info.name == name)
+                return true;
+            // on windows the zip file paths are also windows style. (of course)
+            if(info.name == name.replace("/", "\\"))
+                return true;
+        }
+        while (mZip.goToNextFile());
+        ERROR("Failed to find file in zip. [file='%1']", name);
+        return false;
+    }
+private:
+    const QString mZipFile;
+    const QString mZipDir;
+    const QString mWorkspaceDir;
+    QFile mFile;
+    mutable QuaZip mZip;
+    std::unordered_map<std::string, std::string> mUriMapping;
+};
+
+
+class ExportZipArchive : public app::ResourcePacker
+{
+public:
+    ExportZipArchive(const QString& filename, const QString& workspace_dir)
+      : mZipFile(filename)
+      , mWorkspaceDir(workspace_dir)
+    {
+        mZip.setAutoClose(true);
+        mZip.setFileNameCodec("UTF-8");
+        mZip.setUtf8Enabled(true);
+        mZip.setZip64Enabled(true);
+    }
+    virtual void CopyFile(const std::string& uri, const std::string& dir) override
+    {
+        // don't package resources that are part of the editor.
+        // todo: this would need some kind of versioning in order to
+        // make sure that the resources under app:// then match between
+        // the exporter and the importer.
+        if (base::StartsWith(uri, "app://"))
+            return;
+
+        if (const auto* dupe = base::SafeFind(mUriMapping, uri))
+        {
+            DEBUG("Skipping duplicate file copy. [file='%1']", uri);
+            return;
+        }
+
+        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_info = QFileInfo(src_file);
+        if (!src_info.exists())
+        {
+            ERROR("Could not find source file. [file='%1']", src_file);
+            return;
+        }
+        const auto& src_path = src_info.absoluteFilePath();
+        const auto& src_name = src_info.fileName();
+        const auto& dst_dir  = app::FromUtf8(dir);
+        const auto& dst_name = app::JoinPath(dst_dir, src_name);
+
+        std::vector<char> buffer;
+        if (!app::ReadBinaryFile(src_file, buffer))
+        {
+            ERROR("Failed to read file contents. [file='%1']", src_file);
+            return;
+        }
+
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_name));
+        zip_file.write(buffer.data(), buffer.size());
+        zip_file.close();
+        ASSERT(base::EndsWith(dir, "/"));
+        mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
+        DEBUG("Copied new file into zip archive. [file='%1', size=%2]", src_file, app::Bytes { buffer.size() });
+    }
+    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    {
+        if (const auto* dupe = base::SafeFind(mUriMapping, uri))
+        {
+            DEBUG("Skipping duplicate file replace. [file='%1']", uri);
+            return;
+        }
+        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_info = QFileInfo(src_file);
+        if (!src_info.exists())
+        {
+            ERROR("Could not find source file. [file='%1']", src_file);
+            return;
+        }
+        const auto& src_name = src_info.fileName();
+        const auto& dst_dir  = app::FromUtf8(dir);
+        const auto& dst_name = app::JoinPath(dst_dir, src_name);
+
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_name));
+        zip_file.write((const char*)data, len);
+        zip_file.close();
+        ASSERT(base::EndsWith(dir, "/"));
+        mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
+        DEBUG("Added new file into zip archive. [file='%1']", dst_name);
+    }
+
+    virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
+    {
+        const auto& file = MapFileToFilesystem(app::FromUtf8(uri));
+        return app::detail::LoadArrayBuffer(file, bytes);
+    }
+    virtual std::string MapUri(const std::string& uri) const override
+    {
+        const auto* mapping = base::SafeFind(mUriMapping, uri);
+        ASSERT(mapping);
+        return *mapping;
+    }
+
+    void WriteText(const std::string& text, const char* name)
+    {
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(name));
+        zip_file.write(text.c_str(), text.size());
+        zip_file.close();
+    }
+    void WriteBytes(const QByteArray& bytes, const char* name)
+    {
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(name));
+        zip_file.write(bytes.data(), bytes.size());
+        zip_file.close();
+    }
+
+    void Close()
+    {
+        mZip.close();
+        mFile.flush();
+        mFile.close();
+    }
+    bool Open()
+    {
+        mFile.setFileName(mZipFile);
+        if (!mFile.open(QIODevice::ReadWrite))
+        {
+            ERROR("Failed to open zip file for writing. [file='%1', error='%2']", mZipFile, mFile.errorString());
+            return false;
+        }
+        mZip.setIoDevice(&mFile);
+        if (!mZip.open(QuaZip::mdCreate))
+        {
+            ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
+            return false;
+        }
+        DEBUG("QuaZip open successful. [file='%1']", mZipFile);
+        return true;
+    }
+private:
+    QString MapFileToFilesystem(const QString& uri) const
+    {
+        return MapWorkspaceUri(uri, mWorkspaceDir);
+    }
+private:
+    const QString mZipFile;
+    const QString mWorkspaceDir;
+    std::unordered_map<std::string, std::string> mUriMapping;
+    QFile mFile;
+    QuaZip mZip;
+};
 
 class MyResourcePacker : public app::ResourcePacker
 {
@@ -117,7 +441,7 @@ public:
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = app::ToUtf8(dst_uri);
     }
-    virtual void ReplaceFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
     {
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
@@ -129,15 +453,16 @@ public:
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = app::ToUtf8(dst_uri);
     }
-    virtual std::string ResolveUri(const std::string& uri) const override
+    virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
     {
-        return app::ToUtf8(MapFileToFilesystem(app::FromUtf8(uri)));
+        const auto& file = MapFileToFilesystem(app::FromUtf8(uri));
+        return app::detail::LoadArrayBuffer(file, bytes);
     }
     virtual std::string MapUri(const std::string& uri) const override
     {
-        if (const auto* found = base::SafeFind(mUriMapping, uri))
-            return *found;
-        BUG("No such URI mapping.");
+        const auto* mapping = base::SafeFind(mUriMapping, uri);
+        ASSERT(mapping);
+        return *mapping;
     }
     QString WriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len)
     {
@@ -227,19 +552,7 @@ public:
     }
     QString MapFileToFilesystem(const QString& uri) const
     {
-        // see comments in AddFileToWorkspace.
-        // this is basically the same as MapFilePath except this API
-        // is internal to only this application whereas MapFilePath is part of the
-        // API exposed to the graphics/ subsystem.
-        QString ret = uri;
-        if (ret.startsWith("ws://"))
-            ret = app::CleanPath(ret.replace("ws://", mWorkspaceDir));
-        else if (uri.startsWith("app://"))
-            ret = app::CleanPath(ret.replace("app://", GetAppDir()));
-        else if (uri.startsWith("fs://"))
-            ret.remove(0, 5);
-        // return as is
-        return ret;
+        return MapWorkspaceUri(uri, mWorkspaceDir);
     }
     QString MapFileToPackage(const QString& file) const
     {
@@ -417,7 +730,7 @@ public:
             else if (auto it = image_map.find(tex.file) != image_map.end())
                 continue;
 
-            const QFileInfo info(app::FromUtf8(packer.ResolveUri(tex.file)));
+            const QFileInfo info(app::FromUtf8(tex.file));
             const QString src_file = info.absoluteFilePath();
             //const QImage src_pix(src_file);
             // QImage seems to lie about something or then the test pngs are produced
@@ -2464,6 +2777,107 @@ void Workspace::Tick()
 
 }
 
+bool Workspace::ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options)
+{
+    ExportZipArchive zip(options.zip_file, mWorkspaceDir);
+    if (!zip.Open())
+        return false;
+
+    // unfortunately we need to make copies of the resources
+    // since packaging might modify the resources yet the
+    // original resources should not be changed.
+    // todo: perhaps rethink this.. what other ways would there be ?
+    // constraints:
+    //  - don't wan to duplicate the serialization/deserialization/JSON writing
+    //  - should not know details of resources (materials, drawables etc)
+    //  - material depends on resource packer, resource packer should not then
+    //    know about material
+    std::vector<std::unique_ptr<Resource>> mutable_copies;
+    for (const auto* resource : resources)
+    {
+        ASSERT(!resource->IsPrimitive());
+        mutable_copies.push_back(resource->Copy());
+    }
+
+    QJsonObject properties;
+    data::JsonObject content;
+    for (auto& resource: mutable_copies)
+    {
+        resource->Pack(zip);
+        resource->Serialize(content);
+        resource->SaveProperties(properties);
+    }
+    QJsonDocument doc(properties);
+    zip.WriteText(content.ToString(), "content.json");
+    zip.WriteBytes(doc.toJson(), "properties.json");
+    zip.Close();
+    return true;
+}
+
+bool Workspace::ImportContent(const ImportOptions& options)
+{
+    const QFileInfo info(options.zip_file);
+    const auto& zip_dir = info.baseName();
+    ImportZipArchive zip(options.zip_file, zip_dir, mWorkspaceDir);
+    if (!zip.Open())
+        return false;
+
+    QByteArray property_bytes;
+    QByteArray content_bytes;
+    if (!zip.ReadFile("zip://content.json", &content_bytes))
+    {
+        ERROR("Could not find content.json file in zip archive. [file='%1']", options.zip_file);
+        return false;
+    }
+    if (!zip.ReadFile("zip://properties.json", &property_bytes))
+    {
+        ERROR("Could not find property.json file in zip archive. [file='%1']", options.zip_file);
+        return false;
+    }
+
+    data::JsonObject content;
+    const auto [ok, error] = content.ParseString(content_bytes.constData(), content_bytes.size());
+    if (!ok)
+    {
+        ERROR("Failed to parse JSON content. [error='%1']", error);
+        return false;
+    }
+    std::vector<std::unique_ptr<Resource>> resources;
+    LoadMaterials<gfx::MaterialClass>("materials", content, resources);
+    LoadResources<gfx::KinematicsParticleEngineClass>("particles", content, resources);
+    LoadResources<gfx::PolygonClass>("shapes", content, resources);
+    LoadResources<game::EntityClass>("entities", content, resources);
+    LoadResources<game::SceneClass>("scenes", content, resources);
+    LoadResources<game::TilemapClass>("tilemaps", content, resources);
+    LoadResources<Script>("scripts", content, resources);
+    LoadResources<DataFile>("data_files", content, resources);
+    LoadResources<audio::GraphClass>("audio_graphs", content, resources);
+    LoadResources<uik::Window>("uis", content, resources);
+
+    // it seems a bit funny here to be calling "pack" when actually we're
+    // unpacking but the implementation of zip based resource packer is
+    // such that data is copied (packed) from the zip and into the workspace
+    for (auto& resource : resources)
+    {
+        resource->Pack(zip);
+    }
+
+    // load property JSONs
+    const auto& docu  = QJsonDocument::fromJson(property_bytes);
+    const auto& props = docu.object();
+    for (auto& resource : resources)
+    {
+        resource->LoadProperties(props);
+    }
+
+    for (const auto& resource : resources)
+    {
+        SaveResource(*resource);
+    }
+    INFO("Imported %1 resources(s) from '%2'.", resources.size(), options.zip_file);
+    return true;
+}
+
 bool Workspace::PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options)
 {
     const QString& outdir = JoinPath(options.directory, options.package_name);
@@ -2485,6 +2899,7 @@ bool Workspace::PackContent(const std::vector<const Resource*>& resources, const
     std::vector<std::unique_ptr<Resource>> mutable_copies;
     for (const auto* resource : resources)
     {
+        ASSERT(!resource->IsPrimitive());
         mutable_copies.push_back(resource->Copy());
     }
 
