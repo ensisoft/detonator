@@ -50,8 +50,9 @@ namespace app
     {
     public:
         virtual ~ResourcePacker() = default;
-        virtual std::string CopyFile(const std::string& uri, const std::string& dir) = 0;
+        virtual void CopyFile(const std::string& uri, const std::string& dir) = 0;
         virtual std::string ResolveUri(const std::string& uri) const = 0;
+        virtual std::string MapUri(const std::string& uri) const = 0;
     private:
     };
 
@@ -487,8 +488,8 @@ namespace app
         void PackResource(const ResourceType&, const ResourcePacker&)
         {}
 
-        void PackResource(const app::Script& script, ResourcePacker& packer);
-        void PackResource(const app::DataFile& data, ResourcePacker& packer);
+        void PackResource(app::Script& script, ResourcePacker& packer);
+        void PackResource(app::DataFile& data, ResourcePacker& packer);
         void PackResource(audio::GraphClass& audio, ResourcePacker& packer);
         void PackResource(game::EntityClass& entity, ResourcePacker& packer);
         void PackResource(game::TilemapClass& map, ResourcePacker& packer);

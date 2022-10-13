@@ -104,16 +104,22 @@ public:
       : mPackageDir(package_dir)
       , mWorkspaceDir(workspace_dir)
     {}
-    virtual std::string CopyFile(const std::string& uri, const std::string& dir) override
+    virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
         const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
         const auto& dst_uri  = MapFileToPackage(dst_file);
-        return app::ToUtf8(dst_uri);
+        mUriMapping[uri] = app::ToUtf8(dst_uri);
     }
     virtual std::string ResolveUri(const std::string& uri) const override
     {
         return app::ToUtf8(MapFileToFilesystem(app::FromUtf8(uri)));
+    }
+    virtual std::string MapUri(const std::string& uri) const override
+    {
+        if (const auto* found = base::SafeFind(mUriMapping, uri))
+            return *found;
+        BUG("No such URI mapping.");
     }
 
     QString CopyFile(const QString& src_file, const QString& dst_dir, const QString& filename = QString(""))
@@ -226,6 +232,7 @@ private:
     unsigned mNumCopies = 0;
     std::unordered_map<QString, QString> mFileMap;
     std::unordered_set<QString> mFileNames;
+    std::unordered_map<std::string, std::string> mUriMapping;
 };
 
 class GfxTexturePacker : public gfx::TexturePacker
