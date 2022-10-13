@@ -241,6 +241,24 @@ endif()
 
 target_link_libraries(EngineLib INTERFACE box2d)
 
+add_library(QuaZip
+    third_party/quazip/quazip/unzip.c
+    third_party/quazip/quazip/zip.c
+    third_party/quazip/quazip/JlCompress.cpp
+    third_party/quazip/quazip/qioapi.cpp
+    third_party/quazip/quazip/quaadler32.cpp
+    third_party/quazip/quazip/quachecksum32.cpp
+    third_party/quazip/quazip/quacrc32.cpp
+    third_party/quazip/quazip/quagzipfile.cpp
+    third_party/quazip/quazip/quaziodevice.cpp
+    third_party/quazip/quazip/quazip.cpp
+    third_party/quazip/quazip/quazipdir.cpp
+    third_party/quazip/quazip/quazipfile.cpp
+    third_party/quazip/quazip/quazipfileinfo.cpp
+    third_party/quazip/quazip/quazipnewinfo.cpp)
+target_compile_definitions(QuaZip PUBLIC QUAZIP_STATIC)
+target_link_libraries(QuaZip Qt5::Core)
+
 add_library(QtColorWidgets
         third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
         third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
@@ -461,12 +479,14 @@ target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(GSEditor EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
 target_link_libraries(GSEditor Lua)
 target_link_libraries(GSEditor QtColorWidgets)
+target_link_libraries(GSEditor QuaZip)
 target_link_libraries(GSEditor ${CONAN_LIBS})
 target_link_libraries(GSEditor cmake_git_version_tracking)
 install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
@@ -500,10 +520,12 @@ add_executable(EditorGameHost
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(EditorGameHost EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(EditorGameHost QuaZip)
 target_link_libraries(EditorGameHost ${CONAN_LIBS})
 target_link_libraries(EditorGameHost cmake_git_version_tracking)
 install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
@@ -651,6 +673,8 @@ add_executable(unit_test_ipc
         editor/app/ipc.cpp
         editor/app/packing.cpp
         editor/app/process.cpp)
+target_include_directories(unit_test_ipc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+
 add_executable(unit_test_resource
         editor/app/unit_test/unit_test_resource.cpp
         editor/app/utility.cpp
@@ -666,6 +690,8 @@ add_executable(unit_test_workspace
         editor/app/buffer.cpp
         editor/app/packing.cpp
         editor/app/process.cpp)
+target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+
 add_executable(unit_test_event_log
         editor/app/unit_test/unit_test_window-eventlog.cpp
         editor/app/window-eventlog.cpp)
@@ -700,9 +726,11 @@ target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR
 target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(unit_test_ipc QuaZip)
 target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(unit_test_workspace QuaZip)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 

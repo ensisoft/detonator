@@ -1520,6 +1520,125 @@ void unit_test_list_deps()
             TEST_REQUIRE(FindResourceItem("EntityScript", list));
         }
     }
+}
+
+void unit_test_export_import_basic()
+{
+    {
+        DeleteDir("TestWorkspace");
+        MakeDir("TestWorkspace");
+
+        QDir d;
+        // setup dummy shaders and data.
+        TEST_REQUIRE(d.mkpath("TestWorkspace/shaders/es2"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/lua"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/audio"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/data"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/ui"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/shaders/es2/my_material.glsl", "my_material.glsl"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/lua/game_script.lua", "game_script.lua"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/audio/music.mp3", "music.mp3"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/data/levels.txt", "levels.txt"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/font.otf", "font.otf"));
+        // setup dummy UI style file
+        QString style(
+                R"(
+{
+  "properties": [
+     {
+       "key": "widget/border-width",
+       "value": 1.0
+     },
+     {
+       "key": "widget/text-font",
+       "value": "ws://fonts/font.otf"
+     }
+   ],
+
+  "materials": [
+     {
+       "key": "widget/background",
+       "type": "Null"
+     }
+  ]
+}
+)");
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/style.json", style));
+
+        app::Workspace workspace("TestWorkspace");
+
+        // setup some content.
+        gfx::CustomMaterialClass material;
+        material.SetShaderUri(workspace.MapFileToWorkspace(std::string("TestWorkspace/shaders/es2/my_material.glsl")));
+        app::MaterialResource material_resource(material, "material");
+        gfx::PolygonClass poly;
+        app::CustomShapeResource shape_resource(poly, "poly");
+        gfx::KinematicsParticleEngineClass particles;
+        app::ParticleSystemResource particle_resource(particles, "particles");
+
+        app::Script script;
+        script.SetFileURI(workspace.MapFileToWorkspace(std::string("TestWorkspace/lua/game_script.lua")));
+        app::ScriptResource script_resource(script, "GameScript");
+
+        audio::GraphClass audio_graph("music_graph");
+        audio::GraphClass::Element music_src;
+        music_src.id = base::RandomString(10);
+        music_src.name = "music";
+        music_src.type = "FileSource";
+        music_src.args["file"] = workspace.MapFileToWorkspace(std::string("TestWorkspace/audio/music.mp3"));
+        audio_graph.AddElement(std::move(music_src));
+        app::AudioResource audio_resource(audio_graph, "music.mp3");
+
+        app::DataFile data;
+        data.SetFileURI(workspace.MapFileToWorkspace(std::string("TestWorkspace/data/levels.txt")));
+        app::DataResource data_resource(data, "levels.txt");
+
+        uik::Window window;
+        window.SetStyleName(workspace.MapFileToWorkspace(std::string("TestWorkspace/ui/style.json")));
+        app::UIResource ui_resource(window, "UI");
+
+        workspace.SaveResource(material_resource);
+        workspace.SaveResource(shape_resource);
+        workspace.SaveResource(particle_resource);
+        workspace.SaveResource(script_resource);
+        workspace.SaveResource(audio_resource);
+        workspace.SaveResource(data_resource);
+        workspace.SaveResource(ui_resource);
+
+        app::Workspace::ExportOptions options;
+        options.zip_file = "test-export.zip";
+
+        // select the resources.
+        std::vector<const app::Resource*> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+        resources.push_back(&workspace.GetUserDefinedResource(1));
+        resources.push_back(&workspace.GetUserDefinedResource(2));
+        resources.push_back(&workspace.GetUserDefinedResource(3));
+        resources.push_back(&workspace.GetUserDefinedResource(4));
+        resources.push_back(&workspace.GetUserDefinedResource(5));
+        resources.push_back(&workspace.GetUserDefinedResource(6));
+        TEST_REQUIRE(workspace.ExportContent(resources, options));
+    }
+
+    {
+        DeleteDir("TestWorkspace");
+        MakeDir("TestWorkspace");
+
+        app::Workspace workspace("TestWorkspace");
+
+        app::Workspace::ImportOptions options;
+        options.zip_file = "test-export.zip";
+        TEST_REQUIRE(workspace.ImportContent(options));
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 7);
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/shaders/es2/my_material.glsl") == "my_material.glsl");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/lua/game_script.lua") == "game_script.lua");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/data/levels.txt") == "levels.txt");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
+        const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style.json");
+        TEST_REQUIRE(!style_string.isEmpty());
+    }
 
 }
 
@@ -1549,5 +1668,6 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_name_collision_resample_bug();
     unit_test_json_export_import();
     unit_test_list_deps();
+    unit_test_export_import_basic();
     return 0;
 }

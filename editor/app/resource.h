@@ -51,8 +51,8 @@ namespace app
     public:
         virtual ~ResourcePacker() = default;
         virtual void CopyFile(const std::string& uri, const std::string& dir) = 0;
-        virtual void ReplaceFile(const std::string& uri, const std::string& dir, const void* data, size_t len) = 0;
-        virtual std::string ResolveUri(const std::string& uri) const = 0;
+        virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) = 0;
+        virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const = 0;
         virtual std::string MapUri(const std::string& uri) const = 0;
     private:
     };
