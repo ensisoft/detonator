@@ -27,6 +27,7 @@
 #  include <QObject>
 #  include <QVariant>
 #  include <glm/glm.hpp>
+#  include <quazip/quazip.h>
 #include "warnpop.h"
 
 #include <memory>
@@ -45,8 +46,33 @@
 #include "resource.h"
 #include "utility.h"
 
+class QuaZip;
+
 namespace app
 {
+    class ContentZip
+    {
+    public:
+        ContentZip();
+
+        bool Open(const QString& zip_file);
+
+        bool ReadFile(const QString& file, QByteArray* array) const;
+
+        size_t GetNumResources() const
+        { return mResources.size(); }
+        const Resource& GetResource(size_t index) const
+        { return *base::SafeIndex(mResources, index); }
+    private:
+        bool FindZipFile(const QString& unix_style_name) const;
+    private:
+        friend class Workspace;
+        QString mZipFile;
+        QFile mFile;
+        mutable QuaZip mZip;
+        std::vector<std::unique_ptr<Resource>> mResources;
+    };
+
     // Workspace groups together a collection of resources
     // that user can edit and work with such as materials,
     // animations and particle engines. Each resource has
@@ -615,10 +641,7 @@ namespace app
         };
         bool ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options);
 
-        struct ImportOptions {
-            QString zip_file;
-        };
-        bool ImportContent(const ImportOptions& options);
+        bool ImportContent(ContentZip& zip);
 
         struct ContentPackingOptions {
             // the output directory into which place the packed content.

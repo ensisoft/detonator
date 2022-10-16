@@ -114,19 +114,80 @@ QString MapWorkspaceUri(const QString& uri, const QString& workspace)
     return ret;
 }
 
-class ImportZipArchive : public app::ResourcePacker
+template<typename ClassType>
+bool LoadResources(const char* type,
+                   const data::Reader& data,
+                   std::vector<std::unique_ptr<app::Resource>>& vector)
+{
+    DEBUG("Loading %1", type);
+    bool success = true;
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
+    {
+        const auto& chunk = data.GetReadChunk(type, i);
+        std::string name;
+        std::string id;
+        if (!chunk->Read("resource_name", &name) ||
+            !chunk->Read("resource_id", &id))
+        {
+            ERROR("Unexpected JSON. Maybe old workspace version?");
+            success = false;
+            continue;
+        }
+        std::optional<ClassType> ret = ClassType::FromJson(*chunk);
+        if (!ret.has_value())
+        {
+            ERROR("Failed to load resource. [name='%1']", name);
+            success = false;
+            continue;
+        }
+        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret.value()), app::FromUtf8(name)));
+        DEBUG("Loaded resource. [name='%1']", name);
+    }
+    return success;
+}
+
+template<typename ClassType>
+bool LoadMaterials(const char* type,
+                   const data::Reader& data,
+                   std::vector<std::unique_ptr<app::Resource>>& vector)
+{
+    DEBUG("Loading %1", type);
+    bool success = true;
+    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
+    {
+        const auto& chunk = data.GetReadChunk(type, i);
+        std::string name;
+        std::string id;
+        if (!chunk->Read("resource_name", &name) ||
+            !chunk->Read("resource_id", &id))
+        {
+            ERROR("Unexpected JSON. Maybe old workspace version?");
+            success = false;
+            continue;
+        }
+        auto ret = ClassType::FromJson(*chunk);
+        if (!ret)
+        {
+            ERROR("Failed to load material. [name='%1']", name);
+            success = false;
+            continue;
+        }
+        vector.push_back(std::make_unique<app::MaterialResource>(std::move(ret), app::FromUtf8(name)));
+        DEBUG("Loaded material. [name='%1']", name);
+    }
+    return success;
+}
+
+
+class ZipArchiveImporter : public app::ResourcePacker
 {
 public:
-    ImportZipArchive(const QString& zip_file, const QString& zip_dir, const QString& workspace_dir)
+    ZipArchiveImporter(const QString& zip_file, const QString& zip_dir, const QString& workspace_dir, QuaZip& zip)
        : mZipFile(zip_file)
        , mZipDir(zip_dir)
        , mWorkspaceDir(workspace_dir)
-    {
-        mZip.setAutoClose(true);
-        mZip.setFileNameCodec("UTF-8");
-        mZip.setUtf8Enabled(true);
-        mZip.setZip64Enabled(true);
-    }
+       , mZip(zip)
+    {}
     virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
         // copy file from the zip into the workspace directory.
@@ -220,33 +281,7 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
-    bool Open()
-    {
-        mFile.setFileName(mZipFile);
-        if (!mFile.open(QIODevice::ReadOnly))
-        {
-            ERROR("Failed to open zip file for reading. [file='%1', error='%2']", mZipFile, mFile.errorString());
-            return false;
-        }
-        mZip.setIoDevice(&mFile);
-        if (!mZip.open(QuaZip::mdUnzip))
-        {
-            ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
-            return false;
-        }
-        DEBUG("QuaZip open successful. [file='%1']", mZipFile);
 
-        mZip.goToFirstFile();
-        do
-        {
-            QuaZipFileInfo info;
-            if (mZip.getCurrentFileInfo(&info))
-            {
-                DEBUG("Found file in zip. [file='%1']", info.name);
-            }
-        } while (mZip.goToNextFile());
-        return true;
-    }
 private:
     QString MapUriToZipFile(const std::string& uri) const
     {
@@ -279,16 +314,15 @@ private:
     const QString mZipFile;
     const QString mZipDir;
     const QString mWorkspaceDir;
-    QFile mFile;
-    mutable QuaZip mZip;
+    QuaZip& mZip;
     std::unordered_map<std::string, std::string> mUriMapping;
 };
 
 
-class ExportZipArchive : public app::ResourcePacker
+class ZipArchiveExporter : public app::ResourcePacker
 {
 public:
-    ExportZipArchive(const QString& filename, const QString& workspace_dir)
+    ZipArchiveExporter(const QString& filename, const QString& workspace_dir)
       : mZipFile(filename)
       , mWorkspaceDir(workspace_dir)
     {
@@ -1071,6 +1105,113 @@ private:
 
 namespace app
 {
+ContentZip::ContentZip()
+{
+    mZip.setAutoClose(true);
+    mZip.setFileNameCodec("UTF-8");
+    mZip.setUtf8Enabled(true);
+    mZip.setZip64Enabled(true);
+}
+
+bool ContentZip::Open(const QString& zip_file)
+{
+    mFile.setFileName(zip_file);
+    if (!mFile.open(QIODevice::ReadOnly))
+    {
+        ERROR("Failed to open zip file for reading. [file='%1', error='%2']", mZipFile, mFile.errorString());
+        return false;
+    }
+    mZip.setIoDevice(&mFile);
+    if (!mZip.open(QuaZip::mdUnzip))
+    {
+        ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
+        return false;
+    }
+    DEBUG("QuaZip open successful. [file='%1']", mZipFile);
+    mZip.goToFirstFile();
+    do
+    {
+        QuaZipFileInfo info;
+        if (mZip.getCurrentFileInfo(&info))
+        {
+            DEBUG("Found file in zip. [file='%1']", info.name);
+        }
+    } while (mZip.goToNextFile());
+
+    QByteArray content_bytes;
+    QByteArray property_bytes;
+    if (!ReadFile("content.json", &content_bytes))
+    {
+        ERROR("Could not find content.json file in zip archive. [file='%1']", zip_file);
+        return false;
+    }
+    if (!ReadFile("properties.json", &property_bytes))
+    {
+        ERROR("Could not find properties.json file in zip archive. [file='%1']", zip_file);
+        return false;
+    }
+    data::JsonObject content;
+    const auto [ok, error] = content.ParseString(content_bytes.constData(), content_bytes.size());
+    if (!ok)
+    {
+        ERROR("Failed to parse JSON content. [error='%1']", error);
+        return false;
+    }
+
+    LoadMaterials<gfx::MaterialClass>("materials", content, mResources);
+    LoadResources<gfx::KinematicsParticleEngineClass>("particles", content, mResources);
+    LoadResources<gfx::PolygonClass>("shapes", content, mResources);
+    LoadResources<game::EntityClass>("entities", content, mResources);
+    LoadResources<game::SceneClass>("scenes", content, mResources);
+    LoadResources<game::TilemapClass>("tilemaps", content, mResources);
+    LoadResources<Script>("scripts", content, mResources);
+    LoadResources<DataFile>("data_files", content, mResources);
+    LoadResources<audio::GraphClass>("audio_graphs", content, mResources);
+    LoadResources<uik::Window>("uis", content, mResources);
+
+    // load property JSONs
+    const auto& docu  = QJsonDocument::fromJson(property_bytes);
+    const auto& props = docu.object();
+    for (auto& resource : mResources)
+    {
+        resource->LoadProperties(props);
+    }
+
+    mZipFile = zip_file;
+    return true;
+}
+
+bool ContentZip::ReadFile(const QString& file, QByteArray* array) const
+{
+    if (!FindZipFile(file))
+        return false;
+    QuaZipFile zip_file(&mZip);
+    zip_file.open(QIODevice::ReadOnly);
+    *array = zip_file.readAll();
+    zip_file.close();
+    return true;
+}
+
+bool ContentZip::FindZipFile(const QString& unix_style_name) const
+{
+    if (!mZip.goToFirstFile())
+        return false;
+    // on Windows the zip file paths are also windows style. (why, but of course)
+    QString windows_style_name = unix_style_name;
+    windows_style_name.replace("/", "\\");
+    do
+    {
+        QuaZipFileInfo info;
+        if (!mZip.getCurrentFileInfo(&info))
+            return false;
+        if ((info.name == unix_style_name) ||
+            (info.name == windows_style_name))
+            return true;
+    }
+    while (mZip.goToNextFile());
+    ERROR("Failed to find file in zip. [file='%1']", unix_style_name);
+    return false;
+}
 
 Workspace::Workspace(const QString& dir)
   : mWorkspaceDir(FixWorkspacePath(dir))
@@ -1636,70 +1777,6 @@ QString Workspace::MapFileToFilesystem(const QString& uri) const
 QString Workspace::MapFileToFilesystem(const std::string& uri) const
 {
     return MapFileToFilesystem(FromUtf8(uri));
-}
-
-template<typename ClassType>
-bool LoadResources(const char* type,
-                   const data::Reader& data,
-                   std::vector<std::unique_ptr<Resource>>& vector)
-{
-    DEBUG("Loading %1", type);
-    bool success = true;
-    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
-    {
-        const auto& chunk = data.GetReadChunk(type, i);
-        std::string name;
-        std::string id;
-        if (!chunk->Read("resource_name", &name) ||
-            !chunk->Read("resource_id", &id))
-        {
-            ERROR("Unexpected JSON. Maybe old workspace version?");
-            success = false;
-            continue;
-        }
-        std::optional<ClassType> ret = ClassType::FromJson(*chunk);
-        if (!ret.has_value())
-        {
-            ERROR("Failed to load resource '%1'", name);
-            success = false;
-            continue;
-        }
-        vector.push_back(std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name)));
-        DEBUG("Loaded resource '%1'", name);
-    }
-    return success;
-}
-
-template<typename ClassType>
-bool LoadMaterials(const char* type,
-                   const data::Reader& data,
-                   std::vector<std::unique_ptr<Resource>>& vector)
-{
-    DEBUG("Loading %1", type);
-    bool success = true;
-    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
-    {
-        const auto& chunk = data.GetReadChunk(type, i);
-        std::string name;
-        std::string id;
-        if (!chunk->Read("resource_name", &name) ||
-            !chunk->Read("resource_id", &id))
-        {
-            ERROR("Unexpected JSON. Maybe old workspace version?");
-            success = false;
-            continue;
-        }
-        auto ret = ClassType::FromJson(*chunk);
-        if (!ret)
-        {
-            ERROR("Failed to load resource '%1'", name);
-            success = false;
-            continue;
-        }
-        vector.push_back(std::make_unique<MaterialResource>(std::move(ret), FromUtf8(name)));
-        DEBUG("Loaded resource '%1'", name);
-    }
-    return success;
 }
 
 bool Workspace::LoadContent(const QString& filename)
@@ -2795,7 +2872,7 @@ void Workspace::Tick()
 
 bool Workspace::ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options)
 {
-    ExportZipArchive zip(options.zip_file, mWorkspaceDir);
+    ZipArchiveExporter zip(options.zip_file, mWorkspaceDir);
     if (!zip.Open())
         return false;
 
@@ -2830,67 +2907,24 @@ bool Workspace::ExportContent(const std::vector<const Resource*>& resources, con
     return true;
 }
 
-bool Workspace::ImportContent(const ImportOptions& options)
+bool Workspace::ImportContent(ContentZip& zip)
 {
-    const QFileInfo info(options.zip_file);
+    const QFileInfo info(zip.mZipFile);
     const auto& zip_dir = info.baseName();
-    ImportZipArchive zip(options.zip_file, zip_dir, mWorkspaceDir);
-    if (!zip.Open())
-        return false;
-
-    QByteArray property_bytes;
-    QByteArray content_bytes;
-    if (!zip.ReadFile("zip://content.json", &content_bytes))
-    {
-        ERROR("Could not find content.json file in zip archive. [file='%1']", options.zip_file);
-        return false;
-    }
-    if (!zip.ReadFile("zip://properties.json", &property_bytes))
-    {
-        ERROR("Could not find property.json file in zip archive. [file='%1']", options.zip_file);
-        return false;
-    }
-
-    data::JsonObject content;
-    const auto [ok, error] = content.ParseString(content_bytes.constData(), content_bytes.size());
-    if (!ok)
-    {
-        ERROR("Failed to parse JSON content. [error='%1']", error);
-        return false;
-    }
-    std::vector<std::unique_ptr<Resource>> resources;
-    LoadMaterials<gfx::MaterialClass>("materials", content, resources);
-    LoadResources<gfx::KinematicsParticleEngineClass>("particles", content, resources);
-    LoadResources<gfx::PolygonClass>("shapes", content, resources);
-    LoadResources<game::EntityClass>("entities", content, resources);
-    LoadResources<game::SceneClass>("scenes", content, resources);
-    LoadResources<game::TilemapClass>("tilemaps", content, resources);
-    LoadResources<Script>("scripts", content, resources);
-    LoadResources<DataFile>("data_files", content, resources);
-    LoadResources<audio::GraphClass>("audio_graphs", content, resources);
-    LoadResources<uik::Window>("uis", content, resources);
+    ZipArchiveImporter importer(zip.mZipFile, zip_dir, mWorkspaceDir, zip.mZip);
 
     // it seems a bit funny here to be calling "pack" when actually we're
     // unpacking but the implementation of zip based resource packer is
     // such that data is copied (packed) from the zip and into the workspace
-    for (auto& resource : resources)
+    for (auto& resource : zip.mResources)
     {
-        resource->Pack(zip);
+        resource->Pack(importer);
     }
 
-    // load property JSONs
-    const auto& docu  = QJsonDocument::fromJson(property_bytes);
-    const auto& props = docu.object();
-    for (auto& resource : resources)
-    {
-        resource->LoadProperties(props);
-    }
-
-    for (const auto& resource : resources)
+    for (const auto& resource : zip.mResources)
     {
         SaveResource(*resource);
     }
-    INFO("Imported %1 resources(s) from '%2'.", resources.size(), options.zip_file);
     return true;
 }
 
