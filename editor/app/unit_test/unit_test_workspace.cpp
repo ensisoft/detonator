@@ -1647,9 +1647,9 @@ void unit_test_export_import_basic()
 
         app::Workspace workspace("TestWorkspace");
 
-        app::Workspace::ImportOptions options;
-        options.zip_file = "test-export.zip";
-        TEST_REQUIRE(workspace.ImportContent(options));
+        app::ContentZip zip;
+        TEST_REQUIRE(zip.Open("test-export.zip"));
+        TEST_REQUIRE(workspace.ImportContent(zip));
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 7);
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/shaders/es2/my_material.glsl") == "my_material.glsl");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/lua/game_script.lua") == "game_script.lua");
