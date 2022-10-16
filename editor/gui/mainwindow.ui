@@ -1641,10 +1641,10 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Resource</string>
+    <string>Open</string>
    </property>
    <property name="toolTip">
-    <string>Edit Resource</string>
+    <string>Open resource</string>
    </property>
   </action>
   <action name="actionSaveWorkspace">
@@ -1668,10 +1668,10 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Resource in Win</string>
+    <string>Open in New Window</string>
    </property>
    <property name="toolTip">
-    <string>Edit Resource</string>
+    <string>Open resource in new window</string>
    </property>
   </action>
   <action name="actionEditResourceNewTab">
@@ -1680,10 +1680,10 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Resource in Tab</string>
+    <string>Open in New Tab</string>
    </property>
    <property name="toolTip">
-    <string>Edit Resource</string>
+    <string>Open resource in new tab</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -1760,7 +1760,7 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Resource ...</string>
+    <string>Open Resource ...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
