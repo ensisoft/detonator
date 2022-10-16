@@ -235,6 +235,16 @@ public:
             return false;
         }
         DEBUG("QuaZip open successful. [file='%1']", mZipFile);
+
+        mZip.goToFirstFile();
+        do
+        {
+            QuaZipFileInfo info;
+            if (mZip.getCurrentFileInfo(&info))
+            {
+                DEBUG("Found file in zip. [file='%1']", info.name);
+            }
+        } while (mZip.goToNextFile());
         return true;
     }
 private:
@@ -245,26 +255,24 @@ private:
         return app::FromUtf8(rest);
     }
 
-    bool FindZipFile(QString name) const
+    bool FindZipFile(const QString& unix_style_name) const
     {
         if (!mZip.goToFirstFile())
             return false;
+        // on windows the zip file paths are also windows style. (of course)
+        QString windows_style_name = unix_style_name;
+        windows_style_name.replace("/", "\\");
         do
         {
             QuaZipFileInfo info;
             if (!mZip.getCurrentFileInfo(&info))
                 return false;
-
-            DEBUG("Zip contains file: '%1'", info.name);
-
-            if (info.name == name)
-                return true;
-            // on windows the zip file paths are also windows style. (of course)
-            if(info.name == name.replace("/", "\\"))
+            if ((info.name == unix_style_name) ||
+                (info.name == windows_style_name))
                 return true;
         }
         while (mZip.goToNextFile());
-        ERROR("Failed to find file in zip. [file='%1']", name);
+        ERROR("Failed to find file in zip. [file='%1']", unix_style_name);
         return false;
     }
 private:
@@ -430,6 +438,14 @@ public:
     {}
     virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
+        // if the target dir for packing is textures/ we skip this because
+        // the textures are packed through calls to GfxTexturePacker.
+        if (dir == "textures/")
+        {
+            mUriMapping[uri] = uri;
+            return;
+        }
+
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
             DEBUG("Skipping duplicate file copy. [file='%1']", uri);

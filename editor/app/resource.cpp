@@ -410,6 +410,12 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                     text.font = packer.MapUri(text.font);
                 }
             }
+            else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
+            {
+                const auto& uri = file_source->GetFilename();
+                packer.CopyFile(uri, "textures/");
+                file_source->SetFileName(packer.MapUri(uri));
+            }
         }
     }
     else if (auto* texture = material.AsTexture())
@@ -424,6 +430,12 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                 packer.CopyFile(text.font, "fonts/");
                 text.font = packer.MapUri(text.font);
             }
+        }
+        else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
+        {
+            const auto& uri = file_source->GetFilename();
+            packer.CopyFile(uri, "textures/");
+            file_source->SetFileName(packer.MapUri(uri));
         }
     }
     else if (auto* custom = material.AsCustom())
@@ -447,6 +459,12 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                             text.font  = packer.MapUri(text.font);
                         }
                     }
+                    else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
+                    {
+                        const auto& uri = file_source->GetFilename();
+                        packer.CopyFile(uri, "textures/");
+                        file_source->SetFileName(packer.MapUri(uri));
+                    }
                 }
             }
             else if (auto* texture = texture_map->AsTextureMap2D())
@@ -461,6 +479,12 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                         packer.CopyFile(text.font, "fonts/");
                         text.font = packer.MapUri(text.font);
                     }
+                }
+                else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
+                {
+                    const auto& uri = file_source->GetFilename();
+                    packer.CopyFile(uri, "textures/");
+                    file_source->SetFileName(packer.MapUri(uri));
                 }
             }
         }

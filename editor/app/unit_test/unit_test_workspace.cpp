@@ -1297,6 +1297,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
         const auto& bmp = img.AsBitmap<gfx::RGB>();
         TEST_REQUIRE(bmp == bitmap[1]);
     }
+    gfx::SetResourceLoader(nullptr);
 }
 
 void unit_test_json_export_import()
@@ -1526,16 +1527,18 @@ void unit_test_export_import_basic()
 {
     {
         DeleteDir("TestWorkspace");
-        MakeDir("TestWorkspace");
 
         QDir d;
         // setup dummy shaders and data.
+        TEST_REQUIRE(d.mkpath("TestWorkspace"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/shaders/es2"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/lua"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/audio"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/data"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/ui"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/textures"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/textures/foobar"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/shaders/es2/my_material.glsl", "my_material.glsl"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/lua/game_script.lua", "game_script.lua"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/audio/music.mp3", "music.mp3"));
@@ -1568,10 +1571,27 @@ void unit_test_export_import_basic()
 
         app::Workspace workspace("TestWorkspace");
 
+        gfx::RgbBitmap bitmap;
+        bitmap.Resize(128, 100);
+        bitmap.Fill(gfx::Color::Yellow);
+        gfx::WritePNG(bitmap, "TestWorkspace/textures/foobar/test_bitmap.png");
+
         // setup some content.
+        gfx::detail::TextureFileSource texture_source;
+        texture_source.SetFileName(workspace.MapFileToWorkspace(std::string("TestWorkspace/textures/foobar/test_bitmap.png")));
+        texture_source.SetName("test-texture");
+
+        gfx::TextureMap2D texture;
+        texture.SetSamplerName("kTexture");
+        texture.SetRectUniformName("kTextureRect");
+        texture.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+        texture.SetTexture(texture_source.Copy());
+
         gfx::CustomMaterialClass material;
+        material.SetTextureMap("texture", std::move(texture));
         material.SetShaderUri(workspace.MapFileToWorkspace(std::string("TestWorkspace/shaders/es2/my_material.glsl")));
         app::MaterialResource material_resource(material, "material");
+
         gfx::PolygonClass poly;
         app::CustomShapeResource shape_resource(poly, "poly");
         gfx::KinematicsParticleEngineClass particles;
@@ -1638,8 +1658,14 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
         const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style.json");
         TEST_REQUIRE(!style_string.isEmpty());
-    }
 
+        gfx::Image texture;
+        TEST_REQUIRE(texture.Load("TestWorkspace/test-export/textures/test_bitmap.png"));
+        const auto& bmp = texture.AsBitmap<gfx::RGB>();
+        TEST_REQUIRE(bmp.GetWidth() == 128);
+        TEST_REQUIRE(bmp.GetHeight() == 100);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 128 * 100);
+    }
 }
 
 int test_main(int argc, char* argv[])
