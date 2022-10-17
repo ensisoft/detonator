@@ -1920,15 +1920,24 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionImportZIP->setEnabled(mWorkspace != nullptr);
     mUI.actionRenameResource->setEnabled(!indices.empty());
 
-    // disable edit actions if a non-native resources have been
-    // selected. these need to be opened through an external editor.
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
-        if (resource.IsAudioGraph() || resource.IsDataFile()) {
-            mUI.actionEditResource->setEnabled(false);
-            mUI.actionEditResourceNewTab->setEnabled(false);
-            mUI.actionEditResourceNewWindow->setEnabled(false);
+        if (resource.IsDataFile())
+        {
+            // disable edit actions if a non-native resources have been
+            // selected. these need to be opened through an external editor.
+            SetEnabled(mUI.actionEditResource, false);
+            SetEnabled(mUI.actionEditResourceNewTab, false);
+            SetEnabled(mUI.actionEditResourceNewWindow, false);
+            // disable duplicate, don't know how to dupe external data files.
+            SetEnabled(mUI.actionDuplicateResource, false);
+        }
+        else if (resource.IsScript())
+        {
+            // this doesn't currently do what is expected, since the script file
+            // is *not* copied.
+            SetEnabled(mUI.actionDuplicateResource, false);
         }
     }
 
