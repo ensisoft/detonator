@@ -1184,6 +1184,7 @@ Tilemap::Tilemap(const TilemapClass& klass)
 
 bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
 {
+    bool success = true;
     for (auto& layer : mLayers)
     {
         const auto& klass = layer->GetClass();
@@ -1200,12 +1201,12 @@ bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
         }
         else
         {
-            ERROR("Failed to load tilemap layer data. [layer='%1']", klass.GetName());
-            return false;
+            WARN("Failed to load tilemap layer data. [layer='%1']", klass.GetName());
+            success = false;
         }
     }
-    DEBUG("Loaded tilemap successfully. [map='%1', layers=%2]", mClass->GetName(), mClass->GetNumLayers());
-    return true;
+    DEBUG("Loaded tilemap. [map='%1', layers=%2]", mClass->GetName(), mClass->GetNumLayers());
+    return success;
 }
 
 void Tilemap::AddLayer(std::unique_ptr<TilemapLayer> layer)

@@ -202,7 +202,7 @@ void Renderer::Draw(const game::Tilemap& map,
     for (size_t i=0; i<map.GetNumLayers(); ++i)
     {
         const auto& layer = map.GetLayer(i);
-        if (layer.IsVisible() && layer.HasRenderComponent())
+        if (layer.IsVisible() && layer.HasRenderComponent() && layer.IsLoaded())
         {
             constexpr auto draw_render_layer = true;
             constexpr auto draw_data_layer = false;
