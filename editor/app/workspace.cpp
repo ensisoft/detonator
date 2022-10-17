@@ -2558,7 +2558,7 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
             }
         }
     }
-    // combine the original indicies together with the associated
+    // combine the original indices together with the associated
     // resource indices.
     base::AppendVector(indices, relatives);
 
@@ -2600,24 +2600,27 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
         emit ResourceToBeDeleted(carcass.get());
     }
 
-    // script resources are special in the sense that they're the only
-    // resources where the underlying file system content file is actually
-    // created by this editor. for everything else, shaders, image files
-    // and font files the resources are created by other tools/applications
+    // script and tilemap layer data resources are special in the sense that
+    // they're the only resources where the underlying filesystem data file
+    // is actually created by this editor. for everything else, shaders,
+    // image files and font files the resources are created by other tools,
     // and we only keep references to those files.
-    // So for scripts when the script resource is deleted we're actually
-    // going to delete the underlying filesystem file as well.
     for (const auto& carcass : graveyard)
     {
         QString dead_file;
         if (carcass->IsScript())
         {
+            // for scripts when the script resource is deleted we're actually
+            // going to delete the underlying filesystem file as well.
             Script* script = nullptr;
             carcass->GetContent(&script);
             dead_file = MapFileToFilesystem(script->GetFileURI());
         }
         else if (carcass->IsDataFile())
         {
+            // data files that link to a tilemap layer are also going to be
+            // deleted when the map is deleted. These files would be completely
+            // useless without any way to actually use them for anything.
             DataFile* data = nullptr;
             carcass->GetContent(&data);
             if (data->GetTypeTag() == DataFile::TypeTag::TilemapData)

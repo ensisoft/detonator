@@ -1668,7 +1668,7 @@ void unit_test_export_import_basic()
     }
 }
 
-void unit_test_duplicate()
+void unit_test_duplicate_with_data()
 {
     // check duplication of tilemap layer data.
     {
@@ -1737,6 +1737,62 @@ void unit_test_duplicate()
     }
 }
 
+void unit_test_delete_with_data()
+{
+    // check deletion of tilemap layer data.
+    {
+        DeleteDir("TestWorkspace");
+
+        QDir d;
+        TEST_REQUIRE(d.mkpath("TestWorkspace"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/data"));
+
+        app::Workspace workspace("TestWorkspace");
+
+        game::TilemapLayerClass layer;
+        layer.SetName("layer");
+        layer.SetType(game::TilemapLayerClass::Type::DataUInt8);
+
+        const auto& data_uri = app::toString("ws://data/%1.bin", layer.GetId());
+        const auto& data_file = workspace.MapFileToFilesystem(data_uri);
+        TEST_REQUIRE(app::WriteTextFile(data_file, "dummy layer data"));
+        TEST_REQUIRE(QFileInfo(data_file).exists() == true);
+
+        app::DataFile datafile;
+        datafile.SetFileURI(data_uri);
+        datafile.SetTypeTag(app::DataFile::TypeTag::TilemapData);
+        datafile.SetOwnerId(layer.GetId());
+
+        layer.SetDataUri(app::ToUtf8(data_uri));
+        layer.SetDataId(datafile.GetId());
+
+        game::TilemapClass map;
+        map.SetName("map");
+        map.SetMapWidth(10);
+        map.SetMapHeight(10);
+        map.AddLayer(layer);
+
+        app::DataResource data_resource(datafile, "layer data");
+        workspace.SaveResource(data_resource);
+
+        app::TilemapResource map_resource(map, "tilemap");
+        workspace.SaveResource(map_resource);
+
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 2);
+        TEST_REQUIRE(workspace.GetUserDefinedResource(0).GetName() == "layer data");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(1).GetName() == "tilemap");
+
+        workspace.DeleteResource(1);
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
+        TEST_REQUIRE(QFileInfo(data_file).exists() == false);
+    }
+
+    // todo: script deletion
+    {
+
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -1765,6 +1821,7 @@ int test_main(int argc, char* argv[])
     unit_test_list_deps();
     unit_test_export_import_basic();
 
-    unit_test_duplicate();
+    unit_test_duplicate_with_data();
+    unit_test_delete_with_data();
     return 0;
 }
