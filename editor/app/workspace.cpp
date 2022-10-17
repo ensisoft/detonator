@@ -2676,28 +2676,76 @@ void Workspace::DuplicateResources(std::vector<size_t> indices)
 
     std::sort(indices.begin(), indices.end(), std::less<size_t>());
 
+    std::map<const Resource*, size_t> insert_index;
     std::vector<std::unique_ptr<Resource>> dupes;
+
     for (int i=0; i<indices.size(); ++i)
     {
-        const auto row = indices[i];
-        const auto& resource = GetResource(row);
-        auto clone = resource.Clone();
-        clone->SetName(QString("Copy of %1").arg(resource.GetName()));
-        dupes.push_back(std::move(clone));
+        const auto row_index = indices[i];
+        const auto& src_resource = GetResource(row_index);
+
+        auto cpy_resource = src_resource.Clone();
+        cpy_resource->SetName(QString("Copy of %1").arg(src_resource.GetName()));
+
+        if (src_resource.IsTilemap())
+        {
+            const game::TilemapClass* src_map = nullptr;
+            game::TilemapClass* cpy_map = nullptr;
+            src_resource.GetContent(&src_map);
+            cpy_resource->GetContent(&cpy_map);
+            ASSERT(src_map->GetNumLayers() == cpy_map->GetNumLayers());
+            for (size_t i=0; i<src_map->GetNumLayers(); ++i)
+            {
+                const auto& src_layer = src_map->GetLayer(i);
+                const auto& src_uri   = src_layer.GetDataUri();
+                if (src_uri.empty())
+                    continue;
+                auto& cpy_layer = cpy_map->GetLayer(i);
+
+                const auto& dst_uri = base::FormatString("ws://data/%1.bin", cpy_layer.GetId());
+                const auto& src_file = MapFileToFilesystem(src_uri);
+                const auto& dst_file = MapFileToFilesystem(dst_uri);
+                const auto [success, error] = CopyFile(src_file, dst_file);
+                if (!success)
+                {
+                    WARN("Failed to duplicate tilemap layer data file. [layer='%1', file='%2', error='%3']",
+                         cpy_layer.GetName(), dst_file, error);
+                    cpy_layer.ResetDataId();
+                    cpy_layer.ResetDataUri();
+                }
+                else
+                {
+                    app::DataFile cpy_data;
+                    cpy_data.SetFileURI(dst_uri);
+                    cpy_data.SetOwnerId(cpy_layer.GetId());
+                    cpy_data.SetTypeTag(app::DataFile::TypeTag::TilemapData);
+                    const auto& cpy_data_resource_name = toString("%1 Layer Data", cpy_resource->GetName());
+                    auto cpy_data_resource = std::make_unique<app::DataResource>(cpy_data, cpy_data_resource_name);
+                    insert_index[cpy_data_resource.get()] = row_index;
+                    dupes.push_back(std::move(cpy_data_resource));
+                    cpy_layer.SetDataId(cpy_data.GetId());
+                    cpy_layer.SetDataUri(dst_uri);
+                    DEBUG("Duplicated tilemap layer data. [layer='%1', src='%2', dst='%3']",
+                          cpy_layer.GetName(), src_file, dst_file);
+                }
+            }
+        }
+        insert_index[cpy_resource.get()] = row_index;
+        dupes.push_back(std::move(cpy_resource));
     }
 
-    for (int i=0; i<(int)dupes.size(); ++i)
+    for (size_t i=0; i<dupes.size(); ++i)
     {
-        const auto pos = indices[i]+ i;
-        beginInsertRows(QModelIndex(), pos, pos);
-        auto it = mResources.begin();
-        it += pos;
-        auto* dupe = dupes[i].get();
-        mResources.insert(it, std::move(dupes[i]));
+        const auto index = insert_index[dupes[i].get()] + i;
+
+        beginInsertRows(QModelIndex(), index, index);
+
+        auto* dupe_ptr = dupes[i].get();
+        mResources.insert(mResources.begin() + index, std::move(dupes[i]));
         mVisibleCount++;
         endInsertRows();
 
-        emit NewResourceAvailable(dupe);
+        emit NewResourceAvailable(dupe_ptr);
     }
 }
 
