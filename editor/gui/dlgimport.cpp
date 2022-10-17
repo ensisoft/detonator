@@ -64,7 +64,7 @@ void DlgImport::on_btnSelectFile_clicked()
     if (filename.isEmpty())
         return;
 
-    auto zip = std::make_unique<app::ContentZip>();
+    auto zip = std::make_unique<app::ResourceArchive>();
     if (!zip->Open(filename))
     {
         QMessageBox msg(this);
@@ -117,7 +117,7 @@ void DlgImport::on_btnImport_clicked()
             else import_count++;
         }
     }
-    if (!mWorkspace->ImportContent(*mZip))
+    if (!mWorkspace->ImportResourceArchive(*mZip))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);

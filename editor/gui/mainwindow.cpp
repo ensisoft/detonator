@@ -1556,7 +1556,7 @@ void MainWindow::on_actionExportZIP_triggered()
     app::Workspace::ExportOptions options;
     options.zip_file = filename;
 
-    if (!mWorkspace->ExportContent(resources, options))
+    if (!mWorkspace->ExportResourceArchive(resources, options))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
