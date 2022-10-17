@@ -56,6 +56,7 @@
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/tilemapwidget.h"
 #include "editor/gui/dlgabout.h"
+#include "editor/gui/dlgimport.h"
 #include "editor/gui/dlgtileimport.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
@@ -1444,8 +1445,8 @@ void MainWindow::on_actionExportJSON_triggered()
     if (indices.isEmpty())
         return;
     const auto& filename = QFileDialog::getSaveFileName(this,
-        tr("Export Resources as Json"),
-        tr("content.json"),
+        tr("Export Resource Json"),
+        tr("resource.json"),
         tr("JSON (*.json)"));
     if (filename.isEmpty())
         return;
@@ -1455,16 +1456,17 @@ void MainWindow::on_actionExportJSON_triggered()
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
         msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Failed to export the JSON into file.\n"
+        msg.setText(tr("Failed to export the JSON to a file.\n"
                        "Please see the log for details."));
         msg.exec();
         return;
     }
-    NOTE("Exported %1 resource(s) into '%2'", indices.size(), filename);
+    NOTE("Exported %1 resource(s) to '%2'", indices.size(), filename);
+    INFO("Exported %1 resource(s) to '%2'", indices.size(), filename);
     QMessageBox msg(this);
     msg.setIcon(QMessageBox::Information);
     msg.setStandardButtons(QMessageBox::Ok);
-    msg.setText(tr("Exported %1 resource(s) into '%2'").arg(indices.size()).arg(filename));
+    msg.setText(tr("Exported %1 resource(s) to '%2'").arg(indices.size()).arg(filename));
     msg.exec();
 }
 
@@ -1516,6 +1518,61 @@ void MainWindow::on_actionImportJSON_triggered()
         msg.setText(tr("Imported %1 resources into workspace.").arg(import_count));
         msg.exec();
     }
+}
+
+void MainWindow::on_actionImportZIP_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    DlgImport dlg(this, mWorkspace.get());
+    dlg.exec();
+}
+
+void MainWindow::on_actionExportZIP_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    const auto& selection = GetSelection(mUI.workspace);
+    if (selection.isEmpty())
+        return;
+    const auto& filename = QFileDialog::getSaveFileName(this,
+        tr("Export resource(s) to Zip"),
+        tr("export.zip"),
+        tr("ZIP (*.zip)"));
+    if (filename.isEmpty())
+        return;
+
+    std::vector<const app::Resource*> resources;
+
+    for (int i=0; i<selection.size(); ++i)
+        resources.push_back(&mWorkspace->GetUserDefinedResource(selection[i].row()));
+
+    const auto& list = mWorkspace->ListDependencies(selection);
+    for (const auto& item : list)
+        resources.push_back(item.resource);
+
+    app::Workspace::ExportOptions options;
+    options.zip_file = filename;
+
+    if (!mWorkspace->ExportContent(resources, options))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to export the resource(s) to a zip file.\n"
+                       "Please see the application log for more details."));
+        msg.exec();
+        return;
+    }
+    NOTE("Exported %1 resource(s) to '%2'.", resources.size(), filename);
+    INFO("Exported %1 resource(s) to '%2'.", resources.size(), filename);
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Information);
+    msg.setStandardButtons(QMessageBox::Ok);
+    msg.setText(tr("Exported %1 resources to '%2'.").arg(resources.size()).arg(filename));
+    msg.exec();
 }
 
 void MainWindow::on_actionEditResource_triggered()
@@ -1859,6 +1916,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
     mUI.actionExportJSON->setEnabled(!indices.isEmpty());
     mUI.actionImportJSON->setEnabled(mWorkspace != nullptr);
+    mUI.actionExportZIP->setEnabled(!indices.isEmpty());
+    mUI.actionImportZIP->setEnabled(mWorkspace != nullptr);
     mUI.actionRenameResource->setEnabled(!indices.empty());
 
     // disable edit actions if a non-native resources have been
@@ -1874,7 +1933,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     }
 
     QMenu show;
-    show.setTitle("Show ...");
+    show.setTitle("Show");
     for (const auto val : magic_enum::enum_values<app::Resource::Type>())
     {
         // skip drawable it's a superclass type and not directly relevant
@@ -1892,7 +1951,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     }
 
     QMenu script;
-    script.setTitle("New Script ...");
+    script.setTitle("New Script");
     script.setIcon(QIcon("icons:add.png"));
     script.addAction(mUI.actionNewBlankScript);
     script.addAction(mUI.actionNewEntityScript);
@@ -1912,6 +1971,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionImportFiles);
     menu.addAction(mUI.actionImportTiles);
+    menu.addAction(mUI.actionImportJSON);
+    menu.addAction(mUI.actionImportZIP);
     menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
@@ -1920,8 +1981,9 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionRenameResource);
     menu.addAction(mUI.actionDuplicateResource);
     menu.addAction(mUI.actionDeleteResource);
+    menu.addSeparator();
     menu.addAction(mUI.actionExportJSON);
-    menu.addAction(mUI.actionImportJSON);
+    menu.addAction(mUI.actionExportZIP);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());

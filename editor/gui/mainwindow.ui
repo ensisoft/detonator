@@ -1994,7 +1994,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>Export Json</string>
+    <string>Export Json ...</string>
    </property>
    <property name="toolTip">
     <string>Export resources as JSON</string>
@@ -2042,7 +2042,7 @@
      <normaloff>:/16x16_ico_png/rename.png</normaloff>:/16x16_ico_png/rename.png</iconset>
    </property>
    <property name="text">
-    <string>Rename</string>
+    <string>Rename ...</string>
    </property>
    <property name="toolTip">
     <string>Rename selected resources</string>
@@ -2054,7 +2054,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>Import Json</string>
+    <string>Import Json ...</string>
    </property>
    <property name="toolTip">
     <string>Import resources from JSON</string>
@@ -2130,6 +2130,30 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionImportZIP">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import Zip ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Import resources from a zip package</string>
+   </property>
+  </action>
+  <action name="actionExportZIP">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Zip ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Export selected resources into a zip package</string>
    </property>
   </action>
  </widget>

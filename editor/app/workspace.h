@@ -32,6 +32,7 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 
 #include "base/assert.h"
 #include "audio/loader.h"
@@ -63,6 +64,10 @@ namespace app
         { return mResources.size(); }
         const Resource& GetResource(size_t index) const
         { return *base::SafeIndex(mResources, index); }
+        void IgnoreResource(size_t index)
+        { mIgnoreSet.insert(index); }
+        bool IsIndexIgnored(size_t index) const
+        { return base::Contains(mIgnoreSet, index); }
     private:
         bool FindZipFile(const QString& unix_style_name) const;
     private:
@@ -71,6 +76,7 @@ namespace app
         QFile mFile;
         mutable QuaZip mZip;
         std::vector<std::unique_ptr<Resource>> mResources;
+        std::set<size_t> mIgnoreSet;
     };
 
     // Workspace groups together a collection of resources

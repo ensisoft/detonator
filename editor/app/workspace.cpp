@@ -2916,13 +2916,19 @@ bool Workspace::ImportContent(ContentZip& zip)
     // it seems a bit funny here to be calling "pack" when actually we're
     // unpacking but the implementation of zip based resource packer is
     // such that data is copied (packed) from the zip and into the workspace
-    for (auto& resource : zip.mResources)
+    for (size_t i=0; i<zip.mResources.size(); ++i)
     {
+        if (zip.IsIndexIgnored(i))
+            continue;
+        auto& resource = zip.mResources[i];
         resource->Pack(importer);
     }
 
-    for (const auto& resource : zip.mResources)
+    for (size_t i=0; i<zip.mResources.size(); ++i)
     {
+        if (zip.IsIndexIgnored(i))
+            continue;
+        auto& resource = zip.mResources[i];
         SaveResource(*resource);
     }
     return true;
