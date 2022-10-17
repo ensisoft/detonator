@@ -51,10 +51,10 @@ class QuaZip;
 
 namespace app
 {
-    class ContentZip
+    class ResourceArchive
     {
     public:
-        ContentZip();
+        ResourceArchive();
 
         bool Open(const QString& zip_file);
 
@@ -645,9 +645,9 @@ namespace app
         struct ExportOptions {
             QString zip_file;
         };
-        bool ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options);
+        bool ExportResourceArchive(const std::vector<const Resource*>& resources, const ExportOptions& options);
 
-        bool ImportContent(ContentZip& zip);
+        bool ImportResourceArchive(ResourceArchive& zip);
 
         struct ContentPackingOptions {
             // the output directory into which place the packed content.
@@ -697,15 +697,16 @@ namespace app
             QString emsdk_path;
         };
 
-        // Pack the selected resources into a deployable "package".
+        // Build the selected resources into a deployable release "package", that
+        // can be redistributed to the end users.
         // This includes copying the resource files such as fonts, textures and shaders
         // and also building content packages such as texture atlas(ses).
-        // The directory in which the output is to be placed will have it's
+        // The directory in which the output is to be placed will have its
         // previous contents OVERWRITTEN.
         // Returns true if everything went smoothly, otherwise false
         // and the package process might have failed in some way.
         // Errors/warnings encountered during the process will be logged.
-        bool PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
+        bool BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
 
     public slots:
         // Save or update a resource in the workspace. If the resource by the same type
@@ -735,9 +736,9 @@ namespace app
         // signal handler returns the pointer is no longer valid!
         void ResourceToBeDeleted(const Resource* resource);
 
-        // This signal is emitted intermittedly during  the
-        // execution of PackContent.
-        // Action is the name of the current action (human readable)
+        // This signal is emitted intermittently during  the
+        // execution of BuildReleasePackage.
+        // Action is the name of the current action (human-readable)
         // and step is the number of the current step out of total
         // steps under this action.
         void ResourcePackingUpdate(const QString& action, int step, int total);

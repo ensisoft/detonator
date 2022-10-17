@@ -433,7 +433,7 @@ R"(
     resources.push_back(&workspace.GetUserDefinedResource(5));
     resources.push_back(&workspace.GetUserDefinedResource(6));
     resources.push_back(&workspace.GetUserDefinedResource(7));
-    TEST_REQUIRE(workspace.PackContent(resources, options));
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
     // in the output folder we should have content.json, config.json
     // and the shaders copied into shaders/es2/
@@ -480,7 +480,7 @@ R"(
     DeleteDir("TestPackage");
     options.write_config_file = false;
     options.write_content_file = false;
-    workspace.PackContent(resources, options);
+    workspace.BuildReleasePackage(resources, options);
     TEST_REQUIRE(!base::FileExists("TestPackage/test/content.json"));
     TEST_REQUIRE(!base::FileExists("TestPackage/config.json"));
 }
@@ -532,7 +532,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/test_bitmap0.png"));
@@ -571,7 +571,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
@@ -610,7 +610,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
@@ -646,7 +646,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
@@ -679,7 +679,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
@@ -730,7 +730,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
         resources.push_back(&workspace.GetUserDefinedResource(1));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         // bitmap0 and bitmap1 should only be copied once and combined
         // with bitmap2. Bitmap3 is too large to pack.
@@ -787,7 +787,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
         resources.push_back(&workspace.GetUserDefinedResource(1));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
@@ -870,7 +870,7 @@ void unit_test_packing_texture_composition_format()
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         // todo: assuming a specific order in which the textures are generated. this needs to be fixed.
 
@@ -954,7 +954,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         auto loader = engine::JsonFileClassLoader::Create();
         loader->LoadFromFile("TestPackage/content.json");
@@ -990,7 +990,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         auto loader = engine::JsonFileClassLoader::Create();
         loader->LoadFromFile("TestPackage/content.json");
@@ -1030,7 +1030,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         // select the resources.
         std::vector<const app::Resource *> resources;
         resources.push_back(&workspace.GetUserDefinedResource(0));
-        TEST_REQUIRE(workspace.PackContent(resources, options));
+        TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/Generated_0.png"));
@@ -1099,7 +1099,7 @@ void unit_test_packing_texture_name_collision()
     std::vector<const app::Resource *> resources;
     resources.push_back(&workspace.GetUserDefinedResource(0));
     resources.push_back(&workspace.GetUserDefinedResource(1));
-    TEST_REQUIRE(workspace.PackContent(resources, options));
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
     // verify output
     auto cloader = engine::JsonFileClassLoader::Create();
@@ -1203,7 +1203,7 @@ void unit_test_packing_ui_style_resources()
     // select the resources.
     std::vector<const app::Resource*> resources;
     resources.push_back(&workspace.GetUserDefinedResource(0));
-    TEST_REQUIRE(workspace.PackContent(resources, options));
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
     // UI style files should be copied into ui/
     // the UI style is rewritten when the resource references are re-mapped and thus
@@ -1264,7 +1264,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     std::vector<const app::Resource *> resources;
     resources.push_back(&workspace.GetUserDefinedResource(0));
     resources.push_back(&workspace.GetUserDefinedResource(1));
-    TEST_REQUIRE(workspace.PackContent(resources, options));
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
     // verify output
     auto cloader = engine::JsonFileClassLoader::Create();
@@ -1638,7 +1638,7 @@ void unit_test_export_import_basic()
         resources.push_back(&workspace.GetUserDefinedResource(4));
         resources.push_back(&workspace.GetUserDefinedResource(5));
         resources.push_back(&workspace.GetUserDefinedResource(6));
-        TEST_REQUIRE(workspace.ExportContent(resources, options));
+        TEST_REQUIRE(workspace.ExportResourceArchive(resources, options));
     }
 
     {
@@ -1647,9 +1647,9 @@ void unit_test_export_import_basic()
 
         app::Workspace workspace("TestWorkspace");
 
-        app::ContentZip zip;
+        app::ResourceArchive zip;
         TEST_REQUIRE(zip.Open("test-export.zip"));
-        TEST_REQUIRE(workspace.ImportContent(zip));
+        TEST_REQUIRE(workspace.ImportResourceArchive(zip));
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 7);
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/shaders/es2/my_material.glsl") == "my_material.glsl");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/lua/game_script.lua") == "game_script.lua");

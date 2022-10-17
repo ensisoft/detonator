@@ -1105,7 +1105,7 @@ private:
 
 namespace app
 {
-ContentZip::ContentZip()
+ResourceArchive::ResourceArchive()
 {
     mZip.setAutoClose(true);
     mZip.setFileNameCodec("UTF-8");
@@ -1113,7 +1113,7 @@ ContentZip::ContentZip()
     mZip.setZip64Enabled(true);
 }
 
-bool ContentZip::Open(const QString& zip_file)
+bool ResourceArchive::Open(const QString& zip_file)
 {
     mFile.setFileName(zip_file);
     if (!mFile.open(QIODevice::ReadOnly))
@@ -1181,7 +1181,7 @@ bool ContentZip::Open(const QString& zip_file)
     return true;
 }
 
-bool ContentZip::ReadFile(const QString& file, QByteArray* array) const
+bool ResourceArchive::ReadFile(const QString& file, QByteArray* array) const
 {
     if (!FindZipFile(file))
         return false;
@@ -1192,7 +1192,7 @@ bool ContentZip::ReadFile(const QString& file, QByteArray* array) const
     return true;
 }
 
-bool ContentZip::FindZipFile(const QString& unix_style_name) const
+bool ResourceArchive::FindZipFile(const QString& unix_style_name) const
 {
     if (!mZip.goToFirstFile())
         return false;
@@ -2870,7 +2870,7 @@ void Workspace::Tick()
 
 }
 
-bool Workspace::ExportContent(const std::vector<const Resource*>& resources, const ExportOptions& options)
+bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resources, const ExportOptions& options)
 {
     ZipArchiveExporter zip(options.zip_file, mWorkspaceDir);
     if (!zip.Open())
@@ -2907,7 +2907,7 @@ bool Workspace::ExportContent(const std::vector<const Resource*>& resources, con
     return true;
 }
 
-bool Workspace::ImportContent(ContentZip& zip)
+bool Workspace::ImportResourceArchive(ResourceArchive& zip)
 {
     const QFileInfo info(zip.mZipFile);
     const auto& zip_dir = info.baseName();
@@ -2934,7 +2934,7 @@ bool Workspace::ImportContent(ContentZip& zip)
     return true;
 }
 
-bool Workspace::PackContent(const std::vector<const Resource*>& resources, const ContentPackingOptions& options)
+bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options)
 {
     const QString& outdir = JoinPath(options.directory, options.package_name);
     if (!MakePath(outdir))

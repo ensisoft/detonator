@@ -217,7 +217,7 @@ void DlgPackage::on_btnStart_clicked()
     options.write_html5_content_fs_image  = GetValue(mUI.chkGenerateHtml5FS);
     options.python_executable             = mSettings.python_executable;
     options.emsdk_path                    = mSettings.emsdk;
-    const auto success = mWorkspace.PackContent(resources, options);
+    const auto success = mWorkspace.BuildReleasePackage(resources, options);
 
     mUI.btnStart->setEnabled(true);
     mUI.btnClose->setEnabled(true);

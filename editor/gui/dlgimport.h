@@ -54,6 +54,6 @@ namespace gui
         Ui::DlgImport mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        std::unique_ptr<app::ContentZip> mZip;
+        std::unique_ptr<app::ResourceArchive> mZip;
     };
 } // namespace
