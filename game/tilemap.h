@@ -513,6 +513,7 @@ namespace game
         virtual base::bitflag<Flags> GetFlags() const = 0;
         virtual Type GetType() const = 0;
         virtual bool TestFlag(Flags flag) const = 0;
+        virtual bool IsLoaded() const = 0;
 
         virtual void Load(const std::shared_ptr<TilemapData>& data, unsigned default_cache_size) = 0;
         virtual void Save() = 0;
@@ -613,6 +614,8 @@ namespace game
             { return mClass->GetType(); }
             virtual bool TestFlag(Flags flag) const override
             { return mFlags.test(flag); }
+            virtual bool IsLoaded() const override
+            { return mData != nullptr; }
 
             virtual void Load(const std::shared_ptr<TilemapData>& data, unsigned default_cache_size) override
             {
