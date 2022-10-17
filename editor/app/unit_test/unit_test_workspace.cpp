@@ -1668,6 +1668,75 @@ void unit_test_export_import_basic()
     }
 }
 
+void unit_test_duplicate()
+{
+    // check duplication of tilemap layer data.
+    {
+        DeleteDir("TestWorkspace");
+
+        QDir d;
+        TEST_REQUIRE(d.mkpath("TestWorkspace"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/data"));
+
+        app::Workspace workspace("TestWorkspace");
+
+        game::TilemapLayerClass layer;
+        layer.SetName("layer");
+        layer.SetType(game::TilemapLayerClass::Type::DataUInt8);
+
+        const auto& data_uri  = app::toString("ws://data/%1.bin", layer.GetId());
+        const auto& data_file = workspace.MapFileToFilesystem(data_uri);
+        TEST_REQUIRE(app::WriteTextFile(data_file, "dummy layer data"));
+
+        app::DataFile datafile;
+        datafile.SetFileURI(data_uri);
+        datafile.SetTypeTag(app::DataFile::TypeTag::TilemapData);
+        datafile.SetOwnerId(layer.GetId());
+
+        layer.SetDataUri(app::ToUtf8(data_uri));
+        layer.SetDataId(datafile.GetId());
+
+        game::TilemapClass map;
+        map.SetName("map");
+        map.SetMapWidth(10);
+        map.SetMapHeight(10);
+        map.AddLayer(layer);
+
+        app::DataResource data_resource(datafile, "layer data");
+        workspace.SaveResource(data_resource);
+
+        app::TilemapResource map_resource(map, "tilemap");
+        workspace.SaveResource(map_resource);
+
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 2);
+        TEST_REQUIRE(workspace.GetUserDefinedResource(0).GetName() == "layer data");
+        TEST_REQUIRE(workspace.GetUserDefinedResource(1).GetName() == "tilemap");
+
+        workspace.DuplicateResource(1);
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 4);
+
+        {
+            const auto& cpy_data_res = workspace.GetResourceByName("Copy of tilemap Layer Data", app::Resource::Type::DataFile);
+            const auto& cpy_map_res  = workspace.GetResourceByName("Copy of tilemap", app::Resource::Type::Tilemap);
+
+            const game::TilemapClass* cpy_map = nullptr;
+            cpy_map_res.GetContent(&cpy_map);
+            TEST_REQUIRE(cpy_map->GetNumLayers() == 1);
+            const auto& cpy_layer = cpy_map->GetLayer(0);
+
+            const app::DataFile* data = nullptr;
+            cpy_data_res.GetContent(&data);
+            TEST_REQUIRE(data->GetTypeTag() == app::DataFile::TypeTag::TilemapData);
+            TEST_REQUIRE(data->GetFileURI() == base::FormatString("ws://data/%1.bin", cpy_layer.GetId()));
+            TEST_REQUIRE(data->GetOwnerId() == cpy_layer.GetId());
+            TEST_REQUIRE(data->GetFileURI() == cpy_layer.GetDataUri());
+            TEST_REQUIRE(data->GetId()      == cpy_layer.GetDataId());
+            const auto& cpy_file = workspace.MapFileToFilesystem(data->GetFileURI());
+            TEST_REQUIRE(app::ReadTextFile(cpy_file) == "dummy layer data");
+        }
+    }
+}
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -1695,5 +1764,7 @@ int test_main(int argc, char* argv[])
     unit_test_json_export_import();
     unit_test_list_deps();
     unit_test_export_import_basic();
+
+    unit_test_duplicate();
     return 0;
 }
