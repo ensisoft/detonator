@@ -22,6 +22,7 @@
 #  include <QObject>
 #  include <QLocalServer>
 #  include <QtNetwork>
+#  include <QJsonObject>
 #include "warnpop.h"
 
 namespace app
@@ -38,9 +39,8 @@ namespace app
     // so that the changes can be shown to the user in the game
     // window and edits are "live":
 
-    // This is the "host" part of the communication. Created
-    // by the editor process. Opens a new local socket and
-    // accepts 1 connection.
+    // This is the "host" part of the IPC communication channel.
+    // Opens a new local socket and accepts 1 incoming client connection.
     class IPCHost : public QObject
     {
         Q_OBJECT
@@ -50,7 +50,7 @@ namespace app
         IPCHost(const IPCHost& other) = delete;
         ~IPCHost() ;
 
-        bool Open(const QString& name);
+        bool Open(const QString& ipc_socke_name);
         void Close();
         bool IsConnected() const
         { return mClient != nullptr; }
@@ -61,16 +61,17 @@ namespace app
 
         IPCHost& operator=(const IPCHost&) = delete;
 
-        static
-        void Cleanup(const QString& name);
+        static void CleanupSocket(const QString& ipc_socket_name);
 
     signals:
         void UserPropertyUpdated(const QString& name, const QVariant& data);
+        void JsonMessageReceived(const QJsonObject& json);
 
     public slots:
         // On invocation serialize the contents of the resource
         // object and send to the connected client if any.
         void ResourceUpdated(const Resource* resource);
+        void SendJsonMessage(const QJsonObject& json);
 
     private slots:
         void NewConnection();
@@ -83,9 +84,9 @@ namespace app
         QDataStream mClientStream;
     };
 
-    // This is the "client" part of the communication. Created
-    // by the game host process. Opens a new local socket and
-    // tries to connect to the local host.
+    // This is the "client" part of the IPC communication channel.
+    // The IPC Client opens a new local socket and tries to connect
+    // to the specified local host socket.
     class IPCClient : public QObject
     {
         Q_OBJECT
@@ -98,7 +99,7 @@ namespace app
         // Try to connect to the named local server identified
         // by its name. This function will wait for the connection
         // to complete. Returns true on success or false on error.
-        bool Open(const QString& name);
+        bool Open(const QString& ipc_socket_name);
 
         void Close();
 
@@ -112,8 +113,10 @@ namespace app
         // message. The resource object contains the exact same
         // state that was stored on the host side.
         void ResourceUpdated(const Resource* resource);
+        void JsonMessageReceived(const QJsonObject& json);
     public slots:
         void UserPropertyUpdated(const QString& name, const QVariant& data);
+        void SendJsonMessage(const QJsonObject& json);
     private slots:
         void ReadMessage();
         void ReadError(QLocalSocket::LocalSocketError error);

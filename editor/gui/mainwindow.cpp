@@ -2141,7 +2141,7 @@ void MainWindow::on_actionProjectPlay_triggered()
             return;
 
         ASSERT(!mIPCHost);
-        app::IPCHost::Cleanup("gamestudio-local-socket");
+        app::IPCHost::CleanupSocket("gamestudio-local-socket");
         auto ipc = std::make_unique<app::IPCHost>();
         if (!ipc->Open("gamestudio-local-socket"))
             return;
