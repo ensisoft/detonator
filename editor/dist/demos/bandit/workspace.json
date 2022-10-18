@@ -401,7 +401,11 @@
         "material": "xrUzM3pdBZ"
     },
     "Yq50Y5iaj6": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_0BEu7bmIj7": "",
+        "comment_8FQMqZtbZH": "",
+        "comment_GnMCqKtj3e": "",
+        "comment_wI6nyLEiCZ": ""
     },
     "Yyg2eMPHlt": {
         "checked_for_packing": 1
@@ -466,13 +470,13 @@
         "material": "bBSpmT5CN0"
     },
     "gwm3bTflRn": {
+        "checked_for_packing": 1,
         "comment_KIiKgUK0Dg": "",
         "comment_UIbYC5M3Iq": "",
         "comment_Y0gBBtChIX": "",
         "comment_l2p8ir9ZhN": ""
     },
     "gzjp7PwMQd": {
-        "checked_for_packing": 1
     },
     "iFATbhg5NM": {
         "checked_for_packing": 1
@@ -629,7 +633,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "512",

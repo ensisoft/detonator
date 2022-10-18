@@ -5071,6 +5071,7 @@
       "resource_id": "UWF4u1fYHa",
       "resource_name": "Game",
       "script_file": "OiyvAkqpIL",
+      "tilemap": "",
       "top_boundary": -500.0,
       "vars": [
         {
@@ -5186,7 +5187,8 @@
       },
       "resource_id": "Z2zrRug3HP",
       "resource_name": "Menu",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [

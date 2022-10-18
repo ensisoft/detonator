@@ -5644,7 +5644,7 @@
             "x": -177.0,
             "y": -165.0
           },
-          "rotation": -0.2555859088897705,
+          "rotation": -0.2555162012577057,
           "scale": {
             "x": 1.0,
             "y": 1.0
@@ -5663,7 +5663,7 @@
             "font_name": "app://fonts/KomikaTitle-Wide.ttf",
             "font_size": 48,
             "horizontal_align": "Center",
-            "layer": 0,
+            "layer": 1,
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
@@ -5689,7 +5689,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
             "material": "nLUoQRjXrg",
             "renderpass": "Draw",
@@ -5743,7 +5743,7 @@
             "font_name": "app://fonts/KomikaTitle-Wide.ttf",
             "font_size": 28,
             "horizontal_align": "Center",
-            "layer": 0,
+            "layer": 1,
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
@@ -13947,6 +13947,7 @@
       "resource_id": "vWm1hXNdOD",
       "resource_name": "Level 0",
       "script_file": "",
+      "tilemap": "",
       "vars": [
         {
           "array": false,
@@ -14724,6 +14725,7 @@
       "resource_name": "Menu Scene",
       "right_boundary": 600.0,
       "script_file": "",
+      "tilemap": "",
       "top_boundary": -400.0
     }
   ],

@@ -4320,7 +4320,8 @@
       },
       "resource_id": "dFl9nHNaNT",
       "resource_name": "Demo",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [
