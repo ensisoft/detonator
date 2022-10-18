@@ -66,6 +66,7 @@ namespace app
     signals:
         void UserPropertyUpdated(const QString& name, const QVariant& data);
         void JsonMessageReceived(const QJsonObject& json);
+        void ClientConnected();
 
     public slots:
         // On invocation serialize the contents of the resource

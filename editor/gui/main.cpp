@@ -44,9 +44,11 @@
 #include "git.h"
 
 #include "base/logging.h"
+#include "base/cmdline.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/mainwindow.h"
+#include "editor/gui/viewwindow.h"
 
 void copyright()
 {
@@ -141,142 +143,300 @@ void copyright()
     INFO(APP_TITLE);
 }
 
-class ForwardingLogger : public base::Logger
+template<typename Window>
+void EventLoop(QApplication& app, Window& window)
 {
-public:
-    ForwardingLogger() : mLogger(std::cout)
+    // run the mainloop
+    // this isn't the conventional way to run a qt based
+    // application's main loop. normally one would just call
+    // app.exec() but it seems to greatly degrade the performance
+    // up to an order of magnitude difference in rendering perf
+    // as measured by frames per second.
+    // the problem with this type of loop however is that on a modern
+    // machine with performant GPU were the GPU workloads are small
+    // and without sync to VBLANK enabled we're basically going
+    // to be running a busy loop here burning a lot of cycles for nothing.
+    while (!window.isClosed())
     {
-        mLogger.EnableTerminalColors(true);
+        app.processEvents();
+        if (window.isClosed())
+            break;
+
+        // why are we not calling iterateMainLoop directly here??
+        // the problem has to do with modal dialogs. When a modal
+        // dialog is open Qt enters a temporary event loop which
+        // would mean that this code would not get a chance to render.
+        // thus, the iteration of the main loop code in the mainwindow
+        // is triggered by an event posted to the application queue
+
+        if (!window.haveAcceleratedWindows())
+        {
+            DEBUG("Enter slow event loop.");
+            // enter a temporary "slow" event loop until there are again
+            // windows that require "acceleration" i.e. continuous game loop
+            // style processing.
+            QEventLoop loop;
+            QObject::connect(&window, &Window::newAcceleratedWindowOpen, &loop, &QEventLoop::quit);
+            QObject::connect(&window, &Window::aboutToClose, &loop, &QEventLoop::quit);
+            loop.exec();
+            DEBUG("Exit slow event loop.");
+        }
+    }
+    DEBUG("Exiting...");
+}
+
+
+void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplication& app)
+{
+    class ForwardingLogger : public base::Logger
+    {
+    public:
+        ForwardingLogger() : mLogger(std::cout)
+        {
+            mLogger.EnableTerminalColors(false);
+        }
+        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+        {
+            // 1. strip the file/line information. Events written into
+            // gamehosts's app::EventLog don't have this.
+            // 2. encode the type of the message in the message itself
+            // and write to stdout for the editor process to read it.
+            std::string prefix;
+            if (type == base::LogEvent::Error)
+                prefix = "E: ";
+            else if (type == base::LogEvent::Warning)
+                prefix = "W: ";
+            else if (type == base::LogEvent::Info)
+                prefix = "I: ";
+            else if (type == base::LogEvent::Debug)
+                prefix = "D: ";
+
+            std::string message;
+            message.append(prefix);
+            message.append(msg);
+            message.append("\n");
+            mLogger.Write(type, message.c_str());
+        }
+
+        virtual void Write(base::LogEvent type, const char* msg) override
+        {
+            mLogger.Write(type, msg);
+        }
+        virtual void Flush() override
+        {
+            mLogger.Flush();
+        }
+        virtual base::bitflag<base::Logger::WriteType> GetWriteMask() const override
+        {
+            base::bitflag<base::Logger::WriteType> ret;
+            ret.set(base::Logger::WriteType::WriteRaw, !mWriteFormatted);
+            ret.set(base::Logger::WriteType::WriteFormatted, mWriteFormatted);
+            return ret;
+        }
+    private:
+        base::OStreamLogger mLogger;
+        bool mWriteFormatted = false;
+    };
+
+    // set the logger object for the subsystem to use, we'll
+    // direct all this to the terminal for now.
+    base::LockedLogger<ForwardingLogger> logger((ForwardingLogger()));
+    base::SetGlobalLog(&logger);
+    base::EnableDebugLog(true);
+    DEBUG("It's alive!");
+
+    // capture log events written into app::EventLog and forward
+    // them to the base logger which writes them to stdout
+    // which is re-directed to a file when this process is started
+    // by the GSEditor process.
+    app::EventLog::get().OnNewEvent = [](const app::Event& event) {
+
+        //base::Write
+        base::LogEvent type;
+        if (event.type == app::Event::Type::Info)
+            type = base::LogEvent::Info;
+        else if (event.type == app::Event::Type::Warning)
+            type = base::LogEvent::Warning;
+        else if (event.type == app::Event::Type::Error)
+            type = base::LogEvent::Error;
+        else if (event.type == app::Event::Type::Debug)
+            type = base::LogEvent::Debug;
+        else return;
+        auto msg = app::ToUtf8(event.message);
+        // currently, the app::Event information doesn't have file/line
+        // information.
+        auto* logger = base::GetGlobalLog();
+        if (logger->TestWriteMask(base::Logger::WriteType::WriteRaw)) {
+            logger->Write(type, __FILE__, __LINE__, msg.c_str());
+        }
+        if (logger->TestWriteMask(base::Logger::WriteType::WriteFormatted)) {
+            msg.append("\n");
+            logger->Write(type, msg.c_str());
+        }
+    };
+
+    if (!style.empty())
+    {
+        QStyle* pstyle = QApplication::setStyle(app::FromUtf8(style));
+        if (pstyle == nullptr) {
+            WARN("No such application style. [style='%1']", style);
+        } else {
+            QApplication::setPalette(pstyle->standardPalette());
+            DEBUG("Applied application style. [style='%1']", style);
+        }
     }
 
-    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+    gui::ViewWindow window(app);
+    window.show();
+    window.Connect(app::FromUtf8(ipc_socket));
+
+    EventLoop(app, window);
+}
+
+void EditorMain(QApplication& app)
+{
+    // prefix with a . to make this a "hidden" dir
+    // which is the convention on Linux
+    app::InitializeAppHome(".Gamestudio Editor");
+
+    class ForwardingLogger : public base::Logger
     {
-        // forward Error and warnings to the application log too.
-        if (type == base::LogEvent::Error)
-            ERROR(msg);
-        else if (type == base::LogEvent::Warning)
-            WARN(msg);
-        else if (type == base::LogEvent::Info)
-            INFO(msg);
-        mLogger.Write(type, file, line, msg);
+    public:
+        ForwardingLogger() : mLogger(std::cout)
+        {
+            mLogger.EnableTerminalColors(true);
+        }
+
+        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+        {
+            // forward Error and warnings to the application log too.
+            if (type == base::LogEvent::Error)
+                ERROR(msg);
+            else if (type == base::LogEvent::Warning)
+                WARN(msg);
+            else if (type == base::LogEvent::Info)
+                INFO(msg);
+            mLogger.Write(type, file, line, msg);
+        }
+
+        virtual void Write(base::LogEvent type, const char* msg) override
+        {
+            mLogger.Write(type, msg);
+        }
+        virtual void Flush() override
+        {
+            mLogger.Flush();
+        }
+    private:
+        base::OStreamLogger mLogger;
+    };
+
+    // set the logger object for the subsystem to use, we'll
+    // direct all this to the terminal for now.
+    base::LockedLogger<ForwardingLogger> logger((ForwardingLogger()));
+    base::SetGlobalLog(&logger);
+    base::EnableDebugLog(true);
+    DEBUG("It's alive!");
+
+    copyright();
+
+    // Create the application main window into which we add
+    // main widgets.
+    gui::MainWindow window(app);
+
+    window.LoadSettings();
+    window.LoadState();
+    window.showWindow();
+
+    EventLoop(app, window);
+}
+
+int Main(int argc, char* argv[])
+{
+    base::CommandLineOptions options;
+    options.Add("--viewer", "Launch project viewer only.");
+    options.Add("--app-style", "Name of the style to apply.", std::string(""));
+    options.Add("--socket-name", "Name of the local socket to connect to.", std::string(""));
+    options.Add("--help", "Print this help.");
+
+    bool viewer_mode = false;
+    std::string arg_parse_error;
+    std::string ipc_socket_name;
+    std::string style;
+    if (!options.Parse(base::CreateStandardArgs(argc, argv), &arg_parse_error))
+    {
+        std::cout << arg_parse_error;
+        std::cout << std::endl;
+        return 0;
+    }
+    else if (options.WasGiven("--help"))
+    {
+        options.Print(std::cout);
+        return 0;
+    }
+    viewer_mode = options.WasGiven("--viewer");
+    if (viewer_mode)
+    {
+        if (!options.GetValue("--socket-name", &ipc_socket_name))
+            ipc_socket_name = "gamestudio-local-socket";
     }
 
-    virtual void Write(base::LogEvent type, const char* msg) override
+    // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
+    // turns out this attribute is needed in order to make Qt
+    // create a GLES2 context.
+    // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
+    QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
+    //QCoreApplication::setAttribute(Qt::AA_NativeWindows);
+
+    // set the aliases for icon search paths
+    QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
+    QDir::setSearchPaths("level", QStringList(":/32x32_ico_png"));
+
+    // Set default surface format.
+    // note that the alpha channel is not used on purpose.
+    // using an alpha channel will cause artifacts with alpha
+    // compositing window compositor such as picom. i.e. the
+    // background surfaces in the compositor's window stack will
+    // show through. in terms of alpha blending the game content
+    // whether the destination color buffer has alpha channel or
+    // not should be irrelevant.
+    QSurfaceFormat format;
+    format.setVersion(2, 0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setDepthBufferSize(24);
+    format.setAlphaBufferSize(0); // no alpha channel
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setStencilBufferSize(8);
+    format.setSamples(4);
+    format.setSwapInterval(0);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setColorSpace(QSurfaceFormat::ColorSpace::sRGBColorSpace);
+    QSurfaceFormat::setDefaultFormat(format);
+
+    QApplication app(argc, argv);
+
+    // Add a path for Qt to look for the plugins at runtime
+    // note that this needs to be called *after* the QApplication object has been created.
+    QCoreApplication::addLibraryPath(app::JoinPath(QCoreApplication::applicationDirPath(), "plugins"));
+
+    if (viewer_mode)
     {
-        mLogger.Write(type, msg);
+        ViewerMain(style, ipc_socket_name, app);
+        return 0;
     }
-    virtual void Flush() override
-    {
-        mLogger.Flush();
-    }
-private:
-    base::OStreamLogger mLogger;
-};
+
+    EditorMain(app);
+    return 0;
+}
 
 int main(int argc, char* argv[])
 {
     try
     {
-        // prefix with a . to make this a "hidden" dir
-        // which is the convention on Linux
-        app::InitializeAppHome(".Gamestudio Editor");
-
-        // set the logger object for the subsystem to use, we'll
-        // direct all this to the terminal for now.
-        base::LockedLogger<ForwardingLogger> logger((ForwardingLogger()));
-        base::SetGlobalLog(&logger);
-        base::EnableDebugLog(true);
-        DEBUG("It's alive!");
-
-        copyright();
-
-        // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
-        // turns out this attribute is needed in order to make Qt
-        // create a GLES2 context.
-        // https://lists.qt-project.org/pipermail/interest/2015-February/015404.html
-        QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-        //QCoreApplication::setAttribute(Qt::AA_NativeWindows);
-
-        // set the aliases for icon search paths
-        QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
-        QDir::setSearchPaths("level", QStringList(":/32x32_ico_png"));
-
-        // Set default surface format.
-        // note that the alpha channel is not used on purpose.
-        // using an alpha channel will cause artifacts with alpha
-        // compositing window compositor such as picom. i.e. the
-        // background surfaces in the compositor's window stack will
-        // show through. in terms of alpha blending the game content
-        // whether the destination color buffer has alpha channel or
-        // not should be irrelevant.
-        QSurfaceFormat format;
-        format.setVersion(2, 0);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-        format.setRenderableType(QSurfaceFormat::OpenGLES);
-        format.setDepthBufferSize(24);
-        format.setAlphaBufferSize(0); // no alpha channel
-        format.setRedBufferSize(8);
-        format.setGreenBufferSize(8);
-        format.setBlueBufferSize(8);
-        format.setStencilBufferSize(8);
-        format.setSamples(4);
-        format.setSwapInterval(0);
-        format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-        format.setColorSpace(QSurfaceFormat::ColorSpace::sRGBColorSpace);
-        QSurfaceFormat::setDefaultFormat(format);
-
-        QApplication app(argc, argv);
-
-        // Add a path for Qt to look for the plugins at runtime
-        // note that this needs to be called *after* the QApplication object has been created.
-        QCoreApplication::addLibraryPath(app::JoinPath(QCoreApplication::applicationDirPath(), "plugins"));
-
-        // Create the application main window into which we add
-        // main widgets.
-        gui::MainWindow window(app);
-
-        window.LoadSettings();
-        window.LoadState();
-        window.showWindow();
-
-        // run the mainloop
-        // this isn't the conventional way to run a qt based
-        // application's main loop. normally one would just call
-        // app.exec() but it seems to greatly degrade the performance
-        // up to an order of magnitude difference in rendering perf
-        // as measured by frames per second.
-        // the problem with this type of loop however is that on a modern
-        // machine with performant GPU were the GPU workloads are small
-        // and without sync to VBLANK enabled we're basically going
-        // to be running a busy loop here burning a lot cycles for nothing.
-        while (!window.isClosed())
-        {
-            app.processEvents();
-            if (window.isClosed())
-                break;
-
-            // why are we not calling iterateMainLoop directly here??
-            // the problem has to do with modal dialogs. When a modal
-            // dialog is open Qt enters a temporary event loop which
-            // would mean that this code would not get a chance to render.
-            // thus the iteration of the main loop code in the mainwindow
-            // is triggered by an event posted to the application queue
-
-            if (!window.haveAcceleratedWindows())
-            {
-                DEBUG("Enter slow event loop.");
-                // enter a temporary "slow" event loop until there are again
-                // windows that require "acceleration" i.e. continuous game loop
-                // style processing.
-                QEventLoop loop;
-                QObject::connect(&window, &gui::MainWindow::newAcceleratedWindowOpen, &loop, &QEventLoop::quit);
-                QObject::connect(&window, &gui::MainWindow::aboutToClose, &loop, &QEventLoop::quit);
-                loop.exec();
-                DEBUG("Exit slow event loop.");
-            }
-        }
-
-        DEBUG("Exiting...");
+        return Main(argc, argv);
     }
     catch (const std::exception& e)
     {
@@ -288,5 +448,3 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
     return 0;
 }
-
-

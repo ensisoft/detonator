@@ -150,6 +150,7 @@ void IPCHost::NewConnection()
     connect(mClient, &QLocalSocket::readyRead, this, &IPCHost::ReadMessage);
     mClientStream.setDevice(mClient);
     DEBUG("New IPC client connection ready.");
+    emit ClientConnected();
 }
 
 void IPCHost::ClientDisconnected()

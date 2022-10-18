@@ -204,6 +204,21 @@ void MaterialWidget::Initialize(const UISettings& settings)
     SetValue(mUI.zoom, settings.zoom);
 }
 
+void MaterialWidget::SetViewerMode()
+{
+    SetVisible(mUI.baseProperties,    false);
+    SetVisible(mUI.builtInProperties, false);
+    SetVisible(mUI.gradientMap,       false);
+    SetVisible(mUI.textureCoords,     false);
+    SetVisible(mUI.customUniforms,    false);
+    SetVisible(mUI.customSamplers,    false);
+    SetVisible(mUI.textureFilters,    false);
+    SetVisible(mUI.textureMaps,       false);
+    SetVisible(mUI.textureProp,       false);
+    SetVisible(mUI.textureRect,       false);
+    on_actionPlay_triggered();
+}
+
 void MaterialWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

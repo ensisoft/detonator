@@ -55,6 +55,28 @@ DlgImport::~DlgImport()
 
 }
 
+bool DlgImport::OpenArchive(const QString& file)
+{
+    auto zip = std::make_unique<app::ResourceArchive>();
+    if (!zip->Open(file))
+        return false;
+
+    mUI.list->clear();
+    for (size_t i=0; i<zip->GetNumResources(); ++i)
+    {
+        const auto& resource = zip->GetResource(i);
+        QListWidgetItem* item = new QListWidgetItem();
+        item->setIcon(resource.GetIcon());
+        item->setText(resource.GetName());
+        mUI.list->addItem(item);
+    }
+
+    mZip = std::move(zip);
+    SetValue(mUI.file, file);
+    SetEnabled(mUI.btnImport, true);
+    return true;
+}
+
 void DlgImport::on_btnSelectFile_clicked()
 {
     const auto& filename = QFileDialog::getOpenFileName(this,

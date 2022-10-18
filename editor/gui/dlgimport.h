@@ -46,6 +46,8 @@ namespace gui
         DlgImport(QWidget* parent, app::Workspace* workspace);
        ~DlgImport();
 
+        bool OpenArchive(const QString& file);
+
     private slots:
         void on_btnSelectFile_clicked();
         void on_btnImport_clicked();

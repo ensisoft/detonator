@@ -77,6 +77,12 @@ namespace gui
         virtual void Initialize(const UISettings& settings)
         {}
 
+        // Set the widget in viewer mode where all editing features
+        // are disabled and removed from the widget's UI and only
+        // viewing is possible.
+        virtual void SetViewerMode()
+        {}
+
         // Returns whether the widget does accelerated rendering and needs to
         // run in an accelerated "game style" loop.
         virtual bool IsAccelerated() const

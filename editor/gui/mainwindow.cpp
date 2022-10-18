@@ -264,7 +264,7 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "emsdk",                      &mSettings.emsdk);
     settings.GetValue("Settings", "clear_color",                &mSettings.clear_color);
     settings.GetValue("Settings", "grid_color",                 &mSettings.grid_color);
-    settings.GetValue("Settings", "default_grid",               (unsigned*)&mUISettings.grid);
+    settings.GetValue("Settings", "default_grid",               &mUISettings.grid);
     settings.GetValue("Settings", "default_zoom",               &mUISettings.zoom);
     settings.GetValue("Settings", "snap_to_grid",               &mUISettings.snap_to_grid);
     settings.GetValue("Settings", "show_viewport",              &mUISettings.show_viewport);
@@ -273,6 +273,7 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "vsync",                      &mSettings.vsync);
     settings.GetValue("Settings", "frame_delay",                &mSettings.frame_delay);
     settings.GetValue("Settings", "mouse_cursor",               &mSettings.mouse_cursor);
+    settings.GetValue("Settings", "viewer_geometry",            &mSettings.viewer_geometry);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetVSYNC(mSettings.vsync);
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
@@ -739,11 +740,21 @@ void MainWindow::CloseWorkspace()
     {
         mGameProcess.Kill();
     }
+    if  (mViewerProcess.IsRunning())
+    {
+        mViewerProcess.Kill();
+    }
 
     if (mIPCHost)
     {
         mIPCHost->Close();
         mIPCHost.reset();
+    }
+
+    if (mIPCHost2)
+    {
+        mIPCHost2->Close();
+        mIPCHost2.reset();
     }
 
     if (mPlayWindow)
@@ -1855,6 +1866,62 @@ void MainWindow::on_actionImagePacker_triggered()
     DlgImgPack dlg(this);
     dlg.exec();
 }
+
+void MainWindow::on_actionLaunchViewer_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    app::IPCHost::CleanupSocket("gamestudio-local-socket-2");
+    auto ipc = std::make_unique<app::IPCHost>();
+    if (!ipc->Open("gamestudio-local-socket-2"))
+        return;
+
+    DEBUG("Local socket is open!");
+
+    QStringList viewer_args;
+    viewer_args << "--viewer";
+    viewer_args << "--socket-name";
+    viewer_args << "gamestudio-local-socket-2";
+    viewer_args << "--app-style";
+    viewer_args << mSettings.style_name;
+
+    QString executable = "GSEditor";
+#if defined(WINDOWS_OS)
+    executable.append(".exe");
+#endif
+    const auto& exec_file = app::JoinPath(QCoreApplication::applicationDirPath(), executable);
+    const auto& log_file  = app::JoinPath(QCoreApplication::applicationDirPath(), "viewer.log");
+    const auto& viewer_cwd  = QDir::currentPath();
+    mViewerProcess.EnableTimeout(false);
+    mViewerProcess.onFinished = [this]() {
+        DEBUG("Viewer process finished.");
+        if (mViewerProcess.GetError() != app::Process::Error::None)
+            ERROR("Viewer process error. [error='%1']", mViewerProcess.GetError());
+
+        mIPCHost2->Close();
+        mIPCHost2.reset();
+        SetEnabled(mUI.actionLaunchViewer, true);
+    };
+    mViewerProcess.Start(exec_file, viewer_args, log_file, viewer_cwd);
+    mIPCHost2 = std::move(ipc);
+
+    QObject::connect(mIPCHost2.get(), &app::IPCHost::ClientConnected,
+         [this]() {
+             QJsonObject json;
+             app::JsonWrite(json, "message",      QString("settings"));
+             app::JsonWrite(json, "clear_color",  mSettings.clear_color);
+             app::JsonWrite(json, "grid_color",   mSettings.grid_color);
+             app::JsonWrite(json, "mouse_cursor", mSettings.mouse_cursor);
+             app::JsonWrite(json, "vsync",        mSettings.vsync);
+             app::JsonWrite(json, "geometry",     mSettings.viewer_geometry);
+             mIPCHost2->SendJsonMessage(json);
+        });
+    QObject::connect(mIPCHost2.get(), &app::IPCHost::JsonMessageReceived, this, &MainWindow::ViewerJsonMessageReceived);
+
+    SetEnabled(mUI.actionLaunchViewer, false);
+}
+
 void MainWindow::on_actionClearLog_triggered()
 {
     app::EventLog::get().clear();
@@ -2659,6 +2726,34 @@ void MainWindow::ResourceAvailable(const app::Resource* resource)
     }
 }
 
+void MainWindow::ViewerJsonMessageReceived(const QJsonObject& json)
+{
+    QString message;
+    app::JsonReadSafe(json, "message", &message);
+    DEBUG("New IPC message from viewer. [message='%1']", message);
+
+    if (message == "viewer-geometry")
+    {
+        QString geometry;
+        app::JsonReadSafe(json, "geometry", &geometry);
+        mSettings.viewer_geometry = geometry;
+    }
+    else if (message == "viewer-export")
+    {
+        QString zip_file;
+        app::JsonReadSafe(json, "zip_file", &zip_file);
+
+        DlgImport dlg(this, mWorkspace.get());
+        if (!dlg.OpenArchive(zip_file))
+            return;
+        dlg.exec();
+    }
+    else
+    {
+        WARN("Ignoring unknown JSON IPC message. [message='%1']", message);
+    }
+}
+
 bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
@@ -2768,30 +2863,31 @@ void MainWindow::BuildRecentWorkspacesMenu()
 void MainWindow::SaveSettings()
 {
     Settings settings("Ensisoft", "Gamestudio Editor");
-    settings.SetValue("Settings", "image_editor_executable", mSettings.image_editor_executable);
-    settings.SetValue("Settings", "image_editor_arguments", mSettings.image_editor_arguments);
-    settings.SetValue("Settings", "shader_editor_executable", mSettings.shader_editor_executable);
-    settings.SetValue("Settings", "shader_editor_arguments", mSettings.shader_editor_arguments);
-    settings.SetValue("Settings", "default_open_win_or_tab", mSettings.default_open_win_or_tab);
-    settings.SetValue("Settings", "script_editor_executable", mSettings.script_editor_executable);
-    settings.SetValue("Settings", "script_editor_arguments", mSettings.script_editor_arguments);
-    settings.SetValue("Settings", "audio_editor_executable", mSettings.audio_editor_executable);
-    settings.SetValue("Settings", "audio_editor_arguments", mSettings.audio_editor_arguments);
-    settings.SetValue("Settings", "style_name", mSettings.style_name);
+    settings.SetValue("Settings", "image_editor_executable",    mSettings.image_editor_executable);
+    settings.SetValue("Settings", "image_editor_arguments",     mSettings.image_editor_arguments);
+    settings.SetValue("Settings", "shader_editor_executable",   mSettings.shader_editor_executable);
+    settings.SetValue("Settings", "shader_editor_arguments",    mSettings.shader_editor_arguments);
+    settings.SetValue("Settings", "default_open_win_or_tab",    mSettings.default_open_win_or_tab);
+    settings.SetValue("Settings", "script_editor_executable",   mSettings.script_editor_executable);
+    settings.SetValue("Settings", "script_editor_arguments",    mSettings.script_editor_arguments);
+    settings.SetValue("Settings", "audio_editor_executable",    mSettings.audio_editor_executable);
+    settings.SetValue("Settings", "audio_editor_arguments",     mSettings.audio_editor_arguments);
+    settings.SetValue("Settings", "style_name",                 mSettings.style_name);
     settings.SetValue("Settings", "save_automatically_on_play", mSettings.save_automatically_on_play);
-    settings.SetValue("Settings", "python_executable", mSettings.python_executable);
-    settings.SetValue("Settings", "emsdk", mSettings.emsdk);
-    settings.SetValue("Settings", "clear_color", mSettings.clear_color);
-    settings.SetValue("Settings", "grid_color", mSettings.grid_color);
-    settings.SetValue("Settings", "default_grid", (unsigned)mUISettings.grid);
-    settings.SetValue("Settings", "default_zoom", mUISettings.zoom);
-    settings.SetValue("Settings", "snap_to_grid", mUISettings.snap_to_grid);
-    settings.SetValue("Settings", "show_viewport", mUISettings.show_viewport);
-    settings.SetValue("Settings", "show_origin", mUISettings.show_origin);
-    settings.SetValue("Settings", "show_grid", mUISettings.show_grid);
-    settings.SetValue("Settings", "vsync", mSettings.vsync);
-    settings.SetValue("Settings", "frame_delay", mSettings.frame_delay);
-    settings.SetValue("Settings", "mouse_cursor", mSettings.mouse_cursor);
+    settings.SetValue("Settings", "python_executable",          mSettings.python_executable);
+    settings.SetValue("Settings", "emsdk",                      mSettings.emsdk);
+    settings.SetValue("Settings", "clear_color",                mSettings.clear_color);
+    settings.SetValue("Settings", "grid_color",                 mSettings.grid_color);
+    settings.SetValue("Settings", "default_grid",               mUISettings.grid);
+    settings.SetValue("Settings", "default_zoom",               mUISettings.zoom);
+    settings.SetValue("Settings", "snap_to_grid",               mUISettings.snap_to_grid);
+    settings.SetValue("Settings", "show_viewport",              mUISettings.show_viewport);
+    settings.SetValue("Settings", "show_origin",                mUISettings.show_origin);
+    settings.SetValue("Settings", "show_grid",                  mUISettings.show_grid);
+    settings.SetValue("Settings", "vsync",                      mSettings.vsync);
+    settings.SetValue("Settings", "frame_delay",                mSettings.frame_delay);
+    settings.SetValue("Settings", "mouse_cursor",               mSettings.mouse_cursor);
+    settings.SetValue("Settings", "viewer_geometry",            mSettings.viewer_geometry);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
     settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
