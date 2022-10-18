@@ -272,7 +272,7 @@
             "font_name": "app://fonts/orbitron-bold.otf",
             "font_size": 20,
             "horizontal_align": "Center",
-            "layer": 0,
+            "layer": 1,
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
@@ -1911,7 +1911,8 @@
       },
       "resource_id": "lTi7YXjdsz",
       "resource_name": "Phys Test 0",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -3252,7 +3253,8 @@
       },
       "resource_id": "XwQTFkhxPJ",
       "resource_name": "Phys Test 1",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -3537,7 +3539,8 @@
       },
       "resource_id": "7zQLUleDer",
       "resource_name": "Phys Test 2",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -4087,6 +4090,7 @@
       "resource_id": "pATaRMBTR7",
       "resource_name": "Phys Test 3",
       "script_file": "",
+      "tilemap": "",
       "vars": [
         {
           "array": false,
@@ -4696,6 +4700,7 @@
       "resource_id": "v8AR2h5m8R",
       "resource_name": "Phys Test 4",
       "script_file": "",
+      "tilemap": "",
       "vars": [
         {
           "array": false,
@@ -5298,7 +5303,8 @@
       },
       "resource_id": "2rSIWqteXS",
       "resource_name": "Phys Test 5",
-      "script_file": "k4Stm2rLJJ"
+      "script_file": "k4Stm2rLJJ",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -5577,7 +5583,8 @@
       },
       "resource_id": "f7S1HTDAgE",
       "resource_name": "Phys Test 6",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [

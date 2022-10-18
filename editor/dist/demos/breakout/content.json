@@ -4592,7 +4592,8 @@
       },
       "resource_id": "q9wPieFpP5",
       "resource_name": "Level 4",
-      "script_file": "WGNKEJwulf"
+      "script_file": "WGNKEJwulf",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -6373,7 +6374,8 @@
       },
       "resource_id": "EjfqiKs7A1",
       "resource_name": "Level 2",
-      "script_file": "WGNKEJwulf"
+      "script_file": "WGNKEJwulf",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -8902,7 +8904,8 @@
       },
       "resource_id": "xZLaeqWePM",
       "resource_name": "Level 3",
-      "script_file": "WGNKEJwulf"
+      "script_file": "WGNKEJwulf",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -11035,7 +11038,8 @@
       },
       "resource_id": "7kkLq83FnE",
       "resource_name": "Level 1",
-      "script_file": "WGNKEJwulf"
+      "script_file": "WGNKEJwulf",
+      "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
@@ -19072,7 +19076,8 @@
       },
       "resource_id": "kZPKqhUrT6",
       "resource_name": "MainMenu",
-      "script_file": ""
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [
