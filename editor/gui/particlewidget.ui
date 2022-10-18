@@ -21,7 +21,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <widget class="QGroupBox" name="groupBox_3">
+      <widget class="QGroupBox" name="baseProperties">
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -1041,7 +1041,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QGroupBox" name="groupBox_6">
+      <widget class="QGroupBox" name="particleProperties">
        <property name="minimumSize">
         <size>
          <width>390</width>

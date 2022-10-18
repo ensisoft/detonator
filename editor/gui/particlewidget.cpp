@@ -355,6 +355,20 @@ void ParticleEditorWidget::Initialize(const UISettings& settings)
     SetValue(mUI.chkShowGrid, settings.show_grid);
 }
 
+void ParticleEditorWidget::SetViewerMode()
+{
+    SetVisible(mUI.baseProperties,     false);
+    SetVisible(mUI.dirSector,          false);
+    SetVisible(mUI.localSpace,         false);
+    SetVisible(mUI.localEmitter,       false);
+    SetVisible(mUI.transform,          false);
+    SetVisible(mUI.particleProperties, false);
+    SetVisible(mUI.sizeDerivatives,    false);
+    SetVisible(mUI.alphaDerivatives,   false);
+    mViewMode = true;
+    on_actionPlay_triggered();
+}
+
 void ParticleEditorWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
@@ -534,7 +548,10 @@ void ParticleEditorWidget::Update(double secs)
         SetEnabled(mUI.actionPlay, true);
         mEngine.reset();
         mMaterial.reset();
-        return;
+        if (mViewMode)
+        {
+            on_actionPlay_triggered();
+        }
     }
 }
 

@@ -161,6 +161,12 @@ void ShapeWidget::Initialize(const UISettings& settings)
     SetValue(mUI.chkShowGrid, settings.show_grid);
 }
 
+void ShapeWidget::SetViewerMode()
+{
+    SetVisible(mUI.baseProperties, false);
+    SetVisible(mUI.lblHelp,        false);
+}
+
 void ShapeWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);

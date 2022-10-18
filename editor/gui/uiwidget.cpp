@@ -421,7 +421,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.windowName, mState.window.GetName());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
-    SetValue(mUI.windowScriptFile, mState.window.GetScriptFile());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -493,6 +493,21 @@ void UIWidget::Initialize(const UISettings& settings)
     SetValue(mUI.chkSnap,       settings.snap_to_grid);
     SetValue(mUI.chkShowOrigin, settings.show_origin);
     SetValue(mUI.chkShowGrid,   settings.show_grid);
+}
+
+void UIWidget::SetViewerMode()
+{
+    SetVisible(mUI.baseProperties,   false);
+    SetVisible(mUI.viewTransform,    false);
+    SetVisible(mUI.widgetTree,       false);
+    SetVisible(mUI.widgetProperties, false);
+    SetVisible(mUI.widgetStyle,      false);
+    SetVisible(mUI.widgetData,       false);
+    SetVisible(mUI.lblHelp,          false);
+    SetValue(mUI.chkShowGrid,        false);
+    SetValue(mUI.chkShowOrigin,      false);
+    QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
+    on_actionPlay_triggered();
 }
 
 void UIWidget::AddActions(QToolBar& bar)

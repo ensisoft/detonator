@@ -141,6 +141,7 @@ namespace gui
         void on_actionCloseWorkspace_triggered();
         void on_actionSettings_triggered();
         void on_actionImagePacker_triggered();
+        void on_actionLaunchViewer_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowInfo_toggled(bool val);
         void on_actionLogShowWarning_toggled(bool val);
@@ -185,6 +186,7 @@ namespace gui
         void CleanGarbage();
         void ResourceUpdated(const app::Resource* resource);
         void ResourceAvailable(const app::Resource* resource);
+        void ViewerJsonMessageReceived(const QJsonObject& json);
 
     private:
         void BuildRecentWorkspacesMenu();
@@ -243,10 +245,12 @@ namespace gui
         // the child process for running the game
         // in a separate process (GameHost).
         app::Process mGameProcess;
+        app::Process mViewerProcess;
         // Local host socket for communicating workspace
         // events to the child (client) game process over
         // ICP messaging.
         std::unique_ptr<app::IPCHost> mIPCHost;
+        std::unique_ptr<app::IPCHost> mIPCHost2;
         // proxy model for filtering application event log
         app::EventLogProxy mEventLog;
         // the application's main clipboard.

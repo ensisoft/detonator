@@ -533,7 +533,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_27">
+      <widget class="QLabel" name="lblHelp">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Control key to toggle &amp;quot;Snap to grid&amp;quot; when &lt;br/&gt;moving or resizing a widget.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -590,7 +590,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="lblZoom">
             <property name="text">
              <string>Zoom</string>
             </property>

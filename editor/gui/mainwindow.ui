@@ -1359,6 +1359,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionImagePacker"/>
+    <addaction name="actionLaunchViewer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2154,6 +2155,15 @@
    </property>
    <property name="toolTip">
     <string>Export selected resources into a zip package</string>
+   </property>
+  </action>
+  <action name="actionLaunchViewer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/application.png</normaloff>:/16x16_ico_png/application.png</iconset>
+   </property>
+   <property name="text">
+    <string>Viewer ...</string>
    </property>
   </action>
  </widget>

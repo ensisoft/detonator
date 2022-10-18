@@ -86,6 +86,8 @@ namespace gui
         // whether to show the native mouse cursor or a custom
         // mouse cursor when the pointer is inside the gfx widget/window.
         GfxWindow::MouseCursor mouse_cursor = GfxWindow::MouseCursor::Native;
+        // Encoded geometry of the editor when running in viewer mode.
+        QString viewer_geometry;
     };
 
 } // namespace

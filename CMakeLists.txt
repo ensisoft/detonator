@@ -418,6 +418,9 @@ add_executable(GSEditor
     editor/gui/mainwindow.h
     editor/gui/mainwindow.cpp
     editor/gui/mainwindow.ui
+    editor/gui/viewwindow.h
+    editor/gui/viewwindow.ui
+    editor/gui/viewwindow.cpp
     editor/gui/main.cpp
     editor/gui/particlewidget.h
     editor/gui/particlewidget.cpp

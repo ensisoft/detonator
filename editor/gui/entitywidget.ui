@@ -21,7 +21,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="baseProperties">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -845,7 +845,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="lblHelp">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Hold Shift key to maintain aspect ratio when&lt;br/&gt;resizing a node.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;&lt;br/&gt;Hold Control key to toggle &amp;quot;Snap to grid&amp;quot; when &lt;br/&gt;moving a node.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -1028,7 +1028,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QGroupBox" name="renderTree">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>

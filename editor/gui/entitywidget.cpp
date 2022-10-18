@@ -570,6 +570,24 @@ void EntityWidget::Initialize(const UISettings& settings)
     SetValue(mUI.zoom,            settings.zoom);
 }
 
+void EntityWidget::SetViewerMode()
+{
+    SetVisible(mUI.baseProperties, false);
+    SetVisible(mUI.tabWidget,      false);
+    SetVisible(mUI.transform,      false);
+    SetVisible(mUI.lblHelp,        false);
+    SetVisible(mUI.renderTree,     false);
+    SetVisible(mUI.nodeProperties, false);
+    SetVisible(mUI.nodeTransform,  false);
+    SetVisible(mUI.nodeItems,      false);
+    SetValue(mUI.chkShowGrid,      false);
+    SetValue(mUI.chkShowOrigin,    false);
+    SetValue(mUI.chkShowViewport,  false);
+
+    QTimer::singleShot(10, this, &EntityWidget::on_btnResetTransform_clicked);
+    on_actionPlay_triggered();
+}
+
 void EntityWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
