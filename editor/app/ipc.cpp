@@ -38,7 +38,8 @@
 namespace {
     enum MessageType {
         ResourceUpdate,
-        UserPropertyUpdate
+        UserPropertyUpdate,
+        JsonMessage
     };
 }
 
@@ -51,17 +52,17 @@ IPCHost::~IPCHost()
     Close();
 }
 
-bool IPCHost::Open(const QString& name)
+bool IPCHost::Open(const QString& ipc_socket_name)
 {
     ASSERT(mClient == nullptr);
-    DEBUG("Opening IPC host '%1'", name);
-    if (!mServer.listen(name))
+    DEBUG("Opening IPC socket host. [socket='%1']", ipc_socket_name);
+    if (!mServer.listen(ipc_socket_name))
     {
-        ERROR("Failed to open server '%1'", mServer.errorString());
+        ERROR("Failed to open IPC server. [error='%1']", mServer.errorString());
         return false;
     }
     connect(&mServer, &QLocalServer::newConnection, this, &IPCHost::NewConnection);
-    DEBUG("Host open.");
+    DEBUG("IPC socket host is open. [socket='%1']", ipc_socket_name);
     return true;
 }
 void IPCHost::Close()
@@ -79,9 +80,9 @@ void IPCHost::Close()
 }
 
 //static
-void IPCHost::Cleanup(const QString& name)
+void IPCHost::CleanupSocket(const QString& ipc_socket_name)
 {
-    QLocalServer::removeServer(name);
+    QLocalServer::removeServer(ipc_socket_name);
 }
 
 void IPCHost::ResourceUpdated(const Resource* resource)
@@ -99,33 +100,56 @@ void IPCHost::ResourceUpdated(const Resource* resource)
     const auto& data = json.ToString();
     const auto& str  = FromUtf8(data);
 
-    QByteArray block;
-    QDataStream stream(&block, QIODevice::WriteOnly);
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
     stream.setVersion(QDataStream::Qt_5_10);
     stream << (quint32)MessageType::ResourceUpdate;
     stream << str;
 
-    if (mClient->write(block) != block.size())
-        ERROR("Socket write error.");
+    if (mClient->write(buffer) != buffer.size())
+    {
+        ERROR("IPC socket write error. [error='%1']", mClient->errorString());
+        return;
+    }
     mClient->flush();
-    DEBUG("Wrote resource update '%1' '%2' %3 bytes", resource->GetId(),
-          resource->GetName(), str.size());
+    DEBUG("Sent IPC resource update. [id='%1', name='%2', size=%3 b]",
+          resource->GetId(), resource->GetName(), str.size());
+}
+
+void IPCHost::SendJsonMessage(const QJsonObject& json)
+{
+    QJsonDocument document;
+    document.setObject(json);
+
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_10);
+    stream << (quint32)MessageType::JsonMessage;
+    stream << document.toJson();
+    if (mClient->write(buffer) != buffer.size())
+    {
+        ERROR("IPC socket write error. [error='%1']", mClient->errorString());
+        return;
+    }
+    mClient->flush();
+    DEBUG("Sent IPC JSON message. [size=%1 b]", buffer.size());
 }
 
 void IPCHost::NewConnection()
 {
     ASSERT(mClient == nullptr);
-    DEBUG("Got new connection.");
+
     QLocalSocket* client = mServer.nextPendingConnection();
     if (client == nullptr)
     {
-        ERROR("Error in client accept. '%1'", mServer.errorString());
+        ERROR("Error in IPC client accept. [error='%1']", mServer.errorString());
         return;
     }
     mClient = client;
     connect(mClient, &QLocalSocket::disconnected, this, &IPCHost::ClientDisconnected);
     connect(mClient, &QLocalSocket::readyRead, this, &IPCHost::ReadMessage);
     mClientStream.setDevice(mClient);
+    DEBUG("New IPC client connection ready.");
 }
 
 void IPCHost::ClientDisconnected()
@@ -144,7 +168,7 @@ void IPCHost::ReadMessage()
     while (!mClientStream.atEnd())
     {
         // start a new read transaction trying to read all the
-        // expected data. if not possible (i.e buffer doesn't yet
+        // expected data. if not possible (i.e. buffer doesn't yet
         // contain all data) then rollback.
         mClientStream.startTransaction();
         quint32 type = 0;
@@ -159,19 +183,33 @@ void IPCHost::ReadMessage()
             if (!mClientStream.commitTransaction())
                 return;
 
-            DEBUG("Read new property '%1'", name);
+            DEBUG("Read new IPC property update message. [prop='%1']", name);
             emit UserPropertyUpdated(name, data);
         }
-        else
+        else if (type == MessageType::JsonMessage)
         {
-            BUG("Unhandled IPC message type.");
+            QByteArray json_buffer;
+            mClientStream >> json_buffer;
+            if (!mClientStream.commitTransaction())
+                return;
+
+            const auto& document =QJsonDocument::fromJson(json_buffer);
+            if (document.isEmpty() || document.isNull())
+            {
+                WARN("Discarding null/empty IPC JSON message.");
+                return;
+            }
+
+            DEBUG("Read new IPC JSON message. [size=%1 b]", json_buffer.size());
+            emit JsonMessageReceived(document.object());
         }
+        else BUG("Unhandled IPC message type.");
     }
 }
 
 IPCClient::IPCClient()
 {
-    DEBUG("Create IPC Client");
+    DEBUG("Create new IPC Client");
     connect(&mSocket, &QLocalSocket::readyRead, this, &IPCClient::ReadMessage);
     // only from qt 5.15 onwards
     //connect(&mSocket, &QLocalSocket::errorOccurred, this, &IPCClient::ReadError);
@@ -188,15 +226,15 @@ IPCClient::~IPCClient()
     mSocket.close();
 }
 
-bool IPCClient::Open(const QString& name)
+bool IPCClient::Open(const QString& ipc_socket_name)
 {
-    mSocket.connectToServer(name);
+    mSocket.connectToServer(ipc_socket_name);
     if (!mSocket.waitForConnected())
     {
-        ERROR("Socket connection failed. ");
+        ERROR("IPC client socket connection failed. [error='%1']", mSocket.errorString());
         return false;
     }
-    DEBUG("Socket connected to host.");
+    DEBUG("IPC client socket connected to host. [socket='%1']", ipc_socket_name);
     return true;
 }
 
@@ -246,11 +284,34 @@ void IPCClient::UserPropertyUpdated(const QString& name, const QVariant& data)
     stream << data;
 
     if (mSocket.write(block) != block.size())
-        ERROR("Socket write error.");
+    {
+        ERROR("IPC client socket write error. [error='%1']", mSocket.errorString());
+        return;
+    }
 
     mSocket.flush();
-    DEBUG("Wrote new property '%1'", name);
+    DEBUG("Sent IPC property update. [prop='%1']", name);
 }
+
+void IPCClient::SendJsonMessage(const QJsonObject& json)
+{
+    QJsonDocument document;
+    document.setObject(json);
+
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_10);
+    stream << (quint32)MessageType::JsonMessage;
+    stream << document.toJson();
+    if (mSocket.write(buffer) != buffer.size())
+    {
+        ERROR("IPC socket write error. [error='%1']", mSocket.errorString());
+        return;
+    }
+    mSocket.flush();
+    DEBUG("Sent IPC JSON message. [size=%1 b]", buffer.size());
+}
+
 
 void IPCClient::ReadMessage()
 {
@@ -272,7 +333,7 @@ void IPCClient::ReadMessage()
         const auto [ok, error] = json.ParseString(ToUtf8(message));
         if (!ok)
         {
-            ERROR("JSON parse error (%1') in IPC message.", error);
+            ERROR("JSON parse error in IPC message. [error='%1']", error);
             return;
         }
         //std::cout << json.dump(2);
@@ -313,15 +374,28 @@ void IPCClient::ReadMessage()
               resource->GetId(), resource->GetName(), message.size());
         emit ResourceUpdated(resource.get());
     }
-    else
+    else if (type == MessageType::JsonMessage)
     {
-        BUG("Unhandled IPC message type.");
+        QByteArray json_buffer;
+        mStream >> json_buffer;
+        if (!mStream.commitTransaction())
+            return;
+
+        const auto& document = QJsonDocument::fromJson(json_buffer);
+        if (document.isNull() || document.isEmpty())
+        {
+            WARN("Discarding null/empty IPC JSON message.");
+            return;
+        }
+        DEBUG("Read new IPC JSON message. [size=%1 b]", json_buffer.size());
+        emit JsonMessageReceived(document.object());
     }
+    else BUG("Unhandled IPC message type.");
 }
+
 void IPCClient::ReadError(QLocalSocket::LocalSocketError error)
 {
-    ERROR("Socket error: %1", error);
-    ERROR(mSocket.errorString());
+    ERROR("IPC Socket read error. [error='%1']", mSocket.errorString());
 }
 
 } // namespace
