@@ -2987,9 +2987,9 @@ bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resour
 
 bool Workspace::ImportResourceArchive(ResourceArchive& zip)
 {
-    const QFileInfo info(zip.mZipFile);
-    const auto& zip_dir = info.baseName();
-    ZipArchiveImporter importer(zip.mZipFile, zip_dir, mWorkspaceDir, zip.mZip);
+    const auto& sub_folder = zip.GetImportSubFolderName();
+    const auto& name_prefix = zip.GetResourceNamePrefix();
+    ZipArchiveImporter importer(zip.mZipFile, sub_folder, mWorkspaceDir, zip.mZip);
 
     // it seems a bit funny here to be calling "pack" when actually we're
     // unpacking but the implementation of zip based resource packer is
@@ -3000,6 +3000,8 @@ bool Workspace::ImportResourceArchive(ResourceArchive& zip)
             continue;
         auto& resource = zip.mResources[i];
         resource->Pack(importer);
+        const auto& name = resource->GetName();
+        resource->SetName(name_prefix + name);
     }
 
     for (size_t i=0; i<zip.mResources.size(); ++i)

@@ -60,6 +60,15 @@ namespace app
 
         bool ReadFile(const QString& file, QByteArray* array) const;
 
+        void SetImportSubFolderName(const QString& name)
+        { mSubFolderName = name; }
+        void SetResourceNamePrefix(const QString& prefix)
+        { mNamePrefix = prefix; }
+        QString GetImportSubFolderName() const
+        { return mSubFolderName; }
+        QString GetResourceNamePrefix() const
+        { return mNamePrefix; }
+
         size_t GetNumResources() const
         { return mResources.size(); }
         const Resource& GetResource(size_t index) const
@@ -73,6 +82,8 @@ namespace app
     private:
         friend class Workspace;
         QString mZipFile;
+        QString mSubFolderName;
+        QString mNamePrefix;
         QFile mFile;
         mutable QuaZip mZip;
         std::vector<std::unique_ptr<Resource>> mResources;

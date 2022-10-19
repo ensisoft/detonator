@@ -240,9 +240,13 @@ void ViewWindow::on_btnExport_clicked()
         msg.exec();
         return;
     }
+    const auto& settings = mWorkspace->GetProjectSettings();
+
     QJsonObject json;
     app::JsonWrite(json, "message", QString("viewer-export"));
     app::JsonWrite(json, "zip_file", file);
+    app::JsonWrite(json, "folder_suggestion", settings.application_name);
+    app::JsonWrite(json, "prefix_suggestion", settings.application_name);
     mClientSocket.SendJsonMessage(json);
 }
 

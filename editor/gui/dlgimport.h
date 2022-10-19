@@ -46,12 +46,14 @@ namespace gui
         DlgImport(QWidget* parent, app::Workspace* workspace);
        ~DlgImport();
 
-        bool OpenArchive(const QString& file);
-
+        bool OpenArchive(const QString& file,
+                         const QString& folder_suggestion,
+                         const QString& prefix_suggestion);
     private slots:
         void on_btnSelectFile_clicked();
         void on_btnImport_clicked();
         void on_btnClose_clicked();
+        void on_prefix_editingFinished();
     private:
         Ui::DlgImport mUI;
     private:
