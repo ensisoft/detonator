@@ -407,6 +407,9 @@ public:
     }
     virtual std::string MapUri(const std::string& uri) const override
     {
+        if (base::StartsWith(uri, "app://"))
+            return uri;
+
         const auto* mapping = base::SafeFind(mUriMapping, uri);
         ASSERT(mapping);
         return *mapping;
