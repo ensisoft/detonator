@@ -2741,10 +2741,13 @@ void MainWindow::ViewerJsonMessageReceived(const QJsonObject& json)
     else if (message == "viewer-export")
     {
         QString zip_file;
+        QString folder_suggestion;
+        QString prefix_suggestion;
         app::JsonReadSafe(json, "zip_file", &zip_file);
-
+        app::JsonReadSafe(json, "folder_suggestion", &folder_suggestion);
+        app::JsonReadSafe(json, "prefix_suggestion", &prefix_suggestion);
         DlgImport dlg(this, mWorkspace.get());
-        if (!dlg.OpenArchive(zip_file))
+        if (!dlg.OpenArchive(zip_file, folder_suggestion, prefix_suggestion))
             return;
         dlg.exec();
     }

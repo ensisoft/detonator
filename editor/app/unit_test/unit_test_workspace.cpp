@@ -1648,6 +1648,7 @@ void unit_test_export_import_basic()
         app::Workspace workspace("TestWorkspace");
 
         app::ResourceArchive zip;
+        zip.SetImportSubFolderName("test-export");
         TEST_REQUIRE(zip.Open("test-export.zip"));
         TEST_REQUIRE(workspace.ImportResourceArchive(zip));
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 7);

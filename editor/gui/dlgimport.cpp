@@ -52,10 +52,12 @@ DlgImport::DlgImport(QWidget* parent, app::Workspace* workspace)
 
 DlgImport::~DlgImport()
 {
-
+    mUI.list->clear();
 }
 
-bool DlgImport::OpenArchive(const QString& file)
+bool DlgImport::OpenArchive(const QString& file,
+                            const QString& folder_suggestion,
+                            const QString& prefix_suggestion)
 {
     auto zip = std::make_unique<app::ResourceArchive>();
     if (!zip->Open(file))
@@ -67,12 +69,14 @@ bool DlgImport::OpenArchive(const QString& file)
         const auto& resource = zip->GetResource(i);
         QListWidgetItem* item = new QListWidgetItem();
         item->setIcon(resource.GetIcon());
-        item->setText(resource.GetName());
+        item->setText(prefix_suggestion + "/" + resource.GetName());
         mUI.list->addItem(item);
     }
 
     mZip = std::move(zip);
     SetValue(mUI.file, file);
+    SetValue(mUI.folder, folder_suggestion + "/");
+    SetValue(mUI.prefix, prefix_suggestion + "/");
     SetEnabled(mUI.btnImport, true);
     return true;
 }
@@ -98,24 +102,35 @@ void DlgImport::on_btnSelectFile_clicked()
         return;
     }
 
+    const QFileInfo info(filename);
+    QString suggestion = info.baseName();
+    suggestion.append("/");
+
     mUI.list->clear();
     for (size_t i=0; i<zip->GetNumResources(); ++i)
     {
         const auto& resource = zip->GetResource(i);
         QListWidgetItem* item = new QListWidgetItem();
         item->setIcon(resource.GetIcon());
-        item->setText(resource.GetName());
+        item->setText(suggestion + resource.GetName());
         mUI.list->addItem(item);
     }
-    mZip = std::move(zip);
+
+    SetValue(mUI.folder, suggestion);
+    SetValue(mUI.prefix, suggestion);
     SetValue(mUI.file, filename);
     SetEnabled(mUI.btnImport, true);
+
+    mZip = std::move(zip);
 }
 
 void DlgImport::on_btnImport_clicked()
 {
     if (!mZip)
         return;
+
+    mZip->SetImportSubFolderName(GetValue(mUI.folder));
+    mZip->SetResourceNamePrefix(GetValue(mUI.prefix));
 
     AutoEnabler import_btn(mUI.btnImport);
 
@@ -161,6 +176,24 @@ void DlgImport::on_btnImport_clicked()
 void DlgImport::on_btnClose_clicked()
 {
     close();
+}
+
+void DlgImport::on_prefix_editingFinished()
+{
+    if (!mZip)
+        return;
+
+    const QString& prefix = GetValue(mUI.prefix);
+
+    mUI.list->clear();
+    for (size_t i=0; i<mZip->GetNumResources(); ++i)
+    {
+        const auto& resource = mZip->GetResource(i);
+        QListWidgetItem* item = new QListWidgetItem();
+        item->setIcon(resource.GetIcon());
+        item->setText(prefix + resource.GetName());
+        mUI.list->addItem(item);
+    }
 }
 
 } // namespace
