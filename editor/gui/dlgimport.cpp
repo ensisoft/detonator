@@ -137,7 +137,7 @@ void DlgImport::on_btnImport_clicked()
             else if (ret == QMessageBox::No)
                 mZip->IgnoreResource(i);
             else import_count++;
-        }
+        } else import_count++;
     }
     if (!mWorkspace->ImportResourceArchive(*mZip))
     {
