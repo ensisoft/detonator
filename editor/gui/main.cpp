@@ -357,6 +357,8 @@ int Main(int argc, char* argv[])
     options.Add("--viewer", "Launch project viewer only.");
     options.Add("--app-style", "Name of the style to apply.", std::string(""));
     options.Add("--socket-name", "Name of the local socket to connect to.", std::string(""));
+    options.Add("--no-workspace", "Don't load any previous workspace");
+    options.Add("--no-session", "Don't load any previous window session within a workspace.");
     options.Add("--help", "Print this help.");
 
     bool viewer_mode = false;
