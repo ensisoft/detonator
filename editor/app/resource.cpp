@@ -286,12 +286,16 @@ void PackResource(game::EntityClass& entity, ResourcePacker& packer)
 }
 void PackResource(game::TilemapClass& map, ResourcePacker& packer)
 {
+    // there's an important requirement regarding resource packing order.
+    // The tilemap layer refers to a data object for the level data,
+    // and when doing URI mapping this means that the packager must have
+    // already seen the data object, or otherwise the mapping cannot work.
+    // this means the data object must be packed before the tilemap!
     for (size_t i=0; i<map.GetNumLayers(); ++i)
     {
         auto& layer = map.GetLayer(i);
-        // todo: maybe fix this implicit assumption here regarding where the
-        // data file goes when packing.
-        layer.SetDataUri(base::FormatString("pck://data/%1.bin", layer.GetId()));
+        const auto& uri = layer.GetDataUri();
+        layer.SetDataUri(packer.MapUri(uri));
     }
 }
 

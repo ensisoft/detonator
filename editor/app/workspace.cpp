@@ -190,6 +190,9 @@ public:
     {}
     virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
+        if (base::StartsWith(uri, "app://"))
+            return;
+
         // copy file from the zip into the workspace directory.
         const auto& src_file = MapUriToZipFile(uri);
         if (!FindZipFile(src_file))
@@ -275,7 +278,8 @@ public:
     }
     virtual std::string MapUri(const std::string& uri) const override
     {
-        DEBUG("%1", uri);
+        if (base::StartsWith(uri, "app://"))
+            return uri;
 
         const auto* mapping = base::SafeFind(mUriMapping, uri);
         ASSERT(mapping);
@@ -1179,6 +1183,16 @@ bool ResourceArchive::Open(const QString& zip_file)
     {
         resource->LoadProperties(props);
     }
+
+    // Partition the resources such that the data objects come in first.
+    // This is done because some resources such as tilemaps refer to the
+    // data resources by URI and in order for the URI remapping to work
+    // the packer must have packed the data object before packing the
+    // tilemap object.
+    std::partition(mResources.begin(), mResources.end(),
+        [](const auto& resource) {
+            return resource->IsDataFile();
+        });
 
     mZipFile = zip_file;
     return true;
@@ -2946,6 +2960,16 @@ bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resour
         mutable_copies.push_back(resource->Copy());
     }
 
+    // Partition the resources such that the data objects come in first.
+    // This is done because some resources such as tilemaps refer to the
+    // data resources by URI and in order for the URI remapping to work
+    // the packer must have packed the data object before packing the
+    // tilemap object.
+    std::partition(mutable_copies.begin(), mutable_copies.end(),
+        [](const auto& resource) {
+            return resource->IsDataFile();
+        });
+
     QJsonObject properties;
     data::JsonObject content;
     for (auto& resource: mutable_copies)
@@ -3012,6 +3036,16 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         ASSERT(!resource->IsPrimitive());
         mutable_copies.push_back(resource->Copy());
     }
+
+    // Partition the resources such that the data objects come in first.
+    // This is done because some resources such as tilemaps refer to the
+    // data resources by URI and in order for the URI remapping to work
+    // the packer must have packed the data object before packing the
+    // tilemap object.
+    std::partition(mutable_copies.begin(), mutable_copies.end(),
+        [](const auto& resource) {
+            return resource->IsDataFile();
+        });
 
     DEBUG("Max texture size. [width=%1, height=%2]", options.max_texture_width, options.max_texture_height);
     DEBUG("Pack size. [width=%1, height=%2]", options.texture_pack_width, options.texture_pack_height);
