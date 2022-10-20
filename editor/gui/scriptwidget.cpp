@@ -1783,6 +1783,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "help_splitter", mUI.helpSplitter);
     GetUserProperty(resource, "show_settings", &show_settings);
     SetVisible(mUI.settings, show_settings);
+    SetEnabled(mUI.actionSettings, !show_settings);
 
     QString font_name;
     if (GetUserProperty(resource, "font_name", &font_name))
@@ -1934,6 +1935,7 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     settings.LoadWidget("Script", mUI.helpSplitter);
     settings.LoadWidget("Script", mUI.tableView);
     SetVisible(mUI.settings, show_settings);
+    SetEnabled(mUI.actionSettings, !show_settings);
 
     QString font_name;
     if (settings.GetValue("Script", "font_name", &font_name))
@@ -2176,6 +2178,7 @@ void ScriptWidget::on_actionReplaceText_triggered()
 void ScriptWidget::on_actionSettings_triggered()
 {
     SetVisible(mUI.settings, true);
+    SetEnabled(mUI.actionSettings, false);
 }
 
 void ScriptWidget::on_btnFindNext_clicked()
@@ -2307,6 +2310,7 @@ void ScriptWidget::on_btnResetFont_clicked()
 void ScriptWidget::on_btnSettingsClose_clicked()
 {
     SetVisible(mUI.settings, false);
+    SetEnabled(mUI.actionSettings, true);
 }
 
 void ScriptWidget::on_editorFontName_currentIndexChanged(int)
