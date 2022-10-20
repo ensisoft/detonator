@@ -221,10 +221,19 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
     {
-        mCustomGraphicsPainter->SetOrthographicProjection((float) width() , (float) height());
-        mCustomGraphicsPainter->SetViewport(0, 0, width(), height());
-        mCustomGraphicsPainter->SetSurfaceSize(width(), height());
+        const auto surface_width  = (float)width();
+        const auto surface_height = (float)height();
+
+        mCustomGraphicsPainter->SetOrthographicProjection(surface_width, surface_height);
+        mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
+        mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         onPaintScene(*mCustomGraphicsPainter, 0.0);
+
+        // reset these for subsequent drawing (below) since the widget's paint function
+        // might have changed these unexpectedly.
+        mCustomGraphicsPainter->SetOrthographicProjection(surface_width, surface_height);
+        mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
+        mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
     }
 
     mNumFrames++;
@@ -264,6 +273,8 @@ void GfxWindow::paintGL()
 
     if (WindowMouseCursor == MouseCursor::Custom)
     {
+
+
         static std::shared_ptr<gfx::ColorClass> cursor_material;
         if (!cursor_material)
         {
