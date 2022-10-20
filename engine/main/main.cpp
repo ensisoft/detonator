@@ -520,6 +520,7 @@ int main(int argc, char* argv[])
             if (base::JsonReadSafe(json["desktop"], "audio_io_strategy", &audio_io_strategy))
                 loaders.ResourceLoader->SetDefaultAudioIOStrategy(audio_io_strategy);
 
+            loaders.ResourceLoader->LoadResourceLoadingInfo(content_file);
             loaders.ResourceLoader->SetApplicationPath(application_path);
             loaders.ResourceLoader->SetContentPath(content_path);
             loaders.ResourceLoader->PreloadFiles();

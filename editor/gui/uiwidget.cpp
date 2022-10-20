@@ -2289,7 +2289,7 @@ const uik::Widget* UIWidget::GetCurrentWidget() const
 
 bool UIWidget::LoadStyleVerbose(const QString& name)
 {
-    const auto& data = mState.workspace->LoadEngineData(app::ToUtf8(name));
+    const auto& data = mState.workspace->LoadEngineDataUri(app::ToUtf8(name));
     if (!data)
     {
         QMessageBox msg(this);
@@ -2325,7 +2325,7 @@ bool UIWidget::LoadStyleVerbose(const QString& name)
 
 bool UIWidget::LoadStyleQuiet(const std::string& uri)
 {
-    const auto& data = mState.workspace->LoadEngineData(uri);
+    const auto& data = mState.workspace->LoadEngineDataUri(uri);
     if (!data)
     {
         ERROR("Failed to load style file. [file='%1']", uri);
