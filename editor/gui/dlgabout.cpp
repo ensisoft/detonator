@@ -43,8 +43,8 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent)
     mUI.copyright->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     //mUI.www->setText(APP_LINKS);
     //mUI.www->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    mUI.build->setText(app::toString("Branch: '%1'\nCommit: %2\nDate: '%3'\nCompiler: %4 %5\n",
-        git_Branch(), git_CommitSHA1(), __DATE__ ", " __TIME__, COMPILER_NAME, COMPILER_VERSION));
+    mUI.build->setText(app::toString("Branch: '%1'\nCommit: %2\nDate: '%3'\nCompiler: %4 %5\nRel: %6",
+        git_Branch(), git_CommitSHA1(), __DATE__ ", " __TIME__, COMPILER_NAME, COMPILER_VERSION, APP_VERSION));
     mUI.build->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     QMovie* movie = new QMovie(this);
