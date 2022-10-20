@@ -672,6 +672,13 @@ public:
         , kResizeLargeTextures(resize_large)
         , kPackSmallTextures(pack_small)
     {}
+   ~GfxTexturePacker()
+    {
+        for (const auto& temp : mTempFiles)
+        {
+            QFile::remove(temp);
+        }
+    }
     virtual void PackTexture(ObjectHandle instance, const std::string& file) override
     {
         mTextureMap[instance].file = file;
@@ -890,6 +897,7 @@ public:
                 img_name   = info.baseName() + ".png";
                 // map the input image to an image in /tmp/
                 image_map[tex.file] = temp;
+                mTempFiles.push_back(temp);
             }
             else
             {
@@ -1105,6 +1113,7 @@ private:
         bool allowed_to_combine = true;
     };
     std::unordered_map<ObjectHandle, TextureSource> mTextureMap;
+    std::vector<QString> mTempFiles;
 };
 
 
