@@ -140,7 +140,7 @@ void copyright()
     INFO("Compiled: " __DATE__ ", " __TIME__);
     INFO("Copyright (c) Sami Väisänen 2020-2022");
     INFO("Built on branch '%1' with commit %2", git_Branch(), git_CommitSHA1());
-    INFO(APP_TITLE);
+    INFO(APP_TITLE ", " APP_VERSION);
 }
 
 template<typename Window>
