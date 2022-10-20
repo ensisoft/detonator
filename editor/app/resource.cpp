@@ -492,12 +492,16 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                 }
             }
         }
-        std::string shader_uri = custom->GetShaderUri();
-        if (shader_uri.empty())
+        const auto& shader_glsl_uri = custom->GetShaderUri();
+        if (shader_glsl_uri.empty())
             return;
-        packer.CopyFile(shader_uri, "shaders/es2/");
-        shader_uri = packer.MapUri(shader_uri);
-        custom->SetShaderUri(shader_uri);
+        const auto& shader_desc_uri = boost::replace_all_copy(shader_glsl_uri, ".glsl", ".json");
+        // this only has significance when exporting/importing
+        // a resource archive.
+        packer.CopyFile(shader_desc_uri, "shaders/es2/");
+        // copy the actual shader glsl
+        packer.CopyFile(shader_glsl_uri, "shaders/es2/");
+        custom->SetShaderUri(packer.MapUri(shader_glsl_uri));
     }
 }
 
