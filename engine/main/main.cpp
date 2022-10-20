@@ -49,6 +49,7 @@
 #include "base/utility.h"
 #include "base/json.h"
 #include "base/trace.h"
+#include "data/json.h"
 #include "engine/main/interface.h"
 #include "engine/classlib.h"
 #include "wdk/opengl/config.h"
@@ -514,13 +515,23 @@ int main(int argc, char* argv[])
             DEBUG("Content package: '%1'", content);
             DEBUG("Content path: '%1']", content_path);
             DEBUG("Content file: '%1']", content_file);
-            if (!loaders.ContentLoader->LoadFromFile(content_file))
+
+            data::JsonFile content_json_file;
+            const auto [success, error_string] = content_json_file.Load(content_file);
+            if (!success)
+            {
+                ERROR("Failed to load game content from file. [file='%1', error='%2']", content_file, error_string);
                 return EXIT_FAILURE;
+            }
+            const auto& content_json = content_json_file.GetRootObject();
+            if (!loaders.ContentLoader->LoadClasses(content_json))
+                return EXIT_FAILURE;
+
             engine::FileResourceLoader::DefaultAudioIOStrategy audio_io_strategy;
             if (base::JsonReadSafe(json["desktop"], "audio_io_strategy", &audio_io_strategy))
                 loaders.ResourceLoader->SetDefaultAudioIOStrategy(audio_io_strategy);
 
-            loaders.ResourceLoader->LoadResourceLoadingInfo(content_file);
+            loaders.ResourceLoader->LoadResourceLoadingInfo(content_json);
             loaders.ResourceLoader->SetApplicationPath(application_path);
             loaders.ResourceLoader->SetContentPath(content_path);
             loaders.ResourceLoader->PreloadFiles();

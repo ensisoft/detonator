@@ -25,6 +25,7 @@
 #include "base/json.h"
 #include "base/trace.h"
 #include "base/utility.h"
+#include "data/json.h"
 #include "wdk/events.h"
 #include "engine/main/interface.h"
 #include "engine/loader.h"
@@ -259,7 +260,17 @@ public:
 
         mContentLoader  = engine::JsonFileClassLoader::Create();
         mResourceLoader = engine::FileResourceLoader::Create();
-        mContentLoader->LoadFromFile("/" + content + "/content.json");
+
+        data::JsonFile content_json_file;
+        const auto [success, error_string] = content_json_file.Load("/" + content + "/content.json");
+        if (!success)
+        {
+            ERROR("Failed to load game content from file. [file='%1', error='%2']", "content.json", error_string);
+            return false;
+        }
+        const auto& content_json = content_json_file.GetRootObject();
+        if (!mContentLoader->LoadClasses(content_json))
+            return false;
 
         engine::FileResourceLoader::DefaultAudioIOStrategy audio_io_strategy;
         if (base::JsonReadSafe(json["wasm"], "audio_io_strategy", &audio_io_strategy))
@@ -267,7 +278,7 @@ public:
 
         mResourceLoader->SetApplicationPath("/");
         mResourceLoader->SetContentPath("/" + content);
-        mResourceLoader->LoadResourceLoadingInfo("/" + content + "/content.json");
+        mResourceLoader->LoadResourceLoadingInfo(content_json);
 
         // todo: context attributes.
         mContext.reset(new WebGLContext(power_pref, antialias));
