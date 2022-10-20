@@ -134,6 +134,13 @@ void copyright()
     INFO("https://sol2.rtfd.io");
     INFO("sol2 C++ Lua library binding. %1", SOL_VERSION_STRING);
 
+    INFO("Copyright (C) 2005-2020 Sergey A. Tachenov and contributors");
+    INFO("Distributed under LGPL, full details in the COPYING file.");
+    INFO("Original ZIP package is copyrighted by Gilles Vollant, see");
+    INFO("quazip/(un)zip.h files for details, but basically it's the zlib license.");
+    INFO("https://github.com/stachenov/quazip");
+    INFO("https://stachenov.github.io/quazip/");
+
     INFO("http://www.ensisoft.com");
     INFO("https://www.github.com/ensisoft/gamestudio");
     INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
