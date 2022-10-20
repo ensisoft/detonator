@@ -2740,6 +2740,9 @@ void MainWindow::ViewerJsonMessageReceived(const QJsonObject& json)
     }
     else if (message == "viewer-export")
     {
+        // try to bring this window to the top
+        activateWindow();
+
         QString zip_file;
         QString folder_suggestion;
         QString prefix_suggestion;
