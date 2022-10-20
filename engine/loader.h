@@ -20,6 +20,7 @@
 
 #include <memory>
 
+#include "data/fwd.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
 #include "audio/loader.h"
@@ -73,7 +74,7 @@ namespace engine
 
         // Load the meta information how to load some particular types of
         // data objects based on the content.json file.
-        virtual bool LoadResourceLoadingInfo(const std::string& file) = 0;
+        virtual bool LoadResourceLoadingInfo(const data::Reader& data) = 0;
         // Set the default IO strategy for loading audio data.
         virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) = 0;
         // Set the filesystem path of the current running binary on the file system.
@@ -98,9 +99,11 @@ namespace engine
         // In general no validation is done regarding the completeness of th
         // loaded content. I.e. it's possible that classes refer to
         // resources (i.e. other classes) that aren't available.
-        virtual bool LoadFromFile(const std::string& file) = 0;
+        virtual bool LoadClasses(const data::Reader& data) = 0;
         // create new content loader.
         static std::unique_ptr<JsonFileClassLoader> Create();
+        // helper
+        bool LoadClassesFromFile(const std::string& file);
     private:
     };
 } // namespace

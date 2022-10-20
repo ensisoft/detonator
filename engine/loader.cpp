@@ -535,17 +535,8 @@ public:
     }
 
     // FileResourceLoader impl
-    virtual bool LoadResourceLoadingInfo(const std::string& file) override
+    virtual bool LoadResourceLoadingInfo(const data::Reader& data) override
     {
-        data::JsonFile json;
-        const auto [success, error] = json.Load(file);
-        if (!success)
-        {
-            ERROR("Failed to load game content from file. [file=%1', error='%2']", file, error);
-            return false;
-        }
-        data::JsonObject data = json.GetRootObject();
-
         for (unsigned i=0; i<data.GetNumChunks("scripts"); ++i)
         {
             std::string id;
@@ -694,9 +685,8 @@ public:
     virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
     virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
     // ContentLoader impl
-    virtual bool LoadFromFile(const std::string& file) override;
+    virtual bool LoadClasses(const data::Reader& data) override;
 private:
-    std::string mResourceFile;
     // These are the material types that have been loaded
     // from the resource file.
     std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>> mMaterials;
@@ -853,32 +843,23 @@ bool LoadMaterials(const data::Reader& data, const char* type,
     return true;
 }
 
-bool ContentLoaderImpl::LoadFromFile(const std::string& file)
+bool ContentLoaderImpl::LoadClasses(const data::Reader& data)
 {
-    data::JsonFile json;
-    const auto [success, error] = json.Load(file);
-    if (!success)
-    {
-        ERROR("Failed to load game content from file. [file=%1', error='%2']", file, error);
+    if (!LoadMaterials(data, "materials", mMaterials, nullptr))
         return false;
-    }
-    data::JsonObject root = json.GetRootObject();
-
-    if (!LoadMaterials(root, "materials", mMaterials, nullptr))
+    if (!LoadContent<gfx::DrawableClass, gfx::KinematicsParticleEngineClass>(data, "particles", mDrawables, nullptr))
         return false;
-    if (!LoadContent<gfx::DrawableClass, gfx::KinematicsParticleEngineClass>(root, "particles", mDrawables, nullptr))
+   if (!LoadContent<gfx::DrawableClass, gfx::PolygonClass>(data, "shapes", mDrawables, nullptr))
+       return false;
+   if (!LoadContent<game::EntityClass>(data, "entities", mEntities, &mEntityNameTable))
+       return false;
+   if (!LoadContent<game::SceneClass>(data, "scenes", mScenes, &mSceneNameTable))
+       return false;
+   if (!LoadContent<uik::Window>(data, "uis", mWindows, nullptr))
+       return false;
+   if (!LoadContent<audio::GraphClass>(data, "audio_graphs", mAudioGraphs, nullptr))
         return false;
-   if (!LoadContent<gfx::DrawableClass, gfx::PolygonClass>(root, "shapes", mDrawables, nullptr))
-       return false;
-   if (!LoadContent<game::EntityClass>(root, "entities", mEntities, &mEntityNameTable))
-       return false;
-   if (!LoadContent<game::SceneClass>(root, "scenes", mScenes, &mSceneNameTable))
-       return false;
-   if (!LoadContent<uik::Window>(root, "uis", mWindows, nullptr))
-       return false;
-   if (!LoadContent<audio::GraphClass>(root, "audio_graphs", mAudioGraphs, nullptr))
-        return false;
-   if (!LoadContent<game::TilemapClass>(root, "tilemaps", mMaps, nullptr))
+   if (!LoadContent<game::TilemapClass>(data, "tilemaps", mMaps, nullptr))
        return false;
 
     // need to resolve the entity references.
@@ -901,7 +882,6 @@ bool ContentLoaderImpl::LoadFromFile(const std::string& file)
             node.SetEntity(klass);
         }
     }
-    mResourceFile = file;
     return true;
 }
 
@@ -950,5 +930,17 @@ ClassHandle<const game::TilemapClass> ContentLoaderImpl::FindTilemapClassById(co
 // static
 std::unique_ptr<JsonFileClassLoader> JsonFileClassLoader::Create()
 { return std::make_unique<ContentLoaderImpl>(); }
+
+bool JsonFileClassLoader::LoadClassesFromFile(const std::string& file)
+{
+    data::JsonFile json;
+    const auto [success, error] = json.Load(file);
+    if (!success)
+    {
+        ERROR("Failed to load game content from file. [file=%1', error='%2']", file, error);
+        return false;
+    }
+    return this->LoadClasses(json.GetRootObject());
+}
 
 } // namespace

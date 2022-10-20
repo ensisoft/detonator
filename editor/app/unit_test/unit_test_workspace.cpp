@@ -455,7 +455,7 @@ R"(
     TEST_REQUIRE(style_string.contains("widget/border-width"));
 
     auto loader = engine::JsonFileClassLoader::Create();
-    loader->LoadFromFile("TestPackage/test/content.json");
+    loader->LoadClassesFromFile("TestPackage/test/content.json");
     TEST_REQUIRE(loader->FindMaterialClassById(material.GetId()));
     TEST_REQUIRE(loader->FindDrawableClassById(poly.GetId()));
     TEST_REQUIRE(loader->FindDrawableClassById(particles.GetId()));
@@ -957,7 +957,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         auto loader = engine::JsonFileClassLoader::Create();
-        loader->LoadFromFile("TestPackage/content.json");
+        loader->LoadClassesFromFile("TestPackage/content.json");
         auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->AsTexture()->GetTextureRect();
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -993,7 +993,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
 
         auto loader = engine::JsonFileClassLoader::Create();
-        loader->LoadFromFile("TestPackage/content.json");
+        loader->LoadClassesFromFile("TestPackage/content.json");
         auto mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect = mat->AsTexture()->GetTextureRect();
         TEST_REQUIRE(rect == gfx::FRect(0.0f, 0.0f, 0.5f, 0.5f));
@@ -1042,7 +1042,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow)  >= 32*32);
 
         auto loader = engine::JsonFileClassLoader::Create();
-        loader->LoadFromFile("TestPackage/content.json");
+        loader->LoadClassesFromFile("TestPackage/content.json");
         const auto& mat = loader->FindMaterialClassById(material.GetId());
         const auto& rect0 = mat->AsSprite()->GetTextureRect(0);
         const auto& rect1 = mat->AsSprite()->GetTextureRect(1);
@@ -1104,7 +1104,7 @@ void unit_test_packing_texture_name_collision()
     // verify output
     auto cloader = engine::JsonFileClassLoader::Create();
     auto floader = engine::FileResourceLoader::Create();
-    cloader->LoadFromFile("TestPackage/content.json");
+    cloader->LoadClassesFromFile("TestPackage/content.json");
     floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());
 
@@ -1269,7 +1269,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     // verify output
     auto cloader = engine::JsonFileClassLoader::Create();
     auto floader = engine::FileResourceLoader::Create();
-    cloader->LoadFromFile("TestPackage/content.json");
+    cloader->LoadClassesFromFile("TestPackage/content.json");
     floader->SetContentPath("TestPackage");
     gfx::SetResourceLoader(floader.get());
 
