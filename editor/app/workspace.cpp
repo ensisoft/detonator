@@ -1599,16 +1599,44 @@ engine::ClassHandle<const game::TilemapClass> Workspace::FindTilemapClassById(co
     return FindClassHandleById<game::TilemapClass>(id, Resource::Type::Tilemap);
 }
 
-engine::EngineDataHandle Workspace::LoadEngineData(const std::string& URI) const
+engine::EngineDataHandle Workspace::LoadEngineDataUri(const std::string& URI) const
 {
     const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
     DEBUG("URI '%1' => '%2'", URI, file);
     return EngineBuffer::LoadFromFile(file);
 }
 
-engine::EngineDataHandle Workspace::LoadEngineDataFromFile(const std::string& filename) const
+engine::EngineDataHandle Workspace::LoadEngineDataFile(const std::string& filename) const
 {
     return EngineBuffer::LoadFromFile(app::FromUtf8(filename));
+}
+engine::EngineDataHandle Workspace::LoadEngineDataId(const std::string& id) const
+{
+    for (size_t i=0; i<mVisibleCount; ++i)
+    {
+        const auto& resource = mResources[i];
+        if (resource->GetIdUtf8() != id)
+            continue;
+
+        std::string uri;
+        if (resource->IsDataFile())
+        {
+            const DataFile* data = nullptr;
+            resource->GetContent(&data);
+            uri = data->GetFileURI();
+        }
+        else if (resource->IsScript())
+        {
+            const Script* script = nullptr;
+            resource->GetContent(&script);
+            uri = script->GetFileURI();
+        }
+        else BUG("Unknown ID in engine data loading.");
+        const auto& file = MapFileToFilesystem(uri);
+        DEBUG("URI '%1' => '%2'", uri, file);
+        return EngineBuffer::LoadFromFile(file);
+    }
+    return nullptr;
 }
 
 gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)

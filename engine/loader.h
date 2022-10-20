@@ -47,13 +47,16 @@ namespace engine
         using EngineDataHandle = engine::EngineDataHandle;
 
         virtual ~Loader() = default;
-        // Load game data based on a URI. The URI undergoes a resolution
+        // Load engine data based on a URI. The URI undergoes a resolution
         // and the content may be loaded from a resource pack etc.
         // Returns a null handle if no such data could be loaded.
-        virtual EngineDataHandle LoadEngineData(const std::string& uri) const = 0;
-        // Load game data from a file on the file system.
+        virtual EngineDataHandle LoadEngineDataUri(const std::string& uri) const = 0;
+        // Load engine data from a file on the file system.
         // Returns a null handle if no such data could be loaded.
-        virtual EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const = 0;
+        virtual EngineDataHandle LoadEngineDataFile(const std::string& filename) const = 0;
+        // Load engine data based on a data object ID.
+        // Returns a null handle if no such data could be loaded.
+        virtual EngineDataHandle LoadEngineDataId(const std::string& id) const = 0;
     };
 
     // Loader implementation for loading all kinds of subsystem
@@ -68,6 +71,9 @@ namespace engine
             Automatic, Memmap, Stream, Buffer
         };
 
+        // Load the meta information how to load some particular types of
+        // data objects based on the content.json file.
+        virtual bool LoadResourceLoadingInfo(const std::string& file) = 0;
         // Set the default IO strategy for loading audio data.
         virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) = 0;
         // Set the filesystem path of the current running binary on the file system.

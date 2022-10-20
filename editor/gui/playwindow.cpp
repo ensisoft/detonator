@@ -249,7 +249,7 @@ public:
         mGraphicsBuffers[URI] = buffer;
         return buffer;
     }
-    virtual engine::EngineDataHandle LoadEngineData(const std::string& URI) const override
+    virtual engine::EngineDataHandle LoadEngineDataUri(const std::string& URI) const override
     {
         auto it = mEngineDataBuffers.find(URI);
         if (it != mEngineDataBuffers.end())
@@ -261,7 +261,7 @@ public:
         mEngineDataBuffers[URI] = buffer;
         return buffer;
     }
-    virtual engine::EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override
+    virtual engine::EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
         // expect this to be a path relative to the content path
         // (which is the workspace path here)
@@ -272,6 +272,11 @@ public:
 
         return app::EngineBuffer::LoadFromFile(file);
     }
+    virtual engine::EngineDataHandle LoadEngineDataId(const std::string& id) const override
+    {
+        return mWorkspace.LoadEngineDataId(id);
+    }
+
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     {

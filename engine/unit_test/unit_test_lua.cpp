@@ -55,13 +55,21 @@ private:
 
 class TestLoader : public engine::Loader {
 public:
-    EngineDataHandle LoadEngineData(const std::string& uri) const override
+    EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
     { return nullptr; }
-    EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override
+    EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
         if (base::StartsWith(filename, "this-file-doesnt-exist"))
             return nullptr;
         return std::make_shared<TestData>(filename);
+    }
+    EngineDataHandle LoadEngineDataId(const std::string& id) const override
+    {
+        if (base::StartsWith(id, "this-file-doesnt-exist"))
+            return nullptr;
+        if (base::EndsWith(id, ".lua"))
+            return std::make_shared<TestData>(id);
+        return std::make_shared<TestData>(id + ".lua");
     }
 };
 

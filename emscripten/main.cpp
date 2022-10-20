@@ -267,6 +267,7 @@ public:
 
         mResourceLoader->SetApplicationPath("/");
         mResourceLoader->SetContentPath("/" + content);
+        mResourceLoader->LoadResourceLoadingInfo("/" + content + "/content.json");
 
         // todo: context attributes.
         mContext.reset(new WebGLContext(power_pref, antialias));

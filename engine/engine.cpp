@@ -750,26 +750,26 @@ private:
     bool HaveOpenUI() const
     { return !mUIStack.empty(); }
 
-    void LoadStyle(const std::string& name)
+    void LoadStyle(const std::string& uri)
     {
         // todo: if the style loading somehow fails, then what?
         mUIStyle.ClearProperties();
         mUIStyle.ClearMaterials();
         mUIState.Clear();
 
-        auto data = mEngineDataLoader->LoadEngineData(name);
+        auto data = mEngineDataLoader->LoadEngineDataUri(uri);
         if (!data)
         {
-            ERROR("Failed to load UI style '%1' data.", name);
+            ERROR("Failed to load UI style. [uri='%1']", uri);
             return;
         }
 
         if (!mUIStyle.LoadStyle(*data))
         {
-            ERROR("Failed to parse UI style '%1'.", name);
+            ERROR("Failed to parse UI style. [uri='%1']", uri);
             return;
         }
-        DEBUG("Loaded UI style '%1'", name);
+        DEBUG("Loaded UI style file successfully. [uri='%1']", uri);
     }
 
     void OnAction(const engine::OpenUIAction& action)

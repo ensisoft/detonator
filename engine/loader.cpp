@@ -386,7 +386,7 @@ public:
         return buff;
     }
     // GameDataLoader impl
-    virtual EngineDataHandle LoadEngineData(const std::string& uri) const override
+    virtual EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
     {
         const auto& filename = ResolveURI(uri);
         auto it = mGameDataBufferCache.find(filename);
@@ -401,7 +401,7 @@ public:
         mGameDataBufferCache[filename] = buff;
         return buff;
     }
-    virtual EngineDataHandle LoadEngineDataFromFile(const std::string& filename) const override
+    virtual EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
         // expect this to be a path relative to the content path
         // this loading function is only used to load the Lua files
@@ -421,6 +421,27 @@ public:
         mGameDataBufferCache[file] = buff;
         return buff;
     }
+    virtual EngineDataHandle LoadEngineDataId(const std::string& id) const override
+    {
+        if (const auto* uri = base::SafeFind(mObjectIdUriMap, id))
+        {
+            const auto& filename = ResolveURI(*uri);
+            auto it = mGameDataBufferCache.find(filename);
+            if (it != mGameDataBufferCache.end())
+                return it->second;
+
+            std::vector<char> buffer;
+            if (!LoadFileBuffer(filename, &buffer))
+                return nullptr;
+
+            auto buff = std::make_shared<GameDataFileBuffer>(*uri, std::move(buffer));
+            mGameDataBufferCache[filename] = buff;
+            return buff;
+        }
+        ERROR("No URI mapping for engine data. [id='%1']", id);
+        return nullptr;
+    }
+
     // audio::Loader impl
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
@@ -514,6 +535,38 @@ public:
     }
 
     // FileResourceLoader impl
+    virtual bool LoadResourceLoadingInfo(const std::string& file) override
+    {
+        data::JsonFile json;
+        const auto [success, error] = json.Load(file);
+        if (!success)
+        {
+            ERROR("Failed to load game content from file. [file=%1', error='%2']", file, error);
+            return false;
+        }
+        data::JsonObject data = json.GetRootObject();
+
+        for (unsigned i=0; i<data.GetNumChunks("scripts"); ++i)
+        {
+            std::string id;
+            std::string uri;
+            const auto& chunk = data.GetReadChunk("scripts", i);
+            chunk->Read("id", &id);
+            chunk->Read("uri", &uri);
+            mObjectIdUriMap[std::move(id)] = std::move(uri);
+        }
+        for (unsigned i=0; i<data.GetNumChunks("data_files"); ++i)
+        {
+            std::string id;
+            std::string uri;
+            const auto& chunk = data.GetReadChunk("data_files", i);
+            chunk->Read("id", &id);
+            chunk->Read("uri", &uri);
+            mObjectIdUriMap[std::move(id)] = std::move(uri);
+        }
+        return true;
+    }
+
     virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) override
     { mDefaultAudioIO = strategy; }
     virtual void SetApplicationPath(const std::string& path) override
@@ -609,6 +662,14 @@ private:
     // the root of the resource dir against which to resolve the resource URIs.
     std::string mContentPath;
     std::string mApplicationPath;
+    // Mapping from IDs to URIS. This happens with scripts and data objects
+    // that are referenced by an ID by some higher level object such as an
+    // entity or tilemap. Originally in the editor the ID is the ID of a
+    // workspace resource object that then contains the URI that maps to the
+    // actual file that contains the data. In this loader implementation
+    // we have no use for the actual object so the whole thing can be
+    // simplified to juse ID->URI mapping.
+    std::unordered_map<std::string, std::string> mObjectIdUriMap;
 };
 
 // static
