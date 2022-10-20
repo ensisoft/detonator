@@ -479,6 +479,15 @@ public:
     {}
     virtual void CopyFile(const std::string& uri, const std::string& dir) override
     {
+        // sort of hack here, probe the uri and skip the copy of a
+        // custom shader .json descriptor. it's not needed in the
+        // deployed package.
+        if (base::Contains(uri, "shaders/es2") && base::EndsWith(uri, ".json"))
+        {
+            DEBUG("Skipping copy of shader .json descriptor. [uri='%1']", uri);
+            return;
+        }
+
         // if the target dir for packing is textures/ we skip this because
         // the textures are packed through calls to GfxTexturePacker.
         if (dir == "textures/")
