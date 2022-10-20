@@ -357,11 +357,6 @@ public:
             ERROR("Could not find source file. [file='%1']", src_file);
             return;
         }
-        const auto& src_path = src_info.absoluteFilePath();
-        const auto& src_name = src_info.fileName();
-        const auto& dst_dir  = app::FromUtf8(dir);
-        const auto& dst_name = app::JoinPath(dst_dir, src_name);
-
         std::vector<char> buffer;
         if (!app::ReadBinaryFile(src_file, buffer))
         {
@@ -369,12 +364,26 @@ public:
             return;
         }
 
+        const auto& src_path = src_info.absoluteFilePath();
+        const auto& src_name = src_info.fileName();
+        const auto& dst_dir  = app::FromUtf8(dir);
+
+        QString dst_name = src_name;
+        QString dst_file = app::JoinPath(dst_dir, dst_name);
+        unsigned rename_attempt = 0;
+        while (base::Contains(mFileNames, dst_name))
+        {
+            dst_name = app::toString("%1_%2", rename_attempt++, src_name);
+            dst_file = app::JoinPath(dst_dir, dst_name);
+        }
+        mFileNames.insert(dst_name);
+
         QuaZipFile zip_file(&mZip);
-        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_name));
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_file));
         zip_file.write(buffer.data(), buffer.size());
         zip_file.close();
         ASSERT(base::EndsWith(dir, "/"));
-        mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
+        mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(dst_name));
         DEBUG("Copied new file into zip archive. [file='%1', size=%2]", src_file, app::Bytes { buffer.size() });
     }
     virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
@@ -465,6 +474,7 @@ private:
 private:
     const QString mZipFile;
     const QString mWorkspaceDir;
+    std::unordered_set<QString> mFileNames;
     std::unordered_map<std::string, std::string> mUriMapping;
     QFile mFile;
     QuaZip mZip;
