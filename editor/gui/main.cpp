@@ -388,6 +388,7 @@ int Main(int argc, char* argv[])
     {
         if (!options.GetValue("--socket-name", &ipc_socket_name))
             ipc_socket_name = "gamestudio-local-socket";
+        options.GetValue("--app-style", &style);
     }
 
     // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
