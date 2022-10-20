@@ -1669,6 +1669,81 @@ void unit_test_export_import_basic()
     }
 }
 
+void unit_test_export_name_dupe()
+{
+    gfx::RgbBitmap bitmap[2];
+    bitmap[0].Resize(64, 64);
+    bitmap[0].Fill(gfx::Color::Green);
+    bitmap[1].Resize(32, 32);
+    bitmap[1].Fill(gfx::Color::HotPink);
+
+    {
+        DeleteDir("TestWorkspace");
+        MakeDir("TestWorkspace");
+        MakeDir("TestWorkspace/textures/foo");
+        MakeDir("TestWorkspace/textures/bar");
+
+        gfx::WritePNG(bitmap[0], "TestWorkspace/textures/foo/bitmap.png");
+        gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
+
+        app::Workspace workspace("TestWorkspace");
+        gfx::TextureMap2DClass materials[2];
+        materials[0].SetTexture(gfx::LoadTextureFromFile("ws://textures/foo/bitmap.png"));
+        materials[1].SetTexture(gfx::LoadTextureFromFile("ws://textures/bar/bitmap.png"));
+        workspace.SaveResource(app::MaterialResource(materials[0], "material0"));
+        workspace.SaveResource(app::MaterialResource(materials[1], "material1"));
+
+        app::Workspace::ExportOptions options;
+        options.zip_file = "test-export2.zip";
+        // select the resources.
+        std::vector<const app::Resource*> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+        resources.push_back(&workspace.GetUserDefinedResource(1));
+        TEST_REQUIRE(workspace.ExportResourceArchive(resources, options));
+    }
+
+    {
+        DeleteDir("TestWorkspace");
+        MakeDir("TestWorkspace");
+
+        app::Workspace workspace("TestWorkspace");
+
+        app::ResourceArchive zip;
+        zip.SetImportSubFolderName("test-export");
+        TEST_REQUIRE(zip.Open("test-export2.zip"));
+        TEST_REQUIRE(workspace.ImportResourceArchive(zip));
+        TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 2);
+
+        {
+            const auto* resource0 = workspace.FindResourceByName("material0", app::Resource::Type::Material);
+            const auto* resource1 = workspace.FindResourceByName("material1", app::Resource::Type::Material);
+            TEST_REQUIRE(resource0);
+            TEST_REQUIRE(resource1);
+            const gfx::MaterialClass* material0;
+            const gfx::MaterialClass* material1;
+            resource0->GetContent(&material0);
+            resource1->GetContent(&material1);
+            const auto* texture_map0 = material0->AsTexture();
+            const auto* texture_map1 = material1->AsTexture();
+            const auto* texture_map_source0 = texture_map0->GetTextureSource();
+            const auto* texture_map_source1 = texture_map1->GetTextureSource();
+            const auto* texture_map_file_source0 = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_map_source0);
+            const auto* texture_map_file_source1 = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_map_source1);
+            TEST_REQUIRE(texture_map_file_source0->GetFilename() != texture_map_file_source1->GetFilename());
+            const auto& texture_file0 = workspace.MapFileToFilesystem(texture_map_file_source0->GetFilename());
+            const auto& texture_file1 = workspace.MapFileToFilesystem(texture_map_file_source1->GetFilename());
+            gfx::Image img0;
+            gfx::Image img1;
+            TEST_REQUIRE(img0.Load(app::ToUtf8(texture_file0)));
+            TEST_REQUIRE(img1.Load(app::ToUtf8(texture_file1)));
+            const auto& bmp0 = img0.AsBitmap<gfx::RGB>();
+            const auto& bmp1 = img1.AsBitmap<gfx::RGB>();
+            TEST_REQUIRE(bmp0 == bitmap[0]);
+            TEST_REQUIRE(bmp1 == bitmap[1]);
+        }
+    }
+}
+
 void unit_test_duplicate_with_data()
 {
     // check duplication of tilemap layer data.
@@ -1821,6 +1896,7 @@ int test_main(int argc, char* argv[])
     unit_test_json_export_import();
     unit_test_list_deps();
     unit_test_export_import_basic();
+    unit_test_export_name_dupe();
 
     unit_test_duplicate_with_data();
     unit_test_delete_with_data();
