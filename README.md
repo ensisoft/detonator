@@ -13,31 +13,39 @@ Other readmes:
   * [Game](game/README.md "Game readme") (todo)
   * [Engine](engine/README.md "Engine readme") (todo)
   * [UI](uikit/README.md "UIKit readme") 
-  * [WDK](wdk/README.md "WDK readme")
+  * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
 
 ![Screenshot](screens/bandit-play.gif "Bandit demo")
 
-Currently supported major features:
-* Qt5 based editor
+Currently, supported major features:
+* Qt5 based WYSIWYG editor
 * Text rendering
 * Various primitive shapes, custom polygon shapes
 * Material system
 * Particle system
 * Entity system with animation tracks
-* Audio engine
-* Lua based scripting for entities, scenes and game logic
+* Audio engine with approx. dozen audio elements
+* Lua based scripting for entities, scenes, "main" game logic and UIs
 * Scene builder
-* Styleable UI system 
-* Box2D based physics
-* Demo content
-* Game content packaging
-* Window integration (https://github.com/ensisoft/wdk)
-* HTML5/WASM build target support
+* Styleable UI system (JSON style files *and* material system integration) 
+* Physics engine based on Box2D
+* Demo content and starter content
+* Game content packaging for native and HTML5/WASM (with Emscripten)
+* Resource archives, export and import between projects (in zip)
+* Tilemap importer, several handy dialogs for materials, fonts, colors etc.
+
+Currently, not yet 100% complete major features:
+* Tilemaps 
+  * TODO: Lua APIs
+  * TODO: Tilemap related algorithms such as path finding
+  * TODO: Compression etc. performance improvements
+  * TODO: Rendering performance improvements and fixes
 
 Planned major features not yet implemented:
-* tile maps and tile engine
-* partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
-* OpenGL ES3 backend, WebGL2
+* Partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
+* OpenGL ES3 backend and WebGL2
+* Android support (TBD)
+* Mobile web + touch screen support 
 
 Planned minor features not yet implemented:
 * See issues for more details
@@ -50,7 +58,7 @@ you can write your entity specific game play code.
 
 ![Screenshot](screens/editor-material.png "Material editor")
 Create materials using the material editor by setting some properties for the provided default material shaders.
-Currently supports sprite animations, textures (including text and noise), gradient and color fills out of box.
+Currently, supports sprite animations, textures (including text and noise), gradient and color fills out of box.
 Custom shaders can be used too.
 
 ![Screenshot](screens/editor-scene.png "Scene editor")
@@ -60,16 +68,21 @@ the game plays.
 
 ![Screenshot](screens/editor-ui.png "UI editor")
 Create the game's UI in the UI editor. The UI and the widgets can be styled using a JSON based style file and then individual widgets
-can have their style properties fine tuned in the editor. The style system integrates with the editor's material system too!
+can have their style properties fine-tuned in the editor. The style system integrates with the editor's material system too!
 
 ![Screenshot](screens/editor-audio.png "Audio graph editor")
 Create audio graphs using the audio editor. Each audio graph can have a number of elements added to it. The graph then
-specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output. Currently
-supported audio backends are Waveout on Windows and Pulseaudio on Linux. Supported formats are wav, mp3, ogg and flac.
+specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output. 
+Currently, supported audio backends are Waveout on Windows, Pulseaudio on Linux and OpenAL on HTML5/WASM. 
+Supported formats are wav, mp3, ogg and flac.
 
 ![Screenshot](screens/editor-script.png "Script editor")
-Use the built-in code editor to write the Lua scripts for the entities, scenes or for the game. The editor has a built-in
-help system for accessing the engine side Lua API documentation.
+Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
+help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting and linting.
+
+![Screenshot](screens/editor-particle.png "Particle editor")
+The particle editor allows several types of particle effects to be created conveniently by adjusting several sliders 
+and knobs that control the particle effect. 
 
 ![Screenshot](screens/demo-bandit.png "Editor game play window")
 During the development the game is available for play in the editor. It's possible to do live edits to the
@@ -154,9 +167,9 @@ On Windows
   $ cd emscripten
   $ mkdir build
   $ cd build
-  $ emcmake cmake .. 
-  $ ninja -j8
-  $ ninja -j8 install
+  $ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+  $ ninja -j16
+  $ ninja -j16 install
 ```
 
 If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder. 
@@ -164,9 +177,8 @@ The .js file contains the JavaScript glue code needed to manhandle the WASM code
 when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
 game's output directory.
 
-Penguin Juice (Linux)
-------------------------------
-
+![Screenshot](logo/linux.png) Linux
+-------------------------------------
 - Install the dev packages.
   (for Ubuntu based systems)
 ```
@@ -177,7 +189,9 @@ Penguin Juice (Linux)
 - Install Conan build system.
 https://docs.conan.io/en/latest/installation.html
 
+```
 $ conan profile new default --detect
+```
 
 If conan bitches about "ERROR: invalid setting" (for example when GCC major version changes)
 you can try edit ~/.conan/settings.yaml 
@@ -227,7 +241,7 @@ For example:
   $ kcaghegrind cachegrind.out.XXXXX
 ```
 
-Instructions for build using Ninja, Clang and Mold linker (optional)
+Alternative instructions for build using Ninja, Clang and Mold linker (optional)
 ```
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
@@ -244,7 +258,7 @@ Instructions for build using Ninja, Clang and Mold linker (optional)
 ```
 
 
-Boring But Stable (Windows)
+![Screenshot](logo/win10.png) Windows
 ---------------------------------
 
 These build instructions are for MSVS 2019 Community Edition and for 64bit build.
@@ -313,7 +327,7 @@ to implement is the "Engine" interface in engine/main/interface.h.
 From source code to a running game:
 1. Build the whole project as outlined in the **Build Instructions** previously.
    You will also need to *install* the build targets. Installing not only copies the binaries into the right place
-   but also copies other assets such as GLSL shader files. Without the install step things will not work correctly!
+   but also copies other assets such as GLSL shader files. Without the installation step things will not work correctly!
 2. After building launch the Editor from the editor/dist folder.
 3. *In the Editor:* Open your game's workspace folder. This is the folder that contains the workspace.json and content.json files.
    In Gamestudio this is essentially your "project" (It's simply a folder with those two specific files in it).
@@ -322,8 +336,10 @@ From source code to a running game:
    1. The game resources copied over, i.e. shaders, textures, font files etc.
    2. A content.json file that contains the resource descriptions for your assets that you've built in the editor
    3. A config.json file that contains the settings for the GameMain to launch the game
-   4. A "GameMain" executable and engine library.  These are the default game studio binaries for running your
+   4. A native "GameMain" executable and engine library.  These are the default game studio binaries for running your
       game content after the project has been packaged.
+   5. FILESYSTEM, FILESYSTEM.js, game.html GameEngine.wasm, GameEngine.js. These are the HTML5/WASM files that are
+      needed to run the game in the browser. 
 5. After packaging launch your game by running the GameMain executable in the package output directory.
 
 
@@ -342,7 +358,7 @@ An overview of the runtime architecture:
 3. The launcher application will then enter the top-level game loop. Inside the loop it will:
    1. Process any window system window events to handle pending keyboard/mouse etc. events and pass them to the engine as needed.
    2. Handle events coming from the engine instance. These could be for example requests to toggle full screen mode.
-   3. Accumulate and track time, call functions to Update, Tick and Draw the app instance.
+   3. Accumulate and track time, call functions to Update, Tick and Draw the engine instance.
 
 Inside the game engine the following will take place.
 1. The various subsystems are updated and ticked. These include physics, audio, scripting etc.
@@ -353,10 +369,14 @@ Inside the game engine the following will take place.
 4. The engine will handle the incoming events/requests from the game itself. For example the game might request a scene
    to be loaded or the game to be paused.
 
+The above flow is essentially the same for all platforms across Windows/Linux and HTML5/WASM, except that on the web the
+host application (emscripten/main.cpp) creates the WebGL context through JS APIs and there's no shared library for the engine
+but rather all the engine code is built into the same WASM blob with the loader/host application.
+
 Running (Unit) Tests
 --------------------
 There'a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
-a "*unit_test_*" is a unit test. There's a very simple testing utility that is available in base. [test_minimal.h](base/test_minimal.h)  
+a "*unit_test_*" is a unit test. There's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)  
 In order to run tests after a successful build:
 
 ```
@@ -404,7 +424,7 @@ Tracing & Profiling
 What follows is only specific to Linux. I don't know the tools for doing this on Windows.
 
 The engine has very primitive tracing built in. Most of the top-level subsystem calls to update all subsystems and to render
-the scene are wrapped inside trace calls. (The macros and tracing facilities can be found in base/trace.h) 
+the scene are wrapped inside trace calls. (The macros and tracing facilities can be found in [base/trace.h](base/trace.h) 
 ```
   TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
   TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mScene , *mPainter , transform, nullptr, &cull));
