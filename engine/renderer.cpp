@@ -646,6 +646,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
 
     const auto& entity = *std::get<const EntityType*>(paint_node.entity);
     const auto& node   = *std::get<const EntityNodeType*>(paint_node.entity_node);
+    const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_size);
@@ -666,7 +667,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             if (time >= half_period)
                 visible_now = false;
         }
-        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && visible_now)
+        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
         {
             DrawPacket packet;
             packet.drawable  = paint_node.text_drawable;
@@ -695,7 +696,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             transform.Translate(0.0f, 1.0f);
         }
         // if it doesn't render then no draw packets are generated
-        if (item->TestFlag(DrawableItemType::Flags::VisibleInGame))
+        if (item->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible)
         {
             DrawPacket packet;
             packet.material  = paint_node.item_material;
