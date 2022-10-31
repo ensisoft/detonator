@@ -1710,6 +1710,9 @@ void LuaRuntime::OnUIOpen(uik::Window* ui)
     if (mGameEnv)
         CallLua((*mGameEnv)["OnUIOpen"], ui);
 
+    if (mScene &&  mSceneEnv)
+        CallLua((*mSceneEnv)["OnUIOpen"], mScene, ui);
+
     if (auto* env = GetTypeEnv(*ui))
     {
         CallLua((*env)["OnUIOpen"], ui);
@@ -1720,6 +1723,9 @@ void LuaRuntime::OnUIClose(uik::Window* ui, int result)
     if (mGameEnv)
         CallLua((*mGameEnv)["OnUIClose"], ui, result);
 
+    if (mScene && mSceneEnv)
+        CallLua((*mSceneEnv)["OnUIClose"], mScene, ui, result);
+
     if (auto* env = GetTypeEnv(*ui))
     {
         CallLua((*env)["OnUIClose"], ui, result);
@@ -1729,6 +1735,9 @@ void LuaRuntime::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& ac
 {
     if (mGameEnv)
         CallLua((*mGameEnv)["OnUIAction"], ui, action);
+
+    if (mScene && mSceneEnv)
+        CallLua((*mSceneEnv)["OnUIAction"], mScene, ui, action);
 
     if (auto* env = GetTypeEnv(*ui))
     {
