@@ -996,6 +996,14 @@ public:
     }
     size_t GetSize() const
     { return mResult.size(); }
+
+    static ResultVector Join(const ResultVector& lhs, const ResultVector& rhs)
+    {
+        Vector vec;
+        base::AppendVector(vec, lhs.mResult);
+        base::AppendVector(vec, rhs.mResult);
+        return  ResultVector(std::move(vec));
+    }
 private:
     Vector mResult;
     typename Vector::iterator mBegin;
@@ -2969,6 +2977,7 @@ void BindGameLib(sol::state& L)
     entity_list["GetAt"]   = &EntityList::GetAt;
     entity_list["Size"]    = &EntityList::GetSize;
     entity_list["GetNext"] = &EntityList::GetNext;
+    entity_list["Join"]    = &EntityList::Join;
 
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
