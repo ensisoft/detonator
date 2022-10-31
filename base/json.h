@@ -66,6 +66,7 @@ struct JsonRef {
 JsonPtr NewJsonPtr();
 JsonRef GetJsonObj(const nlohmann::json& json, const char* name);
 
+bool JsonReadSafe(const nlohmann::json& object, const char* name, double* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, float* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, int* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, unsigned* out);
@@ -74,6 +75,7 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, std::string* o
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec2* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec3* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec4* out);
+bool JsonReadSafe(const nlohmann::json& value, double* out);
 bool JsonReadSafe(const nlohmann::json& value, float* out);
 bool JsonReadSafe(const nlohmann::json& value, int* out);
 bool JsonReadSafe(const nlohmann::json& value, unsigned* out);

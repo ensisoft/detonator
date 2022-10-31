@@ -31,8 +31,8 @@
 // !! SEMANTICS CHANGE BETWEEN DEBUG AND RELEASE BUILD !!
 //
 // Trying to access an attribute using operator[] does not check
-// whether a given key exists. instead it uses a standard CRT assert
-// which then changes semantics depending whether NDEBUG is defined
+// whether a given key exists. Instead, it uses a standard CRT assert
+// which then changes semantics depending on whether NDEBUG is defined
 // or not.
 
 namespace data {
@@ -65,6 +65,10 @@ std::unique_ptr<Reader> JsonObject::GetReadChunk(const char* name, unsigned inde
     return std::make_unique<JsonObject>(obj);
 }
 
+bool JsonObject::Read(const char* name, double* out) const
+{
+    return base::JsonReadSafe(*mJson, name, out);
+}
 bool JsonObject::Read(const char* name, float* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
@@ -112,6 +116,10 @@ bool JsonObject::Read(const char* name, base::FSize* out) const
 bool JsonObject::Read(const char* name, base::Color4f* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
+}
+bool JsonObject::Read(const char* name, unsigned index, double* out) const
+{
+    return read_array(name, index, out);
 }
 bool JsonObject::Read(const char* name, unsigned index, float* out) const
 { return read_array(name, index, out); }

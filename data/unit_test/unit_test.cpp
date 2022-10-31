@@ -43,6 +43,7 @@ void unit_test_basic()
     data::JsonObject json;
     TEST_REQUIRE(json.IsEmpty());
 
+    json.Write("double", 2.0);
     json.Write("float", 1.0f);
     json.Write("int", 123);
     json.Write("unsigned", 333u);
@@ -56,6 +57,7 @@ void unit_test_basic()
     json.Write("size", base::FSize(50.0f, 50.0f));
     json.Write("color", base::Color4f(base::Color::HotPink));
 
+    TEST_REQUIRE(json.HasValue("double"));
     TEST_REQUIRE(json.HasValue("float"));
     TEST_REQUIRE(json.HasValue("float"));
     TEST_REQUIRE(json.HasValue("int"));
@@ -72,6 +74,7 @@ void unit_test_basic()
     TEST_REQUIRE(json.HasValue("huhu") == false);
     TEST_REQUIRE(json.IsEmpty() == false);
 
+    TestValue("double", json, 2.0);
     TestValue("float", json, 1.0f);
     TestValue("int", json, 123);
     TestValue("unsigned", json, 333u);

@@ -69,6 +69,14 @@ JsonRef GetJsonObj(const nlohmann::json& json, const char* name)
     return ret;
 }
 
+bool JsonReadSafe(const nlohmann::json& object, const char* name, double* out)
+{
+    if (!object.contains(name) || !object[name].is_number_float())
+        return false;
+    *out = object[name];
+    return true;
+}
+
 bool JsonReadSafe(const nlohmann::json& object, const char* name, float* out)
 {
     if (!object.contains(name) || !object[name].is_number_float())
@@ -216,6 +224,14 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color)
         !base::JsonReadSafe(object, "a", &a))
         return false;
     *color = Color4f(r, g, b, a);
+    return true;
+}
+
+bool JsonReadSafe(const nlohmann::json& value, double* out)
+{
+    if (!value.is_number_float())
+        return false;
+    *out = value;
     return true;
 }
 

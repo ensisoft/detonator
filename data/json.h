@@ -44,12 +44,14 @@ namespace data
         // reader interface impl
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name) const override;
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name, unsigned index) const override;
+        virtual bool Read(const char* name, double* out) const override;
         virtual bool Read(const char* name, float* out) const override;
         virtual bool Read(const char* name, int* out) const override;
         virtual bool Read(const char* name, unsigned* out) const override;
         virtual bool Read(const char* name, bool* out) const override;
         virtual bool Read(const char* name, std::string* out) const override;
         // array read for primitive items.
+        virtual bool Read(const char* name, unsigned index, double* out) const override;
         virtual bool Read(const char* name, unsigned index, float* out) const override;
         virtual bool Read(const char* name, unsigned index, int* out) const override;
         virtual bool Read(const char* name, unsigned index, unsigned* out) const override;
