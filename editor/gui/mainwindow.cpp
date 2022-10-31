@@ -1331,6 +1331,12 @@ void MainWindow::on_actionNewSceneScript_triggered()
     stream << QString("function OnEntityTimer(%1, entity, timer, jitter)\nend\n\n").arg(var);
     stream << "-- Called on posted entity events.\n";
     stream << QString("function OnEntityEvent(%1, entity, event)\nend\n\n").arg(var);
+    stream << "-- Called on UI open event.\n";
+    stream << QString("function OnUIOpen(%1, ui)\nend\n\n").arg(var);
+    stream << "-- Called on UI close event.\n";
+    stream << QString("function OnUIClose(%1, ui, result)\nend\n\n").arg(var);
+    stream << "--Called on UI action event.\n";
+    stream << QString("function OnUIAction(%1, ui, action)\nend\n\n").arg(var);
 
     io.flush();
     io.close();
