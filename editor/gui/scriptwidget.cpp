@@ -1215,6 +1215,8 @@ void InitDoc()
     DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index.", "unsigned", "index");
     DOC_METHOD_0("game.Entity", "GetNext", "Get the current item and move on to the next item.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
+    DOC_FUNCTION_2("game.EntityList", "Join", "Join two entity lists together into a new entity list.",
+                   "game.EntityList", "first", "game.EntityList", "second");
 
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
