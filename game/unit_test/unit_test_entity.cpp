@@ -298,6 +298,7 @@ void unit_test_entity_class()
     entity.SetFlag(game::EntityClass::Flags::UpdateEntity, false);
     entity.SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
     entity.SetSriptFileId("script_123.lua");
+    entity.SetTag("foo bar");
     {
         game::EntityNodeClass node;
         node.SetName("root");
@@ -376,6 +377,7 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetName() == "TestEntityClass");
     TEST_REQUIRE(entity.GetLifetime() == real::float32(5.0f));
     TEST_REQUIRE(entity.GetScriptFileId() == "script_123.lua");
+    TEST_REQUIRE(entity.GetTag() == "foo bar");
     TEST_REQUIRE(entity.GetNumNodes() == 3);
     TEST_REQUIRE(entity.GetNode(0).GetName() == "root");
     TEST_REQUIRE(entity.GetNode(1).GetName() == "child_1");

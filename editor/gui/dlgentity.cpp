@@ -192,6 +192,21 @@ DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::Scen
     SetEnabled(mUI.btnResetVar, false);
     SetEnabled(mUI.btnEditVar, false);
 
+    if (const auto* tag = node.GetTag())
+    {
+        SetValue(mUI.entityTag, *tag);
+        // the tag string could be an empty string which means the
+        // placeholder text must be removed in order to indicate on the UI
+        // correctly that the placeholder text is set, but it's set to an
+        // emtpy string. Otherwise, the UI will indicate "Class Default".
+        SetPlaceholderText(mUI.entityTag, QString(""));
+    }
+    else
+    {
+        SetValue(mUI.entityTag, QString(""));
+        SetPlaceholderText(mUI.entityTag, QString("Class Default"));
+    }
+
     std::vector<ResourceListItem> tracks;
     for (size_t i=0; i< klass.GetNumAnimations(); ++i)
     {
@@ -259,6 +274,13 @@ void DlgEntity::on_btnResetLifetime_clicked()
     SetValue(mUI.entityLifetime, 0.0);
 }
 
+void DlgEntity::on_btnResetTag_clicked()
+{
+    mNodeClass.ResetTag();
+    SetValue(mUI.entityTag, QString(""));
+    SetPlaceholderText(mUI.entityTag, "Class Default");
+}
+
 void DlgEntity::on_btnEditVar_clicked()
 {
     auto items = mUI.tableView->selectionModel()->selectedRows();
@@ -311,6 +333,12 @@ void DlgEntity::on_entityLifetime_valueChanged(double value)
     // 0.0f and X to hide the -1.0 special.
     value = math::clamp(0.0, mUI.entityLifetime->maximum(), value);
     SetValue(mUI.entityLifetime, value);
+}
+
+void DlgEntity::on_entityTag_textChanged(const QString& text)
+{
+    mNodeClass.SetTag(GetValue(mUI.entityTag));
+    SetPlaceholderText(mUI.entityTag, QString(""));
 }
 
 void DlgEntity::ScriptVariableSelectionChanged(const QItemSelection&, const QItemSelection&)

@@ -716,6 +716,7 @@ EntityClass::EntityClass(const EntityClass& other)
 {
     mClassId     = other.mClassId;
     mName        = other.mName;
+    mTag         = other.mTag;
     mScriptFile  = other.mScriptFile;
     mIdleTrackId = other.mIdleTrackId;
     mFlags       = other.mFlags;
@@ -1173,6 +1174,7 @@ std::size_t EntityClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mTag);
     hash = base::hash_combine(hash, mIdleTrackId);
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mFlags.value());
@@ -1219,6 +1221,7 @@ void EntityClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mClassId);
     data.Write("name", mName);
+    data.Write("tag", mTag);
     data.Write("idle_track", mIdleTrackId);
     data.Write("script_file", mScriptFile);
     data.Write("flags", mFlags);
@@ -1275,13 +1278,13 @@ void EntityClass::IntoJson(data::Writer& data) const
 std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
 {
     EntityClass ret;
-    if (!data.Read("id", &ret.mClassId) ||
-        !data.Read("name", &ret.mName) ||
-        !data.Read("idle_track", &ret.mIdleTrackId) ||
-        !data.Read("script_file", &ret.mScriptFile) ||
-        !data.Read("flags", &ret.mFlags) ||
-        !data.Read("lifetime", &ret.mLifetime))
-        return std::nullopt;
+    data.Read("id",          &ret.mClassId);
+    data.Read("name",        &ret.mName);
+    data.Read("tag",         &ret.mTag);
+    data.Read("idle_track",  &ret.mIdleTrackId);
+    data.Read("script_file", &ret.mScriptFile);
+    data.Read("flags",       &ret.mFlags);
+    data.Read("lifetime",    &ret.mLifetime);
 
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
@@ -1441,6 +1444,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     EntityClass tmp(other);
     mClassId         = std::move(tmp.mClassId);
     mName            = std::move(tmp.mName);
+    mTag             = std::move(tmp.mTag);
     mIdleTrackId     = std::move(tmp.mIdleTrackId);
     mNodes           = std::move(tmp.mNodes);
     mJoints          = std::move(tmp.mJoints);
@@ -1504,6 +1508,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     mIdleTrackId = mClass->GetIdleTrackId();
     mFlags       = mClass->GetFlags();
     mLifetime    = mClass->GetLifetime();
+    mInstanceTag = mClass->GetTag();
 }
 
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)

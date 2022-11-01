@@ -999,6 +999,7 @@ void InitDoc()
     DOC_TABLE("game.EntityClass");
     DOC_METHOD_0("string", "GetId", "Get the entity class ID.");
     DOC_METHOD_0("string", "GetName", "Get the entity class name.");
+    DOC_METHOD_0("string", "GetTag", "Get entity tag string.");
     DOC_METHOD_0("float", "GetLifetime", "Get the entity lifetime.");
     DOC_METHOD_0("bool|float|string|int|vec2", "index",
                  "Lua index meta method.<br>"
@@ -1093,10 +1094,12 @@ void InitDoc()
     DOC_METHOD_0("string", "GetId", "Get entity instance ID.");
     DOC_METHOD_0("string", "GetClassName", "Get entity class type name.");
     DOC_METHOD_0("string", "GetClassId", "Get entity class type ID.");
+    DOC_METHOD_0("string", "GetTag", "Get entity tag string.");
     DOC_METHOD_0("int", "GetNumNodes", "Get the number of entity nodes in this entity.");
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
+    DOC_METHOD_1("void", "SetTag", "Set entity tag string.", "string", "tag");
     DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
     DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
@@ -1226,6 +1229,7 @@ void InitDoc()
                                                            "The scene's script variables are accessible as properties of the scene object.<br>"
                                                            "For example a script variable named 'score' would be accessible as object.score.");
     DOC_METHOD_1("game.EntityList", "ListEntitiesByClassName", "List all entities of the given class identified by its class name", "string", "class");
+    DOC_METHOD_1("game.EntityList", "ListEntitiesByTag", "List all entities that match the given tag string.", "string", "tag");
     DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
                                                           "Returns nil if no such entity could be found.",

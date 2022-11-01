@@ -1321,6 +1321,11 @@ void EntityWidget::on_entityName_textChanged(const QString& text)
     mState.entity->SetName(GetValue(mUI.entityName));
 }
 
+void EntityWidget::on_entityTag_textChanged(const QString& text)
+{
+    mState.entity->SetTag(GetValue(mUI.entityTag));
+}
+
 void EntityWidget::on_entityLifetime_valueChanged(double value)
 {
     const bool limit_lifetime = value > 0.0;
@@ -2730,6 +2735,7 @@ void EntityWidget::DisplayEntityProperties()
     SetEnabled(mUI.btnEditScript, mState.entity->HasScriptFile());
 
     SetValue(mUI.entityName, mState.entity->GetName());
+    SetValue(mUI.entityTag, mState.entity->GetTag());
     SetValue(mUI.entityID, mState.entity->GetId());
     SetValue(mUI.idleTrack, ListItemId(mState.entity->GetIdleTrackId()));
     SetValue(mUI.scriptFile, ListItemId(mState.entity->GetScriptFileId()));

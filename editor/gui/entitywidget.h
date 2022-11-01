@@ -107,6 +107,7 @@ namespace gui
         void on_actionNodeComment_triggered();
         void on_actionNodeRename_triggered();
         void on_entityName_textChanged(const QString& text);
+        void on_entityTag_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
         void on_chkKillAtLifetime_stateChanged(int);
         void on_chkKillAtBoundary_stateChanged(int);
