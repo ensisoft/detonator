@@ -88,6 +88,8 @@ namespace game
         { mName = name; }
         void SetLayer(int layer)
         { mLayer = layer; }
+        void SetTag(const std::string& tag)
+        { mTagString = tag; }
         void SetIdleAnimationId(const std::string& id)
         { mIdleAnimationId = id; }
         void SetParentRenderTreeNodeId(const std::string& id)
@@ -114,6 +116,8 @@ namespace game
         { mLifetime.reset(); }
         void SetLifetime(double lifetime)
         { mLifetime = lifetime; }
+        void ResetTag()
+        { mTagString.reset(); }
 
         // class getters.
         glm::vec2 GetTranslation() const
@@ -134,6 +138,8 @@ namespace game
         { return mParentRenderTreeNodeId; }
         std::shared_ptr<const EntityClass> GetEntityClass() const
         { return mEntity; }
+        const std::string* GetTag() const
+        { return mTagString ? &mTagString.value() : nullptr; }
         bool TestFlag(Flags flag) const
         { return mFlagValBits.test(flag); }
         int GetLayer() const
@@ -148,6 +154,8 @@ namespace game
         { return mLifetime.has_value(); }
         bool HasFlagSetting(Flags flag) const
         { return mFlagSetBits.test(flag); }
+        bool HasTag() const
+        { return mTagString.has_value(); }
         void ClearFlagSetting(Flags flag)
         { mFlagSetBits.set(flag, false); }
         std::size_t GetNumScriptVarValues() const
@@ -193,7 +201,7 @@ namespace game
         // node in the parent entity's render tree that is to
         // be used as the parent of this entity's nodes.
         std::string mParentRenderTreeNodeId;
-        // The human readable name for the node.
+        // The human-readable name for the node.
         std::string mName;
         // The position of the node relative to its parent.
         glm::vec2   mPosition = {0.0f, 0.0f};
@@ -212,6 +220,7 @@ namespace game
         // track designation if set.
         std::string mIdleAnimationId;
         std::optional<double> mLifetime;
+        std::optional<std::string> mTagString;
         std::vector<ScriptVarValue> mScriptVarValues;
     private:
         // This is the runtime class reference to the
@@ -550,6 +559,10 @@ namespace game
         std::vector<Entity*> ListEntitiesByClassName(const std::string& name);
         // List all entities of the given class identified by its class name.
         std::vector<const Entity*> ListEntitiesByClassName(const std::string& name) const;
+        // List entities that have a matching tag string.
+        std::vector<Entity*> ListEntitiesByTag(const std::string& tag);
+        // List entities that have a matching tag string.
+        std::vector<const Entity*> ListEntitiesByTag(const std::string& tag) const;
         // Get the node by index. The index must be valid.
         const Entity& GetEntity(size_t index) const;
         // Find entity by id. Returns nullptr if  no such node could be found.

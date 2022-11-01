@@ -2723,9 +2723,10 @@ void BindGameLib(sol::state& L)
 
     auto entity_class = table.new_usertype<EntityClass>("EntityClass",
        sol::meta_function::index, &GetScriptVar<EntityClass>);
-    entity_class["GetId"]   = &EntityClass::GetId;
-    entity_class["GetName"] = &EntityClass::GetName;
+    entity_class["GetId"]       = &EntityClass::GetId;
+    entity_class["GetName"]     = &EntityClass::GetName;
     entity_class["GetLifetime"] = &EntityClass::GetLifetime;
+    entity_class["GetTag"]      = &EntityClass::GetTag;
 
     auto actuator_class = table.new_usertype<ActuatorClass>("ActuatorClass");
     actuator_class["GetName"]       = &ActuatorClass::GetName;
@@ -2855,6 +2856,7 @@ void BindGameLib(sol::state& L)
         sol::meta_function::new_index, &SetScriptVar<Entity>);
     entity["GetName"]              = &Entity::GetName;
     entity["GetId"]                = &Entity::GetId;
+    entity["GetTag"]               = &Entity::GetTag;
     entity["GetClassName"]         = &Entity::GetClassName;
     entity["GetClassId"]           = &Entity::GetClassId;
     entity["GetClass"]             = &Entity::GetClass;
@@ -2876,6 +2878,7 @@ void BindGameLib(sol::state& L)
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
     entity["Die"]                  = &Entity::Die;
+    entity["SetTag"]               = &Entity::SetTag;
     entity["TestFlag"]             = &TestFlag<Entity>;
     entity["SetFlag"]              = &SetFlag<Entity>;
     entity["SetVisible"]           = &Entity::SetVisible;
@@ -2984,6 +2987,9 @@ void BindGameLib(sol::state& L)
        sol::meta_function::new_index, &SetScriptVar<Scene>);
     scene["ListEntitiesByClassName"]    = [](Scene& scene, const std::string& name) {
         return EntityList(scene.ListEntitiesByClassName(name));
+    };
+    scene["ListEntitiesByTag"] = [](Scene& scene, const std::string& tag) {
+        return EntityList(scene.ListEntitiesByTag(tag));
     };
     scene["GetTime"]                    = &Scene::GetTime;
     scene["GetClassName"]               = &Scene::GetClassName;

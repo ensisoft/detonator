@@ -242,6 +242,12 @@ inline void SetPlaceholderText(QComboBox* cmb, const QString& text)
     cmb->setPlaceholderText(text);
 }
 
+inline void SetPlaceholderText(QLineEdit* edit, const QString& text)
+{
+    QSignalBlocker s(edit);
+    edit->setPlaceholderText(text);
+}
+
 inline void SetRange(QDoubleSpinBox* spin, double min, double max)
 {
     QSignalBlocker s(spin);

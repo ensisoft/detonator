@@ -42,9 +42,11 @@ namespace gui
         void on_btnCancel_clicked();
         void on_btnResetIdleAnimation_clicked();
         void on_btnResetLifetime_clicked();
+        void on_btnResetTag_clicked();
         void on_btnEditVar_clicked();
         void on_btnResetVar_clicked();
         void on_entityLifetime_valueChanged(double value);
+        void on_entityTag_textChanged(const QString& text);
         void ScriptVariableSelectionChanged(const QItemSelection&,  const QItemSelection&);
     private:
         void SetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);

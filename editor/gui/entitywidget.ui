@@ -50,7 +50,7 @@
           <item>
            <widget class="QComboBox" name="scriptFile">
             <property name="placeholderText">
-             <string>Select Script ...</string>
+             <string>No entity script</string>
             </property>
            </widget>
           </item>
@@ -250,7 +250,7 @@
           <item>
            <widget class="QComboBox" name="idleTrack">
             <property name="placeholderText">
-             <string>Select Track ...</string>
+             <string>No idle animation</string>
             </property>
            </widget>
           </item>
@@ -330,6 +330,16 @@
           </property>
           <property name="text">
            <string> Tick entity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="entityTag"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Tag</string>
           </property>
          </widget>
         </item>
@@ -3086,6 +3096,7 @@
   <tabstop>btnResetScript</tabstop>
   <tabstop>entityLifetime</tabstop>
   <tabstop>btnResetLifetime</tabstop>
+  <tabstop>entityTag</tabstop>
   <tabstop>chkKillAtLifetime</tabstop>
   <tabstop>chkKillAtBoundary</tabstop>
   <tabstop>chkTickEntity</tabstop>

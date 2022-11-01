@@ -158,9 +158,11 @@ std::size_t SceneNodeClass::GetHash() const
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
     hash = base::hash_combine(hash, mIdleAnimationId);
-    if (mLifetime.has_value())
-        hash = base::hash_combine(hash, mLifetime.value());
-    for (const auto& value : mScriptVarValues) {
+    hash = base::hash_combine(hash, mLifetime);
+    hash = base::hash_combine(hash, mTagString);
+
+    for (const auto& value : mScriptVarValues)
+    {
         hash = base::hash_combine(hash, value.id);
         hash = base::hash_combine(hash, ScriptVar::GetHash(value.value));
     }
@@ -185,19 +187,20 @@ SceneNodeClass SceneNodeClass::Clone() const
 
 void SceneNodeClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id",       mClassId);
-    data.Write("entity",   mEntityId);
-    data.Write("name",     mName);
-    data.Write("position", mPosition);
-    data.Write("scale",    mScale);
-    data.Write("rotation", mRotation);
-    data.Write("flag_val_bits", mFlagValBits);
-    data.Write("flag_set_bits", mFlagSetBits);
-    data.Write("layer",    mLayer);
+    data.Write("id",                      mClassId);
+    data.Write("entity",                  mEntityId);
+    data.Write("name",                    mName);
+    data.Write("position",                mPosition);
+    data.Write("scale",                   mScale);
+    data.Write("rotation",                mRotation);
+    data.Write("flag_val_bits",           mFlagValBits);
+    data.Write("flag_set_bits",           mFlagSetBits);
+    data.Write("layer",                   mLayer);
     data.Write("parent_render_tree_node", mParentRenderTreeNodeId);
-    data.Write("idle_animation_id", mIdleAnimationId);
-    if (mLifetime.has_value())
-        data.Write("lifetime", mLifetime.value());
+    data.Write("idle_animation_id",       mIdleAnimationId);
+    data.Write("lifetime",                mLifetime);
+    data.Write("tag",                     mTagString);
+
     for (const auto& value : mScriptVarValues)
     {
         auto chunk = data.NewWriteChunk();
@@ -212,26 +215,20 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
 std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
 {
     SceneNodeClass ret;
-    if (!data.Read("id",       &ret.mClassId)||
-        !data.Read("entity",   &ret.mEntityId) ||
-        !data.Read("name",     &ret.mName) ||
-        !data.Read("position", &ret.mPosition) ||
-        !data.Read("scale",    &ret.mScale) ||
-        !data.Read("rotation", &ret.mRotation) ||
-        !data.Read("flag_val_bits", &ret.mFlagValBits) ||
-        !data.Read("flag_set_bits", &ret.mFlagSetBits) ||
-        !data.Read("layer", &ret.mLayer) ||
-        !data.Read("parent_render_tree_node", &ret.mParentRenderTreeNodeId) ||
-        !data.Read("idle_animation_id", &ret.mIdleAnimationId))
-        return std::nullopt;
-    if (data.HasValue("lifetime"))
-    {
-        // todo: double
-        float lifetime = 0.0;
-        if (!data.Read("lifetime", &lifetime))
-            return std::nullopt;
-        ret.mLifetime = lifetime;
-    }
+    data.Read("id",                      &ret.mClassId);
+    data.Read("entity",                  &ret.mEntityId);
+    data.Read("name",                    &ret.mName);
+    data.Read("position",                &ret.mPosition);
+    data.Read("scale",                   &ret.mScale);
+    data.Read("rotation",                &ret.mRotation);
+    data.Read("flag_val_bits",           &ret.mFlagValBits);
+    data.Read("flag_set_bits",           &ret.mFlagSetBits);
+    data.Read("layer",                   &ret.mLayer);
+    data.Read("parent_render_tree_node", &ret.mParentRenderTreeNodeId);
+    data.Read("idle_animation_id",       &ret.mIdleAnimationId);
+    data.Read("lifetime",                &ret.mLifetime);
+    data.Read("tag",                     &ret.mTagString);
+
     for (unsigned i=0; i<data.GetNumChunks("values"); ++i)
     {
         const auto& chunk = data.GetReadChunk("values", i);
@@ -253,18 +250,18 @@ SceneClass::SceneClass(const SceneClass& other)
 {
     std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
 
-    mClassId    = other.mClassId;
-    mName       = other.mName;
-    mTilemap    = other.mTilemap;
-    mScriptFile = other.mScriptFile;
-    mScriptVars = other.mScriptVars;
+    mClassId                 = other.mClassId;
+    mName                    = other.mName;
+    mTilemap                 = other.mTilemap;
+    mScriptFile              = other.mScriptFile;
+    mScriptVars              = other.mScriptVars;
     mDynamicSpatialIndex     = other.mDynamicSpatialIndex;
     mDynamicSpatialRect      = other.mDynamicSpatialRect;
     mDynamicSpatialIndexArgs = other.mDynamicSpatialIndexArgs;
-    mLeftBoundary   = other.mLeftBoundary;
-    mRightBoundary  = other.mRightBoundary;
-    mTopBoundary    = other.mTopBoundary;
-    mBottomBoundary = other.mBottomBoundary;
+    mLeftBoundary            = other.mLeftBoundary;
+    mRightBoundary           = other.mRightBoundary;
+    mTopBoundary             = other.mTopBoundary;
+    mBottomBoundary          = other.mBottomBoundary;
 
     for (const auto& node : other.mNodes)
     {
@@ -1011,6 +1008,8 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
             entity->SetIdleTrackId(node.GetIdleAnimationId());
         if (node.HasLifetimeSetting())
             entity->SetLifetime(node.GetLifetime());
+        if (node.HasTag())
+            entity->SetTag(*node.GetTag());
 
         if (entity->HasIdleTrack())
             entity->PlayIdle();
@@ -1136,6 +1135,29 @@ std::vector<const Entity*> Scene::ListEntitiesByClassName(const std::string& nam
     for (auto& entity : mEntities)
     {
         if (entity->GetClassName() == name)
+            ret.push_back(entity.get());
+    }
+    return ret;
+}
+
+std::vector<Entity*> Scene::ListEntitiesByTag(const std::string& tag)
+{
+    std::vector<Entity*> ret;
+    for (auto& entity : mEntities)
+    {
+        const auto& tag_string = entity->GetTag();
+        if (base::Contains(tag_string, tag))
+            ret.push_back(entity.get());
+    }
+    return ret;
+}
+std::vector<const Entity*> Scene::ListEntitiesByTag(const std::string& tag) const
+{
+    std::vector<const Entity*> ret;
+    for (auto& entity : mEntities)
+    {
+        const auto& tag_string = entity->GetTag();
+        if (base::Contains(tag_string, tag))
             ret.push_back(entity.get());
     }
     return ret;
