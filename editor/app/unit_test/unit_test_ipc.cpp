@@ -43,11 +43,6 @@ void unit_test_ipc_host()
     TEST_REQUIRE(host.IsOpen() == true);
     TEST_REQUIRE(host.IsConnected() == false);
 
-    // try open 2nd host on the same name
-    {
-        app::IPCHost host;
-        TEST_REQUIRE(host.Open("test-socket") == false);
-    }
     host.Close();
     TEST_REQUIRE(host.IsConnected() == false);
     TEST_REQUIRE(host.IsOpen() == false);
@@ -66,12 +61,25 @@ void unit_test_ipc_client()
     TEST_REQUIRE(host.Open("test-socket"));
     TEST_REQUIRE(client.Open("test-socket"));
     TEST_REQUIRE(client.IsOpen());
+    
     QEventLoop footgun;
-    footgun.processEvents();
+    for (int i = 0; i < 100; ++i)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        footgun.processEvents();
+        if (host.IsConnected())
+            break;
+    }
     TEST_REQUIRE(host.IsConnected());
 
     client.Close();
-    footgun.processEvents();
+    for (int i = 0; i < 100; ++i)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        footgun.processEvents();
+        if (host.IsConnected() == false)
+            break;
+    }
     TEST_REQUIRE(host.IsConnected() == false);
     TEST_REQUIRE(host.IsOpen() == true);
 }
