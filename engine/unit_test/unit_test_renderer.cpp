@@ -86,11 +86,9 @@ public:
         attrs.surfaces.pbuffer = true;
         attrs.double_buffer    = false;
         attrs.srgb_buffer      = true;
-        attrs.sampling         = wdk::Config::Multisampling::MSAA4;
-
+        constexpr auto debug_context = false;
         mConfig   = std::make_unique<wdk::Config>(attrs);
-        mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false, //debug
-                                                   wdk::Context::Type::OpenGL_ES);
+        mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0, debug_context, wdk::Context::Type::OpenGL_ES);
         mSurface  = std::make_unique<wdk::Surface>(*mConfig, w, h);
         mContext->MakeCurrent(mSurface.get());
     }
