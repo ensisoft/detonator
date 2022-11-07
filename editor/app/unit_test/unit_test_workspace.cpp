@@ -307,6 +307,7 @@ void unit_test_packing_basic()
     TEST_REQUIRE(d.mkpath("fonts"));
     TEST_REQUIRE(d.mkpath("ui"));
     TEST_REQUIRE(app::WriteTextFile("shaders/es2/my_material.glsl", "my_material.glsl"));
+    TEST_REQUIRE(app::WriteTextFile("shaders/es2/my_material.json", "my_material.json"));
     // setup dummy scripts this one is global (outside the workspace tree)
     TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua", "game_script.lua"));
     TEST_REQUIRE(app::WriteTextFile("audio/music.mp3", "music.mp3"));
