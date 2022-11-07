@@ -229,7 +229,7 @@ void unit_test_widget()
     widget.SetFlag(uik::Widget::Flags::VisibleInGame, false);
     widget.SetStyleProperty("flag", true);
     widget.SetStyleProperty("float", 1.0f);
-    widget.SetStyleProperty("string", "foobar");
+    widget.SetStyleProperty("string", std::string("foobar"));
 
     data::JsonObject json;
     widget.IntoJson(json);
