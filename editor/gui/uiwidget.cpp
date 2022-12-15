@@ -2061,6 +2061,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
 {
     SetValue(mUI.widgetId, QString(""));
     SetValue(mUI.widgetName, QString(""));
+    SetValue(mUI.widgetType, QString(""));
     SetValue(mUI.widgetStyleString, QString(""));
     SetValue(mUI.widgetWidth, 0.0f);
     SetValue(mUI.widgetHeight, 0.0f);
@@ -2083,6 +2084,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         const auto& size = widget->GetSize();
         const auto& pos = widget->GetPosition();
         SetValue(mUI.widgetId , widget->GetId());
+        SetValue(mUI.widgetType, app::toString(widget->GetType()));
         SetValue(mUI.widgetName , widget->GetName());
         SetValue(mUI.widgetStyleString, widget->GetStyleString());
         SetValue(mUI.widgetWidth , size.GetWidth());
