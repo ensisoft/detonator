@@ -222,7 +222,9 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     // the button can render on top of the container even when not inside
     // the tab widget.
     //
-    //
+
+    painter.BeginDrawWidgets();
+
     class PaintVisitor : public ConstVisitor {
     public:
         PaintVisitor(const Window& w, double time, Painter& p, State& s, PaintHook* h)
@@ -310,6 +312,8 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
 
     PaintVisitor visitor(*this, time, painter, state, hook);
     mRenderTree.PreOrderTraverse(visitor);
+
+    painter.EndDrawWidgets();
 }
 
 void Window::Update(State& state, double time, float dt)

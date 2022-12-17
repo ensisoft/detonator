@@ -111,8 +111,12 @@ void UIColor::IntoJson(nlohmann::json& json) const
 UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary& loader) const
 {
     auto klass = loader.FindMaterialClassById(mMaterialId);
+    // currently, the material style that is associated with a paint struct
+    // can use class names too. so also try to find with the name.
     if (klass == nullptr)
-        WARN("Unresolved UI material ID '%1'", mMaterialId);
+        klass = loader.FindMaterialClassByName(mMaterialId);
+    if (klass == nullptr)
+        WARN("Unresolved UI material. [material='%1']", mMaterialId);
     return klass;
 }
 
@@ -155,6 +159,42 @@ void UITexture::IntoJson(nlohmann::json& json) const
 }
 
 } // detail
+
+UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
+{
+    ASSERT(mClassLib);
+    auto [ok, json, error] = base::JsonParse(str);
+    if (!ok)
+    {
+        ERROR("Failed to parse UI style material string. [error='%1']", error);
+        return nullptr;
+    }
+    UIMaterial::Type type;
+    if (!base::JsonReadSafe(json, "type", &type))
+    {
+        ERROR("Failed to resolve UI style material string material type.");
+        return nullptr;
+    }
+    std::unique_ptr<UIMaterial> factory;
+    if (type == UIMaterial::Type::Null)
+        factory.reset(new detail::UINullMaterial());
+    else if (type == UIMaterial::Type::Color)
+        factory.reset(new detail::UIColor);
+    else if (type == UIMaterial::Type::Gradient)
+        factory.reset(new detail::UIGradient);
+    else if (type == UIMaterial::Type::Reference)
+        factory.reset(new detail::UIMaterialReference);
+    else if (type == UIMaterial::Type::Texture)
+        factory.reset(new detail::UITexture);
+    else BUG("Unhandled material type.");
+
+    if (!factory->FromJson(json))
+    {
+        WARN("Failed to parse UI style material string.");
+        return nullptr;
+    }
+    return factory->GetClass(*mClassLib);
+}
 
 std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& key) const
 {
@@ -798,6 +838,28 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
     }
 }
 
+void UIPainter::BeginDrawWidgets()
+{
+    // see EndDrawWidgets for more details
+    for (auto& material : mWidgetMaterials)
+    {
+        material.used = false;
+    }
+}
+
+void UIPainter::EndDrawWidgets()
+{
+    // erase all materials that were created based on material's
+    // associated with paint operations. it's possible that those
+    // definitions change on the fly when (the game can change them
+    // arbitrarily) and this means that any corresponding material
+    // instances that are actually no longer used must be dropped.
+    base::EraseRemove(mWidgetMaterials,
+        [](const auto& material) {
+            return  !material.used;
+        });
+}
+
 bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
 {
     return mStyle->ParseStyleString(tag, style);
@@ -919,6 +981,55 @@ bool UIPainter::GetMaterial(const std::string& key, gfx::Material** material) co
 gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id, const PaintStruct& ps, const std::string& key) const
 {
     gfx::Material* ret = nullptr;
+
+    // if the paint operation has associated material definitions these take
+    // precedence over any other styling information
+    if (ps.style_materials)
+    {
+        std::string prefix;
+        if (ps.enabled == false)
+            prefix = "disabled/";
+        else if (ps.pressed)
+            prefix = "pressed/";
+        else if (ps.focused)
+            prefix = "focused/";
+        else if (ps.moused)
+            prefix = "mouse-over/";
+
+        // check if we have this particular material key in the set of paint materials
+        if (const auto* val = base::SafeFind(*ps.style_materials, prefix + key))
+        {
+            size_t hash = 0;
+            hash = base::hash_combine(hash, *val);
+            // look for an existing material instance
+            for (auto& material : mWidgetMaterials)
+            {
+                if (material.hash != hash)
+                    continue;
+                else if (material.key != prefix + key)
+                    continue;
+                else if (material.widget != id)
+                    continue;
+
+                material.used = true;
+                return material.material.get();
+            }
+            // create a new material instance if the material definition is valid/parses properly
+            WidgetMaterial material;
+            material.used     = true;
+            material.hash     = hash;
+            material.widget   = id;
+            material.key      = prefix + key;
+            if (auto klass = mStyle->MakeMaterial(*val))
+            {
+                material.material = gfx::CreateMaterialInstance(klass);
+                ret = material.material.get();
+            }
+            mWidgetMaterials.push_back(std::move(material));
+            return ret;
+        }
+    }
+
     if (ps.enabled == false)
         ret = GetWidgetMaterial(id, ps.klass, "disabled/" + key);
     else if (ps.pressed)

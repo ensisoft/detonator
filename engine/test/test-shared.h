@@ -44,6 +44,11 @@ public:
     {
         return nullptr;
     }
+    virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
+    {
+        return nullptr;
+    }
+
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
     {
         if (name == "uv_test")

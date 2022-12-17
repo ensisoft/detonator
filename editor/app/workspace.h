@@ -130,6 +130,7 @@ namespace app
         virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
         virtual engine::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
         virtual engine::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
+        virtual engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
         virtual engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
         virtual engine::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
         virtual engine::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;

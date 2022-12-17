@@ -130,6 +130,8 @@ public:
     { return nullptr; }
     virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
     { return nullptr; }
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
+    { return nullptr; }
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
     {
         if (id == "pink")

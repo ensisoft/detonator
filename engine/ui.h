@@ -48,9 +48,9 @@ namespace engine
         using MaterialClass = std::shared_ptr<const gfx::MaterialClass>;
         // What's the type of the UI material source.
         enum class Type {
-            // Material is generated and it uses a gradient color map.
+            // Material is generated, and it uses a gradient color map.
             Gradient,
-            // Material is generated and it uses a single color.
+            // Material is generated, and it uses a single color.
             Color,
             // Material is a reference to another material resource
             // that needs to be loaded through the ClassLibrary.
@@ -287,7 +287,7 @@ namespace engine
         }
         // Get a property value. Returns true if the value was available
         // and stores the actual value into value ptr.
-        // Otherwise returns false and value is not changed.
+        // Otherwise, returns false and value is not changed.
         template<typename T>
         bool GetValue(T* value) const
         {
@@ -391,6 +391,7 @@ namespace engine
           : mClassLib(classlib)
         {}
 
+        MaterialClass MakeMaterial(const std::string& str) const;
         std::optional<MaterialClass> GetMaterial(const std::string& key) const;
         UIProperty GetProperty(const std::string& key) const;
         bool ParseStyleString(const std::string& tag, const std::string& style);
@@ -419,7 +420,7 @@ namespace engine
         {
             // have to make special case for enum and convert into a string
             // since if the property would be serialized (MakeStyleString)
-            // we'd not be able do the conversion into string without
+            // we'd not be able to do the conversion to string without
             // knowing the type of the enum.
             if constexpr (std::is_enum<T>::value) {
                 mProperties[key] = std::string(magic_enum::enum_name(value));
@@ -494,6 +495,7 @@ namespace engine
                 , mPainter(painter)
         {}
         // uik::Painter implementation.
+        virtual void BeginDrawWidgets() override;
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
         virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
@@ -505,6 +507,7 @@ namespace engine
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
+        virtual void EndDrawWidgets() override;
         virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
 
         // About deleting material instances.
@@ -563,9 +566,24 @@ namespace engine
         UIStyle* mStyle = nullptr;
         gfx::Painter* mPainter = nullptr;
 
-        // material instances.
+        // "static" material instances based on a combination of properties
+        // from a) style (JSON) file, b) style strings that are loaded through
+        // calls to ParseStyle.
         mutable std::unordered_map<std::string,
                     std::unique_ptr<gfx::Material>> mMaterials;
+        // "dynamic" materials that are only per specific widget and take
+        // precedence over the base materials (see above).
+        // Created and deleted on the fly based on the material information
+        // that comes through the PaintStruct when painting.
+        struct WidgetMaterial {
+            std::size_t hash = 0;
+            std::string widget;
+            std::string key;
+            std::unique_ptr<gfx::Material> material;
+            bool used = false;
+        };
+        mutable std::vector<WidgetMaterial> mWidgetMaterials;
+
         // failed properties. use this to avoid spamming
         // the log with properties that are failing on every
         // single iteration of paint.

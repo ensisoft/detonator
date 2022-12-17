@@ -677,8 +677,9 @@ public:
     virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
     virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
     virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
-    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override;
-    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& name) const override;
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
     virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
     virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
     virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
@@ -773,17 +774,27 @@ ClassHandle<const uik::Window> ContentLoaderImpl::FindUIById(const std::string& 
     return it->second;
 }
 
-ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& name) const
+ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassByName(const std::string& name) const
 {
-    auto it = mMaterials.find(name);
+    for (auto& [key, klass] : mMaterials)
+    {
+        if (klass->GetName() == name)
+            return klass;
+    }
+    return nullptr;
+}
+
+ClassHandle<const gfx::MaterialClass> ContentLoaderImpl::FindMaterialClassById(const std::string& id) const
+{
+    auto it = mMaterials.find(id);
     if (it != std::end(mMaterials))
         return it->second;
     return nullptr;
 }
 
-ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(const std::string& name) const
+ClassHandle<const gfx::DrawableClass> ContentLoaderImpl::FindDrawableClassById(const std::string& id) const
 {
-    auto it = mDrawables.find(name);
+    auto it = mDrawables.find(id);
     if (it != std::end(mDrawables))
         return it->second;
     return nullptr;

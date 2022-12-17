@@ -16,11 +16,16 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#include "warnpop.h"
+
 #include <set>
 
 #include "base/assert.h"
 #include "base/hash.h"
 #include "base/format.h"
+#include "base/json.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "uikit/widget.h"
@@ -53,6 +58,19 @@ size_t BaseWidget::GetHash() const
             hash = base::hash_combine(hash, *val);
         }
     }
+    if (mStyleMaterials)
+    {
+        std::set<std::string> keys;
+        for (const auto& [key, _] : *mStyleMaterials)
+            keys.insert(key);
+
+        for (const auto& key : keys)
+        {
+            const auto* val = base::SafeFind(*mStyleMaterials, key);
+            hash = base::hash_combine(hash, key);
+            hash = base::hash_combine(hash, *val);
+        }
+    }
     return hash;
 }
 void BaseWidget::IntoJson(data::Writer& data) const
@@ -71,6 +89,16 @@ void BaseWidget::IntoJson(data::Writer& data) const
             chunk->Write("key", key);
             chunk->Write("val", val);
             data.AppendChunk("style_properties", std::move(chunk));
+        }
+    }
+    if (mStyleMaterials)
+    {
+        for (const auto& [key, val] : *mStyleMaterials)
+        {
+            auto chunk = data.NewWriteChunk();
+            chunk->Write("key", key);
+            chunk->Write("val", val);
+            data.AppendChunk("style_materials", std::move(chunk));
         }
     }
 }
@@ -96,6 +124,20 @@ bool BaseWidget::FromJson(const data::Reader& data)
             props[key] = std::move(val);
         }
         mStyleProperties = std::move(props);
+    }
+    if (data.HasArray("style_materials"))
+    {
+        StyleMaterialMap materials;
+        for (unsigned i=0; i<data.GetNumItems("style_materials"); ++i)
+        {
+            const auto& chunk = data.GetReadChunk("style_materials", i);
+            std::string key;
+            std::string val;
+            chunk->Read("key", &key);
+            chunk->Read("val", &val);
+            materials[key] = std::move(val);
+        }
+        mStyleMaterials = std::move(materials);
     }
     return true;
 }
@@ -123,6 +165,30 @@ void BaseWidget::DeleteStyleProperty(const std::string& key)
     map.erase(key);
 }
 
+void BaseWidget::SetStyleMaterial(const std::string& key, const std::string& material)
+{
+    auto map = mStyleMaterials.value_or(StyleMaterialMap());
+    map[key] = material;
+    mStyleMaterials = std::move(map);
+}
+
+const std::string* BaseWidget::GetStyleMaterial(const std::string& key) const
+{
+    if (!mStyleMaterials)
+        return nullptr;
+
+    const auto& map = mStyleMaterials.value();
+    const auto* val = base::SafeFind(map, key);
+    return val;
+}
+void BaseWidget::DeleteStyleMaterial(const std::string& key)
+{
+    if (!mStyleMaterials)
+        return;
+    auto& map = mStyleMaterials.value();
+    map.erase(key);
+}
+
 void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 {
     Painter::PaintStruct p;
@@ -135,6 +201,7 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "form";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
@@ -159,6 +226,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.pressed = false;
     p.klass   = "progress-bar";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     p.moused = false;
     p.pressed = false;
@@ -207,6 +275,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "slider";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect slider;
@@ -320,6 +389,7 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "spinbox";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
 
     FRect edt, btn_inc, btn_dec;
     ComputeBoxes(paint.rect, &btn_inc, &btn_dec, &edt);
@@ -500,6 +570,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "label";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -535,6 +606,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.pressed = ps.state->GetValue(ps.widgetId + "/pressed", false);
     p.klass   = "push-button";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
@@ -600,6 +672,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "checkbox";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -716,6 +789,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.pressed = false;
     p.klass   = "radiobutton";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -840,6 +914,7 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "groupbox";
     p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
@@ -856,6 +931,39 @@ bool GroupBoxModel::FromJson(const data::Reader& data)
 }
 
 } // namespace detail
+
+void Widget::SetColor(const std::string& key, const Color4f& color)
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "type", "Color");
+    base::JsonWrite(json, "color", color);
+    const auto& style_string = json.dump();
+    SetStyleMaterial(key, style_string);
+}
+
+void Widget::SetMaterial(const std::string& key, const std::string& material)
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "type", "Reference");
+    base::JsonWrite(json, "material", material);
+    const auto& style_string = json.dump();
+    SetStyleMaterial(key, style_string);
+}
+void Widget::SetGradient(const std::string& key,
+                         const Color4f& top_left,
+                         const Color4f& top_right,
+                         const Color4f& bottom_left,
+                         const Color4f& bottom_right)
+{
+    nlohmann::json json;
+    base::JsonWrite(json, "type", "Gradient");
+    base::JsonWrite(json, "color0", top_left);
+    base::JsonWrite(json, "color1", top_right);
+    base::JsonWrite(json, "color2", bottom_left);
+    base::JsonWrite(json, "color3", bottom_right);
+    const auto& style_string = json.dump();
+    SetStyleMaterial(key, style_string);
+}
 
 std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
 {
