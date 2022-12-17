@@ -77,6 +77,8 @@ namespace uik
             FRect clip;
             // Optional set of style properties associated with the paint operation.
             const StylePropertyMap* style_properties = nullptr;
+            // Optional set of style materials associated with the paint operation.
+            const StyleMaterialMap* style_materials = nullptr;
         };
         virtual ~Painter() = default;
 
@@ -90,6 +92,8 @@ namespace uik
         // and once it's open it'll show a drop-down list with several items.
         // The widget paint operations are thus broken down into these primitive operations
         // which the widget implementations can then use to compose the widget.
+
+        virtual void BeginDrawWidgets() {}
 
         // Draw the widget background if any.
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const = 0;
@@ -125,6 +129,8 @@ namespace uik
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const FRect& knob) const = 0;
 
         virtual void DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::optional<float> percentage) const = 0;
+
+        virtual void EndDrawWidgets() {}
 
         // todo: more sub widget draw ops.
 

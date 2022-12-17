@@ -86,6 +86,15 @@ void AppendVector(std::vector<T>& head, std::vector<T>&& tail)
                 std::make_move_iterator(tail.end()));
 }
 
+template<typename T, typename Predicate> inline
+void EraseRemove(std::vector<T>& vector, Predicate pred)
+{
+    // remove shuffles the values in the vector such that the
+    // removed items are at the end of the vector and the iterator
+    // returned is the first item in the sequence of removed items
+    vector.erase(std::remove_if(vector.begin(), vector.end(), pred), vector.end());
+}
+
 template<typename K, typename T>
 T* SafeFind(std::unordered_map<K, T>& map, const K& key)
 {

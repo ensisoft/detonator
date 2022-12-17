@@ -725,6 +725,18 @@ void InitDoc()
     DOC_METHOD_1("int|float|string|base.Color4f", "GetStyleProperty", "Get a styling property by the given key.<br>"
                                                                           "Returns nil if no such property exists.",
                  "string", "key");
+    DOC_METHOD_2("void", "SetStyleMaterial", "Set a painter specific material style property string.",
+                 "string", "key", "string", "material_style_string");
+    DOC_METHOD_1("void", "DeleteStyleMaterial", "Delete a styling material property by the given key.", "string", "key");
+    DOC_METHOD_1("string", "GetStyleMaterial", "Get a material styling property by the given key.<br>"
+                                               "Returns nil if no such material key exists.", "string", "key");
+    DOC_METHOD_2("void", "SetColor", "Set a widget material by the given key to a solid color material.",
+                 "string", "key", "base.Color4f", "color");
+    DOC_METHOD_2("void", "SetMaterial", "Set a widget material to a material identified by its class ID or name.",
+                 "string", "key", "string", "material");
+    DOC_METHOD_5("void", "SetGradient", "Set a widget material to a color gradient material.",
+                 "string", "key", "base.Color4f", "top_left", "base.Color4f", "top_right", "base.Color4f", "bottom_left", "base.Color4f", "bottom_right");
+
     DOC_METHOD_0("uik.Label", "AsLabel", "Cast the widget to Label. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.PushButton", "AsPushButton", "Cast the widget to PushButton. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.CheckBox", "AsCheckBox", "Cast the widget to CheckBox. Returns nil if the cast failed.");

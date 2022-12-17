@@ -204,6 +204,18 @@ public:
     }
     virtual void DeleteStyleProperty(const std::string& key) override
     {}
+    virtual void SetStyleMaterial(const std::string& key, const std::string& material) override
+    {
+
+    }
+    virtual const std::string* GetStyleMaterial(const std::string& key) const override
+    {
+        return nullptr;
+    }
+    virtual void DeleteStyleMaterial(const std::string& key) override
+    {
+
+    }
 private:
 };
 

@@ -62,6 +62,10 @@ namespace engine
         // Find a user interface (UI KIT) provided window object by name.
         // If not found will return a nullptr.
         virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const = 0;
+        // Find a graphics subsystem provided material class object by its class name.
+        // If not found will return nullptr. Iń case of multiple classes by the same name
+        // it's unspecified which will be returned.
+        virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const = 0;
         // Find a graphics subsystem provided material class object by its class id.
         // If not found will return a nullptr.
         virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const = 0;

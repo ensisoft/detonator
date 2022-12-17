@@ -61,6 +61,9 @@ namespace uik
     using WidgetActionValue = std::variant<int, float, bool, std::string, ListItem>;
 
     using StyleProperty = std::variant<float, bool, std::string, Color4f>;
+    // maps property key such as 'text-color' to a property value.
     using StylePropertyMap = std::unordered_map<std::string, StyleProperty>;
+    // maps material key such as 'border' to a material definition string
+    using StyleMaterialMap = std::unordered_map<std::string, std::string>;
 
 } // namespace

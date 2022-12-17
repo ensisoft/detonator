@@ -1523,6 +1523,10 @@ engine::ClassHandle<const uik::Window> Workspace::FindUIById(const std::string& 
 {
     return FindClassHandleById<uik::Window>(id, Resource::Type::UI);
 }
+engine::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassByName(const std::string& name) const
+{
+    return FindClassHandleByName<gfx::MaterialClass>(name, Resource::Type::Material);
+}
 engine::ClassHandle<const gfx::MaterialClass> Workspace::FindMaterialClassById(const std::string& klass) const
 {
     return FindClassHandleById<gfx::MaterialClass>(klass, Resource::Type::Material);

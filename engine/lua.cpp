@@ -760,6 +760,18 @@ void BindWidgetInterface(sol::usertype<Widget>& widget)
             return sol::make_object(lua, *prop);
         return sol::make_object(lua, sol::nil);
     };
+    widget["SetStyleMaterial"]    = &Widget::SetStyleMaterial;
+    widget["DeleteStyleMaterial"] = &Widget::DeleteStyleMaterial;
+    widget["GetStyleMaterial"]    = [](Widget& widget, const std::string& key, sol::this_state state) {
+        sol::state_view lua(state);
+        if (const auto* str = widget.GetStyleMaterial(key))
+            return sol::make_object(lua, *str);
+        return sol::make_object(lua, sol::nil);
+    };
+    widget["SetColor"]    = &Widget::SetColor;
+    widget["SetMaterial"] = &Widget::SetMaterial;
+    widget["SetGradient"] = &Widget::SetGradient;
+
     widget["SetVisible"]     = [](Widget& widget, bool on_off) {
         widget.SetFlag(Widget::Flags::VisibleInGame, on_off);
     };

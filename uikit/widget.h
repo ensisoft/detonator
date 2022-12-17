@@ -212,11 +212,31 @@ namespace uik
         virtual FRect GetRect() const
         { return FRect(0.0f, 0.0f, GetSize()); }
 
+        // Override a specific style property for this widget only by setting
+        // a new property by the given key value. This property value will take
+        // precedence over the inline style string associated with this widget
+        // and any baseline style that would otherwise be applied.
         virtual void SetStyleProperty(const std::string& key, const StyleProperty& prop) = 0;
+        // Get a specific style property by the given key. Returns nullptr if no such
+        // property exists.
         virtual const StyleProperty* GetStyleProperty(const std::string& key) const = 0;
+        // Delete a specific style property by the given key. Does nothing if no such
+        // property exists.
         virtual void DeleteStyleProperty(const std::string& key) = 0;
 
+        virtual void SetStyleMaterial(const std::string& key, const std::string& material) = 0;
+        virtual const std::string* GetStyleMaterial(const std::string& key) const = 0;
+        virtual void DeleteStyleMaterial(const std::string& key) = 0;
+
         // helpers
+        void SetColor(const std::string& key, const Color4f& color);
+        void SetMaterial(const std::string& key, const std::string& material);
+        void SetGradient(const std::string& key,
+                         const Color4f& top_left,
+                         const Color4f& top_right,
+                         const Color4f& bottom_left,
+                         const Color4f& bottom_right);
+
         inline bool IsContainer() const
         {
             const auto type = GetType();
@@ -266,6 +286,7 @@ namespace uik
             std::string widgetId;
             std::string widgetName;
             const StylePropertyMap* style_properties = nullptr;
+            const StyleMaterialMap* style_materials = nullptr;
             Painter* painter = nullptr;
             State* state = nullptr;
         };
@@ -663,6 +684,9 @@ namespace uik
             virtual void SetStyleProperty(const std::string& key, const StyleProperty& prop) override;
             virtual const StyleProperty* GetStyleProperty(const std::string& key) const override;
             virtual void DeleteStyleProperty(const std::string& key) override;
+            virtual void SetStyleMaterial(const std::string& key, const std::string& material) override;
+            virtual const std::string* GetStyleMaterial(const std::string& key) const override;
+            virtual void DeleteStyleMaterial(const std::string& key) override;
         protected:
             std::string mId;
             std::string mName;
@@ -671,6 +695,7 @@ namespace uik
             uik::FSize  mSize;
             base::bitflag<Flags> mFlags;
             std::optional<StylePropertyMap> mStyleProperties;
+            std::optional<StyleMaterialMap> mStyleMaterials;
         };
 
         template<typename WidgetModel>
@@ -716,6 +741,8 @@ namespace uik
                 ps.state       = &state;
                 if (mStyleProperties)
                     ps.style_properties = &mStyleProperties.value();
+                if (mStyleMaterials)
+                    ps.style_materials = &mStyleMaterials.value();
 
                 WidgetModel::Paint(paint, ps);
             }
