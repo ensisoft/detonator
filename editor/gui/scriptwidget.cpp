@@ -1432,6 +1432,23 @@ void InitDoc()
                                         "base.Color4f, base.FPoint, base.FSize, base.FRect<br>"
                                         "game.Entity, game.Scene");
 
+    DOC_TABLE("game.KeyValueStore");
+    DOC_META_METHOD_0("...", "index", "Lua index meta method.");
+    DOC_META_METHOD_0("...", "newindex", "LUa new index meta method.");
+    DOC_METHOD_2("void", "SetValue", "Set a value by the given key in the key-value store.",
+                 "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "value");
+    DOC_METHOD_1("...", "GetValue", "Get a value by the given key in the key-value store. <br>"
+                                    "It is an error to try to access a key that doesn't exist.",
+                 "string", "key");
+    DOC_METHOD_1("bool", "HasValue", "Check whether the given key exists in the key-value store.", "string", "key");
+    DOC_METHOD_0("void", "Clear", "Remove all keys and values from the store.");
+    DOC_METHOD_1("void", "Persist", "Serialize the contents of the key-value store into a data object.",
+                 "data.JsonObject|data.Writer", "data");
+    DOC_METHOD_1("bool", "Restore", "Deserialize the contents of the key-value store from a data object.",
+                 "data.JsonObject|data.Reader", "data");
+    DOC_METHOD_2("void", "InitValue", "Initialize a key with a value if it doesn't yet exist.",
+                 "string", "key", "...", "value");
+
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
             if (left.table < right.table)
