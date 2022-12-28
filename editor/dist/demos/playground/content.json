@@ -84,7 +84,8 @@
       },
       "resource_id": "a8UWU1fUNZ",
       "resource_name": "Constant Speed Ball",
-      "script_file": "9jMLWUyAWj"
+      "script_file": "9jMLWUyAWj",
+      "tag": ""
     },
     {
       "flags": {
@@ -170,7 +171,8 @@
       },
       "resource_id": "dK1EdyK1h8",
       "resource_name": "Vertical Wall",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -307,6 +309,7 @@
       "resource_id": "Fwn9yS1gWF",
       "resource_name": "Static Block",
       "script_file": "QCSIpWak63",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -403,7 +406,8 @@
       },
       "resource_id": "6M7kjbtJOK",
       "resource_name": "Dynamic Ball",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -489,7 +493,8 @@
       },
       "resource_id": "dgq5ss7Iy9",
       "resource_name": "User Ball",
-      "script_file": "kppKkQuA0g"
+      "script_file": "kppKkQuA0g",
+      "tag": ""
     },
     {
       "flags": {
@@ -705,7 +710,8 @@
       },
       "resource_id": "kpR98Mlxaz",
       "resource_name": "Distance Joint Balls",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -791,7 +797,8 @@
       },
       "resource_id": "ETnTKLXRXi",
       "resource_name": "Horizontal Wall",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -877,7 +884,8 @@
       },
       "resource_id": "EsFlY7oEfM",
       "resource_name": "Dynamic Block",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1041,7 +1049,8 @@
       },
       "resource_id": "lCSj0gMTqU",
       "resource_name": "Wrecking Ball",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1110,7 +1119,8 @@
       },
       "resource_id": "pK3rRC7a5h",
       "resource_name": "Marker",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1298,7 +1308,8 @@
       },
       "resource_id": "TfojPSWQmJ",
       "resource_name": "Fixture Widget",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1373,7 +1384,8 @@
       },
       "resource_id": "EnPRIQkKBO",
       "resource_name": "message",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1448,7 +1460,8 @@
       },
       "resource_id": "fy5aapEM0F",
       "resource_name": "message",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     }
   ],
   "scenes": [

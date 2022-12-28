@@ -781,6 +781,7 @@
       "resource_id": "diUlEeS5JH",
       "resource_name": "Player",
       "script_file": "rvZg0UT77h",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -951,6 +952,7 @@
       "resource_id": "iH79uGdYNY",
       "resource_name": "RedBullet",
       "script_file": "4KwMiHn2Zz",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1310,6 +1312,7 @@
       "resource_id": "pNT0bA0bpw",
       "resource_name": "Ship2",
       "script_file": "FXdfIUPul3",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -1477,7 +1480,8 @@
       },
       "resource_id": "7NAD3QgFlq",
       "resource_name": "Background",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1580,6 +1584,7 @@
       "resource_id": "qOIpuPbyL1",
       "resource_name": "Asteroid",
       "script_file": "bjZ0TrwuxI",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1659,7 +1664,8 @@
       },
       "resource_id": "7AdsZqt5pg",
       "resource_name": "RedExplosion",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1728,7 +1734,8 @@
       },
       "resource_id": "gMY5RFLgyd",
       "resource_name": "BlueExplosion",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1798,6 +1805,7 @@
       "resource_id": "5LKG2wBRGq",
       "resource_name": "BlueBullet",
       "script_file": "4KwMiHn2Zz",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1887,6 +1895,7 @@
       "resource_id": "A7Z5jfJF38",
       "resource_name": "RedMine",
       "script_file": "QldASNFLIb",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -2025,6 +2034,7 @@
       "resource_id": "sX3kBAhLxU",
       "resource_name": "Shockwave",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -2169,6 +2179,7 @@
       "resource_id": "q4pUEDx2rE",
       "resource_name": "Score",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -2335,7 +2346,8 @@
       },
       "resource_id": "wXtbrxNRpX",
       "resource_name": "GameScore",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2452,7 +2464,8 @@
       },
       "resource_id": "NtNnX1kgNp",
       "resource_name": "Mine Status",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2521,7 +2534,8 @@
       },
       "resource_id": "XExwRNFj8H",
       "resource_name": "Stars",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2590,7 +2604,8 @@
       },
       "resource_id": "AnA5w5xqxv",
       "resource_name": "Flash",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     }
   ],
   "materials": [
