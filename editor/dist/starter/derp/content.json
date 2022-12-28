@@ -262,6 +262,7 @@
       "resource_id": "tqHo3nK0b9",
       "resource_name": "FlappyBird",
       "script_file": "zJgI2SZT3X",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -445,7 +446,8 @@
       },
       "resource_id": "Ytj4tDET1a",
       "resource_name": "Spike",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -514,7 +516,8 @@
       },
       "resource_id": "qv7w7J7Aiv",
       "resource_name": "Background",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -583,7 +586,8 @@
       },
       "resource_id": "IxyHIKNMIn",
       "resource_name": "Ground",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     }
   ],
   "materials": [

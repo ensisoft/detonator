@@ -129,6 +129,7 @@
       "resource_id": "HFSA8Yezdr",
       "resource_name": "StoneBlock",
       "script_file": "4NMFT9hs0Y",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -244,7 +245,8 @@
       },
       "resource_id": "DOzd15fNMX",
       "resource_name": "Tile1",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -330,7 +332,8 @@
       },
       "resource_id": "7WjAKJb7hY",
       "resource_name": "Tile2",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -416,7 +419,8 @@
       },
       "resource_id": "SFrJwO771l",
       "resource_name": "Tile4",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -502,7 +506,8 @@
       },
       "resource_id": "Fm5ByqI6xo",
       "resource_name": "Tile3",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -571,7 +576,8 @@
       },
       "resource_id": "y7bWvFuoie",
       "resource_name": "Tree",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -657,7 +663,8 @@
       },
       "resource_id": "b2lU3gYIwf",
       "resource_name": "Tile8",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -743,7 +750,8 @@
       },
       "resource_id": "ImTnUuKMDu",
       "resource_name": "Tile7",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -829,7 +837,8 @@
       },
       "resource_id": "GaQT22N3OL",
       "resource_name": "Tile6",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -915,7 +924,8 @@
       },
       "resource_id": "9LU4RC9DH0",
       "resource_name": "Tile15",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1001,7 +1011,8 @@
       },
       "resource_id": "d8ZPi5y9Ps",
       "resource_name": "Tile14",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1087,7 +1098,8 @@
       },
       "resource_id": "bOtC7Fnmmp",
       "resource_name": "Tile13",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1173,7 +1185,8 @@
       },
       "resource_id": "g3TRakI9ob",
       "resource_name": "Tile12",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1259,7 +1272,8 @@
       },
       "resource_id": "8Prh114uxP",
       "resource_name": "Tile11",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1345,7 +1359,8 @@
       },
       "resource_id": "dJKagvO0jM",
       "resource_name": "Tile10",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1431,7 +1446,8 @@
       },
       "resource_id": "nR73zKx341",
       "resource_name": "Tile9",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1517,7 +1533,8 @@
       },
       "resource_id": "vYm7CMPRrJ",
       "resource_name": "Tile5",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1586,7 +1603,8 @@
       },
       "resource_id": "bEAIWd3ESl",
       "resource_name": "Bush (1)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1672,7 +1690,8 @@
       },
       "resource_id": "2Q2vkLGDEg",
       "resource_name": "Crate",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1741,7 +1760,8 @@
       },
       "resource_id": "HpAo2l11sT",
       "resource_name": "Cactus (1)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1810,7 +1830,8 @@
       },
       "resource_id": "2sWxF1jCqU",
       "resource_name": "Cactus (2)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1879,7 +1900,8 @@
       },
       "resource_id": "Y3nvZp6DaX",
       "resource_name": "Cactus (3)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1948,7 +1970,8 @@
       },
       "resource_id": "WKsCpHkbNw",
       "resource_name": "Billboard",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2338,6 +2361,7 @@
       "resource_id": "FNUUxWSBTe",
       "resource_name": "Player",
       "script_file": "vq6v6WdXwZ",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -3211,6 +3235,7 @@
       "resource_id": "MiA8FWNEaF",
       "resource_name": "Horizontal Elevator",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -3537,6 +3562,7 @@
       "resource_id": "Jn0SpbgGSY",
       "resource_name": "Vertical Elevator",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -3794,7 +3820,8 @@
       },
       "resource_id": "te9JjLzdlp",
       "resource_name": "Tile16",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -4117,7 +4144,8 @@
       },
       "resource_id": "z3qBPdpAGa",
       "resource_name": "Small Island",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -4186,7 +4214,8 @@
       },
       "resource_id": "O5QefURbEM",
       "resource_name": "Grass (2)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -4255,7 +4284,8 @@
       },
       "resource_id": "TyE5N8JWlx",
       "resource_name": "Grass (1)",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -4956,7 +4986,8 @@
       },
       "resource_id": "ZNaUsmn31R",
       "resource_name": "Plateu",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5025,7 +5056,8 @@
       },
       "resource_id": "WtCkGlPDwf",
       "resource_name": "Skeleton",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5094,7 +5126,8 @@
       },
       "resource_id": "tqF7brLL08",
       "resource_name": "Stone",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5272,7 +5305,8 @@
       },
       "resource_id": "gwm3bTflRn",
       "resource_name": "Parallax Background",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5386,6 +5420,7 @@
       "resource_id": "dfb84OzuRo",
       "resource_name": "Coin",
       "script_file": "7lSTOyhTqF",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -5492,7 +5527,8 @@
       },
       "resource_id": "iFATbhg5NM",
       "resource_name": "Coins Particles",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5578,7 +5614,8 @@
       },
       "resource_id": "Dm9UM2yky9",
       "resource_name": "Violet Diamond",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -5785,7 +5822,8 @@
       },
       "resource_id": "Yq50Y5iaj6",
       "resource_name": "Static Background",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     }
   ],
   "materials": [

@@ -95,6 +95,7 @@
       "resource_id": "BbEpeqHSYG",
       "resource_name": "Basic Flame",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -306,6 +307,7 @@
       "resource_id": "UEHaD6hTOe",
       "resource_name": "Pixel Flame",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -497,6 +499,7 @@
       "resource_id": "SX0ABkBEq9",
       "resource_name": "Basic Flame + Sparks + Smoke",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -646,6 +649,7 @@
       "resource_id": "BtXKsAOnPr",
       "resource_name": "Basic Flame + Sparks",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -877,6 +881,7 @@
       "resource_id": "BkQRl3PzCr",
       "resource_name": "Basic Explosion",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -957,6 +962,7 @@
       "resource_id": "JUOysDXYJL",
       "resource_name": "Background",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -1182,7 +1188,8 @@
       },
       "resource_id": "7D4iRC0ogE",
       "resource_name": "Energy Explosion",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1403,6 +1410,7 @@
       "resource_id": "4POqhfHWQE",
       "resource_name": "Magic",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1634,6 +1642,7 @@
       "resource_id": "1RlBexDBsu",
       "resource_name": "Dark Magic",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1797,7 +1806,8 @@
       },
       "resource_id": "96IAS00DCm",
       "resource_name": "Basic Snow + Flakes",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -1908,7 +1918,8 @@
       },
       "resource_id": "4ZgNL1JNfD",
       "resource_name": "Basic Snow",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2059,7 +2070,8 @@
       },
       "resource_id": "pTbMGuziXE",
       "resource_name": "Basic Waterfall",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2242,6 +2254,7 @@
       "resource_id": "qGhg1ub3rt",
       "resource_name": "Summoning Circle",
       "script_file": "nIkywmIbBJ",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -2410,7 +2423,8 @@
       },
       "resource_id": "tyNkXUoRPJ",
       "resource_name": "Blood Impact",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -2610,7 +2624,8 @@
       },
       "resource_id": "rAxSklk4hv",
       "resource_name": "Spaceship",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     }
   ],
   "materials": [

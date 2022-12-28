@@ -171,6 +171,7 @@
       "resource_id": "ltMbxDy6wk",
       "resource_name": "Paddle",
       "script_file": "HRXSPeXFUN",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -259,7 +260,8 @@
       },
       "resource_id": "E8G5MCkSFp",
       "resource_name": "Wall",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -328,7 +330,8 @@
       },
       "resource_id": "KA0GT192DW",
       "resource_name": "Floor",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -397,7 +400,8 @@
       },
       "resource_id": "BCh1h8kEOP",
       "resource_name": "Ceiling",
-      "script_file": ""
+      "script_file": "",
+      "tag": ""
     },
     {
       "flags": {
@@ -484,6 +488,7 @@
       "resource_id": "9G2p8G3zMT",
       "resource_name": "Ball",
       "script_file": "8xZogKY3K1",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -599,6 +604,7 @@
       "resource_id": "mSF0NAZ4A5",
       "resource_name": "Gray Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -696,6 +702,7 @@
       "resource_id": "Jw14oLX1CD",
       "resource_name": "Yellow Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -802,6 +809,7 @@
       "resource_id": "eX85urYgUe",
       "resource_name": "Green Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -908,6 +916,7 @@
       "resource_id": "YOZ0Sp88fq",
       "resource_name": "Red Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1014,6 +1023,7 @@
       "resource_id": "kkBOwiYNRn",
       "resource_name": "Purple Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1120,6 +1130,7 @@
       "resource_id": "J160KPStMB",
       "resource_name": "Blue Brick",
       "script_file": "viXTDKHRIB",
+      "tag": "",
       "vars": [
         {
           "array": false,
@@ -1389,6 +1400,7 @@
       "resource_id": "ijOB1QBrNK",
       "resource_name": "Background",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
@@ -1583,6 +1595,7 @@
       "resource_id": "v9YZBBhlpu",
       "resource_name": "OneTwoGo",
       "script_file": "",
+      "tag": "",
       "tracks": [
         {
           "actuators": [
