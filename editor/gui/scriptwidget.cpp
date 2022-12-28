@@ -559,6 +559,9 @@ void InitDoc()
     DOC_METHOD_0("data.Writer", "NewWriteChunk", "Create a new writer object for a new data chunk.");
     DOC_METHOD_2("void", "AppendChunk", "Append the data chunk to a chunk array under the given key.",
                  "string", "key", "data.Writer", "chunk");
+    DOC_METHOD_1("bool, string", "WriteFile", "Write the contents of this writer chunk to a file.<br>"
+                                              "Returns true and an empty string on success or false and error string on error.",
+                 "string", "file");
 
     DOC_TABLE("data.JsonObject");
     DOC_METHOD_0("data.JsonObject", "new", "Construct a new JsonObject.<br>"

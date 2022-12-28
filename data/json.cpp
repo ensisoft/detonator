@@ -26,6 +26,7 @@
 #include "base/utility.h"
 #include "base/json.h"
 #include "data/json.h"
+#include "data/io.h"
 
 // Warning about nlohmann::json
 // !! SEMANTICS CHANGE BETWEEN DEBUG AND RELEASE BUILD !!
@@ -261,6 +262,12 @@ void JsonObject::AppendChunk(const char* name, std::unique_ptr<Writer> chunk)
     auto* json = dynamic_cast<JsonObject*>(chunk.get());
     ASSERT(json);
     (*mJson)[name].push_back(std::move(*json->mJson));
+}
+
+bool JsonObject::Dump(IODevice& device) const
+{
+    const auto& str = mJson->dump();
+    return device.WriteBytes(str.c_str(), str.size());
 }
 
 std::tuple<bool, std::string> JsonObject::ParseString(const std::string& str)

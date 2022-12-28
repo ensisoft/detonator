@@ -99,6 +99,8 @@ namespace data
         virtual void AppendChunk(const char* name, const Writer& chunk) override;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
 
+        virtual bool Dump(IODevice& device) const override;
+
         // bring the template helpers into scope when using this type.
         using Writer::Write;
         using Reader::Read;

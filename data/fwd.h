@@ -23,4 +23,5 @@ namespace data {
     class Writer;
     class JsonObject;
     class JsonFile;
+    class IODevice;
 } // namespace

@@ -40,6 +40,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "data/json.h"
+#include "data/io.h"
 #include "audio/graph.h"
 #include "game/entity.h"
 #include "game/util.h"
@@ -2248,9 +2249,7 @@ void BindData(sol::state& L)
         return ret;
     };
     // overload this when/if there are different data formats
-    data["WriteFile"] = [](const data::JsonObject& json, const std::string& file) {
-        return data::WriteJsonFile(json, file);
-    };
+    data["WriteFile"] = data::WriteFile;
     data["ReadFile"] = [](const std::string& file) {
         const auto& upper = base::ToUpperUtf8(file);
         std::unique_ptr<data::Reader> ret;
@@ -2262,8 +2261,7 @@ void BindData(sol::state& L)
             }
             return std::make_tuple(std::move(ret), std::move(error));
         }
-        return std::make_tuple(std::move(ret),
-                   std::string("unsupported file type"));
+        return std::make_tuple(std::move(ret), std::string("unsupported file type"));
     };
 }
 
