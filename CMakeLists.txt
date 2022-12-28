@@ -163,7 +163,8 @@ add_library(AudioLib
     audio/element.cpp
     audio/graph.cpp)
 add_library(DataLib
-    data/json.cpp)
+    data/json.cpp
+    data/io.cpp)
 add_library(GfxLib
     graphics/bitmap.cpp
     graphics/drawing.cpp

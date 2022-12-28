@@ -26,6 +26,7 @@
 #include <memory>
 #include <variant>
 #include <optional>
+#include <tuple>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -33,6 +34,8 @@
 
 namespace data
 {
+    class IODevice;
+
     class Writer
     {
     public:
@@ -65,6 +68,9 @@ namespace data
         virtual void AppendChunk(const char* name, const Writer& chunk) = 0;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) = 0;
         virtual bool HasValue(const char* name) const = 0;
+
+        // Dump and write the contents of this chunk to the IO device.
+        virtual bool Dump(IODevice& device) const = 0;
 
         // helpers
         template<typename... T>
@@ -103,4 +109,5 @@ namespace data
         }
     private:
     };
+
 } // namespace
