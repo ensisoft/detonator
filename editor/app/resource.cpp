@@ -330,7 +330,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     nlohmann::json style_json;
     style.SaveStyle(style_json);
     const auto& style_string_json = style_json.dump(2);
-    packer.WriteFile(style_uri, "ui/", style_string_json.data(), style_string_json.size());
+    packer.WriteFile(style_uri, "ui/style/", style_string_json.data(), style_string_json.size());
 
     window.SetStyleName(packer.MapUri(style_uri));
 

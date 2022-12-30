@@ -450,7 +450,7 @@ R"(
     // UI style files should be copied into ui/
     // the UI style is rewritten when the resource references are re-mapped and thus
     // may not be the exact same string as what was originally written.
-    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style.json");
+    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style/style.json");
     TEST_REQUIRE(style_string.contains("materials"));
     TEST_REQUIRE(style_string.contains("widget/background"));
     TEST_REQUIRE(style_string.contains("widget/border-width"));
@@ -1209,7 +1209,7 @@ void unit_test_packing_ui_style_resources()
     // UI style files should be copied into ui/
     // the UI style is rewritten when the resource references are re-mapped and thus
     // may not be the exact same string as what was originally written.
-    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style.json");
+    const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style/style.json");
     TEST_REQUIRE(style_string.contains("properties"));
     TEST_REQUIRE(style_string.contains("materials"));
     TEST_REQUIRE(style_string.contains("pck://fonts/style_font.otf"));
@@ -1658,7 +1658,7 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/data/levels.txt") == "levels.txt");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
-        const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style.json");
+        const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style/style.json");
         TEST_REQUIRE(!style_string.isEmpty());
 
         gfx::Image texture;

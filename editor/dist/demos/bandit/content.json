@@ -17348,7 +17348,7 @@
       "resource_id": "7qhE9P3Lno",
       "resource_name": "Game UI",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
