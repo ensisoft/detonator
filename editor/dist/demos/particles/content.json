@@ -4388,7 +4388,7 @@
       "resource_id": "yE2AzTSvif",
       "resource_name": "UI",
       "script_file": "2JJndZoBDS",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "{\"materials\":[{\"color\":{\"a\":1.0,\"b\":0.29019609093666077,\"g\":0.29019609093666077,\"r\":0.29019609093666077},\"key\":\"push-button/button-border\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/pressed/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/mouse-over/button-background\",\"type\":\"Color\"}]}",
       "widgets": [
         {

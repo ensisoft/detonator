@@ -411,7 +411,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.window.AddWidget(form);
     mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
 
-    LoadStyleQuiet("app://ui/default.json");
+    LoadStyleQuiet("app://ui/style/default.json");
 
     PopulateUIStyles(mUI.windowStyleFile);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);

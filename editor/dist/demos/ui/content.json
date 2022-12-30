@@ -1104,7 +1104,7 @@
       "resource_id": "GUqwuv4TMH",
       "resource_name": "Font Demo",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
@@ -1291,7 +1291,7 @@
       "resource_id": "x8itAE59QO",
       "resource_name": "All Widgets",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
@@ -1566,7 +1566,7 @@
                     "w": 243.0
                   },
                   "style": "null",
-                  "text": "app://ui/default.json\n",
+                  "text": "app://ui/style/default.json\n",
                   "type": "Label"
                 },
                 {
@@ -1837,7 +1837,7 @@
       "resource_id": "0Ll9lSrzWl",
       "resource_name": "Buttons",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
@@ -2157,7 +2157,7 @@
       "resource_id": "DANndT4HWt",
       "resource_name": "Jungle",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
@@ -2298,7 +2298,7 @@
       "resource_id": "q2BRyKzJzf",
       "resource_name": "Loaders",
       "script_file": "",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "",
       "widgets": [
         {
@@ -2502,7 +2502,7 @@
       "resource_id": "qNrtwb1b52",
       "resource_name": "Kenney",
       "script_file": "hz6w2tG1gv",
-      "style_file": "app://ui/default.json",
+      "style_file": "app://ui/style/default.json",
       "style_string": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color1\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color2\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"color3\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"key\":\"progress-bar/progress-bar-fill\",\"type\":\"Gradient\"},{\"key\":\"progress-bar/progress-bar-background\",\"material\":\"YhgdhQ1IUT\",\"type\":\"Reference\"},{\"key\":\"radiobutton/check-border\",\"type\":\"Null\"},{\"key\":\"spinbox/text-edit-background\",\"material\":\"YhgdhQ1IUT\",\"type\":\"Reference\"},{\"key\":\"slider/mouse-over/slider-knob\",\"material\":\"d7Z89Xy9iD\",\"type\":\"Reference\"},{\"key\":\"spinbox/button-background\",\"material\":\"eeAJs1B4tT\",\"type\":\"Reference\"},{\"key\":\"slider/pressed/slider-knob\",\"material\":\"d7Z89Xy9iD\",\"type\":\"Reference\"},{\"key\":\"spinbox/button-icon-arrow-up\",\"material\":\"Oy4DagSFlB\",\"type\":\"Reference\"},{\"key\":\"slider/slider-knob\",\"material\":\"d7Z89Xy9iD\",\"type\":\"Reference\"},{\"key\":\"slider/slider-background\",\"material\":\"YhgdhQ1IUT\",\"type\":\"Reference\"},{\"key\":\"radiobutton/check-background\",\"material\":\"uw7esRl3hJ\",\"type\":\"Reference\"},{\"key\":\"slider/slider-knob-border\",\"type\":\"Null\"},{\"key\":\"checkbox/check-mark\",\"material\":\"XFp2yP7TDj\",\"type\":\"Reference\"},{\"key\":\"push-button/mouse-over/button-border\",\"type\":\"Null\"},{\"key\":\"radiobutton/check-mark\",\"material\":\"fQLKKyNYYt\",\"type\":\"Reference\"},{\"key\":\"push-button/pressed/button-background\",\"material\":\"6E6PvayxaN\",\"type\":\"Reference\"},{\"key\":\"spinbox/button-icon-arrow-down\",\"material\":\"jWhZFo43TS\",\"type\":\"Reference\"},{\"key\":\"spinbox/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"push-button/button-background\",\"material\":\"eeAJs1B4tT\",\"type\":\"Reference\"},{\"key\":\"spinbox/pressed/button-background\",\"material\":\"6E6PvayxaN\",\"type\":\"Reference\"},{\"key\":\"push-button/mouse-over/button-background\",\"material\":\"eeAJs1B4tT\",\"type\":\"Reference\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/button-border\",\"type\":\"Null\"},{\"key\":\"checkbox/check-border\",\"type\":\"Null\"},{\"key\":\"checkbox/check-background\",\"material\":\"uw7esRl3hJ\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"spinbox/edit-text-size\",\"value\":28},{\"key\":\"spinbox/edit-text-font\",\"value\":\"ws://textures/UIPack/font/kenvector_future.ttf\"},{\"key\":\"slider/slider-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"radiobutton/check-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"widget/text-size\",\"value\":22},{\"key\":\"widget/text-font\",\"value\":\"ws://textures/UIPack/font/kenvector_future.ttf\"},{\"key\":\"spinbox/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.009048599749803543,\"g\":0.009048599749803543,\"r\":0.14763103425502777}},{\"key\":\"slider/slider-knob-shape\",\"value\":\"Rectangle\"}]}",
       "widgets": [
         {

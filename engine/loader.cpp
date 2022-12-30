@@ -568,7 +568,7 @@ public:
     {
         DEBUG("Preloading file buffers.");
         const char* dirs[] = {
-          "fonts", "lua", "textures", "ui", "shaders/es2"
+          "fonts", "lua", "textures", "ui/style", "shaders/es2"
         };
         size_t bytes_loaded = 0;
         for (size_t i=0; i<base::ArraySize(dirs); ++i)
