@@ -17370,6 +17370,7 @@
                 "w": 1024.0
               },
               "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -17389,6 +17390,7 @@
                     "w": 403.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
@@ -17410,6 +17412,7 @@
                         "w": 100.0
                       },
                       "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"RnL44evfW5\",\"type\":\"Reference\"}]}",
+                      "tab_index": 0,
                       "text": "",
                       "type": "Label"
                     },
@@ -17431,6 +17434,7 @@
                         "w": 40.0
                       },
                       "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"2ynNMbWOK3\",\"type\":\"Reference\"}]}",
+                      "tab_index": 0,
                       "text": "\n",
                       "type": "Label"
                     },
@@ -17452,6 +17456,7 @@
                         "w": 100.0
                       },
                       "style": "{\"properties\":[{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+                      "tab_index": 0,
                       "text": "x 0",
                       "type": "Label"
                     },
@@ -17473,6 +17478,7 @@
                         "w": 100.0
                       },
                       "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"RnL44evfW5\",\"type\":\"Reference\"}]}",
+                      "tab_index": 0,
                       "text": "",
                       "type": "Label"
                     }
@@ -17516,6 +17522,7 @@
                 "w": 1200.0
               },
               "style": "{\"materials\":[{\"key\":\"TxMXBP1JDO/background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -17536,6 +17543,7 @@
                     "w": 124.0
                   },
                   "style": "{\"materials\":[{\"key\":\"3TkC6O4BkK/background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -17557,6 +17565,7 @@
                     "w": 124.0
                   },
                   "style": "{\"materials\":[{\"key\":\"osEMp7g053/background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -17577,6 +17586,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
+                  "tab_index": 0,
                   "text": "Quit",
                   "type": "PushButton"
                 },
@@ -17597,6 +17607,7 @@
                     "w": 119.0
                   },
                   "style": "{\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
+                  "tab_index": 1,
                   "text": "Play",
                   "type": "PushButton"
                 }

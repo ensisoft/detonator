@@ -4410,6 +4410,7 @@
                 "w": 1200.0
               },
               "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -4429,6 +4430,7 @@
                     "w": 603.0
                   },
                   "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"},{\"color\":{\"a\":0.16470588743686676,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"key\":\"border\",\"type\":\"Color\"}]}",
+                  "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
@@ -4450,6 +4452,7 @@
                         "w": 400.0
                       },
                       "style": "",
+                      "tab_index": 0,
                       "text": "Label",
                       "type": "Label"
                     },
@@ -4470,6 +4473,7 @@
                         "w": 50.0
                       },
                       "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                      "tab_index": 0,
                       "text": "<",
                       "type": "PushButton"
                     },
@@ -4490,6 +4494,7 @@
                         "w": 50.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":24},{\"key\":\"text-size\",\"value\":24}]}",
+                      "tab_index": 3,
                       "text": ">",
                       "type": "PushButton"
                     },
@@ -4512,6 +4517,7 @@
                         "w": 211.0
                       },
                       "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"check-background\",\"type\":\"Color\"}]}",
+                      "tab_index": 1,
                       "text": "Background image",
                       "type": "CheckBox"
                     },
@@ -4534,6 +4540,7 @@
                         "w": 142.0
                       },
                       "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"check-background\",\"type\":\"Color\"}]}",
+                      "tab_index": 2,
                       "text": "Fullscreen",
                       "type": "CheckBox"
                     }

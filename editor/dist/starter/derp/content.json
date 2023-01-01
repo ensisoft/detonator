@@ -1393,6 +1393,7 @@
                 "w": 1000.0
               },
               "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"LPH6tgo9eN\",\"type\":\"Reference\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -1413,6 +1414,7 @@
                     "w": 221.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -1434,6 +1436,7 @@
                     "w": 900.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36}]}",
+                  "tab_index": 0,
                   "text": "Press ' Space' to fly the derpo bird\nbut watch out for the spike!",
                   "type": "Label"
                 },
@@ -1454,6 +1457,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}}]}",
+                  "tab_index": 0,
                   "text": "Play",
                   "type": "PushButton"
                 },
@@ -1474,6 +1478,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-size\",\"value\":36}]}",
+                  "tab_index": 1,
                   "text": "Quit",
                   "type": "PushButton"
                 },
@@ -1495,6 +1500,7 @@
                     "w": 148.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -1516,6 +1522,7 @@
                     "w": 102.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Fj66N4PDUG\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 }

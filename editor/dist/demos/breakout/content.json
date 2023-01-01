@@ -19173,6 +19173,7 @@
                 "w": 1000.0
               },
               "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -19192,6 +19193,7 @@
                     "w": 600.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
@@ -19213,6 +19215,7 @@
                         "w": 439.0
                       },
                       "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-size\",\"value\":26}]}",
+                      "tab_index": 0,
                       "text": "GAMESTUDIO  Breakout Clone\n",
                       "type": "Label"
                     }
@@ -19235,6 +19238,7 @@
                     "w": 200.0
                   },
                   "style": "{\"materials\":[{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"mouse-over/border\",\"material\":\"_Cyan\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-blink\",\"value\":false},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28}]}",
+                  "tab_index": 0,
                   "text": "Play",
                   "type": "PushButton"
                 },
@@ -19255,6 +19259,7 @@
                     "w": 200.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"mouse-over/border\",\"material\":\"_Cyan\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-blink\",\"value\":false},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28}]}",
+                  "tab_index": 1,
                   "text": "Exit",
                   "type": "PushButton"
                 }
@@ -19296,6 +19301,7 @@
                 "w": 1000.0
               },
               "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -19315,6 +19321,7 @@
                     "w": 1000.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
@@ -19336,6 +19343,7 @@
                         "w": 90.0
                       },
                       "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Rs00QF2N4E\",\"type\":\"Reference\"}]}",
+                      "tab_index": 0,
                       "text": "",
                       "type": "Label"
                     },
@@ -19357,6 +19365,7 @@
                         "w": 100.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":20},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"text-size\",\"value\":20}]}",
+                      "tab_index": 0,
                       "text": "3",
                       "type": "Label"
                     },
@@ -19378,6 +19387,7 @@
                         "w": 100.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36}]}",
+                      "tab_index": 0,
                       "text": "Label",
                       "type": "Label"
                     },
@@ -19399,6 +19409,7 @@
                         "w": 100.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36}]}",
+                      "tab_index": 0,
                       "text": "Label",
                       "type": "Label"
                     }

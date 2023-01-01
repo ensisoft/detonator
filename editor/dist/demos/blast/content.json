@@ -5385,6 +5385,7 @@
                 "w": 1200.0
               },
               "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -5405,6 +5406,7 @@
                     "w": 600.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"Kb5sHrP5bL\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5426,6 +5428,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5447,6 +5450,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5468,6 +5472,7 @@
                     "w": 399.0
                   },
                   "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "tab_index": 0,
                   "text": "GAME OVER",
                   "type": "Label"
                 },
@@ -5489,6 +5494,7 @@
                     "w": 499.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "tab_index": 0,
                   "text": "NEW HIGHSCORE",
                   "type": "Label"
                 }
@@ -5530,6 +5536,7 @@
                 "w": 1200.0
               },
               "style": "{\"materials\":[{\"key\":\"dkzxQN4CYv/border\",\"type\":\"Null\"},{\"key\":\"dkzxQN4CYv/background\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -5550,6 +5557,7 @@
                     "w": 600.0
                   },
                   "style": "{\"materials\":[{\"key\":\"yxS9Nl10Ob/background\",\"material\":\"Kb5sHrP5bL\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5570,6 +5578,7 @@
                     "w": 150.0
                   },
                   "style": "{\"materials\":[{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -5591,6 +5600,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"key\":\"uwLts6eeud/background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5612,6 +5622,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"key\":\"9uBdXHd3R3/background\",\"material\":\"vg5yQskPIv\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -5632,6 +5643,7 @@
                     "w": 150.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"2HWYlifK1N\",\"type\":\"Reference\"},{\"key\":\"pressed/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"M0ePA9uzA5\",\"type\":\"Reference\"}]}",
+                  "tab_index": 1,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -5653,6 +5665,7 @@
                     "w": 603.0
                   },
                   "style": "{\"properties\":[{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "tab_index": 0,
                   "text": "Press space to shoot.\n\nPress 1 to launch a mine.",
                   "type": "Label"
                 },
@@ -5673,6 +5686,7 @@
                     "w": 150.0
                   },
                   "style": "{\"materials\":[{\"key\":\"mouse-over/background\",\"material\":\"OFJHLiHeaP\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"IRvSQ66eD6\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"}]}",
+                  "tab_index": 2,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -5693,6 +5707,7 @@
                     "w": 150.0
                   },
                   "style": "{\"materials\":[{\"key\":\"RTLiMmUoN2/pressed/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/background\",\"material\":\"tetreytAkz\",\"type\":\"Reference\"},{\"key\":\"RTLiMmUoN2/mouse-over/background\",\"material\":\"RKmQZx8H1s\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"Z2vMjFgL9w\",\"type\":\"Reference\"},{\"key\":\"mouse-over/background\",\"material\":\"AuNZPvQDrI\",\"type\":\"Reference\"}]}",
+                  "tab_index": 3,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -5714,6 +5729,7 @@
                     "w": 603.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22}]}",
+                  "tab_index": 0,
                   "text": "highscore",
                   "type": "Label"
                 }
@@ -5755,6 +5771,7 @@
                 "w": 600.0
               },
               "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -5774,6 +5791,7 @@
                     "w": 400.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"lu4EmBCEzh\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "tab_index": 0,
                   "type": "Form",
                   "widgets": [
                     {
@@ -5794,6 +5812,7 @@
                         "w": 400.0
                       },
                       "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
+                      "tab_index": 0,
                       "text": "GAMESTUDIO \nSami Vaisanen\n\nGraphics \nUnLuckY Studio\n\nMusic\nJuhani Junkala",
                       "type": "Label"
                     }
@@ -5819,6 +5838,7 @@
                 "w": 200.0
               },
               "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-size\",\"value\":10},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+              "tab_index": 0,
               "text": "Press Esc to exit",
               "type": "Label"
             }
@@ -5858,6 +5878,7 @@
                 "w": 600.0
               },
               "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -5877,6 +5898,7 @@
                     "w": 400.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"lu4EmBCEzh\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "tab_index": 0,
                   "type": "Form",
                   "widgets": [
                     {
@@ -5898,6 +5920,7 @@
                         "w": 300.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "tab_index": 0,
                       "text": "Play Music",
                       "type": "CheckBox"
                     },
@@ -5920,6 +5943,7 @@
                         "w": 302.0
                       },
                       "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "tab_index": 1,
                       "text": "Play Effects",
                       "type": "CheckBox"
                     },
@@ -5940,6 +5964,7 @@
                         "w": 302.0
                       },
                       "style": "",
+                      "tab_index": 2,
                       "type": "Slider",
                       "value": 0.5
                     },
@@ -5961,6 +5986,7 @@
                         "w": 299.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "tab_index": 0,
                       "text": "Music Volume",
                       "type": "Label"
                     },
@@ -5982,6 +6008,7 @@
                         "w": 299.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "tab_index": 0,
                       "text": "Effects volume",
                       "type": "Label"
                     },
@@ -6002,6 +6029,7 @@
                         "w": 302.0
                       },
                       "style": "",
+                      "tab_index": 3,
                       "type": "Slider",
                       "value": 0.5
                     },
@@ -6023,6 +6051,7 @@
                         "w": 200.0
                       },
                       "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-size\",\"value\":10},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "tab_index": 0,
                       "text": "Press Esc to exit",
                       "type": "Label"
                     }
