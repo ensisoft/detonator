@@ -117,13 +117,14 @@ QString MapWorkspaceUri(const QString& uri, const QString& workspace)
 template<typename ClassType>
 bool LoadResources(const char* type,
                    const data::Reader& data,
-                   std::vector<std::unique_ptr<app::Resource>>& vector)
+                   std::vector<std::unique_ptr<app::Resource>>& vector,
+                   app::MigrationLog* log = nullptr)
 {
     DEBUG("Loading %1", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        const auto& chunk = data.GetReadChunk(type, i);
+        auto chunk = data.GetReadChunk(type, i);
         std::string name;
         std::string id;
         if (!chunk->Read("resource_name", &name) ||
@@ -133,6 +134,8 @@ bool LoadResources(const char* type,
             success = false;
             continue;
         }
+        chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
+
         std::optional<ClassType> ret = ClassType::FromJson(*chunk);
         if (!ret.has_value())
         {
@@ -149,13 +152,14 @@ bool LoadResources(const char* type,
 template<typename ClassType>
 bool LoadMaterials(const char* type,
                    const data::Reader& data,
-                   std::vector<std::unique_ptr<app::Resource>>& vector)
+                   std::vector<std::unique_ptr<app::Resource>>& vector,
+                   app::MigrationLog* log = nullptr)
 {
     DEBUG("Loading %1", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        const auto& chunk = data.GetReadChunk(type, i);
+        auto chunk = data.GetReadChunk(type, i);
         std::string name;
         std::string id;
         if (!chunk->Read("resource_name", &name) ||
@@ -165,6 +169,8 @@ bool LoadMaterials(const char* type,
             success = false;
             continue;
         }
+        chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
+
         auto ret = ClassType::FromJson(*chunk);
         if (!ret)
         {
@@ -1709,9 +1715,9 @@ game::TilemapDataHandle Workspace::LoadTilemapData(const game::Loader::TilemapDa
     return TilemapBuffer::LoadFromFile(file);
 }
 
-bool Workspace::LoadWorkspace()
+bool Workspace::LoadWorkspace(MigrationLog* log)
 {
-    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json")) ||
+    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log) ||
         !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
 
@@ -1856,7 +1862,7 @@ QString Workspace::MapFileToFilesystem(const std::string& uri) const
     return MapFileToFilesystem(FromUtf8(uri));
 }
 
-bool Workspace::LoadContent(const QString& filename)
+bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
 {
     data::JsonFile file;
     const auto [ok, error] = file.Load(app::ToUtf8(filename));
@@ -1868,16 +1874,16 @@ bool Workspace::LoadContent(const QString& filename)
     }
     data::JsonObject root = file.GetRootObject();
 
-    LoadMaterials<gfx::MaterialClass>("materials", root, mResources);
-    LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources);
-    LoadResources<gfx::PolygonClass>("shapes", root, mResources);
-    LoadResources<game::EntityClass>("entities", root, mResources);
-    LoadResources<game::SceneClass>("scenes", root, mResources);
-    LoadResources<game::TilemapClass>("tilemaps", root, mResources);
-    LoadResources<Script>("scripts", root, mResources);
-    LoadResources<DataFile>("data_files", root, mResources);
-    LoadResources<audio::GraphClass>("audio_graphs", root, mResources);
-    LoadResources<uik::Window>("uis", root, mResources);
+    LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
+    LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources, log);
+    LoadResources<gfx::PolygonClass>("shapes", root, mResources, log);
+    LoadResources<game::EntityClass>("entities", root, mResources, log);
+    LoadResources<game::SceneClass>("scenes", root, mResources, log);
+    LoadResources<game::TilemapClass>("tilemaps", root, mResources, log);
+    LoadResources<Script>("scripts", root, mResources, log);
+    LoadResources<DataFile>("data_files", root, mResources, log);
+    LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log);
+    LoadResources<uik::Window>("uis", root, mResources, log);
 
     // create an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
@@ -1890,6 +1896,15 @@ bool Workspace::LoadContent(const QString& filename)
             return resource->IsPrimitive() == false;
         });
     mVisibleCount = std::distance(mResources.begin(), primitives_start);
+
+    // Invoke resource migration hook that allows us to perform one-off
+    // activities when the underlying data has changed between different
+    // data versions.
+    for (auto& res : mResources)
+    {
+        if (!res->IsPrimitive())
+            res->Migrate(log);
+    }
 
     INFO("Loaded content file '%1'", filename);
     return true;

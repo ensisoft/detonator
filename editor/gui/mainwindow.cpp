@@ -65,6 +65,7 @@
 #include "editor/gui/dlgnew.h"
 #include "editor/gui/dlgproject.h"
 #include "editor/gui/dlgsave.h"
+#include "editor/gui/dlgmigrationlog.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -439,8 +440,10 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 {
     ASSERT(!mWorkspace);
 
+    app::MigrationLog migration_log;
+
     auto workspace = std::make_unique<app::Workspace>(dir);
-    if (!workspace->LoadWorkspace())
+    if (!workspace->LoadWorkspace(&migration_log))
         return false;
 
     mWorkspace = std::move(workspace);
@@ -574,6 +577,20 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     {
         on_mainTab_currentChanged(-1);
     }
+
+    // todo: regarding migration, an unresolved issue is that
+    // if there's some session/window state that is to be restored
+    // there's no migration path for that state.
+    // either a) figure out how to that migration or b) discard that state
+    // with option b) some work might unfortunately then be lost but
+    // maybe the solution is simply "don't do it".
+
+    if (!migration_log.IsEmpty())
+    {
+        DlgMigrationLog dlg(this, migration_log);
+        dlg.exec();
+    }
+
     return success;
 }
 

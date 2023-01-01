@@ -33,6 +33,7 @@
 
 #include "base/assert.h"
 #include "data/writer.h"
+#include "data/reader.h"
 #include "audio/graph.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
@@ -55,6 +56,44 @@ namespace app
         virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const = 0;
         virtual std::string MapUri(const std::string& uri) const = 0;
     private:
+    };
+
+    class MigrationLog
+    {
+    public:
+        struct Action {
+            QString name;
+            QString id;
+            QString message;
+            QString type;
+        };
+        void Log(const AnyString& id, const AnyString& name, const AnyString& type, const AnyString& message)
+        {
+            Action m;
+            m.id      = id;
+            m.name    = name;
+            m.message = message;
+            m.type    = type;
+            mLog.push_back(std::move(m));
+        }
+        template<typename Resource>
+        void Log(const Resource& res, const AnyString& type, const AnyString& message)
+        {
+            Action a;
+            a.id      = FromUtf8(res.GetId());
+            a.name    = FromUtf8(res.GetName());
+            a.message = message;
+            a.type    = type;
+            mLog.push_back(std::move(a));
+        }
+        bool IsEmpty() const
+        { return mLog.empty(); }
+        size_t GetNumActions() const
+        { return mLog.size(); }
+        const Action& GetAction(size_t index) const
+        { return base::SafeIndex(mLog, index); }
+    private:
+        std::vector<Action> mLog;
     };
 
     // Editor app resource object. These are objects that the user
@@ -147,6 +186,9 @@ namespace app
         virtual QStringList ListDependencies() const = 0;
 
         virtual void Pack(ResourcePacker& packer) = 0;
+
+        // Migrate resource from previous version to the current version.
+        virtual void Migrate(MigrationLog* log) = 0;
 
         // helpers
         inline std::string GetNameUtf8() const
@@ -485,7 +527,7 @@ namespace app
         QStringList ListResourceDependencies(const game::TilemapClass& map, const QVariantMap& props);
         QStringList ListResourceDependencies(const uik::Window& window, const QVariantMap& props);
 
-        template<typename ResourceType>
+        template<typename ResourceType> inline
         void PackResource(const ResourceType&, const ResourcePacker&)
         {}
 
@@ -496,6 +538,18 @@ namespace app
         void PackResource(game::TilemapClass& map, ResourcePacker& packer);
         void PackResource(uik::Window& window, ResourcePacker& packer);
         void PackResource(gfx::MaterialClass& material, ResourcePacker& packer);
+
+        // Stub for migrating the low level data chunk from one version to another.
+        // This stub does nothing and returns the original chunk. Resources that
+        // require this functionality should then have a specialization of this stub.
+        template<typename ResourceType> inline
+        std::unique_ptr<data::Reader> MigrateResourceDataChunk(std::unique_ptr<data::Reader> chunk, MigrationLog* log)
+        { return chunk; }
+
+        template<typename ResourceType> inline
+        void MigrateResource(const ResourceType&, MigrationLog*)
+        {}
+
     } // detail
 
     template<typename BaseTypeContent>
@@ -636,6 +690,8 @@ namespace app
         { return detail::ListResourceDependencies(*mContent, mProps); }
         virtual void Pack(ResourcePacker& packer) override
         { detail::PackResource(*mContent, packer); }
+        virtual void Migrate(MigrationLog* log) override
+        { detail::MigrateResource(*mContent, log); }
 
         // GameResourceBase
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
@@ -779,6 +835,8 @@ namespace app
         { return detail::ListResourceDependencies(*mClass, mProps); }
         virtual void Pack(ResourcePacker& packer) override
         { detail::PackResource(*mClass, packer); }
+        virtual void Migrate(MigrationLog* log) override
+        { detail::MigrateResource(*mClass, log); }
 
         // GameResourceBase
         virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override

@@ -62,6 +62,25 @@ namespace app
         QString mKey;
     };
 
+    class AnyString
+    {
+    public:
+        AnyString(const char* str)
+          : mStr(str)
+        {}
+        AnyString(const QString& str)
+          : mStr(str)
+        {}
+        AnyString(const std::string& str)
+          : mStr(FromUtf8(str))
+        {}
+        operator const QString& () const
+        { return mStr; }
+    private:
+        QString mStr;
+    };
+
+
     template<typename Key, typename Value>
     class KeyValueRange
     {
