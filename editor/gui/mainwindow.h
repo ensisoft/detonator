@@ -68,7 +68,9 @@ namespace gui
         void LoadSettings();
 
         // Load previous application state.
-        void LoadState();
+        void LoadLastState();
+
+        void LoadLastWorkspace();
 
         // Prepare (enumerate) the currently open MainWidgets in the window menu
         // and prepare window swapping shortcuts.
