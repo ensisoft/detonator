@@ -92,6 +92,8 @@ namespace uik
         virtual Type GetType() const = 0;
         // Test a widget flag. Returns true if the flag is set, otherwise false.
         virtual bool TestFlag(Flags flag) const = 0;
+        // Get widgets tab index for keyboard navigation.
+        virtual unsigned GetTabIndex() const = 0;
         // Set the unique Widget ID.
         virtual void SetId(const std::string& id) = 0;
         // Set the widget name.
@@ -109,6 +111,10 @@ namespace uik
         virtual void SetStyleString(const std::string& style) = 0;
         // Set a widget flag on or off.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
+        // Set the tab index that is used to navigate between widgets
+        // when using keyboard navigation. No two widgets should have
+        // the same index value assigned.
+        virtual void SetTabIndex(unsigned index) = 0;
         // Serialize the widget's state into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load the widget's state from the given JSON object. Returns
@@ -244,6 +250,15 @@ namespace uik
                 return true;
             return false;
         }
+        inline bool CanFocus() const
+        {
+            const auto type = GetType();
+            if (type == Type::GroupBox || type == Type::Form ||
+                type == Type::Label || type == Type::ProgressBar)
+                return false;
+            return true;
+        }
+
         inline bool IsEnabled() const
         { return TestFlag(Flags::Enabled);  }
         inline bool IsVisible() const
@@ -666,6 +681,8 @@ namespace uik
             { return mPosition; }
             virtual bool TestFlag(Flags flag) const override
             { return mFlags.test(flag); }
+            virtual unsigned GetTabIndex() const override
+            { return mTabIndex; }
             virtual void SetId(const std::string& id) override
             { mId = id; }
             virtual void SetName(const std::string& name) override
@@ -678,6 +695,8 @@ namespace uik
             { mStyle = style; }
             virtual void SetFlag(Flags flag, bool on_off) override
             { mFlags.set(flag, on_off); }
+            virtual void SetTabIndex(unsigned index) override
+            { mTabIndex = index; }
             virtual size_t GetHash() const override;
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -696,6 +715,7 @@ namespace uik
             base::bitflag<Flags> mFlags;
             std::optional<StylePropertyMap> mStyleProperties;
             std::optional<StyleMaterialMap> mStyleMaterials;
+            unsigned mTabIndex = 0;
         };
 
         template<typename WidgetModel>

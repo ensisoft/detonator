@@ -505,5 +505,44 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
     }
 }
 
+void MigrateResource(uik::Window& window, app::MigrationLog* log)
+{
+    // migration path for old data which doesn't yet have tab order values.
+    // if all widgets have 0 as tab index then initialize here.
+
+    bool does_have_tab_ordering = false;
+    bool does_need_tab_ordering = false;
+
+    for (size_t i=0; i<window.GetNumWidgets(); ++i)
+    {
+        const auto& widget = window.GetWidget(i);
+        if (!widget.CanFocus())
+            continue;
+        does_need_tab_ordering = true;
+        if (widget.GetTabIndex() != 0u)
+        {
+            does_have_tab_ordering = true;
+            break;
+        }
+    }
+    if (!does_need_tab_ordering || does_have_tab_ordering)
+        return;
+
+    if (log)
+    {
+        log->Log(window, "UI", "Generated UI widget tab order.");
+    }
+
+    // generate tab order values if none yet exist.
+    unsigned tab_index = 0;
+    for (size_t i=0; i<window.GetNumWidgets(); ++i)
+    {
+        auto& widget = window.GetWidget(i);
+        if (!widget.CanFocus())
+            continue;
+        widget.SetTabIndex(tab_index++);
+    }
+}
+
 } // namespace
 } // namespace

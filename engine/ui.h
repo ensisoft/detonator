@@ -536,6 +536,8 @@ namespace engine
         void SetPainter(gfx::Painter* painter)
         { mPainter = painter; }
 
+        gfx::Painter* GetPainter()
+        { return mPainter; }
     private:
         void SetClip(const gfx::FRect& rect);
         void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape) const;
