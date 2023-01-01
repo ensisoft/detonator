@@ -352,8 +352,23 @@ void EditorMain(QApplication& app)
     gui::MainWindow window(app);
 
     window.LoadSettings();
-    window.LoadState();
+    window.LoadLastState();
     window.showWindow();
+
+    bool load_last_workspace = true;
+    // check if we have a flag to disable workspace loading.
+    // useful for development purposes when you know the workspace
+    // might not load properly.
+    const QStringList& args = app.arguments();
+    for (const QString& arg : args)
+    {
+        if (arg == "--no-workspace")
+            load_last_workspace = false;
+    }
+    if (load_last_workspace)
+    {
+        window.LoadLastWorkspace();
+    }
 
     EventLoop(app, window);
 }

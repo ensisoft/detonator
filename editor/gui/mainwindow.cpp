@@ -307,7 +307,7 @@ void MainWindow::LoadSettings()
 }
 
 
-void MainWindow::LoadState()
+void MainWindow::LoadLastState()
 {
     const auto& file = app::GetAppHomeFilePath("state.json");
     Settings settings(file);
@@ -365,20 +365,18 @@ void MainWindow::LoadState()
     mUI.workspace->setModel(nullptr);
     mWorkspaceProxy.SetModel(nullptr);
     mWorkspaceProxy.setSourceModel(nullptr);
-
     BuildRecentWorkspacesMenu();
+}
 
-    // check if we have a flag to disable workspace loading.
-    // useful for development purposes when you know the workspace
-    // might not load properly.
-    const QStringList& args = QCoreApplication::arguments();
-    for (const QString& arg : args)
+void MainWindow::LoadLastWorkspace()
+{
+    const auto& file = app::GetAppHomeFilePath("state.json");
+    Settings settings(file);
+    if (!settings.Load())
     {
-        if (arg == "--no-workspace")
-            return;
+        ERROR("Failed to load application state.");
+        return;
     }
-
-    // load previous workspace if any
     const auto& workspace = settings.GetValue("MainWindow", "current_workspace", QString(""));
     if (workspace.isEmpty())
         return;
@@ -389,7 +387,7 @@ void MainWindow::LoadState()
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Warning);
         msg.setText(tr("There was a problem loading the previous workspace.\n\n%1"
-                        "See the application log for more details.").arg(workspace));
+                       "See the application log for more details.").arg(workspace));
         msg.exec();
     }
 }
