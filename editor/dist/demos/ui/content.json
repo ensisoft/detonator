@@ -1126,6 +1126,7 @@
                 "w": 1024.0
               },
               "style": "null",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -1146,6 +1147,7 @@
                     "w": 200.0
                   },
                   "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1167,6 +1169,7 @@
                     "w": 262.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1188,6 +1191,7 @@
                     "w": 483.0
                   },
                   "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-size\",\"value\":48},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-size\",\"value\":48}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1209,6 +1213,7 @@
                     "w": 200.0
                   },
                   "style": "{\"properties\":[{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1230,6 +1235,7 @@
                     "w": 262.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1251,6 +1257,7 @@
                     "w": 483.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"edit-text-size\",\"value\":48},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-size\",\"value\":48}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1272,6 +1279,7 @@
                     "w": 840.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":72},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/orbitron-black.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/orbitron-black.otf\"},{\"key\":\"edit-text-size\",\"value\":72},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 }
@@ -1313,6 +1321,7 @@
                 "w": 1024.0
               },
               "style": "null",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -1332,6 +1341,7 @@
                     "w": 100.0
                   },
                   "style": "null",
+                  "tab_index": 0,
                   "text": "PushButton",
                   "type": "PushButton"
                 },
@@ -1354,6 +1364,7 @@
                     "w": 100.0
                   },
                   "style": "null",
+                  "tab_index": 1,
                   "text": "Check",
                   "type": "CheckBox"
                 },
@@ -1374,6 +1385,7 @@
                     "w": 238.0
                   },
                   "style": "null",
+                  "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
@@ -1396,6 +1408,7 @@
                         "w": 100.0
                       },
                       "style": "null",
+                      "tab_index": 2,
                       "type": "SpinBox",
                       "value": 0
                     },
@@ -1417,6 +1430,7 @@
                         "w": 100.0
                       },
                       "style": "null",
+                      "tab_index": 0,
                       "text": "X\n",
                       "type": "Label"
                     },
@@ -1439,6 +1453,7 @@
                         "w": 100.0
                       },
                       "style": "null",
+                      "tab_index": 3,
                       "type": "SpinBox",
                       "value": 4
                     },
@@ -1460,6 +1475,7 @@
                         "w": 100.0
                       },
                       "style": "null",
+                      "tab_index": 0,
                       "text": "Y\n",
                       "type": "Label"
                     }
@@ -1482,6 +1498,7 @@
                     "w": 300.0
                   },
                   "style": "null",
+                  "tab_index": 4,
                   "type": "Slider",
                   "value": 0.5
                 },
@@ -1502,6 +1519,7 @@
                     "w": 300.0
                   },
                   "style": "null",
+                  "tab_index": 0,
                   "text": "%1%",
                   "type": "ProgressBar",
                   "value": 0.5
@@ -1523,6 +1541,7 @@
                     "w": 103.0
                   },
                   "style": "null",
+                  "tab_index": 5,
                   "text": "PushButton",
                   "type": "PushButton"
                 },
@@ -1545,6 +1564,7 @@
                     "w": 100.0
                   },
                   "style": "null",
+                  "tab_index": 6,
                   "text": "Check",
                   "type": "CheckBox"
                 },
@@ -1566,6 +1586,7 @@
                     "w": 243.0
                   },
                   "style": "null",
+                  "tab_index": 0,
                   "text": "app://ui/style/default.json\n",
                   "type": "Label"
                 },
@@ -1586,6 +1607,7 @@
                     "w": 300.0
                   },
                   "style": "null",
+                  "tab_index": 0,
                   "text": "Loading...",
                   "type": "ProgressBar"
                 },
@@ -1607,6 +1629,7 @@
                     "w": 200.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1628,6 +1651,7 @@
                     "w": 200.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/After_Shok.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/After_Shok.ttf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1649,6 +1673,7 @@
                     "w": 248.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1670,6 +1695,7 @@
                     "w": 200.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/OpenSans-BoldItalic.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/OpenSans-BoldItalic.ttf\"},{\"key\":\"jWI4vMkr99/edit-text-font\",\"value\":\"app://fonts/orbitron-light.otf\"},{\"key\":\"jWI4vMkr99/text-font\",\"value\":\"app://fonts/orbitron-light.otf\"}]}",
+                  "tab_index": 0,
                   "text": "Quick brown fox\njumps over\nthe lazy dog",
                   "type": "Label"
                 },
@@ -1690,6 +1716,7 @@
                     "w": 184.0
                   },
                   "style": "null",
+                  "tab_index": 7,
                   "text": "PushButton",
                   "type": "PushButton"
                 },
@@ -1710,6 +1737,7 @@
                     "w": 100.0
                   },
                   "style": "null",
+                  "tab_index": 8,
                   "text": "PushButton",
                   "type": "PushButton"
                 },
@@ -1732,6 +1760,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 9,
                   "text": "One",
                   "type": "RadioButton"
                 },
@@ -1754,6 +1783,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 10,
                   "text": "Two",
                   "type": "RadioButton"
                 },
@@ -1776,6 +1806,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 11,
                   "text": "Three",
                   "type": "RadioButton"
                 },
@@ -1797,6 +1828,7 @@
                     "w": 306.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"yTsaLXKonJ\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "\n",
                   "type": "Label"
                 },
@@ -1818,6 +1850,7 @@
                     "w": 567.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/AtariFontFullVersion.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/AtariFontFullVersion.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0}},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0}},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+                  "tab_index": 0,
                   "text": "Press Left or Right arrow to navigate\nPress Esc to exit\n",
                   "type": "Label"
                 }
@@ -1859,6 +1892,7 @@
                 "w": 1024.0
               },
               "style": "",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -1878,6 +1912,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1898,6 +1933,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                  "tab_index": 1,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1918,6 +1954,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.09362936019897461,\"g\":0.09362936019897461,\"r\":0.9063706398010254}},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.09362936019897461,\"g\":0.09362936019897461,\"r\":0.9063706398010254}}]}",
+                  "tab_index": 2,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1938,6 +1975,7 @@
                     "w": 117.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.015243763104081154,\"g\":0.015243763104081154,\"r\":0.9328603148460388},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"button-border-width\",\"value\":2.0}]}",
+                  "tab_index": 3,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1958,6 +1996,7 @@
                     "w": 117.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.08482490479946136,\"g\":0.9281758069992065,\"r\":0.09733729809522629},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.015243763104081154,\"g\":0.015243763104081154,\"r\":0.9328603148460388},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"button-border-width\",\"value\":2.0}]}",
+                  "tab_index": 4,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1978,6 +2017,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.08482490479946136,\"g\":0.9281758069992065,\"r\":0.09733729809522629},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.015243763104081154,\"g\":0.015243763104081154,\"r\":0.9328603148460388},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"pressed/button-shape\",\"value\":\"Circle\"},{\"key\":\"button-border-width\",\"value\":4.0},{\"key\":\"button-shape\",\"value\":\"Circle\"}]}",
+                  "tab_index": 5,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -1998,6 +2038,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-blink\",\"value\":true}]}",
+                  "tab_index": 6,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -2018,6 +2059,7 @@
                     "w": 100.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"text-underline\",\"value\":false},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
+                  "tab_index": 7,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -2038,6 +2080,7 @@
                     "w": 199.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.08482490479946136,\"g\":0.9281758069992065,\"r\":0.09733729809522629},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.015243763104081154,\"g\":0.015243763104081154,\"r\":0.9328603148460388},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"pressed/button-shape\",\"value\":\"Parallelogram\"},{\"key\":\"button-border-width\",\"value\":4.0},{\"key\":\"button-shape\",\"value\":\"Parallelogram\"},{\"key\":\"text-size\",\"value\":22}]}",
+                  "tab_index": 8,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -2058,6 +2101,7 @@
                     "w": 117.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.0322575718164444,\"g\":0.0322575718164444,\"r\":0.16334782540798187},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.046509500592947006,\"g\":0.046509500592947006,\"r\":0.1101701408624649},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"button-border-width\",\"value\":2.0}]}",
+                  "tab_index": 9,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -2078,6 +2122,7 @@
                     "w": 100.0
                   },
                   "style": "{\"materials\":[{\"color\":{\"a\":1.0,\"b\":0.3832913637161255,\"g\":0.3832913637161255,\"r\":0.5518272519111633},\"key\":\"button-background\",\"type\":\"Color\"},{\"color\":{\"a\":1.0,\"b\":0.0786449983716011,\"g\":0.0786449983716011,\"r\":0.9213550090789795},\"key\":\"button-border\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"button-border-width\",\"value\":2.0}]}",
+                  "tab_index": 10,
                   "text": "Click",
                   "type": "PushButton"
                 },
@@ -2098,6 +2143,7 @@
                     "w": 69.0
                   },
                   "style": "{\"materials\":[{\"key\":\"mouse-over/button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"pressed/button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "tab_index": 11,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -2118,6 +2164,7 @@
                     "w": 69.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"mouse-over/button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"},{\"key\":\"button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"pressed/button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"}]}",
+                  "tab_index": 12,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -2138,6 +2185,7 @@
                     "w": 199.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.08482490479946136,\"g\":0.9281758069992065,\"r\":0.09733729809522629},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color3\":{\"a\":1.0,\"b\":0.015243763104081154,\"g\":0.015243763104081154,\"r\":0.9328603148460388},\"key\":\"button-border\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"button-shape\",\"value\":\"Capsule\"},{\"key\":\"button-border-width\",\"value\":4.0},{\"key\":\"pressed/button-shape\",\"value\":\"Capsule\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22}]}",
+                  "tab_index": 13,
                   "text": "Click",
                   "type": "PushButton"
                 }
@@ -2179,6 +2227,7 @@
                 "w": 1024.0
               },
               "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"4qvyEBTB4F\",\"type\":\"Reference\"}]}",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -2199,6 +2248,7 @@
                     "w": 454.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"HU96WMrFpk\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "Label"
                 },
@@ -2219,6 +2269,7 @@
                     "w": 70.0
                   },
                   "style": "{\"materials\":[{\"key\":\"mouse-over/button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"pressed/button-background\",\"material\":\"kljFlfexQD\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -2239,6 +2290,7 @@
                     "w": 70.0
                   },
                   "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"mouse-over/button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"},{\"key\":\"button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"pressed/button-background\",\"material\":\"oXAiESiaJx\",\"type\":\"Reference\"}]}",
+                  "tab_index": 1,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -2259,6 +2311,7 @@
                     "w": 70.0
                   },
                   "style": "{\"materials\":[{\"key\":\"button-background\",\"material\":\"pvnDjWDxs8\",\"type\":\"Reference\"},{\"key\":\"pressed/button-background\",\"material\":\"pvnDjWDxs8\",\"type\":\"Reference\"},{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"mouse-over/button-background\",\"material\":\"pvnDjWDxs8\",\"type\":\"Reference\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+                  "tab_index": 2,
                   "text": "",
                   "type": "PushButton"
                 },
@@ -2279,6 +2332,7 @@
                     "w": 70.0
                   },
                   "style": "{\"materials\":[{\"key\":\"pressed/button-background\",\"material\":\"dd8Ju6AKhO\",\"type\":\"Reference\"},{\"key\":\"mouse-over/button-background\",\"material\":\"dd8Ju6AKhO\",\"type\":\"Reference\"},{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"button-background\",\"material\":\"dd8Ju6AKhO\",\"type\":\"Reference\"}]}",
+                  "tab_index": 3,
                   "text": "",
                   "type": "PushButton"
                 }
@@ -2320,6 +2374,7 @@
                 "w": 1024.0
               },
               "style": "",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -2339,6 +2394,7 @@
                     "w": 500.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "%1%",
                   "type": "ProgressBar",
                   "value": 0.25
@@ -2360,6 +2416,7 @@
                     "w": 500.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "Loading ...",
                   "type": "ProgressBar"
                 },
@@ -2380,6 +2437,7 @@
                     "w": 500.0
                   },
                   "style": "{\"materials\":[{\"key\":\"progress-bar-border\",\"material\":\"_DarkRed\",\"type\":\"Reference\"},{\"color\":{\"a\":1.0,\"b\":0.12466620653867722,\"g\":0.426504909992218,\"r\":0.12335393577814102},\"key\":\"progress-bar-fill\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"progress-bar-fill-shape\",\"value\":\"Parallelogram\"},{\"key\":\"progress-bar-border-width\",\"value\":2.0}]}",
+                  "tab_index": 0,
                   "text": "Loading ...",
                   "type": "ProgressBar"
                 },
@@ -2400,6 +2458,7 @@
                     "w": 500.0
                   },
                   "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-size\",\"value\":26},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/armalite_rifle.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/armalite_rifle.ttf\"}]}",
+                  "tab_index": 0,
                   "text": "loading",
                   "type": "ProgressBar"
                 },
@@ -2420,6 +2479,7 @@
                     "w": 500.0
                   },
                   "style": "{\"materials\":[{\"key\":\"progress-bar-fill\",\"material\":\"_DarkGreen\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"_DarkRed\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"border-width\",\"value\":1.0}]}",
+                  "tab_index": 0,
                   "text": "%1%",
                   "type": "ProgressBar",
                   "value": 0.5
@@ -2441,6 +2501,7 @@
                     "w": 500.0
                   },
                   "style": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color1\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"color2\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color3\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"key\":\"progress-bar-fill\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.03927672281861305,\"g\":0.03927672281861305,\"r\":0.03927672281861305}},{\"key\":\"text-font\",\"value\":\"app://fonts/ChunkFive-Print.otf\"}]}",
+                  "tab_index": 0,
                   "text": "%1%",
                   "type": "ProgressBar",
                   "value": 0.75
@@ -2462,6 +2523,7 @@
                     "w": 500.0
                   },
                   "style": "{\"materials\":[{\"key\":\"progress-bar-background\",\"material\":\"OqRvzjnzW5\",\"type\":\"Reference\"},{\"key\":\"progress-bar-fill\",\"material\":\"TkUiWPFJd7\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "",
                   "type": "ProgressBar"
                 },
@@ -2482,6 +2544,7 @@
                     "w": 500.0
                   },
                   "style": "{\"materials\":[{\"key\":\"progress-bar-fill\",\"material\":\"TkUiWPFJd7\",\"type\":\"Reference\"},{\"key\":\"progress-bar-background\",\"material\":\"OqRvzjnzW5\",\"type\":\"Reference\"}]}",
+                  "tab_index": 0,
                   "text": "loading %1%",
                   "type": "ProgressBar",
                   "value": 0.2199999988079071
@@ -2524,6 +2587,7 @@
                 "w": 500.0
               },
               "style": "",
+              "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
@@ -2545,6 +2609,7 @@
                     "w": 163.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "Check",
                   "type": "CheckBox"
                 },
@@ -2565,6 +2630,7 @@
                     "w": 400.0
                   },
                   "style": "",
+                  "tab_index": 1,
                   "type": "Slider",
                   "value": 0.5
                 },
@@ -2587,6 +2653,7 @@
                     "w": 260.0
                   },
                   "style": "",
+                  "tab_index": 2,
                   "text": "RadioButton",
                   "type": "RadioButton"
                 },
@@ -2609,6 +2676,7 @@
                     "w": 260.0
                   },
                   "style": "",
+                  "tab_index": 3,
                   "text": "RadioButton",
                   "type": "RadioButton"
                 },
@@ -2630,6 +2698,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "Label",
                   "type": "Label"
                 },
@@ -2650,6 +2719,7 @@
                     "w": 400.0
                   },
                   "style": "",
+                  "tab_index": 4,
                   "text": "PushButton",
                   "type": "PushButton"
                 },
@@ -2672,6 +2742,7 @@
                     "w": 200.0
                   },
                   "style": "",
+                  "tab_index": 5,
                   "type": "SpinBox",
                   "value": 0
                 },
@@ -2693,6 +2764,7 @@
                     "w": 100.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "Label",
                   "type": "Label"
                 },
@@ -2715,6 +2787,7 @@
                     "w": 163.0
                   },
                   "style": "",
+                  "tab_index": 6,
                   "text": "Check",
                   "type": "CheckBox"
                 },
@@ -2735,6 +2808,7 @@
                     "w": 400.0
                   },
                   "style": "",
+                  "tab_index": 0,
                   "text": "%1%",
                   "type": "ProgressBar",
                   "value": 0.5
