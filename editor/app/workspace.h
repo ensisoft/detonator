@@ -44,8 +44,8 @@
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "game/loader.h"
-#include "resource.h"
-#include "utility.h"
+#include "editor/app/resource.h"
+#include "editor/app/utility.h"
 
 class QuaZip;
 
@@ -194,7 +194,7 @@ namespace app
 
         // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
-        bool LoadWorkspace();
+        bool LoadWorkspace(MigrationLog* log = nullptr);
         // Try to save the contents of the workspace into the current workspace dir.
         // Returns true on success. Any errors are logged.
         bool SaveWorkspace();
@@ -757,7 +757,7 @@ namespace app
         void ResourcePackingUpdate(const QString& action, int step, int total);
 
     private:
-        bool LoadContent(const QString& file);
+        bool LoadContent(const QString& file, MigrationLog* log);
         bool LoadProperties(const QString& file);
         void LoadUserSettings(const QString& file);
         bool SaveContent(const QString& file) const;

@@ -413,6 +413,9 @@ add_executable(GSEditor
     editor/gui/dlgimport.h
     editor/gui/dlgimport.ui
     editor/gui/dlgimport.cpp
+    editor/gui/dlgmigrationlog.h
+    editor/gui/dlgmigrationlog.ui
+    editor/gui/dlgmigrationlog.cpp
     editor/gui/gfxwidget.h
     editor/gui/gfxwidget.cpp
     editor/gui/mainwidget.h
