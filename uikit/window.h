@@ -44,18 +44,19 @@ namespace uik
     {
     public:
         virtual ~PaintHook() = default;
+        using PaintEvent = Widget::PaintEvent;
+
         // Inspect the paint event that will take place for the given widget.
         // Should return true if the painting is to proceed or false to omit
-        // the actual painting. When the painting is omitted no begin/end paints
-        // are then called.
-        virtual bool InspectPaint(const Widget* widget, Widget::PaintEvent& event, State& state)
+        // the actual painting.
+        virtual bool InspectPaint(const Widget* widget, const State& state, PaintEvent& paint)
         { return true; }
-        // When widget painting is to take place (see InspectPaint) this is called
-        // before the widget is asked to paint itself.
-        virtual void BeginPaintWidget(const Widget* widget, State& state, Painter& painter) {}
-        // When widget painting is to take place (see InspectPaint) this called
-        // right after the widget has painted itself.
-        virtual void EndPaintWidget(const Widget* widget, State& state, Painter& painter) {}
+        // When widget painting is taking place this is called right before
+        // the widget is asked to paint itself.
+        virtual void BeginPaintWidget(const Widget* widget, const State& state, const PaintEvent& paint, Painter& painter) {}
+        // When widget painting is taking place this called right after
+        // the widget has painted itself.
+        virtual void EndPaintWidget(const Widget* widget, const State& state, const PaintEvent& paint, Painter& painter) {}
     private:
     };
 

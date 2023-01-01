@@ -550,6 +550,8 @@ namespace app
         void MigrateResource(const ResourceType&, MigrationLog*)
         {}
 
+        void MigrateResource(uik::Window& window, MigrationLog* log);
+
     } // detail
 
     template<typename BaseTypeContent>

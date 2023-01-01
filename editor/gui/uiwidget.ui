@@ -662,6 +662,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkShowTabOrder">
+            <property name="text">
+             <string>Show tab order</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="color_widgets::ColorSelector" name="widgetColor">
             <property name="minimumSize">
              <size>
@@ -1895,6 +1905,18 @@
     <string>Ctrl+8</string>
    </property>
   </action>
+  <action name="actionWidgetOrder">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/tab_go.png</normaloff>:/16x16_ico_png/tab_go.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tab Order ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Reoder the widgets in the tab order list</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1956,6 +1978,7 @@
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowTabOrder</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>widgetId</tabstop>
   <tabstop>widgetType</tabstop>

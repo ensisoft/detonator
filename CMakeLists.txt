@@ -401,6 +401,9 @@ add_executable(GSEditor
     editor/gui/dlgstylestring.h
     editor/gui/dlgstylestring.ui
     editor/gui/dlgstylestring.cpp
+    editor/gui/dlgwidgetlist.h
+    editor/gui/dlgwidgetlist.ui
+    editor/gui/dlgwidgetlist.cpp
     editor/gui/dlggradient.h
     editor/gui/dlggradient.ui
     editor/gui/dlgnew.h

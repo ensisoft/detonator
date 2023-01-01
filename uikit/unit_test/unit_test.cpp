@@ -134,6 +134,8 @@ public:
     { return TestWidget::Type::Label; }
     virtual bool TestFlag(Flags flag) const override
     { return this->flags.test(flag); }
+    virtual unsigned GetTabIndex() const override
+    { return 0; }
     virtual void SetId(const std::string& id) override
     {}
     virtual void SetName(const std::string& name) override
@@ -146,6 +148,8 @@ public:
     {}
     virtual void SetFlag(Flags flag, bool on_off) override
     { this->flags.set(flag, on_off); }
+    virtual void SetTabIndex(unsigned index) override
+    { }
     virtual void IntoJson(data::Writer& json) const override
     {}
     virtual bool FromJson(const data::Reader& json) override
@@ -233,6 +237,7 @@ void unit_test_widget()
     TEST_REQUIRE(widget.TestFlag(uik::Widget::Flags::Enabled));
     TEST_REQUIRE(widget.IsEnabled());
     TEST_REQUIRE(widget.IsVisible());
+    TEST_REQUIRE(widget.GetTabIndex() == 0);
 
     widget.SetName("widget");
     widget.SetStyleString("style string");
@@ -242,6 +247,7 @@ void unit_test_widget()
     widget.SetStyleProperty("flag", true);
     widget.SetStyleProperty("float", 1.0f);
     widget.SetStyleProperty("string", std::string("foobar"));
+    widget.SetTabIndex(123);
 
     data::JsonObject json;
     widget.IntoJson(json);
@@ -256,6 +262,7 @@ void unit_test_widget()
         TEST_REQUIRE(other.GetPosition() == widget.GetPosition());
         TEST_REQUIRE(other.IsEnabled() == widget.IsEnabled());
         TEST_REQUIRE(other.IsVisible() == widget.IsVisible());
+        TEST_REQUIRE(other.GetTabIndex() == widget.GetTabIndex());
         uik::StyleProperty prop = *other.GetStyleProperty("flag");
         TEST_REQUIRE(std::get<bool>(prop) == true);
         prop = *other.GetStyleProperty("float");
@@ -275,6 +282,7 @@ void unit_test_widget()
         TEST_REQUIRE(copy->GetPosition() == widget.GetPosition());
         TEST_REQUIRE(copy->IsEnabled() == widget.IsEnabled());
         TEST_REQUIRE(copy->IsVisible() == widget.IsVisible());
+        TEST_REQUIRE(copy->GetTabIndex() == widget.GetTabIndex());
     }
 
     // clone
@@ -288,6 +296,7 @@ void unit_test_widget()
         TEST_REQUIRE(clone->GetPosition() == widget.GetPosition());
         TEST_REQUIRE(clone->IsEnabled() == widget.IsEnabled());
         TEST_REQUIRE(clone->IsVisible() == widget.IsVisible());
+        TEST_REQUIRE(clone->GetTabIndex() == widget.GetTabIndex());
     }
 }
 

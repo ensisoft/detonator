@@ -152,6 +152,18 @@ Window::Window(const Window& other)
 
 Widget* Window::AddWidget(std::unique_ptr<Widget> widget)
 {
+    if (widget->CanFocus())
+    {
+        int max_tab_index = -1;
+        for (auto& w : mWidgets)
+        {
+            if (!w->CanFocus())
+                continue;
+            max_tab_index = std::max(max_tab_index, (int)w->GetTabIndex());
+        }
+        widget->SetTabIndex(max_tab_index + 1);
+    }
+
     auto ret = widget.get();
     mWidgets.push_back(std::move(widget));
     return ret;
@@ -161,9 +173,21 @@ Widget* Window::DuplicateWidget(const Widget* widget)
 {
     std::vector<std::unique_ptr<Widget>> clones;
 
+    unsigned max_tab_index = 0;
+    for (auto& w : mWidgets)
+    {
+        if (!w->CanFocus())
+            continue;
+        max_tab_index = std::max(max_tab_index, w->GetTabIndex());
+    }
+
     auto* ret = uik::DuplicateWidget(mRenderTree, widget, &clones);
     for (auto& clone : clones)
+    {
+        if (clone->CanFocus())
+            clone->SetTabIndex(++max_tab_index);
         mWidgets.push_back(std::move(clone));
+    }
     return ret;
 }
 
@@ -176,6 +200,20 @@ void Window::DeleteWidget(const Widget* carcass)
 {
     std::unordered_set<const Widget*> graveyard;
 
+    std::vector<Widget*> taborder;
+    for (auto& w : mWidgets)
+    {
+        if (!w->CanFocus())
+            continue;
+        const auto index = w->GetTabIndex();
+        if (index >= taborder.size())
+            taborder.resize(index+1);
+        taborder[index] = w.get();
+    }
+    // if there are some holes in the tab order list (really this is a BUG somewhere)
+    // remove any such nullptrs from the taborder list.
+    taborder.erase(std::remove(taborder.begin(), taborder.end(), nullptr), taborder.end());
+
     mRenderTree.PreOrderTraverseForEach([&graveyard](const Widget* widget) {
         graveyard.insert(widget);
     }, carcass);
@@ -187,6 +225,17 @@ void Window::DeleteWidget(const Widget* carcass)
     mWidgets.erase(std::remove_if(mWidgets.begin(), mWidgets.end(), [&graveyard](const auto& node) {
         return graveyard.find(node.get()) != graveyard.end();
     }), mWidgets.end());
+
+    // delete the widgets that were removed from the tab order list.
+    taborder.erase(std::remove_if(taborder.begin(), taborder.end(), [&graveyard](const auto* widget) {
+        return graveyard.find(widget) != graveyard.end();
+    }), taborder.end());
+
+    // reindex the taborder widgets and assign new tab indices.
+    for (unsigned i=0; i<taborder.size(); ++i)
+    {
+        taborder[i]->SetTabIndex(i);
+    }
 }
 
 Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)
@@ -264,12 +313,12 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
                 paint.time    = mCurrentTime;
                 if (mPaintHook)
                 {
-                    if (mPaintHook->InspectPaint(widget, paint, mWidgetState))
+                    mPaintHook->BeginPaintWidget(widget, mWidgetState, paint, mPainter);
+                    if (mPaintHook->InspectPaint(widget, mWidgetState, paint))
                     {
-                        mPaintHook->BeginPaintWidget(widget, mWidgetState, mPainter);
                         widget->Paint(paint , mWidgetState , mPainter);
-                        mPaintHook->EndPaintWidget(widget, mWidgetState, mPainter);
                     }
+                    mPaintHook->EndPaintWidget(widget, mWidgetState, paint, mPainter);
                 }
                 else
                 {

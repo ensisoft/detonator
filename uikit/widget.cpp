@@ -45,6 +45,7 @@ size_t BaseWidget::GetHash() const
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mTabIndex);
     if (mStyleProperties)
     {
         std::set<std::string> keys;
@@ -75,12 +76,13 @@ size_t BaseWidget::GetHash() const
 }
 void BaseWidget::IntoJson(data::Writer& data) const
 {
-    data.Write("id",       mId);
-    data.Write("name",     mName);
-    data.Write("style",    mStyle);
-    data.Write("position", mPosition);
-    data.Write("size",     mSize);
-    data.Write("flags",    mFlags);
+    data.Write("id",        mId);
+    data.Write("name",      mName);
+    data.Write("style",     mStyle);
+    data.Write("position",  mPosition);
+    data.Write("size",      mSize);
+    data.Write("flags",     mFlags);
+    data.Write("tab_index", mTabIndex);
     if (mStyleProperties)
     {
         for (const auto& [key, val] : *mStyleProperties)
@@ -105,12 +107,13 @@ void BaseWidget::IntoJson(data::Writer& data) const
 
 bool BaseWidget::FromJson(const data::Reader& data)
 {
-    data.Read("id",       &mId);
-    data.Read("name",     &mName);
-    data.Read("style",    &mStyle);
-    data.Read("position", &mPosition);
-    data.Read("size",     &mSize);
-    data.Read("flags",    &mFlags);
+    data.Read("id",        &mId);
+    data.Read("name",      &mName);
+    data.Read("style",     &mStyle);
+    data.Read("position",  &mPosition);
+    data.Read("size",      &mSize);
+    data.Read("flags",     &mFlags);
+    data.Read("tab_index", &mTabIndex);
     if (data.HasArray("style_properties"))
     {
         StylePropertyMap props;
@@ -914,6 +917,8 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "groupbox";
     p.style_properties = ps.style_properties;
+
+
     p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);

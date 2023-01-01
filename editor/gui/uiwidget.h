@@ -89,6 +89,7 @@ namespace gui
         void on_actionNewRadioButton_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
+        void on_actionWidgetOrder_triggered();
         void on_windowName_textChanged(const QString& text);
         void on_windowStyleFile_currentIndexChanged(int);
         void on_windowScriptFile_currentIndexChanged(int);
@@ -201,7 +202,6 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float  mViewTransformRotation  = 0.0f;
         bool mCameraWasLoaded = false;
-        QString mCurrentStyle;
 
         unsigned mRefreshTick = 0;
         std::deque<std::string> mMessageQueue;

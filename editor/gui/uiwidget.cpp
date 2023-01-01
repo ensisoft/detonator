@@ -44,6 +44,7 @@
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgstyleproperties.h"
 #include "editor/gui/dlgstylestring.h"
+#include "editor/gui/dlgwidgetlist.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/settings.h"
@@ -450,6 +451,7 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -505,6 +507,7 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.widgetData,       false);
     SetVisible(mUI.lblHelp,          false);
     SetValue(mUI.chkShowGrid,        false);
+    SetValue(mUI.chkShowTabOrder,    false);
     SetValue(mUI.chkShowOrigin,      false);
     QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
     on_actionPlay_triggered();
@@ -561,6 +564,7 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.rotation);
     settings.SaveWidget("UI", mUI.chkShowOrigin);
     settings.SaveWidget("UI", mUI.chkShowGrid);
+    settings.SaveWidget("UI", mUI.chkShowTabOrder);
     settings.SaveWidget("UI", mUI.chkSnap);
     settings.SaveWidget("UI", mUI.cmbGrid);
     settings.SaveWidget("UI", mUI.zoom);
@@ -583,6 +587,7 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.chkShowGrid);
     settings.LoadWidget("UI", mUI.chkSnap);
     settings.LoadWidget("UI", mUI.cmbGrid);
+    settings.LoadWidget("UI", mUI.chkShowTabOrder);
     settings.LoadWidget("UI", mUI.zoom);
     settings.LoadWidget("UI", mUI.widget);
 
@@ -983,6 +988,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.chkSnap,       false);
     SetEnabled(mUI.chkShowOrigin, false);
     SetEnabled(mUI.chkShowGrid,   false);
+    SetEnabled(mUI.chkShowTabOrder, false);
 }
 void UIWidget::on_actionPause_triggered()
 {
@@ -1040,6 +1046,7 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    SetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     SetUserProperty(resource, "widget", mUI.widget);
 
     mState.workspace->SaveResource(resource);
@@ -1117,6 +1124,34 @@ void UIWidget::on_actionWidgetDuplicate_triggered()
         mUI.tree->Rebuild();
         mUI.tree->SelectItemById(app::FromUtf8(dupe->GetId()));
         mState.window.Style(*mState.painter);
+    }
+}
+
+void UIWidget::on_actionWidgetOrder_triggered()
+{
+    std::vector<uik::Widget*> taborder;
+    for (size_t i=0; i<mState.window.GetNumWidgets(); ++i)
+    {
+        auto& widget = mState.window.GetWidget(i);
+        if (!widget.CanFocus())
+            continue;
+        const auto index = widget.GetTabIndex();
+        if (index >= taborder.size())
+            taborder.resize(index+1);
+        taborder[index] = &widget;
+    }
+
+    taborder.erase(std::remove(taborder.begin(), taborder.end(), nullptr), taborder.end());
+
+    DlgWidgetList dlg(this, taborder);
+    const auto ret = dlg.exec();
+
+    if (ret == QDialog::Rejected)
+        return;
+
+    for (unsigned i=0; i<taborder.size(); ++i)
+    {
+        taborder[i]->SetTabIndex(i);
     }
 }
 
@@ -1571,16 +1606,23 @@ void UIWidget::on_tree_customContextMenuRequested(QPoint)
     const auto* widget = GetCurrentWidget();
     SetEnabled(mUI.actionWidgetDelete, false);
     SetEnabled(mUI.actionWidgetDuplicate, false);
+    SetEnabled(mUI.actionWidgetOrder, false);
     if (widget)
     {
         SetEnabled(mUI.actionWidgetDelete , true);
         SetEnabled(mUI.actionWidgetDuplicate , true);
+    }
+    if (mState.window.GetNumWidgets())
+    {
+        SetEnabled(mUI.actionWidgetOrder, true);
     }
 
     QMenu menu(this);
     menu.addAction(mUI.actionWidgetDuplicate);
     menu.addSeparator();
     menu.addAction(mUI.actionWidgetDelete);
+    menu.addSeparator();
+    menu.addAction(mUI.actionWidgetOrder);
     menu.exec(QCursor::pos());
 }
 
@@ -1712,14 +1754,36 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         class PaintHook : public uik::PaintHook
         {
         public:
-            virtual bool InspectPaint(const uik::Widget* widget, uik::Widget::PaintEvent& event, uik::State& state) override
+            PaintHook(const State& state, bool paint_tab_order)
+              : mState(state)
+              , mPaintTabOrder(paint_tab_order)
+            {}
+            virtual bool InspectPaint(const uik::Widget* widget, const uik::State& state, PaintEvent& event) override
             {
                 if (!widget->TestFlag(uik::Widget::Flags::VisibleInEditor))
                     return false;
                 return true;
             }
+            virtual void EndPaintWidget(const uik::Widget* widget, const uik::State& state, const PaintEvent& paint, uik::Painter& painter) override
+            {
+                if (!mPaintTabOrder)
+                    return;
+                if (!widget->CanFocus())
+                    return;
+                const auto tab_index = widget->GetTabIndex();
+
+                const auto& rect = paint.rect;
+                gfx::FRect rc;
+                rc.Resize(20.0f, 20.0f);
+                rc.Translate(rect.GetX(), rect.GetY());
+                rc.Translate(rect.GetWidth(), rect.GetHeight());
+                //rc.Translate(10.0f, 1.0f);
+                ShowMessage(base::FormatString("%1.", tab_index), rc, *mState.painter->GetPainter());
+            }
         private:
-        } hook;
+            const State& mState;
+            const bool mPaintTabOrder = false;
+        } hook (mState, GetValue(mUI.chkShowTabOrder));
 
         // paint the design state copy of the window.
         uik::State s;
