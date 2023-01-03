@@ -68,6 +68,11 @@
       "key": "widget/border",
       "type": "Null"
     },
+    {
+      "key": "widget/focus-rect",
+      "type": "Color",
+      "color": "Silver"
+    },
 
     {
       "key": "widget/button-icon",

@@ -284,13 +284,16 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     FRect slider;
     FRect knob;
     ComputeLayout(paint.rect, &slider, &knob);
-    p.pressed = ps.state->GetValue(ps.widgetId + "/slider-down", false);
-    p.moused  = ps.state->GetValue(ps.widgetId + "/slider-under-mouse", false);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/slider-knob-down", false);
+    p.moused  = ps.state->GetValue(ps.widgetId + "/slider-knob-under-mouse", false);
     ps.painter->DrawSlider(ps.widgetId, p, knob);
 
     p.pressed = false;
     p.moused  = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
+
+    if (p.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 }
 void SliderModel::IntoJson(data::Writer& data) const
 {
@@ -308,7 +311,7 @@ WidgetAction SliderModel::MousePress(const MouseEvent& mouse, const MouseStruct&
 {
     FRect slider, knob;
     ComputeLayout(mouse.widget_window_rect, &slider, &knob);
-    ms.state->SetValue(ms.widgetId + "/slider-down", knob.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/slider-knob-down", knob.TestPoint(mouse.window_mouse_pos));
     ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
     return WidgetAction {};
 }
@@ -316,9 +319,9 @@ WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& 
 {
     FRect slider, knob;
     ComputeLayout(mouse.widget_window_rect, &slider, &knob);
-    ms.state->SetValue(ms.widgetId + "/slider-under-mouse", knob.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/slider-knob-under-mouse", knob.TestPoint(mouse.window_mouse_pos));
 
-    const auto slider_down = ms.state->GetValue(ms.widgetId + "/slider-down", false);
+    const auto slider_down = ms.state->GetValue(ms.widgetId + "/slider-knob-down", false);
     if (!slider_down)
         return WidgetAction {};
 
@@ -338,14 +341,14 @@ WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& 
 }
 WidgetAction SliderModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
 {
-    ms.state->SetValue(ms.widgetId + "/slider-down", false);
+    ms.state->SetValue(ms.widgetId + "/slider-knob-down", false);
 
     return WidgetAction {};
 }
 WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
 {
-    ms.state->SetValue(ms.widgetId + "/slider-down", false);
-    ms.state->SetValue(ms.widgetId + "/slider-under-mouse", false);
+    ms.state->SetValue(ms.widgetId + "/slider-knob-down", false);
+    ms.state->SetValue(ms.widgetId + "/slider-knob-under-mouse", false);
     return WidgetAction {};
 }
 
@@ -429,6 +432,10 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.enabled = paint.enabled;
     p.pressed = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
+
+    p.rect = paint.rect;
+    if (p.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 }
 void SpinBoxModel::IntoJson(data::Writer& data) const
 {
@@ -438,10 +445,9 @@ void SpinBoxModel::IntoJson(data::Writer& data) const
 }
 bool SpinBoxModel::FromJson(const data::Reader& data)
 {
-    if (!data.Read("value", &mValue) ||
-        !data.Read("min", &mMinVal) ||
-        !data.Read("max", &mMaxVal))
-        return false;
+    data.Read("value", &mValue);
+    data.Read("min", &mMinVal);
+    data.Read("max", &mMaxVal);
     return true;
 }
 
@@ -586,9 +592,8 @@ void LabelModel::IntoJson(data::Writer& data) const
 }
 bool LabelModel::FromJson(const data::Reader& data)
 {
-    if (!data.Read("text", &mText) ||
-        !data.Read("line_height", &mLineHeight))
-        return false;
+    data.Read("text", &mText);
+    data.Read("line_height", &mLineHeight);
     return true;
 }
 
@@ -610,9 +615,13 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.klass   = "push-button";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    if (p.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
+
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -623,8 +632,7 @@ void PushButtonModel::IntoJson(data::Writer& data)  const
 
 bool PushButtonModel::FromJson(const data::Reader& data)
 {
-    if (!data.Read("text", &mText))
-        return false;
+    data.Read("text", &mText);
     return true;
 }
 
@@ -687,6 +695,8 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 
     p.rect = text;
     ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    if (paint.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
     p.rect = paint.rect;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -700,10 +710,9 @@ void CheckBoxModel::IntoJson(data::Writer& data) const
 }
 bool CheckBoxModel::FromJson(const data::Reader& data)
 {
-    if (!data.Read("text", &mText) ||
-        !data.Read("checked", &mChecked) ||
-        !data.Read("check", &mCheck))
-        return false;
+    data.Read("text", &mText);
+    data.Read("checked", &mChecked);
+    data.Read("check", &mCheck);
     return true;
 }
 
@@ -804,6 +813,8 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
 
     p.rect = text;
     ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    if (p.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
     p.rect = paint.rect;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -917,9 +928,8 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.pressed = false;
     p.klass   = "groupbox";
     p.style_properties = ps.style_properties;
-
-
     p.style_materials  = ps.style_materials;
+
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
@@ -929,9 +939,7 @@ void GroupBoxModel::IntoJson(data::Writer& data) const
 }
 bool GroupBoxModel::FromJson(const data::Reader& data)
 {
-    if (!data.Read("text", &mText))
-        return false;
-
+    data.Read("text", &mText);
     return true;
 }
 
