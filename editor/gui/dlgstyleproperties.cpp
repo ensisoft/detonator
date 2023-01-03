@@ -275,12 +275,15 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     std::vector<Property> props = {
         // base widget style properties that apply to all widgets.
         // i.e. when the widget is "widget" the property applies to all
-        // widgets such as pushbuttons, labels etc. unless there's a
+        // widgets such as push-buttons, labels etc. unless there's a
         // widget specific override.
         {"background",                    "widget", PropertyType::Material},
         {"shape",                         "widget", PropertyType::Shape},
         {"border",                        "widget", PropertyType::Material},
         {"border-width",                  "widget", PropertyType::Float},
+        {"focus-rect",                    "widget", PropertyType::Material},
+        {"focus-rect-shape",              "widget", PropertyType::Shape},
+        {"focus-rect-width",              "widget", PropertyType::Float},
         {"text-color",                    "widget", PropertyType::Color},
         {"text-blink",                    "widget", PropertyType::Bool},
         {"text-underline",                "widget", PropertyType::Bool},
@@ -440,7 +443,25 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"progress-bar-fill",             "progress-bar", PropertyType::Material},
         {"progress-bar-fill-shape",       "progress-bar", PropertyType::Shape},
         {"progress-bar-border",           "progress-bar", PropertyType::Material},
-        {"progress-bar-border-width",     "progress-bar", PropertyType::Float}
+        {"progress-bar-border-width",     "progress-bar", PropertyType::Float},
+
+        // DrawWidgetFocusRect
+        {"focus-rect",                    "push-button", PropertyType::Material},
+        {"focus-rect-shape",              "push-button", PropertyType::Shape},
+        {"focus-rect-width",              "push-button", PropertyType::Float},
+        {"focus-rect",                    "radiobutton", PropertyType::Material},
+        {"focus-rect-shape",              "radiobutton", PropertyType::Shape},
+        {"focus-rect-width",              "radiobutton", PropertyType::Float},
+        {"focus-rect",                    "checkbox", PropertyType::Material},
+        {"focus-rect-shape",              "checkbox", PropertyType::Shape},
+        {"focus-rect-width",              "checkbox", PropertyType::Float},
+        {"focus-rect",                    "spinbox", PropertyType::Material},
+        {"focus-rect-shape",              "spinbox", PropertyType::Shape},
+        {"focus-rect-width",              "spinbox", PropertyType::Float},
+        {"focus-rect",                    "slider", PropertyType::Material},
+        {"focus-rect-shape",              "slider", PropertyType::Shape},
+        {"focus-rect-width",              "slider", PropertyType::Float},
+
     };
     std::sort(props.begin(), props.end(), [](const auto& lhs, const auto& rhs) {
         if (lhs.klass < rhs.klass)

@@ -641,7 +641,17 @@ void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
 
 void UIPainter::DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const
 {
-    // todo:
+    if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
+    {
+        const auto button_shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
+        const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", button_shape);
+        const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
+
+        gfx::FRect rect = ps.rect;
+        rect.Grow(-4.0f, -4.0f);
+        rect.Translate(2.0f, 2.0f);
+        OutlineShape(rect, *material, rect_shape, rect_width);
+    }
 }
 
 void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool checked) const
