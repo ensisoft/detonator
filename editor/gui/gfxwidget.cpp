@@ -443,6 +443,12 @@ void GfxWindow::keyPressEvent(QKeyEvent* key)
         QWindow::keyPressEvent(key);
 }
 
+void GfxWindow::keyReleaseEvent(QKeyEvent* key)
+{
+    if (onKeyRelease(key))
+        QWindow::keyReleaseEvent(key);
+}
+
 void GfxWindow::wheelEvent(QWheelEvent* wheel)
 {
     onMouseWheel(wheel);
@@ -611,6 +617,11 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
 
         if (mWindow && onKeyPress)
             return onKeyPress(key);
+        return false;
+    };
+    mWindow->onKeyRelease = [&](QKeyEvent* key) {
+        if (mWindow && onKeyRelease)
+            return onKeyRelease(key);
         return false;
     };
     mWindow->onMouseWheel = [&](QWheelEvent* wheel) {
