@@ -126,6 +126,7 @@ namespace gui
         std::function<void (QMouseEvent* mickey)> onMouseDoubleClick;
         // keyboard callbacks
         std::function<bool (QKeyEvent* key)>      onKeyPress;
+        std::function<bool (QKeyEvent* key)>      onKeyRelease;
 
         static void SetDefaultFilter(gfx::Device::MinFilter filter)
         { DefaultMinFilter = filter; }
@@ -158,6 +159,7 @@ namespace gui
         virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
         virtual void mouseDoubleClickEvent(QMouseEvent* mickey) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
+        virtual void keyReleaseEvent(QKeyEvent* key) override;
         virtual void wheelEvent(QWheelEvent* wheel) override;
         virtual void focusInEvent(QFocusEvent* event) override;
         virtual void focusOutEvent(QFocusEvent* event) override;
@@ -238,6 +240,7 @@ namespace gui
         // was consumed. This will stop further processing of the
         // keypress.
         std::function<bool (QKeyEvent* key)>      onKeyPress;
+        std::function<bool (QKeyEvent* key)>      onKeyRelease;
 
         // zoom in/out callbacks
         std::function<void ()> onZoomIn;
