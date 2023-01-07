@@ -44,6 +44,7 @@ add_executable(GameEngine
     ../base/trace.cpp
     ../base/json.cpp
     ../data/json.cpp
+    ../data/io.cpp
     ../game/animation.cpp
     ../game/entity.cpp
     ../game/scene.cpp
