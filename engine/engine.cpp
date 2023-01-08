@@ -297,7 +297,7 @@ public:
                                   (surf_height - device_viewport_height)*0.5,
                                   device_viewport_width, device_viewport_height);
             mPainter->ResetViewMatrix();
-            TRACE_CALL("UI::Paint",ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
+            TRACE_CALL("UI::Paint", ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
         }
 
         TRACE_ENTER(DebugDrawing);
@@ -586,12 +586,18 @@ public:
     {
         if (mBlockKeyboard)
             return;
+
+        SendUIKeyEvent(key, &uik::Window::KeyDown);
+
         mRuntime->OnKeyDown(key);
     }
     virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
         if (mBlockKeyboard)
             return;
+
+        SendUIKeyEvent(key, &uik::Window::KeyUp);
+
         mRuntime->OnKeyUp(key);
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
@@ -684,6 +690,30 @@ private:
         return event;
     }
 
+    using UIKeyFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::KeyEvent&, uik::State&);
+    template<typename WdkEvent>
+    void SendUIKeyEvent(const WdkEvent& key, UIKeyFunc which)
+    {
+        auto* ui = GetUI();
+        if (ui == nullptr)
+            return;
+        if (!ui->TestFlag(uik::Window::Flags::EnableVirtualKeys))
+            return;
+
+        const auto vk = mUIKeyMap.MapKey(key.symbol, key.modifiers);
+        if (vk == uik::VirtualKey::None)
+            return;
+
+        uik::Window::KeyEvent event;
+        event.key  = vk;
+        event.time = base::GetTime();
+        const auto& action = (ui->*which)(event, mUIState);
+        if (action.type == uik::WidgetActionType::None)
+            return;
+
+        mRuntime->OnUIAction(ui, action);
+    }
+
     using UIMouseFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
     void SendUIMouseEvent(const uik::Window::MouseEvent& mickey, UIMouseFunc which)
     {
@@ -755,7 +785,6 @@ private:
         // todo: if the style loading somehow fails, then what?
         mUIStyle.ClearProperties();
         mUIStyle.ClearMaterials();
-        mUIState.Clear();
 
         auto data = mEngineDataLoader->LoadEngineDataUri(uri);
         if (!data)
@@ -772,19 +801,39 @@ private:
         DEBUG("Loaded UI style file successfully. [uri='%1']", uri);
     }
 
+    void LoadKeyMap(const std::string& uri)
+    {
+        mUIKeyMap.Clear();
+
+        auto data = mEngineDataLoader->LoadEngineDataUri(uri);
+        if (!data)
+        {
+            ERROR("Failed to load UI keymap data. [uri='%1']", uri);
+            return;
+        }
+        if (!mUIKeyMap.LoadKeys(*data))
+        {
+            ERROR("Failed to parse UI keymap. [uri='%1']", uri);
+            return;
+        }
+        DEBUG("Loaded UI keymap successfully. [uri='%1']", uri);
+    }
+
     void OnAction(const engine::OpenUIAction& action)
     {
         auto window = action.ui;
 
         LoadStyle(window->GetStyleName());
+        LoadKeyMap(window->GetKeyMapFile());
 
+        mUIState.Clear();
         window->Style(mUIPainter);
+        window->Show(mUIState);
         // push the window to the top of the UI stack. this is the new
         // currently active UI
         mUIStack.push(window);
 
         mUIPainter.DeleteMaterialInstances();
-        mUIState.Clear();
 
         auto* ui = mUIStack.top().get();
         mRuntime->OnUIOpen(ui);
@@ -811,6 +860,7 @@ private:
             mUIState.Clear();
 
             ui->Style(mUIPainter);
+            ui->Show(mUIState);
         }
     }
     void OnAction(engine::PlayAction& action)
@@ -1061,6 +1111,7 @@ private:
     // The UI painter for painting UIs
     engine::UIPainter mUIPainter;
     engine::UIStyle mUIStyle;
+    engine::UIKeyMap mUIKeyMap;
     // The audio engine.
     std::unique_ptr<engine::AudioEngine> mAudio;
     // The game runtime that runs the actual game logic.

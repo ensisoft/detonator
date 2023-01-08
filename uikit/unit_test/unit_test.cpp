@@ -195,6 +195,14 @@ public:
         mouse.push_back(m);
         return Action{};
     }
+    virtual Action KeyDown(const KeyEvent& key, uik::State& state) override
+    {
+        return {};
+    }
+    virtual Action KeyUp(const KeyEvent& key, uik::State& state) override
+    {
+        return {};
+    }
 
     virtual std::unique_ptr<Widget> Copy() const override
     { return std::make_unique<TestWidget>(); }
@@ -814,6 +822,122 @@ void unit_test_apply_style()
     TEST_REQUIRE(p.styles[2].style == "button style");
 }
 
+void unit_test_keyboard_focus()
+{
+    // no widgets that can take keyboard focus.
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+        window.Show(state);
+
+        uik::Window::KeyEvent event;
+        event.key  = uik::VirtualKey::FocusNext;
+        event.time = 0.0;
+        auto action = window.KeyDown(event, state);
+        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+    }
+
+    // one keyboard focusable widget
+    {
+        uik::Window window;
+        uik::State state;
+
+        auto* btn = window.AddWidget(uik::PushButton());
+        window.LinkChild(nullptr, btn);
+
+        window.EnableVirtualKeys(true);
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
+
+        uik::Window::KeyEvent event;
+        event.key  = uik::VirtualKey::FocusNext;
+        event.time = 0.0;
+        auto action = window.KeyDown(event, state);
+        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
+
+        event.key  = uik::VirtualKey::FocusPrev;
+        event.time = 0.0;
+        action = window.KeyDown(event, state);
+        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
+    }
+
+    // cycle over multiple focusable widgets backwards and forwards.
+    {
+        uik::Window window;
+        uik::State state;
+
+        window.EnableVirtualKeys(true);
+        auto* btn0 = window.AddWidget(uik::PushButton());
+        auto* btn1 = window.AddWidget(uik::PushButton());
+        auto* lbl  = window.AddWidget(uik::Label());
+        TEST_REQUIRE(btn0->GetTabIndex() == 0);
+        TEST_REQUIRE(btn1->GetTabIndex() == 1);
+        window.LinkChild(nullptr, btn0);
+        window.LinkChild(nullptr, btn1);
+        window.LinkChild(nullptr, lbl);
+
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn0);
+
+        uik::Window::KeyEvent event;
+        event.key  = uik::VirtualKey::FocusNext;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn1);
+
+        event.key  = uik::VirtualKey::FocusNext;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn0);
+
+        event.key  = uik::VirtualKey::FocusPrev;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn1);
+    }
+
+    {
+
+    }
+}
+
+void unit_test_keyboard_radiobutton_select()
+{
+    // when several radio buttons are in the same container (group)
+    // using the up/down virtual keys will cycle over the radio buttons
+    uik::State state;
+    uik::Window window;
+    window.EnableVirtualKeys(true);
+
+    auto* rad0 = window.AddWidget(uik::RadioButton());
+    auto* rad1 = window.AddWidget(uik::RadioButton());
+    rad0->SetSelected(true);
+    rad1->SetSelected(false);
+    window.LinkChild(nullptr, rad0);
+    window.LinkChild(nullptr, rad1);
+
+    window.Show(state);
+    TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+    TEST_REQUIRE(rad0->IsSelected() == true);
+    TEST_REQUIRE(rad1->IsSelected() == false);
+
+    uik::Window::KeyEvent event;
+    event.key  = uik::VirtualKey::MoveDown;
+    event.time = 0.0;
+    window.KeyDown(event, state);
+    TEST_REQUIRE(rad0->IsSelected() == false);
+    TEST_REQUIRE(rad1->IsSelected() == true);
+
+    event.key = uik::VirtualKey::MoveUp;
+    window.KeyDown(event, state);
+    TEST_REQUIRE(rad0->IsSelected() == true);
+    TEST_REQUIRE(rad1->IsSelected() == false);
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_label();
@@ -826,5 +950,7 @@ int test_main(int argc, char* argv[])
     unit_test_window_transforms();
     unit_test_util();
     unit_test_apply_style();
+    unit_test_keyboard_focus();
+    unit_test_keyboard_radiobutton_select();
     return 0;
 }

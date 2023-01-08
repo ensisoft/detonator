@@ -21,6 +21,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/math.h"
 #include "base/treeop.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -126,6 +127,9 @@ namespace uik
 Window::Window()
 {
     mId = base::RandomString(10);
+    mFlags.set(Flags::EnableVirtualKeys, false);
+    mFlags.set(Flags::WantsKeyEvents, false);
+    mFlags.set(Flags::WantsMouseEvents, false);
 }
 
 Window::Window(const Window& other)
@@ -135,6 +139,7 @@ Window::Window(const Window& other)
     mScriptFile  = other.mScriptFile;
     mStyleFile   = other.mStyleFile;
     mStyleString = other.mStyleString;
+    mKeyMapFile  = other.mKeyMapFile;
     mFlags       = other.mFlags;
 
     std::unordered_map<const Widget*, const Widget*> map;
@@ -150,7 +155,7 @@ Window::Window(const Window& other)
     });
 }
 
-Widget* Window::AddWidget(std::unique_ptr<Widget> widget)
+Widget* Window::AddWidgetPtr(std::unique_ptr<Widget> widget)
 {
     if (widget->CanFocus())
     {
@@ -365,6 +370,28 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     painter.EndDrawWidgets();
 }
 
+void Window::Show(State& state)
+{
+    if (!mFlags.test(Flags::EnableVirtualKeys))
+        return;
+
+    // find the first keyboard focusable widget if any.
+    Widget* widget = nullptr;
+
+    for (auto& w : mWidgets)
+    {
+        if (!w->CanFocus() || !w->IsVisible() || !w->IsEnabled())
+            continue;
+
+        if (!widget || w->GetTabIndex() < widget->GetTabIndex())
+            widget = w.get();
+    }
+    if (!widget)
+        return;
+
+    state.SetValue(mId + "/focused-widget", widget);
+}
+
 void Window::Update(State& state, double time, float dt)
 {
     for (auto& widget : mWidgets)
@@ -471,6 +498,7 @@ void Window::IntoJson(data::Writer& data) const
     data.Write("script_file", mScriptFile);
     data.Write("style_file", mStyleFile);
     data.Write("style_string", mStyleString);
+    data.Write("keymap_file", mKeyMapFile);
     data.Write("flags", mFlags);
     RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
@@ -535,6 +563,146 @@ Window::WidgetAction Window::MouseMove(const MouseEvent& mouse, State& state)
     return send_mouse_event(mouse, &Widget::MouseMove, state);
 }
 
+Window::WidgetAction Window::KeyDown(const KeyEvent& key, State& state)
+{
+    Widget* focused_widget = nullptr;
+    state.GetValue(mId + "/focused-widget", &focused_widget);
+
+    // todo: when using keyboard navigation only consider a single radio-button
+    // per container.
+    if (key.key == VirtualKey::FocusNext || key.key == VirtualKey::FocusPrev)
+    {
+        std::vector<Widget*> taborder;
+        for (auto& w : mWidgets)
+        {
+            if (!w->CanFocus() || !w->IsEnabled() || !w->IsVisible())
+                continue;
+            const auto tabindex = w->GetTabIndex();
+            if (tabindex >= taborder.size())
+                taborder.resize(tabindex+1);
+            taborder[tabindex] = w.get();
+        }
+        taborder.erase(std::remove(taborder.begin(), taborder.end(), nullptr), taborder.end());
+        if (taborder.empty())
+            return {};
+
+        if (focused_widget)
+        {
+            int index = 0;
+            for (index=0; index<taborder.size(); ++index)
+            {
+                if (taborder[index] == focused_widget)
+                    break;
+            }
+            if (key.key == VirtualKey::FocusNext)
+            {
+                index = math::wrap(0, (int)taborder.size()-1, ++index);
+            }
+            else
+            {
+                index = math::wrap(0, (int)taborder.size()-1, --index);
+            }
+            focused_widget = taborder[index];
+        }
+        else
+        {
+            focused_widget = taborder[0];
+        }
+        state.SetValue(mId + "/focused-widget", focused_widget);
+    }
+    else if (focused_widget)
+    {
+        if (focused_widget->GetType() == Widget::Type::RadioButton &&
+            (key.key == VirtualKey::MoveDown || key.key == VirtualKey::MoveUp))
+        {
+            auto* parent = mRenderTree.HasParent(focused_widget) ?
+                           mRenderTree.GetParent(focused_widget) : nullptr;
+
+            std::vector<Widget*> children;
+            base::ListChildren(mRenderTree, parent, &children);
+
+            children.erase(std::remove_if(children.begin(), children.end(), [](Widget* w) {
+                if (w->GetType() != Widget::Type::RadioButton)
+                    return true;
+                if (!w->IsEnabled() || !w->IsVisible())
+                    return true;
+                return false;
+            }), children.end());
+
+            std::sort(children.begin(), children.end(), [](const auto* lhs, const auto* rhs) {
+                return lhs->GetTabIndex() < rhs->GetTabIndex();
+            });
+
+            unsigned radio_button_index = 0;
+            for (radio_button_index=0; radio_button_index<children.size(); ++radio_button_index)
+            {
+                if (WidgetCast<RadioButton>(children[radio_button_index])->IsSelected())
+                    break;
+            }
+
+            if (key.key == VirtualKey::MoveUp)
+            {
+                if (radio_button_index == 0)
+                    return WidgetAction{};
+                --radio_button_index;
+            }
+            else if (key.key == VirtualKey::MoveDown)
+            {
+                if (radio_button_index == children.size()-1)
+                    return WidgetAction{};
+                ++radio_button_index;
+            }
+            for (auto* btn : children)
+            {
+                WidgetCast<RadioButton>(btn)->SetSelected(false);
+            }
+            WidgetCast<RadioButton>(children[radio_button_index])->SetSelected(true);
+
+            if (parent)
+            {
+                WidgetAction action;
+                action.id    = parent->GetId();
+                action.name  = parent->GetName();
+                action.value = parent->GetName();
+                action.type  = WidgetActionType::RadioButtonSelected;
+                return action;
+            }
+            return WidgetAction{};
+        }
+
+        const auto& ret = focused_widget->KeyDown(key, state);
+        if (ret.type == WidgetActionType::None)
+            return {};
+
+        WidgetAction action;
+        action.id    = focused_widget->GetId();
+        action.name  = focused_widget->GetName();
+        action.type  = ret.type;
+        action.value = ret.value;
+        return action;
+    }
+    return {};
+}
+
+Window::WidgetAction Window::KeyUp(const KeyEvent& key, State& state)
+{
+    Widget* focused_widget = nullptr;
+    if (state.GetValue(mId + "/focused-widget", &focused_widget))
+    {
+        const auto& ret = focused_widget->KeyUp(key, state);
+        if (ret.type == WidgetActionType::None)
+            return {};
+
+        WidgetAction action;
+        action.id    = focused_widget->GetId();
+        action.name  = focused_widget->GetName();
+        action.type  = ret.type;
+        action.value = ret.value;
+        return action;
+    }
+    return  {};
+}
+
 Window Window::Clone() const
 {
     Window copy(*this);
@@ -548,6 +716,14 @@ void Window::ClearWidgets()
     mWidgets.clear();
 }
 
+const Widget* Window::GetFocusedWidget(const State& state) const
+{
+    const Widget* widget = nullptr;
+    state.GetValue(mId + "/focused-widget", &widget);
+    return widget;
+}
+
+
 size_t Window::GetHash() const
 {
     size_t hash = 0;
@@ -556,6 +732,7 @@ size_t Window::GetHash() const
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mStyleFile);
     hash = base::hash_combine(hash, mStyleString);
+    hash = base::hash_combine(hash, mKeyMapFile);
     hash = base::hash_combine(hash, mFlags);
     mRenderTree.PreOrderTraverseForEach([&hash](const Widget* widget) {
         if (widget == nullptr)
@@ -576,6 +753,7 @@ Window& Window::operator=(const Window& other)
     std::swap(mScriptFile, copy.mScriptFile);
     std::swap(mStyleFile, copy.mStyleFile);
     std::swap(mStyleString, copy.mStyleString);
+    std::swap(mKeyMapFile, copy.mKeyMapFile);
     std::swap(mWidgets, copy.mWidgets);
     std::swap(mRenderTree, copy.mRenderTree);
     std::swap(mFlags, copy.mFlags);
@@ -592,6 +770,7 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
     if (!data.Read("style_file", &ret.mStyleFile))
         data.Read("style", &ret.mStyleFile); // old version before style_string and style_file
     data.Read("style_string", &ret.mStyleString);
+    data.Read("keymap_file", &ret.mKeyMapFile);
     data.Read("flags", &ret.mFlags);
 
     if (!data.GetNumChunks("widgets"))

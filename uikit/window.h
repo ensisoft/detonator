@@ -78,6 +78,8 @@ namespace uik
         using ConstVisitor  = RenderTree::ConstVisitor;
 
         enum class Flags {
+            // Whether to enable virtual key handling.
+            EnableVirtualKeys,
             // Whether to pass keyboard events to the window script or not.
             WantsKeyEvents,
             // Whether to pass mouse events to the window script or not.
@@ -88,15 +90,17 @@ namespace uik
         Window(const Window& other);
 
         // Add a new widget instance to the window.
-        Widget* AddWidget(std::unique_ptr<Widget> widget);
+        Widget* AddWidget(std::unique_ptr<Widget> widget)
+        {
+            return AddWidgetPtr(std::move(widget));
+        }
 
         // Add a new widget instance to the window.
         template<typename WidgetType>
-        Widget* AddWidget(WidgetType&& widget)
+        auto AddWidget(WidgetType&& widget)
         {
             auto w = std::make_unique<std::decay_t<WidgetType>>(std::forward<WidgetType>(widget));
-            mWidgets.push_back(std::move(w));
-            return mWidgets.back().get();
+            return (std::decay_t<WidgetType>*)AddWidgetPtr(std::move(w));
         }
 
         Widget* DuplicateWidget(const Widget* widget);
@@ -170,6 +174,8 @@ namespace uik
         // Paint the window and its widgets.
         void Paint(State& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
 
+        void Show(State& state);
+
         // Update the window and its widgets.
         void Update(State& state, double time, float dt);
 
@@ -236,6 +242,8 @@ namespace uik
             double time = 0.0;
         };
 
+        using KeyEvent = Widget::KeyEvent;
+
         // WidgetAction defines the response to some event.
         // For example when a push button receives a mouse button
         // down followed by a release it'll generate a ButtonPress
@@ -289,8 +297,12 @@ namespace uik
         WidgetAction MouseRelease(const MouseEvent& mouse, State& state);
         // Dispatch mouse move event.
         WidgetAction MouseMove(const MouseEvent& mouse, State& state);
-
-        // TBD keyboard events.
+        // Dispatch key event to the widget that has the current
+        // keyboard input focus.
+        WidgetAction KeyDown(const KeyEvent& key, State& state);
+        // Dispatch key event to the widget that has the current
+        // keyboard input focus.
+        WidgetAction KeyUp(const KeyEvent& key, State& state);
 
         // Serialize the window and its widget hierarchy into JSON.
         void IntoJson(data::Writer& data) const;
@@ -319,6 +331,12 @@ namespace uik
         { mScriptFile.clear(); }
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
+        void SetKeyMapFile(const std::string& file)
+        { mKeyMapFile = file; }
+        void ResetKeyMapFile()
+        { mKeyMapFile.clear(); }
+        void EnableVirtualKeys(bool enabled)
+        { mFlags.set(Flags::EnableVirtualKeys, enabled); }
 
         // Getters.
         std::size_t GetHash() const;
@@ -342,6 +360,10 @@ namespace uik
         { return !mScriptFile.empty(); }
         bool TestFlag(Flags flag) const
         { return mFlags.test(flag); }
+        std::string GetKeyMapFile() const
+        { return mKeyMapFile; }
+
+        const Widget* GetFocusedWidget(const State& state) const;
 
         // Helpers
         Widget* FindWidgetByName(const std::string& name)
@@ -371,12 +393,15 @@ namespace uik
         };
         using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, State&);
         WidgetAction send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state);
+
+        Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
     private:
         std::string mId;
         std::string mName;
         std::string mScriptFile;
         std::string mStyleFile;
         std::string mStyleString;
+        std::string mKeyMapFile;
         std::vector<std::unique_ptr<Widget>> mWidgets;
         RenderTree mRenderTree;
         base::bitflag<Flags> mFlags;

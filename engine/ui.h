@@ -34,6 +34,8 @@
 #include "graphics/color4f.h"
 #include "graphics/material.h"
 #include "graphics/fwd.h"
+#include "wdk/keys.h"
+#include "wdk/bitflag.h"
 
 namespace engine
 {
@@ -592,5 +594,23 @@ namespace engine
         mutable std::unordered_set<std::string> mFailedProperties;
     };
 
+
+    class UIKeyMap
+    {
+    public:
+        void Clear();
+
+        bool LoadKeys(const nlohmann::json& json);
+        bool LoadKeys(const EngineData& data);
+
+        uik::VirtualKey MapKey(wdk::Keysym sym, wdk::bitflag<wdk::Keymod> mods) const;
+    private:
+        struct KeyMapping {
+            wdk::Keysym sym = wdk::Keysym::None;
+            wdk::bitflag<wdk::Keymod> mods;
+            uik::VirtualKey vk = uik::VirtualKey::None;
+        };
+        std::vector<KeyMapping> mKeyMap;
+    };
 
 } // namespace

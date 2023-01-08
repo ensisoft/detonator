@@ -351,6 +351,38 @@ WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
     ms.state->SetValue(ms.widgetId + "/slider-knob-under-mouse", false);
     return WidgetAction {};
 }
+WidgetAction SliderModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    // todo: maybe use non-constant delta step when moving slider by keys
+    if (key.key == VirtualKey::MoveUp || key.key == VirtualKey::MoveRight)
+    {
+        if (mValue < 1.0f)
+        {
+            mValue = math::clamp(0.0f, 1.0f, mValue + 0.05f);
+            WidgetAction action;
+            action.type = WidgetActionType::ValueChanged;
+            action.value = mValue;
+            return action;
+        }
+    }
+    else if (key.key == VirtualKey::MoveDown || key.key == VirtualKey::MoveLeft)
+    {
+        if (mValue > 0.0f)
+        {
+            mValue = math::clamp(0.0f, 1.0f, mValue - 0.05f);
+            WidgetAction action;
+            action.type = WidgetActionType::ValueChanged;
+            action.value = mValue;
+            return action;
+        }
+    }
+    return WidgetAction {};
+}
+
+WidgetAction SliderModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
+    return WidgetAction {};
+}
 
 void SliderModel::ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) const
 {
@@ -513,6 +545,33 @@ WidgetAction SpinBoxModel::MouseLeave(const MouseStruct& ms)
     return WidgetAction {};
 }
 
+WidgetAction SpinBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    auto last_value = mValue;
+
+    if (key.key == VirtualKey::MoveUp)
+    {
+        mValue = math::clamp(mMinVal, mMaxVal, mValue+1);
+    }
+    else if (key.key == VirtualKey::MoveDown)
+    {
+        mValue = math::clamp(mMinVal, mMaxVal, mValue-1);
+    }
+    if (last_value != mValue)
+    {
+        WidgetAction action;
+        action.type = WidgetActionType::ValueChanged;
+        action.value = mValue;
+        return action;
+    }
+    return WidgetAction {};
+}
+WidgetAction SpinBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
+    return WidgetAction {};
+}
+
+
 void SpinBoxModel::ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit) const
 {
     const auto widget_width  = rect.GetWidth();
@@ -663,6 +722,27 @@ WidgetAction PushButtonModel::MouseLeave(const MouseStruct& ms)
     return WidgetAction {};
 }
 
+WidgetAction PushButtonModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    if (key.key == VirtualKey::Select)
+    {
+        ks.state->SetValue(ks.widgetId + "/pressed", true);
+    }
+    return WidgetAction {};
+}
+WidgetAction PushButtonModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
+    const bool pressed = ks.state->GetValue(ks.widgetId + "/pressed", false);
+    if (key.key == VirtualKey::Select && pressed)
+    {
+        ks.state->SetValue(ks.widgetId + "/pressed", false);
+        WidgetAction action;
+        action.type = WidgetActionType::ButtonPress;
+        return action;
+    }
+    return WidgetAction {};
+}
+
 size_t CheckBoxModel::GetHash(size_t hash) const
 {
     hash = base::hash_combine(hash, mText);
@@ -741,6 +821,27 @@ WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStr
 WidgetAction CheckBoxModel::MouseLeave(const MouseStruct& ms)
 {
     ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    return WidgetAction {};
+}
+
+WidgetAction CheckBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    const auto state = mChecked;
+    if (key.key == VirtualKey::Select)
+    {
+        mChecked = !mChecked;
+    }
+    if (state != mChecked)
+    {
+        WidgetAction action;
+        action.type  = WidgetActionType::ValueChanged;
+        action.value = mChecked;
+        return action;
+    }
+    return {};
+}
+WidgetAction CheckBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
     return WidgetAction {};
 }
 
@@ -870,6 +971,20 @@ WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const Mouse
 WidgetAction RadioButtonModel::MouseLeave(const MouseStruct& ms)
 {
     ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    return WidgetAction {};
+}
+
+WidgetAction RadioButtonModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    if (key.key == VirtualKey::Select)
+    {
+        if (!mSelected)
+            mRequestSelection = true;
+    }
+    return WidgetAction {};
+}
+WidgetAction RadioButtonModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
     return WidgetAction {};
 }
 

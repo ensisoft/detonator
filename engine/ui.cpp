@@ -335,7 +335,7 @@ bool UIStyle::LoadStyle(const EngineData& data)
     auto [ok, json, error] = base::JsonParse(beg, end);
     if (!ok)
     {
-        ERROR("Load style failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
+        ERROR("UI style load failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
         return false;
     }
     return LoadStyle(json);
@@ -1157,6 +1157,83 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
     }
     return UIProperty();
 }
+
+void UIKeyMap::Clear()
+{
+    mKeyMap.clear();
+}
+
+bool UIKeyMap::LoadKeys(const nlohmann::json& json)
+{
+    if (!json.contains("keys"))
+        return true;
+
+    bool success = true;
+    std::vector<KeyMapping> keys;
+    for (const auto& item : json["keys"].items())
+    {
+        const auto& obj = item.value();
+
+        uik::VirtualKey vk = uik::VirtualKey::None;
+        wdk::Keysym sym = wdk::Keysym::None;
+        wdk::bitflag<wdk::Keymod> mods;
+        std::string mod;
+        if (!base::JsonReadSafe(obj, "sym", &sym))
+        {
+            WARN("Ignoring UI key mapping with unrecognized key symbol.");
+            success = false;
+            continue;
+        }
+        if (!base::JsonReadSafe(obj, "vk", &vk))
+        {
+            WARN("Ignoring UI key mapping with unrecognized virtual key.");
+            success = false;
+            continue;
+        }
+        // this is optionally in the JSON
+        base::JsonReadSafe(obj, "mods", &mod);
+        if (base::Contains(mod, "ctrl"))
+            mods.set(wdk::Keymod::Control);
+        if (base::Contains(mod, "shift"))
+            mods.set(wdk::Keymod::Shift);
+        if (base::Contains(mod, "alt"))
+            mods.set(wdk::Keymod::Alt);
+
+        //DEBUG("Parsing keymap entry. [sym=%1, mods=%2, vk=%3]", base::ToString(sym), mod, vk);
+
+        KeyMapping key;
+        key.mods = mods;
+        key.sym  = sym;
+        key.vk   = vk;
+        keys.push_back(key);
+    }
+    mKeyMap = std::move(keys);
+    return success;
+}
+
+bool UIKeyMap::LoadKeys(const EngineData& data)
+{
+    const auto* beg = (const char*)data.GetData();
+    const auto* end = (const char*)data.GetData() + data.GetSize();
+    const auto& [ok, json, error] = base::JsonParse(beg, end);
+    if (!ok)
+    {
+        ERROR("UI Keymap load failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
+        return false;
+    }
+    return LoadKeys(json);
+}
+
+uik::VirtualKey UIKeyMap::MapKey(wdk::Keysym sym, wdk::bitflag<wdk::Keymod> mods) const
+{
+    for (const auto& mapping : mKeyMap)
+    {
+        if ((mapping.sym == sym) && (mapping.mods == mods))
+            return mapping.vk;
+    }
+    return uik::VirtualKey::None;
+}
+
 
 } // namespace
 

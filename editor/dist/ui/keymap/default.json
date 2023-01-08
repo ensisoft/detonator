@@ -1,0 +1,33 @@
+{
+    "keys": [
+        {
+            "sym": "Tab",
+            "vk": "FocusNext"
+        },
+        {
+            "sym": "Tab",
+            "mods": "shift",
+            "vk": "FocusPrev"
+        },
+        {
+            "sym": "ArrowUp",
+            "vk": "MoveUp"
+        },
+        {
+            "sym": "ArrowDown",
+            "vk": "MoveDown"
+        },
+        {
+            "sym": "ArrowLeft",
+            "vk": "MoveLeft"
+        },
+        {
+            "sym": "ArrowRight",
+            "vk": "MoveRight"
+        },
+        {
+            "sym": "Space",
+            "vk": "Select"
+        }
+    ]
+}

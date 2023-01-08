@@ -108,6 +108,7 @@ wdk::Keysym MapVirtualKey(int from_qt)
 {
     static std::map<int, wdk::Keysym> KeyMap = {
         {Qt::Key_Backspace, wdk::Keysym::Backspace},
+        {Qt::Key_Backtab,   wdk::Keysym::Tab}, // really. wtf?
         {Qt::Key_Tab,       wdk::Keysym::Tab},
         {Qt::Key_Return,    wdk::Keysym::Enter},
         {Qt::Key_Space,     wdk::Keysym::Space},

@@ -169,6 +169,15 @@ namespace uik
             double time = 0.0f;
         };
 
+        struct KeyEvent {
+            // The virtual key that was pressed/released.
+            VirtualKey key = VirtualKey::None;
+            // The current time. The starting point is unspecified
+            // so one should only use this to measure elapsed times
+            // between timed events and not presume any other semantics.
+            double time = 0.0;
+        };
+
         using ActionType = WidgetActionType;
 
         struct Action {
@@ -199,6 +208,10 @@ namespace uik
         // Mouse event handler to be called right after the mouse has left
         // the widget and is no longer on top of the widget.
         virtual Action MouseLeave(State& state) = 0;
+        // Keyboard key down event handler for virtual keys.
+        virtual Action KeyDown(const KeyEvent& key, State& state) = 0;
+        // Keyboard key up event handler for virtual keys.
+        virtual Action KeyUp(const KeyEvent& key, State& state) = 0;
 
         // Create an exact copy of this widget with the same properties
         // and same widget ID. Be sure to know how to use this right.
@@ -296,6 +309,7 @@ namespace uik
         using Painter = uik::Painter;
         using MouseEvent = uik::Widget::MouseEvent;
         using PaintEvent = uik::Widget::PaintEvent;
+        using KeyEvent   = uik::Widget::KeyEvent;
         using WidgetAction = uik::Widget::Action;
         struct PaintStruct {
             std::string widgetId;
@@ -323,6 +337,11 @@ namespace uik
             State* state = nullptr;
             double time  = 0.0;
             float dt     = 0.0f;
+        };
+        struct KeyStruct {
+            std::string widgetId;
+            std::string widgetName;
+            State* state = nullptr;
         };
 
         class FormModel
@@ -380,6 +399,8 @@ namespace uik
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
             void ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) const;
         private:
@@ -412,6 +433,8 @@ namespace uik
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
            void ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit =nullptr) const;
            WidgetAction UpdateValue(const std::string& id, State& state);
@@ -471,6 +494,8 @@ namespace uik
             { return WidgetAction{}; }
             inline WidgetAction MouseEnter(const MouseStruct&)
             { return WidgetAction{}; }
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
             std::string mText;
         };
@@ -514,6 +539,8 @@ namespace uik
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
             void ComputeLayout(const FRect& rect, FRect* text, FRect* check) const;
         private:
@@ -567,6 +594,8 @@ namespace uik
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
             void ComputeLayout(const FRect& rect, FRect* text, FRect* check) const;
         private:
@@ -597,8 +626,9 @@ namespace uik
             static constexpr auto InitialWidth  = 100;
             static constexpr auto InitialHeight = 30;
             static constexpr auto WantsMouseEvents = false;
-            static constexpr auto WantsUpdate = false;
-            static constexpr auto WantsPoll = false;
+            static constexpr auto WantsKeyEvents   = false;
+            static constexpr auto WantsUpdate      = false;
+            static constexpr auto WantsPoll        = false;
         };
 
         template<typename WidgetModel>
@@ -622,18 +652,21 @@ namespace uik
         {
             static constexpr auto Type = Widget::Type::PushButton;
             static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
         };
         template<>
         struct WidgetModelTraits<CheckBoxModel> : public WidgetTraits
         {
             static constexpr auto Type = Widget::Type::CheckBox;
             static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
         };
         template<>
         struct WidgetModelTraits<RadioButtonModel> : public WidgetTraits
         {
             static constexpr auto Type = Widget::Type::RadioButton;
             static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
             static constexpr auto WantsPoll = true;
         };
         template<>
@@ -648,6 +681,7 @@ namespace uik
         {
             static constexpr auto Type = Widget::Type::SpinBox;
             static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
             static constexpr auto WantsPoll = true;
         };
         template<>
@@ -656,6 +690,7 @@ namespace uik
             static constexpr auto Type = Widget::Type::Slider;
             static constexpr auto InitialWidth     = 200;
             static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
         };
 
         template<>
@@ -866,6 +901,29 @@ namespace uik
                 }
                 else return WidgetAction {};
             }
+            virtual WidgetAction KeyDown(const KeyEvent& key, State& state) override
+            {
+                if constexpr (Traits::WantsKeyEvents)
+                {
+                    KeyStruct ks;
+                    ks.state      = &state;
+                    ks.widgetId   = mId;
+                    ks.widgetName = mName;
+                    return WidgetModel::KeyDown(key, ks);
+                } else return WidgetAction {};
+            }
+            virtual WidgetAction KeyUp(const KeyEvent& key, State& state) override
+            {
+                if constexpr(Traits::WantsKeyEvents)
+                {
+                    KeyStruct ks;
+                    ks.state      = &state;
+                    ks.widgetId   = mId;
+                    ks.widgetName = mName;
+                    return WidgetModel::KeyUp(key, ks);
+                } else return WidgetAction {};
+            }
+
             virtual std::unique_ptr<Widget> Copy() const override
             {
                 auto ret = std::make_unique<BasicWidget>(*this);
