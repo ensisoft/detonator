@@ -779,6 +779,21 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
         const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(ps.rect, *material, shape);
     }
+    if (ps.focused)
+    {
+        if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
+        {
+            const auto button_shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
+            const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", button_shape);
+            const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
+
+            gfx::FRect rect = ps.rect;
+            rect.Grow(-4.0f, -4.0f);
+            rect.Translate(2.0f, 2.0f);
+            OutlineShape(rect, *material, rect_shape, rect_width);
+        }
+    }
+
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);

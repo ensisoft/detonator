@@ -288,13 +288,15 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.moused  = ps.state->GetValue(ps.widgetId + "/slider-knob-under-mouse", false);
     ps.painter->DrawSlider(ps.widgetId, p, knob);
 
+    // drawing the focus rect has been baked in the DrawSlider since that
+    // is simply the easiest and most pragmatic way to get a nicer
+    // rendering and composition of widget components.
+
     p.pressed = false;
     p.moused  = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
-
-    if (p.focused)
-        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 }
+
 void SliderModel::IntoJson(data::Writer& data) const
 {
     data.Write("value", mValue);
@@ -439,6 +441,8 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 
     p.rect = edt;
     ps.painter->DrawTextEditBox(ps.widgetId, p);
+    if (p.focused)
+        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
     Painter::EditableText text;
     text.text = std::to_string(mValue);
@@ -464,11 +468,8 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.enabled = paint.enabled;
     p.pressed = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
-
-    p.rect = paint.rect;
-    if (p.focused)
-        ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 }
+
 void SpinBoxModel::IntoJson(data::Writer& data) const
 {
     data.Write("value", mValue);
