@@ -1,8 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
-
 local _index = 0
-local _max_index = 5
+local _max_index = 6
 
 local _TestTable = {}
 
@@ -16,6 +15,7 @@ function LoadGame()
     _TestTable[3] = 'Loaders'
     _TestTable[4] = 'Jungle'
     _TestTable[5] = 'Kenney'
+    _TestTable[6] = 'Keyboard Nav'
     Game:OpenUI(_TestTable[0])
     return true
 end
@@ -30,7 +30,7 @@ end
 -- Called before the application exist.
 -- This is the last chance to persist any state that should
 -- be restored on next game run. 
-function SaveGame() 
+function SaveGame()
     Game:DebugPrint('SaveGame called')
 end
 
@@ -45,7 +45,6 @@ end
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay called.')
 end
-
 
 -- Called as a response to Game:EndPlay when the game play ends.
 function EndPlay(scene)
@@ -87,22 +86,21 @@ end
 -- end
 function OnKeyDown(symbol, modifier_bits)
     local index = _index
-    if symbol == wdk.Keys.ArrowLeft then 
+    if symbol == wdk.Keys.ArrowLeft then
         index = index - 1
-    elseif symbol == wdk.Keys.ArrowRight then 
+    elseif symbol == wdk.Keys.ArrowRight then
         index = index + 1
-    elseif symbol == wdk.Keys.Escape then 
+    elseif symbol == wdk.Keys.Escape then
         Game:Quit(0)
-    end    
-
-
-    if index < 0 then 
-        index = _max_index
-    elseif index > _max_index then 
-        index = 0 
     end
 
-    if index ~= _index then 
+    if index < 0 then
+        index = _max_index
+    elseif index > _max_index then
+        index = 0
+    end
+
+    if index ~= _index then
         Game:CloseUI(0)
         Game:OpenUI(_TestTable[index])
         _index = index
@@ -120,12 +118,12 @@ end
 -- 'modifiers'    - modifier bits of keyboard mods that were pressed (if any).
 -- 'over_scene'   - true to indicate that the mouse cursor is over the scene viewport in window.
 function OnMousePress(mouse)
-    --Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
+    -- Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse button release events.
 function OnMouseRelease(mouse)
-    --Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
+    -- Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse move events.
