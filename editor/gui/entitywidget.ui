@@ -41,7 +41,7 @@
         <item row="10" column="1">
          <widget class="QCheckBox" name="chkKeyEvents">
           <property name="text">
-           <string>Receive keyboard events</string>
+           <string>Receive keyboard events in script</string>
           </property>
          </widget>
         </item>
@@ -126,7 +126,7 @@
         <item row="11" column="1">
          <widget class="QCheckBox" name="chkMouseEvents">
           <property name="text">
-           <string>Receive mouse events</string>
+           <string>Receive mouse events in script</string>
           </property>
          </widget>
         </item>
@@ -228,7 +228,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Update entity</string>
+           <string>Update entity script</string>
           </property>
          </widget>
         </item>
@@ -329,7 +329,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string> Tick entity</string>
+           <string> Tick entity script</string>
           </property>
          </widget>
         </item>
