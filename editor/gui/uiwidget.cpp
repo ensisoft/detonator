@@ -92,6 +92,104 @@ std::vector<app::ResourceListItem> ListMaterials(const app::Workspace* workspace
     materials.insert(materials.begin(), item);
     return materials;
 }
+
+wdk::bitflag<wdk::Keymod> MapQtKeyMods(int mods)
+{
+    wdk::bitflag<wdk::Keymod> modifiers;
+    if (mods & Qt::ShiftModifier)
+        modifiers |= wdk::Keymod::Shift;
+    if (mods & Qt::ControlModifier)
+        modifiers |= wdk::Keymod::Control;
+    if (mods & Qt::AltModifier)
+        modifiers |= wdk::Keymod::Alt;
+    return modifiers;
+}
+
+// table mapping Qt key identifiers to WDK key identifiers.
+// Qt doesn't provide a way to separate in virtual keys between
+// between Left and Right Control or Left and Right shift key.
+// We're mapping these to the *left* key for now.
+wdk::Keysym MapQtKeySym(int from_qt)
+{
+    static std::map<int, wdk::Keysym> KeyMap = {
+        {Qt::Key_Backspace, wdk::Keysym::Backspace},
+        {Qt::Key_Tab,       wdk::Keysym::Tab},
+        {Qt::Key_Backtab,   wdk::Keysym::Tab}, // really. wtf?
+        {Qt::Key_Return,    wdk::Keysym::Enter},
+        {Qt::Key_Space,     wdk::Keysym::Space},
+        {Qt::Key_0,         wdk::Keysym::Key0},
+        {Qt::Key_1,         wdk::Keysym::Key1},
+        {Qt::Key_2,         wdk::Keysym::Key2},
+        {Qt::Key_3,         wdk::Keysym::Key3},
+        {Qt::Key_4,         wdk::Keysym::Key4},
+        {Qt::Key_5,         wdk::Keysym::Key5},
+        {Qt::Key_6,         wdk::Keysym::Key6},
+        {Qt::Key_7,         wdk::Keysym::Key7},
+        {Qt::Key_8,         wdk::Keysym::Key8},
+        {Qt::Key_9,         wdk::Keysym::Key9},
+        {Qt::Key_A,         wdk::Keysym::KeyA},
+        {Qt::Key_B,         wdk::Keysym::KeyB},
+        {Qt::Key_C,         wdk::Keysym::KeyC},
+        {Qt::Key_D,         wdk::Keysym::KeyD},
+        {Qt::Key_E,         wdk::Keysym::KeyE},
+        {Qt::Key_F,         wdk::Keysym::KeyF},
+        {Qt::Key_G,         wdk::Keysym::KeyG},
+        {Qt::Key_H,         wdk::Keysym::KeyH},
+        {Qt::Key_I,         wdk::Keysym::KeyI},
+        {Qt::Key_J,         wdk::Keysym::KeyJ},
+        {Qt::Key_K,         wdk::Keysym::KeyK},
+        {Qt::Key_L,         wdk::Keysym::KeyL},
+        {Qt::Key_M,         wdk::Keysym::KeyM},
+        {Qt::Key_N,         wdk::Keysym::KeyN},
+        {Qt::Key_O,         wdk::Keysym::KeyO},
+        {Qt::Key_P,         wdk::Keysym::KeyP},
+        {Qt::Key_Q,         wdk::Keysym::KeyQ},
+        {Qt::Key_R,         wdk::Keysym::KeyR},
+        {Qt::Key_S,         wdk::Keysym::KeyS},
+        {Qt::Key_T,         wdk::Keysym::KeyT},
+        {Qt::Key_U,         wdk::Keysym::KeyU},
+        {Qt::Key_V,         wdk::Keysym::KeyV},
+        {Qt::Key_W,         wdk::Keysym::KeyW},
+        {Qt::Key_X,         wdk::Keysym::KeyX},
+        {Qt::Key_Y,         wdk::Keysym::KeyY},
+        {Qt::Key_Z,         wdk::Keysym::KeyZ},
+        {Qt::Key_F1,        wdk::Keysym::F1},
+        {Qt::Key_F2,        wdk::Keysym::F2},
+        {Qt::Key_F3,        wdk::Keysym::F3},
+        {Qt::Key_F4,        wdk::Keysym::F4},
+        {Qt::Key_F5,        wdk::Keysym::F5},
+        {Qt::Key_F6,        wdk::Keysym::F6},
+        {Qt::Key_F7,        wdk::Keysym::F7},
+        {Qt::Key_F8,        wdk::Keysym::F8},
+        {Qt::Key_F9,        wdk::Keysym::F9},
+        {Qt::Key_F10,       wdk::Keysym::F10},
+        {Qt::Key_F11,       wdk::Keysym::F11},
+        {Qt::Key_F12,       wdk::Keysym::F12},
+        {Qt::Key_Control,   wdk::Keysym::ControlL},
+        {Qt::Key_Alt,       wdk::Keysym::AltL},
+        {Qt::Key_Shift,     wdk::Keysym::ShiftL},
+        {Qt::Key_CapsLock,  wdk::Keysym::CapsLock},
+        {Qt::Key_Insert,    wdk::Keysym::Insert},
+        {Qt::Key_Delete,    wdk::Keysym::Del},
+        {Qt::Key_Home,      wdk::Keysym::Home},
+        {Qt::Key_End,       wdk::Keysym::End},
+        {Qt::Key_PageUp,    wdk::Keysym::PageUp},
+        {Qt::Key_PageDown,  wdk::Keysym::PageDown},
+        {Qt::Key_Left,      wdk::Keysym::ArrowLeft},
+        {Qt::Key_Up,        wdk::Keysym::ArrowUp},
+        {Qt::Key_Down,      wdk::Keysym::ArrowDown},
+        {Qt::Key_Right,     wdk::Keysym::ArrowRight},
+        {Qt::Key_Escape,    wdk::Keysym::Escape},
+        {Qt::Key_Plus,      wdk::Keysym::Plus},
+        {Qt::Key_Minus,     wdk::Keysym::Minus}
+    };
+    auto it = KeyMap.find(from_qt);
+    if (it == std::end(KeyMap))
+        return wdk::Keysym::None;
+    return it->second;
+}
+
+
 } // namespace
 
 namespace gui
@@ -375,6 +473,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onMouseRelease = std::bind(&UIWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMouseWheel   = std::bind(&UIWidget::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&UIWidget::KeyPress, this, std::placeholders::_1);
+    mUI.widget->onKeyRelease   = std::bind(&UIWidget::KeyRelease, this, std::placeholders::_1);
     mUI.widget->onZoomIn       = std::bind(&UIWidget::ZoomIn, this);
     mUI.widget->onZoomOut      = std::bind(&UIWidget::ZoomOut, this);
     mUI.widget->onPaintScene   = std::bind(&UIWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
@@ -413,16 +512,20 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
 
     LoadStyleQuiet("app://ui/style/default.json");
+    LoadKeysQuiet("app://ui/keymap/default.json");
 
     PopulateUIStyles(mUI.windowStyleFile);
+    PopulateUIKeyMaps(mUI.windowKeyMap);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -464,9 +567,11 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
 
     SetValue(mUI.windowName, window->GetName());
     SetValue(mUI.windowID, window->GetId());
+    SetValue(mUI.windowKeyMap, window->GetKeyMapFile());
     SetValue(mUI.windowStyleFile, window->GetStyleName());
     SetValue(mUI.windowStyleString, window->GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(window->GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, window->HasScriptFile());
@@ -599,9 +704,11 @@ bool UIWidget::LoadState(const Settings& settings)
 
     SetValue(mUI.windowID, mState.window.GetId());
     SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
@@ -863,9 +970,11 @@ void UIWidget::Undo()
 
     DisplayCurrentWidgetProperties();
     SetValue(mUI.windowName, mState.window.GetName());
+    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
     SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
     SetValue(mUI.windowStyleString, mState.window.GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
@@ -965,30 +1074,32 @@ void UIWidget::on_actionPlay_triggered()
     mPlayState = PlayState::Playing;
     mState.active_window = std::make_unique<uik::Window>(mState.window);
     mState.active_state  = std::make_unique<uik::State>();
+    mState.active_window->Show(*mState.active_state);
     SetEnabled(mUI.actionPlay,  false);
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop,  true);
-    SetEnabled(mUI.baseProperties,      false);
-    SetEnabled(mUI.viewTransform,       false);
-    SetEnabled(mUI.widgetTree,          false);
-    SetEnabled(mUI.widgetProperties,    false);
-    SetEnabled(mUI.widgetStyle,         false);
-    SetEnabled(mUI.widgetData,          false);
-    SetEnabled(mUI.actionNewCheckBox,   false);
-    SetEnabled(mUI.actionNewSpinBox,    false);
-    SetEnabled(mUI.actionNewSlider,     false);
+    SetEnabled(mUI.baseProperties,       false);
+    SetEnabled(mUI.viewTransform,        false);
+    SetEnabled(mUI.widgetTree,           false);
+    SetEnabled(mUI.widgetProperties,     false);
+    SetEnabled(mUI.widgetStyle,          false);
+    SetEnabled(mUI.widgetData,           false);
+    SetEnabled(mUI.actionNewCheckBox,    false);
+    SetEnabled(mUI.actionNewSpinBox,     false);
+    SetEnabled(mUI.actionNewSlider,      false);
     SetEnabled(mUI.actionNewProgressBar, false);
     SetEnabled(mUI.actionNewRadioButton, false);
-    SetEnabled(mUI.actionNewGroupBox,   false);
-    SetEnabled(mUI.actionNewForm,       false);
-    SetEnabled(mUI.actionNewLabel,      false);
-    SetEnabled(mUI.actionNewPushButton, false);
-    SetEnabled(mUI.cmbGrid,       false);
-    SetEnabled(mUI.zoom,          false);
-    SetEnabled(mUI.chkSnap,       false);
-    SetEnabled(mUI.chkShowOrigin, false);
-    SetEnabled(mUI.chkShowGrid,   false);
-    SetEnabled(mUI.chkShowTabOrder, false);
+    SetEnabled(mUI.actionNewGroupBox,    false);
+    SetEnabled(mUI.actionNewForm,        false);
+    SetEnabled(mUI.actionNewLabel,       false);
+    SetEnabled(mUI.actionNewPushButton,  false);
+    SetEnabled(mUI.cmbGrid,              false);
+    SetEnabled(mUI.zoom,                 false);
+    SetEnabled(mUI.chkSnap,              false);
+    SetEnabled(mUI.chkShowOrigin,        false);
+    SetEnabled(mUI.chkShowGrid,          false);
+    SetEnabled(mUI.chkShowTabOrder,      false);
+    mUI.widget->activateWindow();
 }
 void UIWidget::on_actionPause_triggered()
 {
@@ -1022,11 +1133,12 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewSlider,     true);
     SetEnabled(mUI.actionNewProgressBar, true);
     SetEnabled(mUI.actionNewRadioButton, true);
-    SetEnabled(mUI.cmbGrid,       true);
-    SetEnabled(mUI.zoom,          true);
-    SetEnabled(mUI.chkSnap,       true);
-    SetEnabled(mUI.chkShowOrigin, true);
-    SetEnabled(mUI.chkShowGrid,   true);
+    SetEnabled(mUI.cmbGrid,         true);
+    SetEnabled(mUI.zoom,            true);
+    SetEnabled(mUI.chkSnap,         true);
+    SetEnabled(mUI.chkShowOrigin,   true);
+    SetEnabled(mUI.chkShowGrid,     true);
+    SetEnabled(mUI.chkShowTabOrder, true);
 
     mMessageQueue.clear();
 }
@@ -1174,6 +1286,11 @@ void UIWidget::on_windowScriptFile_currentIndexChanged(int index)
     SetEnabled(mUI.btnEditScript, true);
 }
 
+void UIWidget::on_chkEnableKeyMap_stateChanged(int)
+{
+    mState.window.SetFlag(uik::Window::Flags::EnableVirtualKeys, GetValue(mUI.chkEnableKeyMap));
+}
+
 void UIWidget::on_chkRecvMouseEvents_stateChanged(int)
 {
     mState.window.SetFlag(uik::Window::Flags::WantsMouseEvents, GetValue(mUI.chkRecvMouseEvents));
@@ -1278,6 +1395,25 @@ void UIWidget::on_btnResetProgVal_clicked()
 {
     SetValue(mUI.progVal, -1);
     UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_btnReloadKeyMap_clicked()
+{
+    const auto& map = mState.window.GetKeyMapFile();
+    if (map.empty())
+        return;
+    LoadKeysVerbose(map);
+}
+void UIWidget::on_btnSelectKeyMap_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select JSON Keymap File"), "",
+        tr("Keymap (*.json)"));
+    if (file.isEmpty())
+        return;
+    const auto& uri = mState.workspace->MapFileToWorkspace(file);
+    if (LoadKeysVerbose(app::ToUtf8(uri)))
+        SetValue(mUI.windowKeyMap, uri);
 }
 
 void UIWidget::on_btnReloadStyle_clicked()
@@ -1989,6 +2125,25 @@ void UIWidget::MouseDoubleClick(QMouseEvent* mickey)
 
 bool UIWidget::KeyPress(QKeyEvent* key)
 {
+    if (mPlayState == PlayState::Playing)
+    {
+        if (!mState.keymap || !mState.active_window->TestFlag(uik::Window::Flags::EnableVirtualKeys))
+            return true;
+
+        const auto sym = MapQtKeySym(key->key());
+        const auto mods = MapQtKeyMods(key->modifiers());
+
+        uik::Window::KeyEvent e;
+        e.key  = mState.keymap->MapKey(sym, mods);
+        e.time = mPlayTime;
+        const auto& action = mState.active_window->KeyDown(e, *mState.active_state);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+
+        //DEBUG("Key press mapped to UI vk: %1", e.key);
+        return true;
+    }
+
     if (mCurrentTool && mCurrentTool->KeyPress(key))
         return true;
 
@@ -2034,6 +2189,29 @@ bool UIWidget::KeyPress(QKeyEvent* key)
             return false;
     }
     return true;
+}
+
+bool UIWidget::KeyRelease(QKeyEvent* key)
+{
+    if (mPlayState == PlayState::Playing)
+    {
+        if (!mState.keymap || !mState.active_window->TestFlag(uik::Window::Flags::EnableVirtualKeys))
+            return true;
+
+        const auto sym = MapQtKeySym(key->key());
+        const auto mods = MapQtKeyMods(key->modifiers());
+
+        uik::Window::KeyEvent e;
+        e.key  = mState.keymap->MapKey(sym, mods);
+        e.time = mPlayTime;
+        const auto& action = mState.active_window->KeyUp(e, *mState.active_state);
+        if (action.type != uik::WidgetActionType::None)
+            mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+
+        //DEBUG("Key release mapped to UI vk: %1", e.key);
+        return true;
+    }
+    return false;
 }
 
 void UIWidget::UpdateCurrentWidgetProperties()
@@ -2401,7 +2579,7 @@ bool UIWidget::LoadStyleQuiet(const std::string& uri)
     style->SetClassLibrary(mState.workspace);
     if (!style->LoadStyle(*data))
     {
-        ERROR("Errors were found while parsing the style [file='%1']", uri);
+        ERROR("Failed to load style data. [file='%1']", uri);
         return false;
     }
     mState.style = std::move(style);
@@ -2410,6 +2588,55 @@ bool UIWidget::LoadStyleQuiet(const std::string& uri)
     mState.window.Style(*mState.painter);
     mState.window.SetStyleName(uri);
     INFO("Loaded UI style '%1'.", uri);
+    return true;
+}
+
+bool UIWidget::LoadKeysVerbose(const std::string& uri)
+{
+    const auto& data = mState.workspace->LoadEngineDataUri(uri);
+    if (!data)
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to load keymap file.\n"));
+        msg.exec();
+        return false;
+    }
+    auto keymap = std::make_unique<engine::UIKeyMap>();
+    if (!keymap->LoadKeys(*data))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Warning);
+        msg.setText(tr("Errors were found while parsing keymap file.\n"
+                       "Keymap might be incomplete or unusable.\n"
+                       "Do you want to continue?"));
+        if (msg.exec() == QMessageBox::No)
+            return false;
+    }
+    mState.keymap = std::move(keymap);
+    INFO("Loaded UI keymap '%1'.", uri);
+    NOTE("Loaded UI keymap '%1'.", uri);
+    return true;
+}
+
+bool UIWidget::LoadKeysQuiet(const std::string& uri)
+{
+    const auto& data = mState.workspace->LoadEngineDataUri(uri);
+    if (!data)
+    {
+        ERROR("Failed to load keymap file. [file='%1']", uri);
+        return false;
+    }
+    auto keymap = std::make_unique<engine::UIKeyMap>();
+    if (!keymap->LoadKeys(*data))
+    {
+        ERROR("Failed to load keymap data. [file='%1']", uri);
+        return false;
+    }
+    mState.keymap = std::move(keymap);
+    INFO("Loaded UI keymap '%1'.", uri);
     return true;
 }
 

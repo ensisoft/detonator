@@ -98,7 +98,7 @@ void PopulateUIStyles(QComboBox* cmb)
     QStringList filters;
     filters << "*.json";
     const auto& appdir = QCoreApplication::applicationDirPath();
-    const auto& styledir = app::JoinPath(appdir, "ui");
+    const auto& styledir = app::JoinPath(appdir, "ui/style");
     QDir dir;
     dir.setPath(styledir);
     dir.setNameFilters(filters);
@@ -106,8 +106,29 @@ void PopulateUIStyles(QComboBox* cmb)
     for (const auto& style_file : style_files)
     {
         const QFileInfo info(style_file);
-        cmb->addItem("app://ui/" + info.fileName());
+        cmb->addItem("app://ui/style/" + info.fileName());
     }
 }
+
+void PopulateUIKeyMaps(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+
+    QStringList filters;
+    filters << "*.json";
+    const auto& appdir = QCoreApplication::applicationDirPath();
+    const auto& styledir = app::JoinPath(appdir, "ui/keymap");
+    QDir dir;
+    dir.setPath(styledir);
+    dir.setNameFilters(filters);
+    const QStringList& style_files = dir.entryList();
+    for (const auto& style_file : style_files)
+    {
+        const QFileInfo info(style_file);
+        cmb->addItem("app://ui/keymap/" + info.fileName());
+    }
+}
+
 
 } // gui

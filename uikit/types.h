@@ -40,10 +40,22 @@ namespace uik
     using Color   = base::Color;
 
     enum class MouseButton {
-        None, Left, Wheel, WheelUp, WheelDown, Right
+        None,
+        Left,
+        Wheel,
+        WheelUp,
+        WheelDown,
+        Right
     };
     enum class VirtualKey {
-
+        None,
+        FocusNext,
+        FocusPrev,
+        MoveDown,
+        MoveUp,
+        MoveLeft,
+        MoveRight,
+        Select
     };
 
     enum class WidgetActionType {

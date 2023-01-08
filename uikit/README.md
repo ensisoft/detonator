@@ -7,8 +7,7 @@ UI layered on top of a scene
 Overview
 -----------------
 Skinnable/styleable UI system that integrates with the editor's material system
-for fine-tuning the look of individual widgets. Currently, provides only mouse
-based input handling. Keyboard input is in the works. Styling is based on key/value 
+for fine-tuning the look of individual widgets. Styling is based on key/value 
 property pairs that are stored in a JSON file, as an inline style string (if any)
 in the window object and as inline style strings (if any) per each widget.
 
@@ -39,6 +38,11 @@ The UI system is completely abstract and doesn't do any rendering directly.
 Instead, the widgets delegate their drawing operations to an abstract painter object
 that can be implemented independently. One such implementation can be found under engine.
 
+Both mouse and keyboard input are supported. The keyboard input is based on virtual keys
+that can be generated in several possible ways. One typical way however is by using a 
+virtual keyboard map, which maps "native" keyboard events (such as those provided by WDK)
+to virtual keys recognized by the uikit. 
+
 Currently, the following widgets have been implemented.
 * Form
   - Container widget for other widgets. Renders an optional border and a background.
@@ -60,7 +64,6 @@ TODO:
 * Dropdown and/or ComboBox
 * LineEdit (for text input)
 * ListWidget
-* Keyboard input handling based on a virtual key system
 
 Screenshots
 ---------------------

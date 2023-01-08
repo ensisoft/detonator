@@ -334,6 +334,7 @@ R"(
 }
 )");
     TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
+    TEST_REQUIRE(app::WriteTextFile("ui/keymap.json", "keymap.json"));
 
     MakeDir("TestWorkspace");
     app::Workspace workspace("TestWorkspace");
@@ -388,6 +389,7 @@ R"(
 
     uik::Window window;
     window.SetStyleName(workspace.MapFileToWorkspace(std::string("ui/style.json")));
+    window.SetKeyMapFile(workspace.MapFileToWorkspace(std::string("ui/keymap.json")));
     app::UIResource ui_resource(window, "UI");
 
     workspace.SaveResource(material_resource);
@@ -454,6 +456,8 @@ R"(
     TEST_REQUIRE(style_string.contains("materials"));
     TEST_REQUIRE(style_string.contains("widget/background"));
     TEST_REQUIRE(style_string.contains("widget/border-width"));
+
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/keymap/keymap.json") == "keymap.json");
 
     auto loader = engine::JsonFileClassLoader::Create();
     loader->LoadClassesFromFile("TestPackage/test/content.json");
@@ -1569,6 +1573,7 @@ void unit_test_export_import_basic()
 }
 )");
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/style.json", style));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/keymap.json", "keymap.json"));
 
         app::Workspace workspace("TestWorkspace");
 
@@ -1617,6 +1622,7 @@ void unit_test_export_import_basic()
 
         uik::Window window;
         window.SetStyleName(workspace.MapFileToWorkspace(std::string("TestWorkspace/ui/style.json")));
+        window.SetKeyMapFile(workspace.MapFileToWorkspace(std::string("TestWorkspace/ui/keymap.json")));
         app::UIResource ui_resource(window, "UI");
 
         workspace.SaveResource(material_resource);
@@ -1658,6 +1664,7 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/data/levels.txt") == "levels.txt");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/keymap/keymap.json") == "keymap.json");
         const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style/style.json");
         TEST_REQUIRE(!style_string.isEmpty());
 

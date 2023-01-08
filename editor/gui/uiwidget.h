@@ -93,6 +93,7 @@ namespace gui
         void on_windowName_textChanged(const QString& text);
         void on_windowStyleFile_currentIndexChanged(int);
         void on_windowScriptFile_currentIndexChanged(int);
+        void on_chkEnableKeyMap_stateChanged(int);
         void on_chkRecvMouseEvents_stateChanged(int);
         void on_chkRecvKeyEvents_stateChanged(int);
         void on_widgetName_textChanged(const QString& text);
@@ -116,6 +117,8 @@ namespace gui
         void on_progText_textChanged();
         void on_progVal_valueChanged(int);
         void on_btnResetProgVal_clicked();
+        void on_btnReloadKeyMap_clicked();
+        void on_btnSelectKeyMap_clicked();
         void on_btnReloadStyle_clicked();
         void on_btnSelectStyle_clicked();
         void on_btnViewPlus90_clicked();
@@ -149,6 +152,7 @@ namespace gui
         void MouseDoubleClick(QMouseEvent* mickey);
         void MouseWheel(QWheelEvent* mickey);
         bool KeyPress(QKeyEvent* key);
+        bool KeyRelease(QKeyEvent* key);
         void UpdateCurrentWidgetProperties();
         void TranslateCamera(float dx, float dy);
         void TranslateCurrentWidget(float dx, float dy);
@@ -160,6 +164,8 @@ namespace gui
         const uik::Widget* GetCurrentWidget() const;
         bool LoadStyleVerbose(const QString& name);
         bool LoadStyleQuiet(const std::string& uri);
+        bool LoadKeysVerbose(const std::string& uri);
+        bool LoadKeysQuiet(const std::string& uri);
         void UpdateDeletedResourceReferences();
         void UncheckPlacementActions();
         uik::FSize GetFormSize() const;
@@ -193,6 +199,7 @@ namespace gui
             std::unique_ptr<uik::Window> active_window;
             std::unique_ptr<engine::UIPainter> painter;
             std::unique_ptr<engine::UIStyle> style;
+            std::unique_ptr<engine::UIKeyMap> keymap;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
         } mState;

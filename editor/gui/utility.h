@@ -1335,5 +1335,6 @@ std::vector<QString> ListAppFonts();
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);
 void PopulateUIStyles(QComboBox* cmb);
+void PopulateUIKeyMaps(QComboBox* cmb);
 
 } // namespace

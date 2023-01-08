@@ -303,6 +303,13 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
 {
     engine::UIStyle style;
 
+    const auto& keymap_uri = window.GetKeyMapFile();
+    if (!keymap_uri.empty())
+    {
+        packer.CopyFile(keymap_uri, "ui/keymap/");
+        window.SetKeyMapFile(packer.MapUri(keymap_uri));
+    }
+
     // package the style resources. currently, this is only the font files.
     const auto& style_uri  = window.GetStyleName();
 
@@ -508,8 +515,17 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
 void MigrateResource(uik::Window& window, app::MigrationLog* log)
 {
     // migration path for old data which doesn't yet have tab order values.
-    // if all widgets have 0 as tab index then initialize here.
+    const auto& keymap_uri = window.GetKeyMapFile();
+    if (keymap_uri.empty())
+    {
+        window.SetKeyMapFile("app://ui/keymap/default.json");
+        if (log)
+        {
+            log->Log(window, "UI", "Added default keymap file.");
+        }
+    }
 
+    // if all widgets have 0 as tab index then initialize here.
     bool does_have_tab_ordering = false;
     bool does_need_tab_ordering = false;
 
