@@ -541,7 +541,7 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
     SetValue(mUI.widgetMaterial, -1);
     SetValue(mUI.grpValue, std::string("Value"));
 
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -628,7 +628,7 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
 
 void DlgWidgetStyleProperties::SetPropertyValue()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -714,7 +714,7 @@ void DlgWidgetStyleProperties::on_btnCancel_clicked()
 
 void DlgWidgetStyleProperties::on_btnOpenFontFile_clicked()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
     const auto& list = QFileDialog::getOpenFileNames(this,
@@ -727,7 +727,7 @@ void DlgWidgetStyleProperties::on_btnOpenFontFile_clicked()
 }
 void DlgWidgetStyleProperties::on_btnSelectFont_clicked()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -757,7 +757,7 @@ void DlgWidgetStyleProperties::on_btnSelectFont_clicked()
 
 void DlgWidgetStyleProperties::on_btnResetProperty_clicked()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -833,7 +833,7 @@ void DlgWidgetStyleProperties::TableSelectionChanged(const QItemSelection, const
 
 void DlgWidgetStyleProperties::SetWidgetMaterial()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -856,7 +856,7 @@ void DlgWidgetStyleProperties::SetWidgetMaterial()
 }
 void DlgWidgetStyleProperties::SetWidgetColor()
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
@@ -888,7 +888,7 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
 {
     using Index = engine::detail::UIGradient::ColorIndex;
 
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
 
