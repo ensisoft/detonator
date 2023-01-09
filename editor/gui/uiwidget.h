@@ -91,6 +91,7 @@ namespace gui
         void on_actionWidgetDuplicate_triggered();
         void on_actionWidgetOrder_triggered();
         void on_windowName_textChanged(const QString& text);
+        void on_windowKeyMap_currentIndexChanged(int);
         void on_windowStyleFile_currentIndexChanged(int);
         void on_windowScriptFile_currentIndexChanged(int);
         void on_chkEnableKeyMap_stateChanged(int);
