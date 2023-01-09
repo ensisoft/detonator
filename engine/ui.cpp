@@ -658,13 +658,13 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "check-background"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Rectangle);
+        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         FillShape(ps.rect, *material, shape);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
-        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Rectangle);
+        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         OutlineShape(ps.rect, *material, shape, width);
     }
     if (!checked)
@@ -672,7 +672,7 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
 
     if (const auto* material = GetWidgetMaterial(id, ps, "check-mark"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::RoundRect);
         gfx::FRect mark;
         mark.Move(ps.rect.GetPosition());
         mark.Resize(ps.rect.GetSize());
@@ -686,13 +686,13 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "check-background"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Circle);
+        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
         FillShape(ps.rect, *material, shape);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
-        const auto shape = GetWidgetProperty(id, ps, "check-background-shape", UIStyle::WidgetShape::Circle);
+        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
         OutlineShape(ps.rect, *material, shape, width);
     }
     if (!selected)
@@ -700,7 +700,7 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
 
     if (const auto* material = GetWidgetMaterial(id, ps, "check-mark"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
+        const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::Circle);
         gfx::FRect mark;
         mark.Move(ps.rect.GetPosition());
         mark.Resize(ps.rect.GetSize());
@@ -776,15 +776,15 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-background"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(ps.rect, *material, shape);
     }
     if (ps.focused)
     {
         if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
         {
-            const auto button_shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
-            const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", button_shape);
+            const auto slider_shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
+            const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", slider_shape);
             const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
 
             gfx::FRect rect = ps.rect;
@@ -808,7 +808,7 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
 
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-border"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "slider-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
         const auto width = GetWidgetProperty(id, ps, "slider-border-width", 1.0f);
         OutlineShape(ps.rect, *material, shape, width);
     }
@@ -818,7 +818,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "progress-bar-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(ps.rect, *material, shape);
     }
 
@@ -857,7 +857,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
 
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-border"))
     {
-        const auto shape = GetWidgetProperty(id, ps, "progress-bar-background-shape", UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         const auto width = GetWidgetProperty(id, ps, "progress-bar-border-width", 1.0f);
         OutlineShape(ps.rect, *material, shape, width);
     }
