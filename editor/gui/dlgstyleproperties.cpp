@@ -234,6 +234,25 @@ private:
     uik::Widget* mWidget = nullptr;
 };
 
+class DlgWidgetStyleProperties::PropertyModelFilter : public QSortFilterProxyModel
+{
+public:
+    void SetFilterString(const app::AnyString& str)
+    { mFilterString = str; }
+protected:
+    virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override
+    {
+        auto* model = static_cast<PropertyModel*>(sourceModel());
+
+        if (mFilterString.empty())
+            return true;
+        const auto& prop = model->GetProperty(row);
+        return base::Contains(prop.key, mFilterString);
+    }
+private:
+    std::string mFilterString;
+};
+
 DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UIStyle* style,  app::Workspace* workspace)
   : QDialog(parent)
   , mWorkspace(workspace)
@@ -472,7 +491,9 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     });
 
     mModel.reset(new PropertyModel(std::move(props), style, workspace));
-    mUI.tableView->setModel(mModel.get());
+    mModelFilter.reset(new PropertyModelFilter());
+    mModelFilter->setSourceModel(mModel.get());
+    mUI.tableView->setModel(mModelFilter.get());
     mUI.tableView->setColumnWidth(1, 250);
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &DlgWidgetStyleProperties::TableSelectionChanged);
@@ -480,6 +501,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     QByteArray geometry;
     if (mWorkspace->GetUserProperty("dlg_widget_style_property_geometry", &geometry))
         restoreGeometry(geometry);
+
+    mModelFilter->invalidate();
 }
 
 DlgWidgetStyleProperties::~DlgWidgetStyleProperties() = default;
@@ -678,6 +701,12 @@ void DlgWidgetStyleProperties::SetPropertyValue()
         mStyle->SetProperty(property_key, (engine::UIStyle::WidgetShape)GetValue(mUI.widgetShape));
     }
     mModel->UpdateRow(row);
+}
+
+void DlgWidgetStyleProperties::on_filter_textEdited(const QString& str)
+{
+    mModelFilter->SetFilterString(str);
+    mModelFilter->invalidate();
 }
 
 void DlgWidgetStyleProperties::on_btnAccept_clicked()

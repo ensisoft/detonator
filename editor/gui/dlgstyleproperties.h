@@ -64,6 +64,7 @@ namespace gui
         void ShowPropertyValue();
         void SetPropertyValue();
     private slots:
+        void on_filter_textEdited(const QString& str);
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnOpenFontFile_clicked();
@@ -87,7 +88,9 @@ namespace gui
         Ui::DlgStyleProperties mUI;
     private:
         class PropertyModel;
+        class PropertyModelFilter;
         std::unique_ptr<PropertyModel> mModel;
+        std::unique_ptr<PropertyModelFilter>  mModelFilter;
     private:
         app::Workspace* mWorkspace  = nullptr;
         engine::UIStyle* mStyle     = nullptr;
