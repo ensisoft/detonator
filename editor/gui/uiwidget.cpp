@@ -2616,6 +2616,7 @@ bool UIWidget::LoadKeysVerbose(const std::string& uri)
             return false;
     }
     mState.keymap = std::move(keymap);
+    mState.window.SetKeyMapFile(uri);
     INFO("Loaded UI keymap '%1'.", uri);
     NOTE("Loaded UI keymap '%1'.", uri);
     return true;
@@ -2636,6 +2637,7 @@ bool UIWidget::LoadKeysQuiet(const std::string& uri)
         return false;
     }
     mState.keymap = std::move(keymap);
+    mState.window.SetKeyMapFile(uri);
     INFO("Loaded UI keymap '%1'.", uri);
     return true;
 }
