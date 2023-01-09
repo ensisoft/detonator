@@ -4380,10 +4380,12 @@
   "uis": [
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": true,
         "WantsMouseEvents": false
       },
       "id": "yE2AzTSvif",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "UI",
       "resource_id": "yE2AzTSvif",
       "resource_name": "UI",
