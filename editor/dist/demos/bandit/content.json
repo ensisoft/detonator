@@ -17340,10 +17340,12 @@
   "uis": [
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "7qhE9P3Lno",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "Game UI",
       "resource_id": "7qhE9P3Lno",
       "resource_name": "Game UI",
@@ -17492,10 +17494,12 @@
     },
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "M3GBwLlWRp",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "Menu UI",
       "resource_id": "M3GBwLlWRp",
       "resource_name": "Menu UI",

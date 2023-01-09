@@ -19143,10 +19143,12 @@
   "uis": [
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "847gBr2NKv",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "MainMenu",
       "resource_id": "847gBr2NKv",
       "resource_name": "MainMenu",
@@ -19271,10 +19273,12 @@
     },
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "3J49aF64Jm",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "HUD",
       "resource_id": "3J49aF64Jm",
       "resource_name": "HUD",

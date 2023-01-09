@@ -5355,10 +5355,12 @@
   "uis": [
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "RoGbL91JLQ",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "GameOver",
       "resource_id": "RoGbL91JLQ",
       "resource_name": "GameOver",
@@ -5506,10 +5508,12 @@
     },
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "T38qa8wN2K",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "MainMenu",
       "resource_id": "T38qa8wN2K",
       "resource_name": "MainMenu",
@@ -5741,10 +5745,12 @@
     },
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "4eIBhHhK0W",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "Credits",
       "resource_id": "4eIBhHhK0W",
       "resource_name": "Credits",
@@ -5848,10 +5854,12 @@
     },
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "PYYxBsykKG",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "Options",
       "resource_id": "PYYxBsykKG",
       "resource_name": "Options",
