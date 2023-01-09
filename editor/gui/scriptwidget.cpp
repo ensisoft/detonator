@@ -2506,11 +2506,10 @@ bool ScriptWidget::LoadDocument(const QString& file)
 
 void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelection&)
 {
-    const auto& indices = mUI.tableView->selectionModel()->selectedRows();
-    for (const auto& i : indices)
+    const auto& indices = GetSelection(mUI.tableView);
+    for (const auto& index : indices)
     {
-        const auto& m = mTableModelProxy->mapToSource(i);
-        const auto& method = g_method_docs[m.row()];
+        const auto& method = g_method_docs[index.row()];
         const auto& name = QString("%1_%2").arg(app::FromUtf8(method.table)).arg(app::FromUtf8(method.name));
         mUI.textBrowser->scrollToAnchor(name);
         //DEBUG("Scroll to anchor. [anchor='%1']", name);
