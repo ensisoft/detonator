@@ -76,6 +76,9 @@ namespace app
         {}
         operator const QString& () const
         { return mStr; }
+
+        operator const std::string () const
+        { return app::ToUtf8(mStr); }
     private:
         QString mStr;
     };
