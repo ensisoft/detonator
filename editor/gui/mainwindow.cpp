@@ -1473,7 +1473,7 @@ void MainWindow::on_actionExportJSON_triggered()
 {
     if (!mWorkspace)
         return;
-    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.workspace);
     if (indices.isEmpty())
         return;
     const auto& filename = QFileDialog::getSaveFileName(this,
@@ -1636,13 +1636,13 @@ void MainWindow::on_actionDeleteResource_triggered()
     msg.setText(tr("Are you sure you want to delete the selected resources ?"));
     if (msg.exec() == QMessageBox::No)
         return;
-    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    const auto& selected = GetSelection(mUI.workspace);
     mWorkspace->DeleteResources(selected);
 }
 
 void MainWindow::on_actionRenameResource_triggered()
 {
-    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    const auto& selected = GetSelection(mUI.workspace);
     for (int i=0; i<selected.size(); ++i)
     {
         auto& resource = mWorkspace->GetResource(selected[i].row());
@@ -1659,7 +1659,7 @@ void MainWindow::on_actionRenameResource_triggered()
 
 void MainWindow::on_actionDuplicateResource_triggered()
 {
-    QModelIndexList selected = mUI.workspace->selectionModel()->selectedRows();
+    const auto& selected = GetSelection(mUI.workspace);
     mWorkspace->DuplicateResources(selected);
 }
 
@@ -1996,7 +1996,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     if (!mWorkspace)
         return;
 
-    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.workspace);
     mUI.actionDeleteResource->setEnabled(!indices.isEmpty());
     mUI.actionDuplicateResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
@@ -3089,7 +3089,7 @@ void MainWindow::ShowHelpWidget()
 
 void MainWindow::EditResources(bool open_new_window)
 {
-    const auto& indices = mUI.workspace->selectionModel()->selectedRows();
+    const auto& indices = GetSelection(mUI.workspace);
     for (int i=0; i<indices.size(); ++i)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());

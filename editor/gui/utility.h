@@ -152,7 +152,16 @@ inline void Decrement(QDoubleSpinBox* spin, float value = 1.0f)
 
 inline QModelIndexList GetSelection(QTableView* view)
 {
-    return view->selectionModel()->selectedRows();
+    const auto* data_model = view->model();
+    const auto& selection  = view->selectionModel()->selectedRows();
+    if (const auto* proxy = qobject_cast<const QSortFilterProxyModel*>(data_model))
+    {
+        QModelIndexList ret;
+        for (auto index : selection)
+            ret.append(proxy->mapToSource(index));
+        return ret;
+    }
+    return selection;
 }
 
 inline void SelectRow(QTableView* view, int row)
