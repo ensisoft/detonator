@@ -201,7 +201,7 @@
       "color": "Gray"
     },
     {
-      "key": "checkbox/check-mark",
+      "key": "checkbox/check-mark-checked",
       "type": "Color",
       "color": "LightGray"
     },
@@ -221,7 +221,7 @@
       "color": "Gray"
     },
     {
-      "key": "radiobutton/check-mark",
+      "key": "radiobutton/check-mark-checked",
       "type": "Color",
       "color": "LightGray"
     },
