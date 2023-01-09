@@ -667,10 +667,9 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         OutlineShape(ps.rect, *material, shape, width);
     }
-    if (!checked)
-        return;
+    const auto* check_mark_name = checked ? "check-mark-checked" : "check-mark-unchecked";
 
-    if (const auto* material = GetWidgetMaterial(id, ps, "check-mark"))
+    if (const auto* material = GetWidgetMaterial(id, ps, check_mark_name))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::RoundRect);
         gfx::FRect mark;
@@ -695,10 +694,9 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
         OutlineShape(ps.rect, *material, shape, width);
     }
-    if (!selected)
-        return;
+    const auto* check_mark_name = selected ? "check-mark-checked" : "check-mark-unchecked";
 
-    if (const auto* material = GetWidgetMaterial(id, ps, "check-mark"))
+    if (const auto* material = GetWidgetMaterial(id, ps, check_mark_name))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::Circle);
         gfx::FRect mark;
