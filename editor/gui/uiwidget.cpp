@@ -1272,6 +1272,14 @@ void UIWidget::on_windowName_textChanged(const QString& text)
     mState.window.SetName(app::ToUtf8(text));
 }
 
+void UIWidget::on_windowKeyMap_currentIndexChanged(int)
+{
+    const auto& file = mState.window.GetKeyMapFile();
+
+    if (!LoadKeysVerbose(GetValue(mUI.windowKeyMap)))
+        SetValue(mUI.windowKeyMap, file);
+}
+
 void UIWidget::on_windowStyleFile_currentIndexChanged(int)
 {
     const auto& name = mState.window.GetStyleName();
