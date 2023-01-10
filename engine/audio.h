@@ -107,17 +107,20 @@ namespace engine
         // immediately when the audio is playing.
         void SetMusicEffect(const std::string& track, unsigned duration, Effect effect);
         // Adjust the gain (volume) on the music stream. There's no strict range
-        // for the gain value but you likely want to keep this around (0.0f, 1.0f)
+        // for the gain value, but you likely want to keep this around (0.0f, 1.0f)
         void SetMusicGain(float gain);
         // Schedule a sound effect for playback after 'when' milliseconds elapse.
         // Returns false if the audio effect could not be loaded.
         bool PlaySoundEffect(const GraphHandle& graph, unsigned when = 0);
         // Adjust the gain (volume) on the effects stream. There's no strict range
-        // for the gain value but you likely want to keep this around (0.0f, 1.0f)
+        // for the gain value, but you likely want to keep this around (0.0f, 1.0f)
         void SetSoundEffectGain(float gain);
         // Kill all currently playing sound effects.
         void KillAllSoundEffects();
 
+        void EnableEffects(bool on_off)
+        { mEnableEffects = on_off; }  
+   
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of
         // audio events that have happened.

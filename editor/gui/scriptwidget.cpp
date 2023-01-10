@@ -1403,6 +1403,9 @@ void InitDoc()
     DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect audio graph after some delay (in milliseconds) elapses.",
                  "audio.GraphClass|string", "graph|graph_name", "unsigned", "delay");
     DOC_METHOD_1("void", "SetSoundEffectGain", "Set the overall sound effect gain (volume adjustment) in the audio mixer.", "float", "gain");
+    DOC_METHOD_1("void", "EnableEffects", "Enable or disable actual sound effect playing. "
+                                          "Toggling the flag does not affect currently playing effects.<br>"
+                                          "The initial value is enabled.", "bool", "on_off");
 
     DOC_TABLE("game.AudioEvent");
     DOC_OBJECT_PROPERTY("string", "type", "The type of the audio event.<br>"

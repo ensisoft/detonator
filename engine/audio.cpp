@@ -209,6 +209,9 @@ void AudioEngine::SetMusicGain(float gain)
 bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
+    if (!mEnableEffects)
+        return true;
+
     const auto name   = "FX#" + std::to_string(mEffectCounter);
     const auto paused = when != 0;
 
