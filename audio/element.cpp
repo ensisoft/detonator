@@ -1224,6 +1224,7 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
     info->channels    = decoder->GetNumChannels();
     info->frames      = decoder->GetNumFrames();
     info->seconds     = (float)info->frames / (float)info->sample_rate;
+    info->bytes       = stream->GetSize();
     return true;
 }
 // static

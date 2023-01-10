@@ -1935,6 +1935,7 @@ void AudioWidget::GetSelectedElementProperties()
     SetValue(mUI.afChannels,   QString(""));
     SetValue(mUI.afSampleRate, QString(""));
     SetValue(mUI.afFrames,     QString(""));
+    SetValue(mUI.afSize,       QString(""));
     SetValue(mUI.afDuration,   0);
     SetValue(mUI.loopCount, 1);
     SetValue(mUI.pcmCaching, false);
@@ -2095,6 +2096,7 @@ void AudioWidget::GetSelectedElementProperties()
         SetValue(mUI.afSampleRate, QString(""));
         SetValue(mUI.afFrames,     QString(""));
         SetValue(mUI.afDuration,   0);
+        SetValue(mUI.afSize,       QString(""));
         const std::string& URI = *item->GetArgValue<std::string>("file");
         if (URI.empty())
             return;
@@ -2106,6 +2108,7 @@ void AudioWidget::GetSelectedElementProperties()
             SetValue(mUI.afChannels,   info.channels);
             SetValue(mUI.afSampleRate, info.sample_rate);
             SetValue(mUI.afFrames,     info.frames);
+            SetValue(mUI.afSize,       app::Bytes{info.bytes});
             SetValue(mUI.afDuration, unsigned(info.seconds * 1000));
         }
         else ERROR("Failed to probe audio file. [file='%1']", file);

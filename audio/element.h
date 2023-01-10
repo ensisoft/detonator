@@ -767,6 +767,8 @@ namespace audio
             unsigned frames      = 0;
             unsigned sample_rate = 0;
             float seconds = 0;
+            // File size (compressed) in bytes.
+            unsigned bytes = 0;
         };
         static bool ProbeFile(const std::string& file, FileInfo* info);
         static void ClearCache();
