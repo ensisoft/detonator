@@ -3234,6 +3234,7 @@ void BindGameLib(sol::state& L)
                 return engine.PlaySoundEffect(klass, 0);
             });
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
+    audio["EnableEffects"]      = &AudioEngine::EnableEffects;
 
     auto audio_event = table.new_usertype<AudioEvent>("AudioEvent",
         sol::meta_function::index, [&L](const AudioEvent& event, const char* key) {
