@@ -878,9 +878,11 @@ public:
         event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
         event.button = MapMouseButton(mickey.btn);
         event.time   = mTime;
-        auto action = mWindow.MousePress(event, mState);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mWindow.MousePress(event, mState);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) override
     {
@@ -889,9 +891,11 @@ public:
         event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
         event.button = MapMouseButton(mickey.btn);
         event.time   = mTime;
-        auto action = mWindow.MouseRelease(event, mState);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mWindow.MouseRelease(event, mState);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
     {
@@ -900,8 +904,8 @@ public:
         event.native_mouse_pos = uik::FPoint(mickey.window_x, mickey.window_y);
         event.button = MapMouseButton(mickey.btn);
         event.time   = mTime;
-        auto action = mWindow.MouseMove(event, mState);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mWindow.MouseMove(event, mState);
+        for (const auto& action : actions)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
             if (action.name == "slider")

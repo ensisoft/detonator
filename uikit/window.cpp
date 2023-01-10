@@ -550,20 +550,20 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
     return actions;
 }
 
-Window::WidgetAction Window::MousePress(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MousePress(const MouseEvent& mouse, State& state)
 {
     return send_mouse_event(mouse, &Widget::MousePress, state);
 }
-Window::WidgetAction Window::MouseRelease(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MouseRelease(const MouseEvent& mouse, State& state)
 {
     return send_mouse_event(mouse, &Widget::MouseRelease, state);
 }
-Window::WidgetAction Window::MouseMove(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MouseMove(const MouseEvent& mouse, State& state)
 {
     return send_mouse_event(mouse, &Widget::MouseMove, state);
 }
 
-Window::WidgetAction Window::KeyDown(const KeyEvent& key, State& state)
+std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& state)
 {
     Widget* focused_widget = nullptr;
     state.GetValue(mId + "/focused-widget", &focused_widget);
@@ -643,13 +643,13 @@ Window::WidgetAction Window::KeyDown(const KeyEvent& key, State& state)
             if (key.key == VirtualKey::MoveUp)
             {
                 if (radio_button_index == 0)
-                    return WidgetAction{};
+                    return {};
                 --radio_button_index;
             }
             else if (key.key == VirtualKey::MoveDown)
             {
                 if (radio_button_index == children.size()-1)
-                    return WidgetAction{};
+                    return {};
                 ++radio_button_index;
             }
             for (auto* btn : children)
@@ -665,9 +665,9 @@ Window::WidgetAction Window::KeyDown(const KeyEvent& key, State& state)
                 action.name  = parent->GetName();
                 action.value = parent->GetName();
                 action.type  = WidgetActionType::RadioButtonSelected;
-                return action;
+                return {action};
             }
-            return WidgetAction{};
+            return {};
         }
 
         const auto& ret = focused_widget->KeyDown(key, state);
@@ -679,12 +679,12 @@ Window::WidgetAction Window::KeyDown(const KeyEvent& key, State& state)
         action.name  = focused_widget->GetName();
         action.type  = ret.type;
         action.value = ret.value;
-        return action;
+        return {action};
     }
     return {};
 }
 
-Window::WidgetAction Window::KeyUp(const KeyEvent& key, State& state)
+std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, State& state)
 {
     Widget* focused_widget = nullptr;
     if (state.GetValue(mId + "/focused-widget", &focused_widget))
@@ -698,7 +698,7 @@ Window::WidgetAction Window::KeyUp(const KeyEvent& key, State& state)
         action.name  = focused_widget->GetName();
         action.type  = ret.type;
         action.value = ret.value;
-        return action;
+        return {action};
     }
     return  {};
 }
@@ -784,7 +784,7 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
     return ret;
 }
 
-Window::WidgetAction Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state)
+std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state)
 {
     // only consider widgets with the appropriate flags
     // i.e. enabled and visible.
@@ -806,7 +806,7 @@ Window::WidgetAction Window::send_mouse_event(const MouseEvent& mouse, MouseHand
     state.SetValue(mId + "/active-widget", new_widget_under_mouse);
 
     if (new_widget_under_mouse == nullptr)
-        return WidgetAction{};
+        return {};
 
     Widget::MouseEvent widget_mouse_event;
     widget_mouse_event.widget_mouse_pos = widget_pos;
@@ -816,14 +816,14 @@ Window::WidgetAction Window::send_mouse_event(const MouseEvent& mouse, MouseHand
     widget_mouse_event.button = mouse.button;
     const auto& ret = (new_widget_under_mouse->*which)(widget_mouse_event, state);
     if (ret.type == WidgetActionType::None)
-        return WidgetAction{};
+        return {};
 
     WidgetAction action;
     action.id    = new_widget_under_mouse->GetId();
     action.name  = new_widget_under_mouse->GetName();
     action.type  = ret.type;
     action.value = ret.value;
-    return action;
+    return {action};
 }
 
 } // namespace

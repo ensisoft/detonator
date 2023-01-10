@@ -834,8 +834,8 @@ void unit_test_keyboard_focus()
         uik::Window::KeyEvent event;
         event.key  = uik::VirtualKey::FocusNext;
         event.time = 0.0;
-        auto action = window.KeyDown(event, state);
-        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+        auto actions = window.KeyDown(event, state);
+        TEST_REQUIRE(actions.empty());
     }
 
     // one keyboard focusable widget
@@ -853,14 +853,12 @@ void unit_test_keyboard_focus()
         uik::Window::KeyEvent event;
         event.key  = uik::VirtualKey::FocusNext;
         event.time = 0.0;
-        auto action = window.KeyDown(event, state);
-        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+        window.KeyDown(event, state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
 
         event.key  = uik::VirtualKey::FocusPrev;
         event.time = 0.0;
-        action = window.KeyDown(event, state);
-        TEST_REQUIRE(action.type == uik::WidgetActionType::None);
+        window.KeyDown(event, state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
     }
 

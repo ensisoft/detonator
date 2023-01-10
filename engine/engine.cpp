@@ -690,7 +690,7 @@ private:
         return event;
     }
 
-    using UIKeyFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::KeyEvent&, uik::State&);
+    using UIKeyFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::KeyEvent&, uik::State&);
     template<typename WdkEvent>
     void SendUIKeyEvent(const WdkEvent& key, UIKeyFunc which)
     {
@@ -707,23 +707,25 @@ private:
         uik::Window::KeyEvent event;
         event.key  = vk;
         event.time = base::GetTime();
-        const auto& action = (ui->*which)(event, mUIState);
-        if (action.type == uik::WidgetActionType::None)
-            return;
-
-        mRuntime->OnUIAction(ui, action);
+        const auto& actions = (ui->*which)(event, mUIState);
+        for (const auto& action : actions)
+        {
+            mRuntime->OnUIAction(ui, action);
+            //DEBUG("Widget action: '%1'", action.type);
+        }
     }
 
-    using UIMouseFunc = uik::Window::WidgetAction (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
+    using UIMouseFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
     void SendUIMouseEvent(const uik::Window::MouseEvent& mickey, UIMouseFunc which)
     {
         auto* ui = GetUI();
 
-        auto action = (ui->*which)(mickey, mUIState);
-        if (action.type == uik::WidgetActionType::None)
-            return;
-        mRuntime->OnUIAction(ui, action);
-        //DEBUG("Widget action: '%1'", action.type);
+        const auto& actions = (ui->*which)(mickey, mUIState);
+        for (const auto& action : actions)
+        {
+            mRuntime->OnUIAction(ui, action);
+            //DEBUG("Widget action: '%1'", action.type);
+        }
     }
     template<typename WdkMouseEvent>
     uik::Window::MouseEvent MapUIMouseEvent(const WdkMouseEvent& mickey) const
