@@ -61,9 +61,9 @@ namespace uik
     enum class WidgetActionType {
         None,
         ButtonPress,
-        ValueChanged,
-        RadioButtonSelected,
-        SingleItemSelected
+        ValueChange,
+        RadioButtonSelect,
+        SingleItemSelect
     };
     struct ListItem {
         std::string text;

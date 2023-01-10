@@ -519,7 +519,7 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
         action.value = ret.value;
         actions.push_back(std::move(action));
 
-        if (ret.type == WidgetActionType::ValueChanged && widget->GetType() == Widget::Type::RadioButton)
+        if (ret.type == WidgetActionType::ValueChange && widget->GetType() == Widget::Type::RadioButton)
         {
             // implement radio button exclusivity by finding all sibling radio
             // buttons under the same parent and then toggling on only the one
@@ -542,7 +542,7 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
                 action.id    = parent->GetId();
                 action.name  = parent->GetName();
                 action.value = widget->GetName();
-                action.type  = WidgetActionType::RadioButtonSelected;
+                action.type  = WidgetActionType::RadioButtonSelect;
                 actions.push_back(action);
             }
         }
@@ -664,7 +664,7 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
                 action.id    = parent->GetId();
                 action.name  = parent->GetName();
                 action.value = parent->GetName();
-                action.type  = WidgetActionType::RadioButtonSelected;
+                action.type  = WidgetActionType::RadioButtonSelect;
                 return {action};
             }
             return {};
