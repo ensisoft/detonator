@@ -337,7 +337,7 @@ WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& 
     ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
 
     WidgetAction action;
-    action.type  = WidgetActionType::ValueChanged;
+    action.type  = WidgetActionType::ValueChange;
     action.value = mValue;
     return action;
 }
@@ -362,7 +362,7 @@ WidgetAction SliderModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
         {
             mValue = math::clamp(0.0f, 1.0f, mValue + 0.05f);
             WidgetAction action;
-            action.type = WidgetActionType::ValueChanged;
+            action.type = WidgetActionType::ValueChange;
             action.value = mValue;
             return action;
         }
@@ -373,7 +373,7 @@ WidgetAction SliderModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
         {
             mValue = math::clamp(0.0f, 1.0f, mValue - 0.05f);
             WidgetAction action;
-            action.type = WidgetActionType::ValueChanged;
+            action.type = WidgetActionType::ValueChange;
             action.value = mValue;
             return action;
         }
@@ -561,7 +561,7 @@ WidgetAction SpinBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
     if (last_value != mValue)
     {
         WidgetAction action;
-        action.type = WidgetActionType::ValueChanged;
+        action.type = WidgetActionType::ValueChange;
         action.value = mValue;
         return action;
     }
@@ -613,7 +613,7 @@ WidgetAction SpinBoxModel::UpdateValue(const std::string& id, State& state)
     {
         mValue = value;
         WidgetAction action;
-        action.type = WidgetActionType::ValueChanged;
+        action.type = WidgetActionType::ValueChange;
         action.value = value;
         return action;
     }
@@ -814,7 +814,7 @@ WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStr
 
     mChecked = !mChecked;
     WidgetAction action;
-    action.type  = WidgetActionType::ValueChanged;
+    action.type  = WidgetActionType::ValueChange;
     action.value = mChecked;
     return action;
 }
@@ -835,7 +835,7 @@ WidgetAction CheckBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
     if (state != mChecked)
     {
         WidgetAction action;
-        action.type  = WidgetActionType::ValueChanged;
+        action.type  = WidgetActionType::ValueChange;
         action.value = mChecked;
         return action;
     }
@@ -945,7 +945,7 @@ WidgetAction RadioButtonModel::PollAction(const PollStruct& poll)
     mSelected = true;
 
     WidgetAction action;
-    action.type  = WidgetActionType::ValueChanged;
+    action.type  = WidgetActionType::ValueChange;
     action.value = true;
     return action;
 }

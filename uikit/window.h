@@ -265,7 +265,7 @@ namespace uik
             // reliable than the name.
             std::string id;
             // The action that is happening, for example ButtonPress,
-            // ValueChanged, ItemSelectionChanged etc.
+            // ValueChange, ItemSelectionChanged etc.
             WidgetActionType type = WidgetActionType::None;
             // The actual value of the action if any. Depends on the
             // type of the action. see uikit/types.h for more details.
