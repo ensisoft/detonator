@@ -568,6 +568,8 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
     Widget* focused_widget = nullptr;
     state.GetValue(mId + "/focused-widget", &focused_widget);
 
+    std::vector<Window::WidgetAction> ret;
+
     // todo: when using keyboard navigation only consider a single radio-button
     // per container.
     if (key.key == VirtualKey::FocusNext || key.key == VirtualKey::FocusPrev)
@@ -586,6 +588,8 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
         if (taborder.empty())
             return {};
 
+        Widget* next_widget = nullptr;
+
         if (focused_widget)
         {
             int index = 0;
@@ -602,13 +606,32 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
             {
                 index = math::wrap(0, (int)taborder.size()-1, --index);
             }
-            focused_widget = taborder[index];
+            next_widget = taborder[index];
         }
         else
         {
-            focused_widget = taborder[0];
+            next_widget = taborder[0];
         }
-        state.SetValue(mId + "/focused-widget", focused_widget);
+        state.SetValue(mId + "/focused-widget", next_widget);
+
+        if (focused_widget && (focused_widget != next_widget))
+        {
+            WidgetAction action;
+            action.type  = WidgetActionType::FocusChange;
+            action.value = false;
+            action.name  = focused_widget->GetName();
+            action.id    = focused_widget->GetId();
+            ret.push_back(action);
+        }
+        if (next_widget && (focused_widget != next_widget))
+        {
+            WidgetAction action;
+            action.type  = WidgetActionType::FocusChange;
+            action.value = true;
+            action.name  = next_widget->GetName();
+            action.id    = next_widget->GetName();
+            ret.push_back(action);
+        }
     }
     else if (focused_widget)
     {
@@ -665,23 +688,24 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
                 action.name  = parent->GetName();
                 action.value = parent->GetName();
                 action.type  = WidgetActionType::RadioButtonSelect;
-                return {action};
+                ret.push_back(action);
             }
-            return {};
         }
-
-        const auto& ret = focused_widget->KeyDown(key, state);
-        if (ret.type == WidgetActionType::None)
-            return {};
-
-        WidgetAction action;
-        action.id    = focused_widget->GetId();
-        action.name  = focused_widget->GetName();
-        action.type  = ret.type;
-        action.value = ret.value;
-        return {action};
+        else
+        {
+            const auto& key_ret = focused_widget->KeyDown(key, state);
+            if (key_ret.type != WidgetActionType::None)
+            {
+                WidgetAction action;
+                action.id    = focused_widget->GetId();
+                action.name  = focused_widget->GetName();
+                action.type  = key_ret.type;
+                action.value = key_ret.value;
+                ret.push_back(action);
+            }
+        }
     }
-    return {};
+    return ret;
 }
 
 std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, State& state)

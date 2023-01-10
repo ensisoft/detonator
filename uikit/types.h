@@ -60,6 +60,7 @@ namespace uik
 
     enum class WidgetActionType {
         None,
+        FocusChange,
         ButtonPress,
         ValueChange,
         RadioButtonSelect,
