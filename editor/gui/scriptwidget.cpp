@@ -1443,6 +1443,8 @@ void InitDoc()
     DOC_METHOD_1("...", "GetValue", "Get a value by the given key in the key-value store. <br>"
                                     "It is an error to try to access a key that doesn't exist.",
                  "string", "key");
+    DOC_METHOD_2("...", "GetValue", "Get a value by the given key if it exists or return default.",
+                 "string", "key", "...", "default");
     DOC_METHOD_1("bool", "HasValue", "Check whether the given key exists in the key-value store.", "string", "key");
     DOC_METHOD_0("void", "Clear", "Remove all keys and values from the store.");
     DOC_METHOD_1("void", "Persist", "Serialize the contents of the key-value store into a data object.",
