@@ -292,17 +292,17 @@ namespace uik
         std::vector<WidgetAction> PollAction(State& state, double time, float dt);
 
         // Dispatch mouse press event.
-        WidgetAction MousePress(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MousePress(const MouseEvent& mouse, State& state);
         // Dispatch mouse release event.
-        WidgetAction MouseRelease(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MouseRelease(const MouseEvent& mouse, State& state);
         // Dispatch mouse move event.
-        WidgetAction MouseMove(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MouseMove(const MouseEvent& mouse, State& state);
         // Dispatch key event to the widget that has the current
         // keyboard input focus.
-        WidgetAction KeyDown(const KeyEvent& key, State& state);
+        std::vector<WidgetAction> KeyDown(const KeyEvent& key, State& state);
         // Dispatch key event to the widget that has the current
         // keyboard input focus.
-        WidgetAction KeyUp(const KeyEvent& key, State& state);
+        std::vector<WidgetAction> KeyUp(const KeyEvent& key, State& state);
 
         // Serialize the window and its widget hierarchy into JSON.
         void IntoJson(data::Writer& data) const;
@@ -392,7 +392,7 @@ namespace uik
             ButtonPress, ButtonRelease, MouseMove
         };
         using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, State&);
-        WidgetAction send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state);
+        std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state);
 
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
     private:

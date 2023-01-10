@@ -1990,9 +1990,11 @@ void UIWidget::MouseMove(QMouseEvent* mickey)
             m.button = uik::MouseButton::Right;
         else if (mickey->button() == Qt::MiddleButton)
             m.button = uik::MouseButton::Wheel;
-        const auto& action = mState.active_window->MouseMove(m, *mState.active_state);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->MouseMove(m, *mState.active_state);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     else if (mCurrentTool)
     {
@@ -2029,9 +2031,11 @@ void UIWidget::MousePress(QMouseEvent* mickey)
             m.button = uik::MouseButton::Right;
         else if (mickey->button() == Qt::MiddleButton)
             m.button = uik::MouseButton::Wheel;
-        const auto& action = mState.active_window->MousePress(m, *mState.active_state);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->MousePress(m, *mState.active_state);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
@@ -2097,9 +2101,11 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
             m.button = uik::MouseButton::Right;
         else if (mickey->button() == Qt::MiddleButton)
             m.button = uik::MouseButton::Wheel;
-        const auto& action = mState.active_window->MouseRelease(m, *mState.active_state);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->MouseRelease(m, *mState.active_state);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
     }
     else if (mCurrentTool && mCurrentTool->MouseRelease(mickey, view))
     {
@@ -2144,9 +2150,11 @@ bool UIWidget::KeyPress(QKeyEvent* key)
         uik::Window::KeyEvent e;
         e.key  = mState.keymap->MapKey(sym, mods);
         e.time = mPlayTime;
-        const auto& action = mState.active_window->KeyDown(e, *mState.active_state);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->KeyDown(e, *mState.active_state);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
+        }
 
         //DEBUG("Key press mapped to UI vk: %1", e.key);
         return true;
@@ -2212,10 +2220,11 @@ bool UIWidget::KeyRelease(QKeyEvent* key)
         uik::Window::KeyEvent e;
         e.key  = mState.keymap->MapKey(sym, mods);
         e.time = mPlayTime;
-        const auto& action = mState.active_window->KeyUp(e, *mState.active_state);
-        if (action.type != uik::WidgetActionType::None)
+        const auto& actions = mState.active_window->KeyUp(e, *mState.active_state);
+        for (const auto& action : actions)
+        {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
-
+        }
         //DEBUG("Key release mapped to UI vk: %1", e.key);
         return true;
     }
