@@ -392,7 +392,7 @@ namespace uik
             ButtonPress, ButtonRelease, MouseMove
         };
         using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, State&);
-        std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state);
+        std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state, bool mouse_press);
 
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
 
