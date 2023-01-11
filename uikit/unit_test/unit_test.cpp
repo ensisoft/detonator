@@ -838,6 +838,51 @@ void unit_test_keyboard_focus()
         TEST_REQUIRE(actions.empty());
     }
 
+    // widget that can take a keyboard focus is in a container
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* btn = window.AddWidget(uik::PushButton());
+        auto* box = window.AddWidget(uik::GroupBox());
+        window.LinkChild(nullptr, box);
+        window.LinkChild(box, btn);
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
+    }
+
+    // widget that can focus is in a container that is disabled.
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* btn = window.AddWidget(uik::PushButton());
+        auto* box = window.AddWidget(uik::GroupBox());
+        box->SetEnabled(false);
+        window.LinkChild(nullptr, box);
+        window.LinkChild(box, btn);
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == nullptr);
+    }
+
+    // widget that can focus is in a container that is hidden
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* btn = window.AddWidget(uik::PushButton());
+        auto* box = window.AddWidget(uik::GroupBox());
+        box->SetVisible(false);
+        window.LinkChild(nullptr, box);
+        window.LinkChild(box, btn);
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == nullptr);
+    }
+
+
     // one keyboard focusable widget
     {
         uik::Window window;
@@ -906,33 +951,126 @@ void unit_test_keyboard_radiobutton_select()
 {
     // when several radio buttons are in the same container (group)
     // using the up/down virtual keys will cycle over the radio buttons
-    uik::State state;
-    uik::Window window;
-    window.EnableVirtualKeys(true);
 
-    auto* rad0 = window.AddWidget(uik::RadioButton());
-    auto* rad1 = window.AddWidget(uik::RadioButton());
-    rad0->SetSelected(true);
-    rad1->SetSelected(false);
-    window.LinkChild(nullptr, rad0);
-    window.LinkChild(nullptr, rad1);
+    {
 
-    window.Show(state);
-    TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
-    TEST_REQUIRE(rad0->IsSelected() == true);
-    TEST_REQUIRE(rad1->IsSelected() == false);
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
 
-    uik::Window::KeyEvent event;
-    event.key  = uik::VirtualKey::MoveDown;
-    event.time = 0.0;
-    window.KeyDown(event, state);
-    TEST_REQUIRE(rad0->IsSelected() == false);
-    TEST_REQUIRE(rad1->IsSelected() == true);
+        auto* rad0 = window.AddWidget(uik::RadioButton());
+        rad0->SetSelected(true);
+        window.LinkChild(nullptr, rad0);
 
-    event.key = uik::VirtualKey::MoveUp;
-    window.KeyDown(event, state);
-    TEST_REQUIRE(rad0->IsSelected() == true);
-    TEST_REQUIRE(rad1->IsSelected() == false);
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+
+        uik::Window::KeyEvent event;
+        event.key = uik::VirtualKey::MoveDown;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+
+        event.key = uik::VirtualKey::MoveUp;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+    }
+
+    // switch between two buttons.
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* rad0 = window.AddWidget(uik::RadioButton());
+        auto* rad1 = window.AddWidget(uik::RadioButton());
+        rad0->SetSelected(true);
+        rad1->SetSelected(false);
+        window.LinkChild(nullptr, rad0);
+        window.LinkChild(nullptr, rad1);
+
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        uik::Window::KeyEvent event;
+        event.key = uik::VirtualKey::MoveDown;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == false);
+        TEST_REQUIRE(rad1->IsSelected() == true);
+
+        event.key = uik::VirtualKey::MoveUp;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+    }
+
+    // switch between two buttons when one is disabled.
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* rad0 = window.AddWidget(uik::RadioButton());
+        auto* rad1 = window.AddWidget(uik::RadioButton());
+        rad0->SetSelected(true);
+        rad1->SetSelected(false);
+        rad1->SetEnabled(false);
+        window.LinkChild(nullptr, rad0);
+        window.LinkChild(nullptr, rad1);
+
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        uik::Window::KeyEvent event;
+        event.key = uik::VirtualKey::MoveDown;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        event.key = uik::VirtualKey::MoveUp;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+    }
+
+    // switch between two buttons when one is hidden.
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* rad0 = window.AddWidget(uik::RadioButton());
+        auto* rad1 = window.AddWidget(uik::RadioButton());
+        rad0->SetSelected(true);
+        rad1->SetSelected(false);
+        rad1->SetVisible(false);
+        window.LinkChild(nullptr, rad0);
+        window.LinkChild(nullptr, rad1);
+
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        uik::Window::KeyEvent event;
+        event.key = uik::VirtualKey::MoveDown;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        event.key = uik::VirtualKey::MoveUp;
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == true);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+    }
 
 }
 

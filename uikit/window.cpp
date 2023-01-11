@@ -174,6 +174,28 @@ Widget* Window::AddWidgetPtr(std::unique_ptr<Widget> widget)
     return ret;
 }
 
+bool Window::CanFocus(const Widget* widget) const
+{
+    // check whether the widget can gain keyboard focus or not.
+
+    // first check if the widget itself can accept keyboard focus.
+    if (!widget->IsEnabled() || !widget->CanFocus() || !widget->IsVisible())
+        return false;
+
+    // check if any of the parents are either disabled or invisible.
+    std::vector<const Widget*> nodes;
+    base::SearchParent(mRenderTree, widget, (const Widget*)nullptr, &nodes);
+    for (const auto* node : nodes)
+    {
+        if (node == nullptr)
+            continue;
+        if (!node->IsEnabled() || !node->IsVisible())
+            return false;
+    }
+
+    return true;
+}
+
 Widget* Window::DuplicateWidget(const Widget* widget)
 {
     std::vector<std::unique_ptr<Widget>> clones;
@@ -380,7 +402,7 @@ void Window::Show(State& state)
 
     for (auto& w : mWidgets)
     {
-        if (!w->CanFocus() || !w->IsVisible() || !w->IsEnabled())
+        if (!CanFocus(w.get()))
             continue;
 
         if (!widget || w->GetTabIndex() < widget->GetTabIndex())
@@ -577,8 +599,9 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
         std::vector<Widget*> taborder;
         for (auto& w : mWidgets)
         {
-            if (!w->CanFocus() || !w->IsEnabled() || !w->IsVisible())
+            if (!CanFocus(w.get()))
                 continue;
+
             const auto tabindex = w->GetTabIndex();
             if (tabindex >= taborder.size())
                 taborder.resize(tabindex+1);
