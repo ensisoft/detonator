@@ -2060,6 +2060,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
                 mCurrentTool.reset(new ResizeWidgetTool(mState, widget, snap, grid_size));
             else mCurrentTool.reset(new MoveWidgetTool(mState, widget, snap, grid_size));
             mUI.tree->SelectItemById(app::FromUtf8(widget->GetId()));
+            DisplayCurrentWidgetProperties();
         }
         else
         {
