@@ -55,8 +55,16 @@
     {
       "key": "form/shape",
       "value": "Rect"
-    }
+    },
 
+    {
+      "key": "widget/disabled/text-color",
+      "value": "Gray"
+    },
+    {
+      "key": "widget/disabled/text-font",
+      "value": "app://fonts/orbitron-light.otf"
+    }
   ],
 
   "materials": [
@@ -115,8 +123,6 @@
       "color3": "Gray",
       "gamma": 2.2
     },
-
-
     {
       "key": "widget/text-edit-background",
       "type": "Gradient",
