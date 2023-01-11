@@ -395,6 +395,8 @@ namespace uik
         std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state);
 
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
+
+        bool CanFocus(const Widget* widget) const;
     private:
         std::string mId;
         std::string mName;

@@ -280,6 +280,10 @@ namespace uik
         { SetSize(FSize(width , height)); }
         inline void SetPosition(float x, float y)
         { SetPosition(FPoint(x , y)); }
+        inline void SetEnabled(bool on_off)
+        { SetFlag(Flags::Enabled, on_off); }
+        inline void SetVisible(bool on_off)
+        { SetFlag(Flags::VisibleInGame, on_off); }
 
         inline void Grow(float dw, float dh)
         { SetSize(ClampSize(GetSize() + FSize(dw, dh))); }
