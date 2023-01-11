@@ -100,6 +100,7 @@ namespace gui
         void UpdateWidgetStyleString();
         void SetMaterialColor(const char* key);
         void SetMaterialGradient(const char* key);
+        std::string MapProperty(std::string key) const;
     private:
         Ui::Style mUI;
     private:
