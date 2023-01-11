@@ -453,13 +453,15 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 
     p.rect    = btn_inc;
     p.moused  = ps.state->GetValue(ps.widgetId + "/btn-inc-mouse-over", false);
-    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-inc-pressed", false);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-inc-pressed", false) ||
+                ps.state->GetValue(ps.widgetId + "/key-inc-pressed", false);
     p.enabled = paint.enabled && mValue < mMaxVal;
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowUp);
 
     p.rect    = btn_dec;
     p.moused  = ps.state->GetValue(ps.widgetId + "/btn-dec-mouse-over", false);
-    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-dec-pressed", false);
+    p.pressed = ps.state->GetValue(ps.widgetId + "/btn-dec-pressed", false) ||
+                ps.state->GetValue(ps.widgetId + "/key-dec-pressed", false);
     p.enabled = paint.enabled && mValue > mMinVal;
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowDown);
 
@@ -553,10 +555,12 @@ WidgetAction SpinBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
     if (key.key == VirtualKey::MoveUp)
     {
         mValue = math::clamp(mMinVal, mMaxVal, mValue+1);
+        ks.state->SetValue(ks.widgetId + "/key-inc-pressed", true);
     }
     else if (key.key == VirtualKey::MoveDown)
     {
         mValue = math::clamp(mMinVal, mMaxVal, mValue-1);
+        ks.state->SetValue(ks.widgetId + "/key-dec-pressed", true);
     }
     if (last_value != mValue)
     {
@@ -569,9 +573,17 @@ WidgetAction SpinBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
 }
 WidgetAction SpinBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
 {
+    if (key.key == VirtualKey::MoveUp)
+    {
+        ks.state->SetValue(ks.widgetId + "/key-inc-pressed", false);
+    }
+    else if (key.key == VirtualKey::MoveDown)
+    {
+        ks.state->SetValue(ks.widgetId + "/key-dec-pressed", false);
+    }
+
     return WidgetAction {};
 }
-
 
 void SpinBoxModel::ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit) const
 {
