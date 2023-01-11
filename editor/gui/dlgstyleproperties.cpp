@@ -247,7 +247,8 @@ protected:
         if (mFilterString.empty())
             return true;
         const auto& prop = model->GetProperty(row);
-        return base::Contains(prop.key, mFilterString);
+        return base::Contains(prop.key, mFilterString) ||
+               base::Contains(prop.klass, mFilterString);
     }
 private:
     std::string mFilterString;
