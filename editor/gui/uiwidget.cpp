@@ -1098,7 +1098,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.chkShowOrigin,        false);
     SetEnabled(mUI.chkShowGrid,          false);
     SetEnabled(mUI.chkShowTabOrder,      false);
-    mUI.widget->activateWindow();
+    mUI.widget->setFocus();
 }
 void UIWidget::on_actionPause_triggered()
 {
