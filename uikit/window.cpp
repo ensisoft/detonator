@@ -574,15 +574,15 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
 
 std::vector<Window::WidgetAction> Window::MousePress(const MouseEvent& mouse, State& state)
 {
-    return send_mouse_event(mouse, &Widget::MousePress, state);
+    return send_mouse_event(mouse, &Widget::MousePress, state, true);
 }
 std::vector<Window::WidgetAction> Window::MouseRelease(const MouseEvent& mouse, State& state)
 {
-    return send_mouse_event(mouse, &Widget::MouseRelease, state);
+    return send_mouse_event(mouse, &Widget::MouseRelease, state, false);
 }
 std::vector<Window::WidgetAction> Window::MouseMove(const MouseEvent& mouse, State& state)
 {
-    return send_mouse_event(mouse, &Widget::MouseMove, state);
+    return send_mouse_event(mouse, &Widget::MouseMove, state, false);
 }
 
 std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& state)
@@ -845,8 +845,10 @@ std::optional<Window> Window::FromJson(const data::Reader& data)
     return ret;
 }
 
-std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state)
+std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state, bool is_mouse_press)
 {
+    std::vector<Window::WidgetAction> ret;
+
     // only consider widgets with the appropriate flags
     // i.e. enabled and visible.
     const bool consider_flags = true;
@@ -864,10 +866,32 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
             new_widget_under_mouse->MouseEnter(state);
     }
     state.SetValue(mId + "/widget-under-mouse", new_widget_under_mouse);
-    state.SetValue(mId + "/active-widget", new_widget_under_mouse);
+
+    if (new_widget_under_mouse && new_widget_under_mouse->CanFocus() && mFlags.test(Flags::EnableVirtualKeys) && is_mouse_press)
+    {
+        Widget* focused_widget = nullptr;
+        state.GetValue(mId + "/focused-widget", &focused_widget);
+        state.SetValue(mId + "/focused-widget", new_widget_under_mouse);
+        if (focused_widget != new_widget_under_mouse)
+        {
+            WidgetAction focus_loss;
+            focus_loss.type  = WidgetActionType::FocusChange;
+            focus_loss.value = false;
+            focus_loss.name  = focused_widget->GetName();
+            focus_loss.id    = focused_widget->GetId();
+            ret.push_back(focus_loss);
+
+            WidgetAction focus_gain;
+            focus_gain.type  = WidgetActionType::FocusChange;
+            focus_gain.value = true;
+            focus_gain.name  = new_widget_under_mouse->GetName();
+            focus_gain.id    = new_widget_under_mouse->GetId();
+            ret.push_back(focus_gain);
+        }
+    }
 
     if (new_widget_under_mouse == nullptr)
-        return {};
+        return ret;
 
     Widget::MouseEvent widget_mouse_event;
     widget_mouse_event.widget_mouse_pos = widget_pos;
@@ -875,16 +899,17 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
     widget_mouse_event.native_mouse_pos = mouse.native_mouse_pos;
     widget_mouse_event.widget_window_rect = widget_rect;
     widget_mouse_event.button = mouse.button;
-    const auto& ret = (new_widget_under_mouse->*which)(widget_mouse_event, state);
-    if (ret.type == WidgetActionType::None)
-        return {};
+    const auto& mouse_ret = (new_widget_under_mouse->*which)(widget_mouse_event, state);
+    if (mouse_ret.type == WidgetActionType::None)
+        return ret;
 
     WidgetAction action;
     action.id    = new_widget_under_mouse->GetId();
     action.name  = new_widget_under_mouse->GetName();
-    action.type  = ret.type;
-    action.value = ret.value;
-    return {action};
+    action.type  = mouse_ret.type;
+    action.value = mouse_ret.value;
+    ret.push_back(action);
+    return ret;
 }
 
 } // namespace
