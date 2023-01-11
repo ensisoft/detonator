@@ -218,8 +218,7 @@ public:
                 {
                     const bool visible = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
                     item.SetUserData(widget);
-                    item.SetIcon(QIcon("icons:eye.png"));
-                    item.SetIconMode(visible ? QIcon::Normal : QIcon::Disabled);
+                    item.SetIcon(QIcon(visible ? "icons:eye.png" : "icons:crossed_eye.png"));
                 }
                 mList.push_back(std::move(item));
                 mLevel++;
@@ -1809,7 +1808,7 @@ void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
     {
         const bool visibility = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
         widget->SetFlag(uik::Widget::Flags::VisibleInEditor, !visibility);
-        item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+        mUI.tree->Rebuild();
     }
 }
 
