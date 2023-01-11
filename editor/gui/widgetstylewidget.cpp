@@ -136,12 +136,10 @@ void WidgetStyleWidget::on_btnSelectAppFont_clicked()
     if (!mWidget)
         return;
 
-    const auto& id = mWidget->GetId();
-
     QString font = GetValue(mUI.widgetFontName);
     if (font.isEmpty())
     {
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-font"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-font")))
             font = app::FromUtf8(prop.GetValue<std::string>());
     }
     DlgFont::DisplaySettings disp;
@@ -150,20 +148,20 @@ void WidgetStyleWidget::on_btnSelectAppFont_clicked()
     disp.blinking  = false;
     disp.text_color = Qt::darkGray;
     if (mUI.widgetFontSize->currentIndex() == -1) {
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-size"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-size")))
             disp.font_size = prop.GetValue<int>();
     } else disp.font_size = GetValue(mUI.widgetFontSize);
 
     const auto underline_state = mUI.widgetTextUnderline->checkState();
     if (underline_state == Qt::PartiallyChecked) {
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-underline"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-underline")))
             disp.underline = prop.GetValue<bool>();
     } else if (underline_state == Qt::Checked)
         disp.underline = true;
     else disp.underline = false;
 
     if (!mUI.widgetTextColor->hasColor()) {
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-color")))
             disp.text_color = FromGfx(prop.GetValue<engine::Color4f>());
     } else  disp.text_color = GetValue(mUI.widgetTextColor);
 
@@ -239,10 +237,10 @@ void WidgetStyleWidget::SetBackgroundMaterial()
             return;
         SetValue(mUI.widgetBackground, ListItemId(dlg.GetSelectedMaterialId()));
 
-        mStyle->SetMaterial(widget->GetId() + mSelector + "/background",
+        mStyle->SetMaterial(MapProperty("/background"),
             engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
-        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + "/background");
+        mPainter->DeleteMaterialInstanceByKey(MapProperty("/background"));
 
         UpdateWidgetStyleString();
     }
@@ -265,10 +263,10 @@ void WidgetStyleWidget::SetBorderMaterial()
             return;
         SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));
 
-        mStyle->SetMaterial(widget->GetId() + mSelector + "/border",
+        mStyle->SetMaterial(MapProperty("/border"),
                             engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
-        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + "/border");
+        mPainter->DeleteMaterialInstanceByKey(MapProperty("/border"));
 
         UpdateWidgetStyleString();
     }
@@ -287,88 +285,66 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
     if (auto* widget = mWidget)
     {
         // set style properties
-        const auto& id = widget->GetId();
         const std::string& font = GetValue(mUI.widgetFontName); // msvs build workaround
         if (font.empty())
-        {
-            mStyle->DeleteProperty(id + mSelector + "/text-font");
-            mStyle->DeleteProperty(id + mSelector + "/edit-text-font");
-        }
-        else
-        {
-            mStyle->SetProperty(id + mSelector + "/text-font", font);
-            mStyle->SetProperty(id + mSelector + "/edit-text-font", font);
-        }
+            mStyle->DeleteProperty(MapProperty("/text-font"));
+        else mStyle->SetProperty(MapProperty("/text-font"), font);
 
         if (mUI.widgetFontSize->currentIndex() == -1)
-        {
-            mStyle->DeleteProperty(id + mSelector + "/text-size");
-            mStyle->DeleteProperties(id + mSelector + "/edit-text-size");
-        }
-        else
-        {
-            mStyle->SetProperty(id + mSelector + "/edit-text-size", (int)GetValue(mUI.widgetFontSize));
-            mStyle->SetProperty(id + mSelector + "/text-size", (int)GetValue(mUI.widgetFontSize));
-        }
+            mStyle->DeleteProperty(MapProperty("/text-size"));
+        else mStyle->SetProperty(MapProperty("/text-size"), (int)GetValue(mUI.widgetFontSize));
 
         if (mUI.widgetTextVAlign->currentIndex() == -1)
-            mStyle->DeleteProperty(id + mSelector + "/text-vertical-align");
-        else mStyle->SetProperty(id + mSelector + "/text-vertical-align",(engine::UIStyle::VerticalTextAlign)GetValue(mUI.widgetTextVAlign));
+            mStyle->DeleteProperty(MapProperty("/text-vertical-align"));
+        else mStyle->SetProperty(MapProperty("/text-vertical-align"),(engine::UIStyle::VerticalTextAlign)GetValue(mUI.widgetTextVAlign));
 
         if (mUI.widgetTextHAlign->currentIndex() == -1)
-            mStyle->DeleteProperty(id + mSelector + "/text-horizontal-align");
-        else mStyle->SetProperty(id + mSelector + "/text-horizontal-align", (engine::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
+            mStyle->DeleteProperty(MapProperty("/text-horizontal-align"));
+        else mStyle->SetProperty(MapProperty("/text-horizontal-align"), (engine::UIStyle::HorizontalTextAlign)GetValue(mUI.widgetTextHAlign));
 
         if (!mUI.widgetTextColor->hasColor())
-        {
-            mStyle->DeleteProperty(id + mSelector + "/text-color");
-            mStyle->DeleteProperty(id + mSelector + "/edit-text-color");
-        }
-        else
-        {
-            mStyle->SetProperty(id + mSelector + "/text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
-            mStyle->SetProperty(id + mSelector + "/edit-text-color", (gfx::Color4f)GetValue(mUI.widgetTextColor));
-        }
+            mStyle->DeleteProperty(MapProperty("/text-color"));
+        else mStyle->SetProperty(MapProperty("/text-color"), (gfx::Color4f)GetValue(mUI.widgetTextColor));
 
         const auto blink_state = mUI.widgetTextBlink->checkState();
         if (blink_state == Qt::PartiallyChecked)
-            mStyle->DeleteProperty(id + mSelector + "/text-blink");
+            mStyle->DeleteProperty(MapProperty("/text-blink"));
         else if (blink_state == Qt::Checked)
-            mStyle->SetProperty(id + mSelector + "/text-blink", true);
+            mStyle->SetProperty(MapProperty("/text-blink"), true);
         else if (blink_state == Qt::Unchecked)
-            mStyle->SetProperty(id + mSelector + "/text-blink", false);
+            mStyle->SetProperty(MapProperty("/text-blink"), false);
 
         const auto underline_state = mUI.widgetTextUnderline->checkState();
         if (underline_state == Qt::PartiallyChecked)
-            mStyle->DeleteProperty(id + mSelector + "/text-underline");
+            mStyle->DeleteProperty(MapProperty("/text-underline"));
         else if (underline_state == Qt::Checked)
-            mStyle->SetProperty(id + mSelector + "/text-underline", true);
+            mStyle->SetProperty(MapProperty("/text-underline"), true);
         else if (underline_state == Qt::Unchecked)
-            mStyle->SetProperty(id + mSelector + "/text-underline", false);
+            mStyle->SetProperty(MapProperty("/text-underline"), false);
 
         if (mUI.widgetBackground->currentIndex() == -1)
-            mStyle->DeleteMaterial(id + mSelector + "/background");
+            mStyle->DeleteMaterial(MapProperty("/background"));
         else if (mUI.widgetBackground->currentIndex() == 0)
-            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UINullMaterial());
+            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UINullMaterial());
         else if (mUI.widgetBackground->currentIndex() == 1)
-            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIColor());
+            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIColor());
         else if (mUI.widgetBackground->currentIndex() == 2)
-            mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIGradient());
-        else mStyle->SetMaterial(id + mSelector + "/background", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
+            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
+        else mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
         if (mUI.widgetBorder->currentIndex() == -1)
-            mStyle->DeleteMaterial(id + mSelector + "/border");
+            mStyle->DeleteMaterial(MapProperty("/border"));
         else if (mUI.widgetBorder->currentIndex() == 0)
-            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UINullMaterial());
+            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UINullMaterial());
         else if (mUI.widgetBorder->currentIndex() == 1)
-            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIColor());
+            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIColor());
         else if (mUI.widgetBorder->currentIndex() == 2)
-            mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIGradient());
-        else mStyle->SetMaterial(id + mSelector + "/border", engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
+            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
+        else mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         // purge old material instances if any.
-        mPainter->DeleteMaterialInstanceByKey(id + mSelector + "/border");
-        mPainter->DeleteMaterialInstanceByKey(id + mSelector + "/background");
+        mPainter->DeleteMaterialInstanceByKey(MapProperty("/border"));
+        mPainter->DeleteMaterialInstanceByKey(MapProperty("/background"));
 
         UpdateWidgetStyleString();
 
@@ -402,7 +378,7 @@ void WidgetStyleWidget::SetMaterialColor(const char* key)
         color_widgets::ColorDialog dlg(this);
         dlg.setAlphaEnabled(true);
         dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
-        if (const auto* material = mStyle->GetMaterialType(widget->GetId() + mSelector + key))
+        if (const auto* material = mStyle->GetMaterialType(MapProperty(key)))
         {
             if (const auto* p = dynamic_cast<const engine::detail::UIColor*>(material))
                 dlg.setColor(FromGfx(p->GetColor()));
@@ -410,10 +386,9 @@ void WidgetStyleWidget::SetMaterialColor(const char* key)
         if (dlg.exec() == QDialog::Rejected)
             return;
 
-        mStyle->SetMaterial(widget->GetId() + mSelector + key,
-                            engine::detail::UIColor(ToGfx(dlg.color())));
+        mStyle->SetMaterial(MapProperty(key), engine::detail::UIColor(ToGfx(dlg.color())));
 
-        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + key);
+        mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
 
         UpdateWidgetStyleString();
     }
@@ -425,7 +400,7 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
     if (auto* widget = mWidget)
     {
         DlgGradient dlg(this);
-        if (const auto* material = mStyle->GetMaterialType(widget->GetId() + mSelector + key))
+        if (const auto* material = mStyle->GetMaterialType(MapProperty(key)))
         {
             if (const auto* p = dynamic_cast<const engine::detail::UIGradient*>(material))
             {
@@ -448,9 +423,9 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
         gradient.SetColor(ToGfx(dlg.GetColor(1)), Index::TopRight);
         gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::BottomLeft);
         gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::BottomRight);
-        mStyle->SetMaterial(widget->GetId() + mSelector + key, std::move(gradient));
+        mStyle->SetMaterial(MapProperty(key), std::move(gradient));
 
-        mPainter->DeleteMaterialInstanceByKey(widget->GetId() + mSelector + key);
+        mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
 
         UpdateWidgetStyleString();
     }
@@ -470,32 +445,30 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
     mUI.widgetTextColor->clearColor();
     if (widget)
     {
-        const auto& id = widget->GetId();
-
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-font"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-font")))
             SetValue(mUI.widgetFontName, prop.GetValue<std::string>());
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-size"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-size")))
             SetValue(mUI.widgetFontSize, QString::number(prop.GetValue<int>()));
 
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-vertical-align"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-vertical-align")))
             SetValue(mUI.widgetTextVAlign , prop.GetValue<engine::UIStyle::VerticalTextAlign>());
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-horizontal-align"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-horizontal-align")))
             SetValue(mUI.widgetTextHAlign , prop.GetValue<engine::UIStyle::HorizontalTextAlign>());
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-color"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-color")))
             SetValue(mUI.widgetTextColor , prop.GetValue<engine::Color4f>());
 
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-blink"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-blink")))
         {
             const auto value = prop.GetValue<bool>();
             SetValue(mUI.widgetTextBlink , value ? Qt::Checked : Qt::Unchecked);
         }
-        if (const auto& prop = mStyle->GetProperty(id + mSelector + "/text-underline"))
+        if (const auto& prop = mStyle->GetProperty(MapProperty("/text-underline")))
         {
             const auto value = prop.GetValue<bool>();
             SetValue(mUI.widgetTextUnderline , value ? Qt::Checked : Qt::Unchecked);
         }
 
-        if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/background"))
+        if (const auto* material = mStyle->GetMaterialType(MapProperty("/background")))
         {
             const auto type = material->GetType();
             if (type == engine::UIMaterial::Type::Null)
@@ -507,7 +480,7 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBackground, ListItemId(p->GetMaterialId()));
         }
-        if (const auto* material = mStyle->GetMaterialType(id + mSelector + "/border"))
+        if (const auto* material = mStyle->GetMaterialType(MapProperty("/border")))
         {
             const auto type = material->GetType();
             if (type == engine::UIMaterial::Type::Null)
@@ -521,6 +494,48 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
         }
     }
     mWidget = widget;
+}
+
+std::string WidgetStyleWidget::MapProperty(std::string key) const
+{
+    if (!mWidget)
+        return key;
+
+    // map some more primitive property keys to more specific
+    // property keys that are probably more like what the user
+    // wants/expects to happen.
+
+    if (mWidget->GetType() == uik::Widget::Type::PushButton)
+    {
+        if (key == "/background")
+            key = "/button-background";
+        else if (key == "/border")
+            key = "/button-border";
+    }
+    else if (mWidget->GetType() == uik::Widget::Type::Slider)
+    {
+        if (key == "/background")
+            key = "/slider-background";
+    }
+    else if (mWidget->GetType() == uik::Widget::Type::ProgressBar)
+    {
+        if (key == "/background")
+            key = "/progress-bar-background";
+    }
+    else if (mWidget->GetType() == uik::Widget::Type::SpinBox)
+    {
+        if (key == "/background")
+            key = "/text-edit-background";
+        else if (key == "/border")
+            key = "/text-edit-border";
+        else if (key == "/text-color")
+            key = "/edit-text-color";
+        else if (key == "/text-size")
+            key = "/edit-text-size";
+        else if (key == "/text-font")
+            key = "/edit-text-font";
+    }
+    return mWidget->GetId() + mSelector + key;
 }
 
 } // namespace
