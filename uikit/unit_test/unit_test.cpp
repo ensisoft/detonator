@@ -1072,6 +1072,35 @@ void unit_test_keyboard_radiobutton_select()
         TEST_REQUIRE(rad1->IsSelected() == false);
     }
 
+    // bug, rapid move up/down in succession without the selection yet
+    // being changed and with initial state being both buttons unselected.
+    // (realizing the change in selection between auto exclusive radio
+    // button group happens in PollAction)
+    {
+        uik::State state;
+        uik::Window window;
+        window.EnableVirtualKeys(true);
+
+        auto* rad0 = window.AddWidget(uik::RadioButton());
+        auto* rad1 = window.AddWidget(uik::RadioButton());
+        rad0->SetSelected(false);
+        rad1->SetSelected(false);
+        window.LinkChild(nullptr, rad0);
+        window.LinkChild(nullptr, rad1);
+
+        window.Show(state);
+        TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
+        TEST_REQUIRE(rad0->IsSelected() == false);
+        TEST_REQUIRE(rad1->IsSelected() == false);
+
+        uik::Window::KeyEvent event;
+        event.key = uik::VirtualKey::MoveDown;
+        event.time = 0.0;
+        window.KeyDown(event, state);
+        window.KeyDown(event, state);
+        TEST_REQUIRE(rad0->IsSelected() == false);
+        TEST_REQUIRE(rad1->IsSelected() == true);
+    }
 }
 
 int test_main(int argc, char* argv[])

@@ -661,12 +661,19 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
         if (focused_widget->GetType() == Widget::Type::RadioButton &&
             (key.key == VirtualKey::MoveDown || key.key == VirtualKey::MoveUp))
         {
+            // implement radio button audio-exclusivity by looking for sibling
+            // radio buttons under the same parent and then setting the appropriate
+            // state on the siblings when up/down virtual key is handled.
+
             auto* parent = mRenderTree.HasParent(focused_widget) ?
                            mRenderTree.GetParent(focused_widget) : nullptr;
 
+            // list all widgets under the same parent as the current focused widget.
             std::vector<Widget*> children;
             base::ListChildren(mRenderTree, parent, &children);
 
+            // remove siblings that aren't radio buttons or are radio buttons but cannot
+            // be selected, (i.e. are not visible or enabled)
             children.erase(std::remove_if(children.begin(), children.end(), [](Widget* w) {
                 if (w->GetType() != Widget::Type::RadioButton)
                     return true;
@@ -679,12 +686,19 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
                 return lhs->GetTabIndex() < rhs->GetTabIndex();
             });
 
+            // look for the currently selected radio button.
             unsigned radio_button_index = 0;
             for (radio_button_index=0; radio_button_index<children.size(); ++radio_button_index)
             {
                 if (WidgetCast<RadioButton>(children[radio_button_index])->IsSelected())
                     break;
             }
+            // the initial condition of radio buttons (in the editor) don't actually
+            // specify any unique selection between the group of buttons. thus
+            // it's possible to have a situation when not a single button has been
+            // yet selected.
+            if (radio_button_index == children.size())
+                radio_button_index = 0;
 
             if (key.key == VirtualKey::MoveUp)
             {
