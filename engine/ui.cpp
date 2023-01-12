@@ -423,14 +423,27 @@ std::string UIStyle::MakeStyleString(const std::string& filter) const
     return json.dump();
 }
 
-void UIStyle::ListMaterials(std::vector<MaterialEntry>* list) const
+void UIStyle::ListMaterials(std::vector<MaterialEntry>* materials) const
 {
     for (const auto& [key, material] : mMaterials)
     {
         MaterialEntry me;
         me.key = key;
         me.material = material.get();
-        list->push_back(std::move(me));
+        materials->push_back(std::move(me));
+    }
+}
+
+void UIStyle::GatherMaterials(const std::string& filter, std::vector<MaterialEntry>* materials) const
+{
+    for (const auto& [key, material] : mMaterials)
+    {
+        if (!base::Contains(key, filter))
+            continue;
+        MaterialEntry entry;
+        entry.key      = key;
+        entry.material = material.get();
+        materials->push_back(entry);
     }
 }
 

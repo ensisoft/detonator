@@ -100,6 +100,10 @@ namespace engine
         class UITexture : public UIMaterial
         {
         public:
+            UITexture() = default;
+            UITexture(std::string uri)
+              : mTextureUri(std::move(uri))
+            {}
             virtual MaterialClass GetClass(const ClassLibrary&) const override;
             virtual Type GetType() const override
             { return Type::Texture; }
@@ -430,6 +434,8 @@ namespace engine
             }
             mProperties[key] = value;
         }
+        void SetProperty(const std::string& key, const char* value)
+        { mProperties[key] = std::string(value); }
         void SetProperty(const std::string& key, const UIProperty& prop)
         { mProperties[key] = prop.GetAny(); }
         // Set a new material setting under the given material key.
@@ -457,9 +463,10 @@ namespace engine
 
         struct MaterialEntry {
             std::string key;
-            const UIMaterial* material = nullptr;
+            UIMaterial* material = nullptr;
         };
-        void ListMaterials(std::vector<MaterialEntry>* list) const;
+        void ListMaterials(std::vector<MaterialEntry>* materials) const;
+        void GatherMaterials(const std::string& filter, std::vector<MaterialEntry>* materials) const;
 
         void ClearProperties()
         { mProperties.clear(); }

@@ -1152,47 +1152,68 @@ void unit_test_packing_ui_style_resources()
      },
      {
        "key": "widget/text-font",
-       "value": "ws://fonts/style_font.otf"
+       "value": "ws://ui/fonts/style_font.otf"
      }
    ],
 
   "materials": [
      {
-       "key": "widget/background",
+       "key": "widget/border",
        "type": "Null"
+     },
+     {
+       "key": "widget/background",
+       "type": "Texture",
+       "texture": "ws://ui/textures/background.png"
      }
   ]
 }
 )");
+    // these are the source directories.
     TEST_REQUIRE(d.mkpath("ui"));
-    TEST_REQUIRE(d.mkpath("fonts"));
-    TEST_REQUIRE(app::WriteTextFile("fonts/widget_font.otf", "widget_font.otf"));
-    TEST_REQUIRE(app::WriteTextFile("fonts/window_font.otf", "window_font.otf"));
+    TEST_REQUIRE(d.mkpath("ui/fonts"));
+    TEST_REQUIRE(d.mkpath("ui/textures"));
     TEST_REQUIRE(app::WriteTextFile("ui/style.json", style));
+    TEST_REQUIRE(app::WriteTextFile("ui/fonts/widget_font.otf", "widget_font.otf"));
+    TEST_REQUIRE(app::WriteTextFile("ui/fonts/window_font.otf", "window_font.otf"));
+    TEST_REQUIRE(app::WriteTextFile("ui/textures/button.png", "button.png"));
+    TEST_REQUIRE(app::WriteTextFile("ui/textures/form.png", "form.png"));
 
     MakeDir("TestWorkspace");
     app::Workspace workspace("TestWorkspace");
 
-    // setup dummy font files
-    TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
-    TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/style_font.otf", "style_font.otf"));
+    // setup dummy static resources (static = URIs are encoded in the style.json)
+    TEST_REQUIRE(d.mkpath("TestWorkspace/ui"));
+    TEST_REQUIRE(d.mkpath("TestWorkspace/ui/fonts"));
+    TEST_REQUIRE(d.mkpath("TestWorkspace/ui/textures"));
+    TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/fonts/style_font.otf", "style_font.otf"));
+    TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/background.png", "background.png"));
     // set project settings.
     app::Workspace::ProjectSettings settings;
     workspace.SetProjectSettings(settings);
 
-    // setup a UI window with widget(s)
+    // setup a UI window with widgets with inline styling that contains
+    // some resource references.
     {
         uik::Label label;
 
+        uik::PushButton button;
+
         engine::UIStyle style;
-        style.SetProperty(label.GetId() + "/text-font", workspace.MapFileToWorkspace(std::string("fonts/widget_font.otf")));
-        style.SetProperty("window/radiobutton/text-font", workspace.MapFileToWorkspace(std::string("fonts/window_font.otf")));
+        style.SetProperty("window/radiobutton/text-font", "fs://ui/fonts/window_font.otf");
+        style.SetMaterial("window/form/background", engine::detail::UITexture("fs://ui/textures/form.png"));
+
+        style.SetProperty(label.GetId() + "/text-font", "fs://ui/fonts/widget_font.otf");
         label.SetStyleString(style.MakeStyleString(label.GetId()));
 
+        style.SetMaterial(button.GetId() + "/background", engine::detail::UITexture("fs://ui/textures/button.png"));
+        button.SetStyleString(style.MakeStyleString(button.GetId()));
+
         uik::Window window;
-        window.SetStyleName(workspace.MapFileToWorkspace(std::string("ui/style.json")));
+        window.SetStyleName("fs://ui/style.json");
         window.SetStyleString(style.MakeStyleString("window"));
         window.AddWidget(std::move(label));
+        window.AddWidget(std::move(button));
         app::UIResource ui_resource(window, "UI");
         workspace.SaveResource(ui_resource);
     }
@@ -1218,10 +1239,16 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(style_string.contains("materials"));
     TEST_REQUIRE(style_string.contains("pck://fonts/style_font.otf"));
     TEST_REQUIRE(!style_string.contains("ws://fonts/style_font.otf"));
+    TEST_REQUIRE(style_string.contains("pck://ui/textures/background.png"));
+    TEST_REQUIRE(!style_string.contains("ws://ui/textures/background.png"));
+
     // UI Font files should be copied into fonts/
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/widget_font.otf") == "widget_font.otf");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/window_font.otf") == "window_font.otf");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/style_font.otf") == "style_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/background.png") == "background.png");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/button.png") == "button.png");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/form.png") == "form.png");
 }
 
 // bug that happens when a texture is resampled and written out
