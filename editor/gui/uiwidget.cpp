@@ -79,6 +79,10 @@ std::vector<app::ResourceListItem> ListMaterials(const app::Workspace* workspace
     // all available in the same UI element.
     app::ResourceListItem item;
 
+    item.name = "UI_Image";
+    item.id   = "_ui_image";
+    materials.insert(materials.begin(), item);
+
     item.name = "UI_Gradient";
     item.id   = "_ui_gradient";
     materials.insert(materials.begin(), item);

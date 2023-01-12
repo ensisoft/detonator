@@ -191,6 +191,8 @@ private:
                     return "UI_Color";
                 else if (type == engine::UIMaterial::Type::Gradient)
                     return "UI_Gradient";
+                else if (type == engine::UIMaterial::Type::Texture)
+                    return "UI_Image";
                 else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 {
                     const auto& id = p->GetMaterialId();
@@ -285,9 +287,11 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
     QAction* set_material = menu->addAction(QIcon("icons:material.png"), "Material");
     QAction* set_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
     QAction* set_gradient = menu->addAction(QIcon("icons:color_gradient.png"), "Gradient");
+    QAction* set_image    = menu->addAction(QIcon("icons:image.png"), "Image");
     connect(set_material, &QAction::triggered, this, &DlgWidgetStyleProperties::SetWidgetMaterial);
     connect(set_color,    &QAction::triggered, this, &DlgWidgetStyleProperties::SetWidgetColor);
     connect(set_gradient, &QAction::triggered, this, &DlgWidgetStyleProperties::SetWidgetGradient);
+    connect(set_image,    &QAction::triggered, this, &DlgWidgetStyleProperties::SetWidgetImage);
     mUI.btnSelectMaterial->setMenu(menu);
 
     using T = uik::Widget::Type;
@@ -564,6 +568,8 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
                 SetValue(mUI.widgetMaterial, QString("UI_Color"));
             else if (type == engine::UIMaterial::Type::Gradient)
                 SetValue(mUI.widgetMaterial, QString("UI_Gradient"));
+            else if (type == engine::UIMaterial::Type::Texture)
+                SetValue(mUI.widgetMaterial, QString("UI_Image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetMaterial, ListItemId(p->GetMaterialId()));
         }
@@ -649,6 +655,8 @@ void DlgWidgetStyleProperties::SetPropertyValue()
             mStyle->SetMaterial(property_key, engine::detail::UIColor());
         else if (mUI.widgetMaterial->currentIndex() == 2)
             mStyle->SetMaterial(property_key, engine::detail::UIGradient());
+        else if (mUI.widgetMaterial->currentIndex() == 3)
+            mStyle->SetMaterial(property_key, engine::detail::UITexture("app://textures/Checkerboard.png"));
         else mStyle->SetMaterial(property_key, engine::detail::UIMaterialReference(GetItemId(mUI.widgetMaterial)));
 
         mPainter->DeleteMaterialInstanceByKey(property_key);
@@ -877,8 +885,6 @@ void DlgWidgetStyleProperties::SetWidgetColor()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    SetValue(mUI.widgetMaterial, QString("UI_Color"));
-
     mStyle->SetMaterial(property_key, engine::detail::UIColor(ToGfx(dlg.color())));
     mPainter->DeleteMaterialInstanceByKey(property_key);
     mModel->UpdateRow(row);
@@ -923,6 +929,35 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
     gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::BottomLeft);
     gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::BottomRight);
     mStyle->SetMaterial(property_key, std::move(gradient));
+
+    mPainter->DeleteMaterialInstanceByKey(property_key);
+
+    mModel->UpdateRow(row);
+
+    ShowPropertyValue();
+}
+
+void DlgWidgetStyleProperties::SetWidgetImage()
+{
+
+    const auto& indices = GetSelection(mUI.tableView);
+    if (indices.isEmpty())
+        return;
+
+    const auto row = indices[0].row();
+    const auto& prop = mModel->GetProperty(row);
+    const auto& selector = GetSelectorString((PropertySelector)GetValue(mUI.cmbSelector));
+    const auto& property_key = GetPropertyKey(prop.klass, mWidgetId, prop.key, selector);
+
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Image File"), "",
+        tr("Images (*.png *.jpg *.jpeg)"));
+    if (file.isEmpty())
+        return;
+
+    const auto& uri = mWorkspace->MapFileToWorkspace(file);
+
+    mStyle->SetMaterial(property_key, engine::detail::UITexture(app::ToUtf8(uri)));
 
     mPainter->DeleteMaterialInstanceByKey(property_key);
 
