@@ -49,9 +49,11 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
         QAction* set_background_material = menu->addAction(QIcon("icons:material.png"), "Material");
         QAction* set_background_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
         QAction* set_background_gradient = menu->addAction(QIcon("icons:color_gradient.png"), "Gradient");
+        QAction* set_background_image    = menu->addAction(QIcon("icons:image.png"), "Image");
         connect(set_background_material, &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundMaterial);
         connect(set_background_color,    &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundColor);
         connect(set_background_gradient, &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundGradient);
+        connect(set_background_image,    &QAction::triggered, this, &WidgetStyleWidget::SetBackgroundImage);
         mUI.btnSelectWidgetBackground->setMenu(menu);
     }
 
@@ -60,9 +62,11 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
         QAction* set_border_material = menu->addAction(QIcon("icons:material.png"), "Material");
         QAction* set_border_color    = menu->addAction(QIcon("icons:color_wheel.png"), "Color");
         QAction* set_border_gradient = menu->addAction(QIcon("icons:color_gradient.png"), "Gradient");
+        QAction* set_border_image    = menu->addAction(QIcon("icons:image.png"), "Image");
         connect(set_border_material, &QAction::triggered, this, &WidgetStyleWidget::SetBorderMaterial);
         connect(set_border_color,    &QAction::triggered, this, &WidgetStyleWidget::SetBorderColor);
         connect(set_border_gradient, &QAction::triggered, this, &WidgetStyleWidget::SetBorderGradient);
+        connect(set_border_image,    &QAction::triggered, this, &WidgetStyleWidget::SetBorderImage);
         mUI.btnSelectWidgetBorder->setMenu(menu);
     }
 
@@ -254,6 +258,11 @@ void WidgetStyleWidget::SetBackgroundGradient()
     SetMaterialGradient("/background");
 }
 
+void WidgetStyleWidget::SetBackgroundImage()
+{
+    SetMaterialImage("/background");
+}
+
 void WidgetStyleWidget::SetBorderMaterial()
 {
     if (auto* widget = mWidget)
@@ -264,7 +273,7 @@ void WidgetStyleWidget::SetBorderMaterial()
         SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));
 
         mStyle->SetMaterial(MapProperty("/border"),
-                            engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
+            engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         mPainter->DeleteMaterialInstanceByKey(MapProperty("/border"));
 
@@ -278,6 +287,11 @@ void WidgetStyleWidget::SetBorderColor()
 void WidgetStyleWidget::SetBorderGradient()
 {
     SetMaterialGradient("/border");
+}
+
+void WidgetStyleWidget::SetBorderImage()
+{
+    SetMaterialImage("/border");
 }
 
 void WidgetStyleWidget::UpdateCurrentWidgetProperties()
@@ -330,6 +344,8 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
             mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIColor());
         else if (mUI.widgetBackground->currentIndex() == 2)
             mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
+        else if (mUI.widgetBackground->currentIndex() == 3)
+            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
         else mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
         if (mUI.widgetBorder->currentIndex() == -1)
@@ -340,6 +356,8 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
             mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIColor());
         else if (mUI.widgetBorder->currentIndex() == 2)
             mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
+        else if (mUI.widgetBorder->currentIndex() == 3)
+            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
         else mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         // purge old material instances if any.
@@ -431,6 +449,26 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
     }
 }
 
+void WidgetStyleWidget::SetMaterialImage(const char* key)
+{
+    if (mWidget)
+    {
+        const auto& file = QFileDialog::getOpenFileName(this,
+            tr("Select Image File"), "",
+            tr("Images (*.png *.jpg *.jpeg)"));
+        if (file.isEmpty())
+            return;
+
+        const auto& uri = mWorkspace->MapFileToWorkspace(file);
+
+        mStyle->SetMaterial(MapProperty(key), engine::detail::UITexture(app::ToUtf8(uri)));
+
+        mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+
+        UpdateWidgetStyleString();
+    }
+}
+
 void WidgetStyleWidget::SetWidget(uik::Widget* widget)
 {
     SetValue(mUI.widgetFontName, -1);
@@ -477,6 +515,8 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
                 SetValue(mUI.widgetBackground, QString("UI_Color"));
             else if (type == engine::UIMaterial::Type::Gradient)
                 SetValue(mUI.widgetBackground, QString("UI_Gradient"));
+            else if (type == engine::UIMaterial::Type::Texture)
+                SetValue(mUI.widgetBackground, QString("UI_Image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBackground, ListItemId(p->GetMaterialId()));
         }
@@ -489,6 +529,8 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
                 SetValue(mUI.widgetBorder, QString("UI_Color"));
             else if (type == engine::UIMaterial::Type::Gradient)
                 SetValue(mUI.widgetBorder, QString("UI_Gradient"));
+            else if (type == engine::UIMaterial::Type::Texture)
+                SetValue(mUI.widgetBorder, QString("UI_Image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBorder, ListItemId(p->GetMaterialId()));
         }

@@ -91,15 +91,19 @@ namespace gui
         void SetBackgroundMaterial();
         void SetBackgroundColor();
         void SetBackgroundGradient();
+        void SetBackgroundImage();
 
         void SetBorderMaterial();
         void SetBorderColor();
         void SetBorderGradient();
+        void SetBorderImage();
+
     private:
         void UpdateCurrentWidgetProperties();
         void UpdateWidgetStyleString();
         void SetMaterialColor(const char* key);
         void SetMaterialGradient(const char* key);
+        void SetMaterialImage(const char* key);
         std::string MapProperty(std::string key) const;
     private:
         Ui::Style mUI;

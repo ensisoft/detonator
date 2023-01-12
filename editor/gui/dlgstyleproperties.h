@@ -84,6 +84,7 @@ namespace gui
         void SetWidgetMaterial();
         void SetWidgetColor();
         void SetWidgetGradient();
+        void SetWidgetImage();
     private:
         Ui::DlgStyleProperties mUI;
     private:
