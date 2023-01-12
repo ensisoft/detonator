@@ -41,6 +41,42 @@ namespace {
         if (!id.empty())
             list.push_back(app::FromUtf8(id));
     }
+
+    void PackUIStyleResources(engine::UIStyle& style, app::ResourcePacker& packer)
+    {
+        std::vector<engine::UIStyle::PropertyKeyValue> props;
+        style.GatherProperties("-font", &props);
+        for (auto& p : props)
+        {
+            std::string src_font_uri;
+            std::string dst_font_uri;
+            p.prop.GetValue(&src_font_uri);
+            packer.CopyFile(src_font_uri, "fonts/");
+            dst_font_uri = packer.MapUri(src_font_uri);
+            p.prop.SetValue(dst_font_uri);
+            style.SetProperty(p.key, p.prop);
+        }
+
+        // copy direct UI texture files over into the package.
+        // note that since we're copying texture files instead of doing
+        // material packing there's no texture packing taking place.
+        std::vector<engine::UIStyle::MaterialEntry> materials;
+        style.ListMaterials(&materials);
+        for (const auto& item : materials)
+        {
+            auto* material = item.material;
+            if (material->GetType() != engine::UIMaterial::Type::Texture)
+                continue;
+            auto* texture = dynamic_cast<engine::detail::UITexture*>(material);
+            std::string src_texture_uri;
+            std::string dst_texture_uri;
+            src_texture_uri = texture->GetTextureUri();
+            packer.CopyFile(src_texture_uri, "/ui/textures/");
+            dst_texture_uri = packer.MapUri(src_texture_uri);
+            texture->SetTextureUri(dst_texture_uri);
+        }
+    }
+
 } // namespace
 
 namespace app {
@@ -322,18 +358,8 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     {
         ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_uri);
     }
-    std::vector<engine::UIStyle::PropertyKeyValue> props;
-    style.GatherProperties("-font", &props);
-    for (auto& p : props)
-    {
-        std::string src_font_uri;
-        std::string dst_font_uri;
-        p.prop.GetValue(&src_font_uri);
-        packer.CopyFile(src_font_uri, "fonts/");
-        dst_font_uri = packer.MapUri(src_font_uri);
-        p.prop.SetValue(dst_font_uri);
-        style.SetProperty(p.key, p.prop);
-    }
+    PackUIStyleResources(style, packer);
+
     nlohmann::json style_json;
     style.SaveStyle(style_json);
     const auto& style_string_json = style_json.dump(2);
@@ -349,18 +375,9 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
         engine::UIStyle style;
         style.ParseStyleString(widget->GetId(), style_string);
-        std::vector<engine::UIStyle::PropertyKeyValue> props;
-        style.GatherProperties("-font", &props);
-        for (auto& p : props)
-        {
-            std::string src_font_uri;
-            std::string dst_font_uri;
-            p.prop.GetValue(&src_font_uri);
-            packer.CopyFile(src_font_uri, "fonts/");
-            dst_font_uri = packer.MapUri(src_font_uri);
-            p.prop.SetValue(dst_font_uri);
-            style.SetProperty(p.key, p.prop);
-        }
+
+        PackUIStyleResources(style, packer);
+
         style_string = style.MakeStyleString(widget->GetId());
         // this is a bit of a hack but we know that the style string
         // contains the widget id for each property. removing the
@@ -379,20 +396,11 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         DEBUG("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
         engine::UIStyle style;
         style.ParseStyleString("window", window_style_string);
-        std::vector<engine::UIStyle::PropertyKeyValue> props;
-        style.GatherProperties("-font", &props);
-        for (auto& p : props)
-        {
-            std::string src_font_uri;
-            std::string dst_font_uri;
-            p.prop.GetValue(&src_font_uri);
-            packer.CopyFile(src_font_uri, "fonts/");
-            dst_font_uri = packer.MapUri(src_font_uri);
-            p.prop.SetValue(dst_font_uri);
-            style.SetProperty(p.key, p.prop);
-        }
+
+        PackUIStyleResources(style, packer);
+
         window_style_string = style.MakeStyleString("window");
-        // this is a bit of a hack but we know that the style string
+        // this is a bit of a hack, but we know that the style string
         // contains the prefix "window" for each property. removing the
         // prefix from the style properties:
         // a) saves some space
