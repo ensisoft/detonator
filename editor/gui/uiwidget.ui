@@ -727,6 +727,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkShowBounds">
+            <property name="text">
+             <string>Show bounds</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="chkShowTabOrder">
             <property name="text">
              <string>Show tab order</string>
@@ -2047,6 +2057,7 @@
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowBounds</tabstop>
   <tabstop>chkShowTabOrder</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>widgetId</tabstop>
