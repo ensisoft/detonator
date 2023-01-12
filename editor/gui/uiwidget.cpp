@@ -553,6 +553,7 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     GetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -611,6 +612,7 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.widgetData,       false);
     SetVisible(mUI.lblHelp,          false);
     SetValue(mUI.chkShowGrid,        false);
+    SetValue(mUI.chkShowBounds,      false);
     SetValue(mUI.chkShowTabOrder,    false);
     SetValue(mUI.chkShowOrigin,      false);
     QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
@@ -668,6 +670,7 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.rotation);
     settings.SaveWidget("UI", mUI.chkShowOrigin);
     settings.SaveWidget("UI", mUI.chkShowGrid);
+    settings.SaveWidget("UI", mUI.chkShowBounds);
     settings.SaveWidget("UI", mUI.chkShowTabOrder);
     settings.SaveWidget("UI", mUI.chkSnap);
     settings.SaveWidget("UI", mUI.cmbGrid);
@@ -689,6 +692,7 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.rotation);
     settings.LoadWidget("UI", mUI.chkShowOrigin);
     settings.LoadWidget("UI", mUI.chkShowGrid);
+    settings.LoadWidget("UI", mUI.chkShowBounds);
     settings.LoadWidget("UI", mUI.chkSnap);
     settings.LoadWidget("UI", mUI.cmbGrid);
     settings.LoadWidget("UI", mUI.chkShowTabOrder);
@@ -1097,6 +1101,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.chkSnap,              false);
     SetEnabled(mUI.chkShowOrigin,        false);
     SetEnabled(mUI.chkShowGrid,          false);
+    SetEnabled(mUI.chkShowBounds,        false);
     SetEnabled(mUI.chkShowTabOrder,      false);
     mUI.widget->setFocus();
 }
@@ -1137,6 +1142,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.chkSnap,         true);
     SetEnabled(mUI.chkShowOrigin,   true);
     SetEnabled(mUI.chkShowGrid,     true);
+    SetEnabled(mUI.chkShowBounds,   true);
     SetEnabled(mUI.chkShowTabOrder, true);
 
     mMessageQueue.clear();
@@ -1157,6 +1163,7 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
+    SetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     SetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     SetUserProperty(resource, "widget", mUI.widget);
 
@@ -1933,7 +1940,8 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
-        gfx::DrawRectOutline(painter, gfx::FRect(0.0f, 0.0f, GetFormSize()), gfx::Color::HotPink);
+        if (GetValue(mUI.chkShowBounds))
+            gfx::DrawRectOutline(painter, gfx::FRect(0.0f, 0.0f, GetFormSize()), gfx::Color::HotPink);
     }
     else
     {
