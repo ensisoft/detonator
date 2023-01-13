@@ -26,6 +26,7 @@
 #  include <QSignalBlocker>
 #  include <QFileInfo>
 #  include <QPoint>
+#  include <QPixmap>
 #  include <color_selector.hpp>
 #  include <glm/glm.hpp>
 #include "warnpop.h"
@@ -148,6 +149,17 @@ inline void Decrement(QDoubleSpinBox* spin, float value = 1.0f)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() - value);
+}
+
+inline void SetImage(QLabel* label, const QPixmap& pixmap)
+{
+    const auto lbl_width = label->width();
+    const auto lbl_height = label->height();
+    const auto pix_widht = pixmap.width();
+    const auto pix_height = pixmap.height();
+    if (pix_widht > pix_height)
+        label->setPixmap(pixmap.scaledToWidth(lbl_width));
+    else label->setPixmap(pixmap.scaledToHeight(lbl_height));
 }
 
 inline QModelIndexList GetSelection(QTableView* view)

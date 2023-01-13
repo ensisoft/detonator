@@ -1359,6 +1359,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionImagePacker"/>
+    <addaction name="actionImageViewer"/>
     <addaction name="actionLaunchViewer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -2163,7 +2164,16 @@
      <normaloff>:/16x16_ico_png/application.png</normaloff>:/16x16_ico_png/application.png</iconset>
    </property>
    <property name="text">
-    <string>Viewer ...</string>
+    <string>Workspace Viewer ...</string>
+   </property>
+  </action>
+  <action name="actionImageViewer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
+   </property>
+   <property name="text">
+    <string>Image Viewer ...</string>
    </property>
   </action>
  </widget>

@@ -54,80 +54,6 @@
 #include "editor/gui/dlgtexturerect.h"
 #include "editor/gui/materialwidget.h"
 
-namespace {
-
-struct TexturePackImage {
-    QString name;
-    unsigned width  = 0;
-    unsigned height = 0;
-    unsigned xpos   = 0;
-    unsigned ypos   = 0;
-    unsigned index  = 0;
-};
-
-bool ReadTexturePack(const QString& json_file, std::vector<TexturePackImage>* out)
-{
-    QFile file(json_file);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        ERROR("Failed to open '%1' for reading. (%2)", json_file, file.error());
-        return false;
-    }
-    const auto& buff = file.readAll();
-    if (buff.isEmpty())
-    {
-        ERROR("JSON file '%1' contains no content.", json_file);
-        return false;
-    }
-    const auto* beg  = buff.data();
-    const auto* end  = buff.data() + buff.size();
-    const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
-    if (json.is_discarded())
-    {
-        ERROR("JSON file '%1' could not be parsed.", json_file);
-        return false;
-    }
-    if (!json.contains("images") || !json["images"].is_array())
-    {
-        ERROR("JSON file '%1' doesn't contain images array.");
-        return false;
-    }
-    for (const auto& img_json : json["images"].items())
-    {
-        const auto& obj = img_json.value();
-        std::string name;
-        unsigned w, h, x, y, index;
-        if (!base::JsonReadSafe(obj, "width", &w) ||
-            !base::JsonReadSafe(obj, "height", &h) ||
-            !base::JsonReadSafe(obj, "xpos", &x) ||
-            !base::JsonReadSafe(obj, "ypos", &y) ||
-            !base::JsonReadSafe(obj, "name", &name) ||
-            !base::JsonReadSafe(obj, "index", &index))
-        {
-            ERROR("Failed to read JSON image box data.");
-            continue;
-        }
-        TexturePackImage tpi;
-        tpi.name   = app::FromUtf8(name);
-        tpi.width  = w;
-        tpi.height = h;
-        tpi.xpos   = x;
-        tpi.ypos   = y;
-        tpi.index  = index;
-        out->push_back(std::move(tpi));
-    }
-
-    // finally sort based on the image index.
-    std::sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
-        return a.index < b.index;
-    });
-
-    INFO("Successfully parsed '%1'. %2 images found.", json_file, out->size());
-    return true;
-}
-
-} // namespace
-
 namespace gui
 {
 
@@ -1849,7 +1775,7 @@ void MaterialWidget::GetTextureProperties()
         SetValue(mUI.textureWidth,  width);
         SetValue(mUI.textureHeight, height);
         SetValue(mUI.textureDepth,  depth);
-        mUI.texturePreview->setPixmap(pix.scaledToHeight(128));
+        SetImage(mUI.texturePreview, pix);
     }
     else ERROR_RETURN("Failed to load texture preview.");
 
