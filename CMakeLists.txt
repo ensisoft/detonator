@@ -371,6 +371,9 @@ add_executable(GSEditor
     editor/gui/dlgtexturerect.h
     editor/gui/dlgtexturerect.ui
     editor/gui/dlgtexturerect.cpp
+    editor/gui/dlgtextureatlas.h
+    editor/gui/dlgtextureatlas.ui
+    editor/gui/dlgtextureatlas.cpp
     editor/gui/dlgimgpack.ui
     editor/gui/dlgimgpack.h
     editor/gui/dlgimgpack.cpp
