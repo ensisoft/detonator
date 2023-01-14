@@ -41,16 +41,16 @@ namespace gui
         void on_btnClose_clicked();
         void on_listWidget_currentRowChanged(int index);
         void on_colorChanged();
-
+        void on_padding_valueChanged(int);
+        void on_chkPot_stateChanged(int);
     private:
         void repack();
 
     private:
         Ui::DlgImgPack mUI;
     private:
-        QPixmap mPackedImage;
+        QImage mPackedImage;
         nlohmann::json mJson;
-        //QString mPackedImageJson;
     };
 
 } // namespace
