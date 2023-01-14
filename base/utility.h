@@ -50,6 +50,19 @@ inline bool IsPowerOfTwo(unsigned i)
     return (i & (i-1)) == 0;
 }
 
+inline unsigned NextPOT(unsigned v)
+{
+    // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+
 template<typename T> inline
 const T* GetOpt(const std::optional<T>& opt)
 {
