@@ -94,6 +94,7 @@ public:
         mRuntime->SetDataLoader(mEngineDataLoader);
         mRuntime->Init();
         mUIStyle.SetClassLibrary(mClasslib);
+        mUIStyle.SetDataLoader(mEngineDataLoader);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
         mRenderer.SetClassLibrary(mClasslib);
