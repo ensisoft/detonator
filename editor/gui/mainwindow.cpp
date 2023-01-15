@@ -556,7 +556,15 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         }
     }
 
-    setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
+    // like magic setting the window title fails when  the workspace load
+    // happens as part of the app startup, i.e. when loading the last workspace.
+    // Smells like some kind of Qt bug...
+    // WAR using a timer with one shot to set window title.
+    QTimer::singleShot(10, this, [this] {
+        if (mWorkspace)
+            setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
+    });
+
     SetValue(mUI.grpHelp, mWorkspace->GetName());
     mUI.workspace->setModel(&mWorkspaceProxy);
     mUI.actionSaveWorkspace->setEnabled(true);
