@@ -41,6 +41,7 @@ namespace engine
 {
     class ClassLibrary;
     class EngineData;
+    class Loader;
 
     // Interface for abstracting away how UI materials are sourced
     // or created.
@@ -64,7 +65,7 @@ namespace engine
         };
         virtual ~UIMaterial() = default;
         // Load/generate the actual material class.
-        virtual MaterialClass GetClass(const ClassLibrary& loader) const = 0;
+        virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const = 0;
         // Get the type of the UI material.
         virtual Type GetType() const = 0;
         // Load state from JSON. Returns true if successful.
@@ -86,7 +87,7 @@ namespace engine
         class UINullMaterial : public UIMaterial
         {
         public:
-            virtual MaterialClass GetClass(const ClassLibrary&) const override
+            virtual MaterialClass GetClass(const ClassLibrary&, const Loader& loader) const override
             { return nullptr; }
             virtual Type GetType() const override
             { return Type::Null; }
@@ -104,17 +105,27 @@ namespace engine
             UITexture(std::string uri)
               : mTextureUri(std::move(uri))
             {}
-            virtual MaterialClass GetClass(const ClassLibrary&) const override;
+            virtual MaterialClass GetClass(const ClassLibrary&, const Loader& loader) const override;
             virtual Type GetType() const override
             { return Type::Texture; }
             virtual bool FromJson(const nlohmann::json&) override;
             virtual void IntoJson(nlohmann::json& json) const override;
             std::string GetTextureUri() const
             { return mTextureUri; }
+            std::string GetMetafileUri() const
+            { return mMetafileUri; }
+            std::string GetTextureName() const
+            { return mTextureName; }
             void SetTextureUri(const std::string& uri)
             { mTextureUri = uri; }
+            void SetMetafileUri(const std::string& uri)
+            { mMetafileUri = uri; }
+            void SetTextureName(const std::string& name)
+            { mTextureName = name; }
         private:
             std::string mTextureUri;
+            std::string mTextureName;
+            std::string mMetafileUri;
         };
         // Create material from a gradient spec.
         class UIGradient : public UIMaterial
@@ -134,7 +145,7 @@ namespace engine
                 SetColor(bottom_right, ColorIndex::BottomRight);
             }
 
-            virtual MaterialClass GetClass(const ClassLibrary& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
             virtual Type GetType() const override
             { return Type::Gradient; }
             virtual bool FromJson(const nlohmann::json& json) override;
@@ -185,7 +196,7 @@ namespace engine
             UIColor() = default;
             UIColor(const gfx::Color4f& color) : mColor(color)
             {}
-            virtual MaterialClass GetClass(const ClassLibrary& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
             virtual Type GetType() const override
             { return Type::Color; }
             virtual bool FromJson(const nlohmann::json& json) override;
@@ -206,7 +217,7 @@ namespace engine
               : mMaterialId(std::move(id))
             {}
             UIMaterialReference() = default;
-            virtual MaterialClass GetClass(const ClassLibrary& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
             virtual bool FromJson(const nlohmann::json& json) override;
             virtual void IntoJson(nlohmann::json& json) const override;
             virtual Type GetType() const override
@@ -406,6 +417,8 @@ namespace engine
         // that needs to be loaded through the class library.
         void SetClassLibrary(const ClassLibrary* classlib)
         { mClassLib = classlib; }
+        void SetDataLoader(const Loader* loader)
+        { mLoader = loader; }
         // Returns whether the style contains a property by the given property key.
         bool HasProperty(const std::string& key) const;
         // Returns whether the style contains a material by the given material name.
@@ -488,6 +501,7 @@ namespace engine
 
     private:
         const ClassLibrary* mClassLib = nullptr;
+        const Loader* mLoader = nullptr;
         std::unordered_map<std::string, std::any> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
     };

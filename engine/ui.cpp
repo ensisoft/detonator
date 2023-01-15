@@ -35,6 +35,7 @@
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
+#include "engine/loader.h"
 
 namespace {
 bool ReadColor(const nlohmann::json& json, const std::string& name, gfx::Color4f* out)
@@ -54,7 +55,7 @@ namespace engine
 {
 namespace detail {
 
-UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& loader) const
+UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
     auto material = std::make_shared<gfx::GradientClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -89,7 +90,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
         base::JsonWrite(json, "gamma", mGamma.value());
 }
 
-UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& loader) const
+UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
     auto material = std::make_shared<gfx::ColorClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -108,13 +109,13 @@ void UIColor::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color", mColor);
 }
 
-UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary& loader) const
+UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
-    auto klass = loader.FindMaterialClassById(mMaterialId);
+    auto klass = classlib.FindMaterialClassById(mMaterialId);
     // currently, the material style that is associated with a paint struct
     // can use class names too. so also try to find with the name.
     if (klass == nullptr)
-        klass = loader.FindMaterialClassByName(mMaterialId);
+        klass = classlib.FindMaterialClassByName(mMaterialId);
     if (klass == nullptr)
         WARN("Unresolved UI material. [material='%1']", mMaterialId);
     return klass;
@@ -137,25 +138,87 @@ bool UIMaterialReference::IsAvailable(const ClassLibrary& loader) const
     return klass != nullptr;
 }
 
-UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary&) const
+UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
     auto material = std::make_shared<gfx::TextureMap2DClass>();
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     material->SetName("UITexture");
+
+    if (mMetafileUri.empty() || mTextureName.empty())
+        return material;
+
+    const auto& data = loader.LoadEngineDataUri(mMetafileUri);
+    if (!data)
+    {
+        WARN("Failed to load packed UITexture texture descriptor meta file. [uri='%1']", mMetafileUri);
+        return material;
+    }
+    DEBUG("Loaded UITexture descriptor meta file. [uri='%1']", mMetafileUri);
+    const auto* beg = (const char*)data->GetData();
+    const auto* end = (const char*)data->GetData() + data->GetSize();
+    const auto& [ok, json, error] = base::JsonParse(beg, end);
+    if (!ok)
+    {
+        WARN("Failed to parse packed UITexture JSON. [uri='%1', error='%2']", mMetafileUri, error);
+        return material;
+    }
+
+    unsigned img_width_px  = 0;
+    unsigned img_height_px = 0;
+    base::JsonReadSafe(json, "image_width", &img_width_px);
+    base::JsonReadSafe(json, "image_height", &img_height_px);
+    if (!img_width_px || !img_height_px)
+    {
+        WARN("Packed UITexture texture size not know. (uri='%1']", mMetafileUri);
+        return material;
+    }
+
+    unsigned img_rect_width_px  = 0;
+    unsigned img_rect_height_px = 0;
+    unsigned img_rect_xpos_px = 0;
+    unsigned img_rect_ypos_px = 0;
+    for (const auto& item : json["images"].items())
+    {
+        const auto& img_json = item.value();
+        std::string name;
+        base::JsonReadSafe(img_json, "name", &name);
+        if (name != mTextureName)
+            continue;
+
+        base::JsonReadSafe(img_json, "width", &img_rect_width_px);
+        base::JsonReadSafe(img_json, "height", &img_rect_height_px);
+        base::JsonReadSafe(img_json, "xpos", &img_rect_xpos_px);
+        base::JsonReadSafe(img_json, "ypos", &img_rect_ypos_px);
+        break;
+    }
+    if (!img_rect_width_px || !img_rect_height_px)
+    {
+        WARN("Packed UITexture sub rectangle description not found. [uri='%1', name='%2']", mMetafileUri, mTextureName);
+        return material;
+    }
+    gfx::FRect  rect;
+    rect.SetX(img_rect_xpos_px / (float)img_width_px);
+    rect.SetY(img_rect_ypos_px / (float)img_height_px);
+    rect.SetWidth(img_rect_width_px / (float)img_width_px);
+    rect.SetHeight(img_rect_height_px / (float)img_height_px);
+    material->SetTextureRect(rect);
     return material;
 }
 
 bool UITexture::FromJson(const nlohmann::json& json)
 {
-    if (!base::JsonReadSafe(json, "texture", &mTextureUri))
-        return false;
+    base::JsonReadSafe(json, "texture", &mTextureUri);
+    base::JsonReadSafe(json, "metafile", &mMetafileUri);
+    base::JsonReadSafe(json, "name", &mTextureName);
     return true;
 }
 
 void UITexture::IntoJson(nlohmann::json& json) const
 {
     base::JsonWrite(json, "texture", mTextureUri);
+    base::JsonWrite(json, "metafile", mMetafileUri);
+    base::JsonWrite(json, "name", mTextureName);
 }
 
 } // detail
@@ -193,7 +256,7 @@ UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
         WARN("Failed to parse UI style material string.");
         return nullptr;
     }
-    return factory->GetClass(*mClassLib);
+    return factory->GetClass(*mClassLib, *mLoader);
 }
 
 std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& key) const
@@ -202,7 +265,7 @@ std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& ke
     auto it = mMaterials.find(key);
     if (it == mMaterials.end())
         return std::nullopt;
-    return it->second->GetClass(*mClassLib);
+    return it->second->GetClass(*mClassLib, *mLoader);
 }
 
 UIProperty UIStyle::GetProperty(const std::string& key) const
