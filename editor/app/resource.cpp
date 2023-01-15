@@ -74,6 +74,12 @@ namespace {
             packer.CopyFile(src_texture_uri, "/ui/textures/");
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetTextureUri(dst_texture_uri);
+            src_texture_uri = texture->GetMetafileUri();
+            if (src_texture_uri.empty())
+                continue;
+            packer.CopyFile(src_texture_uri, "/ui/textures/");
+            dst_texture_uri = packer.MapUri(src_texture_uri);
+            texture->SetMetafileUri(dst_texture_uri);
         }
     }
 

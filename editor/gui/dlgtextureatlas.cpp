@@ -101,48 +101,39 @@ namespace gui
 DlgTextureAtlas::DlgTextureAtlas(QWidget* parent) : QDialog(parent)
 {
     mUI.setupUi(this);
+
+    SetVisible(mUI.btnCancel, false);
+    SetVisible(mUI.btnAccept, false);
 }
 
-void DlgTextureAtlas::on_btnSelectImage_clicked()
+void DlgTextureAtlas::LoadImage(const QString& file)
 {
-    const auto& file_name = QFileDialog::getOpenFileName(this,
-        tr("Select Image File"), "",
-        tr("Images (*.png *.jpg *.jpeg)"));
-    if (file_name.isEmpty())
-        return;
-
-    const QPixmap pixmap(file_name);
+    const QPixmap pixmap(file);
     if (pixmap.isNull())
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
         msg.setText(tr("There was a problem reading the image.\n'%1'\n"
-                       "Perhaps the image is not a valid image?").arg(file_name));
+                       "Perhaps the image is not a valid image?").arg(file));
         msg.exec();
         return;
     }
     SetImage(mUI.lblImage, pixmap);
-    SetValue(mUI.imageFile, file_name);
+    SetValue(mUI.imageFile, file);
     mImage = pixmap;
 }
 
-void DlgTextureAtlas::on_btnSelectJson_clicked()
+void DlgTextureAtlas::LoadJson(const QString& file)
 {
-    const auto& file_name = QFileDialog::getOpenFileName(this,
-        tr("Select Json File"), "",
-        tr("Json (*.json)"));
-    if (file_name.isEmpty())
-        return;
-
     std::vector<Image> image_list;
-    if (!ReadTexturePack(file_name, &image_list))
+    if (!ReadTexturePack(file, &image_list))
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
         msg.setText(tr("There was a problem reading the file.\n'%1'\n"
-                       "Perhaps the image is not a valid JSON file?").arg(file_name));
+                       "Perhaps the image is not a valid JSON file?").arg(file));
         msg.exec();
         return;
     }
@@ -153,12 +144,81 @@ void DlgTextureAtlas::on_btnSelectJson_clicked()
         item->setText(img.name);
     }
     mList = std::move(image_list);
-    SetValue(mUI.jsonFile, file_name);
+    SetValue(mUI.jsonFile, file);
+}
+void DlgTextureAtlas::SetDialogMode()
+{
+    SetVisible(mUI.btnClose, false);
+    SetVisible(mUI.btnAccept, true);
+    SetVisible(mUI.btnCancel, true);
+    SetEnabled(mUI.btnAccept, false);
+}
+
+QString DlgTextureAtlas::GetImageFileName() const
+{
+    return GetValue(mUI.imageFile);
+}
+QString DlgTextureAtlas::GetJsonFileName() const
+{
+    return GetValue(mUI.jsonFile);
+}
+QString DlgTextureAtlas::GetImageName() const
+{
+    const auto row = mUI.listWidget->currentRow();
+    if (row == -1)
+        return "";
+
+    return mList[row].name;
+}
+
+void DlgTextureAtlas::on_btnSelectImage_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Image File"), "",
+        tr("Images (*.png *.jpg *.jpeg)"));
+    if (file.isEmpty())
+        return;
+
+    LoadImage(file);
+}
+
+void DlgTextureAtlas::on_btnSelectJson_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Json File"), "",
+        tr("Json (*.json)"));
+    if (file.isEmpty())
+        return;
+
+    LoadJson(file);
 }
 
 void DlgTextureAtlas::on_btnClose_clicked()
 {
     close();
+}
+
+void DlgTextureAtlas::on_btnAccept_clicked()
+{
+    if (!FileExists(mUI.imageFile))
+    {
+        mUI.imageFile->setFocus();
+        return;
+    }
+    if (!FileExists(mUI.jsonFile))
+    {
+        mUI.jsonFile->setFocus();
+        return;
+    }
+    const auto row = mUI.listWidget->currentRow();
+    if (row == -1)
+        return;
+
+    accept();
+}
+void DlgTextureAtlas::on_btnCancel_clicked()
+{
+    reject();
 }
 
 void DlgTextureAtlas::on_listWidget_currentRowChanged(int index)
@@ -167,6 +227,7 @@ void DlgTextureAtlas::on_listWidget_currentRowChanged(int index)
     {
         SetValue(mUI.imgSize, QString(""));
         SetValue(mUI.imgPos, QString(""));
+        SetEnabled(mUI.btnAccept, false);
         mUI.lblImagePreview->setPixmap(QPixmap(":texture.png"));
         return;
     }
@@ -183,6 +244,9 @@ void DlgTextureAtlas::on_listWidget_currentRowChanged(int index)
                                   item.width,
                                   item.height);
     SetImage(mUI.lblImagePreview, img);
+
+    if (FileExists(mUI.imageFile) && FileExists(mUI.jsonFile))
+        SetEnabled(mUI.btnAccept, true);
 }
 
 } // namespace
