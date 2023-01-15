@@ -34,6 +34,7 @@
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgfont.h"
 #include "editor/gui/dlggradient.h"
+#include "editor/gui/dlgtextureatlas.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -453,15 +454,36 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
 {
     if (mWidget)
     {
-        const auto& file = QFileDialog::getOpenFileName(this,
+        QString image_file = QFileDialog::getOpenFileName(this,
             tr("Select Image File"), "",
             tr("Images (*.png *.jpg *.jpeg)"));
-        if (file.isEmpty())
+        if (image_file.isEmpty())
             return;
 
-        const auto& uri = mWorkspace->MapFileToWorkspace(file);
+        QString image_name;
+        QString json_file;
+        json_file = image_file + ".json";
+        if (FileExists(json_file))
+        {
+            DlgTextureAtlas dlg(this);
+            dlg.SetDialogMode();
+            dlg.show();
+            dlg.LoadImage(image_file);
+            dlg.LoadJson(json_file);
+            if (dlg.exec() == QDialog::Rejected)
+                return;
+            image_file = dlg.GetImageFileName();
+            json_file  = dlg.GetJsonFileName();
+            image_name = dlg.GetImageName();
+        }
+        const auto& image_uri = mWorkspace->MapFileToWorkspace(image_file);
+        const auto& json_uri  = mWorkspace->MapFileToWorkspace(json_file);
 
-        mStyle->SetMaterial(MapProperty(key), engine::detail::UITexture(app::ToUtf8(uri)));
+        engine::detail::UITexture texture;
+        texture.SetTextureUri(app::ToUtf8(image_uri));
+        texture.SetMetafileUri(app::ToUtf8(json_uri));
+        texture.SetTextureName(app::ToUtf8(image_name));
+        mStyle->SetMaterial(MapProperty(key), std::move(texture));
 
         mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
 

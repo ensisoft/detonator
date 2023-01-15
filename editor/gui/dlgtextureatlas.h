@@ -42,10 +42,21 @@ namespace gui
         };
 
         DlgTextureAtlas(QWidget* parent);
+
+        void LoadImage(const QString& file);
+        void LoadJson(const QString& file);
+        void SetDialogMode();
+
+        QString GetImageFileName() const;
+        QString GetJsonFileName() const;
+        QString GetImageName() const;
+
     private slots:
         void on_btnSelectImage_clicked();
         void on_btnSelectJson_clicked();
         void on_btnClose_clicked();
+        void on_btnAccept_clicked();
+        void on_btnCancel_clicked();
         void on_listWidget_currentRowChanged(int index);
     private:
         Ui::DlgTextureAtlas mUI;

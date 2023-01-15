@@ -507,6 +507,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.tree  = mUI.tree;
     mState.style = std::make_unique<engine::UIStyle>();
     mState.style->SetClassLibrary(workspace);
+    mState.style->SetDataLoader(workspace);
     mState.workspace = workspace;
     mState.painter.reset(new engine::UIPainter);
     mState.painter->SetStyle(mState.style.get());
@@ -2575,6 +2576,7 @@ bool UIWidget::LoadStyleVerbose(const QString& name)
 
     auto style = std::make_unique<engine::UIStyle>();
     style->SetClassLibrary(mState.workspace);
+    style->SetDataLoader(mState.workspace);
     if (!style->LoadStyle(*data))
     {
         QMessageBox msg(this);
@@ -2606,6 +2608,7 @@ bool UIWidget::LoadStyleQuiet(const std::string& uri)
     }
     auto style = std::make_unique<engine::UIStyle>();
     style->SetClassLibrary(mState.workspace);
+    style->SetDataLoader(mState.workspace);
     if (!style->LoadStyle(*data))
     {
         ERROR("Failed to load style data. [file='%1']", uri);
