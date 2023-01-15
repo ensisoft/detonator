@@ -481,6 +481,9 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
     SetValue(mUI.widgetBackground, -1);
     SetValue(mUI.widgetBorder, -1);
     mUI.widgetTextColor->clearColor();
+
+    mWidget = widget;
+
     if (widget)
     {
         if (const auto& prop = mStyle->GetProperty(MapProperty("/text-font")))
@@ -535,7 +538,6 @@ void WidgetStyleWidget::SetWidget(uik::Widget* widget)
                 SetValue(mUI.widgetBorder, ListItemId(p->GetMaterialId()));
         }
     }
-    mWidget = widget;
 }
 
 std::string WidgetStyleWidget::MapProperty(std::string key) const
