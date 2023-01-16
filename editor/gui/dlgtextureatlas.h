@@ -23,7 +23,12 @@
 #  include <QDialog>
 #  include <QString>
 #  include <QPixmap>
+#  include <QTimer>
 #include "warnpop.h"
+
+#include <memory>
+
+#include "graphics/fwd.h"
 
 namespace gui
 {
@@ -57,11 +62,32 @@ namespace gui
         void on_btnClose_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
-        void on_listWidget_currentRowChanged(int index);
+        void on_widgetColor_colorChanged(QColor color);
+        void on_listWidget_itemSelectionChanged();
+        void on_tabWidget_currentChanged(int);
+        void finished();
+        void timer();
+    private:
+        void OnPaintScene(gfx::Painter& painter, double secs);
+        void OnMousePress(QMouseEvent* mickey);
+        void OnMouseMove(QMouseEvent* mickey);
+        void OnMouseRelease(QMouseEvent* mickey);
+        void OnMouseDoubleClick(QMouseEvent* mickey);
+        bool OnKeyPress(QKeyEvent* event);
     private:
         Ui::DlgTextureAtlas mUI;
     private:
         std::vector<Image> mList;
+        std::size_t mSelectedIndex = 0;
+        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::unique_ptr<gfx::Material> mMaterial;
+        unsigned mWidth  = 0;
+        unsigned mHeight = 0;
         QPixmap mImage;
+        QTimer mTimer;
+        QPoint mTrackingOffset;
+        QPoint mCurrentPoint;
+        QPoint mStartPoint;
+        bool mTracking = false;
     };
 } // namespace

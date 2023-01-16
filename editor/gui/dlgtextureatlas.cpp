@@ -28,6 +28,8 @@
 #include <algorithm>
 
 #include "base/json.h"
+#include "graphics/painter.h"
+#include "graphics/drawing.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgtextureatlas.h"
 #include "editor/gui/utility.h"
@@ -38,13 +40,13 @@ namespace {
         QFile io(file);
         if (!io.open(QIODevice::ReadOnly))
         {
-            ERROR("Failed to open '%1' for reading. (%2)", file, io.error());
+            ERROR("Failed to open file for reading. [file='%1', error=%2]", file, io.error());
             return false;
         }
         const auto& buff = io.readAll();
         if (buff.isEmpty())
         {
-            ERROR("JSON file '%1' contains no content.", file);
+            ERROR("JSON file contains no JSON content. [file='%1']", file);
             return false;
         }
         const auto* beg  = buff.data();
@@ -52,12 +54,12 @@ namespace {
         const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
         if (json.is_discarded())
         {
-            ERROR("JSON file '%1' could not be parsed.", file);
+            ERROR("Failed to parse JSON file. [file='%1']", file);
             return false;
         }
         if (!json.contains("images") || !json["images"].is_array())
         {
-            ERROR("JSON file '%1' doesn't contain images array.");
+            ERROR("JSON file doesn't contain images array. [file='%1']", file);
             return false;
         }
         for (const auto& img_json : json["images"].items())
@@ -72,7 +74,7 @@ namespace {
                 !base::JsonReadSafe(obj, "name", &name) ||
                 !base::JsonReadSafe(obj, "index", &index))
             {
-                ERROR("Failed to read JSON image box data.");
+                WARN("Failed to read JSON image box data.");
                 continue;
             }
             gui::DlgTextureAtlas::Image img;
@@ -101,6 +103,27 @@ namespace gui
 DlgTextureAtlas::DlgTextureAtlas(QWidget* parent) : QDialog(parent)
 {
     mUI.setupUi(this);
+    mUI.widget->onPaintScene   = std::bind(&DlgTextureAtlas::OnPaintScene,   this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onMouseMove    = std::bind(&DlgTextureAtlas::OnMouseMove,    this, std::placeholders::_1);
+    mUI.widget->onMousePress   = std::bind(&DlgTextureAtlas::OnMousePress,   this, std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&DlgTextureAtlas::OnMouseRelease, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&DlgTextureAtlas::OnMouseDoubleClick, this, std::placeholders::_1);
+    mUI.widget->onKeyPress     = std::bind(&DlgTextureAtlas::OnKeyPress,     this, std::placeholders::_1);
+    mUI.widget->onZoomOut = [this]() {
+        float zoom = GetValue(mUI.zoom);
+        SetValue(mUI.zoom, zoom - 0.1);
+    };
+    mUI.widget->onZoomIn = [this]() {
+        float zoom = GetValue(mUI.zoom);
+        SetValue(mUI.zoom, zoom + 0.2);
+    };
+    mUI.widget->onInitScene = [&](unsigned, unsigned) {
+        mTimer.setInterval(1000.0/60.0);
+        mTimer.start();
+    };
+
+    connect(this, &QDialog::finished, this, &DlgTextureAtlas::finished);
+    connect(&mTimer, &QTimer::timeout, this, &DlgTextureAtlas::timer);
 
     SetVisible(mUI.btnCancel, false);
     SetVisible(mUI.btnAccept, false);
@@ -108,20 +131,38 @@ DlgTextureAtlas::DlgTextureAtlas(QWidget* parent) : QDialog(parent)
 
 void DlgTextureAtlas::LoadImage(const QString& file)
 {
-    const QPixmap pixmap(file);
-    if (pixmap.isNull())
+    auto source = std::make_unique<gfx::detail::TextureFileSource>();
+    source->SetFileName(app::ToUtf8(file));
+    source->SetName(app::ToUtf8(file));
+    auto bitmap = source->GetData();
+    if (!bitmap)
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("There was a problem reading the image.\n'%1'\n"
-                       "Perhaps the image is not a valid image?").arg(file));
+        msg.setText("The selected image file could not be loaded.");
         msg.exec();
         return;
     }
-    SetImage(mUI.lblImage, pixmap);
+
+    const auto img_width = bitmap->GetWidth();
+    const auto img_height = bitmap->GetHeight();
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto scale = std::min((float)width/(float)img_width,
+                                (float)height/(float)img_height);
+
+    mWidth    = img_width;
+    mHeight   = img_height;
+    mClass = std::make_shared<gfx::TextureMap2DClass>();
+    mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    mClass->SetTexture(std::move(source));
+    mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+    mClass->SetGamma(1.0f);
+    mMaterial = gfx::CreateMaterialInstance(mClass);
+    mSelectedIndex = mList.size(); // clear selection from image.
     SetValue(mUI.imageFile, file);
-    mImage = pixmap;
+    SetValue(mUI.zoom, scale);
 }
 
 void DlgTextureAtlas::LoadJson(const QString& file)
@@ -137,13 +178,22 @@ void DlgTextureAtlas::LoadJson(const QString& file)
         msg.exec();
         return;
     }
-    ClearList(mUI.listWidget);
-    for (const auto& img : image_list)
+    ClearTable(mUI.listWidget);
+    ResizeTable(mUI.listWidget, image_list.size(), 5);
+    mUI.listWidget->setHorizontalHeaderLabels({"Name", "Width", "Height", "X", "Y"});
+
+    for (unsigned row=0; row<image_list.size(); ++row)
     {
-        QListWidgetItem* item = new QListWidgetItem(mUI.listWidget);
-        item->setText(img.name);
+        const auto& img = image_list[row];
+        SetTableItem(mUI.listWidget, row, 0, img.name);
+        SetTableItem(mUI.listWidget, row, 1, img.width);
+        SetTableItem(mUI.listWidget, row, 2, img.height);
+        SetTableItem(mUI.listWidget, row, 3, img.xpos);
+        SetTableItem(mUI.listWidget, row, 4, img.ypos);
     }
+
     mList = std::move(image_list);
+    mSelectedIndex = mList.size();
     SetValue(mUI.jsonFile, file);
 }
 void DlgTextureAtlas::SetDialogMode()
@@ -164,11 +214,19 @@ QString DlgTextureAtlas::GetJsonFileName() const
 }
 QString DlgTextureAtlas::GetImageName() const
 {
-    const auto row = mUI.listWidget->currentRow();
-    if (row == -1)
-        return "";
-
-    return mList[row].name;
+    if (mUI.tabWidget->currentIndex() == 0)
+    {
+        if (mSelectedIndex < mList.size())
+            return mList[mSelectedIndex].name;
+    }
+    else
+    {
+        const auto row = mUI.listWidget->currentRow();
+        if (row > 0 && row < mList.size())
+            return mList[row].name;
+    }
+    BUG("Image index is not properly set.");
+    return "";
 }
 
 void DlgTextureAtlas::on_btnSelectImage_clicked()
@@ -210,9 +268,17 @@ void DlgTextureAtlas::on_btnAccept_clicked()
         mUI.jsonFile->setFocus();
         return;
     }
-    const auto row = mUI.listWidget->currentRow();
-    if (row == -1)
-        return;
+    if (mUI.tabWidget->currentIndex() == 0)
+    {
+        if (mSelectedIndex == mList.size())
+            return;
+    }
+    else
+    {
+        const auto row = mUI.listWidget->currentRow();
+        if (row == -1)
+            return;
+    }
 
     accept();
 }
@@ -221,32 +287,134 @@ void DlgTextureAtlas::on_btnCancel_clicked()
     reject();
 }
 
-void DlgTextureAtlas::on_listWidget_currentRowChanged(int index)
+void DlgTextureAtlas::on_widgetColor_colorChanged(QColor color)
 {
-    if (index == -1)
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
+void DlgTextureAtlas::on_listWidget_itemSelectionChanged()
+{
+    const auto row = mUI.listWidget->currentRow();
+    SetEnabled(mUI.btnAccept, row != -1);
+}
+
+void DlgTextureAtlas::on_tabWidget_currentChanged(int)
+{
+    if (mUI.tabWidget->currentIndex() == 0)
     {
-        SetValue(mUI.imgSize, QString(""));
-        SetValue(mUI.imgPos, QString(""));
-        SetEnabled(mUI.btnAccept, false);
-        mUI.lblImagePreview->setPixmap(QPixmap(":texture.png"));
-        return;
+        if (mSelectedIndex == mList.size())
+            SetEnabled(mUI.btnAccept, false);
+        else SetEnabled(mUI.btnAccept, true);
     }
+    else
+    {
+        const auto row = mUI.listWidget->currentRow();
+        SetEnabled(mUI.btnAccept, row != -1);
+    }
+}
 
-    const auto& item = mList[index];
-    SetValue(mUI.imgSize, app::toString("w=%1, h=%2", item.width, item.height));
-    SetValue(mUI.imgPos, app::toString("x=%1, y=%2", item.xpos, item.ypos));
+void DlgTextureAtlas::finished()
+{
+    mUI.widget->dispose();
+}
+void DlgTextureAtlas::timer()
+{
+    mUI.widget->triggerPaint();
+}
 
-    if (mImage.isNull())
+void DlgTextureAtlas::OnPaintScene(gfx::Painter& painter, double secs)
+{
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
+
+    if (!mMaterial)
         return;
 
-    const auto& img = mImage.copy(item.xpos,
-                                  item.ypos,
-                                  item.width,
-                                  item.height);
-    SetImage(mUI.lblImagePreview, img);
+    const float width  = mUI.widget->width();
+    const float height = mUI.widget->height();
+    painter.SetViewport(0, 0, width, height);
 
-    if (FileExists(mUI.imageFile) && FileExists(mUI.jsonFile))
-        SetEnabled(mUI.btnAccept, true);
+    const float zoom   = GetValue(mUI.zoom);
+    const float img_width  = mWidth * zoom;
+    const float img_height = mHeight * zoom;
+    const auto xpos = (width - img_width) * 0.5f;
+    const auto ypos = (height - img_height) * 0.5f;
+
+    gfx::FRect img_rect(0.0f, 0.0f, img_width, img_height);
+    img_rect.Translate(xpos, ypos);
+    img_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
+    gfx::FillRect(painter, img_rect, *mMaterial);
+
+    if (mList.empty() || mSelectedIndex == mList.size())
+        return;
+
+    const auto& img = mList[mSelectedIndex];
+
+    gfx::FRect sel_rect(0.0f, 0.0f, img.width*zoom, img.height*zoom);
+    sel_rect.Translate(xpos, ypos);
+    sel_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
+    sel_rect.Translate(img.xpos*zoom, img.ypos*zoom);
+    gfx::DrawRectOutline(painter, sel_rect, gfx::CreateMaterialFromColor(gfx::Color::Green));
+}
+void DlgTextureAtlas::OnMousePress(QMouseEvent* mickey)
+{
+    mStartPoint = mickey->pos();
+
+    if (mickey->button() == Qt::RightButton)
+        mTracking = true;
+    else if (mickey->button() == Qt::LeftButton)
+    {
+        if (mList.empty() || !mMaterial)
+            return;
+        const float width = mUI.widget->width();
+        const float height = mUI.widget->height();
+        const float zoom   = GetValue(mUI.zoom);
+        const float img_width = mWidth * zoom;
+        const float img_height = mHeight * zoom;
+        const auto xpos = (width - img_width) * 0.5f;
+        const auto ypos = (height - img_height) * 0.5f;
+        const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
+        const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
+
+        for (mSelectedIndex=0; mSelectedIndex<mList.size(); ++mSelectedIndex)
+        {
+            const auto& img = mList[mSelectedIndex];
+            if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width)
+                continue;
+            if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height)
+                continue;
+
+            break;
+        }
+        if (mSelectedIndex == mList.size())
+            SetEnabled(mUI.btnAccept, false);
+        else SetEnabled(mUI.btnAccept, true);
+    }
+}
+void DlgTextureAtlas::OnMouseMove(QMouseEvent* mickey)
+{
+    mCurrentPoint = mickey->pos();
+
+    if (!mTracking)
+        return;
+
+    mTrackingOffset += (mCurrentPoint - mStartPoint);
+    mStartPoint = mCurrentPoint;
+}
+void DlgTextureAtlas::OnMouseRelease(QMouseEvent* mickey)
+{
+    mTracking = false;
+}
+
+void DlgTextureAtlas::OnMouseDoubleClick(QMouseEvent* mickey)
+{
+    OnMousePress(mickey);
+    if (mSelectedIndex < mList.size())
+        accept();
+}
+
+bool DlgTextureAtlas::OnKeyPress(QKeyEvent* event)
+{
+    return false;
 }
 
 } // namespace
