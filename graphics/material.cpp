@@ -2296,7 +2296,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         // buffer have not changed.
         texture = device.MakeTexture(name);
 
-        auto bitmap = mText.TryRasterize();
+        auto bitmap = mText.Rasterize();
         if (!bitmap)
             return;
         const auto width  = bitmap->GetWidth();
