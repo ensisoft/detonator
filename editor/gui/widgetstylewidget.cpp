@@ -338,32 +338,28 @@ void WidgetStyleWidget::UpdateCurrentWidgetProperties()
             mStyle->SetProperty(MapProperty("/text-underline"), false);
 
         if (mUI.widgetBackground->currentIndex() == -1)
-            mStyle->DeleteMaterial(MapProperty("/background"));
+            DeleteMaterial(MapProperty("/background"));
         else if (mUI.widgetBackground->currentIndex() == 0)
-            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UINullMaterial());
+            SetMaterial(MapProperty("/background"), engine::detail::UINullMaterial());
         else if (mUI.widgetBackground->currentIndex() == 1)
-            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIColor());
+            SetMaterial(MapProperty("/background"), engine::detail::UIColor());
         else if (mUI.widgetBackground->currentIndex() == 2)
-            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
+            SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
         else if (mUI.widgetBackground->currentIndex() == 3)
-            mStyle->SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
-        else mStyle->SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
+            SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+        else SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
         if (mUI.widgetBorder->currentIndex() == -1)
-            mStyle->DeleteMaterial(MapProperty("/border"));
+            DeleteMaterial(MapProperty("/border"));
         else if (mUI.widgetBorder->currentIndex() == 0)
-            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UINullMaterial());
+            SetMaterial(MapProperty("/border"), engine::detail::UINullMaterial());
         else if (mUI.widgetBorder->currentIndex() == 1)
-            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIColor());
+            SetMaterial(MapProperty("/border"), engine::detail::UIColor());
         else if (mUI.widgetBorder->currentIndex() == 2)
-            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
+            SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
         else if (mUI.widgetBorder->currentIndex() == 3)
-            mStyle->SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
-        else mStyle->SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
-
-        // purge old material instances if any.
-        mPainter->DeleteMaterialInstanceByKey(MapProperty("/border"));
-        mPainter->DeleteMaterialInstanceByKey(MapProperty("/background"));
+            SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+        else SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         UpdateWidgetStyleString();
 
@@ -602,6 +598,29 @@ std::string WidgetStyleWidget::MapProperty(std::string key) const
             key = "/edit-text-font";
     }
     return mWidget->GetId() + mSelector + key;
+}
+
+template<typename T>
+void WidgetStyleWidget::SetMaterial(const std::string& key, T material)
+{
+    // if the material already exists and has the same type as the
+    // new material then
+    if (const auto* prev = mStyle->GetMaterialType(key))
+    {
+        if (prev->GetType() == material.GetType())
+            return;
+    }
+    mStyle->SetMaterial(key, std::move(material));
+    // purge old material instance and force the painter
+    // to recreate the material instance so that the changes
+    // take effect
+    mPainter->DeleteMaterialInstanceByKey(key);
+}
+
+void WidgetStyleWidget::DeleteMaterial(const std::string& key)
+{
+    mStyle->DeleteMaterial(key);
+    mPainter->DeleteMaterialInstanceByKey(key);
 }
 
 } // namespace
