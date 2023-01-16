@@ -105,6 +105,10 @@ namespace gui
         void SetMaterialGradient(const char* key);
         void SetMaterialImage(const char* key);
         std::string MapProperty(std::string key) const;
+
+        template<typename T>
+        void SetMaterial(const std::string& key, T material);
+        void DeleteMaterial(const std::string& key);
     private:
         Ui::Style mUI;
     private:
