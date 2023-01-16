@@ -60,11 +60,8 @@ namespace gfx
         void SetBufferSize(unsigned width, unsigned height);
 
         // Rasterize the text buffer contents into a bitmap.
-        // Throws an exception on an error.
+        // Returns nullptr if the rasterization fails.
         std::shared_ptr<AlphaMask> Rasterize() const;
-        // Try to rasterize the contents into a a bitmap.
-        // Returns nullptr one error.
-        std::shared_ptr<AlphaMask> TryRasterize() const;
 
         bool ComputeTextMetrics(unsigned* width, unsigned* height) const;
 

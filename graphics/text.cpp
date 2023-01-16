@@ -408,6 +408,11 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
     // height of all the text blocks and the maximum line width.
     for (const auto& text : mText)
     {
+        // hmm, maybe not exactly the right place to do this but 
+        // certainly convenient....
+        if (text.font.empty())
+            return nullptr;
+
         if (fontname != text.font)
         {
             // make sure to call FT_Done_Face before discarding the font data buffer!
@@ -415,16 +420,17 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
             // make sure to keep the font data buffer around while the face exists.
             fontbuff = gfx::LoadResource(text.font);
             if (!fontbuff)
-                throw std::runtime_error("Failed to load font file: " + text.font);
+                ERROR_RETURN(nullptr, "Failed to load font file. [font='%1]", text.font);
+
             if (FT_New_Memory_Face(freetype.library, (const FT_Byte*)fontbuff->GetData(),
                                    fontbuff->GetSize(), 0, &face))
-                throw std::runtime_error("Failed to load font file: " + text.font);
+                ERROR_RETURN(nullptr, "Failed to load font face. [font='%1']", text.font);
             face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
             if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
-                throw std::runtime_error("Font doesn't support Unicode");
+                ERROR_RETURN(nullptr, "Font doesn't support Unicode. [font='%1']", text.font);
             if (FT_Set_Pixel_Sizes(face, 0, text.fontsize))
-                throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(text.fontsize));
+                ERROR_RETURN(nullptr, "Font doesn't support expected pixel size. [font='%1', size='%2']", text.font, text.fontsize);
 
             fontsize = text.fontsize;
             fontname = text.font;
@@ -432,7 +438,7 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
         if (fontsize != text.fontsize)
         {
             if (FT_Set_Pixel_Sizes(face, 0, text.fontsize))
-                throw std::runtime_error("Font doesn't support pixel size: " + std::to_string(text.fontsize));
+                ERROR_RETURN(nullptr, "Font doesn't support expected pixel size. [font='%1', size='%2']", text.font, text.fontsize);
         }
 
         TextBlock block;
@@ -504,33 +510,10 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
     return out;
 }
 
-std::shared_ptr<AlphaMask> TextBuffer::TryRasterize() const
-{
-    try
-    {
-        // hmm, maybe not exactly the right place to do this but not
-        // certainly convenient....
-        // check for empty font settings which will cause an exception
-        // to be thrown.
-        for (const auto& text : mText)
-        {
-            if (text.font.empty())
-                return nullptr;
-        }
-        return Rasterize();
-    }
-    catch (const std::exception& e)
-    {
-        ERROR(e.what());
-        ERROR("Failed to rasterize text buffer.");
-    }
-    return nullptr;
-}
-
 bool TextBuffer::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
 {
     // todo: implement better, using font metrics and not using rasterization
-    auto buffer = TryRasterize();
+    auto buffer = Rasterize();
     if (!buffer)
         return false;
     *width  = buffer->GetWidth();
