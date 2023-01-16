@@ -367,6 +367,36 @@ inline void ClearList(QListWidget* list)
     list->clear();
 }
 
+inline void ClearTable(QTableWidget* table)
+{
+    QSignalBlocker s(table);
+    table->clearContents();
+}
+
+inline void ResizeTable(QTableWidget* table, unsigned rows, unsigned cols)
+{
+    QSignalBlocker s(table);
+    table->setRowCount(rows);
+    table->setColumnCount(cols);
+}
+
+inline QTableWidgetItem* SetTableItem(QTableWidget* table, unsigned row, unsigned col, QString text)
+{
+    QSignalBlocker s(table);
+    QTableWidgetItem* item = new QTableWidgetItem(text);
+    table->setItem(row, col, item);
+    return item;
+}
+
+template<typename T>
+inline QTableWidgetItem* SetTableItem(QTableWidget* table, unsigned row, unsigned col, T value)
+{
+    QSignalBlocker s(table);
+    QTableWidgetItem* item = new QTableWidgetItem(app::toString(value));
+    table->setItem(row, col, item);
+    return item;
+}
+
 inline void SetList(QListWidget* list, const ResourceList& items)
 {
     // maintain the current/previous selections
