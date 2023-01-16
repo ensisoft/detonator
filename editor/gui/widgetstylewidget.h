@@ -99,7 +99,8 @@ namespace gui
         void SetBorderImage();
 
     private:
-        void UpdateCurrentWidgetProperties();
+        void ShowWidgetProperties();
+        void UpdateWidgetProperties();
         void UpdateWidgetStyleString();
         void SetMaterialColor(const char* key);
         void SetMaterialGradient(const char* key);
