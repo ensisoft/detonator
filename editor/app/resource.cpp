@@ -428,12 +428,9 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
             if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
             {
                 auto& text_buffer = text_source->GetTextBuffer();
-                for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
-                {
-                    auto& text = text_buffer.GetText(j);
-                    packer.CopyFile(text.font, "fonts/");
-                    text.font = packer.MapUri(text.font);
-                }
+                auto& text_chunk  = text_buffer.GetText();
+                packer.CopyFile(text_chunk.font, "fonts/");
+                text_chunk.font = packer.MapUri(text_chunk.font);
             }
             else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
             {
@@ -449,12 +446,9 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
         if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
         {
             auto& text_buffer = text_source->GetTextBuffer();
-            for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
-            {
-                auto& text = text_buffer.GetText(j);
-                packer.CopyFile(text.font, "fonts/");
-                text.font = packer.MapUri(text.font);
-            }
+            auto& text_chunk  = text_buffer.GetText();
+            packer.CopyFile(text_chunk.font, "fonts/");
+            text_chunk.font = packer.MapUri(text_chunk.font);
         }
         else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
         {
@@ -477,12 +471,9 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                     if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
                     {
                         auto& text_buffer = text_source->GetTextBuffer();
-                        for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
-                        {
-                            auto& text = text_buffer.GetText(j);
-                            packer.CopyFile(text.font, "fonts/");
-                            text.font  = packer.MapUri(text.font);
-                        }
+                        auto& text_chunk  = text_buffer.GetText();
+                        packer.CopyFile(text_chunk.font, "fonts/");
+                        text_chunk.font  = packer.MapUri(text_chunk.font);
                     }
                     else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
                     {
@@ -498,12 +489,9 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                 if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
                 {
                     auto& text_buffer = text_source->GetTextBuffer();
-                    for (size_t j=0; j<text_buffer.GetNumTexts(); ++j)
-                    {
-                        auto& text = text_buffer.GetText(j);
-                        packer.CopyFile(text.font, "fonts/");
-                        text.font = packer.MapUri(text.font);
-                    }
+                    auto& text_chunk  = text_buffer.GetText();
+                    packer.CopyFile(text_chunk.font, "fonts/");
+                    text_chunk.font = packer.MapUri(text_chunk.font);
                 }
                 else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
                 {

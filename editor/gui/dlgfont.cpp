@@ -134,8 +134,7 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
         text_and_style.lineheight = 1.0f;
         gfx::TextBuffer text;
         text.SetBufferSize(mBoxWidth, mBoxHeight);
-        text.ClearText();
-        text.AddText(std::move(text_and_style));
+        text.SetText(std::move(text_and_style));
         gfx::TextMaterial material(std::move(text));
         material.SetRuntime(time_milliseconds / 1000.0);
         material.SetPointSampling(true);

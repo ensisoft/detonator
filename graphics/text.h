@@ -117,43 +117,49 @@ namespace gfx
         };
 
         // Add text to the buffer.
-        void AddText(const std::string& text, const std::string& font, unsigned font_size_px)
+        void SetText(const std::string& text, const std::string& font, unsigned font_size_px)
         {
             Text t;
             t.text = text;
             t.font = font;
             t.fontsize = font_size_px;
-            mText.push_back(t);
+            mText = std::move(t);
         }
 
         // Add text to the buffer for rasterization.
-        void AddText(const Text& text)
-        { mText.push_back(text); }
+        void SetText(const Text& text)
+        { mText = text; }
 
         // add text to the buffer for rasterization.
-        void AddText(Text&& text)
-        { mText.push_back(std::move(text)); }
+        void SetText(Text&& text)
+        { mText = std::move(text); }
 
         // Clear all texts from the text buffer.
         void ClearText()
-        { mText.clear(); }
+        {
+            mText.text.clear();
+            mText.font.clear();
+        }
+        void SetText(const std::string& text)
+        { mText.text = text; }
+        void SetFont(const std::string& font)
+        { mText.font = font; }
+        void SetFontSize(unsigned font_size_px)
+        { mText.fontsize = font_size_px; }
+        void SetLineHeight(float scaler)
+        { mText.lineheight = scaler; }
+        void SetUnderline(bool underline)
+        { mText.underline = underline; }
 
-        // Get the number of text objects currently in the text buffer.
-        size_t GetNumTexts() const
-        { return mText.size(); }
-
-        // Get the text blob at the given index
-        const Text& GetText(size_t index) const
-        { return base::SafeIndex(mText, index); }
-
-        // Get the text blob at the given index.
-        Text& GetText(size_t index)
-        { return base::SafeIndex(mText, index); }
+        const Text& GetText() const
+        { return mText; }
+        Text& GetText()
+        { return mText; }
 
         // Returns true if the text buffer contains now text objects
         // otherwise false.
         bool IsEmpty() const
-        { return mText.empty(); }
+        { return mText.text.empty(); }
 
         // Compute hash of the contents of the string buffer.
         std::size_t GetHash() const;
@@ -172,7 +178,7 @@ namespace gfx
         HorizontalAlignment mHorizontalAlign = HorizontalAlignment::AlignCenter;
         // vertical text alignment with respect to the rasterized buffer.
         VerticalAlignment mVerticalAlign = VerticalAlignment::AlignCenter;
-        std::vector<Text> mText;
+        Text mText;
     };
 
 } // namespace
