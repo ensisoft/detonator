@@ -517,27 +517,42 @@ public:
 
     virtual void ClearColor(const Color4f& color) override
     {
+        if (!SetupFBO())
+            return;
+
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
     }
     virtual void ClearStencil(int value) override
     {
+        if (!SetupFBO())
+            return;
+
         GL_CALL(glClearStencil(value));
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
     virtual void ClearDepth(float value) override
     {
+        if (!SetupFBO())
+            return;
+
         GL_CALL(glClearDepthf(value));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     }
     virtual void ClearColorDepth(const Color4f& color, float depth) override
     {
+        if (!SetupFBO())
+            return;
+
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClearDepthf(depth));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
     }
     virtual void ClearColorDepthStencil(const Color4f&  color, float depth, int stencil) override
     {
+        if (!SetupFBO())
+            return;
+
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClearDepthf(depth));
         GL_CALL(glClearStencil(stencil));
@@ -672,19 +687,14 @@ public:
 
     virtual void SetFramebuffer(const Framebuffer* fbo) override
     {
-        if (fbo)
-        {
-            const auto* impl = static_cast<const FramebufferImpl*>(fbo);
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, impl->GetHandle()));
-        }
-        else
-        {
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-        }
+        mFBO = (FramebufferImpl*)fbo;
     }
 
     virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
     {
+        if (!SetupFBO())
+            return;
+
         const auto* myprog = static_cast<const ProgImpl*>(&program);
         const auto* mygeom = static_cast<const GeomImpl*>(&geometry);
         myprog->SetFrameStamp(mFrameNumber);
@@ -1265,6 +1275,8 @@ public:
         caps->max_fbo_height        = max_fbo_size;
         caps->max_fbo_width         = max_fbo_size;
     }
+    virtual const Framebuffer* GetCurrentFramebuffer() const override
+    { return mCurrentFBO; }
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
     {
@@ -1376,6 +1388,23 @@ public:
             DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, offset=%3, full=%4%, type=%5]", buffer.name,
                   bytes, offset, percent_full, buffer.usage);
         }
+    }
+    bool SetupFBO()
+    {
+        if (mFBO)
+        {
+            auto* fbo = mFBO.value();
+            mFBO.reset();
+
+            if (fbo == nullptr)
+                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+            else if (fbo && fbo->IsReady())
+                return fbo->Complete();
+            else return fbo->Create() && fbo->Complete();
+
+            mCurrentFBO = fbo;
+        }
+        return true;
     }
 private:
     bool EnableIf(GLenum flag, bool on_off)
@@ -2275,10 +2304,71 @@ private:
                 DEBUG("Deleted frame buffer object. [handle=%1]", mHandle);
             }
         }
-        virtual bool Create(const Config& conf) override
+        virtual void SetConfig(const Config& conf) override
         {
             ASSERT(mHandle == 0);
-            ASSERT(conf.width && conf.height);
+            mConfig = conf;
+        }
+
+        virtual void SetColorTarget(Texture* texture) override
+        {
+            mColorTarget = static_cast<TextureImpl*>(texture);
+            mBindColor   = true;
+        }
+
+        virtual void SetResolveTarget(Texture* texture) override
+        {
+            mResolveTarget = static_cast<TextureImpl*>(texture);
+            mBindResolve   = true;
+        }
+
+        virtual void Resolve(Texture** color) const override
+        {
+            ASSERT(mColorTarget);
+            if (color)
+                *color = mColorTarget;
+        }
+        virtual unsigned GetWidth() const override
+        { return mConfig.width; }
+        virtual unsigned GetHeight() const override
+        { return mConfig.height; }
+        virtual Format GetFormat() const override
+        { return mConfig.format; }
+
+        bool Complete()
+        {
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+            if (!mBindColor && !mBindResolve)
+                return true;
+
+            if (mBindColor)
+            {
+                if (!mColorTarget)
+                {
+                    mColor = std::make_unique<TextureImpl>(mGL, mDevice);
+                    mColor->Upload(nullptr, mConfig.width, mConfig.height, Texture::Format::RGBA, false /*mips*/);
+                    mColor->SetName("FBO/" + mName + "/color0");
+                    mColorTarget = mColor.get();
+                }
+                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColorTarget->GetHandle(), 0));
+                mBindColor = false;
+            }
+            // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
+            // we're treating these status codes as BUGS in the engine code that is trying to create the
+            // frame buffer object and has violated the frame buffer completeness requirement or other
+            // creation parameter constraints.
+            const auto ret = mGL.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (ret == GL_FRAMEBUFFER_COMPLETE)
+                return true;
+            else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
+                ERROR("Unsupported FBO configuration. [name=%1]", mName);
+            else BUG("Incorrect FBO setup.");
+            return false;
+        }
+
+        bool Create()
+        {
+            ASSERT(mHandle == 0);
 
             // WebGL spec see.
             // https://registry.khronos.org/webgl/specs/latest/1.0/
@@ -2330,43 +2420,28 @@ private:
             // * MIP generation
             // * sRGB encoding
 
-            const auto xres = conf.width;
-            const auto yres = conf.height;
-
-            struct Binder {
-                Binder(const OpenGLFunctions& gl) : mGL(gl)
-                {
-                    GL_CALL(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mCurrentFBO));
-                }
-               ~Binder()
-                {
-                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFBO));
-                }
-            private:
-                const OpenGLFunctions& mGL;
-                GLint mCurrentFBO = 0;
-            } binder(mGL);
-
-            mColor = std::make_unique<TextureImpl>(mGL, mDevice);
-            mColor->Upload(nullptr, xres, yres, Texture::Format::RGBA, false /*mips*/);
-            mColor->SetName("FBO/" + mName + "/color0");
-
+            const auto xres = mConfig.width;
+            const auto yres = mConfig.height;
             GL_CALL(glGenFramebuffers(1, &mHandle));
             GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
 
-            if (conf.format == Format::ColorRGBA8)
+            // all the calls to bind the texture target to the framebuffer have been
+            // removed to Complete() function and are here for reference only.
+            // The split between Create() and Complete() allows the same FBO object
+            // to be reused with a different target texture.
+            if (mConfig.format == Format::ColorRGBA8)
             {
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
             }
-            else if (conf.format == Format::ColorRGBA8_Depth16)
+            else if (mConfig.format == Format::ColorRGBA8_Depth16)
             {
                 GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
                 GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
                 GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, xres, yres));
                 GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
             }
-            else if (conf.format == Format::ColorRGBA8_Depth24_Stencil8)
+            else if (mConfig.format == Format::ColorRGBA8_Depth24_Stencil8)
             {
                 if (mDevice.mContext->GetVersion() == Device::Context::Version::OpenGL_ES2)
                 {
@@ -2380,7 +2455,7 @@ private:
                     GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, xres, yres));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                    //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
                 }
                 else
                 {
@@ -2392,45 +2467,32 @@ private:
                     GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
                     GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                    //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
                 }
             }
-            // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
-            // we're treating these status codes as BUGS in the engine code that is trying to create the
-            // frame buffer object and has violated the frame buffer completeness requirement or other
-            // creation parameter constraints.
-            const auto ret = mGL.glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            if (ret == GL_FRAMEBUFFER_COMPLETE)
-                DEBUG("Created new FBO. [width=%1, height=%2, format=%3, handle=%4]", xres, yres, conf.format, mHandle);
-            else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
-                ERROR("Unsupported FBO configuration. [width=%1, height=%2, format=%3]", xres, yres, conf.format);
-            else BUG("Incorrect FBO setup.");
-            mConfig = conf;
-            return ret == GL_FRAMEBUFFER_COMPLETE;
+            DEBUG("New FBO object created. [width=%1, height=%2, format=%3, name=%4]", xres, yres, mConfig.format, mName);
+            return true;
         }
-        virtual void Resolve(Texture** color) const override
-        {
-            ASSERT(mColor);
-            *color = mColor.get();
-        }
-        virtual unsigned GetWidth() const override
-        { return mConfig.width; }
-        virtual unsigned GetHeight() const override
-        { return mConfig.height; }
-        virtual Format GetFormat() const override
-        { return mConfig.format; }
 
         GLuint GetHandle() const
         { return mHandle; }
+        bool IsReady() const
+        { return mHandle != 0; }
     private:
         const std::string mName;
         const OpenGLFunctions& mGL;
         OpenGLES2GraphicsDevice& mDevice;
+        // optional texture target for color buffer when the user
+        // has not specified a texture target.
         std::unique_ptr<TextureImpl> mColor;
         GLuint mHandle = 0;
         // this is either only depth or packed depth+stencil
         GLuint mDepthBuffer = 0;
         Config mConfig;
+        TextureImpl* mColorTarget = nullptr;
+        TextureImpl* mResolveTarget = nullptr;
+        bool mBindColor = true;
+        bool mBindResolve = true;
     };
 private:
     std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
@@ -2459,6 +2521,9 @@ private:
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;
     } mExtensions;
+
+    FramebufferImpl* mCurrentFBO = nullptr;
+    std::optional<FramebufferImpl*> mFBO;
 };
 
 namespace detail {
