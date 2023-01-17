@@ -394,69 +394,50 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
 {
     static FontLibrary freetype;
 
-    std::vector<TextComposite> blocks;
-    std::shared_ptr<const Resource> fontbuff;
-    std::string fontname;
-    unsigned fontsize = 0;
-
     // make sure to destroy face first on stack unwind before
     // font buff is released.
     FT_Face face = nullptr;
-    auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
 
     // rasterize the lines and accumulate the metrics for the
     // height of all the text blocks and the maximum line width.
-    for (const auto& text : mText)
+
+    // hmm, maybe not exactly the right place to do this but
+    // certainly convenient....
+    if (mText.font.empty())
+        return nullptr;
+
+    // make sure to keep the font data buffer around while the face exists.
+    auto fontbuff = gfx::LoadResource(mText.font);
+    if (!fontbuff)
+        ERROR_RETURN(nullptr, "Failed to load font file. [font='%1]", mText.font);
+
+    if (FT_New_Memory_Face(freetype.library, (const FT_Byte*)fontbuff->GetData(),
+                           fontbuff->GetSize(), 0, &face))
+        ERROR_RETURN(nullptr, "Failed to load font face. [font='%1']", mText.font);
+
+    auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
+
+    if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
+        ERROR_RETURN(nullptr, "Font doesn't support Unicode. [font='%1']", mText.font);
+    if (FT_Set_Pixel_Sizes(face, 0, mText.fontsize))
+        ERROR_RETURN(nullptr, "Font doesn't support expected pixel size. [font='%1', size='%2']", mText.font, mText.fontsize);
+
+    TextBlock block;
+    block.line_height = (face->size->metrics.height / EFFIN_MAGIC_SCALE) * mText.lineheight;
+    block.halign = mHorizontalAlign;
+    block.valign = mVerticalAlign;
+
+    std::vector<TextComposite> blocks;
+    std::stringstream ss(mText.text);
+    std::string line;
+    while (std::getline(ss, line))
     {
-        // hmm, maybe not exactly the right place to do this but 
-        // certainly convenient....
-        if (text.font.empty())
-            return nullptr;
-
-        if (fontname != text.font)
-        {
-            // make sure to call FT_Done_Face before discarding the font data buffer!
-            face_raii.reset();
-            // make sure to keep the font data buffer around while the face exists.
-            fontbuff = gfx::LoadResource(text.font);
-            if (!fontbuff)
-                ERROR_RETURN(nullptr, "Failed to load font file. [font='%1]", text.font);
-
-            if (FT_New_Memory_Face(freetype.library, (const FT_Byte*)fontbuff->GetData(),
-                                   fontbuff->GetSize(), 0, &face))
-                ERROR_RETURN(nullptr, "Failed to load font face. [font='%1']", text.font);
-            face_raii = base::MakeUniqueHandle(face, FT_Done_Face);
-
-            if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
-                ERROR_RETURN(nullptr, "Font doesn't support Unicode. [font='%1']", text.font);
-            if (FT_Set_Pixel_Sizes(face, 0, text.fontsize))
-                ERROR_RETURN(nullptr, "Font doesn't support expected pixel size. [font='%1', size='%2']", text.font, text.fontsize);
-
-            fontsize = text.fontsize;
-            fontname = text.font;
-        }
-        if (fontsize != text.fontsize)
-        {
-            if (FT_Set_Pixel_Sizes(face, 0, text.fontsize))
-                ERROR_RETURN(nullptr, "Font doesn't support expected pixel size. [font='%1', size='%2']", text.font, text.fontsize);
-        }
-
-        TextBlock block;
-        block.line_height = (face->size->metrics.height / EFFIN_MAGIC_SCALE) * text.lineheight;
-        block.halign = mHorizontalAlign;
-        block.valign = mVerticalAlign;
-
-        std::stringstream ss(text.text);
-        std::string line;
-        while (std::getline(ss, line))
-        {
-            LineRaster raster;
-            if (!line.empty())
-                raster = RasterizeLine(line, text, face);
-            block.lines.push_back(std::move(raster));
-        }
-        blocks.push_back(CompositeTextBlock(block, face));
+        LineRaster raster;
+        if (!line.empty())
+            raster = RasterizeLine(line, mText, face);
+        block.lines.push_back(std::move(raster));
     }
+    blocks.push_back(CompositeTextBlock(block, face));
 
     // compute total combined size for text blocks to be laid out vertically.
     int text_width_px  = 0;
@@ -528,14 +509,11 @@ std::size_t TextBuffer::GetHash() const
     hash = base::hash_combine(hash, mBufferHeight);
     hash = base::hash_combine(hash, mVerticalAlign);
     hash = base::hash_combine(hash, mHorizontalAlign);
-    for (const auto& t : mText)
-    {
-        hash = base::hash_combine(hash, t.text);
-        hash = base::hash_combine(hash, t.font);
-        hash = base::hash_combine(hash, t.lineheight);
-        hash = base::hash_combine(hash, t.fontsize);
-        hash = base::hash_combine(hash, t.underline);
-    }
+    hash = base::hash_combine(hash, mText.text);
+    hash = base::hash_combine(hash, mText.font);
+    hash = base::hash_combine(hash, mText.lineheight);
+    hash = base::hash_combine(hash, mText.fontsize);
+    hash = base::hash_combine(hash, mText.underline);
     return hash;
 }
 
@@ -545,40 +523,38 @@ void TextBuffer::IntoJson(data::Writer& data) const
     data.Write("height", mBufferHeight);
     data.Write("horizontal_alignment", mHorizontalAlign);
     data.Write("vertical_alignment", mVerticalAlign);
-    for (const auto& text : mText)
-    {
-        auto chunk = data.NewWriteChunk();
-        chunk->Write("string", text.text);
-        chunk->Write("font_file", text.font);
-        chunk->Write("font_size", text.fontsize);
-        chunk->Write("line_height", text.lineheight);
-        chunk->Write("underline", text.underline);
-        data.AppendChunk("texts", std::move(chunk));
-    }
+    // texts used to be an array before. but this simplification
+    // removes the array and only has one chunk
+    auto chunk = data.NewWriteChunk();
+    chunk->Write("string",      mText.text);
+    chunk->Write("font_file",   mText.font);
+    chunk->Write("font_size",   mText.fontsize);
+    chunk->Write("line_height", mText.lineheight);
+    chunk->Write("underline",   mText.underline);
+    data.AppendChunk("texts", std::move(chunk));
 }
 
 // static
 std::optional<TextBuffer> TextBuffer::FromJson(const data::Reader& data)
 {
     TextBuffer buffer;
-    if (!data.Read("width", &buffer.mBufferWidth) ||
-        !data.Read("height", &buffer.mBufferHeight) ||
-        !data.Read("horizontal_alignment", &buffer.mHorizontalAlign) ||
-        !data.Read("vertical_alignment", &buffer.mVerticalAlign))
-        return std::nullopt;
+    data.Read("width", &buffer.mBufferWidth);
+    data.Read("height", &buffer.mBufferHeight);
+    data.Read("horizontal_alignment", &buffer.mHorizontalAlign);
+    data.Read("vertical_alignment", &buffer.mVerticalAlign);
 
-
-    for (unsigned i=0; i<data.GetNumChunks("texts"); ++i)
+    if (data.GetNumChunks("texts"))
     {
-        const auto& chunk = data.GetReadChunk("texts", i);
-        Text t;
-        if (!chunk->Read("string", &t.text) ||
-            !chunk->Read("font_file", &t.font) ||
-            !chunk->Read("font_size", &t.fontsize) ||
-            !chunk->Read("line_height", &t.lineheight) |
-            !chunk->Read("underline", &t.underline))
-            return std::nullopt;
-        buffer.mText.push_back(std::move(t));
+        // texts used to be an array before. but this simplification
+        // removes the array and only has one chunk
+        const auto& chunk = data.GetReadChunk("texts", 0);
+        Text text;
+        chunk->Read("string",      &text.text);
+        chunk->Read("font_file",   &text.font);
+        chunk->Read("font_size",   &text.fontsize);
+        chunk->Read("line_height", &text.lineheight);
+        chunk->Read("underline",   &text.underline);
+        buffer.mText = std::move(text);
     }
     return buffer;
 }

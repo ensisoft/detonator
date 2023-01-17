@@ -359,7 +359,7 @@ void unit_test_sprite()
 
     gfx::TextBuffer text;
     text.SetBufferSize(100, 100);
-    text.AddText("hello world", "font.otf", 23);
+    text.SetText("hello world", "font.otf", 23);
     gfx::detail::TextureTextBufferSource buffer;
     buffer.SetTextBuffer(text);
     buffer.SetName("text");
@@ -430,10 +430,9 @@ void unit_test_sprite()
             const auto* other = SameCast(ret->AsSprite()->GetTextureSource(1), &buffer);
             TEST_REQUIRE(other->GetTextBuffer().GetBufferWidth() == 100);
             TEST_REQUIRE(other->GetTextBuffer().GetBufferHeight() == 100);
-            TEST_REQUIRE(other->GetTextBuffer().GetNumTexts() == 1);
-            TEST_REQUIRE(other->GetTextBuffer().GetText(0).text == "hello world");
-            TEST_REQUIRE(other->GetTextBuffer().GetText(0).font == "font.otf");
-            TEST_REQUIRE(other->GetTextBuffer().GetText(0).fontsize == 23);
+            TEST_REQUIRE(other->GetTextBuffer().GetText().text == "hello world");
+            TEST_REQUIRE(other->GetTextBuffer().GetText().font == "font.otf");
+            TEST_REQUIRE(other->GetTextBuffer().GetText().fontsize == 23);
         }
 
         TEST_REQUIRE(ret->AsSprite()->GetTextureSource(2)->GetSourceType() == gfx::TextureSource::Source::BitmapBuffer);

@@ -1530,7 +1530,7 @@ public:
             transform.Translate(150, 300);
 
             gfx::TextBuffer buff(300, 200);
-            buff.AddText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);
+            buff.SetText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);
 
             gfx::TextureMap2DClass material;
             material.SetTexture(gfx::CreateTextureFromText(buff));

@@ -60,7 +60,7 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
 
     if (!text.IsEmpty())
     {
-        const auto& text_and_style = text.GetText(0);
+        const auto& text_and_style = text.GetText();
         SetValue(mUI.cmbFont, text_and_style.font);
         SetValue(mUI.fontSize, text_and_style.fontsize);
         SetValue(mUI.underline, text_and_style.underline);
@@ -121,8 +121,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     text_and_style.lineheight = GetValue(mUI.lineHeight);
 
     mText.SetBufferSize(buffer_width, buffer_height);
-    mText.ClearText();
-    mText.AddText(std::move(text_and_style));
+    mText.SetText(std::move(text_and_style));
     mText.SetAlignment((gfx::TextBuffer::VerticalAlignment)GetValue(mUI.cmbVAlign));
     mText.SetAlignment((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
     if (adjust)

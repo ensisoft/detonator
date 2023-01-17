@@ -99,7 +99,7 @@ void DrawTextRect(Painter& painter,
     text_and_style.fontsize = font_size_px;
     text_and_style.underline = underline;
     text_and_style.lineheight = line_height;
-    buff.AddText(text_and_style);
+    buff.SetText(text_and_style);
 
     // unfortunately if no raster buffer dimensions were
     // specified the only way to figure them out is to

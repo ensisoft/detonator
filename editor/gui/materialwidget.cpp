@@ -622,11 +622,8 @@ void MaterialWidget::on_btnEditTexture_clicked()
             return;
 
         // map the font files.
-        for (size_t i=0; i<text.GetNumTexts(); ++i)
-        {
-            auto& style_and_text = text.GetText(i);
-            style_and_text.font  = mWorkspace->MapFileToWorkspace(style_and_text.font);
-        }
+        auto& style_and_text = text.GetText();
+        style_and_text.font  = mWorkspace->MapFileToWorkspace(style_and_text.font);
 
         // Update the texture source's TextBuffer
         ptr->SetTextBuffer(std::move(text));
@@ -921,11 +918,8 @@ void MaterialWidget::AddNewTextureMapFromText()
         return;
 
     // map the selected font files to the workspace.
-    for (size_t i = 0; i < text.GetNumTexts(); ++i)
-    {
-        auto& style_and_text = text.GetText(i);
-        style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
-    }
+    auto& style_and_text = text.GetText();
+    style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
 
     auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));
     source->SetName("TextBuffer");

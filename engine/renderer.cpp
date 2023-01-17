@@ -555,7 +555,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
                 buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignCenter);
             else if (text->GetHAlign() == TextItem::HorizontalTextAlign::Right)
                 buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignRight);
-            buffer.AddText(std::move(text_and_style));
+            buffer.SetText(std::move(text_and_style));
 
             // setup material to shade text.
             auto mat = gfx::CreateMaterialInstance(std::move(buffer));
