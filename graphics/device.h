@@ -281,6 +281,8 @@ namespace gfx
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
 
+        virtual const Framebuffer* GetCurrentFramebuffer() const = 0;
+
         // Create a rendering device appropriate for the given OpenGL graphics context.
         // Context should be a valid non-null context object.
         static

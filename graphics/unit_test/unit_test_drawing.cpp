@@ -445,6 +445,10 @@ public:
     {
 
     }
+    virtual const gfx::Framebuffer* GetCurrentFramebuffer() const override
+    {
+        return nullptr;
+    }
 
     const TestTexture& GetTexture(size_t index) const
     {

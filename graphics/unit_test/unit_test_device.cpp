@@ -306,62 +306,9 @@ void main() {
     }
 }
 
-void unit_test_framebuffer()
+void unit_test_render_fbo(gfx::Framebuffer::Format format)
 {
     auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
-
-    {
-        auto* fbo = dev->FindFramebuffer("test");
-        TEST_REQUIRE(fbo == nullptr);
-        fbo = dev->MakeFramebuffer("test");
-        TEST_REQUIRE(fbo);
-        dev->DeleteFramebuffers();
-        fbo = dev->FindFramebuffer("test");
-        TEST_REQUIRE(fbo == nullptr);
-    }
-
-    {
-        auto* fbo = dev->MakeFramebuffer("fbo");
-        gfx::Framebuffer::Config conf;
-        conf.format = gfx::Framebuffer::Format::ColorRGBA8;
-        conf.width  = 512;
-        conf.height = 512;
-
-        TEST_REQUIRE(fbo->Create(conf));
-        dev->DeleteFramebuffers();
-    }
-
-    {
-        auto* fbo = dev->MakeFramebuffer("fbo");
-        gfx::Framebuffer::Config conf;
-        conf.format = gfx::Framebuffer::Format::ColorRGBA8_Depth16;
-        conf.width  = 512;
-        conf.height = 512;
-        TEST_REQUIRE(fbo->Create(conf));
-        dev->DeleteFramebuffers();
-    }
-
-    {
-        auto* fbo = dev->MakeFramebuffer("fbo");
-        gfx::Framebuffer::Config conf;
-        conf.format  = gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8;
-        conf.width   = 512;
-        conf.height  = 512;
-        TEST_REQUIRE(fbo->Create(conf));
-        dev->DeleteFramebuffers();
-    }
-}
-
-void unit_test_render_fbo()
-{
-    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
-
-    gfx::Framebuffer::Config conf;
-    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
-    conf.width  = 10;
-    conf.height = 10;
-    auto* fbo = dev->MakeFramebuffer("test");
-    TEST_REQUIRE(fbo->Create(conf));
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
@@ -413,32 +360,90 @@ void main() {
     state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    // do a couple of loops so that the texture gets bound for sampling
-    // and for rendering.
-    for (int i=0; i<2; ++i)
+    // let the FBO allocate the color target buffer.
     {
-        dev->BeginFrame();
-        // clear the FBO to render and then render the green quad into it.
-        dev->SetFramebuffer(fbo);
-        dev->ClearColor(gfx::Color::Red);
-        dev->Draw(*p0, *geom, state);
 
-        // render using the second program and sample from the FBO texture.
-        gfx::Texture* color = nullptr;
-        fbo->Resolve(&color);
-        color->SetFilter(gfx::Texture::MinFilter::Linear);
-        color->SetFilter(gfx::Texture::MagFilter::Linear);
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
 
-        p1->SetTexture("kTexture", 0, *color);
+        // do a couple of loops so that the texture gets bound for sampling
+        // and for rendering.
+        for (int i = 0; i < 2; ++i)
+        {
+            dev->BeginFrame();
+            // clear the FBO to render and then render the green quad into it.
+            dev->SetFramebuffer(fbo);
+            dev->ClearColor(gfx::Color::Red);
+            dev->Draw(*p0, *geom, state);
 
-        dev->SetFramebuffer(nullptr);
-        dev->ClearColor(gfx::Color::Blue);
-        dev->Draw(*p1, *geom, state);
+            // render using the second program and sample from the FBO texture.
+            gfx::Texture* color = nullptr;
+            fbo->Resolve(&color);
+            color->SetFilter(gfx::Texture::MinFilter::Linear);
+            color->SetFilter(gfx::Texture::MagFilter::Linear);
 
-        dev->EndFrame();
+            p1->SetTexture("kTexture", 0, *color);
 
-        const auto& bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+            dev->SetFramebuffer(nullptr);
+            dev->ClearColor(gfx::Color::Blue);
+            dev->Draw(*p1, *geom, state);
+
+            dev->EndFrame();
+
+            const auto& bmp = dev->ReadColorBuffer(10, 10);
+            TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+        }
+
+        dev->DeleteFramebuffers();
+    }
+
+    // Configure the FBO to use a texture allocated by the caller.
+    {
+
+        auto* target = dev->MakeTexture("target");
+        target->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA, false);
+        target->SetName("FBO-color-target");
+
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
+        fbo->SetColorTarget(target);
+
+        // do a couple of loops so that the texture gets bound for sampling
+        // and for rendering.
+        for (int i = 0; i < 2; ++i)
+        {
+            dev->BeginFrame();
+            // clear the FBO to render and then render the green quad into it.
+            dev->SetFramebuffer(fbo);
+            dev->ClearColor(gfx::Color::Red);
+            dev->Draw(*p0, *geom, state);
+
+            // render using the second program and sample from the FBO texture.
+            gfx::Texture* color = nullptr;
+            fbo->Resolve(&color);
+            color->SetFilter(gfx::Texture::MinFilter::Linear);
+            color->SetFilter(gfx::Texture::MagFilter::Linear);
+
+            p1->SetTexture("kTexture", 0, *color);
+
+            dev->SetFramebuffer(nullptr);
+            dev->ClearColor(gfx::Color::Blue);
+            dev->Draw(*p1, *geom, state);
+
+            dev->EndFrame();
+
+            const auto& bmp = dev->ReadColorBuffer(10, 10);
+            TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+        }
+
     }
 }
 
@@ -1911,9 +1916,10 @@ int test_main(int argc, char* argv[])
     unit_test_shader();
     unit_test_texture();
     unit_test_program();
-    unit_test_framebuffer();
 
-    unit_test_render_fbo();
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth16);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8);
     unit_test_render_color_only();
     unit_test_render_with_single_texture();
     unit_test_render_with_multiple_textures();
