@@ -176,6 +176,11 @@ public:
     {
         mTextures.resize(count);
     }
+    virtual void SetName(const std::string& name) override
+    {
+
+    }
+
     virtual size_t GetPendingUniformCount() const override
     {
         return 0;

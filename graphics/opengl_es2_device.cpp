@@ -1828,13 +1828,13 @@ private:
             if (mProgram)
             {
                 GL_CALL(glDeleteProgram(mProgram));
-                DEBUG("Delete program %1", mProgram);
+                DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
             }
         }
         virtual bool Build(const std::vector<const Shader*>& shaders) override
         {
             GLuint prog = mGL.glCreateProgram();
-            DEBUG("New program %1", prog);
+            DEBUG("Created new GL program object. [name='%1', handle='%2']", mName, prog);
 
             for (const auto* shader : shaders)
             {
@@ -1859,13 +1859,12 @@ private:
 
             if ((link_status == 0) || (valid_status == 0))
             {
-                ERROR("Program build error: %1", build_info);
+                ERROR("Program build error. [name='%1', error='%2']", mName, build_info);
                 GL_CALL(glDeleteProgram(prog));
                 return false;
             }
 
-            DEBUG("Program was built successfully!");
-            DEBUG("Program info: %1", build_info);
+            DEBUG("Program was built successfully. [name='%1', info='%2']", mName, build_info);
             if (mProgram)
             {
                 GL_CALL(glDeleteProgram(mProgram));
@@ -2091,6 +2090,10 @@ private:
         {
             mSamplers.resize(count);
         }
+        virtual void SetName(const std::string& name) override
+        {
+            mName = name;
+        }
         virtual size_t GetPendingUniformCount() const override
         {
             return mUniforms.size();
@@ -2181,6 +2184,7 @@ private:
         const OpenGLFunctions& mGL;
         GLuint mProgram = 0;
         GLuint mVersion = 0;
+        std::string mName;
         std::vector<Sampler> mSamplers;
         mutable std::vector<Uniform> mUniforms;
         mutable std::size_t mFrameNumber = 0;
@@ -2220,7 +2224,7 @@ private:
 
             GLint status = 0;
             GLint shader = mGL.glCreateShader(type);
-            DEBUG("Creating new GL shader object. [name='%1', type='%2']", mName, GLEnumToStr(type));
+            DEBUG("Created new GL shader object. [name='%1', type='%2']", mName, GLEnumToStr(type));
 
             const char* source_ptr = source.c_str();
             GL_CALL(glShaderSource(shader, 1, &source_ptr, nullptr));
