@@ -103,6 +103,10 @@ namespace gfx
         // combine both into a single api call that takes the whole array of textures.
         virtual void SetTextureCount(unsigned count) = 0;
 
+        // Set a (human-readable) name for the program object.
+        // Used for improved debug/log messages.
+        virtual void SetName(const std::string& name) = 0;
+
         // Get the number of pending uniforms that have been changed on the
         // CPU side (i.e. in this program object) but haven't yet been flushed
         // out onto the GPU program. The uniforms will be set the first time the
@@ -116,6 +120,9 @@ namespace gfx
         { SetUniform(name, vec.x, vec.y, vec.z); }
         inline void SetUniform(const char* name, const glm::vec4& vec)
         { SetUniform(name, vec.x, vec.y, vec.z, vec.w); }
+
+        inline bool Build(const Shader* vertex, const Shader* fragment)
+        {  return Build( std::vector<const Shader*> {vertex, fragment }); }
     private:
     };
 
