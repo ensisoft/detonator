@@ -1930,6 +1930,51 @@ void main() {
 
 }
 
+// Texture object assigned to an FBO gets incorrectly deleted
+// leading to the FBO becoming incomplete.
+void unit_test_fbo_texture_delete_bug()
+{
+    auto dev = gfx::Device::Create(std::make_shared<TestContext>(10, 10));
+    auto* fbo = dev->MakeFramebuffer("fbo");
+
+    auto* render_target_texture = dev->MakeTexture("render_texture");
+    render_target_texture->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA);
+    render_target_texture->SetName("render_target_texture");
+
+    auto* dummy_texture = dev->MakeTexture("dummy_texture");
+    dummy_texture->Upload(nullptr, 20, 20, gfx::Texture::Format::RGBA);
+    dummy_texture->SetName("dummy_texture");
+    dummy_texture->SetFlag(gfx::Texture::Flags::GarbageCollect, true);
+
+    gfx::Framebuffer::Config conf;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    conf.width  = 10;
+    conf.height = 10;
+    fbo->SetConfig(conf);
+    fbo->SetColorTarget(render_target_texture);
+
+    dev->BeginFrame();
+    dev->SetFramebuffer(fbo);
+    dev->ClearColor(gfx::Color::White);
+    dev->EndFrame();
+    dev->CleanGarbage(1, gfx::Device::GCFlags::Textures);
+
+    TEST_REQUIRE(dev->FindTexture("dummy_texture") == nullptr);
+    TEST_REQUIRE(dev->FindTexture("render_texture") != nullptr);
+
+    // change the FBO's color buffer target texture to nullptr
+    // which means the FBO will allocate its own texture.
+    dev->BeginFrame();
+    fbo->SetColorTarget(nullptr);
+    dev->SetFramebuffer(fbo);
+    dev->ClearColor(gfx::Color::White);
+    dev->EndFrame();
+    dev->CleanGarbage(1, gfx::Device::GCFlags::Textures);
+
+    TEST_REQUIRE(dev->FindTexture("render_texture") == nullptr);
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -1957,5 +2002,6 @@ int test_main(int argc, char* argv[])
     // bugs
     unit_test_empty_draw_lost_uniform_bug();
     unit_test_repeated_uniform_bug();
+    unit_test_fbo_texture_delete_bug();
     return 0;
 }
