@@ -1288,6 +1288,26 @@ void main() {
         TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
     }
 
+    // texture with GC disabled doesn't get cleaned away
+    {
+        auto* texture = dev->MakeTexture("foo");
+        texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
+        texture->SetFlag(gfx::Texture::Flags::GarbageCollect, false);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+        dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+        dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
+        TEST_REQUIRE(dev->FindTexture("foo"));
+    }
+
+
+    dev->DeleteTextures();
 }
 
 void unit_test_render_dynamic()
