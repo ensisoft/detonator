@@ -1115,8 +1115,8 @@ public:
             // textures and not just individual textures.
             // this is done because a sprite cycle could have any number
             // of textures and not all of them are used all the time.
-            // yet all of them will be used and needed  to render the whole cycle
-            // and we should not clean away textures mid cycle.
+            // yet all of them will be used and needed  to render the whole cycle,
+            // and we should not clean away textures mid-cycle.
             std::unordered_map<std::string, size_t> group_last_use;
             for (auto& pair : mTextures)
             {
@@ -1137,7 +1137,7 @@ public:
                 const auto this_last_used  = impl->GetFrameStamp();
                 const auto last_used = std::max(group_last_used, this_last_used);
                 const auto is_expired = mFrameNumber - last_used >= max_num_idle_frames;
-                if (is_expired)
+                if (is_expired && impl->GarbageCollect())
                 {
                     size_t unit = 0;
                     for (unit = 0; unit < mTextureUnits.size(); ++unit)
@@ -1479,7 +1479,10 @@ private:
         TextureImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
            : mGL(funcs)
            , mDevice(device)
-        {}
+        {
+            mFlags.set(Flags::Transient, false);
+            mFlags.set(Flags::GarbageCollect, true);
+        }
         ~TextureImpl()
         {
             if (mHandle)
@@ -1649,6 +1652,8 @@ private:
         // internal
         bool IsTransient() const
         { return mFlags.test(Flags::Transient); }
+        bool GarbageCollect() const
+        { return mFlags.test(Flags::GarbageCollect); }
         bool HasMips() const
         { return mHasMips; }
         GLuint GetHandle() const

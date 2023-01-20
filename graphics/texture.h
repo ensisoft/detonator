@@ -29,8 +29,11 @@ namespace gfx
         // Flags controlling texture usage and lifetime.
         enum class Flags {
             // Transient textures are used temporarily for a short period
-            // of time to display for example rasterized text.
-            Transient
+            // of time to display for example rasterized text. Default is false.
+            Transient,
+            // Flag to control whether the (non-transient) texture can be
+            // ever be garbage collected or not. Default is true.
+            GarbageCollect
         };
 
         enum class Format {
@@ -160,9 +163,14 @@ namespace gfx
         // helpers.
         inline void SetTransient(bool on_off)
         { SetFlag(Flags::Transient, on_off); }
+        inline void SetGarbageCollection(bool on_off)
+        { SetFlag(Flags::GarbageCollect, on_off); }
 
         inline bool IsTransient() const
         { return TestFlag(Flags::Transient); }
+        inline bool GarbageCollect() const
+        { return TestFlag(Flags::GarbageCollect); }
+
     protected:
     private:
     };
