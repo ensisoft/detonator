@@ -38,6 +38,7 @@
 #include "base/hash.h"
 #include "base/utility.h"
 #include "base/trace.h"
+#include "base/bitflag.h"
 #include "graphics/resource.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
@@ -1484,7 +1485,7 @@ private:
             if (mHandle)
             {
                 GL_CALL(glDeleteTextures(1, &mHandle));
-                if (!mTransient)
+                if (!IsTransient())
                     DEBUG("Deleted texture object. [name='%1', handle=%2]", mName, mHandle);
             }
         }
@@ -1494,10 +1495,10 @@ private:
             if (mHandle == 0)
             {
                 GL_CALL(glGenTextures(1, &mHandle));
-                if (!mTransient)
+                if (!IsTransient())
                     DEBUG("New texture object. [name='%1', handle=%2]", mName, mHandle);
             }
-            if (!mTransient)
+            if (!IsTransient())
                 DEBUG("Loading texture. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
 
             GLenum sizeFormat = 0;
@@ -1606,6 +1607,9 @@ private:
             mDevice.mTextureUnits[last].mag_filter = GL_NONE;
         }
 
+        virtual void SetFlag(Flags flag, bool on_off) override
+        { mFlags.set(flag, on_off); }
+
         // refer actual state setting to the point when
         // the texture is actually used in a program's sampler
         virtual void SetFilter(MinFilter filter) override
@@ -1639,12 +1643,12 @@ private:
         { mGroup = group; }
         virtual size_t GetContentHash() const override
         { return mHash; }
-        virtual void SetTransient(bool on_off) override
-        { mTransient = on_off; }
+        virtual bool TestFlag(Flags flag) const override
+        { return mFlags.test(flag); }
 
         // internal
         bool IsTransient() const
-        { return mTransient; }
+        { return mFlags.test(Flags::Transient); }
         bool HasMips() const
         { return mHasMips; }
         GLuint GetHandle() const
@@ -1713,7 +1717,7 @@ private:
         std::size_t mHash = 0;
         std::string mName;
         std::string mGroup;
-        bool mTransient = false;
+        base::bitflag<Flags> mFlags;
         bool mHasMips   = false;
     };
 
