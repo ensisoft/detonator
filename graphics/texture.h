@@ -26,6 +26,13 @@ namespace gfx
     public:
         virtual ~Texture() = default;
 
+        // Flags controlling texture usage and lifetime.
+        enum class Flags {
+            // Transient textures are used temporarily for a short period
+            // of time to display for example rasterized text.
+            Transient
+        };
+
         enum class Format {
             // non-linear sRGB(A) encoded RGB data.
             sRGB,
@@ -106,6 +113,8 @@ namespace gfx
             BUG("Unexpected bit depth.");
         }
 
+        // Set a texture flag to control texture behaviour.
+        virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Set texture minification filter.
         virtual void SetFilter(MinFilter filter) = 0;
         // Set texture magnification filter.
@@ -139,17 +148,21 @@ namespace gfx
         virtual void SetContentHash(size_t hash) = 0;
         // Get the hash value that was used in the latest data upload.
         virtual size_t GetContentHash() const = 0;
-        // Set a flag indicating whether the texture is transient
-        // or not. Transient textures are removed after some
-        // time and only exist temporarily.
-        // Currently, used only when rendering text.
-        virtual void SetTransient(bool on_off) = 0;
         // Set a (human-readable) name for the texture object.
         // Used for improved debug/log messages.
         virtual void SetName(const std::string& name) = 0;
         // Set the group id used to identify a set of textures that
         // conceptually belong together, for example to a sprite batch.
         virtual void SetGroup(const std::string& name) = 0;
+        // Test whether a flag is on or off.
+        virtual bool TestFlag(Flags flag) const = 0;
+
+        // helpers.
+        inline void SetTransient(bool on_off)
+        { SetFlag(Flags::Transient, on_off); }
+
+        inline bool IsTransient() const
+        { return TestFlag(Flags::Transient); }
     protected:
     private:
     };

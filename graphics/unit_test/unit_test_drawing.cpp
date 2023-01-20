@@ -63,6 +63,8 @@ private:
 class TestTexture : public gfx::Texture
 {
 public:
+    virtual void SetFlag(Flags flag, bool on_off) override
+    {}
     virtual void SetFilter(MinFilter filter) override
     { mMinFilter = filter; }
     virtual void SetFilter(MagFilter filter) override
@@ -95,12 +97,12 @@ public:
     { mHash = hash; }
     virtual size_t GetContentHash() const override
     { return mHash; }
-    virtual void SetTransient(bool on_off) override
-    { mTransient = on_off; }
     virtual void SetName(const std::string&) override
     {}
     virtual void SetGroup(const std::string&) override
     {}
+    virtual bool TestFlag(Flags flag) const override
+    { return false; }
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
@@ -110,7 +112,6 @@ private:
     MinFilter mMinFilter = MinFilter::Default;
     MagFilter mMagFilter = MagFilter::Default;
     std::size_t mHash = 0;
-    bool mTransient = false;
 };
 
 class TestProgram : public gfx::Program
