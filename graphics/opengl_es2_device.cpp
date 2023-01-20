@@ -1137,7 +1137,7 @@ public:
                 const auto this_last_used  = impl->GetFrameStamp();
                 const auto last_used = std::max(group_last_used, this_last_used);
                 const auto is_expired = mFrameNumber - last_used >= max_num_idle_frames;
-                if (is_expired && impl->GarbageCollect())
+                if (is_expired && impl->GarbageCollect() && !impl->IsFBOTarget())
                 {
                     size_t unit = 0;
                     for (unit = 0; unit < mTextureUnits.size(); ++unit)
@@ -1203,7 +1203,7 @@ public:
             auto* impl = static_cast<TextureImpl*>(it->second.get());
             const auto last_used_frame_number = impl->GetFrameStamp();
             const auto is_expired = mFrameNumber - last_used_frame_number >= max_num_idle_frames;
-            if (is_expired && impl->IsTransient())
+            if (is_expired && impl->IsTransient() && !impl->IsFBOTarget())
             {
                 size_t unit = 0;
                 for (unit = 0; unit < mTextureUnits.size(); ++unit)
@@ -1404,7 +1404,9 @@ public:
             else return fbo->Create() && fbo->Complete();
 
             mCurrentFBO = fbo;
-        }
+        }            
+        if (mCurrentFBO)
+            mCurrentFBO->SetFrameStamp(mFrameNumber);
         return true;
     }
 private:
@@ -1656,6 +1658,10 @@ private:
         { return mFlags.test(Flags::GarbageCollect); }
         bool HasMips() const
         { return mHasMips; }
+        bool IsFBOTarget() const
+        { return mFBOBound; }
+        void SetFBOTarget(bool yeah)
+        { mFBOBound = yeah; }
         GLuint GetHandle() const
         { return mHandle; }
         void SetFrameStamp(size_t frame_number) const
@@ -1724,6 +1730,7 @@ private:
         std::string mGroup;
         base::bitflag<Flags> mFlags;
         bool mHasMips   = false;
+        bool mFBOBound  = false;
     };
 
     class GeomImpl : public Geometry
@@ -2325,14 +2332,25 @@ private:
 
         virtual void SetColorTarget(Texture* texture) override
         {
+            if (mColorTarget)
+                mColorTarget->SetFBOTarget(false);
+
             mColorTarget = static_cast<TextureImpl*>(texture);
             mBindColor   = true;
+            if (mColorTarget)
+                mColorTarget->SetFBOTarget(true);
         }
 
         virtual void SetResolveTarget(Texture* texture) override
         {
+            if (mResolveTarget)
+                mResolveTarget->SetFBOTarget(false);
+
             mResolveTarget = static_cast<TextureImpl*>(texture);
             mBindResolve   = true;
+
+            if (mResolveTarget)
+                mResolveTarget->SetFBOTarget(true);
         }
 
         virtual void Resolve(Texture** color) const override
@@ -2485,6 +2503,13 @@ private:
             }
             DEBUG("New FBO object created. [width=%1, height=%2, format=%3, name=%4]", xres, yres, mConfig.format, mName);
             return true;
+        }
+        void SetFrameStamp(size_t stamp)
+        {
+            if (mColorTarget)
+                mColorTarget->SetFrameStamp(stamp);
+            if (mResolveTarget)
+                mResolveTarget->SetFrameStamp(stamp);
         }
 
         GLuint GetHandle() const
