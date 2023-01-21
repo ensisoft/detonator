@@ -664,7 +664,8 @@ void DlgWidgetStyleProperties::SetPropertyValue()
     }
     else if (type == PropertyType::FontString)
     {
-        mStyle->SetProperty(property_key, GetValue(mUI.widgetFontName));
+        const std::string& font = GetValue(mUI.widgetFontName);
+        mStyle->SetProperty(property_key, font);
     }
     else if (type == PropertyType::FontSize)
     {
