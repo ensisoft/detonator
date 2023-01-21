@@ -67,6 +67,7 @@
 #include "editor/gui/dlgsave.h"
 #include "editor/gui/dlgmigrationlog.h"
 #include "editor/gui/dlgtextureatlas.h"
+#include "editor/gui/dlgfontmap.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -1900,6 +1901,12 @@ void MainWindow::on_actionImagePacker_triggered()
 void MainWindow::on_actionImageViewer_triggered()
 {
     DlgTextureAtlas dlg(this);
+    dlg.exec();
+}
+
+void MainWindow::on_actionFontMap_triggered()
+{
+    DlgFontMap dlg(this);
     dlg.exec();
 }
 

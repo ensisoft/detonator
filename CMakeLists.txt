@@ -411,6 +411,9 @@ add_executable(GSEditor
     editor/gui/dlggradient.ui
     editor/gui/dlgnew.h
     editor/gui/dlgnew.ui
+    editor/gui/dlgfontmap.h
+    editor/gui/dlgfontmap.ui
+    editor/gui/dlgfontmap.cpp
     editor/gui/dlgtilelayer.h
     editor/gui/dlgtilelayer.ui
     editor/gui/dlgtileimport.h
