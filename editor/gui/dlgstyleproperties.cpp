@@ -728,11 +728,11 @@ void DlgWidgetStyleProperties::on_btnOpenFontFile_clicked()
     const auto& indices = GetSelection(mUI.tableView);
     if (indices.empty())
         return;
-    const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
+    const auto& list = QFileDialog::getOpenFileName(this,
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf *.json)"));
     if (list.isEmpty())
         return;
-    const auto& file = mWorkspace->MapFileToWorkspace(list[0]);
+    const auto& file = mWorkspace->MapFileToWorkspace(list);
     SetValue(mUI.widgetFontName, file);
     SetPropertyValue();
 }

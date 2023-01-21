@@ -55,7 +55,7 @@ std::vector<QString> ListAppFonts()
     std::vector<QString> ret;
 
     QStringList filters;
-    filters << "*.ttf" << "*.otf";
+    filters << "*.ttf" << "*.otf" << "*.json";
     const auto& appdir = QCoreApplication::applicationDirPath();
     const auto& fontdir = app::JoinPath(appdir , "fonts");
     QDir dir;

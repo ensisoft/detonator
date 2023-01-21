@@ -183,11 +183,11 @@ void WidgetStyleWidget::on_btnSelectCustomFont_clicked()
     if (!mWidget)
         return;
 
-    const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
+    const auto& list = QFileDialog::getOpenFileName(this,
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf *.json)"));
     if (list.isEmpty())
         return;
-    const auto& file = mWorkspace->MapFileToWorkspace(list[0]);
+    const auto& file = mWorkspace->MapFileToWorkspace(list);
     SetValue(mUI.widgetFontName, file);
     UpdateWidgetProperties();
 }
