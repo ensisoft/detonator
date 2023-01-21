@@ -2098,11 +2098,11 @@ void EntityWidget::on_btnSelectFontFile_clicked()
     {
         if (auto* text = node->GetTextItem())
         {
-            const auto& list = QFileDialog::getOpenFileNames(this ,
-                tr("Select Font File") , "" , tr("Font (*.ttf *.otf)"));
+            const auto& list = QFileDialog::getOpenFileName(this ,
+                tr("Select Font File") , "" , tr("Font (*.ttf *.otf *.json)"));
             if (list.isEmpty())
                 return;
-            const auto& file = mState.workspace->MapFileToWorkspace(list[0]);
+            const auto& file = mState.workspace->MapFileToWorkspace(list);
             SetValue(mUI.tiFontName , file);
             text->SetFontName(app::ToUtf8(file));
         }
