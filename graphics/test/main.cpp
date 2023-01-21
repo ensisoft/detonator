@@ -35,6 +35,10 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
+#include "graphics/framebuffer.h"
+#include "graphics/texture.h"
+#include "graphics/shader.h"
+#include "graphics/program.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -928,11 +932,9 @@ public:
 
         // these two rectangles are in a parent-child relationship.
         // the child rectangle is transformed relative to the parent
-        // which is transformed relative to the top level "view"
-        // transform.
+        // which is transformed relative to the top level "view" transform.
         // A call to push begins a new "scope" for a transformations
-        // and subsequent operations combine into a single transformation
-        // matrix.
+        // and subsequent operations combine into a single transformation matrix.
         // the way you need to read these scopes is from the innermost
         // scope towards outermost.
         // individual operations happen in the order they're written.
@@ -1338,6 +1340,13 @@ private:
 class TextAlignTest : public GraphicsTest
 {
 public:
+    TextAlignTest(const std::string& name, const std::string& font, const gfx::Color4f& color, unsigned size)
+      : mName(name)
+      , mFont(font)
+      , mColor(color)
+      , mFontSize(size)
+    {}
+
     virtual void Render(gfx::Painter& painter) override
     {
         const auto cycle = 2.0f;
@@ -1347,27 +1356,27 @@ public:
         // top row
         gfx::DrawTextRect(painter,
             "Left,top\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(50, 50, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 50, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Center,top\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(300, 50, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 50, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Right,top\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(550, 50, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignRight | gfx::TextAlign::AlignTop, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 50, 200, 200), gfx::Color::HotPink, 1.0f);
@@ -1375,27 +1384,27 @@ public:
         // middle row
         gfx::DrawTextRect(painter,
             "Left,center\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(50, 300, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 300, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Center,center\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(300, 300, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 300, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Right,center\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(550, 300, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignRight | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 300, 200, 200), gfx::Color::HotPink, 1.0f);
@@ -1403,27 +1412,27 @@ public:
         // bottom row
         gfx::DrawTextRect(painter,
             "Left,bottom\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(50, 550, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(50, 550, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Center,bottom\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+            mFont, mFontSize,
             gfx::FRect(300, 550, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(300, 550, 200, 200), gfx::Color::HotPink, 1.0f);
 
         gfx::DrawTextRect(painter,
             "Right,bottom\naligned\ntext",
-            "fonts/AtariFontFullVersion.ttf", 14,
+             mFont, mFontSize,
             gfx::FRect(550, 550, 200, 200),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom, 0, 1.4f);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(550, 550, 200, 200), gfx::Color::HotPink, 1.0f);
@@ -1437,22 +1446,30 @@ public:
             "clipclipclipclipclip\n"
             "clipclipclipclipclip\n"
             "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
+            "clipclipclipclipclip\n"
             "clipclipclipclipclip\n",
-            "fonts/AtariFontFullVersion.ttf", 20,
+            mFont, mFontSize,
             gfx::FRect(800, 50, 173, 173),
-            gfx::Color::DarkGray,
+            mColor,
             gfx::TextAlign::AlignRight | gfx::TextAlign::AlignBottom);
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(800, 50, 173, 173), gfx::Color::HotPink, 1.0f);
     }
     virtual std::string GetName() const override
-    { return "TextAlignTest"; }
+    { return mName;  }
 
     virtual void Update(float dt) override
     {
         mTime += dt;
     }
 private:
+    const std::string mName;
+    const std::string mFont;
+    const gfx::Color4f mColor;
+    unsigned mFontSize = 0;
     float mTime = 0.0f;
 };
 
@@ -1503,6 +1520,14 @@ public:
             gfx::Color::DarkGray);
 
         gfx::DrawTextRect(painter,
+            "Hello world!\n"
+            "123456789\n"
+            "#+![]",
+            "fonts/nuskool_krome_64x64.json", 32,
+             gfx::FRect(0, 450, 1024, 100),
+             gfx::Color::White);
+
+        gfx::DrawTextRect(painter,
             "Underlined text",
             "fonts/AtariFontFullVersion.ttf", 18,
             gfx::FRect(0, 50, 300, 100),
@@ -1548,7 +1573,7 @@ public:
             gfx::DrawTextRect(painter,
                 "Very colorful text",
                 "fonts/AtariFontFullVersion.ttf", 20,
-                gfx::FRect(0, 500, 1024, 100),
+                gfx::FRect(0, 600, 1024, 100),
                 gfx::Color4f(r, g, b, 1.0f));
         }
     }
@@ -1997,7 +2022,8 @@ int main(int argc, char* argv[])
     tests.emplace_back(new DrawShapeOutlineTest);
     tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
-    tests.emplace_back(new TextAlignTest);
+    tests.emplace_back(new TextAlignTest("TextAlignTest", "fonts/AtariFontFullVersion.ttf", gfx::Color::DarkGray, 14));
+    tests.emplace_back(new TextAlignTest("TextAlignTest2", "fonts/nuskool_krome_64x64.json", gfx::Color::White, 20));
     tests.emplace_back(new TextRectScaleTest);
     tests.emplace_back(new RenderParticleTest);
     tests.emplace_back(new ShapeTest<gfx::Arrow>("ArrowShapeTest"));

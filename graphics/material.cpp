@@ -280,18 +280,10 @@ bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
 
 std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 {
-    try
-    {
-        // in case of font rasterization fails catch and log the error.
-        // Todo: perhaps the TextBuffer should provide a non-throw rasterization
-        // method, but then it'll need some other way to report the failure.
-        return mTextBuffer.Rasterize();
-    }
-    catch (const std::exception& e)
-    {
-        ERROR(e.what());
-        ERROR("Failed to rasterize text buffer.");
-    }
+    // since this interface is returning a CPU side bitmap object
+    // there's no way to use a texture based (bitmap) font here.
+    if (mTextBuffer.GetRasterFormat() == TextBuffer::RasterFormat::Bitmap)
+        return mTextBuffer.RasterizeBitmap();
     return nullptr;
 }
 
@@ -2290,27 +2282,40 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     auto* texture = device.FindTexture(name);
     if (!texture)
     {
-        // create the texture object first. The if check above
-        // will then act as a throttle and prevent superfluous
-        // attempts to rasterize when the contents of the text
-        // buffer have not changed.
-        texture = device.MakeTexture(name);
-
-        auto bitmap = mText.Rasterize();
-        if (!bitmap)
-            return;
-        const auto width  = bitmap->GetWidth();
-        const auto height = bitmap->GetHeight();
-
         // current text rendering use cases for this TextMaterial
         // are such that we expect the rendered geometry to match
         // the underlying rasterized text texture size almost exactly.
         // this means that we can skip the mipmap generation and use
         // a simple fast nearest/linear texture filter without mips.
         const bool mips = false;
-        texture->SetName("TextMaterial");
-        texture->SetTransient(true);
-        texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
+
+        const auto format = mText.GetRasterFormat();
+        if (format == TextBuffer::RasterFormat::Bitmap)
+        {
+            // create the texture object first. The if check above
+            // will then act as a throttle and prevent superfluous
+            // attempts to rasterize when the contents of the text
+            // buffer have not changed.
+            texture = device.MakeTexture(name);
+            texture->SetName("TextMaterial");
+            texture->SetTransient(true);
+
+            auto bitmap = mText.RasterizeBitmap();
+            if (!bitmap)
+                return;
+            const auto width = bitmap->GetWidth();
+            const auto height = bitmap->GetHeight();
+            texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
+        }
+        else if (format == TextBuffer::RasterFormat::Texture)
+        {
+            texture = mText.RasterizeTexture(device);
+            if (!texture)
+                return;
+        } else if (format == TextBuffer::RasterFormat::None)
+            return;
+        else BUG("Unhandled texture raster format.");
+
         texture->SetContentHash(hash);
         texture->SetWrapX(Texture::Wrapping::Clamp);
         texture->SetWrapY(Texture::Wrapping::Clamp);
@@ -2334,7 +2339,7 @@ void TextMaterial::ApplyStaticState(gfx::Device& device, gfx::Program& program) 
 {}
 Shader* TextMaterial::GetShader(const Environment& env, Device& device) const
 {
-constexpr auto* src = R"(
+constexpr auto* text_shader_bitmap = R"(
 #version 100
 precision highp float;
 uniform sampler2D kTexture;
@@ -2346,13 +2351,50 @@ void main() {
    gl_FragColor = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
 }
         )";
-    auto* shader = device.MakeShader("text-shader");
-    shader->CompileSource(src);
-    shader->SetName("TextShader");
-    return shader;
+constexpr auto* text_shader_texture = R"(
+#version 100
+precision highp float;
+uniform sampler2D kTexture;
+varying vec2 vTexCoord;
+void main() {
+    mat3 flip = mat3(vec3(1.0,  0.0, 0.0),
+                     vec3(0.0, -1.0, 0.0),
+                     vec3(0.0,  1.0, 0.0));
+    vec3 tex = flip * vec3(vTexCoord.xy, 1.0);
+    gl_FragColor = texture2D(kTexture, tex.xy);
+}
+    )";
+    const auto format = mText.GetRasterFormat();
+    if (format == TextBuffer::RasterFormat::Bitmap)
+    {
+        auto* shader = device.MakeShader("text-shader-bitmap");
+        shader->CompileSource(text_shader_bitmap);
+        shader->SetName("text-shader-bitmap");
+        return shader;
+    }
+    else if (format == TextBuffer::RasterFormat::Texture)
+    {
+        auto* shader = device.MakeShader("text-shader-texture");
+        shader->CompileSource(text_shader_texture);
+        shader->SetName("text-shader-texture");
+        return shader;
+    } else if (format == TextBuffer::RasterFormat::None)
+        return nullptr;
+    else BUG("Unhandled texture raster format.");
+    return nullptr;
 }
 std::string TextMaterial::GetProgramId() const
-{ return "text-shader"; }
+{
+    const auto format = mText.GetRasterFormat();
+    if (format == TextBuffer::RasterFormat::Bitmap)
+        return "text-shader-bitmap";
+    else if (format == TextBuffer::RasterFormat::Texture)
+        return "text-shader-texture";
+    else if (format == TextBuffer::RasterFormat::None)
+        return "text-shader-none";
+    else BUG("Unhandled texture raster format.");
+    return "";
+}
 std::string TextMaterial::GetClassId() const
 { return {}; }
 void TextMaterial::Update(float dt)

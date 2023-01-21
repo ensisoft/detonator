@@ -18,6 +18,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec4.hpp>
+#  include <glm/mat4x4.hpp>
+#include "warnpop.h"
+
 #include "base/types.h"
 
 namespace gfx
@@ -32,5 +37,22 @@ namespace gfx
     using FRect  = base::FRect;
     using IRect  = base::IRect;
     using URect  = base::URect;
+
+    struct Quad {
+        glm::vec4 top_left;
+        glm::vec4 bottom_left;
+        glm::vec4 bottom_right;
+        glm::vec4 top_right;
+    };
+
+    inline Quad TransformQuad(const Quad& q, const glm::mat4& mat)
+    {
+        Quad ret;
+        ret.top_left     = mat * q.top_left;
+        ret.bottom_left  = mat * q.bottom_left;
+        ret.bottom_right = mat * q.bottom_right;
+        ret.top_right    = mat * q.top_right;
+        return ret;
+    }
 
 } // gfx

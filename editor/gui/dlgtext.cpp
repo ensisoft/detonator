@@ -126,7 +126,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     mText.SetAlignment((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
     if (adjust)
     {
-        const auto& bitmap = mText.Rasterize();
+        const auto& bitmap = mText.RasterizeBitmap();
         buffer_width  = bitmap->GetWidth();
         buffer_height = bitmap->GetHeight();
         SetValue(mUI.bufferWidth, buffer_width);

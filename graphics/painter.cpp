@@ -48,6 +48,10 @@ public:
     StandardPainter(Device* device)
       : mDevice(device)
     {}
+    virtual Device* GetDevice() override
+    {
+        return mDevice;
+    }
     virtual void SetEditingMode(bool on_off) override
     {
         mEditingMode = on_off;
@@ -83,6 +87,10 @@ public:
     virtual const glm::mat4& GetViewMatrix() const override
     {
         return mViewMatrix;
+    }
+    virtual const glm::mat4& GetProjMatrix() const override
+    {
+        return mProjection;
     }
     virtual void Clear(const Color4f& color) override
     {
