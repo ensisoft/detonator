@@ -522,6 +522,14 @@ public:
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = app::ToUtf8(dst_uri);
+
+        // if the font is a .json+.png font then copy the .png file too!
+        if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
+        {
+            const auto& png_uri = boost::replace_all_copy(uri, ".json", ".png");
+            const auto& png_file = MapFileToFilesystem(app::FromUtf8(png_uri));
+            CopyFile(png_file, app::FromUtf8(dir));
+        }
     }
     virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
     {
@@ -2954,9 +2962,9 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         const auto& name   = info.baseName();
         const auto& suffix = info.completeSuffix().toUpper();
+        const auto& uri = MapFileToWorkspace(file);
         if (suffix == "LUA")
         {
-            const auto& uri = MapFileToWorkspace(file);
             Script script;
             script.SetFileURI(ToUtf8(uri));
             ScriptResource res(script, name);
@@ -2965,7 +2973,6 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG" || suffix == "TGA" || suffix == "BMP")
         {
-            const auto& uri = MapFileToWorkspace(file);
             gfx::detail::TextureFileSource texture;
             texture.SetFileName(ToUtf8(uri));
             texture.SetName(ToUtf8(name));
@@ -2981,7 +2988,6 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else if (suffix == "MP3" || suffix == "WAV" || suffix == "FLAC" || suffix == "OGG")
         {
-            const auto& uri = MapFileToWorkspace(file);
             audio::GraphClass klass(ToUtf8(name));
             audio::GraphClass::Element element;
             element.name = ToUtf8(name);
@@ -2997,7 +3003,6 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else
         {
-            const auto& uri = MapFileToWorkspace(file);
             DataFile data;
             data.SetFileURI(uri);
             data.SetTypeTag(DataFile::TypeTag::External);
@@ -3005,6 +3010,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             SaveResource(res);
             INFO("Imported new data file '%1' based on file '%2'", name, info.filePath());
         }
+        DEBUG("Mapping imported file '%1' => '%2'", file, uri);
     }
 }
 

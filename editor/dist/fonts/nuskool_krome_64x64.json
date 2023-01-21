@@ -1,0 +1,337 @@
+{
+  "case_sensitive": false,
+  "color_space": "Linear",
+  "font_height": 64,
+  "font_width": 64,
+  "image_file": "nuskool_krome_64x64.png",
+  "image_height": 64,
+  "image_width": 4096,
+  "images": [
+    {
+      "char": " ",
+      "xpos": 0,
+      "ypos": 0
+    },
+    {
+      "char": "!",
+      "xpos": 64,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 128,
+      "ypos": 0
+    },
+    {
+      "char": "#",
+      "xpos": 192,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 256,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 320,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 384,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 448,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 512,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 576,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 640,
+      "ypos": 0
+    },
+    {
+      "char": "+",
+      "xpos": 704,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 768,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 832,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 896,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 960,
+      "ypos": 0
+    },
+    {
+      "char": "0",
+      "xpos": 1024,
+      "ypos": 0
+    },
+    {
+      "char": "1",
+      "xpos": 1088,
+      "ypos": 0
+    },
+    {
+      "char": "2",
+      "xpos": 1152,
+      "ypos": 0
+    },
+    {
+      "char": "3",
+      "xpos": 1216,
+      "ypos": 0
+    },
+    {
+      "char": "4",
+      "xpos": 1280,
+      "ypos": 0
+    },
+    {
+      "char": "5",
+      "xpos": 1344,
+      "ypos": 0
+    },
+    {
+      "char": "6",
+      "xpos": 1408,
+      "ypos": 0
+    },
+    {
+      "char": "7",
+      "xpos": 1472,
+      "ypos": 0
+    },
+    {
+      "char": "8",
+      "xpos": 1536,
+      "ypos": 0
+    },
+    {
+      "char": "9",
+      "xpos": 1600,
+      "ypos": 0
+    },
+    {
+      "char": ":",
+      "xpos": 1664,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 1728,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 1792,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 1856,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 1920,
+      "ypos": 0
+    },
+    {
+      "char": "?",
+      "xpos": 1984,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 2048,
+      "ypos": 0
+    },
+    {
+      "char": "a",
+      "xpos": 2112,
+      "ypos": 0
+    },
+    {
+      "char": "b",
+      "xpos": 2176,
+      "ypos": 0
+    },
+    {
+      "char": "c",
+      "xpos": 2240,
+      "ypos": 0
+    },
+    {
+      "char": "d",
+      "xpos": 2304,
+      "ypos": 0
+    },
+    {
+      "char": "e",
+      "xpos": 2368,
+      "ypos": 0
+    },
+    {
+      "char": "f",
+      "xpos": 2432,
+      "ypos": 0
+    },
+    {
+      "char": "g",
+      "xpos": 2496,
+      "ypos": 0
+    },
+    {
+      "char": "h",
+      "xpos": 2560,
+      "ypos": 0
+    },
+    {
+      "char": "i",
+      "xpos": 2624,
+      "ypos": 0
+    },
+    {
+      "char": "j",
+      "xpos": 2688,
+      "ypos": 0
+    },
+    {
+      "char": "k",
+      "xpos": 2752,
+      "ypos": 0
+    },
+    {
+      "char": "l",
+      "xpos": 2816,
+      "ypos": 0
+    },
+    {
+      "char": "m",
+      "xpos": 2880,
+      "ypos": 0
+    },
+    {
+      "char": "n",
+      "xpos": 2944,
+      "ypos": 0
+    },
+    {
+      "char": "o",
+      "xpos": 3008,
+      "ypos": 0
+    },
+    {
+      "char": "p",
+      "xpos": 3072,
+      "ypos": 0
+    },
+    {
+      "char": "q",
+      "xpos": 3136,
+      "ypos": 0
+    },
+    {
+      "char": "r",
+      "xpos": 3200,
+      "ypos": 0
+    },
+    {
+      "char": "s",
+      "xpos": 3264,
+      "ypos": 0
+    },
+    {
+      "char": "t",
+      "xpos": 3328,
+      "ypos": 0
+    },
+    {
+      "char": "u",
+      "xpos": 3392,
+      "ypos": 0
+    },
+    {
+      "char": "v",
+      "xpos": 3456,
+      "ypos": 0
+    },
+    {
+      "char": "w",
+      "xpos": 3520,
+      "ypos": 0
+    },
+    {
+      "char": "x",
+      "xpos": 3584,
+      "ypos": 0
+    },
+    {
+      "char": "y",
+      "xpos": 3648,
+      "ypos": 0
+    },
+    {
+      "char": "z",
+      "xpos": 3712,
+      "ypos": 0
+    },
+    {
+      "char": "[",
+      "xpos": 3776,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 3840,
+      "ypos": 0
+    },
+    {
+      "char": "]",
+      "xpos": 3904,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 3968,
+      "ypos": 0
+    },
+    {
+      "char": "",
+      "xpos": 4032,
+      "ypos": 0
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "Gamestudio Editor",
+  "made_with_ver": "rel-???",
+  "premultiply_alpha_hint": false,
+  "xoffset": 0,
+  "yoffset": 0
+}
