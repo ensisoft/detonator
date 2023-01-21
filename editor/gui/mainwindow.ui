@@ -1358,8 +1358,11 @@
      <string>Tools</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="separator"/>
     <addaction name="actionImagePacker"/>
     <addaction name="actionImageViewer"/>
+    <addaction name="actionFontMap"/>
+    <addaction name="separator"/>
     <addaction name="actionLaunchViewer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -2170,10 +2173,19 @@
   <action name="actionImageViewer">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
+     <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
    </property>
    <property name="text">
     <string>Image Viewer ...</string>
+   </property>
+  </action>
+  <action name="actionFontMap">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/font.png</normaloff>:/16x16_ico_png/font.png</iconset>
+   </property>
+   <property name="text">
+    <string>Font Map ...</string>
    </property>
   </action>
  </widget>

@@ -144,6 +144,7 @@ namespace gui
         void on_actionSettings_triggered();
         void on_actionImagePacker_triggered();
         void on_actionImageViewer_triggered();
+        void on_actionFontMap_triggered();
         void on_actionLaunchViewer_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowInfo_toggled(bool val);
