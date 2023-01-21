@@ -72,16 +72,27 @@
            <string>Image properties</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lblImageDepth">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_36">
+             <property name="text">
+              <string>Width</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_37">
+             <property name="text">
+              <string>Height</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lblImageWidth">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
-             </property>
-             <property name="text">
-              <string/>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -110,23 +121,26 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_38">
-             <property name="text">
-              <string>Depth</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lblImageWidth">
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="lblImageDepth">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="text">
+              <string/>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_38">
+             <property name="text">
+              <string>Depth</string>
              </property>
             </widget>
            </item>
@@ -146,17 +160,20 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_36">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>Width</string>
+              <string>Font character</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_37">
-             <property name="text">
-              <string>Height</string>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="glyphIndex">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
             </widget>
            </item>
@@ -345,7 +362,7 @@
           <item>
            <widget class="QCheckBox" name="chkPremulAlpha">
             <property name="text">
-             <string>Premultiply alpha</string>
+             <string>Premultiply alpha hint</string>
             </property>
            </widget>
           </item>
@@ -414,6 +431,7 @@
   <tabstop>lblImageWidth</tabstop>
   <tabstop>lblImageHeight</tabstop>
   <tabstop>lblImageDepth</tabstop>
+  <tabstop>glyphIndex</tabstop>
   <tabstop>chkPot</tabstop>
   <tabstop>padding</tabstop>
   <tabstop>chkJson</tabstop>

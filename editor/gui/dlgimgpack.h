@@ -43,6 +43,7 @@ namespace gui
         void on_colorChanged();
         void on_padding_valueChanged(int);
         void on_chkPot_stateChanged(int);
+        void on_glyphIndex_textChanged(const QString&);
     private:
         void repack();
 
