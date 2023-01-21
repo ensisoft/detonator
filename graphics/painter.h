@@ -43,6 +43,8 @@ namespace gfx
     {
     public:
         virtual ~Painter() = default;
+        // Get the current graphics set on the painter.
+        virtual Device* GetDevice() = 0;
         // Set flag that enables "editing" mode which indicates
         // that even content marked "static" should be checked against
         // modifications and possibly regenerated/reuploaded to the device.
@@ -79,8 +81,10 @@ namespace gfx
         // is useful when using some drawing system that doesn't support arbitrary
         // transformations.
         virtual void SetViewMatrix(const glm::mat4& view) = 0;
-        // Get the current view matrix if any.
+        // Get the current view matrix if any (could be I)
         virtual const glm::mat4& GetViewMatrix() const = 0;
+        // Get the current projection matrix.
+        virtual const glm::mat4& GetProjMatrix() const = 0;
 
         // Clear the render target with the given clear color.
         // You probably want to do this as the first step before

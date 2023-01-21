@@ -22,19 +22,34 @@
 #  include <ft2build.h>
 #  include FT_FREETYPE_H
 #  include FT_SIZES_H
+#  include <nlohmann/json.hpp>
+#  include <glm/glm.hpp>
+#  include <glm/mat4x4.hpp>
+#  include <glm/gtc/matrix_transform.hpp>
 #include "warnpop.h"
 
 #include <functional>
 #include <stdexcept>
 #include <map>
+#include <unordered_map>
+#include <cwctype>
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/json.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
 #include "graphics/text.h"
+#include "graphics/device.h"
+#include "graphics/framebuffer.h"
+#include "graphics/texture.h"
+#include "graphics/shader.h"
+#include "graphics/program.h"
+#include "graphics/geometry.h"
+#include "graphics/image.h"
+#include "graphics/transform.h"
 
 // some good information here about text rendering
 // https://gankra.github.io/blah/text-hates-you/
@@ -57,6 +72,181 @@ Style:      Bold and Italics modifiers for fonts (hinting, aliasing, and other s
 */
 
 namespace {
+// Glyphs are pre-rendered offline in some image editor tool
+// and packed into a texture. JSON meta file describes the
+// glyphs and (optionally) kerning pairs. Appropriate data
+// files can be produced by the Editor's image packer.
+class GamestudioBitmapFontGlyphPack
+{
+public:
+    struct Glyph {
+        unsigned short px_width  = 0;
+        unsigned short px_height = 0;
+        float width  = 0;
+        float height = 0;
+        float xpos   = 0;
+        float ypos   = 0;
+    };
+    bool ParseFont(const std::string& uri)
+    {
+        const auto& fontbuff = gfx::LoadResource(uri);
+        if (!fontbuff || !fontbuff->GetSize())
+            ERROR_RETURN(false, "Failed to load font file. [file='%1']", uri);
+
+        const char* beg = (const char*)fontbuff->GetData();
+        const char* end = (const char*)fontbuff->GetData() + fontbuff->GetSize();
+        const auto& [success, json, error] = base::JsonParse(beg, end);
+        if (!success)
+            ERROR_RETURN(false, "Failed to parse font JSON. [file='%1']", uri);
+
+        unsigned texture_width  = 0;
+        unsigned texture_height = 0;
+        unsigned font_width  = 0;
+        unsigned font_height = 0;
+        std::string texture_file;
+
+        if (!base::JsonReadSafe(json, "image_width",  &texture_width))
+            ERROR_RETURN(false, "Bitmap font is missing 'image_width' attribute. [file='%1']", uri);
+        if (!base::JsonReadSafe(json, "image_height", &texture_height))
+            ERROR_RETURN(false, "Bitmap font is missing 'image_height' attribute. [file='%1']", uri);
+        if (!base::JsonReadSafe(json, "image_file",   &texture_file))
+            ERROR_RETURN(false, "Bitmap font is missing 'image_file' attribute. [file='%1']", uri);
+
+        bool premultiply_alpha_hint = false;
+        bool case_sensitive = true;
+
+        if (!base::JsonReadSafe(json, "font_width", &font_width))
+            WARN("Bitmap font is missing 'font_width' attribute.[file='%1']", uri);
+        if (!base::JsonReadSafe(json, "font_height", &font_height))
+            WARN("Bitmap font is missing 'font_height' attribute.[file='%1']", uri);
+        if (!base::JsonReadSafe(json, "premultiply_alpha_hint", &premultiply_alpha_hint))
+            WARN("Bitmap font is missing 'premultiply_alpha_hint' attribute. [file='%1']", uri);
+        if (!base::JsonReadSafe(json, "case_sensitive", &case_sensitive))
+            WARN("Bitmap font is missing 'case_sensitive' attribute. [file='%1']", uri);
+
+        std::unordered_map<uint32_t, Glyph> glyphs;
+        for (const auto& item : json["images"].items())
+        {
+            const auto& img_json = item.value();
+            std::string utf8_char_string;
+            Glyph glyph;
+            unsigned width  = font_width;
+            unsigned height = font_height;
+            unsigned xpos   = 0;
+            unsigned ypos   = 0;
+            bool success    = false;
+            if (!base::JsonReadSafe(img_json, "char", &utf8_char_string))
+                WARN("Font glyph is missing 'char' attribute. [file='%1]", uri);
+            else if (!base::JsonReadSafe(img_json, "xpos", &xpos))
+                WARN("Font glyph is missing 'xpos' attribute. [file='%1']", uri);
+            else if (!base::JsonReadSafe(img_json, "ypos", &ypos))
+                WARN("Font glyph is missing 'ypos' attribute. [file='%1']", uri);
+            else if (!base::JsonReadSafe(img_json, "width",  &width) && !font_width)
+                WARN("Font glyph is missing 'width' attribute. [file='%1']", uri);
+            else if (!base::JsonReadSafe(img_json, "height",  &width) && !font_height)
+                WARN("Font glyph is missing 'height' attribute. [file='%1']", uri);
+            else success = true;
+
+            if (!success)
+                continue;
+
+            const auto& wide_char_string = base::FromUtf8(utf8_char_string);
+            if (wide_char_string.empty())
+                continue;
+
+            glyph.px_width  = width;
+            glyph.px_height = height;
+            glyph.width  = (float)width / (float)texture_width;
+            glyph.height = (float)height / (float)texture_height;
+            glyph.xpos   = (float)xpos / (float)texture_width;
+            glyph.ypos   = (float)ypos / (float)texture_height;
+            mCaseSensitive = case_sensitive;
+            mPremulAlpha   = premultiply_alpha_hint;
+            // taking only the first character of the string into account.
+            glyphs[wide_char_string[0]] = std::move(glyph);
+        }
+        mTextureHeight = texture_height;
+        mTextureWidth  = texture_width;
+        mFontWidth     = font_width;
+        mFontHeight    = font_height;
+        mTextureFile   = std::move(texture_file);
+        mGlyphs        = std::move(glyphs);
+        mFontUri       = uri;
+        mValid         = true;
+        DEBUG("Loaded bitmap font JSON. [file='%1']", uri);
+        return true;
+    }
+    unsigned GetFontWidth() const
+    { return mFontWidth; }
+    unsigned GetFontHeight() const
+    { return mFontHeight; }
+    unsigned GetTextureWidth() const
+    { return mTextureWidth; }
+    unsigned GetTextureHeight() const
+    { return mTextureHeight; }
+    std::string GetTextureFile() const
+    { return mTextureFile; }
+    bool IsValid() const
+    { return mValid; }
+
+    gfx::Texture* GetTexture(gfx::Device& device) const
+    {
+        if (mTextureFile.empty())
+            return nullptr;
+        // todo: this name is not necessarily unique.
+        auto* texture = device.FindTexture(mTextureFile);
+        if (texture)
+            return texture;
+
+        auto last_slash = mFontUri.find_last_of('/');
+        if (last_slash == std::string::npos)
+            return nullptr;
+
+        texture = device.MakeTexture(mTextureFile);
+
+        auto uri = mFontUri.substr(0, last_slash);
+        uri += '/';
+        uri += mTextureFile;
+
+        DEBUG("Loading bitmap font texture. [file='%1']", uri);
+        gfx::Image image(uri);
+        if (!image.IsValid())
+            ERROR_RETURN(nullptr, "Failed to load texture. [file='%1']", uri);
+
+        const auto width  = image.GetWidth();
+        const auto height = image.GetHeight();
+        const auto format = gfx::Texture::DepthToFormat(image.GetDepthBits(), true); // todo:  sRGB flag ?
+        texture->SetName(mTextureFile);
+        texture->Upload(image.GetData(), width, height, format);
+        DEBUG("Loaded bitmap font texture. [file='%1']", uri);
+        return texture;
+    }
+
+    const Glyph* FindGlyph(uint32_t character) const
+    {
+        auto* ret = base::SafeFind(mGlyphs, character);
+        if (ret)
+            return ret;
+        else if (!mCaseSensitive && std::iswlower(character))
+            return base::SafeFind(mGlyphs, (uint32_t)std::towupper(character));
+        else if (!mCaseSensitive && std::iswupper(character))
+            return base::SafeFind(mGlyphs, (uint32_t)std::towlower(character));
+        return nullptr;
+    }
+
+private:
+    std::unordered_map<uint32_t, Glyph> mGlyphs;
+    std::string mFontUri;
+    std::string mTextureFile;
+    unsigned mTextureWidth  = 0;
+    unsigned mTextureHeight = 0;
+    unsigned mFontHeight    = 0;
+    unsigned mFontWidth     = 0;
+    bool mValid = false;
+    bool mCaseSensitive = true;
+    bool mPremulAlpha   = false;
+};
+
 // RAII type for initializing and freeing the Freetype library
 struct FontLibrary {
     FT_Library library;
@@ -390,7 +580,17 @@ void TextBuffer::SetBufferSize(unsigned int width, unsigned int height)
     mBufferHeight = height;
 }
 
-std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
+TextBuffer::RasterFormat TextBuffer::GetRasterFormat() const
+{
+    if (base::EndsWith(mText.font, ".otf") ||
+        base::EndsWith(mText.font, ".ttf"))
+        return RasterFormat::Bitmap;
+    if (base::EndsWith(mText.font, ".json"))
+        return RasterFormat::Texture;
+    return RasterFormat::None;
+}
+
+std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
 {
     static FontLibrary freetype;
 
@@ -491,10 +691,268 @@ std::shared_ptr<AlphaMask> TextBuffer::Rasterize() const
     return out;
 }
 
+Texture* TextBuffer::RasterizeTexture(Device& device) const
+{
+    // create the render target texture that will contain the
+    // rasterized texture after we're done. it'll be used as a
+    // render target (color attachment) in an FBO and we render
+    // to it by drawing quads that sample from the font's texture.
+    const auto& texture_name = std::to_string(GetHash());
+    auto* result_texture = device.FindTexture(texture_name);
+    if (result_texture)
+        return result_texture;
+
+    result_texture = device.MakeTexture(texture_name);
+    result_texture->SetName("BitmapFontRasterTarget");
+    result_texture->SetTransient(true);
+
+    // load the bitmap font json descriptor
+    static std::unordered_map<std::string, std::unique_ptr<GamestudioBitmapFontGlyphPack>> font_cache;
+    auto it = font_cache.find(mText.font);
+    if (it == font_cache.end())
+    {
+        auto font = std::make_unique<GamestudioBitmapFontGlyphPack>();
+        font->ParseFont(mText.font);
+        it = font_cache.insert({mText.font, std::move(font)}).first;
+    }
+    auto& font = (*it).second;
+    if (!font->IsValid())
+        return nullptr;
+
+    // upload the font texture onto the device.
+    auto* font_texture = font->GetTexture(device);
+    if (!font_texture)
+        return nullptr;
+
+    // setup the glyph array.
+    struct Glyph {
+        float xpos   = 0.0f;
+        float ypos   = 0.0f;
+        float width  = 0.0f;
+        float height = 0.0f;
+        float texture_xpos   = 0.0f;
+        float texture_ypos   = 0.0f;
+        float texture_width  = 0.0f;
+        float texture_height = 0.0f;
+    };
+    std::vector<Glyph> glyphs;
+
+    std::vector<std::string> lines;
+    std::stringstream  ss(mText.text);
+    std::string line;
+    while (std::getline(ss, line))
+    {
+        lines.push_back(line);
+    }
+
+    unsigned buffer_width  = mBufferWidth;
+    unsigned buffer_height = mBufferHeight;
+    if (!buffer_height)
+    {
+        buffer_height = lines.size() * mText.lineheight * mText.fontsize;
+    }
+    if (!buffer_width)
+    {
+        for (const auto& line : lines)
+        {
+            unsigned line_width = 0;
+            for (const auto char_ : line)
+            {
+                const auto* font_glyph = font->FindGlyph(char_);
+                const float px_height = font_glyph ? font_glyph->px_height : font->GetFontHeight();
+                const float px_width  = font_glyph ? font_glyph->px_width  : font->GetFontWidth();
+                const float glyph_scaler = mText.fontsize / px_height;
+                const float glyph_width  = px_width * glyph_scaler;
+                line_width += glyph_width;
+            }
+            buffer_width = std::max(buffer_width, line_width);
+        }
+    }
+
+    float ypos = 0.0f;
+    if (mVerticalAlign == VerticalAlignment::AlignCenter)
+    {
+        const float text_height = lines.size() * mText.lineheight * mText.fontsize;
+        ypos = ((float)buffer_height - text_height) / 2.0f;
+    }
+    else if (mVerticalAlign == VerticalAlignment::AlignBottom)
+    {
+        const float text_height = lines.size() * mText.lineheight * mText.fontsize;
+        ypos = ((float)buffer_height - text_height);
+    }
+
+    for (const auto& line : lines)
+    {
+        float xpos = 0;
+        auto index = glyphs.size();
+        for (const auto char_ : line)
+        {
+            const auto* font_glyph = font->FindGlyph(char_);
+            const float px_height = font_glyph ? font_glyph->px_height : font->GetFontHeight();
+            const float px_width  = font_glyph ? font_glyph->px_width  : font->GetFontWidth();
+            const float glyph_scaler = mText.fontsize / px_height;
+            const float glyph_width  = px_width * glyph_scaler;
+            const float glyph_height = px_height * glyph_scaler;
+            if (font_glyph == nullptr)
+            {
+                xpos += glyph_width;
+                continue;
+            }
+            Glyph glyph;
+            glyph.xpos   = xpos;
+            glyph.ypos   = ypos;
+            glyph.width  = glyph_width;
+            glyph.height = glyph_height;
+            glyph.texture_xpos   = font_glyph->xpos;
+            glyph.texture_ypos   = font_glyph->ypos;
+            glyph.texture_width  = font_glyph->width;
+            glyph.texture_height = font_glyph->height;
+            glyphs.push_back(glyph);
+            xpos += glyph_width;
+        }
+
+        if (mHorizontalAlign == HorizontalAlignment::AlignCenter)
+        {
+            float delta = ((float)buffer_width - xpos) / 2.0f;
+            for (;index < glyphs.size(); ++index)
+            {
+                glyphs[index].xpos += delta;
+            }
+        }
+        else if (mHorizontalAlign == HorizontalAlignment::AlignRight)
+        {
+            float delta = (float)buffer_width - xpos;
+            for (; index<glyphs.size(); ++index)
+            {
+                glyphs[index].xpos += delta;
+            }
+        }
+        ypos += mText.lineheight * mText.fontsize;
+    }
+
+    result_texture->Upload(nullptr, buffer_width, buffer_height, gfx::Texture::Format::RGBA, false /* mips */);
+
+    auto* fbo = device.FindFramebuffer("BitmapFontCompositeFBO");
+    if (fbo == nullptr)
+    {
+        // when setting the FBO configuration the width/height
+        // don't matter since this FBO will only have a color buffer
+        // render target.
+        gfx::Framebuffer::Config conf;
+        conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+        conf.width  = 0;
+        conf.height = 0;
+        fbo = device.MakeFramebuffer("BitmapFontCompositeFBO");
+        fbo->SetConfig(conf);
+    }
+constexpr auto* fragment_src = R"(
+#version 100
+precision highp float;
+uniform sampler2D kGlyphMap;
+varying vec2 vTexCoord;
+void main() {
+  gl_FragColor = texture2D(kGlyphMap, vTexCoord);
+}
+    )";
+constexpr auto* vertex_src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+
+varying vec2 vTexCoord;
+void main() {
+    vTexCoord   = aTexCoord;
+    gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
+}
+    )";
+    auto* program = device.FindProgram("BitmapFontCompositeProgram");
+    if (program == nullptr)
+    {
+        program  = device.MakeProgram("BitmapFontCompositeProgram");
+        program->SetName("BitmapFontCompositeProgram");
+        auto* fs = device.MakeShader("BitmapFontCompositeFragmentShader");
+        auto* vs = device.MakeShader("BitmapFontCompositeVertexShader");
+        fs->SetName("BitmapFontCompositeFragmentShader");
+        if (!fs->CompileSource(fragment_src))
+            return nullptr;
+        vs->SetName("BitmapFontCompositeVertexShader");
+        if (!vs->CompileSource(vertex_src))
+            return nullptr;
+        if (!program->Build(fs, vs))
+            return nullptr;
+    }
+
+    auto* geometry = device.FindGeometry("BitmapFontTextGeometry");
+    if (geometry == nullptr)
+    {
+        geometry = device.MakeGeometry("BitmapFontGeometry");
+    }
+
+
+    auto ortho = glm::ortho(0.0f, (float)buffer_width, (float)buffer_height, 0.0f);
+    Quad quad;
+    quad.top_left     = {0.0f,  0.0f, 0.0f, 1.0f};
+    quad.bottom_left  = {0.0f,  1.0f, 0.0f, 1.0f};
+    quad.bottom_right = {1.0f,  1.0f, 0.0f, 1.0f};
+    quad.top_right    = {1.0f,  0.0f, 0.0f, 1.0f};
+
+    std::vector<Vertex> verts;
+    for (const auto& glyph : glyphs)
+    {
+        gfx::Transform t;
+        t.Scale(glyph.width, glyph.height);
+        t.Translate(glyph.xpos, glyph.ypos);
+
+        const auto& q = TransformQuad(quad, ortho * t.GetAsMatrix());
+
+        Vertex v0, v1, v2, v3;
+        v0.aPosition = Vec2 {q.top_left.x, q.top_left.y };
+        v0.aTexCoord = Vec2 { glyph.texture_xpos, glyph.texture_ypos };
+
+        v1.aPosition = Vec2 {q.bottom_left.x, q.bottom_left.y };
+        v1.aTexCoord = Vec2 { glyph.texture_xpos, glyph.texture_ypos + glyph.texture_height };
+
+        v2.aPosition = Vec2 {q.bottom_right.x, q.bottom_right.y };
+        v2.aTexCoord = Vec2 { glyph.texture_xpos + glyph.texture_width, glyph.texture_ypos + glyph.texture_height };
+
+        v3.aPosition = Vec2 {q.top_right.x, q.top_right.y };
+        v3.aTexCoord = Vec2 { glyph.texture_xpos + glyph.texture_width, glyph.texture_ypos };
+
+        base::AppendVector(verts, {v0, v1, v2});
+        base::AppendVector(verts, {v0, v2, v3});
+    }
+    geometry->ClearDraws();
+    geometry->SetVertexBuffer(verts, Geometry::Usage::Stream);
+    geometry->AddDrawCmd(Geometry::DrawType::Triangles);
+
+    program->SetTexture("kGlyphMap", 0, *font_texture);
+    program->SetTextureCount(1);
+
+    auto* current = device.GetCurrentFramebuffer();
+
+    fbo->SetColorTarget(result_texture);
+    device.SetFramebuffer(fbo);
+    device.ClearColor(gfx::Color4f(0.0f, 0.0f, 0.0f, 0.0f));
+
+    Device::State state;
+    state.bWriteColor = true;
+    state.blending    = Device::State::BlendOp::Transparent;
+    state.culling     = Device::State::Culling::Back;
+    state.depth_test  = Device::State::DepthTest::Disabled;
+    state.premulalpha = false; // todo:
+    state.scissor     = IRect(); // disabled
+    state.viewport    = IRect(0, 0, buffer_width, buffer_height);
+    state.stencil_func = Device::State::StencilFunc::Disabled;
+    device.Draw(*program, *geometry, state);
+
+    device.SetFramebuffer(current);
+    return result_texture;
+}
+
 bool TextBuffer::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
 {
     // todo: implement better, using font metrics and not using rasterization
-    auto buffer = Rasterize();
+    auto buffer = RasterizeBitmap();
     if (!buffer)
         return false;
     *width  = buffer->GetWidth();

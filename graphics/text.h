@@ -30,6 +30,9 @@
 
 namespace gfx
 {
+    class Texture;
+    class Device;
+
     // Shape a string of text into a series of glyphs
     // with relative positioning to the (imaginary) baseline
     // and then rasterize them into a CPU based buffer.
@@ -59,9 +62,16 @@ namespace gfx
         // Set the new text buffer size.
         void SetBufferSize(unsigned width, unsigned height);
 
+        enum class RasterFormat {
+            None, Bitmap, Texture
+        };
+        RasterFormat GetRasterFormat() const;
+
         // Rasterize the text buffer contents into a bitmap.
         // Returns nullptr if the rasterization fails.
-        std::shared_ptr<AlphaMask> Rasterize() const;
+        std::shared_ptr<AlphaMask> RasterizeBitmap() const;
+
+        Texture* RasterizeTexture(Device& device) const;
 
         bool ComputeTextMetrics(unsigned* width, unsigned* height) const;
 
