@@ -397,6 +397,16 @@ inline QTableWidgetItem* SetTableItem(QTableWidget* table, unsigned row, unsigne
     return item;
 }
 
+
+inline QListWidgetItem* AddItem(QListWidget* list, const QString& text)
+{
+    QSignalBlocker s(list);
+    QListWidgetItem* item = new QListWidgetItem();
+    item->setText(text);
+    list->addItem(item);
+    return item;
+}
+
 inline void SetList(QListWidget* list, const ResourceList& items)
 {
     // maintain the current/previous selections

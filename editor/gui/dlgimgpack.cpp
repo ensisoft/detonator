@@ -82,10 +82,7 @@ void DlgImgPack::on_btnBrowseImage_clicked()
             msg.exec();
             return;
         }
-
-        QListWidgetItem* item = new QListWidgetItem(mUI.listWidget);
-        item->setText(list[i]);
-        mUI.listWidget->addItem(item);
+        AddItem(mUI.listWidget, list[i]);
     }
 
     const auto index = mUI.listWidget->currentRow();
@@ -163,6 +160,7 @@ void DlgImgPack::on_btnSaveAs_clicked()
         msg.setText(tr("Failed to write the JSON description file.\n"
                        "File error '%1'").arg(file.errorString()));
         msg.exec();
+        return;
     }
 
     const auto& json = mJson.dump(2);
@@ -186,18 +184,21 @@ void DlgImgPack::on_listWidget_currentRowChanged(int index)
         SetValue(mUI.lblImageHeight, QString(""));
         SetValue(mUI.lblImageDepth, QString(""));
         SetImage(mUI.lblImagePreview, QPixmap(":texture.png"));
+        SetValue(mUI.glyphIndex, QString(""));
         return;
     }
 
     const QListWidgetItem* item = mUI.listWidget->item(index);
-    const QString& file = item->text();
+    const QString& file  = item->text();
+    const QString& glyph = item->data(Qt::UserRole).toString();
+    SetValue(mUI.glyphIndex, glyph);
+    SetEnabled(mUI.btnDeleteImage, true);
+    SetEnabled(mUI.grpImageProperties, true);
 
     QPixmap pix(file);
     if (pix.isNull())
         return;
 
-    SetEnabled(mUI.btnDeleteImage, true);
-    SetEnabled(mUI.grpImageProperties, true);
     SetValue(mUI.lblImageWidth, pix.width());
     SetValue(mUI.lblImageHeight, pix.height());
     SetValue(mUI.lblImageDepth, pix.depth());
@@ -219,12 +220,19 @@ void DlgImgPack::on_chkPot_stateChanged(int)
     repack();
 }
 
+void DlgImgPack::on_glyphIndex_textChanged(const QString& text)
+{
+    if (auto* item = mUI.listWidget->currentItem())
+    {
+        item->setData(Qt::UserRole, text);
+    }
+}
+
 void DlgImgPack::repack()
 {
     std::vector<app::PackingRectangle> images;
 
     const unsigned padding  = GetValue(mUI.padding);
-
     const bool power_of_two = GetValue(mUI.chkPot);
 
     // take the files and build a list of "named images" for the algorithm
@@ -298,7 +306,8 @@ void DlgImgPack::repack()
         const auto& img     = images[i];
         const auto index    = img.index;
         const auto* item    = mUI.listWidget->item(index);
-        const QString& file = item->text();
+        const QString& image_file = item->text();
+        const QString& glyph_key  = item->data(Qt::UserRole).toString();
 
         const auto xpos   = img.xpos+padding;
         const auto ypos   = img.ypos+padding;
@@ -307,19 +316,21 @@ void DlgImgPack::repack()
 
         const QRectF dst(xpos, ypos, width, height);
         const QRectF src(0, 0, width, height);
-        const QPixmap pix(file);
+        const QPixmap pix(image_file);
         painter.drawPixmap(dst, pix, src);
 
         if (GetValue(mUI.chkJson))
         {
-            const QFileInfo info(file);
+            const QFileInfo info(image_file);
             nlohmann::json json;
-            base::JsonWrite(json, "name", app::ToUtf8(info.fileName()));
-            base::JsonWrite(json, "width", width);
+            base::JsonWrite(json, "name",   app::ToUtf8(info.fileName()));
+            base::JsonWrite(json, "width",  width);
             base::JsonWrite(json, "height", height);
-            base::JsonWrite(json, "xpos", xpos);
-            base::JsonWrite(json, "ypos", ypos);
+            base::JsonWrite(json, "xpos",   xpos);
+            base::JsonWrite(json, "ypos",   ypos);
             base::JsonWrite(json, "index", (unsigned)index);
+            if (!glyph_key.isEmpty())
+                base::JsonWrite(json, "char",  app::ToUtf8(glyph_key));
             mJson["images"].push_back(std::move(json));
         }
     }
