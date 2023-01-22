@@ -1,8 +1,9 @@
-GAMESTUDIO 2D
+DETONATOR 2D
 ===================
-
 A 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such as puzzle games,
 platformers and side scrollers. Eventually support is planned for tile based games too for real time strategy/tactics.
+
+![Screenshot](editor/resource/splash.gif "Bandit demo")
 
 This readme and other readme files, are for developers and cover information related to developing and building the engine itself.<br>
 For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
@@ -15,7 +16,6 @@ Other readmes:
   * [UI](uikit/README.md "UIKit readme") 
   * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
 
-![Screenshot](screens/bandit-play.gif "Bandit demo")
 
 Currently, supported major features:
 * Qt5 based WYSIWYG editor
@@ -26,6 +26,7 @@ Currently, supported major features:
 * Entity system with animation tracks
 * Audio engine with approx. dozen audio elements
 * Lua based scripting for entities, scenes, "main" game logic and UIs
+* Built-in Lua script editor with code formatting and API help
 * Scene builder
 * Styleable UI system (JSON style files *and* material system integration) 
 * Physics engine based on Box2D
@@ -97,7 +98,7 @@ Building to WASM currently supported only for the engine but not the editor.
 The build is separated from the main engine build and is in emscripten/ folder.
 
 - Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
-  location of emsdk is arbitrary, but I've dumped it into gamestudio/ so that my IDE (Clion) can
+  location of emsdk is arbitrary, but I've dumped it into detonator/ so that my IDE (Clion) can
   easily find the emscripten headers for C++ tooling (the CMakeLists then has a matching include for this).
 - Currently, the target Emscripten version is 3.0.0. Using other version will likely break things.
 - If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases. Drop the ninja.exe for example
@@ -107,7 +108,7 @@ On Linux
 
 - Install Emscripten
 ```
-  $ cd gamestudio
+  $ cd detonator
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
@@ -122,11 +123,11 @@ On Linux
   $ emcc --version
   $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
 ```
-- Build the Gamestudio engine into a WASM blob. Make sure that you have the emscripten tools in your path,
+- Build the DETONATOR 2D engine into a WASM blob. Make sure that you have the emscripten tools in your path,
   i.e. you have sourced emsdk_env.sh in your current shell.
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ cd emscripten
   $ mkdir build
@@ -138,7 +139,7 @@ On Linux
 On Windows
 - Install Emscripten
 ```
-  $ cd gamestudio
+  $ cd detonator
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
@@ -149,20 +150,20 @@ On Windows
 -- Check your Emscripten and Ninja installation
 ```
   $ where emcc
-  $ C:\coding\gamestudio\emsdk\upstream\emscripten\emcc
-  $ C:\coding\gamestudio\emsdk\upstream\emscripten\emcc.bat
+  $ C:\coding\detonator\emsdk\upstream\emscripten\emcc
+  $ C:\coding\detonator\emsdk\upstream\emscripten\emcc.bat
   $ emcc --version
   $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
   $ where ninja
-  $ C:\coding\gamestudio\emsdk\ninja.exe
+  $ C:\coding\detonator\emsdk\ninja.exe
   $ ninja --version
   $ 1.10.2
 ```
-- Build the Gamestudio engine into a WASM blob. Make sure you have emcc and ninja in your path i.e. you have
+- Build the DETONATOR 2D engine into a WASM blob. Make sure you have emcc and ninja in your path i.e. you have
   ran emsdk_env.bat in your current shell. 
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ cd emscripten
   $ mkdir build
@@ -198,8 +199,8 @@ you can try edit ~/.conan/settings.yaml
 
 - Build the project in RELEASE mode
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
@@ -211,8 +212,8 @@ you can try edit ~/.conan/settings.yaml
 
 - Build the project in DEBUG mode
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build_d
   $ cd build_d
@@ -224,8 +225,8 @@ you can try edit ~/.conan/settings.yaml
 
 - Build the project for profiling using valgrind / kcachegrind
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio 
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build_profile
   $ cd build_profile
@@ -236,7 +237,7 @@ you can try edit ~/.conan/settings.yaml
 Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
 For example:
 ```
-  $ cd gamestudio/audio/test/
+  $ cd detonator/audio/test/
   $ valgrind --tool=cachegrind ./audio_test --graph
   $ kcaghegrind cachegrind.out.XXXXX
 ```
@@ -245,14 +246,14 @@ Alternative instructions for build using Ninja, Clang and Mold linker (optional)
 ```
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
-  $ conan profile new gamestudio-clang --detect
+  $ conan profile new detonator-clang --detect
   
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
-  $ conan install .. --build missing --profile gamestudio-clang
+  $ conan install .. --build missing --profile detonator-clang
   $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON 
   $ ninja -j16 install
 ```
@@ -280,8 +281,8 @@ https://docs.conan.io/en/latest/installation.html
 Build the project in RELEASE mode.
 
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
@@ -297,8 +298,8 @@ Build the project in DEBUG mode.
 This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
 
 ```
-  $ git clone https://github.com/ensisoft/gamestudio
-  $ cd gamestudio
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build_d
   $ cd build_d
@@ -330,7 +331,7 @@ From source code to a running game:
    but also copies other assets such as GLSL shader files. Without the installation step things will not work correctly!
 2. After building launch the Editor from the editor/dist folder.
 3. *In the Editor:* Open your game's workspace folder. This is the folder that contains the workspace.json and content.json files.
-   In Gamestudio this is essentially your "project" (It's simply a folder with those two specific files in it).
+   In DETONATOR 2D this is essentially your "project" (It's simply a folder with those two specific files in it).
 4. *In the Editor:* Package your content. (Workspace|Package). Select the assets you want to package (most likely everything).
    When the packaging process is complete your selected output directory will contain the following:
    1. The game resources copied over, i.e. shaders, textures, font files etc.
@@ -380,7 +381,7 @@ a "*unit_test_*" is a unit test. There's a very simple testing utility that is a
 In order to run tests after a successful build:
 
 ```
-  $ cd gamestudio/build
+  $ cd detonator/build
   $ ctest -j16
 ```
 Currently, the expectation is that all cases should pass on Linux. On Windows some of the tests are unfortunately broken.
@@ -396,7 +397,7 @@ It's also possible to run the audio/graphics tests separately.
 
 Runs, mp3, ogg, flag and 24bit .wav test. Use --help for more information.
 ```
-  $ cd gamestudio/audio/test
+  $ cd detonator/audio/test
   $ ./audio_test --mp3 --ogg --flac --24bit
   $ ...
   $ ./audio_test --help
@@ -407,7 +408,7 @@ Runs all tests with MSAA4. Any test rendering that differs from the expected gol
 that were not the same between result and gold and the result will be actual rendering result in whole. 
 Use --help for more information.
 ```
-  $ cd gamestudio/graphics/test/dist
+  $ cd detonator/graphics/test/dist
   $ ./graphics_test --test --msaa4
   $ ...
   $ ./graphics_test --help 

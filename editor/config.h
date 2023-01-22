@@ -20,16 +20,13 @@
 
 // Editor build time configuration file.
 #if defined(NDEBUG)
-#  define APP_TITLE "Gamestudio Editor"
+#  define APP_TITLE "DETONATOR 2D"
 #else
-#  define APP_TITLE "Gamestudio Editor DEBUG"
+#  define APP_TITLE "DETONATOR 2D Debug"
 #endif
 // modify the app version before cranking out a release build
 #define APP_VERSION "rel-???"
-#define APP_COPYRIGHT "Copyright (c) 2020-2022\n" \
+#define APP_COPYRIGHT "Copyright (c) 2020-2023\n" \
                       "Sami Väisänen"   \
 
-#define APP_LINKS "http://www.ensisoft.com\n" \
-                  "http://www.gamestudio.com\n" \
-                  "http://www.github.com/ensisoft/gamestudio"
 

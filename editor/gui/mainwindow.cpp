@@ -1929,7 +1929,7 @@ void MainWindow::on_actionLaunchViewer_triggered()
     viewer_args << "--app-style";
     viewer_args << mSettings.style_name;
 
-    QString executable = "GSEditor";
+    QString executable = "Detonator";
 #if defined(WINDOWS_OS)
     executable.append(".exe");
 #endif

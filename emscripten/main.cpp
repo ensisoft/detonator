@@ -204,10 +204,10 @@ public:
         base::EnableLogEvent(base::LogEvent::Error,   global_log_error);
 
         DEBUG("It's alive!");
-        INFO("Ensisoft Gamestudio 2D");
-        INFO("Gamestudio Copyright (c) 2010-2021 Sami Vaisanen");
+        INFO("Ensisoft DETONATOR 2D");
+        INFO("Copyright (c) 2010-2023 Sami Väisänen");
         INFO("http://www.ensisoft.com");
-        INFO("http://github.com/ensisoft/gamestudio");
+        INFO("https://github.com/ensisoft/detonator");
 
         std::string content;
         std::string title;
