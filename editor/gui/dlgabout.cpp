@@ -48,7 +48,7 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent)
     mUI.build->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     QMovie* movie = new QMovie(this);
-    movie->setFileName(":about.gif");
+    movie->setFileName(":splash.gif");
     movie->start();
     mUI.animation->setMovie(movie);
 }

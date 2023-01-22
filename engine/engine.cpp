@@ -1187,9 +1187,9 @@ extern "C" {
 GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
 #if defined(NDEBUG)
-    DEBUG("GameStudioEngine in release build.");
+    DEBUG("DETONATOR 2D Engine in release build. *Kapow!*");
 #else
-    DEBUG("GameStudioEngine in DEBUG build.");
+    DEBUG("DETONATOR 2D Engine in DEBUG build. *pof*");
 #endif
     return new GameStudioEngine;
 }

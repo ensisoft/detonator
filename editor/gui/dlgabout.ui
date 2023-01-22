@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>441</height>
+    <width>655</width>
+    <height>763</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,13 +68,13 @@
             <item>
              <widget class="QLabel" name="animation">
               <property name="toolTip">
-               <string>Animation by wulax  https://opengameart.org/content/lpc-medieval-fantasy-character-sprites</string>
+               <string/>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="../resource/resource.qrc">:/about.gif</pixmap>
+               <pixmap resource="../resource/resource.qrc">:/splash.gif</pixmap>
               </property>
              </widget>
             </item>
@@ -96,7 +96,7 @@
           <item>
            <widget class="QLabel" name="www">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.ensisoft.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;http://www.ensisoft.com&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.gamestudio.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;http://www.gamestudio.com&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.github.com/ensisoft/gamestudio&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;http://www.github.com/ensisoft/gamestudio&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.ensisoft.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;http://www.ensisoft.com&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.gamestudio.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.github.com/ensisoft/gamestudio&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;https://github.com/ensisoft/detonator&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>

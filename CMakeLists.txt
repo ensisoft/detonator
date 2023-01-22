@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(Gamestudio)
+project(DETONATOR2D)
 
 option(USE_MOLD_LINKER "Use mold linker. https://github.com/rui314/mold" OFF)
 
 message(STATUS "
-          ~~ Ensisoft GameStudio ~~
+          ~~ DETONATOR 2D ~~
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
-    Copyright (c) 2019 Sami Väisänen
+    Copyright (c) 2019-2023 Sami Väisänen
                 Ensisoft
 
-https://github.com/ensisoft/gamestudio
+https://github.com/ensisoft/detonator
 
 ")
 
@@ -309,7 +309,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # Editor application.
-add_executable(GSEditor
+add_executable(Detonator
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -490,25 +490,25 @@ add_executable(GSEditor
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # suppress some noise coming from Qt (Qt-Color-Widgets)
-    target_compile_options(GSEditor PRIVATE -Wno-deprecated-declarations)
+    target_compile_options(Detonator PRIVATE -Wno-deprecated-declarations)
 endif()
 
-target_compile_definitions(GSEditor PRIVATE "QTCOLORWIDGETS_LIBRARY")
-target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
-target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
-target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
-target_include_directories(GSEditor PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
-target_link_libraries(GSEditor Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(GSEditor EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
-target_link_libraries(GSEditor Lua)
-target_link_libraries(GSEditor QtColorWidgets)
-target_link_libraries(GSEditor QuaZip)
-target_link_libraries(GSEditor ${CONAN_LIBS})
-target_link_libraries(GSEditor cmake_git_version_tracking)
-install(TARGETS GSEditor DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
+target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(Detonator EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
+target_link_libraries(Detonator Lua)
+target_link_libraries(Detonator QtColorWidgets)
+target_link_libraries(Detonator QuaZip)
+target_link_libraries(Detonator ${CONAN_LIBS})
+target_link_libraries(Detonator cmake_git_version_tracking)
+install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # game host application which provides a host process to load the game
 # libraries for playback.
