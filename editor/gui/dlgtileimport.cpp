@@ -755,7 +755,7 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
             }
             if (row == current_row && col == current_col)
             {
-                gfx::DrawRectOutline(painter, tile, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                gfx::DrawRectOutline(painter, tile, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
             }
             if (tile_value.selected)
             {
