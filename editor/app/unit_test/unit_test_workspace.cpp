@@ -41,6 +41,11 @@
 #include "uikit/window.h"
 #include "uikit/widget.h"
 
+void DeleteFile(const QString& file)
+{
+    QFile::remove(file);
+}
+
 void DeleteDir(const QString& dir)
 {
     QDir d(dir);
@@ -1558,6 +1563,7 @@ void unit_test_export_import_basic()
 {
     {
         DeleteDir("TestWorkspace");
+        DeleteFile("test-export.zip");
 
         QDir d;
         // setup dummy shaders and data.
@@ -1575,6 +1581,8 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/audio/music.mp3", "music.mp3"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/data/levels.txt", "levels.txt"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/font.otf", "font.otf"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/bitmap_font.png", "bitmap_font.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/bitmap_font.json", "bitmap_font.json"));
         // setup dummy UI style file
         QString style(
                 R"(
@@ -1587,6 +1595,10 @@ void unit_test_export_import_basic()
      {
        "key": "widget/text-font",
        "value": "ws://fonts/font.otf"
+     },
+     {
+        "key": "label/text-font",
+        "value": "ws://fonts/bitmap_font.json"
      }
    ],
 
@@ -1690,6 +1702,8 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/data/levels.txt") == "levels.txt");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/bitmap_font.png") == "bitmap_font.png");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/bitmap_font.json") == "bitmap_font.json");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/keymap/keymap.json") == "keymap.json");
         const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style/style.json");
         TEST_REQUIRE(!style_string.isEmpty());
