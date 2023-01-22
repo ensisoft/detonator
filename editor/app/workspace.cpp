@@ -199,41 +199,29 @@ public:
         if (base::StartsWith(uri, "app://"))
             return;
 
-        // copy file from the zip into the workspace directory.
         const auto& src_file = MapUriToZipFile(uri);
-        if (!FindZipFile(src_file))
-            return;
 
-        QuaZipFileInfo info;
-        QByteArray bytes;
+        QString dst_name;
 
-        QuaZipFile zip_file(&mZip);
-        zip_file.open(QIODevice::ReadOnly);
-        zip_file.getFileInfo(&info);
-        bytes = zip_file.readAll();
-
-        // the dir part of the filepath should already have been baked in the zip
-        // when exporting and the filename already contains the directory/path
-        const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
-        const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
-
-        if (!app::MakePath(dst_dir))
+        if (CopyFile(src_file, dir, &dst_name))
         {
-            ERROR("Failed to create directory. [dir='%1']", dst_dir);
-            return;
+            auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(dst_name));
+            DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
+            mUriMapping[uri] = std::move(mapping);
         }
-        QFile file;
-        file.setFileName(dst_file);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+
+        // hack for now to copy the bitmap font image.
+        // this will not work if:
+        // - the file extension is not .png
+        // - the file name is same as the .json file base name
+        if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
         {
-            ERROR("Failed to open file for writing. [file='%1', error='%2']]", dst_file, file.errorString());
-            return;
+            const auto& src_png_uri  = boost::replace_all_copy(uri, ".json", ".png");
+            const auto& src_png_file = MapUriToZipFile(src_png_uri);
+
+            QString dst_png_name;
+            CopyFile(src_png_file, dir, &dst_png_name);
         }
-        file.write(bytes);
-        file.close();
-        auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(info.name));
-        DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
-        mUriMapping[uri] = std::move(mapping);
     }
     virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
     {
@@ -290,6 +278,44 @@ public:
         const auto* mapping = base::SafeFind(mUriMapping, uri);
         ASSERT(mapping);
         return *mapping;
+    }
+    bool CopyFile(const QString& src_file, const std::string& dir, QString*  dst_name)
+    {
+        // copy file from the zip into the workspace directory.
+
+        if (!FindZipFile(src_file))
+            return false;
+
+        QuaZipFileInfo info;
+        QByteArray bytes;
+
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::ReadOnly);
+        zip_file.getFileInfo(&info);
+        bytes = zip_file.readAll();
+
+        // the dir part of the filepath should already have been baked in the zip
+        // when exporting and the filename already contains the directory/path
+        const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
+        const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
+
+        if (!app::MakePath(dst_dir))
+        {
+            ERROR("Failed to create directory. [dir='%1']", dst_dir);
+            return false;
+        }
+        QFile file;
+        file.setFileName(dst_file);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            ERROR("Failed to open file for writing. [file='%1', error='%2']]", dst_file, file.errorString());
+            return false;
+        }
+        file.write(bytes);
+        file.close();
+        *dst_name = info.name;
+        DEBUG("Copied file from zip archive. [src='%1', dst='%2']", src_file, dst_file);
+        return true;
     }
 
 private:
@@ -360,16 +386,9 @@ public:
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
-            ERROR("Could not find source file. [file='%1']", src_file);
+            ERROR("Failed to find zip export source file. [file='%1']", src_file);
             return;
         }
-        std::vector<char> buffer;
-        if (!app::ReadBinaryFile(src_file, buffer))
-        {
-            ERROR("Failed to read file contents. [file='%1']", src_file);
-            return;
-        }
-
         const auto& src_path = src_info.absoluteFilePath();
         const auto& src_name = src_info.fileName();
         const auto& dst_dir  = app::FromUtf8(dir);
@@ -382,15 +401,25 @@ public:
             dst_name = app::toString("%1_%2", rename_attempt++, src_name);
             dst_file = app::JoinPath(dst_dir, dst_name);
         }
-        mFileNames.insert(dst_name);
 
-        QuaZipFile zip_file(&mZip);
-        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_file));
-        zip_file.write(buffer.data(), buffer.size());
-        zip_file.close();
-        ASSERT(base::EndsWith(dir, "/"));
+        if (!CopyFile(src_file, dst_file))
+            return;
+
+        mFileNames.insert(dst_name);
         mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(dst_name));
-        DEBUG("Copied new file into zip archive. [file='%1', size=%2]", src_file, app::Bytes { buffer.size() });
+
+        // hack for now to copy the bitmap font image.
+        // this will not work if:
+        // - the file extension is not .png
+        // - the file name is same as the .json file base name
+        if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
+        {
+            const auto& src_png_uri  = boost::replace_all_copy(uri, ".json", ".png");
+            const auto& src_png_file = MapFileToFilesystem(src_png_uri);
+            auto png_name = src_name;
+            png_name.replace(".json", ".png");
+            CopyFile(src_png_file, app::JoinPath(dst_dir, png_name));
+        }
     }
     virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
     {
@@ -403,7 +432,7 @@ public:
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
-            ERROR("Could not find source file. [file='%1']", src_file);
+            ERROR("Failed to find zip export source file. [file='%1']", src_file);
             return;
         }
         const auto& src_name = src_info.fileName();
@@ -416,7 +445,7 @@ public:
         zip_file.close();
         ASSERT(base::EndsWith(dir, "/"));
         mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
-        DEBUG("Added new file into zip archive. [file='%1']", dst_name);
+        DEBUG("Wrote new file into zip archive. [file='%1']", dst_name);
     }
 
     virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
@@ -447,6 +476,22 @@ public:
         zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(name));
         zip_file.write(bytes.data(), bytes.size());
         zip_file.close();
+    }
+
+    bool CopyFile(const QString& src_file, const QString& dst_file)
+    {
+        std::vector<char> buffer;
+        if (!app::ReadBinaryFile(src_file, buffer))
+        {
+            ERROR("Failed to read file contents. [file='%1']", src_file);
+            return false;
+        }
+        QuaZipFile zip_file(&mZip);
+        zip_file.open(QIODevice::WriteOnly, QuaZipNewInfo(dst_file));
+        zip_file.write(buffer.data(), buffer.size());
+        zip_file.close();
+        DEBUG("Copied new file into zip archive. [file='%1', size=%2]", src_file, app::Bytes { buffer.size() });
+        return true;
     }
 
     void Close()
@@ -1167,7 +1212,7 @@ bool ResourceArchive::Open(const QString& zip_file)
     mFile.setFileName(zip_file);
     if (!mFile.open(QIODevice::ReadOnly))
     {
-        ERROR("Failed to open zip file for reading. [file='%1', error='%2']", mZipFile, mFile.errorString());
+        ERROR("Failed to open zip file for reading. [file='%1', error='%2']", zip_file, mFile.errorString());
         return false;
     }
     mZip.setIoDevice(&mFile);
@@ -1176,7 +1221,7 @@ bool ResourceArchive::Open(const QString& zip_file)
         ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
         return false;
     }
-    DEBUG("QuaZip open successful. [file='%1']", mZipFile);
+    DEBUG("QuaZip open successful. [file='%1']", zip_file);
     mZip.goToFirstFile();
     do
     {
