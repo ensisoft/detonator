@@ -33,7 +33,7 @@
 #include "engine/ui.h"
 #include "engine/color.h"
 #include "editor/app/utility.h"
-#include "editor/gui/dlgtextureatlas.h"
+#include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgstyleproperties.h"
 #include "editor/gui/dlggradient.h"
 #include "editor/gui/dlgfont.h"
@@ -962,7 +962,7 @@ void DlgWidgetStyleProperties::SetWidgetImage()
     json_file = image_file + ".json";
     if (FileExists(json_file))
     {
-        DlgTextureAtlas dlg(this);
+        DlgImgView dlg(this);
         dlg.SetDialogMode();
         dlg.show();
         dlg.LoadImage(image_file);

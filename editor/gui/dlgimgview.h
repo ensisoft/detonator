@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include "ui_dlgtextureatlas.h"
+#  include "ui_dlgimgview.h"
 #  include <QDialog>
 #  include <QString>
 #  include <QPixmap>
@@ -27,26 +27,28 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <optional>
 
 #include "graphics/fwd.h"
 
 namespace gui
 {
-    class DlgTextureAtlas : public QDialog
+    class DlgImgView : public QDialog
     {
         Q_OBJECT
 
     public:
         struct Image {
             QString name;
-            unsigned width  = 0;
-            unsigned height = 0;
+            QString character;
             unsigned xpos   = 0;
             unsigned ypos   = 0;
-            unsigned index  = 0;
+            std::optional<unsigned> index;
+            std::optional<unsigned> width;
+            std::optional<unsigned> height;
         };
 
-        DlgTextureAtlas(QWidget* parent);
+        DlgImgView(QWidget* parent);
 
         void LoadImage(const QString& file);
         void LoadJson(const QString& file);
@@ -62,6 +64,7 @@ namespace gui
         void on_btnClose_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_cmbColorSpace_currentIndexChanged(int);
         void on_widgetColor_colorChanged(QColor color);
         void on_listWidget_itemSelectionChanged();
         void on_tabWidget_currentChanged(int);
@@ -75,7 +78,7 @@ namespace gui
         void OnMouseDoubleClick(QMouseEvent* mickey);
         bool OnKeyPress(QKeyEvent* event);
     private:
-        Ui::DlgTextureAtlas mUI;
+        Ui::DlgImgView mUI;
     private:
         std::vector<Image> mList;
         std::size_t mSelectedIndex = 0;
@@ -89,5 +92,6 @@ namespace gui
         QPoint mCurrentPoint;
         QPoint mStartPoint;
         bool mTracking = false;
+        bool mDialogMode = false;
     };
 } // namespace
