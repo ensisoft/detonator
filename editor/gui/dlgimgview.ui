@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgTextureAtlas</class>
- <widget class="QWidget" name="DlgTextureAtlas">
+ <class>DlgImgView</class>
+ <widget class="QWidget" name="DlgImgView">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>919</width>
-    <height>1053</height>
+    <width>600</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Texture Atlas</string>
+   <string>Image View</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Texture atlas</string>
+      <string>Image view</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -155,6 +159,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Color space</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbColorSpace"/>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -284,6 +298,7 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>listWidget</tabstop>
   <tabstop>zoom</tabstop>
+  <tabstop>cmbColorSpace</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>

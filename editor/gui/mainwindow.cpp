@@ -66,7 +66,7 @@
 #include "editor/gui/dlgproject.h"
 #include "editor/gui/dlgsave.h"
 #include "editor/gui/dlgmigrationlog.h"
-#include "editor/gui/dlgtextureatlas.h"
+#include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgfontmap.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
@@ -1900,7 +1900,7 @@ void MainWindow::on_actionImagePacker_triggered()
 
 void MainWindow::on_actionImageViewer_triggered()
 {
-    DlgTextureAtlas dlg(this);
+    DlgImgView dlg(this);
     dlg.exec();
 }
 

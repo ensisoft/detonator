@@ -34,7 +34,7 @@
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgfont.h"
 #include "editor/gui/dlggradient.h"
-#include "editor/gui/dlgtextureatlas.h"
+#include "editor/gui/dlgimgview.h"
 #include "editor/gui/utility.h"
 
 namespace gui
@@ -546,7 +546,7 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         json_file = image_file + ".json";
         if (FileExists(json_file))
         {
-            DlgTextureAtlas dlg(this);
+            DlgImgView dlg(this);
             dlg.SetDialogMode();
             dlg.show();
             dlg.LoadImage(image_file);
