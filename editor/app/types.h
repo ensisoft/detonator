@@ -79,9 +79,38 @@ namespace app
 
         operator const std::string () const
         { return app::ToUtf8(mStr); }
+
+        const QString& GetWide() const
+        { return mStr; }
+        const std::string GetUtf8() const
+        { return app::ToUtf8(mStr); }
+    private:
+        friend bool operator==(const AnyString&, const AnyString&);
+        friend bool operator!=(const AnyString&, const AnyString&);
+
+        friend bool operator==(const AnyString&, const QString&);
+        friend bool operator!=(const AnyString&, const QString&);
+
+        friend bool operator==(const QString&, const AnyString&);
+        friend bool operator!=(const QString&, const AnyString&);
     private:
         QString mStr;
     };
+
+    inline bool operator==(const AnyString& lhs, const AnyString& rhs)
+    { return lhs.mStr == rhs.mStr; }
+    inline bool operator!=(const AnyString& lhs, const AnyString& rhs)
+    { return lhs.mStr != rhs.mStr; }
+
+    inline bool operator==(const AnyString& lhs, const QString& rhs)
+    { return lhs.mStr == rhs; }
+    inline bool operator!=(const AnyString& lhs, const QString& rhs)
+    { return lhs.mStr != rhs; }
+
+    inline bool operator==(const QString& lhs, const AnyString& rhs)
+    { return lhs == rhs.mStr; }
+    inline bool operator!=(const QString& lhs, const AnyString& rhs)
+    { return lhs != rhs.mStr; }
 
 
     template<typename Key, typename Value>
