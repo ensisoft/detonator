@@ -936,8 +936,8 @@ void AudioGraphScene::SaveState(app::Resource& resource) const
     for (const auto& p : mLinkMap)
     {
         const auto* link = dynamic_cast<const AudioLink*>(p.second);
-        resource.SetProperty(QString("mapping_%1_port").arg(link_counter), app::FromUtf8(p.first));
-        resource.SetProperty(QString("mapping_%1_link").arg(link_counter), app::FromUtf8(link->GetLinkId()));
+        resource.SetProperty(app::PropertyKey("mapping_%1_port", link_counter), p.first);
+        resource.SetProperty(app::PropertyKey("mapping_%1_link", link_counter), link->GetLinkId());
         ++link_counter;
     }
 }

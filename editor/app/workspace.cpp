@@ -97,7 +97,7 @@ QString FixWorkspacePath(QString path)
 #endif
     return path;
 }
-QString MapWorkspaceUri(const QString& uri, const QString& workspace)
+app::AnyString MapWorkspaceUri(const app::AnyString& uri, const QString& workspace)
 {
     // see comments in AddFileToWorkspace.
     // this is basically the same as MapFilePath except this API
@@ -106,9 +106,9 @@ QString MapWorkspaceUri(const QString& uri, const QString& workspace)
     QString ret = uri;
     if (ret.startsWith("ws://"))
         ret = app::CleanPath(ret.replace("ws://", workspace));
-    else if (uri.startsWith("app://"))
+    else if (ret.startsWith("app://"))
         ret = app::CleanPath(ret.replace("app://", GetAppDir()));
-    else if (uri.startsWith("fs://"))
+    else if (ret.startsWith("fs://"))
         ret.remove(0, 5);
     // return as is
     return ret;
@@ -356,7 +356,7 @@ public:
             return;
         }
 
-        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_file = MapFileToFilesystem(uri);
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
@@ -399,7 +399,7 @@ public:
             DEBUG("Skipping duplicate file replace. [file='%1']", uri);
             return;
         }
-        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_file = MapFileToFilesystem(uri);
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
@@ -421,7 +421,7 @@ public:
 
     virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
     {
-        const auto& file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& file = MapFileToFilesystem(uri);
         return app::detail::LoadArrayBuffer(file, bytes);
     }
     virtual std::string MapUri(const std::string& uri) const override
@@ -473,7 +473,7 @@ public:
         return true;
     }
 private:
-    QString MapFileToFilesystem(const QString& uri) const
+    QString MapFileToFilesystem(const app::AnyString& uri) const
     {
         return MapWorkspaceUri(uri, mWorkspaceDir);
     }
@@ -1647,7 +1647,7 @@ engine::ClassHandle<const game::TilemapClass> Workspace::FindTilemapClassById(co
 
 engine::EngineDataHandle Workspace::LoadEngineDataUri(const std::string& URI) const
 {
-    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    const auto& file = MapFileToFilesystem(URI);
     DEBUG("URI '%1' => '%2'", URI, file);
     return EngineBuffer::LoadFromFile(file);
 }
@@ -1696,7 +1696,7 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
         if (it != application_resources.end())
             return it->second;
     }
-    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    const auto& file = MapFileToFilesystem(URI);
     DEBUG("URI '%1' => '%2'", URI, file);
     auto ret = GraphicsBuffer::LoadFromFile(file);
     if (base::StartsWith(URI, "app://")) {
@@ -1708,7 +1708,7 @@ gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
 audio::SourceStreamHandle Workspace::OpenAudioStream(const std::string& URI,
     AudioIOStrategy strategy, bool enable_file_caching) const
 {
-    const auto& file = MapFileToFilesystem(app::FromUtf8(URI));
+    const auto& file = MapFileToFilesystem(URI);
     DEBUG("URI '%1' => '%2'", URI, file);
     return audio::OpenFileStream(app::ToUtf8(file), strategy, enable_file_caching);
 }
@@ -1781,8 +1781,10 @@ QString Workspace::GetSubDir(const QString& dir, bool create) const
     return path;
 }
 
-QString Workspace::MapFileToWorkspace(const QString& filepath) const
+AnyString Workspace::MapFileToWorkspace(const AnyString& name) const
 {
+    const QString filepath = name;
+
     // don't remap already mapped files.
     if (filepath.startsWith("app://") ||
         filepath.startsWith("fs://") ||
@@ -1837,16 +1839,10 @@ QString Workspace::MapFileToWorkspace(const QString& filepath) const
     // mapping other paths to identity. will not be portable to another
     // user's computer to another system, unless it's accessible on every
     // machine using the same path (for example a shared file system mount)
-    return QString("fs://%1").arg(file);
+    return toString("fs://%1", file);
 }
 
-// convenience wrapper
-std::string Workspace::MapFileToWorkspace(const std::string& file) const
-{
-    return ToUtf8(MapFileToWorkspace(FromUtf8(file)));
-}
-
-QString Workspace::MapFileToFilesystem(const QString& uri) const
+AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
 {
     // see comments in AddFileToWorkspace.
     // this is basically the same as MapFilePath except this API
@@ -1856,18 +1852,13 @@ QString Workspace::MapFileToFilesystem(const QString& uri) const
     QString ret = uri;
     if (ret.startsWith("ws://"))
         ret = CleanPath(ret.replace("ws://", mWorkspaceDir));
-    else if (uri.startsWith("app://"))
+    else if (ret.startsWith("app://"))
         ret = CleanPath(ret.replace("app://", GetAppDir()));
-    else if (uri.startsWith("fs://"))
+    else if (ret.startsWith("fs://"))
         ret.remove(0, 5);
 
     // return as is
     return ret;
-}
-
-QString Workspace::MapFileToFilesystem(const std::string& uri) const
-{
-    return MapFileToFilesystem(FromUtf8(uri));
 }
 
 bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
@@ -2413,22 +2404,22 @@ void Workspace::SaveResource(const Resource& resource)
     NOTE("Saved new resource '%1'", resource.GetName());
 }
 
-QString Workspace::MapDrawableIdToName(const QString& id) const
+QString Workspace::MapDrawableIdToName(const AnyString& id) const
 {
     return MapResourceIdToName(id);
 }
 
-QString Workspace::MapMaterialIdToName(const QString& id) const
+QString Workspace::MapMaterialIdToName(const AnyString& id) const
 {
     return MapResourceIdToName(id);
 }
 
-QString Workspace::MapEntityIdToName(const QString &id) const
+QString Workspace::MapEntityIdToName(const AnyString &id) const
 {
     return MapResourceIdToName(id);
 }
 
-QString Workspace::MapResourceIdToName(const QString &id) const
+QString Workspace::MapResourceIdToName(const AnyString &id) const
 {
     for (const auto& resource : mResources)
     {
@@ -2438,22 +2429,22 @@ QString Workspace::MapResourceIdToName(const QString &id) const
     return "";
 }
 
-bool Workspace::IsValidMaterial(const QString& klass) const
+bool Workspace::IsValidMaterial(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
-        if (resource->GetType() == Resource::Type::Material &&
-            resource->GetId() == klass)
+        if (resource->GetId() == id &&
+            resource->GetType() == Resource::Type::Material)
             return true;
     }
     return false;
 }
 
-bool Workspace::IsValidDrawable(const QString& klass) const
+bool Workspace::IsValidDrawable(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
-        if (resource->GetId() == klass &&
+        if (resource->GetId() == id &&
             (resource->GetType() == Resource::Type::ParticleSystem ||
              resource->GetType() == Resource::Type::Shape ||
              resource->GetType() == Resource::Type::Drawable))
@@ -2462,7 +2453,7 @@ bool Workspace::IsValidDrawable(const QString& klass) const
     return false;
 }
 
-bool Workspace::IsValidTilemap(const QString& id) const
+bool Workspace::IsValidTilemap(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -2472,7 +2463,7 @@ bool Workspace::IsValidTilemap(const QString& id) const
     return false;
 }
 
-bool Workspace::IsValidScript(const QString& id) const
+bool Workspace::IsValidScript(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -2482,7 +2473,7 @@ bool Workspace::IsValidScript(const QString& id) const
     return false;
 }
 
-bool Workspace::IsUserDefinedResource(const QString& id) const
+bool Workspace::IsUserDefinedResource(const AnyString& id) const
 {
     for (const auto& res : mResources)
     {
@@ -2493,10 +2484,6 @@ bool Workspace::IsUserDefinedResource(const QString& id) const
     }
     BUG("No such material was found.");
     return false;
-}
-bool Workspace::IsUserDefinedResource(const std::string& id) const
-{
-    return IsUserDefinedResource(FromUtf8(id));
 }
 
 Resource& Workspace::GetResource(size_t index)
@@ -2740,19 +2727,7 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
     }
 }
 
-void Workspace::DeleteResource(const std::string& id)
-{
-    for (size_t i=0; i<GetNumUserDefinedResources(); ++i)
-    {
-        const auto& res = GetUserDefinedResource(i);
-        if (res.GetIdUtf8() == id)
-        {
-            DeleteResource(i);
-            return;
-        }
-    }
-}
-void Workspace::DeleteResource(const QString& id)
+void Workspace::DeleteResource(const AnyString& id)
 {
     for (size_t i=0; i<GetNumUserDefinedResources(); ++i)
     {

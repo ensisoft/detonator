@@ -23,6 +23,8 @@
 
 #include "data/writer.h"
 #include "data/reader.h"
+#include "editor/app/types.h"
+
 namespace app
 {
     namespace detail {
@@ -52,14 +54,10 @@ namespace app
             { return mOwnerId; }
             void SetName(const std::string& name)
             { mName = name; }
-            void SetFileURI(const std::string& uri)
+            void SetFileURI(const AnyString& uri)
             { mFileURI = uri; }
-            void SetFileURI(const QString& uri)
-            { mFileURI = ToUtf8(uri); }
-            void SetOwnerId(const std::string& id)
+            void SetOwnerId(const AnyString& id)
             { mOwnerId = id; }
-            void SetOwnerId(const QString& id)
-            { mOwnerId = ToUtf8(id); }
             void SetTypeTag(TypeTag tag)
             { mTypeTag = tag; }
             void IntoJson(data::Writer& data) const

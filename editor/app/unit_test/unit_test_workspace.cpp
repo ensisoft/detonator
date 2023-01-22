@@ -95,33 +95,32 @@ void unit_test_path_mapping()
     // paths relative to the workspace are expressed using ws:// reference.
     // paths relative to the application are expressed using app:// reference
     // other paths are expressed using fs:// reference
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace/relative/path/file.png")) == "ws://relative/path/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(app , "relative/path/file.png")) == "app://relative/path/file.png");
-
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace\\relative\\path\\file.png")) == "ws://relative/path/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(app , "relative\\path\\file.png")) == "app://relative/path/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace/some/folder")) == "ws://some/folder");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace\\some\\folder")) == "ws://some/folder");
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace/relative/path/file.png"))    == app::AnyString("ws://relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(app , "relative/path/file.png"))                  == app::AnyString("app://relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace\\relative\\path\\file.png")) == app::AnyString("ws://relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(app , "relative\\path\\file.png"))                == app::AnyString("app://relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace/some/folder"))               == app::AnyString("ws://some/folder"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace(app::JoinPath(cwd , "TestWorkspace\\some\\folder"))             == app::AnyString("ws://some/folder"));
 #if defined(POSIX_OS)
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("/tmp/file.png")) == "fs:///tmp/file.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs:///tmp/file.png")) == "/tmp/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("some/file/name.png")) == "fs://some/file/name.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://some/file/name.png")) == "some/file/name.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("/tmp/some/folder")) == "fs:///tmp/some/folder");
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs:///tmp/some/folder")) == "/tmp/some/folder");
+    TEST_REQUIRE(workspace.MapFileToWorkspace("/tmp/file.png")            == app::AnyString("fs:///tmp/file.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs:///tmp/file.png")      == app::AnyString("/tmp/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace("some/file/name.png")       == app::AnyString("fs://some/file/name.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://some/file/name.png") == app::AnyString("some/file/name.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace("/tmp/some/folder")         == app::AnyString("fs:///tmp/some/folder"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs:///tmp/some/folder")   == app::AnyString("/tmp/some/folder"));
 #elif defined(WINDOWS_OS)
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("c:\\tmp\\file.png")) == "fs://c:\\tmp\\file.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://c:\\tmp\\file.png")) == "c:\\tmp\\file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("some\\file\\name.png")) == "fs://some\\file\\name.png");
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("fs://some\\file\\name.png")) == "some\\file\\name.png");
+    TEST_REQUIRE(workspace.MapFileToWorkspace("c:\\tmp\\file.png")          == app::AnyString("fs://c:\\tmp\\file.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://c:\\tmp\\file.png")    == app::AnyString("c:\\tmp\\file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace("some\\file\\name.png")       == app::AnyString("fs://some\\file\\name.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("fs://some\\file\\name.png") == app::AnyString("some\\file\\name.png"));
 #endif
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("ws://relative/path/file.png")) == app::JoinPath(cwd, "TestWorkspace/relative/path/file.png"));
-    TEST_REQUIRE(workspace.MapFileToFilesystem(QString("app://relative/path/file.png")) == app::JoinPath(app, "relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("ws://relative/path/file.png")  == app::JoinPath(cwd, "TestWorkspace/relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToFilesystem("app://relative/path/file.png") == app::JoinPath(app, "relative/path/file.png"));
 
     // don't re-encode already encoded file names.
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("ws://relative/path/file.png")) == "ws://relative/path/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("app://foo/bar/file.png")) == "app://foo/bar/file.png");
-    TEST_REQUIRE(workspace.MapFileToWorkspace(QString("fs:///tmp/file.png")) == "fs:///tmp/file.png");
+    TEST_REQUIRE(workspace.MapFileToWorkspace("ws://relative/path/file.png") == app::AnyString("ws://relative/path/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace("app://foo/bar/file.png")      == app::AnyString("app://foo/bar/file.png"));
+    TEST_REQUIRE(workspace.MapFileToWorkspace("fs:///tmp/file.png")          == app::AnyString("fs:///tmp/file.png"));
 }
 
 void unit_test_resource()
@@ -207,7 +206,7 @@ void unit_test_save_load()
         material.SetId("foo123");
         app::MaterialResource resource(material, "TestMaterial");
         resource.SetProperty("int", 123);
-        resource.SetProperty("str", QString("hello"));
+        resource.SetProperty("str", app::AnyString("hello"));
         resource.SetUserProperty("foo", 444);
         resource.SetUserProperty("bar", 777);
         workspace.SaveResource(resource);
@@ -1344,7 +1343,7 @@ void unit_test_json_export_import()
         material.SetId("foo123");
         app::MaterialResource resource(material, "TestMaterial");
         resource.SetProperty("int", 123);
-        resource.SetProperty("str", QString("hello"));
+        resource.SetProperty("str", app::AnyString("hello"));
         workspace.SaveResource(resource);
         workspace.ExportResourceJson(std::vector<size_t>{0}, "test_export_import_content.json");
     }

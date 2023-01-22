@@ -39,6 +39,7 @@
 #include "base/assert.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
+#include "editor/app/types.h"
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/resource.h"
@@ -491,25 +492,13 @@ inline void SetValue(QGroupBox* group, bool on_off)
     group->setChecked(on_off);
 }
 
-inline void SetValue(QGroupBox* group, const QString& text)
+inline void SetValue(QGroupBox* group, const app::AnyString& text)
 {
     QSignalBlocker s(group);
     group->setTitle(text);
 }
 
-inline void SetValue(QGroupBox* group, const std::string& text)
-{
-    QSignalBlocker s(group);
-    group->setTitle(app::FromUtf8(text));
-}
-
-inline void SetValue(QLineEdit* line, const std::string& val)
-{
-    QSignalBlocker s(line);
-    line->setText(app::FromUtf8(val));
-    line->setCursorPosition(0);
-}
-inline void SetValue(QLineEdit* line, const QString& val)
+inline void SetValue(QLineEdit* line, const app::AnyString& val)
 {
     QSignalBlocker s(line);
     line->setText(val);
@@ -549,15 +538,10 @@ inline void SetValue(QLineEdit* line, const app::Bytes& bytes)
     line->setCursorPosition(0);
 }
 
-inline void SetValue(QPlainTextEdit* edit, const std::string& val)
+inline void SetValue(QPlainTextEdit* edit, const app::AnyString& value)
 {
     QSignalBlocker s(edit);
-    edit->setPlainText(app::FromUtf8(val));
-}
-inline void SetValue(QPlainTextEdit* edit,const QString& val)
-{
-    QSignalBlocker s(edit);
-    edit->setPlainText(val);
+    edit->setPlainText(value);
 }
 
 inline void SetValue(QDoubleSpinBox* spin, float val)
@@ -618,15 +602,10 @@ inline void SetValue(QSlider* slider, int value)
     slider->setValue(value);
 }
 
-inline void SetValue(QLabel* label, const QString& str)
+inline void SetValue(QLabel* label, const app::AnyString& value)
 {
     QSignalBlocker s(label);
-    label->setText(str);
-}
-inline void SetValue(QLabel* label, const std::string& str)
-{
-    QSignalBlocker s(label);
-    label->setText(app::FromUtf8(str));
+    label->setText(value);
 }
 
 inline void SetValue(gui::TimeWidget* time, unsigned value)
@@ -732,21 +711,11 @@ inline bool MissingFile(const QLineEdit* edit)
     return !QFileInfo(text).exists();
 }
 
-inline bool MissingFile(const QString& filename)
+inline bool MissingFile(const app::AnyString& filename)
 {
     return !QFileInfo(filename).exists();
 }
-
-inline bool MissingFile(const std::string& filename)
-{
-    return MissingFile(app::FromUtf8(filename));
-}
-
-inline bool FileExists(const std::string& filename)
-{
-    return !MissingFile(filename);
-}
-inline bool FileExists(const QString& filename)
+inline bool FileExists(const app::AnyString& filename)
 {
     return !MissingFile(filename);
 }
@@ -988,7 +957,16 @@ template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const color_widgets::ColorSelector* color)
 { res.SetProperty(key, color->color()); }
 template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const app::AnyString& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const std::string& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QString& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const char* value)
 { res.SetProperty(key, value); }
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QJsonObject& json)
@@ -1017,9 +995,7 @@ inline void SetProperty(Resource& res, const PropertyKey& key, double value)
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, quint64 value)
 { res.SetProperty(key, value); }
-template<typename Resource>
-inline void SetProperty(Resource& res, const PropertyKey& key, const std::string& value)
-{ res.SetProperty(key, value); }
+
 
 #if !defined(__MSVC__)
 // this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
@@ -1064,6 +1040,12 @@ template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QString& value)
 { res.SetUserProperty(key, value); }
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const std::string& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const char* value)
+{ res.SetUserProperty(key, QString(value)); }
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QJsonObject& json)
 { res.SetUserProperty(key, json); }
 template<typename Resource>
@@ -1090,9 +1072,7 @@ inline void SetUserProperty(Resource& res, const PropertyKey& key, double value)
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, quint64 value)
 { res.SetUserProperty(key, value); }
-template<typename Resource>
-inline void SetUserProperty(Resource& res, const PropertyKey& key, const std::string& value)
-{ res.SetUserProperty(key, value); }
+
 
 #if !defined(__MSVC__)
 // this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which

@@ -230,10 +230,14 @@ namespace app
         { SetVariantProperty(key, bytes.toBase64()); }
         inline void SetProperty(const PropertyKey& key, const QColor& color)
         { SetVariantProperty(key, color); }
+        inline void SetProperty(const PropertyKey& key, const char* str)
+        { SetVariantProperty(key, QString(str)); }
         inline void SetProperty(const PropertyKey& key, const QString& value)
         { SetVariantProperty(key, value); }
         inline void SetProperty(const PropertyKey& key, const std::string& value)
         { SetVariantProperty(key, app::FromUtf8(value)); }
+        inline void SetProperty(const PropertyKey key, const AnyString& value)
+        { SetVariantProperty(key, value.GetWide()); }
         inline void SetProperty(const PropertyKey& key, quint64 value)
         { SetVariantProperty(key, value); }
         inline void SetProperty(const PropertyKey& key, qint64 value)
@@ -313,6 +317,10 @@ namespace app
         { SetUserVariantProperty(key, value); }
         inline void SetUserProperty(const PropertyKey& key, const std::string& value)
         { SetUserVariantProperty(key, app::FromUtf8(value)); }
+        inline void SetUserProperty(const PropertyKey& key, const AnyString& value)
+        { SetUserVariantProperty(key, value.GetWide()); }
+        inline void SetUserProperty(const PropertyKey& key, const char* value)
+        { SetUserVariantProperty(key, QString(value)); }
         inline void SetUserProperty(const PropertyKey& key, quint64 value)
         { SetUserVariantProperty(key, value); }
         inline void SetUserProperty(const PropertyKey& key, qint64 value)

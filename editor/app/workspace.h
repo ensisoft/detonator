@@ -200,12 +200,10 @@ namespace app
         bool SaveWorkspace();
 
         // Map a file to the workspace and return a file URI
-        QString MapFileToWorkspace(const QString& file) const;
-        std::string MapFileToWorkspace(const std::string& file) const;
+        AnyString MapFileToWorkspace(const AnyString& file) const;
 
         // Map a "workspace file" to a file path in the file system.
-        QString MapFileToFilesystem(const QString& uri) const;
-        QString MapFileToFilesystem(const std::string& uri) const;
+        AnyString MapFileToFilesystem(const AnyString& uri) const;
 
         // Save a resource in the workspace. If the resource by the same id
         // already exists it's overwritten, otherwise a new resource is added to
@@ -256,42 +254,24 @@ namespace app
         ResourceList ListDependencies(std::size_t index) const;
 
         // Map material ID to its human-readable name.
-        QString MapMaterialIdToName(const QString& id) const;
-        QString MapMaterialIdToName(const std::string& id) const
-        { return MapMaterialIdToName(FromUtf8(id)); }
+        QString MapMaterialIdToName(const AnyString& id) const;
         // Map drawable ID to its human-readable name.
-        QString MapDrawableIdToName(const QString& id) const;
-        QString MapDrawableIdToName(const std::string& id) const
-        { return MapDrawableIdToName(FromUtf8(id)); }
-        QString MapEntityIdToName(const QString& id) const;
-        QString MapEntityIdToName(const std::string& id) const
-        { return MapEntityIdToName(FromUtf8(id)); }
-
-        QString MapResourceIdToName(const QString& id) const;
-        QString MapResourceIdToName(const std::string& id) const
-        { return MapResourceIdToName(FromUtf8(id)); }
+        QString MapDrawableIdToName(const AnyString& id) const;
+        QString MapEntityIdToName(const AnyString& id) const;
+        QString MapResourceIdToName(const AnyString& id) const;
 
         // Checks whether the material class id is a valid material class.
         // Includes primitives and user defined materials.
-        bool IsValidMaterial(const QString& klass) const;
-        bool IsValidMaterial(const std::string& klass) const
-        { return IsValidMaterial(FromUtf8(klass)); }
+        bool IsValidMaterial(const AnyString& id) const;
         // Checks whether the drawable class id is a valid drawable class.
         // Includes primitives and user defined drawable shapes.
-        bool IsValidDrawable(const QString& klass) const;
-        bool IsValidDrawable(const std::string& klass) const
-        { return IsValidDrawable(FromUtf8(klass)); }
+        bool IsValidDrawable(const AnyString& id) const;
 
-        bool IsValidScript(const QString& id) const;
-        bool IsValidScript(const std::string& id) const
-        { return IsValidScript(FromUtf8(id)); }
+        bool IsValidScript(const AnyString& id) const;
 
-        bool IsValidTilemap(const QString& id) const;
-        bool IsValidTilemap(const std::string& id) const
-        { return IsValidTilemap(FromUtf8(id)); }
+        bool IsValidTilemap(const AnyString& id) const;
 
-        bool IsUserDefinedResource(const QString& id) const;
-        bool IsUserDefinedResource(const std::string& id) const;
+        bool IsUserDefinedResource(const AnyString& id) const;
 
         // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)
@@ -339,8 +319,8 @@ namespace app
         void DeleteResources(const QModelIndexList& list);
         void DeleteResources(std::vector<size_t> indices);
         void DeleteResource(size_t index);
-        void DeleteResource(const std::string& id);
-        void DeleteResource(const QString& id);
+        void DeleteResource(const AnyString& id);
+
         // Create duplicate copies of the selected resources.
         void DuplicateResources(const QModelIndexList& list);
         void DuplicateResources(std::vector<size_t> indices);
@@ -364,12 +344,18 @@ namespace app
         // == Workspace properties ==
 
         // Returns true if workspace has a property by the given name.
-        bool HasProperty(const QString& name) const
-        { return mProperties.contains(name); }
+        bool HasProperty(const PropertyKey& key) const
+        { return mProperties.contains(key); }
         // Set a property value. If the property exists already the previous
-        // value is overwritten. Otherwise it's added.
-        void SetProperty(const QString& name, const QVariant& value)
-        { mProperties[name] = value; }
+        // value is overwritten. Otherwise, it's added.
+        void SetProperty(const PropertyKey& key, const QVariant& value)
+        { mProperties[key] = value; }
+        void SetProperty(const PropertyKey& key, const QString& value)
+        { mProperties[key] = value; }
+        void SetProperty(const PropertyKey& key, const std::string& value)
+        { mProperties[key] = FromUtf8(value); }
+        void SetProperty(const PropertyKey& key, const AnyString& value)
+        { mProperties[key] = value.GetWide(); }
         // Return the value of the property identied by name.
         // If the property doesn't exist returns default value.
         QVariant GetProperty(const QString& name, const QVariant& def) const
