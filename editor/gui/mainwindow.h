@@ -153,6 +153,7 @@ namespace gui
         void on_eventlist_customContextMenuRequested(QPoint point);
         void on_workspace_customContextMenuRequested(QPoint);
         void on_workspace_doubleClicked();
+        void on_workspaceFilter_textChanged(const QString&);
         void on_actionPackageResources_triggered();
         void on_actionSelectResourceForEditing_triggered();
         void on_actionNewResource_triggered();

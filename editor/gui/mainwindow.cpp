@@ -211,7 +211,8 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mEventLog.setSourceModel(&events);
     mUI.eventlist->setModel(&mEventLog);
 
-    setWindowTitle(QString("%1").arg(APP_TITLE));
+    SetValue(mUI.grpHelp, QString("Welcome to %1").arg(APP_TITLE));
+    setWindowTitle(APP_TITLE);
     setAcceptDrops(true);
 
     QCoreApplication::postEvent(this, new IterateGameLoopEvent);
@@ -487,8 +488,10 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     unsigned show_resource_bits = ~0u;
     QStringList session;
+    QString filter_string;
     mWorkspace->GetUserProperty("session_files", &session);
-    mWorkspace->GetUserProperty("show_resource_bits", &show_resource_bits);
+    mWorkspace->GetUserProperty("resource_show_bits", &show_resource_bits);
+    mWorkspace->GetUserProperty("resource_filter_string", &filter_string);
 
     if (load_session)
     {
@@ -566,14 +569,19 @@ bool MainWindow::LoadWorkspace(const QString& dir)
             setWindowTitle(QString("%1 - %2").arg(APP_TITLE).arg(mWorkspace->GetName()));
     });
 
+    SetEnabled(mUI.actionSaveWorkspace, true);
+    SetEnabled(mUI.actionCloseWorkspace, true);
+    SetEnabled(mUI.actionSelectResourceForEditing, true);
+    SetEnabled(mUI.menuWorkspace, true);
+    SetEnabled(mUI.workspace, true);
+    SetEnabled(mUI.workspaceFilter, true);
+    SetValue(mUI.workspaceFilter, filter_string);
     SetValue(mUI.grpHelp, mWorkspace->GetName());
+
     mUI.workspace->setModel(&mWorkspaceProxy);
-    mUI.actionSaveWorkspace->setEnabled(true);
-    mUI.actionCloseWorkspace->setEnabled(true);
-    mUI.actionSelectResourceForEditing->setEnabled(true);
-    mUI.menuWorkspace->setEnabled(true);
     mWorkspaceProxy.SetModel(mWorkspace.get());
     mWorkspaceProxy.setSourceModel(mWorkspace->GetResourceModel());
+    mWorkspaceProxy.SetFilterString(filter_string);
     mWorkspaceProxy.SetShowBits(show_resource_bits);
     mWorkspaceProxy.invalidate();
 
@@ -695,8 +703,9 @@ bool MainWindow::SaveWorkspace()
         session_file_list << file;
         DEBUG("Saved main widget. [name='%1']", widget->windowTitle());
     }
-    mWorkspace->SetUserProperty("show_resource_bits", mWorkspaceProxy.GetShowBits());
     mWorkspace->SetUserProperty("session_files", session_file_list);
+    mWorkspace->SetUserProperty("resource_show_bits", mWorkspaceProxy.GetShowBits());
+    mWorkspace->SetUserProperty("resource_filter_string", mWorkspaceProxy.GetFilterString());
     if (mCurrentWidget)
     {
         const auto index_of = mUI.mainTab->indexOf(mCurrentWidget);
@@ -792,18 +801,20 @@ void MainWindow::CloseWorkspace()
     // update window menu.
     UpdateWindowMenu();
 
-    mUI.actionSaveWorkspace->setEnabled(false);
-    mUI.actionCloseWorkspace->setEnabled(false);
-    mUI.actionSelectResourceForEditing->setEnabled(false);
-    mUI.menuWorkspace->setEnabled(false);
-    mUI.menuEdit->setEnabled(false);
-    mUI.menuTemp->setEnabled(false);
-    mUI.workspace->setModel(nullptr);
+    SetEnabled(mUI.actionSaveWorkspace, false);
+    SetEnabled(mUI.actionCloseWorkspace, false);
+    SetEnabled(mUI.actionSelectResourceForEditing, false);
+    SetEnabled(mUI.menuWorkspace, false);
+    SetEnabled(mUI.menuEdit, false);
+    SetEnabled(mUI.menuTemp, false);
+    SetEnabled(mUI.workspace, false);
+    SetEnabled(mUI.workspaceFilter, false);
+    SetValue(mUI.workspaceFilter, QString(""));
+    SetValue(mUI.grpHelp, QString("Welcome to %1").arg(APP_TITLE));
+    setWindowTitle(APP_TITLE);
+
     mWorkspaceProxy.SetModel(nullptr);
     mWorkspaceProxy.setSourceModel(nullptr);
-
-    setWindowTitle(QString("%1").arg(APP_TITLE));
-
     mWorkspace.reset();
 
     gfx::SetResourceLoader(nullptr);
@@ -2111,6 +2122,14 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 void MainWindow::on_workspace_doubleClicked()
 {
     on_actionEditResource_triggered();
+}
+
+void MainWindow::on_workspaceFilter_textChanged(const QString&)
+{
+    if (!mWorkspace)
+        return;
+    mWorkspaceProxy.SetFilterString(GetValue(mUI.workspaceFilter));
+    mWorkspaceProxy.invalidate();
 }
 
 void MainWindow::on_actionPackageResources_triggered()
