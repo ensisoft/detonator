@@ -51,6 +51,8 @@ namespace uik
             RadioButton,
             // Widget is a checkbox which has a boolean on/off toggle.
             CheckBox,
+            // Widget is a togglebox which has a boolean on/off toggle.
+            ToggleBox,
             // Groupbox is a container widget for grouping widgets together
             // within a visually representable container.
             GroupBox,
@@ -553,6 +555,32 @@ namespace uik
             Check mCheck  = Check::Left;
         };
 
+        class ToggleBoxModel
+        {
+        public:
+            void SetChecked(bool on_off)
+            { mChecked = on_off; }
+            bool IsChecked() const
+            { return mChecked; }
+            std::size_t GetHash(size_t hash) const;
+            void Update(const UpdateStruct& update) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+            WidgetAction PollAction(const PollStruct& poll);
+            inline WidgetAction MouseEnter(const MouseStruct&)
+            { return WidgetAction{}; }
+            inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
+            { return WidgetAction{}; }
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
+            WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
+        private:
+            bool mChecked = false;
+        };
+
         class RadioButtonModel
         {
         public:
@@ -664,6 +692,17 @@ namespace uik
             static constexpr auto Type = Widget::Type::CheckBox;
             static constexpr auto WantsMouseEvents = true;
             static constexpr auto WantsKeyEvents   = true;
+        };
+        template<>
+        struct WidgetModelTraits<ToggleBoxModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::ToggleBox;
+            static constexpr auto WantsMouseEvents = true;
+            static constexpr auto WantsKeyEvents   = true;
+            static constexpr auto WantsPoll        = true;
+            static constexpr auto WantsUpdate      = true;
+            static constexpr auto InitialWidth     = 60;
+            static constexpr auto InitialHeight    = 30;
         };
         template<>
         struct WidgetModelTraits<RadioButtonModel> : public WidgetTraits
@@ -946,6 +985,7 @@ namespace uik
     using Label       = detail::BasicWidget<detail::LabelModel>;
     using PushButton  = detail::BasicWidget<detail::PushButtonModel>;
     using CheckBox    = detail::BasicWidget<detail::CheckBoxModel>;
+    using ToggleBox   = detail::BasicWidget<detail::ToggleBoxModel>;
     using SpinBox     = detail::BasicWidget<detail::SpinBoxModel>;
     using Slider      = detail::BasicWidget<detail::SliderModel>;
     using ProgressBar = detail::BasicWidget<detail::ProgressBarModel>;

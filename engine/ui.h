@@ -530,6 +530,7 @@ namespace engine
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
+        virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
         virtual void EndDrawWidgets() override;
         virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
 

@@ -133,6 +133,46 @@
       "gamma": 2.2
     },
 
+
+    {
+      "key": "togglebox/toggle-background-on",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-background-off",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-knob-on",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-knob-off",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+
+
+
     {
       "key": "slider/slider-background",
       "type": "Gradient",

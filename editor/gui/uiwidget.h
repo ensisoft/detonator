@@ -87,6 +87,7 @@ namespace gui
         void on_actionNewSlider_triggered();
         void on_actionNewProgressBar_triggered();
         void on_actionNewRadioButton_triggered();
+        void on_actionNewToggleBox_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_actionWidgetOrder_triggered();
@@ -102,6 +103,7 @@ namespace gui
         void on_widgetHeight_valueChanged(double value);
         void on_widgetXPos_valueChanged(double value);
         void on_widgetYPos_valueChanged(double value);
+        void on_toggleChecked_stateChanged(int);
         void on_rbText_textChanged();
         void on_rbPlacement_currentIndexChanged(int);
         void on_rbSelected_stateChanged(int);

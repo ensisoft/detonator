@@ -130,6 +130,8 @@ namespace uik
 
         virtual void DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::optional<float> percentage) const = 0;
 
+        virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const FRect& knob, bool on_off) const = 0;
+
         virtual void EndDrawWidgets() {}
 
         // todo: more sub widget draw ops.

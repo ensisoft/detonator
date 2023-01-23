@@ -89,6 +89,10 @@ public:
     {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override
     {}
+    virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override
+    {
+
+    }
     bool ParseStyle(const WidgetId& id, const std::string& style) override
     {
         StyleInfo s;

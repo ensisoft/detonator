@@ -48,6 +48,23 @@ namespace uik
                 return false;
             return true;
         }
+
+        void DeleteValue(const std::string& key)
+        {
+            mState.erase(key);
+        }
+
+        template<typename T>
+        bool GetValue(const std::string& key, T* value) const
+        {
+            auto it = mState.find(key);
+            if (it == mState.end())
+                return false;
+            ASSERT(std::holds_alternative<T>(it->second));
+            *value = std::get<T>(it->second);
+            return true;
+        }
+
         template<typename T>
         T GetValue(const std::string& key, const T& backup) const
         {

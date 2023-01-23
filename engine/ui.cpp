@@ -743,9 +743,8 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         OutlineShape(ps.rect, *material, shape, width);
     }
-    const auto* check_mark_name = checked ? "check-mark-checked" : "check-mark-unchecked";
 
-    if (const auto* material = GetWidgetMaterial(id, ps, check_mark_name))
+    if (const auto* material = GetWidgetMaterial(id, ps, checked ? "check-mark-checked" : "check-mark-unchecked"))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::RoundRect);
         gfx::FRect mark;
@@ -933,6 +932,49 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         const auto width = GetWidgetProperty(id, ps, "progress-bar-border-width", 1.0f);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
+}
+
+void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const
+{
+    if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-background-on" : "toggle-background-off"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (ps.focused)
+    {
+        if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
+        {
+            const auto slider_shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
+            const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", slider_shape);
+            const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
+
+            gfx::FRect rect = ps.rect;
+            rect.Grow(-4.0f, -4.0f);
+            rect.Translate(2.0f, 2.0f);
+            OutlineShape(rect, *material, rect_shape, rect_width);
+        }
+    }
+
+    if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-knob-on" : "toggle-knob-off"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
+        FillShape(knob, *material, shape);
+    }
+
+    if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-knob-border-on" : "toggle-knob-border-off"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "toggle-knob-border-width", 1.0f);
+        OutlineShape(knob, *material, shape, width);
+    }
+
+    if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-border-on" : "toggle-border-off"))
+    {
+        const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "toggle-border-width", 1.0f);
         OutlineShape(ps.rect, *material, shape, width);
     }
 }

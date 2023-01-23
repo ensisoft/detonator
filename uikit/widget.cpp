@@ -895,6 +895,136 @@ void CheckBoxModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) 
     }
 }
 
+size_t ToggleBoxModel::GetHash(size_t hash) const
+{
+    hash = base::hash_combine(hash, mChecked);
+    return hash;
+}
+
+void ToggleBoxModel::Update(const UpdateStruct& update) const
+{
+    float position = 0.0f;
+    float velocity = 0.0f;
+    if (!update.state->GetValue(update.widgetId + "/velocity", &velocity) ||
+        !update.state->GetValue(update.widgetId + "/position", &position))
+        return;
+
+    position += velocity * update.dt;
+    update.state->SetValue(update.widgetId + "/position", position);
+}
+
+void ToggleBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.focused = paint.focused;
+    p.moused  = paint.moused;
+    p.enabled = paint.enabled;
+    p.rect    = paint.rect;
+    p.clip    = paint.clip;
+    p.time    = paint.time;
+    p.pressed = false;
+    p.klass   = "togglebox";
+    p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
+    ps.painter->DrawWidgetBackground(ps.widgetId, p);
+
+    float knob_pos = mChecked ? 1.0f : 0.0f;
+    knob_pos = ps.state->GetValue(ps.widgetId + "/position", knob_pos);
+    knob_pos = math::clamp(0.0f, 1.0f, knob_pos);
+
+    const auto widget_width  = paint.rect.GetWidth();
+    const auto widget_height = paint.rect.GetHeight();
+    if (widget_width > widget_height)
+    {
+        const auto knob_height = widget_height;
+        const auto knob_width  = widget_height;
+        const auto travel_distance = widget_width - knob_width;
+
+        FRect knob;
+        knob.Resize(knob_width, knob_height);
+        knob.Translate(paint.rect.GetPosition());
+        knob.Translate(knob_pos*travel_distance, 0.0f);
+        ps.painter->DrawToggle(ps.widgetId, p, knob, mChecked);
+    }
+
+    //if (p.focused)
+    //    ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
+
+    p.rect = paint.rect;
+    ps.painter->DrawWidgetBorder(ps.widgetId, p);
+}
+
+void ToggleBoxModel::IntoJson(data::Writer& data) const
+{
+    data.Write("checked", mChecked);
+}
+bool ToggleBoxModel::FromJson(const data::Reader& data)
+{
+    data.Read("checked", &mChecked);
+    return true;
+}
+
+WidgetAction ToggleBoxModel::PollAction(const PollStruct& poll)
+{
+    float position = 0.0f;
+    float velocity = 0.0f;
+    if (!poll.state->GetValue(poll.widgetId + "/velocity", &velocity) ||
+        !poll.state->GetValue(poll.widgetId + "/position", &position))
+        return WidgetAction {};
+
+    bool checked = mChecked;
+    if (velocity < 0.0f && position <= 0.0f)
+        checked = false;
+    else if (velocity > 0.0f && position >= 1.0f)
+        checked = true;
+
+    if (checked != mChecked)
+    {
+        poll.state->DeleteValue(poll.widgetId + "/velocity");
+        poll.state->DeleteValue(poll.widgetId + "/position");
+        mChecked = checked;
+        WidgetAction action;
+        action.type  = WidgetActionType::ValueChange;
+        action.value = checked;
+        return action;
+    }
+    return WidgetAction {};
+}
+
+WidgetAction ToggleBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct&)
+{
+    return WidgetAction {};
+}
+WidgetAction ToggleBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    if (ms.state->HasValue(ms.widgetId + "/position"))
+        return WidgetAction {};
+
+    ms.state->SetValue(ms.widgetId + "/position", mChecked ?  1.0f : 0.0f);
+    ms.state->SetValue(ms.widgetId + "/velocity", mChecked ? -4.0f : 4.0f);
+    return WidgetAction {};
+}
+WidgetAction ToggleBoxModel::MouseLeave(const MouseStruct&)
+{
+    return WidgetAction {};
+}
+WidgetAction ToggleBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
+{
+    if (key.key == VirtualKey::Select)
+    {
+        if (ks.state->HasValue(ks.widgetId + "/position"))
+            return WidgetAction {};
+
+        ks.state->SetValue(ks.widgetId + "/position", mChecked ?  1.0f : 0.0f);
+        ks.state->SetValue(ks.widgetId + "/velocity", mChecked ? -4.0f : 4.0f);
+    }
+    return WidgetAction {};
+}
+WidgetAction ToggleBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
+    return WidgetAction {};
+}
+
 std::size_t RadioButtonModel::GetHash(size_t hash) const
 {
     hash = base::hash_combine(hash, mText);
@@ -1126,6 +1256,8 @@ std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
         return std::make_unique<uik::ProgressBar>();
     else if (type == Widget::Type::RadioButton)
         return std::make_unique<uik::RadioButton>();
+    else if (type == Widget::Type::ToggleBox)
+        return std::make_unique<uik::ToggleBox>();
     else BUG("Unhandled widget type.");
     return nullptr;
 }
@@ -1151,6 +1283,8 @@ std::string Widget::GetWidgetClassName(uik::Widget::Type type)
         return "progress-bar";
     else if (type == Widget::Type::RadioButton)
         return "radiobutton";
+    else if (type == Widget::Type::ToggleBox)
+        return "togglebox";
     else BUG("Unhandled widget type.");
     return "";
 }
@@ -1176,6 +1310,8 @@ Widget::Type Widget::GetWidgetClassType(const std::string& klass)
         return Widget::Type::ProgressBar;
     else if (klass == "radiobutton")
         return Widget::Type::RadioButton;
+    else if (klass == "togglebox")
+        return Widget::Type::ToggleBox;
     else BUG("No such widget class.");
     return Widget::Type::RadioButton;
 }
