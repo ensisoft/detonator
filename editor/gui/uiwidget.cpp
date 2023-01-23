@@ -2002,6 +2002,9 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
     painter.SetOrthographicProjection(0.0f , 0.0f , surface_width , surface_height);
     painter.ResetViewMatrix();
+
+    if (mPlayState == PlayState::Stopped)
+        PrintMousePos(view, painter, mUI.widget);
 }
 
 void UIWidget::MouseMove(QMouseEvent* mickey)
