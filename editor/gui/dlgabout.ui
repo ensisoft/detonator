@@ -144,7 +144,7 @@
             </property>
             <widget class="QWidget" name="tab_22">
              <attribute name="title">
-              <string>Gamestudio</string>
+              <string>DETONATOR 2D</string>
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_16">
               <item>
