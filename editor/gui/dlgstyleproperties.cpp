@@ -152,7 +152,7 @@ public:
     }
     void UpdateRow(size_t row)
     {
-        emit dataChanged(index(row, 0), index(row, 8));
+        emit dataChanged(index(row, 0), index(row+1, 8));
     }
     void SetWidgetId(const std::string& id)
     {
@@ -459,7 +459,19 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"progress-bar-fill-shape",       "progress-bar", PropertyType::Shape},
         {"progress-bar-border",           "progress-bar", PropertyType::Material},
         {"progress-bar-border-width",     "progress-bar", PropertyType::Float},
-
+        // DrawToggle
+        {"toggle-shape",                  "togglebox", PropertyType::Shape},
+        {"toggle-background-on",          "togglebox", PropertyType::Material},
+        {"toggle-background-off",         "togglebox", PropertyType::Material},
+        {"toggle-border-on",              "togglebox", PropertyType::Material},
+        {"toggle-border-off",             "togglebox", PropertyType::Material},
+        {"toggle-border-width",           "togglebox", PropertyType::Float},
+        {"toggle-knob-shape",             "togglebox", PropertyType::Shape},
+        {"toggle-knob-on",                "togglebox", PropertyType::Material},
+        {"toggle-knob-off",               "togglebox", PropertyType::Material},
+        {"toggle-knob-border-on",         "togglebox", PropertyType::Material},
+        {"toggle-knob-border-off",        "togglebox", PropertyType::Material},
+        {"toggle-knob-border-width",      "togglebox", PropertyType::Float},
         // DrawWidgetFocusRect
         {"focus-rect",                    "push-button", PropertyType::Material},
         {"focus-rect-shape",              "push-button", PropertyType::Shape},
@@ -476,7 +488,6 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"focus-rect",                    "slider", PropertyType::Material},
         {"focus-rect-shape",              "slider", PropertyType::Shape},
         {"focus-rect-width",              "slider", PropertyType::Float},
-
     };
     std::sort(props.begin(), props.end(), [](const auto& lhs, const auto& rhs) {
         if (lhs.klass < rhs.klass)

@@ -193,6 +193,20 @@ wdk::Keysym MapQtKeySym(int from_qt)
     return it->second;
 }
 
+enum WidgetIndex {
+    Label,
+    PushButton,
+    CheckBox,
+    GroupBox,
+    Spinbox,
+    Slider,
+    ProgresBar,
+    RadioButton,
+    ToggleBox,
+    Form,
+    LAST
+};
+
 
 } // namespace
 
@@ -641,6 +655,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewSlider);
     bar.addAction(mUI.actionNewProgressBar);
     bar.addAction(mUI.actionNewRadioButton);
+    bar.addAction(mUI.actionNewToggleBox);
     bar.addAction(mUI.actionNewForm);
 }
 void UIWidget::AddActions(QMenu& menu)
@@ -660,6 +675,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewSlider);
     menu.addAction(mUI.actionNewProgressBar);
     menu.addAction(mUI.actionNewRadioButton);
+    menu.addAction(mUI.actionNewToggleBox);
     menu.addAction(mUI.actionNewForm);
 }
 bool UIWidget::SaveState(Settings& settings) const
@@ -1097,6 +1113,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewSlider,      false);
     SetEnabled(mUI.actionNewProgressBar, false);
     SetEnabled(mUI.actionNewRadioButton, false);
+    SetEnabled(mUI.actionNewToggleBox,   false);
     SetEnabled(mUI.actionNewGroupBox,    false);
     SetEnabled(mUI.actionNewForm,        false);
     SetEnabled(mUI.actionNewLabel,       false);
@@ -1142,13 +1159,14 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewSlider,     true);
     SetEnabled(mUI.actionNewProgressBar, true);
     SetEnabled(mUI.actionNewRadioButton, true);
-    SetEnabled(mUI.cmbGrid,         true);
-    SetEnabled(mUI.zoom,            true);
-    SetEnabled(mUI.chkSnap,         true);
-    SetEnabled(mUI.chkShowOrigin,   true);
-    SetEnabled(mUI.chkShowGrid,     true);
-    SetEnabled(mUI.chkShowBounds,   true);
-    SetEnabled(mUI.chkShowTabOrder, true);
+    SetEnabled(mUI.actionNewToggleBox,   true);
+    SetEnabled(mUI.cmbGrid,              true);
+    SetEnabled(mUI.zoom,                 true);
+    SetEnabled(mUI.chkSnap,              true);
+    SetEnabled(mUI.chkShowOrigin,        true);
+    SetEnabled(mUI.chkShowGrid,          true);
+    SetEnabled(mUI.chkShowBounds,        true);
+    SetEnabled(mUI.chkShowTabOrder,      true);
 
     mMessageQueue.clear();
 }
@@ -1178,47 +1196,52 @@ void UIWidget::on_actionSave_triggered()
 
 void UIWidget::on_actionNewForm_triggered()
 {
-    PlaceNewWidget(9);
+    PlaceNewWidget(WidgetIndex::Form);
 }
 
 void UIWidget::on_actionNewLabel_triggered()
 {
-    PlaceNewWidget(1);
+    PlaceNewWidget(WidgetIndex::Label);
 }
 
 void UIWidget::on_actionNewPushButton_triggered()
 {
-    PlaceNewWidget(2);
+    PlaceNewWidget(WidgetIndex::PushButton);
 }
 
 void UIWidget::on_actionNewCheckBox_triggered()
 {
-    PlaceNewWidget(3);
+    PlaceNewWidget(WidgetIndex::CheckBox);
 }
 
 void UIWidget::on_actionNewSpinBox_triggered()
 {
-    PlaceNewWidget(5);
+    PlaceNewWidget(WidgetIndex::Spinbox);
 }
 
 void UIWidget::on_actionNewSlider_triggered()
 {
-    PlaceNewWidget(6);
+    PlaceNewWidget(WidgetIndex::Slider);
 }
 
 void UIWidget::on_actionNewProgressBar_triggered()
 {
-    PlaceNewWidget(7);
+    PlaceNewWidget(WidgetIndex::ProgresBar);
 }
 
 void UIWidget::on_actionNewRadioButton_triggered()
 {
-    PlaceNewWidget(8);
+    PlaceNewWidget(WidgetIndex::RadioButton);
+}
+
+void UIWidget::on_actionNewToggleBox_triggered()
+{
+    PlaceNewWidget(WidgetIndex::ToggleBox);
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
 {
-    PlaceNewWidget(4);
+    PlaceNewWidget(WidgetIndex::GroupBox);
 }
 
 void UIWidget::on_actionWidgetDelete_triggered()
@@ -1346,6 +1369,12 @@ void UIWidget::on_widgetYPos_valueChanged(double value)
 {
     UpdateCurrentWidgetProperties();
 }
+
+void UIWidget::on_toggleChecked_stateChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+
 void UIWidget::on_rbText_textChanged()
 {
     UpdateCurrentWidgetProperties();
@@ -1952,9 +1981,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     {
         const auto show_window = true;
         // paint the active playback window.
-        mState.active_window->Paint(*mState.active_state,
-                                    *mState.painter,
-                                    mPlayTime);
+        mState.active_window->Paint(*mState.active_state, *mState.painter, mPlayTime);
     }
 
     if (const auto* widget = GetCurrentWidget())
@@ -2130,7 +2157,7 @@ void UIWidget::MouseWheel(QWheelEvent* wheel)
 {
     if (auto* place = dynamic_cast<PlaceWidgetTool*>(mCurrentTool.get()))
     {
-        int widget_index = place->GetWidgetIndex() - 1;
+        int widget_index = place->GetWidgetIndex();
         const QPoint &num_degrees = wheel->angleDelta() / 8;
         const QPoint &num_steps = num_degrees / 15;
         // only consider the wheel scroll steps on the vertical axis.
@@ -2139,8 +2166,8 @@ void UIWidget::MouseWheel(QWheelEvent* wheel)
         const int num_vertical_steps = num_steps.y();
         for (int i=0; i<std::abs(num_vertical_steps); ++i)
         {
-            widget_index = math::wrap(0, 8, widget_index + num_vertical_steps);
-            PlaceNewWidget(widget_index + 1);
+            widget_index = math::wrap(0, WidgetIndex::LAST-1, widget_index + num_vertical_steps);
+            PlaceNewWidget(widget_index);
         }
     }
 }
@@ -2308,6 +2335,10 @@ void UIWidget::UpdateCurrentWidgetProperties()
                 }
             }
         }
+        else if (auto* toggle = uik::WidgetCast<uik::ToggleBox>(widget))
+        {
+            toggle->SetChecked(GetValue(mUI.toggleChecked));
+        }
     }
 }
 
@@ -2412,6 +2443,11 @@ void UIWidget::DisplayCurrentWidgetProperties()
             SetValue(mUI.rbPlacement, radio->GetCheckLocation());
             SetValue(mUI.rbSelected, radio->IsSelected());
         }
+        else if (const auto* toggle = uik::WidgetCast<uik::ToggleBox>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.togglePage);
+            SetValue(mUI.toggleChecked, toggle->IsChecked());
+        }
         else
         {
             SetEnabled(mUI.widgetData, false);
@@ -2464,27 +2500,27 @@ void UIWidget::PlaceNewWidget(unsigned int index)
 
     // widget index follows the hotkey indexing. see the .UI in designer
     std::unique_ptr<uik::Widget> widget;
-    if (index == 1)
+    if (index == WidgetIndex::Label)
     {
         widget = std::make_unique<uik::Label>();
         mUI.actionNewLabel->setChecked(true);
     }
-    else if (index == 2)
+    else if (index == WidgetIndex::PushButton)
     {
         widget = std::make_unique<uik::PushButton>();
         mUI.actionNewPushButton->setChecked(true);
     }
-    else if (index == 3)
+    else if (index == WidgetIndex::CheckBox)
     {
         widget = std::make_unique<uik::CheckBox>();
         mUI.actionNewCheckBox->setChecked(true);
     }
-    else if (index == 4)
+    else if (index == WidgetIndex::GroupBox)
     {
         widget = std::make_unique<uik::GroupBox>();
         mUI.actionNewGroupBox->setChecked(true);
     }
-    else if (index == 5)
+    else if (index == WidgetIndex::Spinbox)
     {
         auto spin = std::make_unique<uik::SpinBox>();
         spin->SetMin(0);
@@ -2493,12 +2529,12 @@ void UIWidget::PlaceNewWidget(unsigned int index)
         widget = std::move(spin);
         mUI.actionNewSpinBox->setChecked(true);
     }
-    else if (index == 6)
+    else if (index == WidgetIndex::Slider)
     {
         widget = std::make_unique<uik::Slider>();
         mUI.actionNewSlider->setChecked(true);
     }
-    else if (index == 7)
+    else if (index == WidgetIndex::ProgresBar)
     {
         auto prog = std::make_unique<uik::ProgressBar>();
         prog->SetText("%1%");
@@ -2506,12 +2542,17 @@ void UIWidget::PlaceNewWidget(unsigned int index)
         widget = std::move(prog);
         mUI.actionNewProgressBar->setChecked(true);
     }
-    else if (index == 8)
+    else if (index == WidgetIndex::RadioButton)
     {
         widget = std::make_unique<uik::RadioButton>();
         mUI.actionNewRadioButton->setChecked(true);
     }
-    else if (index == 9)
+    else if (index == WidgetIndex::ToggleBox)
+    {
+        widget = std::make_unique<uik::ToggleBox>();
+        mUI.actionNewToggleBox->setChecked(true);
+    }
+    else if (index == WidgetIndex::Form)
     {
         widget = std::make_unique<uik::Form>();
         mUI.actionNewForm->setChecked(true);
@@ -2685,6 +2726,7 @@ void UIWidget::UncheckPlacementActions()
     mUI.actionNewSlider->setChecked(false);
     mUI.actionNewRadioButton->setChecked(false);
     mUI.actionNewProgressBar->setChecked(false);
+    mUI.actionNewToggleBox->setChecked(false);
 }
 
 void UIWidget::UpdateDeletedResourceReferences()

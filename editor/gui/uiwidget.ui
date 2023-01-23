@@ -1279,7 +1279,7 @@
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>7</number>
+           <number>8</number>
           </property>
           <widget class="QWidget" name="spinPage">
            <layout class="QGridLayout" name="gridLayout_4">
@@ -1723,6 +1723,43 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="togglePage">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="toggleChecked">
+              <property name="text">
+               <string>Checked</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -1990,6 +2027,21 @@
    </property>
    <property name="toolTip">
     <string>Reoder the widgets in the tab order list</string>
+   </property>
+  </action>
+  <action name="actionNewToggleBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>ToggleBox</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new toggle box</string>
    </property>
   </action>
  </widget>
