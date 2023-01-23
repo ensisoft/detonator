@@ -316,13 +316,14 @@ void EditorMain(QApplication& app)
 
         virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
         {
+            auto& event_log = app::EventLog::get();
             // forward Error and warnings to the application log too.
             if (type == base::LogEvent::Error)
-                ERROR(msg);
+                event_log.write(app::Event::Type::Error, app::toString(msg), "engine");
             else if (type == base::LogEvent::Warning)
-                WARN(msg);
+                event_log.write(app::Event::Type::Warning, app::toString(msg), "engine");
             else if (type == base::LogEvent::Info)
-                INFO(msg);
+                event_log.write(app::Event::Type::Info, app::toString(msg), "engine");
             mLogger.Write(type, file, line, msg);
         }
 
