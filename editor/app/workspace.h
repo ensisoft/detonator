@@ -784,6 +784,10 @@ namespace app
         { mBits.set_from_value(value); }
         unsigned GetShowBits() const
         { return mBits.value(); }
+        void SetFilterString(const QString& string)
+        { mFilterString = string; }
+        const QString& GetFilterString() const
+        { return mFilterString; }
     protected:
         bool filterAcceptsRow(int row, const QModelIndex& parent) const override
         {
@@ -792,10 +796,14 @@ namespace app
             const auto& resource = mWorkspace->GetUserDefinedResource(row);
             if (!mBits.test(resource.GetType()))
                 return false;
-            return true;
+            if (mFilterString.isEmpty())
+                return true;
+            const auto& name = resource.GetName();
+            return name.contains(mFilterString, Qt::CaseInsensitive);
         }
     private:
         base::bitflag<Show> mBits;
+        QString mFilterString;
         const Workspace* mWorkspace = nullptr;
     };
 
