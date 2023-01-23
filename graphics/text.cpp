@@ -583,9 +583,12 @@ void TextBuffer::SetBufferSize(unsigned int width, unsigned int height)
 TextBuffer::RasterFormat TextBuffer::GetRasterFormat() const
 {
     if (base::EndsWith(mText.font, ".otf") ||
-        base::EndsWith(mText.font, ".ttf"))
+        base::EndsWith(mText.font, ".ttf") ||
+        base::EndsWith(mText.font, ".OTF") ||
+        base::EndsWith(mText.font, ".TTF"))
         return RasterFormat::Bitmap;
-    if (base::EndsWith(mText.font, ".json"))
+    if (base::EndsWith(mText.font, ".json") ||
+        base::EndsWith(mText.font, ".JSON"))
         return RasterFormat::Texture;
     return RasterFormat::None;
 }
