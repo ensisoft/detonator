@@ -119,11 +119,35 @@ void WidgetStyleWidget::on_widgetTextColor_colorChanged(QColor color)
 }
 void WidgetStyleWidget::on_widgetBackground_currentIndexChanged(int)
 {
-    UpdateWidgetProperties();
+    if (mUI.widgetBackground->currentIndex() == -1)
+        DeleteMaterial(MapProperty("/background"));
+    else if (mUI.widgetBackground->currentIndex() == 0)
+        SetMaterial(MapProperty("/background"), engine::detail::UINullMaterial());
+    else if (mUI.widgetBackground->currentIndex() == 1)
+        SetMaterial(MapProperty("/background"), engine::detail::UIColor());
+    else if (mUI.widgetBackground->currentIndex() == 2)
+        SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
+    else if (mUI.widgetBackground->currentIndex() == 3)
+        SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+    else SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
+
+    UpdateWidgetStyleString();
 }
 void WidgetStyleWidget::on_widgetBorder_currentIndexChanged(int)
 {
-    UpdateWidgetProperties();
+    if (mUI.widgetBorder->currentIndex() == -1)
+        DeleteMaterial(MapProperty("/border"));
+    else if (mUI.widgetBorder->currentIndex() == 0)
+        SetMaterial(MapProperty("/border"), engine::detail::UINullMaterial());
+    else if (mUI.widgetBorder->currentIndex() == 1)
+        SetMaterial(MapProperty("/border"), engine::detail::UIColor());
+    else if (mUI.widgetBorder->currentIndex() == 2)
+        SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
+    else if (mUI.widgetBorder->currentIndex() == 3)
+        SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+    else SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
+
+    UpdateWidgetStyleString();
 }
 void WidgetStyleWidget::on_btnResetWidgetFontName_clicked()
 {
@@ -216,21 +240,12 @@ void WidgetStyleWidget::on_btnResetWidgetTextProp_clicked()
 void WidgetStyleWidget::on_btnResetWidgetBackground_clicked()
 {
     SetValue(mUI.widgetBackground, -1);
-    UpdateWidgetProperties();
+    on_widgetBackground_currentIndexChanged(-1);
 }
 void WidgetStyleWidget::on_btnResetWidgetBorder_clicked()
 {
     SetValue(mUI.widgetBorder, -1);
-    UpdateWidgetProperties();
-}
-void WidgetStyleWidget::on_btnSelectWidgetBackground_clicked()
-{
-
-
-}
-void WidgetStyleWidget::on_btnSelectWidgetBorder_clicked()
-{
-
+    on_widgetBorder_currentIndexChanged(-1);
 }
 
 void WidgetStyleWidget::SetBackgroundMaterial()
@@ -413,30 +428,6 @@ void WidgetStyleWidget::UpdateWidgetProperties()
             mStyle->SetProperty(MapProperty("/text-underline"), true);
         else if (underline_state == Qt::Unchecked)
             mStyle->SetProperty(MapProperty("/text-underline"), false);
-
-        if (mUI.widgetBackground->currentIndex() == -1)
-            DeleteMaterial(MapProperty("/background"));
-        else if (mUI.widgetBackground->currentIndex() == 0)
-            SetMaterial(MapProperty("/background"), engine::detail::UINullMaterial());
-        else if (mUI.widgetBackground->currentIndex() == 1)
-            SetMaterial(MapProperty("/background"), engine::detail::UIColor());
-        else if (mUI.widgetBackground->currentIndex() == 2)
-            SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
-        else if (mUI.widgetBackground->currentIndex() == 3)
-            SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
-        else SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
-
-        if (mUI.widgetBorder->currentIndex() == -1)
-            DeleteMaterial(MapProperty("/border"));
-        else if (mUI.widgetBorder->currentIndex() == 0)
-            SetMaterial(MapProperty("/border"), engine::detail::UINullMaterial());
-        else if (mUI.widgetBorder->currentIndex() == 1)
-            SetMaterial(MapProperty("/border"), engine::detail::UIColor());
-        else if (mUI.widgetBorder->currentIndex() == 2)
-            SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
-        else if (mUI.widgetBorder->currentIndex() == 3)
-            SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
-        else SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
         UpdateWidgetStyleString();
 
@@ -628,13 +619,6 @@ std::string WidgetStyleWidget::MapProperty(std::string key) const
 template<typename T>
 void WidgetStyleWidget::SetMaterial(const std::string& key, T material)
 {
-    // if the material already exists and has the same type as the
-    // new material then
-    if (const auto* prev = mStyle->GetMaterialType(key))
-    {
-        if (prev->GetType() == material.GetType())
-            return;
-    }
     mStyle->SetMaterial(key, std::move(material));
     // purge old material instance and force the painter
     // to recreate the material instance so that the changes
