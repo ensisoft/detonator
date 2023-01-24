@@ -85,8 +85,6 @@ namespace gui
         void on_btnResetWidgetBackground_clicked();
         void on_btnResetWidgetBorder_clicked();
         void on_btnResetWidgetTextColor_clicked();
-        void on_btnSelectWidgetBackground_clicked();
-        void on_btnSelectWidgetBorder_clicked();
 
         void SetBackgroundMaterial();
         void SetBackgroundColor();
