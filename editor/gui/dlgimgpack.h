@@ -34,6 +34,9 @@ namespace gui
     public:
         DlgImgPack(QWidget* parent);
 
+        bool IsClosed() const
+        { return mClosed; }
+
     private slots:
         void on_btnDeleteImage_clicked();
         void on_btnBrowseImage_clicked();
@@ -52,6 +55,7 @@ namespace gui
     private:
         QImage mPackedImage;
         nlohmann::json mJson;
+        bool mClosed = false;
     };
 
 } // namespace
