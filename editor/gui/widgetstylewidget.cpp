@@ -547,7 +547,7 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         if (FileExists(json_file))
         {
             DlgImgView dlg(this);
-            dlg.SetDialogMode();
+            dlg.SetDialogMode(mWorkspace);
             dlg.show();
             dlg.LoadImage(image_file);
             dlg.LoadJson(json_file);

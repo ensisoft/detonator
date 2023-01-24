@@ -152,7 +152,7 @@ public:
     }
     void UpdateRow(size_t row)
     {
-        emit dataChanged(index(row, 0), index(row+1, 8));
+        emit dataChanged(index(row, 0), index(row+1, 8+1));
     }
     void SetWidgetId(const std::string& id)
     {
@@ -974,7 +974,7 @@ void DlgWidgetStyleProperties::SetWidgetImage()
     if (FileExists(json_file))
     {
         DlgImgView dlg(this);
-        dlg.SetDialogMode();
+        dlg.SetDialogMode(mWorkspace);
         dlg.show();
         dlg.LoadImage(image_file);
         dlg.LoadJson(json_file);
