@@ -715,10 +715,9 @@ inline bool MissingFile(const app::AnyString& filename)
 {
     return !QFileInfo(filename).exists();
 }
-inline bool FileExists(const app::AnyString& filename)
-{
-    return !MissingFile(filename);
-}
+
+using app::FileExists;
+
 inline bool FileExists(const QLineEdit* edit)
 {
     return !MissingFile(edit);

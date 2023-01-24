@@ -3365,20 +3365,44 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     {
         emit ResourcePackingUpdate("Generating HTML5 filesystem image...", 0, 0);
 
-        DEBUG("Generating HTML5 filesystem image. [emsdk='%1', python='%2']", options.emsdk_path, options.python_executable);
+        QString package_script = app::JoinPath(options.emsdk_path, "/upstream/emscripten/tools/file_packager.py");
 
-        QString filesystem_image_name = "FILESYSTEM";
-        QStringList args;
-        args << app::JoinPath(options.emsdk_path, "/upstream/emscripten/tools/file_packager.py");
-        args << filesystem_image_name;
-        args << "--preload";
-        args << options.package_name;
-        args << "config.json";
-        args << QString("--js-output=%1.js").arg(filesystem_image_name);
-        QStringList stdout_buffer;
-        QStringList stderr_buffer;
-        Process::RunAndCapture(options.python_executable,
-                               options.directory, args, &stdout_buffer, &stderr_buffer);
+        if (!FileExists(options.python_executable))
+        {
+            ERROR("Python executable was not found. [python='%1']", options.python_executable);
+            ++errors;
+        }
+        else if (!FileExists(package_script))
+        {
+            ERROR("Emscripten filesystem package script not found. [script='%1']", package_script);
+            ++errors;
+        }
+        else
+        {
+            DEBUG("Generating HTML5 filesystem image. [emsdk='%1', python='%2']", options.emsdk_path,
+                  options.python_executable);
+            QString filesystem_image_name = "FILESYSTEM";
+            QStringList args;
+            args << package_script;
+            args << filesystem_image_name;
+            args << "--preload";
+            args << options.package_name;
+            args << "config.json";
+            args << QString("--js-output=%1.js").arg(filesystem_image_name);
+            Process::Error error_code = Process::Error::None;
+            QStringList stdout_buffer;
+            QStringList stderr_buffer;
+            if (!Process::RunAndCapture(options.python_executable,
+                                        options.directory, args,
+                                        &stdout_buffer,
+                                        &stderr_buffer,
+                                        &error_code))
+            {
+                ERROR("Building HTML5/WASM filesystem image failed. [error='%1', python='%2', script='%2']",
+                      error_code, options.python_executable, package_script);
+                ++errors;
+            }
+        }
     }
 
     if (options.copy_html5_files)

@@ -73,6 +73,8 @@ QString CleanPath(const QString& path);
 // Make path. returns true if successful, otherwise false.
 bool MakePath(const QString& path);
 
+bool FileExists(const QString& filename);
+
 bool IsDirectory(const QString& path);
 
 std::tuple<bool, QString> CopyRecursively(const QString& src_dir_path, const QString& dst_dir_path);

@@ -122,6 +122,11 @@ bool MakePath(const QString& path)
     return d.mkpath(path);
 }
 
+bool FileExists(const QString& filename)
+{
+    return QFileInfo(filename).exists();
+}
+
 bool IsDirectory(const QString& path)
 {
     return QFileInfo(path).isDir();
