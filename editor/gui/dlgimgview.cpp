@@ -31,6 +31,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/workspace.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
@@ -211,13 +212,21 @@ void DlgImgView::LoadJson(const QString& file)
     mSelectedIndex = mList.size();
     SetValue(mUI.jsonFile, file);
 }
-void DlgImgView::SetDialogMode()
+void DlgImgView::SetDialogMode(app::Workspace* workspace)
 {
     SetVisible(mUI.btnClose, false);
     SetVisible(mUI.btnAccept, true);
     SetVisible(mUI.btnCancel, true);
     SetEnabled(mUI.btnAccept, false);
     mDialogMode = true;
+    mWorkspace  = workspace;
+    if (mWorkspace)
+    {
+        QByteArray geometry;
+        if (GetUserProperty(*mWorkspace, "dlg_img_view_geometry", &geometry))
+            restoreGeometry(geometry);
+        GetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
+    }
 }
 
 QString DlgImgView::GetImageFileName() const
@@ -254,6 +263,8 @@ void DlgImgView::on_btnSelectImage_clicked()
         return;
 
     LoadImage(file);
+    if (FileExists(file + ".json"))
+        LoadJson(file + ".json");
 }
 
 void DlgImgView::on_btnSelectJson_clicked()
@@ -265,6 +276,12 @@ void DlgImgView::on_btnSelectJson_clicked()
         return;
 
     LoadJson(file);
+
+    QString img = file;
+    img.replace(".json", ".png", Qt::CaseInsensitive);
+    if (FileExists(img))
+        LoadImage(img);
+
 }
 
 void DlgImgView::on_btnClose_clicked()
@@ -296,10 +313,22 @@ void DlgImgView::on_btnAccept_clicked()
             return;
     }
 
+     if (mWorkspace)
+     {
+         SetUserProperty(*mWorkspace, "dlg_img_view_geometry", saveGeometry());
+         SetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
+     }
+
     accept();
 }
 void DlgImgView::on_btnCancel_clicked()
 {
+    if (mWorkspace)
+    {
+        SetUserProperty(*mWorkspace, "dlg_img_view_geometry", saveGeometry());
+        SetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
+    }
+
     reject();
 }
 

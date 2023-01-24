@@ -31,6 +31,10 @@
 
 #include "graphics/fwd.h"
 
+namespace app {
+    class Workspace;
+} // namespace
+
 namespace gui
 {
     class DlgImgView : public QDialog
@@ -52,7 +56,7 @@ namespace gui
 
         void LoadImage(const QString& file);
         void LoadJson(const QString& file);
-        void SetDialogMode();
+        void SetDialogMode(app::Workspace* workspace);
 
         QString GetImageFileName() const;
         QString GetJsonFileName() const;
@@ -80,6 +84,7 @@ namespace gui
     private:
         Ui::DlgImgView mUI;
     private:
+        app::Workspace* mWorkspace = nullptr;
         std::vector<Image> mList;
         std::size_t mSelectedIndex = 0;
         std::shared_ptr<gfx::TextureMap2DClass> mClass;
