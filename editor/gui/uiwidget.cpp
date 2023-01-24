@@ -1848,9 +1848,13 @@ void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* t
     // check if we're trying to drag a parent onto its own child.
     if (base::SearchChild(tree, dst_widget, src_widget))
         return;
-    // todo: probably want to retain the position of the widget
-    // relative to window. this means that the widget's position
-    // needs to be transformed relative to the new parent
+
+    const auto& parent_rect = mState.window.FindWidgetRect(dst_widget);
+    const auto& child_rect  = mState.window.FindWidgetRect(src_widget);
+    const auto& parent_pos  = parent_rect.GetPosition();
+    const auto& child_pos   = child_rect.GetPosition();
+    src_widget->SetPosition(child_pos - parent_pos);
+
     tree.ReparentChild(dst_widget, src_widget);
 }
 void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
