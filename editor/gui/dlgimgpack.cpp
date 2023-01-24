@@ -226,7 +226,8 @@ void DlgImgPack::on_btnSaveAs_clicked()
 
 void DlgImgPack::on_btnClose_clicked()
 {
-    close();
+    mClosed = true;
+    hide();
 }
 
 void DlgImgPack::on_listWidget_currentRowChanged(int index)

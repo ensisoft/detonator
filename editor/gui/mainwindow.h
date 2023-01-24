@@ -44,6 +44,7 @@ namespace gui
     class Settings;
     class ChildWindow;
     class PlayWindow;
+    class DlgImgPack;
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
@@ -262,6 +263,8 @@ namespace gui
         Clipboard mClipboard;
 
         MainWidget::UISettings mUISettings;
+
+        std::unique_ptr<DlgImgPack> mDlgImgPack;
     };
 
 } // namespace

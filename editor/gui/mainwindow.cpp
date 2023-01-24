@@ -1905,8 +1905,10 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionImagePacker_triggered()
 {
-    DlgImgPack dlg(this);
-    dlg.exec();
+    if (!mDlgImgPack)
+        mDlgImgPack = std::make_unique<DlgImgPack>(nullptr);
+
+    mDlgImgPack->show();
 }
 
 void MainWindow::on_actionImageViewer_triggered()
@@ -2522,6 +2524,10 @@ void MainWindow::RefreshUI()
         mUI.actionZoomOut->setEnabled(mCurrentWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
         UpdateStats();
     }
+
+    if (mDlgImgPack && mDlgImgPack->IsClosed())
+        mDlgImgPack.reset();
+
 }
 
 void MainWindow::ShowNote(const app::Event& event)
@@ -2881,6 +2887,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
 
     mIsClosed = true;
+
+    if (mDlgImgPack)
+    {
+        mDlgImgPack->close();
+        mDlgImgPack.reset();
+    }
 
     emit aboutToClose();
 }
