@@ -862,16 +862,15 @@ void UIWidget::Paste(const Clipboard& clipboard)
         const auto new_id = base::RandomString(10);
         w->SetId(new_id);
 
-        // gather the style information
-        auto style = mState.style->MakeStyleString(old_id);
-        if (style.empty())
+        auto style_string = w->GetStyleString();
+        // remove any specific widget IDs from the style string. (in case there's any)
+        boost::erase_all(style_string, old_id + "/");
+
+        w->SetStyleString(style_string);
+        if (style_string.empty())
             continue;
-        // replace previous (old) widget ID with the new ID
-        boost::erase_all(style, old_id + "/");
-        // update widget with new style information
-        w->SetStyleString(style);
-        // update the styling
-        mState.style->ParseStyleString(new_id, style);
+
+        mState.style->ParseStyleString(new_id, style_string);
     }
 
     auto* paste_root = nodes[0].get();
