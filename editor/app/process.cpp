@@ -152,7 +152,8 @@ bool Process::RunAndCapture(const QString& executable,
     const QString& working_dir,
     const QStringList& args,
     QStringList* stdout_buffer,
-    QStringList* stderr_buffer)
+    QStringList* stderr_buffer,
+    Error* error_code)
 {
     Process process;
     process.onStdErr = [&stdout_buffer](const QString& line) {
@@ -167,7 +168,10 @@ bool Process::RunAndCapture(const QString& executable,
     const auto NeverTimeout = -1;
     process.mProcess.waitForFinished(NeverTimeout);
     if (process.GetError() != Error::None)
+    {
+        *error_code = process.GetError();
         return false;
+    }
 
     return true;
 }

@@ -100,8 +100,8 @@ namespace app
             const QString& working_dir,
             const QStringList& args,
             QStringList* stdout_buffer,
-            QStringList* stderr_buffer);
-
+            QStringList* stderr_buffer,
+            Error* error_code = nullptr);
     private slots:
         void ProcessStdOut();
         void ProcessStdErr();
