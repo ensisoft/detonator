@@ -931,6 +931,16 @@ void UIWidget::ReloadShaders()
 void UIWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
+
+    // so actually what we want to do here is to make sure that
+    // changes in packed textures are reflected as well. When an
+    // image pack is changed the locations of the sub-images can
+    // change and result in different texture coordinates.
+    // Deleting all material instances makes sure that any material
+    // instances are re-created and thus any changes in packed images
+    // (and their JSON) are realized.
+    mState.painter->DeleteMaterialInstances();
+
 }
 void UIWidget::Shutdown()
 {
