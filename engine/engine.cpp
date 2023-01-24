@@ -735,7 +735,7 @@ private:
         const auto& rect   = ui->GetBoundingRect();
         const float width  = rect.GetWidth();
         const float height = rect.GetHeight();
-        const float scale = std::min((float)mSurfaceWidth/width, (float)mSurfaceHeight/height);
+        const float scale  = std::min((float)mSurfaceWidth/width, (float)mSurfaceHeight/height);
         const glm::vec2 window_size(width, height);
         const glm::vec2 surface_size(mSurfaceWidth, mSurfaceHeight);
         const glm::vec2 viewport_size = glm::vec2(width, height) * scale;
@@ -1039,7 +1039,13 @@ private:
             // the Game UI runs in "game time". this is in contrast to
             // any possible "in game debug/system menu" that would be
             // running in real wall time.
-            TRACE_CALL("UI::Update", mUIPainter.Update(game_time, dt));
+
+            // Update the UI materials in order to do material animation.
+            TRACE_CALL("UI Painter::Update", mUIPainter.Update(game_time, dt));
+
+            // Update the UI widgets in order to do widget animation.
+            TRACE_CALL("UI Window::Update", ui->Update(mUIState, game_time, dt));
+
             const auto& actions = ui->PollAction(mUIState, game_time, dt);
             for (const auto& action : actions)
             {
