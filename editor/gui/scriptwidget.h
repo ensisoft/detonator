@@ -66,6 +66,7 @@ namespace gui
         virtual bool LoadState(const gui::Settings& settings) override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool OnEscape() override;
+        virtual void Activate() override;
 
         static void SetDefaultSettings(const Settings& settings);
         static void GetDefaultSettings(Settings* settings);

@@ -2023,6 +2023,11 @@ bool ScriptWidget::OnEscape()
     return true;
 }
 
+void ScriptWidget::Activate()
+{
+    mUI.code->setFocus();
+}
+
 void ScriptWidget::on_actionSave_triggered()
 {
     QString filename = mFilename;
