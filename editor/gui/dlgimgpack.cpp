@@ -28,7 +28,6 @@
 #  include <QImageWriter>
 #  include <QMessageBox>
 #  include <QTextStream>
-#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <vector>
@@ -68,23 +67,52 @@ void DlgImgPack::on_btnBrowseImage_clicked()
 {
     const auto& list = QFileDialog::getOpenFileNames(this,
         tr("Select Image File(s)"), "",
-        tr("Images (*.png *.jpg *.jpeg)"));
+        tr("Images (*.png *.jpg *.jpeg);;Source list (*.list.txt)"));
     for (int i=0; i<list.size(); ++i)
     {
-        const QPixmap pix(list[i]);
-        if (pix.isNull())
+        const auto& filename = list[i];
+        if (filename.endsWith(".list.txt"))
         {
-            QMessageBox msg(this);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setText(tr("There was a problem reading the image.\n'%1'\n"
-                           "Perhaps the image is not a valid image?").arg(list[i]));
-            msg.exec();
-            return;
+            QFile file;
+            file.setFileName(filename);
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                QMessageBox msg(this);
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setIcon(QMessageBox::Critical);
+                msg.setText(tr("There was a problem reading the file.\n'%1'\n").arg(filename));
+                msg.exec();
+                continue;
+            }
+            QTextStream stream(&file);
+            stream.setCodec("UTF-8");
+            while (!stream.atEnd())
+            {
+                QString line = stream.readLine();
+                if (line.isEmpty())
+                    continue;
+                QPixmap pix(line);
+                if (pix.isNull())
+                    continue;
+                AddItem(mUI.listWidget, line);
+            }
         }
-        AddItem(mUI.listWidget, list[i]);
+        else
+        {
+            const QPixmap pix(filename);
+            if (pix.isNull())
+            {
+                QMessageBox msg(this);
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setIcon(QMessageBox::Critical);
+                msg.setText(tr("There was a problem reading the image.\n'%1'\n"
+                               "Perhaps the image is not a valid image?").arg(filename));
+                msg.exec();
+                continue;
+            }
+            AddItem(mUI.listWidget, filename);
+        }
     }
-
     const auto index = mUI.listWidget->currentRow();
     mUI.listWidget->setCurrentRow(index == -1 ? 0 : index);
 
@@ -122,6 +150,33 @@ void DlgImgPack::on_btnSaveAs_clicked()
         msg.exec();
     }
     DEBUG("Wrote packaged image to '%1'.", filename);
+
+    {
+        // dump the source files into a simple .txt list file so that
+        // it's possible to quickly recover the same list of source files.
+        // this is useful when repacking (for example adding new images)
+        // to the same packed image.
+        QFile file;
+        file.setFileName(filename + ".list.txt");
+        if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            QTextStream stream(&file);
+            stream.setCodec("UTF-8");
+            for (int i=0; i<GetCount(mUI.listWidget); ++i)
+            {
+                auto* item = mUI.listWidget->item(i);
+                stream << item->text();
+                stream << "\n";
+            }
+            // don't write these for now since this is only a list of source images
+            // stream << "premultiply_alpha=" << (bool)GetValue(mUI.chkPremulAlpha);
+            // stream << "power_of_two=" << (bool)GetValue(mUI.chkPot);
+            // stream << "padding=" << (int)GetValue(mUI.padding);
+        }
+        file.flush();
+        file.close();
+    }
+
 
     if (!GetValue(mUI.chkJson))
         return;
