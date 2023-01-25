@@ -728,6 +728,8 @@ struct ComboBoxItemIdGetter
     { return app::ToUtf8(cmb->currentData().toString()); }
     operator QString() const
     { return cmb->currentData().toString(); }
+    operator app::AnyString() const
+    { return cmb->currentData().toString(); }
     const QComboBox* cmb = nullptr;
 };
 
@@ -740,6 +742,12 @@ struct ListWidgetItemIdGetter
         return "";
     }
     operator QString() const
+    {
+        if (const auto* item = list->currentItem())
+            return item->data(Qt::UserRole).toString();
+        return QString("");
+    }
+    operator app::AnyString() const
     {
         if (const auto* item = list->currentItem())
             return item->data(Qt::UserRole).toString();

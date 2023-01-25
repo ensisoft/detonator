@@ -1428,17 +1428,17 @@ QAbstractFileEngine* Workspace::create(const QString& file) const
     return new QFSFileEngine(ret);
 }
 
-std::unique_ptr<gfx::Material> Workspace::MakeMaterialByName(const QString& name) const
+std::unique_ptr<gfx::Material> Workspace::MakeMaterialByName(const AnyString& name) const
 {
     return gfx::CreateMaterialInstance(GetMaterialClassByName(name));
 
 }
-std::unique_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const QString& name) const
+std::unique_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const AnyString& name) const
 {
     return gfx::CreateDrawableInstance(GetDrawableClassByName(name));
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const QString& name) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const AnyString& name) const
 {
     for (const auto& resource : mResources)
     {
@@ -1452,13 +1452,7 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(cons
     return nullptr;
 }
 
-std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const char* name) const
-{
-    // convenience shim
-    return GetMaterialClassByName(QString::fromUtf8(name));
-}
-
-std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassById(const QString& id) const
+std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassById(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -1472,7 +1466,7 @@ std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassById(const 
     return nullptr;
 }
 
-std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const QString& name) const
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const AnyString& name) const
 {
     for (const auto& resource : mResources)
     {
@@ -1493,12 +1487,8 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
     BUG("No such drawable class.");
     return nullptr;
 }
-std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(const char* name) const
-{
-    // convenience shim
-    return GetDrawableClassByName(QString::fromUtf8(name));
-}
-std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const QString& id) const
+
+std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -1521,7 +1511,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const 
 }
 
 
-std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const QString& name) const
+std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const AnyString& name) const
 {
     for (const auto& resource : mResources)
     {
@@ -1534,7 +1524,7 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassByName(const Q
     BUG("No such entity class.");
     return nullptr;
 }
-std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QString& id) const
+std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -1548,7 +1538,7 @@ std::shared_ptr<const game::EntityClass> Workspace::GetEntityClassById(const QSt
     return nullptr;
 }
 
-std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const QString& id) const
+std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const AnyString& id) const
 {
     for (const auto& resource : mResources)
     {
@@ -1562,10 +1552,6 @@ std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const Q
     return nullptr;
 }
 
-std::shared_ptr<const game::TilemapClass> Workspace::GetTilemapClassById(const std::string& id) const
-{
-    return GetTilemapClassById(FromUtf8(id));
-}
 
 engine::ClassHandle<const audio::GraphClass> Workspace::FindAudioGraphClassById(const std::string& id) const
 {
