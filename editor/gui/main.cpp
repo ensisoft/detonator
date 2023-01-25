@@ -251,6 +251,7 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
     DEBUG("It's alive!");
+    DEBUG(app.applicationDirPath());
 
     // capture log events written into app::EventLog and forward
     // them to the base logger which writes them to stdout
