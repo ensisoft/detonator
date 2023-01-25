@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#define LOGTAG "app"
+
 #include "config.h"
 
 #include "warnpush.h"

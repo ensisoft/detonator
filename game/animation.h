@@ -16,10 +16,6 @@
 
 #pragma once
 
-#ifndef LOGTAG
-#  define LOGTAG "engine"
-#endif
-
 #include "config.h"
 
 #include "warnpush.h"
