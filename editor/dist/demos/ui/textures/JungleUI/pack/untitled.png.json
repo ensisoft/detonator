@@ -1,0 +1,221 @@
+{
+  "image_file": "untitled.png",
+  "image_height": 3050,
+  "image_width": 2539,
+  "images": [
+    {
+      "height": 331,
+      "index": 25,
+      "name": "hud_up.png",
+      "width": 1536,
+      "xpos": 0,
+      "ypos": 0
+    },
+    {
+      "height": 632,
+      "index": 11,
+      "name": "logo.png",
+      "width": 1300,
+      "xpos": 0,
+      "ypos": 331
+    },
+    {
+      "height": 952,
+      "index": 1,
+      "name": "bg_dialog.png",
+      "width": 1298,
+      "xpos": 0,
+      "ypos": 963
+    },
+    {
+      "height": 844,
+      "index": 12,
+      "name": "table.png",
+      "width": 1161,
+      "xpos": 0,
+      "ypos": 1915
+    },
+    {
+      "height": 396,
+      "index": 22,
+      "name": "header_looser.png",
+      "width": 1003,
+      "xpos": 1536,
+      "ypos": 0
+    },
+    {
+      "height": 396,
+      "index": 21,
+      "name": "header_winner.png",
+      "width": 1003,
+      "xpos": 1536,
+      "ypos": 396
+    },
+    {
+      "height": 396,
+      "index": 10,
+      "name": "header_shop.png",
+      "width": 1003,
+      "xpos": 1536,
+      "ypos": 792
+    },
+    {
+      "height": 396,
+      "index": 13,
+      "name": "header_settings.png",
+      "width": 1003,
+      "xpos": 1536,
+      "ypos": 1188
+    },
+    {
+      "height": 500,
+      "index": 8,
+      "name": "btn_play.png",
+      "width": 498,
+      "xpos": 1536,
+      "ypos": 1584
+    },
+    {
+      "height": 448,
+      "index": 2,
+      "name": "boost_1.png",
+      "width": 308,
+      "xpos": 2034,
+      "ypos": 1584
+    },
+    {
+      "height": 448,
+      "index": 3,
+      "name": "boost_2.png",
+      "width": 308,
+      "xpos": 1536,
+      "ypos": 2084
+    },
+    {
+      "height": 448,
+      "index": 0,
+      "name": "ads.png",
+      "width": 308,
+      "xpos": 1844,
+      "ypos": 2084
+    },
+    {
+      "height": 107,
+      "index": 6,
+      "name": "btn_green.png",
+      "width": 308,
+      "xpos": 2152,
+      "ypos": 2084
+    },
+    {
+      "height": 301,
+      "index": 9,
+      "name": "btn_setting.png",
+      "width": 300,
+      "xpos": 2152,
+      "ypos": 2191
+    },
+    {
+      "height": 301,
+      "index": 7,
+      "name": "btn_leader.png",
+      "width": 300,
+      "xpos": 1161,
+      "ypos": 1915
+    },
+    {
+      "height": 301,
+      "index": 4,
+      "name": "btn_about.png",
+      "width": 300,
+      "xpos": 1161,
+      "ypos": 2216
+    },
+    {
+      "height": 291,
+      "index": 23,
+      "name": "hud_moves.png",
+      "width": 300,
+      "xpos": 0,
+      "ypos": 2759
+    },
+    {
+      "height": 71,
+      "index": 24,
+      "name": "hud_panel.png",
+      "width": 224,
+      "xpos": 1536,
+      "ypos": 2532
+    },
+    {
+      "height": 70,
+      "index": 14,
+      "name": "toggle_on.png",
+      "width": 200,
+      "xpos": 1760,
+      "ypos": 2532
+    },
+    {
+      "height": 70,
+      "index": 15,
+      "name": "toggle_off.png",
+      "width": 200,
+      "xpos": 1960,
+      "ypos": 2532
+    },
+    {
+      "height": 147,
+      "index": 5,
+      "name": "btn_close_2.png",
+      "width": 150,
+      "xpos": 2342,
+      "ypos": 1584
+    },
+    {
+      "height": 85,
+      "index": 20,
+      "name": "star_3.png",
+      "width": 141,
+      "xpos": 2342,
+      "ypos": 1731
+    },
+    {
+      "height": 85,
+      "index": 19,
+      "name": "star_2.png",
+      "width": 113,
+      "xpos": 2342,
+      "ypos": 1816
+    },
+    {
+      "height": 95,
+      "index": 16,
+      "name": "btn_plus.png",
+      "width": 93,
+      "xpos": 2342,
+      "ypos": 1901
+    },
+    {
+      "height": 95,
+      "index": 17,
+      "name": "btn_minus.png",
+      "width": 93,
+      "xpos": 2435,
+      "ypos": 1901
+    },
+    {
+      "height": 82,
+      "index": 18,
+      "name": "star_1.png",
+      "width": 82,
+      "xpos": 2455,
+      "ypos": 1816
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 0,
+  "power_of_two": false,
+  "premultiply_alpha": false
+}

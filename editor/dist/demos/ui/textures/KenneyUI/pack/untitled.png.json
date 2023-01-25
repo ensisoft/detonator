@@ -1,0 +1,197 @@
+{
+  "image_file": "untitled.png",
+  "image_height": 512,
+  "image_width": 512,
+  "images": [
+    {
+      "height": 49,
+      "index": 1,
+      "name": "blue_button04.png",
+      "width": 190,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "height": 45,
+      "index": 2,
+      "name": "blue_button05.png",
+      "width": 190,
+      "xpos": 2,
+      "ypos": 55
+    },
+    {
+      "height": 4,
+      "index": 11,
+      "name": "grey_sliderHorizontal.png",
+      "width": 190,
+      "xpos": 2,
+      "ypos": 104
+    },
+    {
+      "height": 100,
+      "index": 20,
+      "name": "glassPanel_cornerTL.png",
+      "width": 100,
+      "xpos": 2,
+      "ypos": 112
+    },
+    {
+      "height": 100,
+      "index": 19,
+      "name": "glassPanel_corners.png",
+      "width": 100,
+      "xpos": 2,
+      "ypos": 216
+    },
+    {
+      "height": 100,
+      "index": 21,
+      "name": "glassPanel.png",
+      "width": 100,
+      "xpos": 196,
+      "ypos": 2
+    },
+    {
+      "height": 100,
+      "index": 12,
+      "name": "metalPanel_blue.png",
+      "width": 100,
+      "xpos": 196,
+      "ypos": 106
+    },
+    {
+      "height": 100,
+      "index": 13,
+      "name": "metalPanel_redCorner.png",
+      "width": 100,
+      "xpos": 196,
+      "ypos": 210
+    },
+    {
+      "height": 100,
+      "index": 14,
+      "name": "metalPanel.png",
+      "width": 100,
+      "xpos": 2,
+      "ypos": 320
+    },
+    {
+      "height": 80,
+      "index": 22,
+      "name": "metalPanel_plate.png",
+      "width": 80,
+      "xpos": 106,
+      "ypos": 112
+    },
+    {
+      "height": 42,
+      "index": 4,
+      "name": "blue_sliderUp.png",
+      "width": 28,
+      "xpos": 106,
+      "ypos": 216
+    },
+    {
+      "height": 36,
+      "index": 0,
+      "name": "blue_boxCheckmark.png",
+      "width": 38,
+      "xpos": 138,
+      "ypos": 216
+    },
+    {
+      "height": 36,
+      "index": 10,
+      "name": "grey_box.png",
+      "width": 38,
+      "xpos": 106,
+      "ypos": 262
+    },
+    {
+      "height": 26,
+      "index": 15,
+      "name": "barHorizontal_green_mid.png",
+      "width": 16,
+      "xpos": 148,
+      "ypos": 262
+    },
+    {
+      "height": 26,
+      "index": 16,
+      "name": "barHorizontal_red_mid.png",
+      "width": 16,
+      "xpos": 168,
+      "ypos": 262
+    },
+    {
+      "height": 24,
+      "index": 17,
+      "name": "dotRed.png",
+      "width": 24,
+      "xpos": 106,
+      "ypos": 320
+    },
+    {
+      "height": 24,
+      "index": 18,
+      "name": "dotGreen.png",
+      "width": 24,
+      "xpos": 134,
+      "ypos": 320
+    },
+    {
+      "height": 20,
+      "index": 3,
+      "name": "blue_checkmark.png",
+      "width": 21,
+      "xpos": 162,
+      "ypos": 320
+    },
+    {
+      "height": 17,
+      "index": 5,
+      "name": "blue_tick.png",
+      "width": 17,
+      "xpos": 187,
+      "ypos": 320
+    },
+    {
+      "height": 10,
+      "index": 9,
+      "name": "grey_arrowUpWhite.png",
+      "width": 15,
+      "xpos": 106,
+      "ypos": 196
+    },
+    {
+      "height": 10,
+      "index": 8,
+      "name": "grey_arrowUpGrey.png",
+      "width": 15,
+      "xpos": 125,
+      "ypos": 196
+    },
+    {
+      "height": 10,
+      "index": 7,
+      "name": "grey_arrowDownWhite.png",
+      "width": 15,
+      "xpos": 144,
+      "ypos": 196
+    },
+    {
+      "height": 10,
+      "index": 6,
+      "name": "grey_arrowDownGrey.png",
+      "width": 15,
+      "xpos": 163,
+      "ypos": 196
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": true,
+  "premultiply_alpha": false
+}
