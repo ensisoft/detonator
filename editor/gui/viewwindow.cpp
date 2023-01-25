@@ -134,6 +134,7 @@ ViewWindow::ViewWindow(QApplication& app) : mApp(app)
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     SetEnabled(mUI.btnExport, false);
+    SetVisible(mUI.lblPreview, false);
 }
 
 ViewWindow::~ViewWindow()
@@ -161,6 +162,35 @@ void ViewWindow::Connect(const QString& local_ipc_socket)
     }
 }
 
+void ViewWindow::on_btnDemoBandit_clicked()
+{
+    LoadDemoWorkspace("demos/bandit/workspace.json");
+}
+void ViewWindow::on_btnDemoBlast_clicked()
+{
+    LoadDemoWorkspace("demos/blast/workspace.json");
+}
+void ViewWindow::on_btnDemoBreak_clicked()
+{
+    LoadDemoWorkspace("demos/breakout/workspace.json");
+}
+void ViewWindow::on_btnDemoParticles_clicked()
+{
+    LoadDemoWorkspace("demos/particles/workspace.json");
+}
+void ViewWindow::on_btnDemoPlayground_clicked()
+{
+    LoadDemoWorkspace("demos/playground/workspace.json");
+}
+void ViewWindow::on_btnDemoUI_clicked()
+{
+    LoadDemoWorkspace("demos/ui/workspace.json");
+}
+void ViewWindow::on_btnDemoDerp_clicked()
+{
+    LoadDemoWorkspace("starter/derp/workspace.json");
+}
+
 void ViewWindow::on_btnSelectFile_clicked()
 {
     const auto& file = QFileDialog::getOpenFileName(this, tr("Select Workspace"),
@@ -168,43 +198,7 @@ void ViewWindow::on_btnSelectFile_clicked()
     if (file.isEmpty())
         return;
 
-    const QFileInfo info(file);
-    const QString dir = info.path();
-
-    // check here whether the files actually exist.
-    // todo: maybe move into workspace to validate folder
-    if (MissingFile(app::JoinPath(dir, "content.json")) ||
-        MissingFile(app::JoinPath(dir, "workspace.json")))
-    {
-        // todo: could ask if the user would like to create a new workspace instead.
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("The selected folder doesn't seem to contain a valid workspace."));
-        msg.exec();
-        return;
-    }
-
-    auto workspace = std::make_unique<app::Workspace>(dir);
-    if (!workspace->LoadWorkspace())
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Failed to load workspace.\n"
-                       "Please See the application log for more information.").arg(dir));
-        msg.exec();
-        return;
-    }
-    ShutdownWidget();
-
-    mWorkspace = std::move(workspace);
-    mUI.workspace->setModel(mWorkspace.get());
-    gfx::SetResourceLoader(mWorkspace.get());
-    connect(mUI.workspace->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &ViewWindow::SelectResource);
-
-    SetValue(mUI.fileSource, file);
+    LoadWorkspace(file);
 }
 
 void ViewWindow::on_btnExport_clicked()
@@ -402,6 +396,58 @@ void ViewWindow::SendWindowState()
     app::JsonWrite(json, "message", QString("viewer-geometry"));
     app::JsonWrite(json, "geometry", QString::fromLatin1(geometry.toBase64()));
     mClientSocket.SendJsonMessage(json);
+}
+
+void ViewWindow::LoadDemoWorkspace(const QString& name)
+{
+    QString where = QCoreApplication::applicationDirPath();
+
+    LoadWorkspace(app::JoinPath(where, name));
+}
+
+void ViewWindow::LoadWorkspace(const QString& file)
+{
+    const QFileInfo info(file);
+    const QString dir = info.path();
+
+    DEBUG("Loading workspace file. [file='%1']", file);
+
+    // check here whether the files actually exist.
+    // todo: maybe move into workspace to validate folder
+    if (MissingFile(app::JoinPath(dir, "content.json")) ||
+        MissingFile(app::JoinPath(dir, "workspace.json")))
+    {
+        // todo: could ask if the user would like to create a new workspace instead.
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("The selected folder doesn't seem to contain a valid workspace."));
+        msg.exec();
+        return;
+    }
+
+    auto workspace = std::make_unique<app::Workspace>(dir);
+    if (!workspace->LoadWorkspace())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to load workspace.\n"
+                       "Please See the application log for more information.").arg(dir));
+        msg.exec();
+        return;
+    }
+    ShutdownWidget();
+
+    mWorkspace = std::move(workspace);
+    mUI.workspace->setModel(mWorkspace.get());
+    gfx::SetResourceLoader(mWorkspace.get());
+    connect(mUI.workspace->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &ViewWindow::SelectResource);
+
+    SetValue(mUI.fileSource, file);
+    SetVisible(mUI.lblPreview, true);
+    SetVisible(mUI.demos, false);
 }
 
 } // gui

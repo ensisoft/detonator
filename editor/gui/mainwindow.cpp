@@ -1946,9 +1946,9 @@ void MainWindow::on_actionLaunchViewer_triggered()
 #if defined(WINDOWS_OS)
     executable.append(".exe");
 #endif
-    const auto& exec_file = app::JoinPath(QCoreApplication::applicationDirPath(), executable);
-    const auto& log_file  = app::JoinPath(QCoreApplication::applicationDirPath(), "viewer.log");
-    const auto& viewer_cwd  = QDir::currentPath();
+    const auto& exec_file   = app::JoinPath(QCoreApplication::applicationDirPath(), executable);
+    const auto& log_file    = app::JoinPath(QCoreApplication::applicationDirPath(), "viewer.log");
+    const auto& viewer_cwd  = QCoreApplication::applicationDirPath();
     mViewerProcess.EnableTimeout(false);
     mViewerProcess.onFinished = [this]() {
         DEBUG("Viewer process finished.");

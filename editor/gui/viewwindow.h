@@ -62,6 +62,13 @@ namespace gui
         void aboutToClose();
 
     private slots:
+        void on_btnDemoBandit_clicked();
+        void on_btnDemoBlast_clicked();
+        void on_btnDemoBreak_clicked();
+        void on_btnDemoParticles_clicked();
+        void on_btnDemoPlayground_clicked();
+        void on_btnDemoUI_clicked();
+        void on_btnDemoDerp_clicked();
         void on_btnSelectFile_clicked();
         void on_btnClose_clicked();
         void on_btnExport_clicked();
@@ -77,6 +84,8 @@ namespace gui
         void ShutdownWidget();
         void RefreshUI();
         void SendWindowState();
+        void LoadDemoWorkspace(const QString& name);
+        void LoadWorkspace(const QString& dir);
     private:
         Ui::ViewWindow mUI;
     private:
