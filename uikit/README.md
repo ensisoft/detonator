@@ -1,8 +1,8 @@
-GAMESTUDIO UI
+DETONATOR 2D UI
 =================
 
-![HUD](screens/screenshot.png "UI layered on top of a scene")
-UI layered on top of a scene
+![HUD](screens/screenshot.png "Widgets with default styling.")  
+Widgets with default styling.
 
 Overview
 -----------------
@@ -58,6 +58,7 @@ Currently, the following widgets have been implemented.
 * RadioButton
 * CheckBox
 * SpinBox (integer)
+* ToggleBox
 
 TODO:
 * Double spinbox
@@ -69,14 +70,10 @@ Screenshots
 ---------------------
 Below are some screenshots demonstrating the capabilities of the skinning system.
 
-![Default Style](screens/default-style.png "UI system screenshot with default style")
-Widgets with default style (default.json) and (mostly) without any widget specific inline styling
-
-![Custom Style](screens/jungle.png "UI system screenshot with custom style")
-Form with 4 buttons with custom skinning/styling
+![Custom Style](screens/jungle.png "UI system screenshot with custom style")  
+https://opengameart.org/content/jungle-cartoon-gui
 
 ![Custom Style](screens/kenney.png "UI system screenshot with custom style")
-Various widgets with custom skinning/styling
 
-![Custom Style](screens/buttons.png "UI system screenshot with custom style")
-Various push buttons with skinning and inline styling
+https://opengameart.org/content/ui-pack  
+https://opengameart.org/content/ui-pack-space-extension
