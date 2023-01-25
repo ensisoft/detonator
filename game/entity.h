@@ -411,6 +411,8 @@ namespace game
         }
         void DeleteMaterialParam(const std::string& name)
         { mMaterialParams.erase(name); }
+        void ClearMaterialParams()
+        { mMaterialParams.clear(); }
         void IntoJson(data::Writer& data) const;
 
         static std::optional<DrawableItemClass> FromJson(const data::Reader& data);
