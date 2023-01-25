@@ -213,10 +213,16 @@ void MaterialActuatorClass::IntoJson(data::Writer& data) const
     data.Write("method",   mInterpolation);
     data.Write("start",    mStartTime);
     data.Write("duration", mDuration);
-    data.Write("name",     mParamName);
-    data.Write("value",    mParamValue);
     data.Write("flags",    mFlags);
+    for (const auto& [key, val] : mMaterialParams)
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("name", key);
+        chunk->Write("value", val);
+        data.AppendChunk("params", std::move(chunk));
+    }
 }
+
 bool MaterialActuatorClass::FromJson(const data::Reader& data)
 {
     data.Read("id",       &mId);
@@ -225,9 +231,16 @@ bool MaterialActuatorClass::FromJson(const data::Reader& data)
     data.Read("method",   &mInterpolation);
     data.Read("start",    &mStartTime);
     data.Read("duration", &mDuration);
-    data.Read("name",     &mParamName);
-    data.Read("value",    &mParamValue);
-    data.Read("flags",   &mFlags);
+    data.Read("flags",    &mFlags);
+    for (unsigned i=0; i<data.GetNumChunks("params"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("params", i);
+        std::string name;
+        MaterialParam  value;
+        chunk->Read("name", &name);
+        chunk->Read("value", &value);
+        mMaterialParams[std::move(name)] = value;
+    }
     return true;
 }
 std::size_t MaterialActuatorClass::GetHash() const
@@ -239,8 +252,17 @@ std::size_t MaterialActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
-    hash = base::hash_combine(hash, mParamName);
-    hash = base::hash_combine(hash, mParamValue);
+
+    std::set<std::string> keys;
+    for (const auto& [key, val] : mMaterialParams)
+        keys.insert(key);
+
+    for (const auto& key : keys)
+    {
+        const auto& val = *base::SafeFind(mMaterialParams, key);
+        hash = base::hash_combine(hash, key);
+        hash = base::hash_combine(hash, val);
+    }
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
@@ -672,46 +694,54 @@ TransformActuator::Instance TransformActuator::GetInstance() const
 
 void MaterialActuator::Start(EntityNode& node)
 {
-    const auto& name = mClass->GetParamName();
     const auto* draw = node.GetDrawable();
     if (draw == nullptr)
     {
-        WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
-        WARN("Setting a material parameter '%1' will have no effect.", name);
+        WARN("Entity node has no drawable item. [node='%1']", node.GetName());
         return;
     }
-    if (const auto* p = draw->FindMaterialParam(name))
-        mStartValue = *p;
-    else WARN("EntityNode '%1' drawable doesn't have such material param '%2'.", node.GetName(), name);
+    const auto& params = mClass->GetMaterialParams();
+    for (const auto& [key, val] : params)
+    {
+        if (const auto* p = draw->FindMaterialParam(key))
+            mStartValues[key] = *p;
+        else WARN("Entity node material parameter was not found. [node='%1', param='%2']", node.GetName(), key);
+    }
 }
+
 void MaterialActuator::Apply(EntityNode& node, float t)
 {
     if (auto* draw = node.GetDrawable())
     {
-        const auto& name = mClass->GetParamName();
-        const auto& end  = mClass->GetParamValue();
-        if (std::holds_alternative<int>(end))
-            draw->SetMaterialParam(name, Interpolate<int>(t));
-        else if (std::holds_alternative<float>(end))
-            draw->SetMaterialParam(name, Interpolate<float>(t));
-        else if (std::holds_alternative<glm::vec2>(end))
-            draw->SetMaterialParam(name, Interpolate<glm::vec2>(t));
-        else if (std::holds_alternative<glm::vec3>(end))
-            draw->SetMaterialParam(name, Interpolate<glm::vec3>(t));
-        else if (std::holds_alternative<glm::vec4>(end))
-            draw->SetMaterialParam(name, Interpolate<glm::vec4>(t));
-        else if (std::holds_alternative<Color4f>(end))
-            draw->SetMaterialParam(name, Interpolate<Color4f>(t));
-        else BUG("Unhandled material parameter type.");
+        for (const auto& [key, beg] : mStartValues)
+        {
+            const auto end = *mClass->FindMaterialParam(key);
+
+            if (std::holds_alternative<int>(end))
+                draw->SetMaterialParam(key, Interpolate<int>(beg, end, t));
+            else if (std::holds_alternative<float>(end))
+                draw->SetMaterialParam(key, Interpolate<float>(beg, end, t));
+            else if (std::holds_alternative<glm::vec2>(end))
+                draw->SetMaterialParam(key, Interpolate<glm::vec2>(beg, end, t));
+            else if (std::holds_alternative<glm::vec3>(end))
+                draw->SetMaterialParam(key, Interpolate<glm::vec3>(beg, end, t));
+            else if (std::holds_alternative<glm::vec4>(end))
+                draw->SetMaterialParam(key, Interpolate<glm::vec4>(beg, end, t));
+            else if (std::holds_alternative<Color4f>(end))
+                draw->SetMaterialParam(key, Interpolate<Color4f>(beg, end, t));
+            else  BUG("Unhandled material parameter type.");
+        }
     }
 }
 void MaterialActuator::Finish(EntityNode& node)
 {
     if (auto* draw = node.GetDrawable())
     {
-        const auto& name = mClass->GetParamName();
-        const auto& end  = mClass->GetParamValue();
-        draw->SetMaterialParam(name, end);
+        const auto& params = mClass->GetMaterialParams();
+        for (const auto& [key, val] : params)
+        {
+            draw->SetMaterialParam(key, val);
+        }
     }
 }
 
