@@ -721,6 +721,7 @@ ContentLoaderImpl::ContentLoaderImpl()
         auto ret = std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color4f(val)));
         ret->SetId("_" + color_name);
         ret->SetName("_" + color_name);
+        ret->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mMaterials["_" + color_name] = ret;
     }
 
