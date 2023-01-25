@@ -56,6 +56,7 @@ namespace gui
         QImage mPackedImage;
         nlohmann::json mJson;
         bool mClosed = false;
+        QString mLastSaveFile;
     };
 
 } // namespace

@@ -131,7 +131,9 @@ void DlgImgPack::on_btnSaveAs_clicked()
 
     // where to save it ?
 
-    QString filename = QString("untitled") + "." + mUI.cmbFormat->currentText().toLower();
+    QString filename = mLastSaveFile;
+    if (filename.isEmpty())
+        filename = QString("untitled") + "." + mUI.cmbFormat->currentText().toLower();
     filename = QFileDialog::getSaveFileName(this,
         tr("Select Save File"), filename, filter);
     if (filename.isEmpty())
@@ -148,6 +150,7 @@ void DlgImgPack::on_btnSaveAs_clicked()
         msg.setIcon(QMessageBox::Critical);
         msg.setText(tr("Failed to write the image.\n%1").arg(writer.errorString()));
         msg.exec();
+        return;
     }
     DEBUG("Wrote packaged image to '%1'.", filename);
 
@@ -177,6 +180,7 @@ void DlgImgPack::on_btnSaveAs_clicked()
         file.close();
     }
 
+    mLastSaveFile = filename;
 
     if (!GetValue(mUI.chkJson))
         return;
