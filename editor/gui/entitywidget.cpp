@@ -1852,6 +1852,13 @@ void EntityWidget::on_dsDrawable_currentIndexChanged(const QString& name)
 }
 void EntityWidget::on_dsMaterial_currentIndexChanged(const QString& name)
 {
+    if (auto* node = GetCurrentNode())
+    {
+        auto* drawable = node->GetDrawable();
+        if (drawable)
+            drawable->ClearMaterialParams();
+    }
+
     UpdateCurrentNodeProperties();
     DisplayCurrentNodeProperties();
 }
