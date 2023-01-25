@@ -1342,6 +1342,7 @@ Workspace::Workspace(const QString& dir)
         auto color = gfx::CreateMaterialClassFromColor(gfx::Color4f(val));
         color.SetId("_" + color_name);
         color.SetName("_" + color_name);
+        color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
     }
 
