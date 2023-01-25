@@ -179,18 +179,15 @@ namespace app
         // allow for access to an object that doesn't exist and simply return nullptr. It's
         // then the responsibility of the caller to determine whether that is a bug or okay
         // condition or what.
-        std::unique_ptr<gfx::Material> MakeMaterialByName(const QString& name) const;
-        std::unique_ptr<gfx::Drawable> MakeDrawableByName(const QString& name) const;
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const QString& name) const;
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const char* name) const;
-        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassById(const QString& id) const;
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const QString& name) const;
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const char* name) const;
-        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassById(const QString& id) const;
-        std::shared_ptr<const game::EntityClass> GetEntityClassByName(const QString& name) const;
-        std::shared_ptr<const game::EntityClass> GetEntityClassById(const QString& id) const;
-        std::shared_ptr<const game::TilemapClass> GetTilemapClassById(const QString& id) const;
-        std::shared_ptr<const game::TilemapClass> GetTilemapClassById(const std::string& id) const;
+        std::unique_ptr<gfx::Material> MakeMaterialByName(const AnyString& name) const;
+        std::unique_ptr<gfx::Drawable> MakeDrawableByName(const AnyString& name) const;
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const AnyString& name) const;
+        std::shared_ptr<const gfx::MaterialClass> GetMaterialClassById(const AnyString& id) const;
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const AnyString& name) const;
+        std::shared_ptr<const gfx::DrawableClass> GetDrawableClassById(const AnyString& id) const;
+        std::shared_ptr<const game::EntityClass> GetEntityClassByName(const AnyString& name) const;
+        std::shared_ptr<const game::EntityClass> GetEntityClassById(const AnyString& id) const;
+        std::shared_ptr<const game::TilemapClass> GetTilemapClassById(const AnyString& id) const;
 
         // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
