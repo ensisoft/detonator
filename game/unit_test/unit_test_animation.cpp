@@ -69,8 +69,7 @@ void apply_material_value(const char* name,
     klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetParamName(name);
-    klass.SetParamValue(value);
+    klass.SetMaterialParam(name, value);
 
     game::MaterialActuator actuator(klass);
     actuator.Start(node);
@@ -551,8 +550,7 @@ void unit_test_material_actuator()
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetInterpolation(game::MaterialActuatorClass::Interpolation::Cosine);
-    klass.SetParamName("kColor");
-    klass.SetParamValue(game::Color4f(game::Color::Green));
+    klass.SetMaterialParam("kColor", game::Color4f(game::Color::Green));
 
     // serialize.
     {
@@ -565,10 +563,10 @@ void unit_test_material_actuator()
         TEST_REQUIRE(copy.GetNodeId()                     == "1234");
         TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()                   == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName()                  == "kColor");
-        TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
         TEST_REQUIRE(copy.GetId()                         == klass.GetId());
         TEST_REQUIRE(copy.GetHash()                       == klass.GetHash());
+        TEST_REQUIRE(*copy.GetMaterialParamValue<game::Color4f>("kColor") == game::Color::Green);
+
     }
     // copy assignment and copy ctor
     {
@@ -578,10 +576,9 @@ void unit_test_material_actuator()
         TEST_REQUIRE(copy.GetNodeId()                     == "1234");
         TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()                   == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName()                  == "kColor");
-        TEST_REQUIRE(*copy.GetParamValue<game::Color4f>() == game::Color::Green);
         TEST_REQUIRE(copy.GetId()                         == klass.GetId());
         TEST_REQUIRE(copy.GetHash()                       == klass.GetHash());
+        TEST_REQUIRE(*copy.GetMaterialParamValue<game::Color4f>("kColor") == game::Color::Green);
         copy = klass;
         TEST_REQUIRE(copy.GetId()   == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());

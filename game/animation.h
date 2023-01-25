@@ -27,6 +27,7 @@
 #include <memory>
 #include <variant>
 #include <optional>
+#include <unordered_map>
 
 #include "base/math.h"
 #include "base/utility.h"
@@ -362,25 +363,45 @@ namespace game
         using MaterialParam = std::variant<float, int,
             Color4f,
             glm::vec2, glm::vec3, glm::vec4>;
+        using MaterialParamMap = std::unordered_map<std::string, MaterialParam>;
 
         Interpolation GetInterpolation() const
         { return mInterpolation; }
-        std::string GetParamName() const
-        { return mParamName; }
-        MaterialParam GetParamValue() const
-        { return mParamValue; }
-        template<typename T>
-        const T* GetParamValue() const
-        { return std::get_if<T>(&mParamValue); }
-        template<typename T>
-        T* GetParamValue()
-        { return std::get_if<T>(&mParamValue); }
-        void SetParamName(const std::string& name)
-        { mParamName = name; }
-        void SetParamValue(const MaterialParam& value)
-        { mParamValue = value; }
         void SetInterpolation(Interpolation method)
         { mInterpolation = method; }
+
+        void SetMaterialParam(const std::string& name, const MaterialParam& value)
+        { mMaterialParams[name] = value; }
+        MaterialParamMap GetMaterialParams()
+        { return mMaterialParams; }
+        const MaterialParamMap& GetMaterialParams() const
+        { return mMaterialParams; }
+        bool HasMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name) != nullptr; }
+        MaterialParam* FindMaterialParam(const std::string& name)
+        { return base::SafeFind(mMaterialParams, name); }
+        const MaterialParam* FindMaterialParam(const std::string& name) const
+        { return base::SafeFind(mMaterialParams, name); }
+        template<typename T>
+        T* GetMaterialParamValue(const std::string& name)
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        template<typename T>
+        const T* GetMaterialParamValue(const std::string& name) const
+        {
+            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        void DeleteMaterialParam(const std::string& name)
+        { mMaterialParams.erase(name); }
+        void SetMaterialParams(const MaterialParamMap& map)
+        { mMaterialParams = map; }
+        void SetMaterialParams(MaterialParamMap&& map)
+        { mMaterialParams = std::move(map); }
 
         virtual Type GetType() const override
         { return Type::Material; }
@@ -390,10 +411,8 @@ namespace game
     private:
         // Interpolation method used to change the value.
         Interpolation mInterpolation = Interpolation::Linear;
-        // The name of the material parameter that is going to be changed (uniform name)
-        std::string mParamName;
-        // The value of the material parameter.
-        MaterialParam mParamValue;
+
+        MaterialParamMap mMaterialParams;
     };
 
     class KinematicActuator;
@@ -660,8 +679,9 @@ namespace game
     class MaterialActuator : public Actuator
     {
     public:
-        using Interpolation = MaterialActuatorClass::Interpolation;
-        using MaterialParam = MaterialActuatorClass::MaterialParam;
+        using Interpolation    = MaterialActuatorClass::Interpolation;
+        using MaterialParam    = MaterialActuatorClass::MaterialParam;
+        using MaterialParamMap = MaterialActuatorClass::MaterialParamMap;
         MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
           : mClass(klass)
         {}
@@ -688,18 +708,16 @@ namespace game
         { return Type::Material; }
     private:
         template<typename T>
-        T Interpolate(float t)
+        T Interpolate(const MaterialParam& start, const MaterialParam& end, float t)
         {
             const auto method = mClass->GetInterpolation();
-            const auto end    = mClass->GetParamValue();
-            const auto start  = mStartValue;
             ASSERT(std::holds_alternative<T>(end));
             ASSERT(std::holds_alternative<T>(start));
             return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
         }
     private:
         std::shared_ptr<const MaterialActuatorClass> mClass;
-        MaterialParam mStartValue;
+        MaterialParamMap mStartValues;
     };
 
     // AnimationClass defines a new type of animation that includes the
