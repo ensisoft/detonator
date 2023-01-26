@@ -113,6 +113,23 @@ float TimelineWidget::MapToSeconds(const QPoint& pos) const
     return seconds;
 }
 
+const TimelineWidget::TimelineItem* TimelineWidget::SelectItem(const QString& id)
+{
+    for (auto& timeline : mTimelines)
+    {
+        for (size_t i=0; i<timeline.GetNumItems(); ++i)
+        {
+            auto& item = timeline.GetItem(i);
+            if (item.id == id)
+            {
+                mSelected = &item;
+                return mSelected;
+            }
+        }
+    }
+    return nullptr;
+}
+
 void TimelineWidget::paintEvent(QPaintEvent* event)
 {
     const QPalette& palette = this->palette();

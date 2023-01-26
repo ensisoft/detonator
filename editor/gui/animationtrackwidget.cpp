@@ -141,7 +141,6 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.timeline->SetModel(mTimelineModel.get());
 
     const auto& settings = workspace->GetProjectSettings();
-    PopulateFromEnum<game::ActuatorClass::Type>(mUI.actuatorType);
     PopulateFromEnum<game::TransformActuatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::SetValueActuatorClass::Interpolation>(mUI.setvalInterpolation);
     PopulateFromEnum<game::SetValueActuatorClass::ParamName>(mUI.setvalName);
@@ -168,7 +167,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     connect(mUI.timeline, &TimelineWidget::SelectedItemDragged,
             this, &AnimationTrackWidget::SelectedItemDragged);
 
-    SetActuatorUIDefaults("");
+    SetActuatorUIDefaults();
     SetActuatorUIEnabled(false);
     RegisterTrackWidget(this);
 }
@@ -482,6 +481,8 @@ void AnimationTrackWidget::Update(double secs)
         mUI.actuatorGroup->setEnabled(true);
         mUI.baseGroup->setEnabled(true);
         mPlayState = PlayState::Stopped;
+        ReturnToDefault();
+        SelectedItemChanged(mUI.timeline->GetSelectedItem());
         NOTE("Animation finished.");
         DEBUG("Animation finished.");
     }
@@ -582,8 +583,7 @@ void AnimationTrackWidget::RealizeEntityChange(std::shared_ptr<const game::Entit
 
     UpdateTrackUI();
     SetActuatorUIEnabled(false);
-    SetActuatorUIDefaults("");
-    SelectedItemChanged(nullptr);
+    SetActuatorUIDefaults();
 
     mEntity = game::CreateEntityInstance(mState.entity);
     mTreeModel.reset(new TreeModel(*mState.entity));
@@ -700,19 +700,24 @@ void AnimationTrackWidget::on_actionReset_triggered()
     if (mPlayState != PlayState::Stopped)
         return;
     mEntity = game::CreateEntityInstance(mState.entity);
-    mUI.timeline->Rebuild();
     mUI.tree->Rebuild();
+    mUI.timeline->Rebuild();
+    mUI.timeline->ClearSelection();
+    SetActuatorUIDefaults();
+    SetActuatorUIEnabled(false);
 }
 
 void AnimationTrackWidget::on_actionDeleteActuator_triggered()
 {
-    const auto* selected = mUI.timeline->GetSelectedItem();
-    if (selected == nullptr)
-        return;
-    mState.track->DeleteActuatorById(app::ToUtf8(selected->id));
-    mUI.timeline->ClearSelection();
-    mUI.timeline->Rebuild();
-    SelectedItemChanged(nullptr);
+    if (auto* actuator = GetCurrentActuator())
+    {
+        mState.track->DeleteActuatorById(actuator->GetId());
+        mUI.timeline->ClearSelection();
+        mUI.timeline->Rebuild();
+        SetActuatorUIDefaults();
+        SetActuatorUIEnabled(false);
+        ReturnToDefault();
+    }
 }
 
 void AnimationTrackWidget::on_actionDeleteActuators_triggered()
@@ -720,7 +725,9 @@ void AnimationTrackWidget::on_actionDeleteActuators_triggered()
     mState.track->Clear();
     mUI.timeline->ClearSelection();
     mUI.timeline->Rebuild();
-    SelectedItemChanged(nullptr);
+    SetActuatorUIDefaults();
+    SetActuatorUIEnabled(false);
+    ReturnToDefault();
 }
 
 void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
@@ -743,6 +750,9 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
     }
     mState.timelines.erase(mState.timelines.begin() + index);
     mUI.timeline->Rebuild();
+    SetActuatorUIDefaults();
+    SetActuatorUIEnabled(false);
+    ReturnToDefault();
 }
 
 void AnimationTrackWidget::on_trackName_textChanged(const QString&)
@@ -752,23 +762,24 @@ void AnimationTrackWidget::on_trackName_textChanged(const QString&)
 
 void AnimationTrackWidget::on_duration_valueChanged(double value)
 {
-    // adjust the actuator start/end bounds by scaling based
-    // on the how growth co-efficient for the duration value.
-    const float duration = mState.track->GetDuration();
-    const auto start_lo_bound = mUI.actuatorStartTime->minimum();
-    const auto start_hi_bound = mUI.actuatorStartTime->maximum();
-    const auto end_lo_bound = mUI.actuatorEndTime->minimum();
-    const auto end_hi_bound = mUI.actuatorEndTime->maximum();
-    // important, must get the current value *before* setting new bounds
-    // since setting the bounds will adjust the value.
-    const float start = GetValue(mUI.actuatorStartTime);
-    const float end   = GetValue(mUI.actuatorEndTime);
-    SetMinMax(mUI.actuatorStartTime, start_lo_bound / duration * value,
-                                     start_hi_bound / duration * value);
-    SetMinMax(mUI.actuatorEndTime, end_lo_bound / duration * value,
-                                   end_hi_bound / duration * value);
-    SetValue(mUI.actuatorStartTime, start / duration * value);
-    SetValue(mUI.actuatorEndTime, end / duration * value);
+    if (auto* item = GetCurrentTimelineItem())
+    {
+        const float duration = mState.track->GetDuration();
+        const auto start_lo_bound = mUI.actuatorStartTime->minimum();
+        const auto start_hi_bound = mUI.actuatorStartTime->maximum();
+        const auto end_lo_bound = mUI.actuatorEndTime->minimum();
+        const auto end_hi_bound = mUI.actuatorEndTime->maximum();
+        // important, must get the current value *before* setting new bounds
+        // since setting the bounds will adjust the value.
+        const float start = GetValue(mUI.actuatorStartTime);
+        const float end = GetValue(mUI.actuatorEndTime);
+        SetMinMax(mUI.actuatorStartTime, start_lo_bound / duration * value,
+                  start_hi_bound / duration * value);
+        SetMinMax(mUI.actuatorEndTime, end_lo_bound / duration * value,
+                  end_hi_bound / duration * value);
+        SetValue(mUI.actuatorStartTime, start / duration * value);
+        SetValue(mUI.actuatorEndTime, end / duration * value);
+    }
 
     mUI.timeline->SetDuration(value);
     mUI.timeline->Update();
@@ -797,66 +808,26 @@ void AnimationTrackWidget::on_actuatorName_textChanged(const QString&)
 
 void AnimationTrackWidget::on_actuatorStartTime_valueChanged(double value)
 {
-    const auto* selected = mUI.timeline->GetSelectedItem();
-    if (!selected)
-        return;
-
-    auto* node = mState.track->FindActuatorById(app::ToUtf8(selected->id));
-    const auto duration  = mState.track->GetDuration();
-    const auto old_start = node->GetStartTime();
-    const auto new_start = value / duration;
-    const auto change    = old_start - new_start;
-    node->SetStartTime(new_start);
-    node->SetDuration(node->GetDuration() + change);
-    mUI.timeline->Rebuild();
+    if (auto* actuator = GetCurrentActuator())
+    {
+        const auto duration = mState.track->GetDuration();
+        const auto old_start = actuator->GetStartTime();
+        const auto new_start = value / duration;
+        const auto change = old_start - new_start;
+        actuator->SetStartTime(new_start);
+        actuator->SetDuration(actuator->GetDuration() + change);
+        mUI.timeline->Rebuild();
+    }
 }
 void AnimationTrackWidget::on_actuatorEndTime_valueChanged(double value)
 {
-    const auto* selected = mUI.timeline->GetSelectedItem();
-    if (!selected)
-        return;
-
-    auto* node = mState.track->FindActuatorById(app::ToUtf8(selected->id));
-    const auto duration = mState.track->GetDuration();
-    const auto start = node->GetStartTime();
-    const auto end   = value / duration;
-    node->SetDuration(end - start);
-    mUI.timeline->Rebuild();
-}
-
-void AnimationTrackWidget::on_actuatorNode_currentIndexChanged(int index)
-{
-    SetActuatorUIDefaults(GetItemId(mUI.actuatorNode));
-    SetActuatorUIEnabled(true);
-}
-
-void AnimationTrackWidget::on_actuatorType_currentIndexChanged(int index)
-{
-    SetEnabled(mUI.transformActuator, false);
-    SetEnabled(mUI.setvalActuator,  false);
-    SetEnabled(mUI.kinematicActuator, false);
-    SetEnabled(mUI.setflagActuator,   false);
-
-    const game::Actuator::Type type = GetValue(mUI.actuatorType);
-    if (type == game::Actuator::Type::Transform)
+    if (auto* actuator = GetCurrentActuator())
     {
-        SetEnabled(mUI.transformActuator, true);
-        mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
-    }
-    else if (type == game::Actuator::Type::SetValue)
-    {
-        SetEnabled(mUI.setvalActuator,  true);
-        mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
-    }
-    else if (type == game::Actuator::Type::Kinematic)
-    {
-        SetEnabled(mUI.kinematicActuator, true);
-        mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
-    }
-    else if (type == game::Actuator::Type::SetFlag)
-    {
-        SetEnabled(mUI.setflagActuator,   true);
-        mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
+        const auto duration = mState.track->GetDuration();
+        const auto start = actuator->GetStartTime();
+        const auto end = value / duration;
+        actuator->SetDuration(end - start);
+        mUI.timeline->Rebuild();
     }
 }
 
@@ -914,12 +885,15 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     }
 
     QMenu menu(this);
+
+    QMenu actuators(this);
+    actuators.setTitle("New Actuator ...");
+    actuators.setIcon(QIcon("icons:add.png"));
     // build menu for adding actuators.
     for (const auto val : magic_enum::enum_values<game::ActuatorClass::Type>())
     {
         const std::string name(magic_enum::enum_name(val));
-        QAction* action = menu.addAction(QIcon("icons:add.png"),
-                QString("New %1 Actuator").arg(app::FromUtf8(name)));
+        QAction* action = actuators.addAction(app::FromUtf8(name));
         action->setEnabled(false);
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
         if (timeline)
@@ -934,6 +908,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
             action->setData(seconds);
         }
     }
+    menu.addMenu(&actuators);
     menu.addSeparator();
     menu.addMenu(&add_timeline);
     menu.addAction(mUI.actionDeleteTimeline);
@@ -947,7 +922,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
 void AnimationTrackWidget::on_transformEndPosX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto pos = node->GetTranslation();
         pos.x = value;
@@ -958,7 +933,7 @@ void AnimationTrackWidget::on_transformEndPosX_valueChanged(double value)
 
 void AnimationTrackWidget::on_transformEndPosY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto pos = node->GetTranslation();
         pos.y = value;
@@ -968,7 +943,7 @@ void AnimationTrackWidget::on_transformEndPosY_valueChanged(double value)
 }
 void AnimationTrackWidget::on_transformEndSizeX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto size = node->GetSize();
         size.x = value;
@@ -978,7 +953,7 @@ void AnimationTrackWidget::on_transformEndSizeX_valueChanged(double value)
 }
 void AnimationTrackWidget::on_transformEndSizeY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto size = node->GetSize();
         size.y = value;
@@ -988,7 +963,7 @@ void AnimationTrackWidget::on_transformEndSizeY_valueChanged(double value)
 }
 void AnimationTrackWidget::on_transformEndScaleX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto scale = node->GetScale();
         scale.x = value;
@@ -999,7 +974,7 @@ void AnimationTrackWidget::on_transformEndScaleX_valueChanged(double value)
 
 void AnimationTrackWidget::on_transformEndScaleY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         auto scale = node->GetScale();
         scale.y = value;
@@ -1010,7 +985,7 @@ void AnimationTrackWidget::on_transformEndScaleY_valueChanged(double value)
 
 void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         node->SetRotation(qDegreesToRadians(value));
         SetSelectedActuatorProperties();
@@ -1019,7 +994,7 @@ void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
 
 void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         SetSelectedActuatorProperties();
     }
@@ -1027,7 +1002,7 @@ void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
 
 void AnimationTrackWidget::on_kinematicEndVeloX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         if  (auto* body = node->GetRigidBody())
         {
@@ -1040,7 +1015,7 @@ void AnimationTrackWidget::on_kinematicEndVeloX_valueChanged(double value)
 }
 void AnimationTrackWidget::on_kinematicEndVeloY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         if  (auto* body = node->GetRigidBody())
         {
@@ -1053,7 +1028,7 @@ void AnimationTrackWidget::on_kinematicEndVeloY_valueChanged(double value)
 }
 void AnimationTrackWidget::on_kinematicEndVeloZ_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         if  (auto* body = node->GetRigidBody())
         {
@@ -1065,7 +1040,7 @@ void AnimationTrackWidget::on_kinematicEndVeloZ_valueChanged(double value)
 
 void AnimationTrackWidget::on_itemFlags_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
 
         SetSelectedActuatorProperties();
@@ -1074,112 +1049,35 @@ void AnimationTrackWidget::on_itemFlags_currentIndexChanged(int)
 
 void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentEntityNode())
     {
         SetSelectedActuatorProperties();
     }
 }
 
-void AnimationTrackWidget::on_btnAddActuator_clicked()
-{
-    // the combobox defines which node is selected as the
-    // target node of the actuator
-    const auto* node = mState.entity->FindNodeById(GetItemId(mUI.actuatorNode));
-
-    // for now simply find the first timeline that matches if any.
-    size_t timeline_index = mState.timelines.size();
-    for (size_t i=0; i<mState.timelines.size(); ++i)
-    {
-        if (mState.timelines[i].nodeId == node->GetId())
-        {
-            timeline_index = i;
-            break;
-        }
-    }
-    // no such timeline at all? then create a new one.
-    if (timeline_index == mState.timelines.size())
-    {
-        Timeline tl;
-        tl.selfId = base::RandomString(10);
-        tl.nodeId = node->GetId();
-        mState.timelines.push_back(std::move(tl));
-    }
-
-    ASSERT(timeline_index < mState.timelines.size());
-    const auto& timeline = mState.timelines[timeline_index];
-
-    // get the animation duration in seconds and normalize the actuator times.
-    const float animation_duration = GetValue(mUI.duration);
-    const float actuator_start = GetValue(mUI.actuatorStartTime);
-    const float actuator_end   = GetValue(mUI.actuatorEndTime);
-    if (actuator_start >= actuator_end)
-    {
-        NOTE("Actuator start time must come before end time.");
-        mUI.actuatorStartTime->setFocus();
-        return;
-    }
-    const auto norm_start = actuator_start / animation_duration;
-    const auto norm_end   = actuator_end / animation_duration;
-
-    const auto& id = node->GetId();
-    float lo_bound = 0.0f;
-    float hi_bound = 1.0f;
-    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
-    {
-        const auto& klass = mState.track->GetActuatorClass(i);
-        if (mState.actuator_to_timeline[klass.GetId()] != timeline.selfId)
-            continue;
-        const auto start = klass.GetStartTime();
-        const auto end   = klass.GetStartTime() + klass.GetDuration();
-        if (start >= norm_start)
-            hi_bound = std::min(hi_bound, start);
-        if (end <= norm_start)
-            lo_bound = std::max(lo_bound, end);
-        // this isn't a free slot actually.
-        if (norm_start >= start && norm_start <= end)
-        {
-            NOTE("No available time slot found.");
-            return;
-        }
-    }
-    const auto start = std::max(lo_bound, norm_start);
-    const auto end   = std::min(hi_bound, norm_end);
-    const game::Actuator::Type type = GetValue(mUI.actuatorType);
-    const std::string& name = GetValue(mUI.actuatorName);
-    AddActuatorFromUI(timeline.selfId, node->GetId(), name, type, start, end - start);
-}
-
 void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
 {
-    if (enabled)
-    {
-        SetEnabled(mUI.actuatorType,       true);
-        SetEnabled(mUI.actuatorStartTime,  true);
-        SetEnabled(mUI.actuatorEndTime,    true);
-        SetEnabled(mUI.actuatorProperties, true);
-        SetEnabled(mUI.btnAddActuator,     true);
-        SetEnabled(mUI.transformActuator,  true);
-        SetValue(mUI.actuatorType, game::ActuatorClass::Type::Transform);
-        mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
-    }
-    else
-    {
-        SetEnabled(mUI.actuatorType,       false);
-        SetEnabled(mUI.actuatorStartTime,  false);
-        SetEnabled(mUI.actuatorEndTime,    false);
-        SetEnabled(mUI.actuatorProperties, false);
-        SetEnabled(mUI.btnAddActuator,     false);
-        SetEnabled(mUI.transformActuator,  false);
-        SetValue(mUI.actuatorType, game::ActuatorClass::Type::Transform);
-        mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
-    }
+    SetEnabled(mUI.actuatorName,       enabled);
+    SetEnabled(mUI.actuatorID,         enabled);
+    SetEnabled(mUI.actuatorType,       enabled);
+    SetEnabled(mUI.actuatorNode,       enabled);
+    SetEnabled(mUI.actuatorStartTime,  enabled);
+    SetEnabled(mUI.actuatorEndTime,    enabled);
+    SetEnabled(mUI.actuatorIsStatic,   enabled);
+    SetEnabled(mUI.actuatorProperties, enabled);
 }
 
-void AnimationTrackWidget::SetActuatorUIDefaults(const std::string& nodeId)
+void AnimationTrackWidget::SetActuatorUIDefaults()
 {
-    SetMinMax(mUI.actuatorStartTime, 0.0, 0.0);
+    SetMinMax(mUI.actuatorStartTime, 0.0, 0.0f);
     SetMinMax(mUI.actuatorEndTime, 0.0, 0.0);
-
+    SetValue(mUI.actuatorName, QString(""));
+    SetValue(mUI.actuatorID, QString(""));
+    SetValue(mUI.actuatorType, QString(""));
+    SetValue(mUI.actuatorNode, QString(""));
+    SetValue(mUI.actuatorStartTime, 0.0f);
+    SetValue(mUI.actuatorEndTime, 0.0f);
+    SetValue(mUI.actuatorIsStatic, false);
     SetValue(mUI.transformInterpolation, game::TransformActuatorClass::Interpolation::Cosine);
     SetValue(mUI.transformEndPosX, 0.0f);
     SetValue(mUI.transformEndPosY, 0.0f);
@@ -1195,58 +1093,28 @@ void AnimationTrackWidget::SetActuatorUIDefaults(const std::string& nodeId)
     SetValue(mUI.kinematicEndVeloX, 0.0f);
     SetValue(mUI.kinematicEndVeloY, 0.0f);
     SetValue(mUI.kinematicEndVeloZ, 0.0f);
-    SetValue(mUI.actuatorStartTime, 0.0f);
-    SetValue(mUI.actuatorEndTime, 0.0f);
 
     if (!mState.track)
         return;
-    // there could be multiple slots where the next actuator is
-    // to placed. the limits would be difficult to express
-    // with the spinboxes, so we just reset the min/max to the
-    // whole animation duration and then clamp on add if needed.
+
     const auto duration = mState.track->GetDuration();
     SetMinMax(mUI.actuatorStartTime, 0.0, duration);
-    SetMinMax(mUI.actuatorEndTime, 0.0, duration);
-    SetValue(mUI.actuatorEndTime, mState.track->GetDuration());
-
-    if (nodeId.empty())
-        return;
-
-    const auto* node = mState.entity->FindNodeById(nodeId);
-    // using the node's current transformation data
-    // as the default end transformation. I.e. "no transformation"
-    const auto& pos     = node->GetTranslation();
-    const auto& size    = node->GetSize();
-    const auto& scale   = node->GetScale();
-    const auto rotation = node->GetRotation();
-    SetValue(mUI.transformEndPosX,   pos.x);
-    SetValue(mUI.transformEndPosY,   pos.y);
-    SetValue(mUI.transformEndSizeX,  size.x);
-    SetValue(mUI.transformEndSizeY,  size.y);
-    SetValue(mUI.transformEndScaleX, scale.x);
-    SetValue(mUI.transformEndScaleY, scale.y);
-    SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
-    if (const auto* draw = node->GetDrawable())
-    {
-        SetValue(mUI.setvalEndValue, draw->GetTimeScale());
-    }
+    SetMinMax(mUI.actuatorEndTime,   0.0, duration);
 }
 
 void AnimationTrackWidget::SetSelectedActuatorProperties()
 {
     if (mPlayState != PlayState::Stopped)
         return;
-    // what's the current actuator? The one that is selected in the timeline
-    // (if any).
-    const auto* item = mUI.timeline->GetSelectedItem();
-    if (item == nullptr)
+
+    auto* actuator = GetCurrentActuator();
+    if (!actuator)
         return;
 
-    auto* klass = mState.track->FindActuatorById(app::ToUtf8(item->id));
-    klass->SetName(GetValue(mUI.actuatorName));
-    klass->SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+    actuator->SetName(GetValue(mUI.actuatorName));
+    actuator->SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
 
-    if (auto* transform = dynamic_cast<game::TransformActuatorClass*>(klass))
+    if (auto* transform = dynamic_cast<game::TransformActuatorClass*>(actuator))
     {
         transform->SetInterpolation(GetValue(mUI.transformInterpolation));
         transform->SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1254,7 +1122,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         transform->SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
         transform->SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
     }
-    else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(klass))
+    else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(actuator))
     {
         using Name = game::SetValueActuatorClass::ParamName;
         const auto name = (Name)GetValue(mUI.setvalName);
@@ -1297,7 +1165,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
         setter->SetParamName(name);
     }
-    else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(klass))
+    else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(actuator))
     {
         glm::vec2 velocity;
         velocity.x = GetValue(mUI.kinematicEndVeloX);
@@ -1306,12 +1174,12 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         kinematic->SetEndLinearVelocity(velocity);
         kinematic->SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
     }
-    else if (auto* setflag = dynamic_cast<game::SetFlagActuatorClass*>(klass))
+    else if (auto* setflag = dynamic_cast<game::SetFlagActuatorClass*>(actuator))
     {
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
     }
-    DEBUG("Updated actuator '%1' (%2)", item->text, item->id);
+    //DEBUG("Updated actuator '%1' (%2)", actuator->GetName(), actuator->GetId());
 
     mUI.timeline->Rebuild();
 }
@@ -1328,33 +1196,33 @@ void AnimationTrackWidget::on_btnTransformMinus90_clicked()
 }
 void AnimationTrackWidget::on_btnTransformReset_clicked()
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == -1)
-        return;
-    // reset the properties of the actuator to the original node class values
-    // first set the values to the UI widgets and then ask the actuator's
-    // state to be updated from the UI.
-    const auto* klass   = mState.entity->FindNodeById(GetItemId(mUI.actuatorNode));
-    const auto& pos     = klass->GetTranslation();
-    const auto& size    = klass->GetSize();
-    const auto& scale   = klass->GetScale();
-    const auto rotation = klass->GetRotation();
-    SetValue(mUI.transformEndPosX, pos.x);
-    SetValue(mUI.transformEndPosY, pos.y);
-    SetValue(mUI.transformEndSizeX, size.x);
-    SetValue(mUI.transformEndSizeY, size.y);
-    SetValue(mUI.transformEndScaleX, scale.x);
-    SetValue(mUI.transformEndScaleY, scale.y);
-    SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+    if (auto* node = GetCurrentEntityNode())
+    {
+        // reset the properties of the actuator to the original node class values
+        // first set the values to the UI widgets and then ask the actuator's
+        // state to be updated from the UI.
+        const auto& klass   = node->GetClass();
+        const auto& pos     = klass.GetTranslation();
+        const auto& size    = klass.GetSize();
+        const auto& scale   = klass.GetScale();
+        const auto rotation = klass.GetRotation();
+        SetValue(mUI.transformEndPosX,     pos.x);
+        SetValue(mUI.transformEndPosY,     pos.y);
+        SetValue(mUI.transformEndSizeX,    size.x);
+        SetValue(mUI.transformEndSizeY,    size.y);
+        SetValue(mUI.transformEndScaleX,   scale.x);
+        SetValue(mUI.transformEndScaleY,   scale.y);
+        SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
 
-    // apply the reset to the visualization entity and to its node instance.
-    auto* node = mEntity->FindNodeByClassId(GetItemId(mUI.actuatorNode));
-    node->SetTranslation(pos);
-    node->SetSize(size);
-    node->SetScale(scale);
-    node->SetRotation(rotation);
+        // apply the reset to the visualization entity and to its node instance.
+        node->SetTranslation(pos);
+        node->SetSize(size);
+        node->SetScale(scale);
+        node->SetRotation(rotation);
 
-    SetSelectedActuatorProperties();
+        // Set the values from the UI to the actual actuator class object.
+        SetSelectedActuatorProperties();
+    }
 }
 
 void AnimationTrackWidget::on_btnViewPlus90_clicked()
@@ -1391,162 +1259,117 @@ void AnimationTrackWidget::on_btnViewReset_clicked()
 
 void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineItem* item)
 {
-    SetEnabled(mUI.transformActuator, false);
-    SetEnabled(mUI.setvalActuator,  false);
-    SetEnabled(mUI.kinematicActuator, false);
-    SetEnabled(mUI.setflagActuator,   false);
-
     if (item == nullptr)
     {
-        const auto duration = mState.track->GetDuration();
-        SetValue(mUI.actuatorName, QString(""));
-        SetValue(mUI.actuatorID, QString(""));
-        SetValue(mUI.actuatorIsStatic, false);
-        SetMinMax(mUI.actuatorStartTime, 0.0, duration);
-        SetMinMax(mUI.actuatorEndTime, 0.0, duration);
-        SetValue(mUI.actuatorType, game::ActuatorClass::Type::Transform);
-        SetValue(mUI.actuatorStartTime, 0.0f);
-        SetValue(mUI.actuatorEndTime, duration);
-        SetValue(mUI.transformInterpolation, game::TransformActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.transformEndPosX, 0.0f);
-        SetValue(mUI.transformEndPosY, 0.0f);
-        SetValue(mUI.transformEndSizeX, 0.0f);
-        SetValue(mUI.transformEndSizeY, 0.0f);
-        SetValue(mUI.transformEndScaleX, 0.0f);
-        SetValue(mUI.transformEndScaleY, 0.0f);
-        SetValue(mUI.transformEndRotation, 0.0f);
-        SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.setvalEndValue, 0.0f);
-        SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
-        SetValue(mUI.kinematicEndVeloX, 0.0f);
-        SetValue(mUI.kinematicEndVeloY, 0.0f);
-        SetValue(mUI.kinematicEndVeloZ, 0.0f);
-        mUI.actuatorNode->setCurrentIndex(-1);
-        mUI.actuatorGroup->setTitle("Actuator");
-        SetEnabled(mUI.actuatorNode, true);
-        SetEnabled(mUI.actuatorType, false);
-        SetEnabled(mUI.actuatorStartTime, false);
-        SetEnabled(mUI.actuatorEndTime, false);
-        SetEnabled(mUI.actuatorProperties, false);
-        SetEnabled(mUI.btnAddActuator, false);
+        SetActuatorUIEnabled(false);
+        SetActuatorUIDefaults();
+        ReturnToDefault();
+        return;
+    }
+
+    SetActuatorUIEnabled(true);
+
+    const auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
+    const auto duration = mState.track->GetDuration();
+    const auto start = actuator->GetStartTime() * duration;
+    const auto end = actuator->GetDuration() * duration + start;
+    const auto node = mEntity->FindNodeByClassId(actuator->GetNodeId());
+
+    // figure out the hi/lo (left right) limits for the spinbox start
+    // and time values for this actuator.
+    float lo_bound = 0.0f;
+    float hi_bound = 1.0f;
+    for (size_t i = 0; i < mState.track->GetNumActuators(); ++i)
+    {
+        const auto& klass = mState.track->GetActuatorClass(i);
+        if (klass.GetId() == actuator->GetId())
+            continue;
+        else if (klass.GetNodeId() != actuator->GetNodeId())
+            continue;
+        const auto start = klass.GetStartTime();
+        const auto end = klass.GetStartTime() + klass.GetDuration();
+        if (start >= actuator->GetStartTime())
+            hi_bound = std::min(hi_bound, start);
+        if (end <= actuator->GetStartTime())
+            lo_bound = std::max(lo_bound, end);
+    }
+    const auto& len = QString::number(end - start, 'f', 2);
+    SetValue(mUI.actuatorName, actuator->GetName());
+    SetValue(mUI.actuatorID, actuator->GetId());
+    SetValue(mUI.actuatorNode, node->GetName());
+    SetValue(mUI.actuatorType, app::toString(actuator->GetType()));
+    SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::ActuatorClass::Flags::StaticInstance));
+    SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
+    SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
+    SetValue(mUI.actuatorStartTime, start);
+    SetValue(mUI.actuatorEndTime, end);
+    SetValue(mUI.actuatorGroup, app::toString("Actuator - %1, %2s", item->text, len));
+
+    if (const auto* ptr = dynamic_cast<const game::TransformActuatorClass*>(actuator))
+    {
+        const auto& pos = ptr->GetEndPosition();
+        const auto& size = ptr->GetEndSize();
+        const auto& scale = ptr->GetEndScale();
+        const auto rotation = ptr->GetEndRotation();
+        SetValue(mUI.transformInterpolation, ptr->GetInterpolation());
+        SetValue(mUI.transformEndPosX, pos.x);
+        SetValue(mUI.transformEndPosY, pos.y);
+        SetValue(mUI.transformEndSizeX, size.x);
+        SetValue(mUI.transformEndSizeY, size.y);
+        SetValue(mUI.transformEndScaleX, scale.x);
+        SetValue(mUI.transformEndScaleY, scale.y);
+        SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+        mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
+
+        node->SetTranslation(pos);
+        node->SetSize(size);
+        node->SetScale(scale);
+        node->SetRotation(rotation);
+    }
+    else if (const auto* ptr = dynamic_cast<const game::SetValueActuatorClass*>(actuator))
+    {
+        const auto name = ptr->GetParamName();
+        using Name = game::SetValueActuatorClass::ParamName;
+        if (name == Name::DrawableTimeScale)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::LinearVelocity)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+        else if (name == Name::LinearVelocityX)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::LinearVelocityY)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::AngularVelocity)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::TextItemColor)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
+        else if (name == Name::TextItemText)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<std::string>());
+        else BUG("Unhandled set value actuator value type.");
+
+        SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
+        SetValue(mUI.setvalName, ptr->GetParamName());
+        mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
+    }
+    else if (const auto* ptr = dynamic_cast<const game::KinematicActuatorClass*>(actuator))
+    {
+        const auto& linear_velocity = ptr->GetEndLinearVelocity();
+        SetValue(mUI.kinematicInterpolation, ptr->GetInterpolation());
+        SetValue(mUI.kinematicEndVeloX, linear_velocity.x);
+        SetValue(mUI.kinematicEndVeloY, linear_velocity.y);
+        SetValue(mUI.kinematicEndVeloZ, ptr->GetEndAngularVelocity());
+        mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
+    }
+    else if (const auto* ptr = dynamic_cast<const game::SetFlagActuatorClass*>(actuator))
+    {
+        SetValue(mUI.itemFlags, ptr->GetFlagName());
+        SetValue(mUI.flagAction, ptr->GetFlagAction());
+        mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
     }
     else
     {
-        const auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
-        const auto duration = mState.track->GetDuration();
-        const auto start = actuator->GetStartTime() * duration;
-        const auto end   = actuator->GetDuration() * duration  + start;
-        const auto node  = mEntity->FindNodeByClassId(actuator->GetNodeId());
-
-        // figure out the hi/lo (left right) limits for the spinbox start
-        // and time values for this actuator.
-        float lo_bound = 0.0f;
-        float hi_bound = 1.0f;
-        for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
-        {
-            const auto& klass = mState.track->GetActuatorClass(i);
-            if (klass.GetId() == actuator->GetId())
-                continue;
-            else if (klass.GetNodeId() != actuator->GetNodeId())
-                continue;
-            const auto start = klass.GetStartTime();
-            const auto end   = klass.GetStartTime() + klass.GetDuration();
-            if (start >= actuator->GetStartTime())
-                hi_bound = std::min(hi_bound, start);
-            if (end <= actuator->GetStartTime())
-                lo_bound = std::max(lo_bound, end);
-        }
-        const auto& len = QString::number(end-start, 'f', 2);
-        SetValue(mUI.actuatorName, actuator->GetName());
-        SetValue(mUI.actuatorID, actuator->GetId());
-        SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::ActuatorClass::Flags::StaticInstance));
-        SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
-        SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
-        SetValue(mUI.actuatorStartTime, start);
-        SetValue(mUI.actuatorEndTime, end);
-        SetValue(mUI.actuatorNode, ListItemId(app::FromUtf8(node->GetClassId())));
-        SetValue(mUI.actuatorType, actuator->GetType());
-        SetValue(mUI.actuatorGroup, tr("Actuator - %1, %2s").arg(item->text).arg(len));
-        SetEnabled(mUI.btnAddActuator, false);
-        SetEnabled(mUI.actuatorType, false);
-        SetEnabled(mUI.actuatorNode, false);
-        SetEnabled(mUI.actuatorStartTime, true);
-        SetEnabled(mUI.actuatorEndTime, true);
-
-        if (const auto* ptr = dynamic_cast<const game::TransformActuatorClass*>(actuator))
-        {
-            const auto& pos = ptr->GetEndPosition();
-            const auto& size = ptr->GetEndSize();
-            const auto& scale = ptr->GetEndScale();
-            const auto rotation = ptr->GetEndRotation();
-            SetValue(mUI.transformInterpolation, ptr->GetInterpolation());
-            SetValue(mUI.transformEndPosX, pos.x);
-            SetValue(mUI.transformEndPosY, pos.y);
-            SetValue(mUI.transformEndSizeX, size.x);
-            SetValue(mUI.transformEndSizeY, size.y);
-            SetValue(mUI.transformEndScaleX, scale.x);
-            SetValue(mUI.transformEndScaleY, scale.y);
-            SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
-            SetEnabled(mUI.actuatorProperties, true);
-            SetEnabled(mUI.transformActuator, true);
-            mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
-
-            node->SetTranslation(pos);
-            node->SetSize(size);
-            node->SetScale(scale);
-            node->SetRotation(rotation);
-        }
-        else if (const auto* ptr = dynamic_cast<const game::SetValueActuatorClass*>(actuator))
-        {
-            const auto name = ptr->GetParamName();
-            using Name = game::SetValueActuatorClass::ParamName;
-            if (name == Name::DrawableTimeScale)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-            else if (name == Name::LinearVelocity)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
-            else if (name == Name::LinearVelocityX)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-            else if (name == Name::LinearVelocityY)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-            else if (name == Name::AngularVelocity)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-            else if (name == Name::TextItemColor)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
-            else if (name == Name::TextItemText)
-                SetValue(mUI.setvalEndValue, *ptr->GetEndValue<std::string>());
-            else BUG("Unhandled set value actuator value type.");
-
-            SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
-            SetValue(mUI.setvalName, ptr->GetParamName());
-            SetEnabled(mUI.actuatorProperties, true);
-            SetEnabled(mUI.setvalActuator, true);
-            mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
-        }
-        else if (const auto* ptr = dynamic_cast<const game::KinematicActuatorClass*>(actuator))
-        {
-            const auto& linear_velocity = ptr->GetEndLinearVelocity();
-            SetValue(mUI.kinematicInterpolation, ptr->GetInterpolation());
-            SetValue(mUI.kinematicEndVeloX, linear_velocity.x);
-            SetValue(mUI.kinematicEndVeloY, linear_velocity.y);
-            SetValue(mUI.kinematicEndVeloZ, ptr->GetEndAngularVelocity());
-            SetEnabled(mUI.actuatorProperties, true);
-            SetEnabled(mUI.kinematicActuator, true);
-            mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
-        }
-        else if (const auto* ptr = dynamic_cast<const game::SetFlagActuatorClass*>(actuator))
-        {
-            SetValue(mUI.itemFlags, ptr->GetFlagName());
-            SetValue(mUI.flagAction, ptr->GetFlagAction());
-            SetEnabled(mUI.actuatorProperties, true);
-            SetEnabled(mUI.setflagActuator, true);
-            mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
-        }
-        else
-        {
-            mUI.actuatorProperties->setEnabled(false);
-        }
-        DEBUG("Selected timeline item '%1' (%2)", item->text, item->id);
+        mUI.actuatorProperties->setEnabled(false);
     }
+    DEBUG("Selected timeline item '%1' (%2)", item->text, item->id);
 }
 
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
@@ -1645,9 +1468,6 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
 
     gfx::Transform view;
-    // apply the view transformation. The view transformation is not part of the
-    // animation per-se but it's the transformation that transforms the animation
-    // and its components from the space of the animation to the global space.
     view.Push();
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
@@ -1669,7 +1489,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         }
         else
         {
-            DrawHook hook(GetCurrentNode());
+            DrawHook hook(GetCurrentEntityNode());
             hook.SetIsPlaying(mPlayState == PlayState::Playing);
             hook.SetDrawVectors(false);
             mRenderer.Draw(*mEntity, painter, view, &hook);
@@ -1677,7 +1497,6 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         mRenderer.EndFrame();
     view.Pop();
 
-    // right arrow
     if (GetValue(mUI.chkShowOrigin))
     {
         DrawBasisVectors(painter, view);
@@ -1767,9 +1586,13 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
         (mPlayState == PlayState::Stopped) &&
         (mickey->button() == Qt::LeftButton))
     {
-        auto* current = GetCurrentNode();
+        // don't allow node selection to change through mouse clicking since it's
+        // confusing. Rather only allow a timeline node to be selected which then
+        // selects the node and when that selected/active node is hit by mouse
+        // select the tool for transforming it.
+        auto* current = GetCurrentEntityNode();
         auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mEntity, current);
-        if (hitnode && hitnode == current)
+        if ((hitnode == current) && current != nullptr)
         {
             view.Push(mEntity->FindNodeTransform(hitnode));
                 const auto mat = view.GetAsMatrix();
@@ -1796,19 +1619,6 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
             else if (top_left_hitbox_hit)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
             else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
-        }
-        else if (!mUI.timeline->GetSelectedItem() && hitnode)
-        {
-            // pick a new node as the selected actuator node
-            SetValue(mUI.actuatorNode, ListItemId(hitnode->GetClassId()));
-            SetActuatorUIDefaults(hitnode->GetClassId());
-            SetActuatorUIEnabled(true);
-        }
-        else if (!mUI.timeline->GetSelectedItem())
-        {
-            SetValue(mUI.actuatorNode, QString(""));
-            SetActuatorUIDefaults("");
-            SetActuatorUIEnabled(false);
         }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
@@ -1848,18 +1658,6 @@ void AnimationTrackWidget::UpdateTrackUI()
     SetMinMax(mUI.actuatorStartTime, 0.0, duration);
     SetMinMax(mUI.actuatorEndTime, 0.0, duration);
 
-    // list the nodes in the entity class.
-    std::vector<ResourceListItem> items;
-    for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
-    {
-        const auto& node = mState.entity->GetNode(i);
-        ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
-        items.push_back(std::move(item));
-    }
-    SetList(mUI.actuatorNode, items);
-
     setWindowTitle(GetValue(mUI.trackName));
 }
 
@@ -1867,7 +1665,7 @@ void AnimationTrackWidget::UpdateTransformActuatorUI()
 {
     if (mPlayState != PlayState::Stopped)
         return;
-    if (const auto* node = GetCurrentNode())
+    if (const auto* node = GetCurrentEntityNode())
     {
         const auto& pos      = node->GetTranslation();
         const auto& size     = node->GetSize();
@@ -1892,15 +1690,9 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         return;
 
     const auto& timeline = mState.timelines[timeline_index];
-
-    // get the node from the animation class object.
-    // the class node's transform values are used for the
-    // initial data for the actuator.
-    SetActuatorUIDefaults(timeline.nodeId);
-
-    const auto* node = mState.entity->FindNodeById(timeline.nodeId);
-    const auto duration = mState.track->GetDuration();
-    const auto position = seconds / duration;
+    const auto* node     = mState.entity->FindNodeById(timeline.nodeId);
+    const auto duration  = mState.track->GetDuration();
+    const auto position  = seconds / duration;
 
     float lo_bound = 0.0f;
     float hi_bound = 1.0f;
@@ -1917,31 +1709,39 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
             lo_bound = std::max(lo_bound, end);
     }
     const auto& name = base::FormatString("Actuator_%1", mState.track->GetNumActuators());
+    const auto node_duration   = hi_bound - lo_bound;
+    const auto node_start_time = lo_bound;
+    const float node_end_time  = node_start_time + duration;
 
-    AddActuatorFromUI(timeline.selfId, node->GetId(), name, type, lo_bound, hi_bound - lo_bound);
-}
+    QString actuator;
 
-void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
-                                             const std::string& nodeId,
-                                             const std::string& name,
-                                             game::ActuatorClass::Type type,
-                                             float start_time,
-                                             float duration)
-{
     if (type == game::ActuatorClass::Type::Transform)
     {
+        const auto& pos     = node->GetTranslation();
+        const auto& size    = node->GetSize();
+        const auto& scale   = node->GetScale();
+        const auto rotation = node->GetRotation();
+        SetValue(mUI.transformEndPosX,   pos.x);
+        SetValue(mUI.transformEndPosY,   pos.y);
+        SetValue(mUI.transformEndSizeX,  size.x);
+        SetValue(mUI.transformEndSizeY,  size.y);
+        SetValue(mUI.transformEndScaleX, scale.x);
+        SetValue(mUI.transformEndScaleY, scale.y);
+        SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+
         game::TransformActuatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(nodeId);
+        klass.SetNodeId(node->GetId());
         klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
-        klass.SetStartTime(start_time);
-        klass.SetDuration(duration);
-        klass.SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
-        klass.SetEndSize(GetValue(mUI.transformEndSizeX), GetValue(mUI.transformEndSizeY));
-        klass.SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
+        klass.SetStartTime(node_start_time);
+        klass.SetDuration(node_duration);
+        klass.SetEndPosition(pos);
+        klass.SetEndSize(size);
+        klass.SetEndScale(scale);
         klass.SetInterpolation(GetValue(mUI.transformInterpolation));
         klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
-        mState.actuator_to_timeline[klass.GetId()] = timelineId;
+        actuator = app::FromUtf8(klass.GetId());
+        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::SetValue)
@@ -1950,10 +1750,10 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         const auto value = (ValName)GetValue(mUI.setvalName);
         game::SetValueActuatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(nodeId);
+        klass.SetNodeId(node->GetId());
         klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
-        klass.SetStartTime(start_time);
-        klass.SetDuration(duration);
+        klass.SetStartTime(node_start_time);
+        klass.SetDuration(node_duration);
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
         if (value == ValName::DrawableTimeScale)
@@ -1971,45 +1771,46 @@ void AnimationTrackWidget::AddActuatorFromUI(const std::string& timelineId,
         else if (value == ValName::TextItemColor)
             klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
         else BUG("Unhandled value actuator value type.");
-
-        mState.actuator_to_timeline[klass.GetId()] = timelineId;
+        actuator = app::FromUtf8(klass.GetId());
+        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::Kinematic)
     {
         game::KinematicActuatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(nodeId);
+        klass.SetNodeId(node->GetId());
         klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
-        klass.SetStartTime(start_time);
-        klass.SetDuration(duration);
+        klass.SetStartTime(node_start_time);
+        klass.SetDuration(node_duration);
         klass.SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
         glm::vec2 velocity;
         velocity.x = GetValue(mUI.kinematicEndVeloX);
         velocity.y = GetValue(mUI.kinematicEndVeloY);
         klass.SetEndLinearVelocity(velocity);
-        mState.actuator_to_timeline[klass.GetId()] = timelineId;
+        actuator = app::FromUtf8(klass.GetId());
+        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddActuator(klass);
     }
     else if (type == game::ActuatorClass::Type::SetFlag)
     {
         game::SetFlagActuatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(nodeId);
+        klass.SetNodeId(node->GetId());
         klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
-        klass.SetStartTime(start_time);
-        klass.SetDuration(duration);
+        klass.SetStartTime(node_start_time);
+        klass.SetDuration(node_duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
         klass.SetFlagAction(GetValue(mUI.flagAction));
-        mState.actuator_to_timeline[klass.GetId()] = timelineId;
+        actuator = app::FromUtf8(klass.GetId());
+        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddActuator(klass);
     }
     mUI.timeline->Rebuild();
+    SelectedItemChanged(mUI.timeline->SelectItem(actuator));
 
-    const float end = start_time + duration;
-    const float animation_duration = GetValue(mUI.duration);
-    DEBUG("New %1 actuator for node '%2' from %3s to %4s", type, nodeId,
-          start_time * animation_duration, end * animation_duration);
+    DEBUG("New %1 actuator on entity node '%2' from %3s to %4s", type, node->GetName(),
+          node_start_time * duration, node_end_time * duration);
 }
 
 void AnimationTrackWidget::CreateTimelines()
@@ -2063,6 +1864,15 @@ void AnimationTrackWidget::RemoveDeletedItems()
     }
 }
 
+void AnimationTrackWidget::ReturnToDefault()
+{
+    // put the nodes that were transformed by the animation visualization/playback
+    // back to the their original positions based on the entity class defaults.
+    // quickest and simplest way to do this is to simply create a new
+    // entity instance and then all state is properly set.
+    mEntity = game::CreateEntityInstance(mState.entity);
+}
+
 void AnimationTrackWidget::DisplayCurrentCameraLocation()
 {
     const auto width  = mUI.widget->width();
@@ -2073,12 +1883,28 @@ void AnimationTrackWidget::DisplayCurrentCameraLocation()
     SetValue(mUI.viewPosY, dist_y);
 }
 
-game::EntityNode* AnimationTrackWidget::GetCurrentNode()
+game::EntityNode* AnimationTrackWidget::GetCurrentEntityNode()
 {
-    const auto index = mUI.actuatorNode->currentIndex();
-    if (index == -1)
-        return nullptr;
-    return mEntity->FindNodeByClassId(GetItemId(mUI.actuatorNode));
+    if (const auto* item = mUI.timeline->GetSelectedItem())
+    {
+        const auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
+        return mEntity->FindNodeByClassId(actuator->GetNodeId());
+    }
+    return nullptr;
+}
+
+game::ActuatorClass* AnimationTrackWidget::GetCurrentActuator()
+{
+    if (auto* item = mUI.timeline->GetSelectedItem())
+    {
+        return mState.track->FindActuatorById(app::ToUtf8(item->id));
+    }
+    return nullptr;
+}
+
+gui::TimelineWidget::TimelineItem* AnimationTrackWidget::GetCurrentTimelineItem()
+{
+    return mUI.timeline->GetSelectedItem();
 }
 
 std::shared_ptr<game::EntityClass> FindSharedEntity(size_t hash)

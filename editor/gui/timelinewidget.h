@@ -138,6 +138,8 @@ namespace gui
         size_t GetCurrentTimelineIndex() const
         { return mHoveredTimeline; }
         float MapToSeconds(const QPoint& pos) const;
+
+        const TimelineItem* SelectItem(const QString& id);
     signals:
         void TimeDragged(float seconds);
         void SelectedItemChanged(const TimelineItem* selected);
