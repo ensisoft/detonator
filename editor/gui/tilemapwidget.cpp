@@ -1295,7 +1295,7 @@ void TilemapWidget::on_btnSelectToolMaterial_clicked()
         DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
         if (dlg.exec() == QDialog::Rejected)
             return;
-        tool->material = dlg.GetSelectedMaterialIdUtf8();
+        tool->material = app::ToUtf8(dlg.GetSelectedMaterialId());
         ShowCurrentTool();
     }
 }

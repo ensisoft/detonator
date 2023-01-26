@@ -27,8 +27,9 @@
 
 #include <vector>
 
-#include "app/resource.h"
 #include "graphics/fwd.h"
+#include "editor/app/types.h"
+#include "editor/app/resource.h"
 
 namespace app {
     class Workspace;
@@ -41,11 +42,10 @@ namespace gui
         Q_OBJECT
 
     public:
-        DlgMaterial(QWidget* parent, const app::Workspace* workspace, const QString& material);
-        QString GetSelectedMaterialId() const
+        DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material);
+        app::AnyString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
-        std::string GetSelectedMaterialIdUtf8() const
-        { return app::ToUtf8(mSelectedMaterialId); }
+
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
