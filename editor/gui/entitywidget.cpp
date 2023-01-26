@@ -372,7 +372,6 @@ public:
         mState.entity->LinkChild(nullptr, child);
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(child->GetId()));
-        RealizeEntityChange(mState.entity);
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -1250,10 +1249,12 @@ void EntityWidget::on_actionNodeMoveUpLayer_triggered()
         {
             const int layer = item->GetLayer();
             item->SetLayer(layer + 1);
+            DisplayCurrentNodeProperties();
+            RealizeEntityChange(mState.entity);
         }
     }
-    DisplayCurrentNodeProperties();
 }
+
 void EntityWidget::on_actionNodeMoveDownLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
@@ -1262,9 +1263,10 @@ void EntityWidget::on_actionNodeMoveDownLayer_triggered()
         {
             const int layer = item->GetLayer();
             item->SetLayer(layer - 1);
+            DisplayCurrentNodeProperties();
+            RealizeEntityChange(mState.entity);
         }
     }
-    DisplayCurrentNodeProperties();
 }
 
 void EntityWidget::on_actionNodeDuplicate_triggered()
@@ -1278,6 +1280,7 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
 
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
+        RealizeEntityChange(mState.entity);
     }
 }
 
@@ -1698,16 +1701,16 @@ void EntityWidget::on_btnSelectMaterial_clicked()
     {
         if (auto* drawable = node->GetDrawable())
         {
-            QString material = app::FromUtf8(drawable->GetMaterialId());
-            DlgMaterial dlg(this, mState.workspace, material);
+            DlgMaterial dlg(this, mState.workspace, drawable->GetMaterialId());
             if (dlg.exec() == QDialog::Rejected)
                 return;
-            material = dlg.GetSelectedMaterialId();
-            if (drawable->GetMaterialId() == app::ToUtf8(material))
+            const auto& material = app::ToUtf8(dlg.GetSelectedMaterialId());
+            if (drawable->GetMaterialId() == material)
                 return;
             drawable->ResetMaterial();
-            drawable->SetMaterialId(app::ToUtf8(dlg.GetSelectedMaterialId()));
+            drawable->SetMaterialId(material);
             DisplayCurrentNodeProperties();
+            RealizeEntityChange(mState.entity);
         }
     }
 }
@@ -1793,6 +1796,7 @@ void EntityWidget::on_nodeName_textChanged(const QString& text)
     item->SetText(text);
     mUI.tree->Update();
     RebuildCombosInternal();
+    RealizeEntityChange(mState.entity);
 }
 void EntityWidget::on_nodeComment_textChanged(const QString& text)
 {
@@ -2090,11 +2094,12 @@ void EntityWidget::on_btnSelectFont_clicked()
             disp.text_color = FromGfx(text->GetTextColor());
             disp.underline  = text->TestFlag(game::TextItemClass::Flags::UnderlineText);
             disp.blinking   = text->TestFlag(game::TextItemClass::Flags::BlinkText);
-            DlgFont dlg(this, mState.workspace, app::FromUtf8(text->GetFontName()), disp);
+            DlgFont dlg(this, mState.workspace, text->GetFontName(), disp);
             if (dlg.exec() == QDialog::Rejected)
                 return;
             SetValue(mUI.tiFontName, dlg.GetSelectedFontURI());
-            text->SetFontName(app::ToUtf8(dlg.GetSelectedFontURI()));
+            text->SetFontName(dlg.GetSelectedFontURI());
+            RealizeEntityChange(mState.entity);
         }
     }
 }
@@ -2105,13 +2110,15 @@ void EntityWidget::on_btnSelectFontFile_clicked()
     {
         if (auto* text = node->GetTextItem())
         {
-            const auto& list = QFileDialog::getOpenFileName(this ,
-                tr("Select Font File") , "" , tr("Font (*.ttf *.otf *.json)"));
-            if (list.isEmpty())
+            const auto& name = QFileDialog::getOpenFileName(this ,
+                tr("Select Font File") , "" ,
+                tr("Font (*.ttf *.otf *.json)"));
+            if (name.isEmpty())
                 return;
-            const auto& file = mState.workspace->MapFileToWorkspace(list);
+            const auto& file = mState.workspace->MapFileToWorkspace(name);
             SetValue(mUI.tiFontName , file);
-            text->SetFontName(app::ToUtf8(file));
+            text->SetFontName(file);
+            RealizeEntityChange(mState.entity);
         }
     }
 }
@@ -2147,8 +2154,9 @@ void EntityWidget::on_drawableItem_toggled(bool on)
             node->RemoveDrawable();
             DEBUG("Removed drawable item from '%1'", node->GetName());
         }
+        DisplayCurrentNodeProperties();
+        RealizeEntityChange(mState.entity);
     }
-    DisplayCurrentNodeProperties();
 }
 void EntityWidget::on_rigidBodyItem_toggled(bool on)
 {
@@ -2199,6 +2207,7 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
     RebuildCombosInternal();
+    RealizeEntityChange(mState.entity);
 }
 
 void EntityWidget::on_textItem_toggled(bool on)
@@ -2226,6 +2235,7 @@ void EntityWidget::on_textItem_toggled(bool on)
             node->RemoveTextItem();
             DEBUG("Removed text item from '%1'" , node->GetName());
         }
+        RealizeEntityChange(mState.entity);
         DisplayCurrentNodeProperties();
     }
 }
@@ -2373,6 +2383,7 @@ void EntityWidget::ResourceUpdated(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
+    RealizeEntityChange(mState.entity);
     mState.renderer.ClearPaintState();
 }
 
@@ -2638,6 +2649,7 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
         mCurrentTool.reset();
         UncheckPlacementActions();
         DisplayCurrentNodeProperties();
+        RealizeEntityChange(mState.entity);
     }
 }
 
@@ -2661,7 +2673,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
         return;
 
     auto* drawable = hitnode->GetDrawable();
-    DlgMaterial dlg(this, mState.workspace, app::FromUtf8(drawable->GetMaterialId()));
+    DlgMaterial dlg(this, mState.workspace, drawable->GetMaterialId());
     if (dlg.exec() == QDialog::Rejected)
         return;
     const auto& materialId = app::ToUtf8(dlg.GetSelectedMaterialId());
@@ -2670,6 +2682,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
     drawable->ResetMaterial();
     drawable->SetMaterialId(materialId);
     DisplayCurrentNodeProperties();
+    RealizeEntityChange(mState.entity);
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
@@ -2987,6 +3000,7 @@ void EntityWidget::TranslateCurrentNode(float dx, float dy)
         node->SetTranslation(pos);
         SetValue(mUI.nodeTranslateX, pos.x);
         SetValue(mUI.nodeTranslateY, pos.y);
+        RealizeEntityChange(mState.entity);
     }
 }
 
@@ -3090,6 +3104,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
     {
         sp->SetShape(GetValue(mUI.spnShape));
     }
+
+    RealizeEntityChange(mState.entity);
 }
 
 void EntityWidget::RebuildMenus()

@@ -95,7 +95,6 @@ namespace gui
         void on_actionDeleteActuator_triggered();
         void on_actionDeleteActuators_triggered();
         void on_actionDeleteTimeline_triggered();
-        void on_btnAddActuator_clicked();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
         void on_btnTransformReset_clicked();
@@ -111,8 +110,6 @@ namespace gui
         void on_actuatorName_textChanged(const QString&);
         void on_actuatorStartTime_valueChanged(double value);
         void on_actuatorEndTime_valueChanged(double value);
-        void on_actuatorNode_currentIndexChanged(int index);
-        void on_actuatorType_currentIndexChanged(int index);
         void on_transformInterpolation_currentIndexChanged(int index);
         void on_setvalInterpolation_currentIndexChanged(int index);
         void on_setvalName_currentIndexChanged(int index);
@@ -147,18 +144,15 @@ namespace gui
         void UpdateTrackUI();
         void SetSelectedActuatorProperties();
         void SetActuatorUIEnabled(bool enabled);
-        void SetActuatorUIDefaults(const std::string& nodeId);
+        void SetActuatorUIDefaults();
         void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
-        void AddActuatorFromUI(const std::string& timelineId,
-                               const std::string& nodeId,
-                               const std::string& name,
-                               game::ActuatorClass::Type type,
-                               float start_time,
-                               float duration);
         void DisplayCurrentCameraLocation();
         void CreateTimelines();
         void RemoveDeletedItems();
-        game::EntityNode* GetCurrentNode();
+        void ReturnToDefault();
+        game::EntityNode* GetCurrentEntityNode();
+        game::ActuatorClass* GetCurrentActuator();
+        gui::TimelineWidget::TimelineItem* GetCurrentTimelineItem();
     private:
         Ui::AnimationTrack mUI;
     private:
