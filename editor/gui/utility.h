@@ -294,6 +294,8 @@ struct ListItemId {
     {}
     ListItemId(const std::string& str) : id(app::FromUtf8(str))
     {}
+    ListItemId(const app::AnyString& str) : id(str)
+    {}
 };
 
 inline void SetValue(QFontComboBox* combo, const QString& str)

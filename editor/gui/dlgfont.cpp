@@ -41,7 +41,7 @@ namespace {
 namespace gui
 {
 
-DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const QString& font, const DisplaySettings& disp)
+DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::AnyString& font, const DisplaySettings& disp)
   : QDialog(parent)
   , mWorkspace(workspace)
   , mDisplay(disp)

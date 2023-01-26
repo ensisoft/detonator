@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "graphics/fwd.h"
+#include "editor/app/types.h"
 
 namespace app {
     class Workspace;
@@ -48,8 +49,8 @@ namespace gui
             bool underline = false;
         };
 
-        DlgFont(QWidget* parent, const app::Workspace* workspace, const QString& font_uri, const DisplaySettings& disp);
-        QString GetSelectedFontURI() const
+        DlgFont(QWidget* parent, const app::Workspace* workspace, const app::AnyString& font_uri, const DisplaySettings& disp);
+        app::AnyString GetSelectedFontURI() const
         { return mSelectedFontURI; }
     private slots:
         void on_btnAccept_clicked();

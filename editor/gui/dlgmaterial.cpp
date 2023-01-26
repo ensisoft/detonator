@@ -39,7 +39,7 @@ namespace {
 namespace gui
 {
 
-DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const QString& material)
+DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material)
   : QDialog(parent)
   , mSelectedMaterialId(material)
   , mWorkspace(workspace)
