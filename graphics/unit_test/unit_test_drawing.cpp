@@ -1414,8 +1414,11 @@ void unit_test_static_poly()
     poly.AddVertices(verts, 3);
     poly.AddDrawCommand(cmd);
 
+    gfx::DrawableClass::Environment env;
+    env.editing_mode = true;
+
     TestDevice device;
-    auto* geom = (TestGeometry*)poly.Upload(true, device);
+    auto* geom = (TestGeometry*)poly.Upload(env, device);
 
     TEST_REQUIRE(geom);
     TEST_REQUIRE(geom->mUploaded == true);
@@ -1428,7 +1431,7 @@ void unit_test_static_poly()
     geom->mUploaded = false;
 
     {
-        auto* g = (TestGeometry*)poly.Upload(true, device);
+        auto* g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
     TEST_REQUIRE(geom->mUploaded == false);
@@ -1439,7 +1442,7 @@ void unit_test_static_poly()
     poly.AddDrawCommand(cmd);
 
     {
-        auto* g = (TestGeometry*)poly.Upload(true, device);
+        auto* g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
     TEST_REQUIRE(geom->mUploaded == true);
@@ -1454,7 +1457,9 @@ void unit_test_static_poly()
 
     // upload when edit mode is false should not re-upload anything.
     {
-        auto g = (TestGeometry*)poly.Upload(false, device);
+        env.editing_mode = false;
+
+        auto g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
     TEST_REQUIRE(geom->mUploaded == false);

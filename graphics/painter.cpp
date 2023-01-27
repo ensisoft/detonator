@@ -289,11 +289,11 @@ private:
                         const Drawable::Environment& drawable_environment,
                         const Material::Environment& material_environment)
     {
-        const std::string& name = drawable.GetProgramId() + "/" + material.GetProgramId();
+        const std::string& name = drawable.GetProgramId(drawable_environment) + "/" + material.GetProgramId();
         Program* prog = mDevice->FindProgram(name);
         if (!prog)
         {
-            Shader* drawable_shader = drawable.GetShader(*mDevice);
+            Shader* drawable_shader = drawable.GetShader(drawable_environment, *mDevice);
             if (!drawable_shader || !drawable_shader->IsValid())
                 return nullptr;
             Shader* material_shader = material.GetShader(material_environment, *mDevice);
