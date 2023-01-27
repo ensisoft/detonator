@@ -27,6 +27,7 @@
 
 #include "editor/app/workspace.h"
 #include "game/fwd.h"
+#include "graphics/fwd.h"
 
 namespace gui
 {
@@ -37,7 +38,10 @@ namespace gui
         Q_OBJECT
 
     public:
-        DlgMaterialParams(QWidget* parent, app::Workspace* workspace, game::DrawableItemClass* item);
+        DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item);
+        DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialActuatorClass* actuator);
+
+        void AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material);
     private slots:
         void on_btnResetGamma_clicked();
         void on_btnResetBaseColor_clicked();
@@ -50,11 +54,10 @@ namespace gui
     private:
         Ui::DlgMaterialParams mUI;
     private:
-        app::Workspace* mWorkspace = nullptr;
         game::DrawableItemClass* mItem = nullptr;
+        game::MaterialActuatorClass* mActuator = nullptr;
         game::DrawableItemClass::MaterialParamMap mOldParams;
         std::vector<gui::Uniform*> mUniforms;
-        bool mCustomMaterial = false;
     };
 
 } // namespace
