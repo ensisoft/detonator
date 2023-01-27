@@ -267,6 +267,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     SetValue(mUI.rotation, 0.0f);
     SetValue(mUI.materials, ListItemId(QString("_White")));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetParams(); // apply the defaults from the UI to the params
@@ -288,6 +289,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     connect(mUI.alpha,     &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::AlphaChanged);
     setWindowTitle("My Particle System");
     mOriginalHash = mClass->GetHash();
+
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -486,13 +488,13 @@ bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipbo
 
 void ParticleEditorWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 void ParticleEditorWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 
 void ParticleEditorWidget::ReloadShaders()

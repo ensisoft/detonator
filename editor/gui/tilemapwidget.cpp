@@ -551,6 +551,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     PopulateFromEnum<TilemapWidget::ToolFunction>(mUI.cmbToolFunction);
     PopulateFromEnum<TilemapWidget::ToolShape>(mUI.cmbToolShape);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
     const auto& materials = mState.workspace->ListAllMaterials();
     SetList(mUI.cmbToolMaterial, materials);
     SetList(mUI.cmbTileMaterial, materials);

@@ -906,44 +906,6 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Material</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="materials">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnSelectMaterial">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Zoom</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QDoubleSpinBox" name="zoom">
             <property name="minimum">
              <double>0.100000000000000</double>
@@ -963,14 +925,38 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QComboBox" name="cmbGrid"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_17">
             <property name="text">
-             <string>Grid</string>
+             <string>Material</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="cmbGrid"/>
+           <widget class="QComboBox" name="materials">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnSelectMaterial">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer">
@@ -1684,10 +1670,10 @@
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>resetTransform</tabstop>
   <tabstop>widget</tabstop>
-  <tabstop>materials</tabstop>
-  <tabstop>btnSelectMaterial</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
+  <tabstop>materials</tabstop>
+  <tabstop>btnSelectMaterial</tabstop>
   <tabstop>chkShowEmitter</tabstop>
   <tabstop>chkShowBounds</tabstop>
   <tabstop>chkShowGrid</tabstop>

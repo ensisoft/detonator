@@ -549,6 +549,17 @@ inline void SetValue(QPlainTextEdit* edit, const app::AnyString& value)
 inline void SetValue(QDoubleSpinBox* spin, float val)
 {
     QSignalBlocker s(spin);
+    if (spin->objectName() == "zoom")
+    {
+        spin->setMinimum(10.0f);
+        spin->setMaximum(500.0f);
+        spin->setSingleStep(1.0f);
+        spin->setDecimals(0);
+        spin->setSuffix(" %");
+        spin->setValue(100 * val);
+        spin->setProperty("zoom_value", true);
+        return;
+    }
     spin->setValue(val);
 }
 
@@ -828,9 +839,17 @@ struct PlainTextEditValueGetter
 struct DoubleSpinBoxValueGetter
 {
     operator float() const
-    { return spin->value(); }
+    {
+        if (spin->objectName() == "zoom" && spin->property("zoom_value").isValid())
+            return spin->value() / 100.0f;
+        return spin->value();
+    }
     operator double() const
-    { return spin->value(); }
+    {
+        if (spin->objectName() == "zoom" && spin->property("zoom_value").isValid())
+            return spin->value() / 100.0;
+        return spin->value();
+    }
     const QDoubleSpinBox* spin = nullptr;
 };
 
