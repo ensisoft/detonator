@@ -760,12 +760,12 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 
 } // detail
 
-std::string SectorClass::GetProgramId() const
+std::string SectorClass::GetProgramId(const Environment&) const
 {
     return "generic-vertex-program";
 }
 
-Shader* SectorClass::GetShader(Device& device) const
+Shader* SectorClass::GetShader(const  Environment&, Device& device) const
 {
     return MakeVertexArrayShader(device);
 }
@@ -860,13 +860,13 @@ bool SectorClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
-std::string RoundRectangleClass::GetProgramId() const
+std::string RoundRectangleClass::GetProgramId(const Environment&) const
 { return "generic-vertex-program"; }
 
-Shader* RoundRectangleClass::GetShader(Device& device) const
+Shader* RoundRectangleClass::GetShader(const Environment& env, Device& device) const
 { return MakeVertexArrayShader(device); }
 
-Geometry* RoundRectangleClass::Upload(const Drawable::Environment& env, Drawable::Style style, Device& device) const
+Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style style, Device& device) const
 {
     using Style = Drawable::Style;
 
@@ -1098,13 +1098,13 @@ bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
-std::string GridClass::GetProgramId() const
+std::string GridClass::GetProgramId(const Environment&) const
 { return "generic-vertex-program"; }
 
-Shader* GridClass::GetShader(Device& device) const
+Shader* GridClass::GetShader(const Environment&, Device& device) const
 { return MakeVertexArrayShader(device); }
 
-Geometry* GridClass::Upload(Device& device) const
+Geometry* GridClass::Upload(const Environment&, Device& device) const
 {
     // use the content properties to generate a name for the
     // gpu side geometry.
@@ -1231,13 +1231,13 @@ void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
     mDrawCommands.push_back(cmd);
 }
 
-std::string PolygonClass::GetProgramId() const
+std::string PolygonClass::GetProgramId(const Environment&) const
 { return "generic-vertex-program"; }
 
-Shader* PolygonClass::GetShader(Device& device) const
+Shader* PolygonClass::GetShader(const Environment&, Device& device) const
 { return MakeVertexArrayShader(device); }
 
-Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
+Geometry* PolygonClass::Upload(const Environment& env, Device& device) const
 {
     auto* geom = device.FindGeometry(mId);
 
@@ -1247,7 +1247,7 @@ Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
     // see if the content needs to be inspected for re-uploading.
     // this takes place only if the polygon is marked dynamic
     // or we're running in the editing mode.
-    if (geom && (!mStatic || editing_mode))
+    if (geom && (!mStatic || env.editing_mode))
     {
         content_hash = GetContentHash();
         if (geom->GetDataHash() != content_hash)
@@ -1261,7 +1261,8 @@ Geometry* PolygonClass::Upload(bool editing_mode, Device& device) const
 
     // set the vertex buffer.
     geom->SetVertexBuffer(mVertices,
-        mStatic && !editing_mode ? Geometry::Usage::Static : Geometry::Usage::Dynamic);
+        mStatic && !env.editing_mode ? Geometry::Usage::Static
+                                     : Geometry::Usage::Dynamic);
 
     geom->ClearDraws();
 
@@ -1493,10 +1494,10 @@ bool CursorClass::LoadFromJson(const data::Reader& data)
     return true;
 }
 
-std::string Cursor::GetProgramId() const
+std::string Cursor::GetProgramId(const Environment& env) const
 { return "generic-vertex-program"; }
 
-Shader* Cursor::GetShader(Device& device) const
+Shader* Cursor::GetShader(const Environment& env, Device& device) const
 { return MakeVertexArrayShader(device); }
 Geometry* Cursor::Upload(const Environment& env, Device& device) const
 {
@@ -1547,7 +1548,7 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
     return nullptr;
 }
 
-std::string KinematicsParticleEngineClass::GetProgramId() const
+std::string KinematicsParticleEngineClass::GetProgramId(const Environment& env) const
 {
     if (mParams.coordinate_space == CoordinateSpace::Local)
         return "local-particle-program";
@@ -1557,7 +1558,7 @@ std::string KinematicsParticleEngineClass::GetProgramId() const
     return "";
 }
 
-Shader* KinematicsParticleEngineClass::GetShader(Device& device) const
+Shader* KinematicsParticleEngineClass::GetShader(const Environment& env, Device& device) const
 {
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
@@ -2231,7 +2232,7 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
     program.SetUniform("kModelViewMatrix",
         *(const Program::Matrix4x4*)glm::value_ptr(*env.view_matrix * *env.model_matrix));
 }
-Shader* TileBatch::GetShader(Device& device) const
+Shader* TileBatch::GetShader(const Environment& env, Device& device) const
 {
     // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
     // and vTexCoord. Even though we're now rendering GL_POINTS this isnt
@@ -2298,7 +2299,7 @@ Drawable::Style TileBatch::GetStyle() const
 {
     return Style::Points;
 }
-std::string TileBatch::GetProgramId() const
+std::string TileBatch::GetProgramId(const Environment& env) const
 {
     return "tile-batch-program";
 }

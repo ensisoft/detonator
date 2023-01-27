@@ -160,7 +160,7 @@ namespace gfx
         // Get the device specific shader object.
         // If the shader does not yet exist on the device it's created
         // and compiled.  On any errors nullptr should be returned.
-        virtual Shader* GetShader(Device& device) const = 0;
+        virtual Shader* GetShader(const Environment& env, Device& device) const = 0;
         // Get the device specific geometry object. If the geometry
         // does not yet exist on the device it's created and the
         // contents from this drawable object are uploaded in some
@@ -188,7 +188,7 @@ namespace gfx
         virtual void Restart(const Environment& env) {}
         // Get the vertex program ID for shape. Used to map the
         // drawable to a device specific program object.
-        virtual std::string GetProgramId() const = 0;
+        virtual std::string GetProgramId(const Environment& env) const = 0;
     private:
     };
 
@@ -302,9 +302,9 @@ namespace gfx
                 program.SetUniform("kModelViewMatrix",
                    *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
             }
-            virtual Shader* GetShader(Device& device) const override
+            virtual Shader* GetShader(const Environment& env, Device& device) const override
             { return DrawableGeometry::GetShader(device); }
-            virtual std::string GetProgramId() const override
+            virtual std::string GetProgramId(const Environment& env) const override
             { return DrawableGeometry::GetProgramId(); }
             virtual Geometry* Upload(const Environment& env, Device& device) const override
             { return DrawableGeometry::Generate(env, mStyle, device); }
@@ -402,9 +402,9 @@ namespace gfx
           : BaseClass(id)
           , mPercentage(percentage)
         {}
-        Shader* GetShader(Device& device) const;
+        Shader* GetShader(const Environment& environment, Device& device) const;
         Geometry* Upload(const Environment& environment, Style style, Device& device) const;
-        std::string GetProgramId() const;
+        std::string GetProgramId(const Environment& environment) const;
 
         virtual Type GetType() const override
         { return Type::Sector; }
@@ -443,8 +443,8 @@ namespace gfx
             program.SetUniform("kModelViewMatrix",
                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
-        virtual Shader* GetShader(Device& device) const override
-        { return mClass->GetShader(device); }
+        virtual Shader* GetShader(const Environment& env, Device& device) const override
+        { return mClass->GetShader(env, device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
         { return mClass->Upload(env, mStyle, device); }
         virtual void SetCulling(Culling cull) override
@@ -455,8 +455,8 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual std::string GetProgramId() const override
-        { return mClass->GetProgramId(); }
+        virtual std::string GetProgramId(const Environment& env) const override
+        { return mClass->GetProgramId(env); }
     private:
         std::shared_ptr<const SectorClass> mClass;
         Style mStyle     = Style::Solid;
@@ -481,9 +481,9 @@ namespace gfx
         void SetRadius(float radius)
         { mRadius = radius;}
 
-        Shader* GetShader(Device& device) const;
-        Geometry* Upload(const Drawable::Environment& env, Style style, Device& device) const;
-        std::string GetProgramId() const;
+        Shader* GetShader(const Environment& env, Device& device) const;
+        Geometry* Upload(const Environment& env, Style style, Device& device) const;
+        std::string GetProgramId(const Environment& env) const;
 
         virtual Type GetType() const override
         { return Type::RoundRectangle; }
@@ -528,10 +528,13 @@ namespace gfx
             program.SetUniform("kModelViewMatrix",
                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
-        virtual Shader* GetShader(Device& device) const override
-        { return mClass->GetShader(device); }
+        virtual Shader* GetShader(const Environment& env, Device& device) const override
+        { return mClass->GetShader(env, device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
         { return mClass->Upload(env, mStyle, device); }
+        virtual std::string GetProgramId(const Environment& env) const override
+        { return mClass->GetProgramId(env); }
+
         virtual void SetCulling(Culling cull) override
         { mCulling = cull; }
         virtual void SetStyle(Style style) override
@@ -540,8 +543,6 @@ namespace gfx
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual std::string GetProgramId() const override
-        { return mClass->GetProgramId(); }
     private:
         std::shared_ptr<const RoundRectangleClass> mClass;
         Culling mCulling = Culling::Back;
@@ -556,9 +557,9 @@ namespace gfx
         {}
         GridClass(const std::string& id) : BaseClass(id)
         {}
-        Shader* GetShader(Device& device) const;
-        Geometry* Upload(Device& device) const;
-        std::string GetProgramId() const;
+        Shader* GetShader(const Environment& env, Device& device) const;
+        Geometry* Upload(const Environment& env, Device& device) const;
+        std::string GetProgramId(const Environment& env) const;
         void SetNumVerticalLines(unsigned lines)
         { mNumVerticalLines = lines; }
         void SetNumHorizontalLines(unsigned lines)
@@ -616,16 +617,18 @@ namespace gfx
             program.SetUniform("kModelViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
-        virtual Shader* GetShader(Device& device) const override
-        { return mClass->GetShader(device); }
+        virtual Shader* GetShader(const Environment& env, Device& device) const override
+        { return mClass->GetShader(env, device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(device); }
+        { return mClass->Upload(env, device); }
+        virtual std::string GetProgramId(const Environment& env) const override
+        { return mClass->GetProgramId(env); }
+
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
-        virtual std::string GetProgramId() const override
-        { return mClass->GetProgramId(); }
+
     private:
         std::shared_ptr<const GridClass> mClass;
         float mLineWidth = 1.0f;
@@ -709,9 +712,9 @@ namespace gfx
         { mStatic = on_off; }
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
-        Shader* GetShader(Device& device) const;
-        Geometry* Upload(bool editing_mode, Device& device) const;
-        std::string GetProgramId() const;
+        Shader* GetShader(const Environment& env, Device& device) const;
+        Geometry* Upload(const Environment& env, Device& device) const;
+        std::string GetProgramId(const Environment& env) const;
 
         virtual Type GetType() const override
         { return Type::Polygon; }
@@ -748,18 +751,20 @@ namespace gfx
             program.SetUniform("kModelViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
-        virtual Shader* GetShader(Device& device) const override
-        { return mClass->GetShader(device); }
+        virtual Shader* GetShader(const Environment& env, Device& device) const override
+        { return mClass->GetShader(env, device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(env.editing_mode, device); }
+        { return mClass->Upload(env, device); }
+        virtual std::string GetProgramId(const Environment& env) const override
+        { return mClass->GetProgramId(env); }
+
         virtual Style GetStyle() const override
         { return Style::Solid; }
         virtual void SetCulling(Culling culling) override
         { mCulling = culling;}
         virtual void SetLineWidth(float width) override
         { mLineWidth = width; }
-        virtual std::string GetProgramId() const override
-        { return mClass->GetProgramId(); }
+
     private:
         std::shared_ptr<const PolygonClass> mClass;
         Culling mCulling = Culling::Back;
@@ -821,11 +826,12 @@ namespace gfx
             program.SetUniform("kModelViewMatrix",
                 *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
         }
-        virtual Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
         virtual Style GetStyle() const override
         { return Style::Solid; }
-        virtual std::string GetProgramId() const override;
+
     private:
         std::shared_ptr<const CursorClass> mClass;
     };
@@ -1063,10 +1069,9 @@ namespace gfx
           , mParams(init)
         {}
 
-        Shader* GetShader(Device& device) const;
+        Shader* GetShader(const Environment& env, Device& device) const;
         Geometry* Upload(const Environment& env, const InstanceState& state, Device& device) const;
-
-        std::string GetProgramId() const;
+        std::string GetProgramId(const Environment& env) const;
 
         void ApplyDynamicState(const Environment& env, Program& program) const;
         void Update(const Environment& env, InstanceState& state, float dt) const;
@@ -1122,15 +1127,20 @@ namespace gfx
             mClass->ApplyDynamicState(env, program);
         }
         // Drawable implementation. Compile the shader.
-        virtual Shader* GetShader(Device& device) const override
+        virtual Shader* GetShader(const Environment& env, Device& device) const override
         {
-            return mClass->GetShader(device);
+            return mClass->GetShader(env, device);
         }
         // Drawable implementation. Upload particles to the device.
         virtual Geometry* Upload(const Environment& env, Device& device) const override
         {
             return mClass->Upload(env, mState, device);
         }
+        virtual std::string GetProgramId(const Environment&  env) const override
+        {
+            return mClass->GetProgramId(env);
+        }
+
         virtual Style GetStyle() const override
         {
             return Style::Points;
@@ -1149,10 +1159,6 @@ namespace gfx
         virtual void Restart(const Environment& env) override
         {
             mClass->Restart(env, mState);
-        }
-        virtual std::string GetProgramId() const override
-        {
-            return mClass->GetProgramId();
         }
 
         // Get the current number of alive particles.
@@ -1180,10 +1186,10 @@ namespace gfx
         TileBatch() = default;
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
-        virtual Shader* GetShader(Device& device) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
 
         void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
