@@ -552,20 +552,14 @@ bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
     switch (action)
     {
         case Actions::CanPaste:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (clipboard->IsEmpty())
-                return false;
-            else if (clipboard->GetType() != "application/json/scene_node")
-                return false;
-            return true;
+            if (clipboard->GetType() == "application/json/scene_node")
+                return true;
+            return false;
         case Actions::CanCopy:
         case Actions::CanCut:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (!GetCurrentNode())
-                return false;
-            return true;
+            if (GetCurrentNode())
+                return true;
+            return false;
         case Actions::CanUndo:
             return mUndoStack.size() > 1;
         case Actions::CanZoomIn: {
@@ -624,12 +618,14 @@ void SceneWidget::Copy(Clipboard& clipboard) const
 }
 void SceneWidget::Paste(const Clipboard& clipboard)
 {
-    if (!mUI.widget->hasInputFocus())
-        return;
-
-    if (clipboard.GetType() != "application/json/scene_node")
+    if (clipboard.IsEmpty())
     {
-        NOTE("No entity JSON data found in clipboard.");
+        NOTE("Clipboard is empty.");
+        return;
+    }
+    else if (clipboard.GetType() != "application/json/scene_node")
+    {
+        NOTE("No scene node JSON data found in clipboard.");
         return;
     }
 

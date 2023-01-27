@@ -734,36 +734,26 @@ bool EntityWidget::CanTakeAction(Actions action, const Clipboard* clipboard) con
     switch (action)
     {
         case Actions::CanPaste:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (clipboard->IsEmpty())
-                return false;
-            else if (clipboard->GetType() != "application/json/entity")
-                return false;
-            return true;
+            if (clipboard->GetType() == "application/json/entity")
+                return true;
+            return false;
         case Actions::CanCopy:
         case Actions::CanCut:
-            if (!mUI.widget->hasInputFocus())
-                return false;
-            else if (!GetCurrentNode())
-                return false;
-            return true;
+            if (GetCurrentNode())
+                return true;
+            return false;
         case Actions::CanUndo:
             return mUndoStack.size() > 1;
-        case Actions::CanZoomIn:
-        {
-            const auto max = mUI.zoom->maximum();
-            const auto val = mUI.zoom->value();
-            return val < max;
-        }
-            break;
-        case Actions::CanZoomOut:
-        {
-            const auto min = mUI.zoom->minimum();
-            const auto val = mUI.zoom->value();
-            return val > min;
-        }
-            break;
+        case Actions::CanZoomIn: {
+                const auto max = mUI.zoom->maximum();
+                const auto val = mUI.zoom->value();
+                return val < max;
+            } break;
+        case Actions::CanZoomOut: {
+                const auto min = mUI.zoom->minimum();
+                const auto val = mUI.zoom->value();
+                return val > min;
+            } break;
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
@@ -817,14 +807,18 @@ void EntityWidget::Copy(Clipboard& clipboard) const
 }
 void EntityWidget::Paste(const Clipboard& clipboard)
 {
-    if (!mUI.widget->hasInputFocus())
+    if (clipboard.IsEmpty())
+    {
+        NOTE("Clipboard is empty.");
         return;
-
-    if (clipboard.GetType() != "application/json/entity")
+    }
+    else if (clipboard.GetType() != "application/json/entity")
     {
         NOTE("No entity JSON data found in clipboard.");
         return;
     }
+
+    mUI.widget->setFocus();
 
     data::JsonObject json;
     auto [success, _] = json.ParseString(clipboard.GetText());
