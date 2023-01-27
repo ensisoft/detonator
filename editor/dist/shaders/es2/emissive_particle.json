@@ -1,0 +1,36 @@
+{
+    "uniforms": [
+        {
+            "name": "kStartColor",
+            "desc": "Start Color",
+            "type": "Color"
+        },
+        {
+            "name": "kEndColor",
+            "desc": "End Color",
+            "type": "Color"
+        },
+        {
+            "name": "kRotationalVelocity",
+            "desc": "Rotatation Velocity",
+            "type": "Float"
+        },
+        {
+            "name": "kRotate",
+            "desc": "Enable rotation",
+            "type": "Float"
+        },
+        {
+            "name": "kBaseRotation",
+            "desc": "Texture rotation",
+            "type": "Float"
+        }
+    ],
+    "maps": [
+        {
+            "desc": "Mask Texture",
+            "name": "kMask",
+            "type": "Texture2D"
+        }
+    ]
+}

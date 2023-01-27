@@ -28,6 +28,7 @@ uniform float kRotationalVelocity;
 // Set to 1.0 for rotation and 0.0 for no rotation.
 uniform float kRotate;
 
+uniform float kBaseRotation;
 
 // Vertex input
 // ---------------------------------------------------
@@ -42,7 +43,7 @@ varying float vParticleRandomValue;
 
 void main()
 {
-    float angle = kTime * kRotationalVelocity;
+    float angle = kTime * kRotationalVelocity + kBaseRotation;
 
     // either read varying texture coords from the vertex shader
     // or use gl_PointCoord which when rendering GL_POINTS

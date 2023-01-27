@@ -1952,24 +1952,15 @@
             },
             "layer": 1,
             "linewidth": 1.0,
-            "material": "dZDA63fz8X",
+            "material": "J8J3JM8rC8",
             "material_params": [
-              {
-                "name": "kEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.6781567335128784,
-                  "g": 0.4266727566719055,
-                  "r": 0.01492332387715578
-                }
-              },
               {
                 "name": "kStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.062424659729003906,
-                  "g": 0.037094682455062866,
-                  "r": 0.0
+                  "b": 0.7930113673210144,
+                  "g": 0.6070038676261902,
+                  "r": 0.5258869528770447
                 }
               }
             ],
@@ -1982,8 +1973,8 @@
           },
           "name": "Water",
           "position": {
-            "x": -0.0,
-            "y": -0.0
+            "x": 0.0,
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -1991,8 +1982,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 147.95272827148438,
-            "y": 21.829843521118164
+            "x": 299.2841491699219,
+            "y": 19.44164276123047
           }
         },
         {
@@ -2009,24 +2000,15 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "8qJeAKQFtw",
+            "material": "J8J3JM8rC8",
             "material_params": [
-              {
-                "name": "kEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.9633325934410095,
-                  "g": 0.5821011662483215,
-                  "r": 0.1104600578546524
-                }
-              },
               {
                 "name": "kStartColor",
                 "value": {
-                  "a": 1.0,
-                  "b": 0.19736018776893616,
-                  "g": 0.1115434467792511,
-                  "r": 0.06196688860654831
+                  "a": 0.4627451002597809,
+                  "b": 0.9201343059539795,
+                  "g": 0.7917754054069519,
+                  "r": 0.729228675365448
                 }
               }
             ],
@@ -2572,6 +2554,12 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "N5AZXzLO89",
+            "material_params": [
+              {
+                "name": "kRotate",
+                "value": 0.0
+              }
+            ],
             "renderpass": "Draw",
             "renderstyle": "Solid",
             "timescale": 1.0
@@ -2626,6 +2614,355 @@
       "resource_name": "Spaceship",
       "script_file": "",
       "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "bQyCGOw7tW",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Rain",
+      "nodes": [
+        {
+          "class": "ISPnm2QqYE",
+          "drawable_item": {
+            "drawable": "Jv6CJCIheq",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "bBESp9pEw3",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Rain",
+          "position": {
+            "x": -150.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1236.0,
+            "y": 1040.0
+          }
+        },
+        {
+          "class": "DKjYlWCCSk",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": -1,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.37254902720451355,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.0
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Darkness",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1200.0,
+            "y": 1000.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "ISPnm2QqYE"
+            }
+          },
+          {
+            "node": {
+              "id": "DKjYlWCCSk"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "bQyCGOw7tW",
+      "resource_name": "Basic Rain",
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "dpnADuNTa0",
+      "idle_track": "uCkRnXuMmP",
+      "lifetime": 0.0,
+      "name": "Basic Rain + Lightning",
+      "nodes": [
+        {
+          "class": "GroRP5vz1A",
+          "drawable_item": {
+            "drawable": "Jv6CJCIheq",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "bBESp9pEw3",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Rain",
+          "position": {
+            "x": -150.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1236.0,
+            "y": 1040.0
+          }
+        },
+        {
+          "class": "rFAKTZFLb6",
+          "drawable_item": {
+            "drawable": "28lGaDWqAm",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "0xydhM7UqW",
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Lightning",
+          "position": {
+            "x": 0.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1200.0,
+            "y": 100.0
+          }
+        },
+        {
+          "class": "8iMd3g8RxH",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": -1,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.37254902720451355,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.0
+                }
+              }
+            ],
+            "renderpass": "Draw",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Darkness",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1200.0,
+            "y": 1000.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "GroRP5vz1A"
+            }
+          },
+          {
+            "node": {
+              "id": "rFAKTZFLb6"
+            }
+          },
+          {
+            "node": {
+              "id": "8iMd3g8RxH"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "dpnADuNTa0",
+      "resource_name": "Basic Rain + Lightning",
+      "script_file": "",
+      "tag": "",
+      "tracks": [
+        {
+          "actuators": [
+            {
+              "actuator": {
+                "cname": "Actuator_0",
+                "duration": 0.01007472351193428,
+                "flags": {
+                  "StaticInstance": true
+                },
+                "id": "iukbn95G6r",
+                "method": "Step",
+                "node": "8iMd3g8RxH",
+                "params": [
+                  {
+                    "name": "kBaseColor",
+                    "value": {
+                      "a": 1.0,
+                      "b": 0.654108464717865,
+                      "g": 0.654108464717865,
+                      "r": 0.654108464717865
+                    }
+                  }
+                ],
+                "start": 0.0
+              },
+              "type": "Material"
+            },
+            {
+              "actuator": {
+                "cname": "Actuator_1",
+                "duration": 0.010074527934193611,
+                "flags": {
+                  "StaticInstance": true
+                },
+                "id": "uoSGHd8Klq",
+                "method": "Step",
+                "node": "8iMd3g8RxH",
+                "params": [
+                  {
+                    "name": "kBaseColor",
+                    "value": {
+                      "a": 0.37254902720451355,
+                      "b": 0.0,
+                      "g": 0.0,
+                      "r": 0.0
+                    }
+                  }
+                ],
+                "start": 0.01007472351193428
+              },
+              "type": "Material"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 3.0,
+          "id": "uCkRnXuMmP",
+          "looping": true,
+          "name": "My Track"
+        }
+      ]
     }
   ],
   "materials": [
@@ -2640,8 +2977,8 @@
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
-      "surface": "Emissive",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "surface": "Transparent",
       "texture_maps": [
         {
           "name": "kMask",
@@ -2671,6 +3008,10 @@
       "type": "Custom",
       "uniforms": [
         {
+          "name": "kBaseRotation",
+          "value": 0.20000000298023224
+        },
+        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -2681,11 +3022,11 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 1.0
         },
         {
           "name": "kRotationalVelocity",
-          "value": 0.0
+          "value": 0.5
         },
         {
           "name": "kStartColor",
@@ -2704,6 +3045,156 @@
       "flags": {
         "PremultipliedAlpha": false
       },
+      "id": "0xydhM7UqW",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "name": "Lightning Particle",
+      "resource_id": "0xydhM7UqW",
+      "resource_name": "Lightning Particle",
+      "shader_src": "",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "surface": "Emissive",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/lightning.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "MuDm2KWWLj",
+            "name": "lightning",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.3100000023841858
+        },
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 0.0,
+            "b": 0.8942549824714661,
+            "g": 0.7756771445274353,
+            "r": 0.8308995366096497
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 0.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 0.0,
+            "b": 0.929198145866394,
+            "g": 0.7711299061775208,
+            "r": 0.7024185657501221
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
+      "id": "bBESp9pEw3",
+      "mag_filter": "Default",
+      "min_filter": "Default",
+      "name": "Rain Particle",
+      "resource_id": "bBESp9pEw3",
+      "resource_name": "Rain Particle",
+      "shader_src": "",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "surface": "Transparent",
+      "texture_maps": [
+        {
+          "name": "kMask",
+          "rect": {
+            "h": 1.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rect_name": "kMaskRect",
+          "sampler_name": "kMask",
+          "texture": {
+            "colorspace": "Linear",
+            "file": "ws://textures/rain.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "Ys3DJk6kzW",
+            "name": "rain",
+            "type": "Filesystem"
+          },
+          "type": "Texture2D"
+        }
+      ],
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": -0.30000001192092896
+        },
+        {
+          "name": "kEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.8942549824714661,
+            "g": 0.7756771445274353,
+            "r": 0.8308995366096497
+          }
+        },
+        {
+          "name": "kRotate",
+          "value": 1.0
+        },
+        {
+          "name": "kRotationalVelocity",
+          "value": 0.0
+        },
+        {
+          "name": "kStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.9607843160629272,
+            "g": 0.7607690691947937,
+            "r": 0.6745098233222961
+          }
+        }
+      ],
+      "wrap_x": "Clamp",
+      "wrap_y": "Clamp"
+    },
+    {
+      "flags": {
+        "PremultipliedAlpha": false
+      },
       "id": "eySa2QEq4I",
       "mag_filter": "Default",
       "min_filter": "Default",
@@ -2711,7 +3202,7 @@
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -2741,6 +3232,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -2782,7 +3277,7 @@
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -2812,6 +3307,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -2853,8 +3352,8 @@
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
-      "surface": "Emissive",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "surface": "Transparent",
       "texture_maps": [
         {
           "name": "kMask",
@@ -2884,29 +3383,33 @@
       "type": "Custom",
       "uniforms": [
         {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
+        {
           "name": "kEndColor",
           "value": {
-            "a": 1.0,
-            "b": 0.9437094926834106,
-            "g": 0.7906004190444946,
-            "r": 0.7819027900695801
+            "a": 0.37254902720451355,
+            "b": 0.9408865571022034,
+            "g": 0.8889906406402588,
+            "r": 0.8860456347465515
           }
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 1.0
         },
         {
           "name": "kRotationalVelocity",
-          "value": 0.0
+          "value": 2.0
         },
         {
           "name": "kStartColor",
           "value": {
-            "a": 1.0,
-            "b": 0.5527275204658508,
-            "g": 0.08061341196298599,
-            "r": 0.0
+            "a": 0.729411780834198,
+            "b": 0.8143892288208008,
+            "g": 0.5719996690750122,
+            "r": 0.5306172370910645
           }
         }
       ],
@@ -2924,7 +3427,7 @@
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -2954,6 +3457,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -2995,7 +3502,7 @@
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -3025,6 +3532,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -3066,7 +3577,7 @@
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -3096,6 +3607,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -3192,8 +3707,8 @@
       },
       "gamma": 1.0,
       "id": "sv05U2SGGE",
-      "name": "snowflake",
-      "particle_action": "None",
+      "name": "Snowflake",
+      "particle_action": "Rotate",
       "rect": {
         "h": 1.0,
         "w": 1.0,
@@ -3202,7 +3717,7 @@
       },
       "rect_name": "",
       "resource_id": "sv05U2SGGE",
-      "resource_name": "snowflake",
+      "resource_name": "Snowflake",
       "sampler_name": "",
       "static": false,
       "surface": "Transparent",
@@ -3228,7 +3743,7 @@
       "texture_velocity": {
         "x": 0.0,
         "y": 0.0,
-        "z": 0.0
+        "z": 0.20000000298023224
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
@@ -3245,7 +3760,7 @@
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/particle.glsl",
+      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
       "texture_maps": [
         {
@@ -3275,6 +3790,10 @@
       ],
       "type": "Custom",
       "uniforms": [
+        {
+          "name": "kBaseRotation",
+          "value": 0.0
+        },
         {
           "name": "kEndColor",
           "value": {
@@ -4052,20 +4571,20 @@
       "init_rect_ypos": 0.0,
       "max_alpha": 0.3199999928474426,
       "max_lifetime": 23.18000030517578,
-      "max_point_size": 110.0,
+      "max_point_size": 94.0,
       "max_time": 3.4028234663852886e+38,
       "max_velocity": 122.54000091552734,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 0.23000000417232513,
       "min_lifetime": 14.460000038146973,
-      "min_point_size": 104.0,
+      "min_point_size": 21.0,
       "min_time": 0.0,
       "min_velocity": 60.779998779296875,
       "mode": "Continuous",
       "motion": "Projectile",
       "name": "Basic Waterfall",
-      "num_particles": 1000.0,
+      "num_particles": 1500.0,
       "placement": "Inside",
       "resource_id": "n6ykHi9xRi",
       "resource_name": "Basic Waterfall",
@@ -4274,6 +4793,88 @@
       "placement": "Inside",
       "resource_id": "MSCSkjl4Su",
       "resource_name": "Star Field",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 1.7627825736999512,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "Jv6CJCIheq",
+      "init_rect_height": 0.009999999776482582,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 3.0,
+      "max_point_size": 4.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.8999999761581421,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 2.0,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 0.5400000214576721,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "name": "Rain",
+      "num_particles": 200.0,
+      "placement": "Inside",
+      "resource_id": "Jv6CJCIheq",
+      "resource_name": "Rain",
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "28lGaDWqAm",
+      "init_rect_height": 0.10000000149011612,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.27000001072883606,
+      "max_alpha": 1.0,
+      "max_lifetime": 0.07999999821186066,
+      "max_point_size": 1010.0,
+      "max_time": 3.0,
+      "max_velocity": 0.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 0.05000000074505806,
+      "min_point_size": 763.0,
+      "min_time": 3.0,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "name": "Lightning",
+      "num_particles": 1.0,
+      "placement": "Inside",
+      "resource_id": "28lGaDWqAm",
+      "resource_name": "Lightning",
       "shape": "Rectangle"
     }
   ],

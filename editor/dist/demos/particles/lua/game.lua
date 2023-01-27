@@ -73,6 +73,9 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
+    if symbol == wdk.Keys.Escape then
+        Game:Quit(0)
+    end
 end
 
 function OnKeyUp(symbol, modifier_bits)
