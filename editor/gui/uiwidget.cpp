@@ -749,30 +749,26 @@ bool UIWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
     switch (action)
     {
         case Actions::CanPaste:
-            if (clipboard->IsEmpty())
-                return false;
-            else if (clipboard->GetType() != "application/json/ui")
-                return false;
-            return true;
+            if (clipboard->GetType() == "application/json/ui")
+                return true;
+            return false;
         case Actions::CanCut:
         case Actions::CanCopy:
-            if (!GetCurrentWidget())
-                return false;
-            return true;
+            if (GetCurrentWidget())
+                return true;
+            return false;
         case Actions::CanUndo:
             return mUndoStack.size() > 1;
-        case Actions::CanZoomIn:
-        {
-            const auto max = mUI.zoom->maximum();
-            const auto val = mUI.zoom->value();
-            return val < max;
-        }
-        case Actions::CanZoomOut:
-        {
-            const auto min = mUI.zoom->minimum();
-            const auto val = mUI.zoom->value();
-            return val > min;
-        }
+        case Actions::CanZoomIn: {
+                const auto max = mUI.zoom->maximum();
+                const auto val = mUI.zoom->value();
+                return val < max;
+            } break;
+        case Actions::CanZoomOut: {
+                const auto min = mUI.zoom->minimum();
+                const auto val = mUI.zoom->value();
+                return val > min;
+            } break;
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
@@ -812,9 +808,6 @@ void UIWidget::Copy(Clipboard& clipboard)  const
 }
 void UIWidget::Paste(const Clipboard& clipboard)
 {
-    if (!mUI.widget->hasInputFocus())
-        return;
-
     if (clipboard.IsEmpty())
     {
         NOTE("Clipboard is empty.");
@@ -822,9 +815,11 @@ void UIWidget::Paste(const Clipboard& clipboard)
     }
     else if (clipboard.GetType() != "application/json/ui")
     {
-        NOTE("No UI JSON found in clipboard.");
+        NOTE("No UI JSON data found in clipboard.");
         return;
     }
+
+    mUI.widget->setFocus();
 
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
