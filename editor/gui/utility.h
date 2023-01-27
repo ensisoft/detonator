@@ -773,6 +773,11 @@ struct ComboBoxValueGetter
             ASSERT(!"not implemented");
         }
     }
+    operator app::AnyString() const
+    {
+        return app::AnyString(cmb->currentText().trimmed());
+    }
+
     operator std::string() const
     {
         return app::ToUtf8(cmb->currentText().trimmed());
