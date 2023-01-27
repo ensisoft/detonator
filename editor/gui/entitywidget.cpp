@@ -479,6 +479,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
 
     RebuildMenus();
     RebuildCombos();
@@ -933,13 +934,13 @@ void EntityWidget::Undo()
 
 void EntityWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 void EntityWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 void EntityWidget::ReloadShaders()
 {

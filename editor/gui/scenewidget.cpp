@@ -386,6 +386,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.name, mState.scene.GetName());
 
@@ -728,13 +729,13 @@ void SceneWidget::Save()
 
 void SceneWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 void SceneWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 void SceneWidget::ReloadShaders()
 {

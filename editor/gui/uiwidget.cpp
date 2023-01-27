@@ -547,6 +547,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
     SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
@@ -555,6 +556,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     RebuildCombos();
     DisplayCurrentWidgetProperties();
     mOriginalHash = mState.window.GetHash();
+
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -910,13 +912,13 @@ void UIWidget::Paste(const Clipboard& clipboard)
 
 void UIWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 void UIWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 void UIWidget::ReloadShaders()
 {

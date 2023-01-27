@@ -97,6 +97,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     setWindowTitle("My Material");
 
     GetMaterialProperties();
+
+    SetValue(mUI.zoom, 1.0f);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -230,15 +232,14 @@ bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) c
 
 void MaterialWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 
 void MaterialWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    if (value > 0.1)
-        mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 
 void MaterialWidget::ReloadShaders()
@@ -1799,7 +1800,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    const auto zoom = mUI.zoom->value();
+    const float zoom = GetValue(mUI.zoom);
     const auto content_width  = width * zoom;
     const auto content_height = width * zoom;
     const auto xpos = (width - content_width) * 0.5f;
