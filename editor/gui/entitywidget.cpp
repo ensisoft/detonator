@@ -1721,7 +1721,9 @@ void EntityWidget::on_btnSetMaterialParams_clicked()
     {
         if (auto* drawable = node->GetDrawable())
         {
-            DlgMaterialParams dlg(this, mState.workspace, drawable);
+            const auto& material = mState.workspace->GetMaterialClassById(drawable->GetMaterialId());
+            DlgMaterialParams dlg(this, drawable);
+            dlg.AdaptInterface(mState.workspace, material.get());
             dlg.exec();
         }
     }

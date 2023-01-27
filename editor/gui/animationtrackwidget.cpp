@@ -32,6 +32,7 @@
 #include "base/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
+#include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/animationtrackwidget.h"
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/drawing.h"
@@ -99,7 +100,7 @@ public:
             // https://colorhunt.co/palette/226038
 
             TimelineWidget::TimelineItem item;
-            item.text      = QString("%1 (%2)").arg(node_name).arg(actuator_name);
+            item.text      = app::toString("%1 (%2)", node_name, actuator_name);
             item.id        = app::FromUtf8(actuator.GetId());
             item.starttime = actuator.GetStartTime();
             item.duration  = actuator.GetDuration();
@@ -111,6 +112,8 @@ public:
                 item.color = QColor(0xe6, 0xb5, 0x66, 150);
             else if (type == game::ActuatorClass::Type::SetValue)
                 item.color = QColor(0xe5, 0x70, 0x7e, 150);
+            else if (type == game::ActuatorClass::Type::Material)
+                item.color = QColor(0xe7, 0x80, 0x7e, 150);
             else BUG("Unhandled type for item colorization.");
 
             (*list)[index].AddItem(item);
@@ -147,6 +150,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::KinematicActuatorClass::Interpolation>(mUI.kinematicInterpolation);
     PopulateFromEnum<game::SetFlagActuatorClass::FlagName>(mUI.itemFlags);
     PopulateFromEnum<game::SetFlagActuatorClass::FlagAction>(mUI.flagAction);
+    PopulateFromEnum<game::MaterialActuatorClass::Interpolation >(mUI.materialInterpolation);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.actionUsePhysics, settings.enable_physics);
@@ -1042,7 +1046,6 @@ void AnimationTrackWidget::on_itemFlags_currentIndexChanged(int)
 {
     if (auto* node = GetCurrentEntityNode())
     {
-
         SetSelectedActuatorProperties();
     }
 }
@@ -1053,6 +1056,29 @@ void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
     {
         SetSelectedActuatorProperties();
     }
+}
+
+void AnimationTrackWidget::on_materialInterpolation_currentIndexChanged(int)
+{
+    if (auto* node = GetCurrentEntityNode())
+    {
+        SetSelectedActuatorProperties();
+    }
+}
+
+void AnimationTrackWidget::on_btnMaterialParameters_clicked()
+{
+    auto* node = GetCurrentEntityNode();
+    auto* klass = mState.entity->FindNodeById(node->GetClassId());
+    auto* drawable = klass ? klass->GetDrawable() : nullptr;
+    auto* actuator = dynamic_cast<game::MaterialActuatorClass*>(GetCurrentActuator());
+    if (!node || !drawable || !actuator)
+        return;
+
+    const auto& material = mWorkspace->GetMaterialClassById(node->GetDrawable()->GetMaterialId());
+    DlgMaterialParams dlg(this, drawable, actuator);
+    dlg.AdaptInterface(mWorkspace, material.get());
+    dlg.exec();
 }
 
 void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
@@ -1093,6 +1119,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.kinematicEndVeloX, 0.0f);
     SetValue(mUI.kinematicEndVeloY, 0.0f);
     SetValue(mUI.kinematicEndVeloZ, 0.0f);
+    SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
 
     if (!mState.track)
         return;
@@ -1179,6 +1206,11 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
     }
+    else if (auto* material = dynamic_cast<game::MaterialActuatorClass*>(actuator))
+    {
+        material->SetInterpolation(GetValue(mUI.materialInterpolation));
+    }
+
     //DEBUG("Updated actuator '%1' (%2)", actuator->GetName(), actuator->GetId());
 
     mUI.timeline->Rebuild();
@@ -1364,6 +1396,11 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
         mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
+    }
+    else if (const auto* ptr = dynamic_cast<const game::MaterialActuatorClass*>(actuator))
+    {
+        SetValue(mUI.materialInterpolation, ptr->GetInterpolation());
+        mUI.actuatorProperties->setCurrentWidget(mUI.materialActuator);
     }
     else
     {
@@ -1806,6 +1843,18 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddActuator(klass);
     }
+    else if (type ==game::ActuatorClass::Type::Material)
+    {
+        game::MaterialActuatorClass klass;
+        klass.SetName(name);
+        klass.SetNodeId(node->GetId());
+        klass.SetStartTime(node_start_time);
+        klass.SetDuration(node_duration);
+        actuator = app::FromUtf8(klass.GetId());
+        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
+        mState.track->AddActuator(klass);
+    }
+
     mUI.timeline->Rebuild();
     SelectedItemChanged(mUI.timeline->SelectItem(actuator));
 

@@ -127,6 +127,8 @@ namespace gui
         void on_kinematicEndVeloZ_valueChanged(double value);
         void on_itemFlags_currentIndexChanged(int);
         void on_flagAction_currentIndexChanged(int index);
+        void on_materialInterpolation_currentIndexChanged(int);
+        void on_btnMaterialParameters_clicked();
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
         void ToggleShowResource();
