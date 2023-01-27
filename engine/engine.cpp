@@ -858,6 +858,7 @@ private:
         if (auto* ui = GetUI())
         {
             LoadStyle(ui->GetStyleName());
+            LoadKeyMap(ui->GetKeyMapFile());
 
             mUIPainter.DeleteMaterialInstances();
             mUIState.Clear();
