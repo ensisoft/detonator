@@ -63,9 +63,9 @@ end
 
 -- Optionally called on keyboard events when the flag is set.
 function OnKeyDown(ui, symbol, modifier_bits)
-    if symbol == wdk.Keys.ArrowLeft then
+    if symbol == wdk.Keys.ArrowRight then
         index = base.wrap(1, #Particles, index + 1)
-    elseif symbol == wdk.Keys.ArrowRight then
+    elseif symbol == wdk.Keys.ArrowLeft then
         index = base.wrap(1, #Particles, index - 1)
     else
         return

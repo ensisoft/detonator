@@ -9,6 +9,8 @@ Particles = {
     'Pixel Flame',
     'Basic Snow',
     'Basic Snow + Flakes',
+    'Basic Rain',
+    'Basic Rain + Lightning',
     'Basic Waterfall',
     'Summoning Circle',
     'Blood Impact',

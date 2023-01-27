@@ -19,6 +19,11 @@
             "name": "kRotate",
             "desc": "Enable rotation",
             "type": "Float"
+        },
+        {
+            "name": "kBaseRotation",
+            "desc": "Texture rotation",
+            "type": "Float"
         }
     ],
     "maps": [
