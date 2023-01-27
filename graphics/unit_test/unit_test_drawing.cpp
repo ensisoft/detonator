@@ -661,16 +661,16 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetGamma(2.0f);
 
-        test.ApplyStaticState(device, program);
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+
+        test.ApplyStaticState(env, device, program);
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(base_color == gfx::Color::Green);
 
         program.Clear();
-
-        gfx::MaterialClass::State env;
-        env.render_points = false;
-        env.material_time = 0.0f;
         test.ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kBaseColor"));
     }
@@ -687,7 +687,11 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetGamma(2.0f);
 
-        test.ApplyStaticState(device, program);
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 0.0f;
+
+        test.ApplyStaticState(env, device, program);
         glm::vec1 gamma;
         gfx::Color4f gradients[4];
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
@@ -703,9 +707,6 @@ void unit_test_material_uniforms()
 
         program.Clear();
 
-        gfx::MaterialClass::State env;
-        env.render_points = false;
-        env.material_time = 0.0f;
         test.ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kGamma"));
         TEST_REQUIRE(!program.HasUniform("kColor0"));
@@ -730,7 +731,11 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        test.ApplyStaticState(device, program);
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 2.0f;
+
+        test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
         glm::vec2 texture_velocity_xy;
         glm::vec1 texture_velocity_z;
@@ -749,9 +754,6 @@ void unit_test_material_uniforms()
 
         program.Clear();
 
-        gfx::MaterialClass::State env;
-        env.render_points = false;
-        env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kGamma"));
         TEST_REQUIRE(!program.HasUniform("kTextureScale"));
@@ -777,7 +779,11 @@ void unit_test_material_uniforms()
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        test.ApplyStaticState(device, program);
+        gfx::MaterialClass::State env;
+        env.render_points = false;
+        env.material_time = 2.0f;
+
+        test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
         glm::vec2 texture_velocity_xy;
         glm::vec1 texture_velocity_z;
@@ -796,9 +802,6 @@ void unit_test_material_uniforms()
 
         program.Clear();
 
-        gfx::MaterialClass::State env;
-        env.render_points = false;
-        env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kGamma"));
         TEST_REQUIRE(!program.HasUniform("kTextureScale"));
@@ -815,11 +818,13 @@ void unit_test_material_uniforms()
         foo.SetStatic(true);
         foo.SetBaseColor(gfx::Color::Red);
 
+        gfx::MaterialClass::State state;
+
         auto bar = foo;
-        TEST_REQUIRE(foo.GetProgramId() == bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) == bar.GetProgramId(state));
 
         bar.SetBaseColor(gfx::Color::Green);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
     }
 
 
@@ -831,20 +836,22 @@ void unit_test_material_uniforms()
         foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
         foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
 
+        gfx::MaterialClass::State state;
+
         auto bar = foo;
-        TEST_REQUIRE(foo.GetProgramId() == bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) == bar.GetProgramId(state));
 
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomLeft);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::TopLeft);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomRight);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
     }
 
     {
@@ -857,25 +864,27 @@ void unit_test_material_uniforms()
         foo.SetTextureVelocityY(5.0f);
         foo.SetTextureVelocityZ(-1.0f);
 
+        gfx::MaterialClass::State state;
+
         auto bar = foo;
-        TEST_REQUIRE(bar.GetProgramId() == foo.GetProgramId());
+        TEST_REQUIRE(bar.GetProgramId(state) == foo.GetProgramId(state));
         foo.SetGamma(2.5f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
     }
 
     {
@@ -889,28 +898,30 @@ void unit_test_material_uniforms()
         foo.SetTextureVelocityZ(-1.0f);
         foo.SetBaseColor(gfx::Color::Red);
 
+        gfx::MaterialClass::State state;
+
         auto bar = foo;
-        TEST_REQUIRE(bar.GetProgramId() == foo.GetProgramId());
+        TEST_REQUIRE(bar.GetProgramId(state) == foo.GetProgramId(state));
         foo.SetGamma(2.5f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
         bar = foo;
         foo.SetBaseColor(gfx::Color::Blue);
-        TEST_REQUIRE(foo.GetProgramId() != bar.GetProgramId());
+        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
     }
 }
 

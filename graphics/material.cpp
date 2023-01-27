@@ -777,7 +777,7 @@ std::unique_ptr<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
 
 Shader* ColorClass::GetShader(const State& state, Device& device) const
 {
-    if (auto* shader = device.FindShader(GetProgramId()))
+    if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
 constexpr auto* src = R"(
@@ -797,7 +797,7 @@ void main()
   gl_FragColor = pow(color, vec4(kGamma));
 }
 )";
-    auto* shader = device.MakeShader(GetProgramId());
+    auto* shader = device.MakeShader(GetProgramId(state));
     ShaderData data;
     data.gamma      = mGamma;
     data.base_color = mColor;
@@ -818,7 +818,7 @@ size_t ColorClass::GetHash() const
     return hash;
 }
 
-std::string ColorClass::GetProgramId() const
+std::string ColorClass::GetProgramId(const State& state) const
 {
     size_t hash = base::hash_combine(0, "color");
     if (mStatic)
@@ -837,7 +837,7 @@ void ColorClass::ApplyDynamicState(const State& state, Device& device, Program& 
         SetUniform("kBaseColor", state.uniforms, mColor, program);
     }
 }
-void ColorClass::ApplyStaticState(Device& device, Program& prog) const
+void ColorClass::ApplyStaticState(const State&, Device& device, Program& prog) const
 {
     prog.SetUniform("kGamma", mGamma);
     prog.SetUniform("kBaseColor", mColor);
@@ -867,7 +867,7 @@ bool ColorClass::FromJson2(const data::Reader& data)
 
 Shader* GradientClass::GetShader(const State& state, Device& device) const
 {
-    if (auto* shader = device.FindShader(GetProgramId()))
+    if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
 constexpr auto* src = R"(
@@ -906,7 +906,7 @@ void main()
 }
 )";
 
-    auto* shader = device.MakeShader(GetProgramId());
+    auto* shader = device.MakeShader(GetProgramId(state));
     ShaderData data;
     data.gamma = mGamma;
     data.color_map[0] = mColorMap[0];
@@ -934,7 +934,7 @@ size_t GradientClass::GetHash() const
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
-std::string GradientClass::GetProgramId() const
+std::string GradientClass::GetProgramId(const State&) const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, "gradient");
@@ -964,7 +964,7 @@ void GradientClass::ApplyDynamicState(const State& state, Device& device, Progra
     }
 }
 
-void GradientClass::ApplyStaticState(Device& device, Program& program) const
+void GradientClass::ApplyStaticState(const State& state, Device& device, Program& program) const
 {
     program.SetUniform("kGamma",  mGamma);
     program.SetUniform("kColor0", mColorMap[0]);
@@ -1028,7 +1028,7 @@ SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
 
 Shader* SpriteClass::GetShader(const State& state, Device& device) const
 {
-    if (auto* shader = device.FindShader(GetProgramId()))
+    if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
     // todo: maybe pack some of shader uniforms
@@ -1135,7 +1135,7 @@ void main()
     gl_FragColor = pow(color, vec4(kGamma));
 }
 )";
-    auto* shader = device.MakeShader(GetProgramId());
+    auto* shader = device.MakeShader(GetProgramId(state));
     ShaderData data;
     data.gamma            = mGamma;
     data.texture_scale    = mTextureScale;
@@ -1169,7 +1169,7 @@ std::size_t SpriteClass::GetHash() const
     return hash;
 }
 
-std::string SpriteClass::GetProgramId() const
+std::string SpriteClass::GetProgramId(const State&) const
 {
     size_t hash = 0;
     base::hash_combine(hash, "sprite");
@@ -1237,13 +1237,16 @@ void SpriteClass::ApplyDynamicState(const State& state, Device& device, Program&
             math::equals(1.0f, sy, eps))
             need_software_wrap = false;
     }
+    const float kMaterialTime     = state.material_time;
+    const float kRenderPoints     = state.render_points ? 1.0f : 0.0f;
+    const float kParticleRotation = state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f;
+    const float kBlendCoeff       = mBlendFrames ? binds.blend_coefficient : 0.0f;
     program.SetTextureCount(2);
-    program.SetUniform("kBlendCoeff", mBlendFrames ? binds.blend_coefficient : 0.0f);
-    program.SetUniform("kTime", (float)state.material_time);
-    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
-    program.SetUniform("kAlphaMask", alpha_mask);
-    program.SetUniform("kApplyRandomParticleRotation",
-                    state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
+    program.SetUniform("kBlendCoeff",                  kBlendCoeff);
+    program.SetUniform("kTime",                        kMaterialTime);
+    program.SetUniform("kRenderPoints",                kRenderPoints);
+    program.SetUniform("kAlphaMask",                   alpha_mask);
+    program.SetUniform("kApplyRandomParticleRotation", kParticleRotation);
 
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
@@ -1267,14 +1270,14 @@ void SpriteClass::ApplyDynamicState(const State& state, Device& device, Program&
     }
 }
 
-void SpriteClass::ApplyStaticState(Device& device, Program& prog) const
+void SpriteClass::ApplyStaticState(const State& state, Device& device, Program& prog) const
 {
-    prog.SetUniform("kBaseColor", mBaseColor);
-    prog.SetUniform("kGamma", mGamma);
-    prog.SetUniform("kTextureScale", mTextureScale.x, mTextureScale.y);
+    prog.SetUniform("kBaseColor",         mBaseColor);
+    prog.SetUniform("kGamma",             mGamma);
+    prog.SetUniform("kTextureScale",      mTextureScale.x, mTextureScale.y);
     prog.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
-    prog.SetUniform("kTextureVelocityZ", mTextureVelocity.z);
-    prog.SetUniform("kTextureRotation", mTextureRotation);
+    prog.SetUniform("kTextureVelocityZ",  mTextureVelocity.z);
+    prog.SetUniform("kTextureRotation",   mTextureRotation);
 }
 
 void SpriteClass::IntoJson(data::Writer& data) const
@@ -1445,7 +1448,7 @@ TextureMap2DClass::TextureMap2DClass(const TextureMap2DClass& other, bool copy)
 
 Shader* TextureMap2DClass::GetShader(const State& state, Device& device) const
 {
-    if (auto* shader = device.FindShader(GetProgramId()))
+    if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
 // todo: pack some of the uniforms ?
@@ -1545,7 +1548,7 @@ void main()
     gl_FragColor = pow(col, vec4(kGamma));
 }
 )";
-    auto* shader = device.MakeShader(GetProgramId());
+    auto* shader = device.MakeShader(GetProgramId(state));
     ShaderData data;
     data.gamma            = mGamma;
     data.base_color       = mBaseColor;
@@ -1577,7 +1580,7 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mTexture.GetHash());
     return hash;
 }
-std::string TextureMap2DClass::GetProgramId() const
+std::string TextureMap2DClass::GetProgramId(const State&) const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, "texture");
@@ -1663,7 +1666,7 @@ void TextureMap2DClass::ApplyDynamicState(const State& state, Device& device, Pr
     }
 }
 
-void TextureMap2DClass::ApplyStaticState(Device& device, Program& prog) const
+void TextureMap2DClass::ApplyStaticState(const State& state, Device& device, Program& prog) const
 {
     prog.SetUniform("kGamma",             mGamma);
     prog.SetUniform("kBaseColor",         mBaseColor);
@@ -1909,7 +1912,7 @@ std::unordered_set<std::string> CustomMaterialClass::GetTextureMapNames() const
 
 Shader* CustomMaterialClass::GetShader(const State& state, Device& device) const
 {
-    const auto& id = GetProgramId();
+    const auto& id = GetProgramId(state);
     if (auto* shader = device.FindShader(id))
         return shader;
 
@@ -1989,7 +1992,7 @@ std::size_t CustomMaterialClass::GetHash() const
     }
     return hash;
 }
-std::string CustomMaterialClass::GetProgramId() const
+std::string CustomMaterialClass::GetProgramId(const State&) const
 {
     size_t hash = 0;
     if (!mShaderSrc.empty())
@@ -2063,7 +2066,7 @@ void CustomMaterialClass::ApplyDynamicState(const State& state, Device& device, 
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetTextureCount(texture_unit);
 }
-void CustomMaterialClass::ApplyStaticState(Device& device, Program& prog) const
+void CustomMaterialClass::ApplyStaticState(const State& state, Device& device, Program& program) const
 {
     // nothing to do here, static state should be in the shader
     // already, either by the shader programmer or by the shader
@@ -2223,18 +2226,18 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
         return *this;
 
     CustomMaterialClass tmp(other, true);
-    std::swap(mClassId, tmp.mClassId);
-    std::swap(mName, tmp.mName);
-    std::swap(mShaderUri, tmp.mShaderUri);
-    std::swap(mShaderSrc, tmp.mShaderSrc);
-    std::swap(mUniforms, tmp.mUniforms);
+    std::swap(mClassId,     tmp.mClassId);
+    std::swap(mName,        tmp.mName);
+    std::swap(mShaderUri,   tmp.mShaderUri);
+    std::swap(mShaderSrc,   tmp.mShaderSrc);
+    std::swap(mUniforms,    tmp.mUniforms);
     std::swap(mSurfaceType, tmp.mSurfaceType);
     std::swap(mTextureMaps, tmp.mTextureMaps);
-    std::swap(mMinFilter, tmp.mMinFilter);
-    std::swap(mMagFilter, tmp.mMagFilter);
-    std::swap(mWrapX, tmp.mWrapX);
-    std::swap(mWrapY, tmp.mWrapY);
-    std::swap(mFlags, tmp.mFlags);
+    std::swap(mMinFilter,   tmp.mMinFilter);
+    std::swap(mMagFilter,   tmp.mMagFilter);
+    std::swap(mWrapX,       tmp.mWrapX);
+    std::swap(mWrapY,       tmp.mWrapY);
+    std::swap(mFlags,       tmp.mFlags);
     return *this;
 }
 
@@ -2244,7 +2247,7 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
     state.material_time = mRuntime;
-    state.uniforms      = mUniforms;
+    state.uniforms      = &mUniforms;
     mClass->ApplyDynamicState(state, device, program);
 
     const auto surface = mClass->GetSurfaceType();
@@ -2258,13 +2261,29 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     raster.premultiplied_alpha = mClass->PremultipliedAlpha();
 }
 
+void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
+{
+    MaterialClass::State state;
+    state.editing_mode  = env.editing_mode;
+    state.render_points = env.render_points;
+    return mClass->ApplyStaticState(state, device, program);
+}
+
+std::string MaterialClassInst::GetProgramId(const Environment& env) const
+{
+    MaterialClass::State state;
+    state.editing_mode  = env.editing_mode;
+    state.render_points = env.render_points;
+    return mClass->GetProgramId(state);
+}
+
 Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
     state.material_time = mRuntime;
-    state.uniforms      = mUniforms;
+    state.uniforms      = &mUniforms;
     return mClass->GetShader(state, device);
 }
 
@@ -2335,7 +2354,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
 }
-void TextMaterial::ApplyStaticState(gfx::Device& device, gfx::Program& program) const
+void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx::Program& program) const
 {}
 Shader* TextMaterial::GetShader(const Environment& env, Device& device) const
 {
@@ -2383,7 +2402,7 @@ void main() {
     else BUG("Unhandled texture raster format.");
     return nullptr;
 }
-std::string TextMaterial::GetProgramId() const
+std::string TextMaterial::GetProgramId(const Environment&) const
 {
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
