@@ -771,8 +771,8 @@ namespace gfx
 
         enum class Flags {
             // When set, change the transparent blending equation
-            // to expect alpha values to be premultpliesd into the
-            // the RGB values.
+            // to expect alpha values to be premultiplied in the
+            // RGB values.
             PremultipliedAlpha
         };
 
@@ -804,7 +804,7 @@ namespace gfx
             // The uniform parameters set on the material instance (if any).
             // The instance uniforms will take precedence over the uniforms
             // set in the class whenever they're set.
-            std::unordered_map<std::string, Uniform> uniforms;
+            const UniformMap* uniforms = nullptr;
         };
 
         virtual ~MaterialClass() = default;
@@ -814,7 +814,7 @@ namespace gfx
         virtual std::string GetName() const = 0;
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
-        virtual std::string GetProgramId() const = 0;
+        virtual std::string GetProgramId(const State& state) const = 0;
         // Get the material class hash value based on the current properties
         // of the class.
         virtual std::size_t GetHash() const = 0;
@@ -837,7 +837,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const = 0;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
-        virtual void ApplyStaticState(Device& device, Program& program) const = 0;
+        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const = 0;
         // Serialize the class into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load the class from JSON. Returns true on success.
@@ -896,17 +896,20 @@ namespace gfx
         { return dynamic_cast<T*>(self); }
 
         template<typename T>
-        static bool SetUniform(const char* name, const UniformMap& uniforms, const T& backup, Program& program)
+        static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program)
         {
-            auto it = uniforms.find(name);
-            if (it == uniforms.end()) {
-                program.SetUniform(name, backup);
-                return true;
-            }
-            const auto& value = it->second;
-            if (const auto* ptr = std::get_if<T>(&value)) {
-                program.SetUniform(name, *ptr);
-                return true;
+            if (uniforms)
+            {
+                auto it = uniforms->find(name);
+                if (it == uniforms->end()) {
+                    program.SetUniform(name, backup);
+                    return true;
+                }
+                const auto& value = it->second;
+                if (const auto* ptr = std::get_if<T>(&value)) {
+                    program.SetUniform(name, *ptr);
+                    return true;
+                }
             }
             program.SetUniform(name, backup);
             return false;
@@ -990,7 +993,7 @@ namespace gfx
         virtual Type GetType() const override { return Type::Color; }
         virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const State& state) const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override
         { return std::make_unique<ColorClass>(*this); }
         virtual std::unique_ptr<MaterialClass> Clone() const override
@@ -1000,7 +1003,7 @@ namespace gfx
             return ret;
         }
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
     private:
@@ -1051,7 +1054,7 @@ namespace gfx
         virtual Type GetType() const override { return Type::Gradient; }
         virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const State&) const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override
         { return std::make_unique<GradientClass>(*this); }
         virtual std::unique_ptr<MaterialClass> Clone() const override
@@ -1061,7 +1064,7 @@ namespace gfx
             return ret;
         }
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
     private:
@@ -1179,11 +1182,11 @@ namespace gfx
         virtual Type GetType() const override { return Type::Sprite; }
         virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const State&) const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
@@ -1284,11 +1287,11 @@ namespace gfx
         virtual Type GetType() const override { return Type::Texture; }
         virtual Shader* GetShader(const State& state, Device& device) const override;
         virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const State&) const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
@@ -1416,11 +1419,11 @@ namespace gfx
         virtual std::size_t GetHash() const override;
         virtual std::string GetId() const override { return mClassId; }
         virtual std::string GetName() const override { return mName; }
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const State&) const override;
         virtual std::unique_ptr<MaterialClass> Copy() const override;
         virtual std::unique_ptr<MaterialClass> Clone() const override;
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson2(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
@@ -1475,13 +1478,13 @@ namespace gfx
         virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const = 0;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
-        virtual void ApplyStaticState(Device& device, Program& program) const = 0;
+        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const = 0;
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader failed to compile.
         virtual Shader* GetShader(const Environment& env, Device& device) const = 0;
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
-        virtual std::string GetProgramId() const = 0;
+        virtual std::string GetProgramId(const Environment& env) const = 0;
         // Get the material class id (if any).
         virtual std::string GetClassId() const = 0;
         // Update material time by a delta value (in seconds).
@@ -1517,10 +1520,9 @@ namespace gfx
         // Apply the material properties to the given program object and set the rasterizer state.
         virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override
-        { mClass->ApplyStaticState(device, program); }
-        virtual std::string GetProgramId() const override
-        { return mClass->GetProgramId(); }
+        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
+
         virtual std::string GetClassId() const override
         { return mClass->GetId(); }
         virtual void Update(float dt) override
@@ -1563,9 +1565,9 @@ namespace gfx
         TextMaterial(const TextBuffer& text);
         TextMaterial(TextBuffer&& text);
         virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
-        virtual void ApplyStaticState(Device& device, Program& program) const override;
+        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId() const override;
+        virtual std::string GetProgramId(const Environment&) const override;
         virtual std::string GetClassId() const override;
         virtual void Update(float dt) override;
         virtual void SetRuntime(float runtime) override;
