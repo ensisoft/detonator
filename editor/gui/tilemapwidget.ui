@@ -28,6 +28,18 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base  properties</string>
        </property>
@@ -902,13 +914,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1019,13 +1031,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>390</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1263,8 +1275,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>92</width>
-                 <height>22</height>
+                 <width>308</width>
+                 <height>400</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -1291,7 +1303,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>390</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1301,6 +1313,12 @@
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="1" column="1">
          <widget class="QSpinBox" name="tileValue">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="stepType">
            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
           </property>

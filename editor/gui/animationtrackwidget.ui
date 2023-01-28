@@ -30,6 +30,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="title">
           <string>Base properties</string>
          </property>
@@ -37,30 +43,6 @@
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="3" column="1">
-             <widget class="QDoubleSpinBox" name="delay">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="suffix">
-               <string> s</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_11">
-              <property name="text">
-               <string>Delay</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Duration</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
              <widget class="QDoubleSpinBox" name="duration">
               <property name="suffix">
                <string> s</string>
@@ -82,29 +64,6 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QLineEdit" name="trackID">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="trackName">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label">
               <property name="sizePolicy">
@@ -118,17 +77,64 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_6">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>Track ID</string>
+               <string>Duration</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="4" column="1">
+             <widget class="QDoubleSpinBox" name="delay">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="suffix">
+               <string> s</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="trackName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Delay</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
              <widget class="QCheckBox" name="looping">
               <property name="text">
                <string>Looping</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="trackID">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>ID</string>
               </property>
              </widget>
             </item>
@@ -411,13 +417,6 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Zoom</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QDoubleSpinBox" name="zoom">
               <property name="minimum">
                <double>0.100000000000000</double>
@@ -525,7 +524,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>350</width>
          <height>0</height>
         </size>
        </property>
@@ -1534,9 +1533,9 @@
  </customwidgets>
  <tabstops>
   <tabstop>trackName</tabstop>
+  <tabstop>trackID</tabstop>
   <tabstop>duration</tabstop>
   <tabstop>delay</tabstop>
-  <tabstop>trackID</tabstop>
   <tabstop>looping</tabstop>
   <tabstop>viewPosX</tabstop>
   <tabstop>viewPosY</tabstop>
@@ -1581,6 +1580,8 @@
   <tabstop>kinematicEndVeloZ</tabstop>
   <tabstop>itemFlags</tabstop>
   <tabstop>flagAction</tabstop>
+  <tabstop>materialInterpolation</tabstop>
+  <tabstop>btnMaterialParameters</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
