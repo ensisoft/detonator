@@ -191,6 +191,7 @@ private:
             shaders.push_back(drawable_shader);
             shaders.push_back(material_shader);
             program = mDevice->MakeProgram(name);
+            program->SetName(name);
             program->Build(shaders);
             if (program->IsValid())
             {

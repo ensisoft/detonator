@@ -35,6 +35,7 @@
 #include "graphics/program.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
+#include "graphics/renderpass.h"
 
 //                  == Notes about shaders ==
 // 1. Shaders are specific to a device within compatibility constraints
@@ -2243,6 +2244,9 @@ CustomMaterialClass& CustomMaterialClass::operator=(const CustomMaterialClass& o
 
 void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
+    if (env.render_pass->GetType() == RenderPass::Type::Stencil)
+        return;
+
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2263,6 +2267,9 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
 
 void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
 {
+    if (env.render_pass->GetType() == RenderPass::Type::Stencil)
+        return;
+
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2271,6 +2278,9 @@ void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device,
 
 std::string MaterialClassInst::GetProgramId(const Environment& env) const
 {
+    if (env.render_pass->GetType() == RenderPass::Type::Stencil)
+        return "stencil-shader";
+
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2279,6 +2289,31 @@ std::string MaterialClassInst::GetProgramId(const Environment& env) const
 
 Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) const
 {
+    if (env.render_pass->GetType() == RenderPass::Type::Stencil)
+    {
+        // if the render pass is a stenciling pass we can replace the material
+        // shader by a simple fragment shader that doesn't do any expensive
+        // operations. It could be desirable to use the texture alpha to write
+        // to the stencil buffer (by discarding fragments) to create a way to
+        // use the texture as a stencil mask. This would then need to be implemented
+        // in the Sprite and TextureMap classes separately.
+        constexpr auto* src = R"(
+#version 100
+precision mediump float;
+void main() {
+   gl_FragColor = vec4(1.0);
+}
+)";
+        auto* shader = device.FindShader("stencil-shader");
+        if (shader == nullptr)
+        {
+            shader = device.MakeShader("stencil-shader");
+            shader->SetName("stencil-shader");
+            shader->CompileSource(src);
+        }
+        return shader;
+    }
+
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
