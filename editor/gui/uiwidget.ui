@@ -24,13 +24,13 @@
       <widget class="QGroupBox" name="baseProperties">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>350</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>16777215</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -771,13 +771,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>16777215</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -814,7 +814,7 @@
       <widget class="QGroupBox" name="widgetProperties">
        <property name="maximumSize">
         <size>
-         <width>400</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1127,7 +1127,7 @@
       <widget class="QGroupBox" name="widgetStyle">
        <property name="maximumSize">
         <size>
-         <width>400</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1255,7 +1255,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>400</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>

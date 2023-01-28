@@ -30,8 +30,14 @@
       <widget class="QGroupBox" name="baseProperties">
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="title">
@@ -1110,8 +1116,14 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="title">

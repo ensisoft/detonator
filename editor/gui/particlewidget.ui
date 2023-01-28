@@ -22,6 +22,18 @@
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QGroupBox" name="baseProperties">
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -122,32 +134,6 @@
         <item row="3" column="1">
          <widget class="QComboBox" name="motion"/>
         </item>
-        <item row="8" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QComboBox" name="when"/>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="numParticles">
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="minimum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>10000.000000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_30">
           <property name="text">
@@ -227,20 +213,6 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Emission</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Emitter</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="ID">
           <property name="sizePolicy">
@@ -253,9 +225,6 @@
            <bool>true</bool>
           </property>
          </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QComboBox" name="shape"/>
         </item>
         <item row="3" column="0">
          <widget class="QLabel" name="label_12">
@@ -271,9 +240,6 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QComboBox" name="placement"/>
-        </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="name">
           <property name="sizePolicy">
@@ -281,13 +247,6 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Placement</string>
           </property>
          </widget>
         </item>
@@ -359,23 +318,32 @@
         </size>
        </property>
        <property name="title">
-        <string>Particle direction</string>
+        <string>Particle emission</string>
        </property>
        <property name="checkable">
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="1">
-         <widget class="QComboBox" name="direction">
+        <item row="7" column="1">
+         <widget class="QSlider" name="dirSizeAngle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="maximum">
+           <number>360</number>
+          </property>
+          <property name="value">
+           <number>360</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="5" column="1">
          <widget class="QSlider" name="dirStartAngle">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -403,17 +371,21 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="dirStartAngleSpin">
-          <property name="minimum">
-           <double>-180.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>180.000000000000000</double>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Placement</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Emitter</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
          <widget class="QLabel" name="label_15">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -429,26 +401,10 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
-         <widget class="QSlider" name="dirSizeAngle">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximum">
-           <number>360</number>
-          </property>
-          <property name="value">
-           <number>360</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="placement"/>
         </item>
-        <item row="0" column="0">
+        <item row="3" column="0">
          <widget class="QLabel" name="label_8">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -461,14 +417,27 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="0" column="1">
+         <widget class="QComboBox" name="shape"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="dirStartAngleSpin">
+          <property name="minimum">
+           <double>-180.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>180.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
          <widget class="QDoubleSpinBox" name="dirSizeAngleSpin">
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="label_16">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -483,6 +452,49 @@
            <string>Size angle</string>
           </property>
          </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="direction">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Emission</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QComboBox" name="when"/>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="numParticles">
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -928,13 +940,6 @@
            <widget class="QComboBox" name="cmbGrid"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Material</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QComboBox" name="materials">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1030,8 +1035,14 @@
       <widget class="QGroupBox" name="particleProperties">
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="title">
@@ -1636,10 +1647,6 @@
   <tabstop>motion</tabstop>
   <tabstop>gravityX</tabstop>
   <tabstop>gravityY</tabstop>
-  <tabstop>shape</tabstop>
-  <tabstop>placement</tabstop>
-  <tabstop>when</tabstop>
-  <tabstop>numParticles</tabstop>
   <tabstop>minTime</tabstop>
   <tabstop>btnResetMinTime</tabstop>
   <tabstop>maxTime</tabstop>
@@ -1647,6 +1654,10 @@
   <tabstop>delay</tabstop>
   <tabstop>btnResetDelay</tabstop>
   <tabstop>canExpire</tabstop>
+  <tabstop>shape</tabstop>
+  <tabstop>when</tabstop>
+  <tabstop>numParticles</tabstop>
+  <tabstop>placement</tabstop>
   <tabstop>direction</tabstop>
   <tabstop>dirStartAngleSpin</tabstop>
   <tabstop>dirStartAngle</tabstop>

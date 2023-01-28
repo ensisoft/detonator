@@ -28,6 +28,18 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -1301,8 +1313,14 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="title">

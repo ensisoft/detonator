@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1503</width>
-    <height>933</height>
+    <height>968</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,12 @@
         <size>
          <width>350</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="title">
@@ -213,9 +219,15 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>16777215</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -279,7 +291,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -610,7 +622,7 @@
       <widget class="QGroupBox" name="audioFile">
        <property name="maximumSize">
         <size>
-         <width>390</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
