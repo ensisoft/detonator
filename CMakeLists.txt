@@ -170,6 +170,7 @@ add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
+    graphics/renderpass.cpp
     graphics/image.cpp
     graphics/device.cpp
     graphics/opengl_es2_device.cpp
@@ -200,6 +201,7 @@ add_library(GfxLibTesting
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
+    graphics/renderpass.cpp
     graphics/image.cpp
     graphics/device.cpp
     graphics/opengl_es2_device.cpp
@@ -583,6 +585,7 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 add_executable(graphics_test
     graphics/bitmap.cpp
     graphics/material.cpp
+    graphics/renderpass.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
     graphics/device.cpp
