@@ -48,6 +48,7 @@ namespace gfx
 {
     class Device;
     class Shader;
+    class RenderPass;
 
     // Interface for acquiring texture data. Possible implementations
     // might load the data from a file or generate it on the fly.
@@ -1459,6 +1460,7 @@ namespace gfx
         virtual ~Material() = default;
 
         struct Environment {
+            const RenderPass* render_pass = nullptr;
             // true if running in an "editing mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.

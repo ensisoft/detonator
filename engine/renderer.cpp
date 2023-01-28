@@ -30,6 +30,7 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
+#include "graphics/renderpass.h"
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/scene.h"
@@ -573,7 +574,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
     {
         const auto& material = item->GetMaterialId();
         const auto& drawable = item->GetDrawableId();
-        if (item->GetRenderPass() == RenderPass::Draw && paint_node.item_material_id != material)
+        if (paint_node.item_material_id != material)
         {
             paint_node.item_material.reset();
             paint_node.item_material_id = material;
@@ -581,7 +582,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             if (klass)
                 paint_node.item_material = gfx::CreateMaterialInstance(klass);
             if (!paint_node.item_material)
-                WARN("No such material class '%1' found for '%2/%3')", material, entity.GetName(), node.GetName());
+                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), node.GetName());
         }
         if (paint_node.item_drawable_id != drawable)
         {
@@ -592,7 +593,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             if (klass)
                 paint_node.item_drawable = gfx::CreateDrawableInstance(klass);
             if (!paint_node.item_drawable)
-                WARN("No such drawable class '%1' found for '%2/%3'", drawable, entity.GetName(), node.GetName());
+                WARN("No such drawable class found. [drawable='%1', entity='%2, node='%3']", drawable, entity.GetName(), node.GetName());
             if (paint_node.item_drawable)
             {
                 gfx::Transform transform;
@@ -744,7 +745,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
 
     struct Layer {
         std::vector<gfx::Painter::DrawShape> draw_list;
-        std::vector<gfx::Painter::MaskShape> mask_list;
+        std::vector<gfx::Painter::DrawShape> mask_list;
     };
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -774,15 +775,16 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         {
             gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
-            shape.drawable = packet.drawable.get();
-            shape.material = packet.material.get();
+            shape.drawable  = packet.drawable.get();
+            shape.material  = packet.material.get();
             entity_layer.draw_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::Mask)
         {
-            gfx::Painter::MaskShape shape;
+            gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
-            shape.drawable = packet.drawable.get();
+            shape.drawable  = packet.drawable.get();
+            shape.material  = packet.material.get();
             entity_layer.mask_list.push_back(shape);
         }
     }
@@ -790,9 +792,18 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
     {
         for (const auto& entity_layer : scene_layer)
         {
-            entity_layer.mask_list.empty()
-                ? painter.Draw(entity_layer.draw_list)
-                : painter.Draw(entity_layer.draw_list, entity_layer.mask_list);
+            if (!entity_layer.mask_list.empty())
+            {
+                const gfx::detail::StencilMaskPass mask(1, 0);
+                const gfx::detail::StencilTestColorWritePass cover(1);
+                painter.Draw(entity_layer.mask_list, mask);
+                painter.Draw(entity_layer.draw_list, cover);
+            }
+            else if (!entity_layer.draw_list.empty())
+            {
+                const gfx::detail::GenericRenderPass pass;
+                painter.Draw(entity_layer.draw_list, pass);
+            }
         }
     }
 }

@@ -39,6 +39,7 @@
 #include "graphics/texture.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
+#include "graphics/renderpass.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -475,11 +476,18 @@ public:
             gfx::Transform mask;
             mask.Resize(400, 400);
             mask.Translate(200 + std::cos(mTime) * 200, 200 + std::sin(mTime) * 200);
+
+            // Clear stencil to all 1s and then write to 0 when fragment is written.
+            const gfx::detail::StencilMaskPass stencil(1, 0);
+            painter.Draw(gfx::Circle(), mask, gfx::CreateMaterialFromColor(gfx::Color::White), stencil);
+
+            // write fragments only where stencil has value 1
+            const gfx::detail::StencilTestColorWritePass cover(1);
+
             gfx::Transform shape;
             shape.Resize(1024, 768);
-            painter.Draw(gfx::Rectangle(), shape, gfx::Circle(), mask, gfx::MaterialClassInst(material));
+            painter.Draw(gfx::Rectangle(), shape, gfx::MaterialClassInst(material), cover);
         }
-
     }
     virtual void Update(float dts) override
     {

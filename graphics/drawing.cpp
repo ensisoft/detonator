@@ -28,6 +28,7 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/text.h"
+#include "graphics/renderpass.h"
 
 namespace {
 gfx::MaterialClassInst MakeMaterial(const gfx::Color4f& color)
@@ -194,7 +195,11 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
     const auto mask_height = height - 2 * line_width;
     mask_transform.Resize(mask_width, mask_height);
     mask_transform.Translate(x + line_width, y + line_width);
-    painter.Draw(shape, outline_transform, shape, mask_transform, material);
+
+    detail::StencilMaskPass mask(1, 0);
+    detail::StencilTestColorWritePass cover(1);
+    painter.Draw(shape, mask_transform, material, mask);
+    painter.Draw(shape, outline_transform, material, cover);
 }
 
 void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)

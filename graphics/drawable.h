@@ -46,6 +46,7 @@ namespace gfx
     class Shader;
     class Geometry;
     class Program;
+    class RenderPass;
 
     // DrawableClass defines a new type of drawable.
      class DrawableClass
@@ -88,6 +89,7 @@ namespace gfx
              Points
          };
          struct Environment {
+             const RenderPass* render_pass = nullptr;
              // true if running in an "editor mode", which means that even
              // content marked static might have changed and should be checked
              // in case it has been modified and should be re-uploaded.

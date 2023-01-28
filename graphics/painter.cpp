@@ -33,6 +33,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
+#include "graphics/renderpass.h"
 #include "graphics/types.h"
 
 namespace gfx
@@ -99,190 +100,75 @@ public:
 
     virtual void Draw(const Drawable& drawable, const Transform& transform, const Material& material) override
     {
-        // create simple orthographic projection matrix.
-        // 0,0 is the window top left, x grows left and y grows down
-        const auto& kModelMatrix = transform.GetAsMatrix();
-        const auto style = drawable.GetStyle();
-
-        Drawable::Environment drawable_env;
-        drawable_env.editing_mode = mEditingMode;
-        drawable_env.pixel_ratio  = mPixelRatio;
-        drawable_env.proj_matrix  = &mProjection;
-        drawable_env.view_matrix  = &mViewMatrix;
-        drawable_env.model_matrix = &kModelMatrix;
-        Geometry* geom = drawable.Upload(drawable_env, *mDevice);
-        if (geom == nullptr)
-            return;
-
-        Material::Environment material_env;
-        material_env.editing_mode  = mEditingMode;
-        material_env.render_points = style == Drawable::Style::Points;
-        Program* prog = GetProgram(drawable, material, drawable_env, material_env);
-        if (prog == nullptr)
-            return;
-
-        Material::RasterState material_raster_state;
-        material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
-
-        Drawable::RasterState drawable_raster_state;
-        drawable.ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
-
-        Device::State state;
-        state.viewport     = MapToDevice(mViewport);
-        state.scissor      = MapToDevice(mScissor);
-        state.bWriteColor  = true;
-        state.stencil_func = Device::State::StencilFunc::Disabled;
-        state.blending     = material_raster_state.blending;
-        state.premulalpha  = material_raster_state.premultiplied_alpha;
-        state.line_width   = drawable_raster_state.line_width;
-        state.culling      = drawable_raster_state.culling;
-        mDevice->Draw(*prog, *geom, state);
+        const detail::GenericRenderPass pass;
+        Draw(drawable, transform, material, pass);
     }
 
-    virtual void Draw(const Drawable& drawShape, const Transform& drawTransform,
-                      const Drawable& maskShape, const Transform& maskTransform,
-                      const Material& material) override
+    virtual void Draw(const Drawable& shape, const Transform& transform, const Material& material, const RenderPass& pass) override
     {
-        const auto& dm = drawTransform.GetAsMatrix();
-        const auto& mm = maskTransform.GetAsMatrix();
-        DrawShape draw;
-        draw.drawable = &drawShape;
-        draw.material = &material;
-        draw.transform = &dm;
-        std::vector<DrawShape> drawlist;
-        drawlist.push_back(draw);
+        const auto& mat = transform.GetAsMatrix();
 
-        MaskShape mask;
-        mask.drawable  = &maskShape;
-        mask.transform = &mm;
-        std::vector<MaskShape> masklist;
-        masklist.push_back(mask);
-        Draw(drawlist, masklist);
+        std::vector<DrawShape> shapes;
+        shapes.resize(1);
+        shapes[0].drawable  = &shape;
+        shapes[0].material  = &material;
+        shapes[0].transform = &mat;
+        Draw(shapes, pass);
     }
 
-    virtual void Draw(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) override
+    virtual void Draw(const std::vector<DrawShape>& shapes, const RenderPass& pass) override
     {
-        mDevice->ClearStencil(1);
+        RenderPass::State render_pass_state;
+        pass.Begin(*mDevice, &render_pass_state);
 
-        Device::State state;
-        state.viewport      = MapToDevice(mViewport);
-        state.scissor       = MapToDevice(mScissor);
-        state.stencil_func  = Device::State::StencilFunc::PassAlways;
-        state.stencil_dpass = Device::State::StencilOp::WriteRef;
-        state.stencil_ref   = 0;
-        state.bWriteColor   = false;
-        state.blending      = Device::State::BlendOp::None;
+        Device::State device_state;
+        device_state.viewport      = MapToDevice(mViewport);
+        device_state.scissor       = MapToDevice(mScissor);
+        device_state.stencil_func  = render_pass_state.stencil_func;
+        device_state.stencil_dpass = render_pass_state.stencil_dpass;
+        device_state.stencil_dfail = render_pass_state.stencil_dfail;
+        device_state.stencil_fail  = render_pass_state.stencil_fail;
+        device_state.stencil_mask  = render_pass_state.stencil_mask;
+        device_state.stencil_ref   = render_pass_state.stencil_ref;
+        device_state.bWriteColor   = render_pass_state.write_color;
+        device_state.depth_test    = render_pass_state.depth_test;
 
-        MaterialClassInst mask_material(CreateMaterialFromColor(gfx::Color::White));
-        // do the masking pass
-        for (const auto& mask : mask_list)
+        for (const auto& shape : shapes)
         {
             Drawable::Environment drawable_env;
             drawable_env.editing_mode = mEditingMode;
             drawable_env.pixel_ratio  = mPixelRatio;
             drawable_env.view_matrix  = &mViewMatrix;
             drawable_env.proj_matrix  = &mProjection;
-            drawable_env.model_matrix = mask.transform;
-            Geometry* geom = mask.drawable->Upload(drawable_env, *mDevice);
-            if (geom == nullptr)
+            drawable_env.model_matrix = shape.transform;
+            drawable_env.render_pass  = &pass;
+            Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
+            if (geometry == nullptr)
                 continue;
 
             Material::Environment material_env;
             material_env.editing_mode  = mEditingMode;
-            material_env.render_points = mask.drawable->GetStyle() == Drawable::Style::Points;
-            Program* prog = GetProgram(*mask.drawable, mask_material, drawable_env,material_env);
-            if (prog == nullptr)
-                continue;
-
-            Material::RasterState material_raster_state;
-            mask_material.ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
-
-            Drawable::RasterState drawable_raster_state;
-            mask.drawable->ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
-            state.culling     = drawable_raster_state.culling;
-            state.line_width  = drawable_raster_state.line_width;
-            state.premulalpha = false;
-            mDevice->Draw(*prog, *geom, state);
-        }
-
-        state.stencil_func  = Device::State::StencilFunc::RefIsEqual;
-        state.stencil_dpass = Device::State::StencilOp::WriteRef;
-        state.stencil_ref   = 1;
-        state.bWriteColor   = true;
-
-        // do the render pass.
-        for (const auto& draw : draw_list)
-        {
-            Drawable::Environment drawable_env;
-            drawable_env.editing_mode = mEditingMode;
-            drawable_env.pixel_ratio  = mPixelRatio;
-            drawable_env.view_matrix  = &mViewMatrix;
-            drawable_env.proj_matrix  = &mProjection;
-            drawable_env.model_matrix = draw.transform;
-            Geometry* geom = draw.drawable->Upload(drawable_env, *mDevice);
-            if (geom == nullptr)
-                continue;
-
-            Material::Environment material_env;
-            material_env.editing_mode  = mEditingMode;
-            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
-            Program* prog = GetProgram(*draw.drawable, *draw.material, drawable_env, material_env);
-            if (prog == nullptr)
-                continue;
-
-            Material::RasterState material_raster_state;
-            draw.material->ApplyDynamicState(material_env, *mDevice, *prog, material_raster_state);
-            state.blending    = material_raster_state.blending;
-            state.premulalpha = material_raster_state.premultiplied_alpha;
-
-            Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyDynamicState(drawable_env, *prog, drawable_raster_state);
-            state.line_width = drawable_raster_state.line_width;
-            state.culling    = drawable_raster_state.culling;
-            mDevice->Draw(*prog, *geom, state);
-        }
-    }
-
-    virtual void Draw(const std::vector<DrawShape>& shapes) override
-    {
-        for (const auto& draw : shapes)
-        {
-            Drawable::Environment drawable_env;
-            drawable_env.editing_mode = mEditingMode;
-            drawable_env.pixel_ratio  = mPixelRatio;
-            drawable_env.proj_matrix  = &mProjection;
-            drawable_env.view_matrix  = &mViewMatrix;
-            drawable_env.model_matrix = draw.transform;
-            Geometry* geom = draw.drawable->Upload(drawable_env, *mDevice);
-            if (geom == nullptr)
-                continue;
-
-            Material::Environment material_env;
-            material_env.editing_mode  = mEditingMode;
-            material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
-            Program* program = GetProgram(*draw.drawable, *draw.material, drawable_env, material_env);
+            material_env.render_points = shape.drawable->GetStyle() == Drawable::Style::Points;
+            material_env.render_pass   = &pass;
+            Program* program = GetProgram(*shape.drawable, *shape.material, drawable_env, material_env);
             if (program == nullptr)
                 continue;
 
             Material::RasterState material_raster_state;
-            draw.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
+            shape.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
+            device_state.blending    = material_raster_state.blending;
+            device_state.premulalpha = material_raster_state.premultiplied_alpha;
 
             Drawable::RasterState drawable_raster_state;
-            draw.drawable->ApplyDynamicState(drawable_env, *program, drawable_raster_state);
+            shape.drawable->ApplyDynamicState(drawable_env, *program, drawable_raster_state);
+            device_state.line_width = drawable_raster_state.line_width;
+            device_state.culling    = drawable_raster_state.culling;
 
-            Device::State state;
-            state.viewport     = MapToDevice(mViewport);
-            state.scissor      = MapToDevice(mScissor);
-            state.bWriteColor  = true;
-            state.stencil_func = Device::State::StencilFunc::Disabled;
-            state.blending     = material_raster_state.blending;
-            state.premulalpha  = material_raster_state.premultiplied_alpha;
-            state.culling      = drawable_raster_state.culling;
-            state.line_width   = drawable_raster_state.line_width;
-            mDevice->Draw(*program, *geom, state);
+            mDevice->Draw(*program, *geometry, device_state);
         }
-    }
 
+        pass.Finish(*mDevice);
+    }
 private:
     Program* GetProgram(const Drawable& drawable,
                         const Material& material,

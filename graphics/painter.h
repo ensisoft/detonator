@@ -36,6 +36,7 @@ namespace gfx
     class Drawable;
     class Material;
     class Transform;
+    class RenderPass;
 
     // Painter class implements some algorithms for
     // drawing different types of objects on the screen.
@@ -90,31 +91,35 @@ namespace gfx
         // You probably want to do this as the first step before
         // doing any other drawing.
         virtual void Clear(const Color4f& color) = 0;
-        // Draw the given shape using the given material with the given transformation.
-        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
-        // Draw using a mask to cover some areas where painting is not desired.
-        // This is a two-step draw operation:
-        // 1. Draw the mask shape using the given mask transform into the stencil buffer.
-        // 2. Draw the actual shape using the given material and transform into the color
-        //    buffer in the area not covered by the mask.
-        virtual void Draw(const Drawable& drawShape, const Transform& drawTransform,
-                          const Drawable& maskShape, const Transform& maskTransform,
-                          const Material& material) = 0;
 
-        struct MaskShape {
-            const glm::mat4* transform = nullptr;
-            const Drawable*  drawable  = nullptr;
-        };
+        // Legacy immediate mode draw function.
+        // Draw the shape with the material and transformation immediately in the
+        // current render target. This used the default/generic render pass which
+        // - writes color buffer
+        // - doesn't do depth testing
+        // - doesn't do stencil testing
+        // Using this function is inefficient and requires the correct draw order
+        // to be managed by the caller since depth testing isn't used. Using this
+        // function is not efficient since the device state is changed on every draw
+        // to the required state. If possible prefer the vector format which allows
+        // to draw multiple objects at once.
+        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
+
+        // Similar to the legacy draw except that allows the device state to be
+        // changed through a render pass object. The render pass object can be
+        // used to control which render target buffers are modified and how.
+        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& material, const RenderPass& pass) = 0;
+
         struct DrawShape {
             const glm::mat4* transform = nullptr;
             const Drawable* drawable   = nullptr;
             const Material* material   = nullptr;
         };
-        // Draw the shapes in the draw list after combining all the shapes in the mast list
-        // into a single mask that covers some areas of the render buffer.
-        virtual void Draw(const std::vector<DrawShape>& draw_list, const std::vector<MaskShape>& mask_list) = 0;
-        // todo:
-        virtual void Draw(const std::vector<DrawShape>& shapes) = 0;
+        // Draw multiple objects inside a render pass. Each object has a drawable shape
+        // which provides the geometrical information of the object to be drawn. A material
+        // which provides the "look&feel" i.e. the surface properties for the shape
+        // and finally a transform which defines the model-to-world transform.
+        virtual void Draw(const std::vector<DrawShape>& shapes, const RenderPass& pass) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);

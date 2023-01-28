@@ -819,9 +819,8 @@ public:
         {
             GLenum depth_test;
             if (state.depth_test == State::DepthTest::LessOrEQual)
-                depth_test = GL_LEQUAL;
+                GL_CALL(glDepthFunc(depth_test));
             else BUG("Unknown GL depth test mode.");
-            GL_CALL(glDepthFunc(depth_test));
         }
 
         if (state.bWriteColor) {
