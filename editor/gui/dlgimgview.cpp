@@ -135,6 +135,7 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
 
     SetVisible(mUI.btnCancel, false);
     SetVisible(mUI.btnAccept, false);
+    SetValue(mUI.zoom, 1.0f);
 }
 
 void DlgImgView::LoadImage(const QString& file)

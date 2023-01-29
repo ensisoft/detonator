@@ -109,6 +109,7 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
     PopulateFromEnum<TextureCutting>(mUI.cmbCutting);
     PopulateFromEnum<ImageFormat>(mUI.cmbImageFormat);
     SetVisible(mUI.progressBar, false);
+    SetValue(mUI.zoom, 1.0f);
 
     on_cmbCutting_currentIndexChanged(0);
     on_materialType_currentIndexChanged(0);

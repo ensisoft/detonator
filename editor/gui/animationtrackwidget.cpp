@@ -154,6 +154,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.actionUsePhysics, settings.enable_physics);
+    SetValue(mUI.zoom, 1.0f);
     setFocusPolicy(Qt::StrongFocus);
 
     mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&AnimationTrackWidget::ZoomIn, this)); };
@@ -427,14 +428,14 @@ bool AnimationTrackWidget::CanTakeAction(Actions action, const Clipboard* clipbo
 
 void AnimationTrackWidget::ZoomIn()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value + 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value + 0.1f);
 }
 
 void AnimationTrackWidget::ZoomOut()
 {
-    const auto value = mUI.zoom->value();
-    mUI.zoom->setValue(value - 0.1);
+    const float value = GetValue(mUI.zoom);
+    SetValue(mUI.zoom, value - 0.1f);
 }
 
 void AnimationTrackWidget::ReloadShaders()
