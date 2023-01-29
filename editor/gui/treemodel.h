@@ -48,10 +48,8 @@ namespace gui
                     item.SetLevel(mLevel);
                     if (node)
                     {
-                        item.SetIcon(QIcon("icons:eye.png"));
-                        if (!node->TestFlag(TreeNode::Flags::VisibleInEditor))
-                            item.SetIconMode(QIcon::Disabled);
-                        else item.SetIconMode(QIcon::Normal);
+                        const auto visible = node->TestFlag(TreeNode::Flags::VisibleInEditor);
+                        item.SetIcon(visible ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
                     }
                     mList.push_back(item);
                     mLevel++;

@@ -1537,9 +1537,9 @@ void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
     if (auto* node = GetCurrentNode())
     {
-        const bool visibility = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, !visibility);
-        item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+        const bool visibility = !node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
+        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, visibility);
+        item->SetIcon(visibility ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
         mUI.tree->Update();
     }
 }
