@@ -980,10 +980,8 @@ void SceneWidget::on_actionNodeEdit_triggered()
     {
         auto klass = node->GetEntityClass();
         if (!klass)
-        {
-            NOTE("Node has no entity klass set.");
             return;
-        }
+
         DlgEntity dlg(this, *klass, *node);
         dlg.exec();
     }
@@ -1357,7 +1355,7 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
         const auto visible_in_editor = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
         // reset the entity instance parameters to defaults since the
         // entity class has changed. only save the flags that are changed
-        // through the this UI.
+        // through this editor UI.
         node->ResetEntityParams();
         node->SetFlag(game::SceneNodeClass::Flags::VisibleInGame, visible_in_game);
         node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, visible_in_editor);
@@ -1652,6 +1650,17 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     mState.renderer.Draw(mState.scene, painter, scene, &hook, &hook);
+
+    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    {
+        const auto& node = mState.scene.GetNode(i);
+        const auto& entity_klass = node.GetEntityClass();
+        if (entity_klass)
+            continue;
+        const auto& pos = mState.scene.MapCoordsFromNodeBox(0.0f, 0.0f, &node);
+        ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), painter);
+    }
+
     mState.renderer.EndFrame();
     painter.ResetViewMatrix();
 
@@ -1711,8 +1720,10 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
         // the visualization of these is in the editor/gui/drawing.cpp/.h files.
         if (auto* current = GetCurrentNode())
         {
-            const auto& entity = current->GetEntityClass();
-            const auto& box    = entity->GetBoundingRect();
+            const auto& entity_klass = current->GetEntityClass();
+            if (!entity_klass)
+                return;
+            const auto& box  = entity_klass->GetBoundingRect();
             view.Push(mState.scene.FindNodeTransform(current));
 
             const auto hotspot = TestToolHotspot(view, box, glm::vec4(click_point.x(), click_point.y(), 0.0f, 1.0));
@@ -1893,8 +1904,11 @@ void SceneWidget::DisplayCurrentNodeProperties()
         int link_index = -1;
         if (const auto* parent = mState.scene.GetRenderTree().GetParent(node))
         {
-            const auto& klass  = parent->GetEntityClass();
-            for (size_t i=0; i<klass->GetNumNodes(); ++i) {
+            const auto& klass = parent->GetEntityClass();
+            if (!klass)
+                return;
+            for (size_t i=0; i<klass->GetNumNodes(); ++i)
+            {
                 const auto& tree = klass->GetRenderTree();
                 const auto& link = klass->GetNode(i);
                 //if (tree.GetParent(&link) == nullptr)
@@ -2076,8 +2090,7 @@ void SceneWidget::UpdateResourceReferences()
         auto klass = mState.workspace->FindEntityClassById(node.GetEntityId());
         if (!klass)
         {
-            WARN("Scene node '%1' refers to an entity ('%2') that is no longer available.",
-                 node.GetName(), node.GetEntityId());
+            WARN("Scene node refers to an entity that is no longer available. [node='%1']", node.GetName());
             node.ResetEntity();
             node.ResetEntityParams();
             continue;
