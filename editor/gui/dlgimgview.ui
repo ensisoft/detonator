@@ -133,13 +133,6 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Zoom</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QDoubleSpinBox" name="zoom">
               <property name="minimum">
                <double>0.100000000000000</double>

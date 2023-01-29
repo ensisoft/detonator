@@ -64,6 +64,7 @@ DlgFontMap::DlgFontMap(QWidget* parent) : QDialog(parent)
 
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     SetEnabled(mUI.btnExport, false);
+    SetValue(mUI.zoom, 1.0f);
 }
 
 DlgFontMap::~DlgFontMap()
