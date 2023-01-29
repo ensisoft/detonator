@@ -82,6 +82,7 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
 void ShowMessage(const std::string& msg, gfx::Painter& painter);
 void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter);
 void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter);
+void ShowError(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter);
 
 void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget);
 
@@ -147,6 +148,11 @@ public:
         if (node.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
             return true;
 
+        // broken entity reference.
+        const auto& klass = node.GetEntityClass();
+        if (!klass)
+            return false;
+
         if (&node == mSelectedSceneNode)
         {
             const auto& entity = node.GetEntityClass();
@@ -162,18 +168,21 @@ public:
     }
     virtual void EndDrawEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
     {
+        // broken entity reference.
+        const auto& entity_klass = node.GetEntityClass();
+        if (!entity_klass)
+            return;
+
         if (&node == mSelectedSceneNode)
         {
-            const auto& entity = node.GetEntityClass();
-            const auto& box    = entity->GetBoundingRect();
+            const auto& box  = entity_klass->GetBoundingRect();
             DrawSelectionBox(painter, trans, box);
             if (mDrawVectors)
                 DrawBasisVectors(painter, trans);
         }
         else if (!node.TestFlag(game::SceneNodeClass::Flags::VisibleInGame))
         {
-            const auto& entity = node.GetEntityClass();
-            const auto& box    = entity->GetBoundingRect();
+            const auto& box  = entity_klass->GetBoundingRect();
             DrawInvisibleItemBox(painter, trans, box);
         }
     }
