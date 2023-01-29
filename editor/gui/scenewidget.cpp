@@ -1661,11 +1661,16 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), painter);
     }
 
-    mState.renderer.EndFrame();
     painter.ResetViewMatrix();
 
     if (mCurrentTool)
         mCurrentTool->Render(painter, view);
+
+    // Remember that the tool can also render using the renderer.
+    // If that happens after the call to "EndFrame" the renderer
+    // resources are lost in EndFrame and the tool's render call will
+    // end up recreating them again.
+    mState.renderer.EndFrame();
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
