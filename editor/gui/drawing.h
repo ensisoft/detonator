@@ -163,14 +163,13 @@ private:
     template<typename Node>
     void GenericAppendPackets(const Node* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets)
     {
-        const auto* drawable   = node->GetDrawable();
         const auto is_selected = mDrawSelection || node == mSelectedItem;
-        const auto is_mask     = drawable && drawable->GetRenderPass() == game::RenderPass::Mask;
         const auto is_playing  = mPlaying;
+        const auto is_visible  = WillDrawSomething(*node);
 
-        // add a visualization for a mask item when not playing and when
-        // the mask object is not selected or when there's no drawable item.
-        if ((is_mask || !drawable) && !is_selected && !is_playing)
+        // add a visualization for a nodes that don't draw anything and
+        // when they're not the selected item.
+        if (!is_visible && !is_selected && !is_playing)
         {
             static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
                     gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
@@ -254,6 +253,27 @@ private:
             packets.push_back(rotation_circle);
         trans.Pop();
     }
+
+    template<typename EntityNode>
+    bool WillDrawSomething(const EntityNode& node) const
+    {
+        if (!node.TestFlag(game::EntityNodeClass::Flags::VisibleInEditor))
+            return false;
+
+        if (const auto* draw = node.GetDrawable())
+        {
+            if (draw->GetRenderPass() == game::RenderPass::Draw &&
+                draw->TestFlag(game::DrawableItemClass::Flags::VisibleInGame))
+                return true;
+        }
+        if (const auto* item= node.GetTextItem())
+        {
+            if (item->TestFlag(game::TextItem::Flags::VisibleInGame))
+                return true;
+        }
+        return false;
+    }
+
 private:
     const void* mSelectedItem = nullptr;
     const game::FRect mViewRect;
