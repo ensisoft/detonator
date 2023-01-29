@@ -365,7 +365,10 @@ void Renderer::EndFrame()
     {
         for (auto it = mPaintNodes.begin(); it != mPaintNodes.end();)
         {
-            it->second.visited ? ++it : it = mPaintNodes.erase(it);
+            const auto& paint_node = it->second;
+            if (paint_node.visited)
+                ++it;
+            else it = mPaintNodes.erase(it);
         }
     }
 }
@@ -494,6 +497,9 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
                 paint_node.world_rotation = box.GetRotation();
                 paint_node.entity_node    = node;
                 paint_node.entity         = &mEntity;
+#if !defined(NDEBUG)
+                paint_node.debug_name     = mEntity.GetName() + "/" + node->GetName();
+#endif
             }
         }
         virtual void LeaveNode(const NodeType* node) override

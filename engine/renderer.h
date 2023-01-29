@@ -209,6 +209,9 @@ namespace engine
             float world_rotation = 0.0f;
             EntityRef     entity;
             EntityNodeRef entity_node;
+#if !defined(NDEBUG)
+            std::string debug_name;
+#endif
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
 
