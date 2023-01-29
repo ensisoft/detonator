@@ -1628,7 +1628,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     DrawHook hook(GetCurrentNode(), viewport);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
-    hook.SetDrawVectors(false);
+    hook.SetDrawVectors(true);
     hook.SetViewMatrix(view.GetAsMatrix());
 
     if (mState.scene.HasTilemap())
@@ -1693,10 +1693,6 @@ void SceneWidget::MouseMove(QMouseEvent* mickey)
 }
 void SceneWidget::MousePress(QMouseEvent* mickey)
 {
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const unsigned grid_size = static_cast<unsigned>(grid);
-
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
@@ -1705,40 +1701,38 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
 
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
-        glm::vec2 scene_node_hitpos;
-        auto scene_node = SelectNode(mickey->pos(), &scene_node_hitpos);
-        if (scene_node)
+        const auto snap = (bool)GetValue(mUI.chkSnap);
+        const auto grid_type = (GridDensity)GetValue(mUI.cmbGrid);
+        const auto grid_size = static_cast<unsigned>(grid_type);
+        const auto& click_point = mickey->pos();
+
+        // if we have a current node see if the mouse click point is in the special
+        // areas that are used to select a tool for resizing/rotating the node.
+        // the visualization of these is in the editor/gui/drawing.cpp/.h files.
+        if (auto* current = GetCurrentNode())
         {
-            auto klass = scene_node->GetEntityClass();
-            std::vector<const game::EntityNodeClass*> hit_entity_nodes;
-            std::vector<glm::vec2> hit_entity_node_positions;
-            klass->CoarseHitTest(scene_node_hitpos.x, scene_node_hitpos.y, &hit_entity_nodes, &hit_entity_node_positions);
-            if (!hit_entity_nodes.empty())
+            const auto& entity = current->GetEntityClass();
+            const auto& box    = entity->GetBoundingRect();
+            view.Push(mState.scene.FindNodeTransform(current));
+
+            const auto hotspot = TestToolHotspot(view, box, glm::vec4(click_point.x(), click_point.y(), 0.0f, 1.0));
+            if (hotspot == ToolHotspot::Resize)
+                mCurrentTool.reset(new ScaleRenderTreeNodeTool(mState.scene, current));
+            else if (hotspot == ToolHotspot::Rotate)
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(mState.scene, current));
+            view.Pop();
+        }
+        if (!mCurrentTool)
+        {
+            if (auto* selection = SelectNode(click_point))
             {
-                const auto* hitnode = hit_entity_nodes[0];
-                const auto& hitpos  = hit_entity_node_positions[0];
-                const auto& size = hitnode->GetSize();
-                // check if any particular special area of interest is being hit
-                const bool bottom_right_hitbox_hit = hitpos.x >= size.x - 10.0f &&
-                                                     hitpos.y >= size.y - 10.0f;
-                const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= 10.0f &&
-                                                 hitpos.y >= 0 && hitpos.y <= 10.0f;
-                if (bottom_right_hitbox_hit)
-                    mCurrentTool.reset(new ScaleRenderTreeNodeTool(mState.scene, scene_node));
-                else if (top_left_hitbox_hit)
-                    mCurrentTool.reset(new RotateRenderTreeNodeTool<game::SceneClass, game::SceneNodeClass>(mState.scene, scene_node));
-                else mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, scene_node, snap, grid_size));
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, selection, snap, grid_size));
+                mUI.tree->SelectItemById(app::FromUtf8(selection->GetId()));
             }
             else
             {
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, scene_node, snap, grid_size));
+                mUI.tree->ClearSelection();
             }
-            mUI.tree->SelectItemById(app::FromUtf8(scene_node->GetId()));
-        }
-        else
-        {
-            mUI.tree->ClearSelection();
-
         }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
@@ -1777,14 +1771,7 @@ void SceneWidget::MouseDoubleClick(QMouseEvent* mickey)
     // Going to simply discard any tool selection here on double click.
     mCurrentTool.reset();
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    glm::vec2 scene_node_hitpos;
-    auto scene_node = SelectNode(mickey->pos(), &scene_node_hitpos);
+    auto scene_node = SelectNode(mickey->pos());
     if (!scene_node)
         return;
 
@@ -2168,7 +2155,7 @@ void SceneWidget::SetSceneBoundary()
         mState.scene.SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
 }
 
-game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::vec2* hitpos)
+game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
 {
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
@@ -2176,9 +2163,8 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
     view.Rotate(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
-    const auto click_pos_in_view = glm::vec4(click_point.x(),
-                                             click_point.y(), 1.0f, 1.0f);
+    const auto& view_to_scene     = glm::inverse(view.GetAsMatrix());
+    const auto click_pos_in_view  = glm::vec4(click_point.x(), click_point.y(), 1.0f, 1.0f);
     const auto click_pos_in_scene = view_to_scene * click_pos_in_view;
 
     std::vector<game::SceneNodeClass*> hit_nodes;
@@ -2206,7 +2192,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
                 mColors.push_back(gfx::Color4f(r, g, b, 0xff));
             }
         }
-        virtual bool FilterEntity(const game::SceneNodeClass& node) override
+        virtual bool FilterEntity(const game::SceneNodeClass& node, gfx::Painter&, gfx::Transform&) override
         {
             // filter out nodes that are currently not visible.
             // probably don't want to select any of those.
@@ -2221,7 +2207,8 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
         {
             for (size_t i=0; i<mHits.size(); ++i)
             {
-                if (mHits[i] == &node) {
+                if (mHits[i] == &node)
+                {
                     mColorIndex = i;
                     return;
                 }
@@ -2252,8 +2239,8 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
     }
     const auto surface_width  = mUI.widget->width();
     const auto surface_height = mUI.widget->height();
-    auto bitmap = device.ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
-    auto pixel = bitmap.GetPixel(0, 0);
+    const auto& bitmap = device.ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
+    const auto& pixel  = bitmap.GetPixel(0, 0);
     for (unsigned i=0; i<hit_nodes.size(); ++i)
     {
         const unsigned rgb = i * 100 + 100;
@@ -2262,27 +2249,18 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
         const unsigned b = (rgb >> 0) & 0xff;
         if ((pixel.r == r) && (pixel.g == g) && (pixel.b == b))
         {
-            *hitpos = hit_positions[i];
             return hit_nodes[i];
         }
     }
-    const auto* currently_selected = GetCurrentNode();
-    // if the currently selected node is among those that were hit
-    // then retain that, otherwise select the node that is at the
-    // topmost layer. (biggest layer value)
+
+    // // select the top most node.
     auto* hit = hit_nodes[0];
     auto  pos = hit_positions[0];
     int layer = hit->GetLayer();
-    for (size_t i=0; i<hit_nodes.size(); ++i)
+    for (size_t i=1; i<hit_nodes.size(); ++i)
     {
-        if (currently_selected == hit_nodes[i])
-        {
-            hit = hit_nodes[i];
-            pos = hit_positions[i];
-            break;
-        }
-        else if (hit_nodes[i]->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor) &&
-                 hit_nodes[i]->GetLayer() >= layer)
+        if (hit_nodes[i]->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor) &&
+            hit_nodes[i]->GetLayer() >= layer)
         {
             hit = hit_nodes[i];
             pos = hit_positions[i];
@@ -2291,7 +2269,6 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point, glm::ve
     }
     if (!hit->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
         return nullptr;
-    *hitpos = pos;
     return hit;
 }
 

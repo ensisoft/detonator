@@ -438,19 +438,23 @@ void Renderer::DrawScene(const SceneType& scene,
     TRACE_SCOPE("Renderer::DrawEntities", "entities=%u", nodes.size());
     for (const auto& p : nodes)
     {
-        if (scene_hook && !scene_hook->FilterEntity(*p.entity_object))
-            continue;
-
         transform.Push(p.node_to_scene);
 
-        if (scene_hook)
-            scene_hook->BeginDrawEntity(*p.entity_object, painter, transform);
+        // draw when there's no scene hook or when the scene hook returns
+        // true for the filtering operation.
+        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*p.entity_object, painter, transform));
 
-        if (p.visual_entity && p.entity_object->TestFlag(EntityType::Flags::VisibleInGame))
-            Draw(*p.visual_entity, painter, transform, entity_hook);
+        if (should_draw)
+        {
+            if (scene_hook)
+                scene_hook->BeginDrawEntity(*p.entity_object, painter, transform);
 
-        if (scene_hook)
-            scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
+            if (p.visual_entity && p.entity_object->TestFlag(EntityType::Flags::VisibleInGame))
+                Draw(*p.visual_entity, painter, transform, entity_hook);
+
+            if (scene_hook)
+                scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
+        }
 
         transform.Pop();
     }

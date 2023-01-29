@@ -39,8 +39,21 @@ void DrawLine(const gfx::Transform& view,
               const glm::vec2& src, const glm::vec2& dst,
               gfx::Painter& painter);
 
-void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view);
-void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer);
+enum class ToolHotspot {
+    None,
+    Rotate,
+    Resize,
+    Remove
+};
+ToolHotspot TestToolHotspot(gfx::Transform& trans, const gfx::FRect& rect, const glm::vec4& view_pos);
+
+void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
+void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
+void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
+
+void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, int layer);
+void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer);
+void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer);
 
 enum class GridDensity {
     Grid10x10   = 10,
@@ -70,8 +83,7 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter);
 void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter);
 void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter);
 
-void PrintMousePos(const gfx::Transform& view,
-                   gfx::Painter& painter, QWidget* widget);
+void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget);
 
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
@@ -83,16 +95,16 @@ class DrawHook : public engine::EntityClassDrawHook,
 public:
     DrawHook()
     {}
-
-    template<typename Node>
-    DrawHook(const Node* selected)
-        : mSelectedItem(selected)
+    DrawHook(const game::EntityNode* selected)
+      : mSelectedEntityNode(selected)
     {}
-
-    template<typename Node>
-    DrawHook(const Node* selected, const game::FRect& view)
-      : mSelectedItem(selected)
+    DrawHook(const game::EntityNodeClass* selected)
+      : mSelectedEntityClassNode(selected)
+    {}
+    DrawHook(const game::SceneNodeClass* selected, const game::FRect& view)
+      : mSelectedSceneNode(selected)
       , mViewRect(view)
+      , mDrawScene(true)
     {}
 
     void SetDrawVectors(bool on_off)
@@ -105,49 +117,69 @@ public:
     // EntityNode
     virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
     {
-        return FilterPacket(node, packet);
+        return GenericFilterEntityPacket(node, packet);
     }
     virtual void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
                                std::vector<engine::DrawPacket>& packets) override
     {
-        GenericAppendPackets(node, trans, packets);
+        if (mDrawScene)
+            return;
+
+        GenericAppendEntityPackets(node, trans, packets);
     }
-
-
     // EntityNodeClass
     virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& packet) override
     {
-        return FilterPacket(node, packet);
+        return GenericFilterEntityPacket(node, packet);
     }
     virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& trans,
                                std::vector<engine::DrawPacket>& packets) override
     {
-        GenericAppendPackets(node, trans, packets);
+        if (mDrawScene)
+            return;
+
+        GenericAppendEntityPackets(node, trans, packets);
     }
 
     // SceneClassDrawHook
-    virtual bool FilterEntity(const game::SceneNodeClass& entity) override
+    virtual bool FilterEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
     {
-        if (!entity.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
-            return false;
-        return true;
-    }
-    virtual void BeginDrawEntity(const game::SceneNodeClass& entity, gfx::Painter& painter, gfx::Transform& trans) override
-    {
-        mDrawSelection  = (&entity == mSelectedItem);
-        mDrawIndicators = false;
-    }
-    virtual void EndDrawEntity(const game::SceneNodeClass& entity, gfx::Painter& painter, gfx::Transform& trans) override
-    {
-        if (mDrawSelection)
+        if (node.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+            return true;
+
+        if (&node == mSelectedSceneNode)
         {
-            DrawBasisVectors(painter, trans);
+            const auto& entity = node.GetEntityClass();
+            const auto& box    = entity->GetBoundingRect();
+            DrawSelectionBox(painter, trans, box);
+            if (mDrawVectors)
+                DrawBasisVectors(painter, trans);
         }
-        mDrawSelection = false;
+        return false;
+    }
+    virtual void BeginDrawEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
+    {
+    }
+    virtual void EndDrawEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
+    {
+        if (&node == mSelectedSceneNode)
+        {
+            const auto& entity = node.GetEntityClass();
+            const auto& box    = entity->GetBoundingRect();
+            DrawSelectionBox(painter, trans, box);
+            if (mDrawVectors)
+                DrawBasisVectors(painter, trans);
+        }
+        else if (!node.TestFlag(game::SceneNodeClass::Flags::VisibleInGame))
+        {
+            const auto& entity = node.GetEntityClass();
+            const auto& box    = entity->GetBoundingRect();
+            DrawInvisibleItemBox(painter, trans, box);
+        }
     }
 private:
     template<typename Node>
-    bool FilterPacket(const Node* node, engine::DrawPacket& packet)
+    bool GenericFilterEntityPacket(const Node* node, engine::DrawPacket& packet)
     {
         if (!node->TestFlag(Node::Flags::VisibleInEditor))
             return false;
@@ -161,105 +193,44 @@ private:
     }
 
     template<typename Node>
-    void GenericAppendPackets(const Node* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets)
+    void GenericAppendEntityPackets(const Node* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets)
     {
-        const auto is_selected = mDrawSelection || node == mSelectedItem;
         const auto is_playing  = mPlaying;
-        const auto is_visible  = WillDrawSomething(*node);
+        const auto is_selected = IsSelected(node);
+        const auto is_visible_game   = IsVisibleInGame(*node);
+        const auto is_visible_editor = IsVisibleInEditor(*node);
 
-        // add a visualization for a nodes that don't draw anything and
-        // when they're not the selected item.
-        if (!is_visible && !is_selected && !is_playing)
+        const auto& size = node->GetSize();
+        const gfx::FRect rect(0.0f, 0.0f, size.x, size.y);
+
+        // if a node is visible in the editor but doesn't draw any game
+        // time content, i.e. not visible in game or won't draw anything otherwise
+        // then add a visualization for it.
+        if ((!is_visible_game && !is_selected && !is_playing) && is_visible_editor)
         {
-            static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
-                    gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
-            static const auto rect  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
-            // visualize it.
-            trans.Push(node->GetModelTransform());
-                engine::DrawPacket box;
-                box.transform = trans.GetAsMatrix();
-                box.material  = yellow;
-                box.drawable  = rect;
-                box.scene_node_layer = 0;
-                box.entity_node_layer = node->GetLayer() + 1;
-                box.pass      = game::RenderPass::Draw;
-                packets.push_back(box);
-            trans.Pop();
+            DrawInvisibleItemBox(trans, packets, rect, node->GetLayer() + 1);
         }
 
         if (!is_selected)
             return;
 
-        static const auto green  = std::make_shared<gfx::MaterialClassInst>(
-                gfx::CreateMaterialClassFromColor(gfx::Color::Green));
-        static const auto rect   = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
-        static const auto circle = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
-        const auto& size = node->GetSize();
-        const auto layer = node->GetLayer() +1  ;
-
-        // draw the selection rectangle.
-        trans.Push(node->GetModelTransform());
-            engine::DrawPacket selection;
-            selection.transform = trans.GetAsMatrix();
-            selection.material  = green;
-            selection.drawable  = rect;
-            selection.entity_node_layer = layer;
-            packets.push_back(selection);
-        trans.Pop();
-
-       //if (!mDrawIndicators)
-       //     return;
-
-        // decompose the matrix in order to get the combined scaling component
-        // so that we can use the inverse scale to keep the resize and rotation
-        // indicators always with same size.
-        const auto& mat = trans.GetAsMatrix();
-        glm::vec3 scale;
-        glm::vec3 translation;
-        glm::vec3 skew;
-        glm::vec4 perspective;
-        glm::quat orientation;
-        glm::decompose(mat, scale, orientation, translation, skew,  perspective);
-
-        // draw the basis vectors
+        DrawSelectionBox(trans, packets, rect, node->GetLayer() + 1);
         if (mDrawVectors)
-        {
-            trans.Push();
-                DrawBasisVectors(trans, packets, layer);
-            trans.Pop();
-        }
+            DrawBasisVectors(trans, packets, node->GetLayer() + 1);
+    }
 
-        // draw the resize indicator. (lower right corner box)
-        trans.Push();
-            trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-            trans.Translate(size.x*0.5f-10.0f/scale.x, size.y*0.5f-10.0f/scale.y);
-            engine::DrawPacket sizing_box;
-            sizing_box.transform = trans.GetAsMatrix();
-            sizing_box.material  = green;
-            sizing_box.drawable  = rect;
-            sizing_box.entity_node_layer = layer;
-            packets.push_back(sizing_box);
-        trans.Pop();
-
-        // draw the rotation indicator. (upper left corner circle)
-        trans.Push();
-            trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-            trans.Translate(-size.x*0.5f, -size.y*0.5f);
-            engine::DrawPacket rotation_circle;
-            rotation_circle.transform = trans.GetAsMatrix();
-            rotation_circle.material  = green;
-            rotation_circle.drawable  = circle;
-            rotation_circle.entity_node_layer = layer;
-            packets.push_back(rotation_circle);
-        trans.Pop();
+    inline bool IsSelected(const game::EntityNodeClass* node) const
+    {
+        return node == mSelectedEntityClassNode;
+    }
+    inline bool IsSelected(const game::EntityNode* node) const
+    {
+        return node == mSelectedEntityNode;
     }
 
     template<typename EntityNode>
-    bool WillDrawSomething(const EntityNode& node) const
+    bool IsVisibleInGame(const EntityNode& node) const
     {
-        if (!node.TestFlag(game::EntityNodeClass::Flags::VisibleInEditor))
-            return false;
-
         if (const auto* draw = node.GetDrawable())
         {
             if (draw->GetRenderPass() == game::RenderPass::Draw &&
@@ -274,13 +245,20 @@ private:
         return false;
     }
 
+    template<typename EntityNode>
+    bool IsVisibleInEditor(const EntityNode& node) const
+    {
+        return node.TestFlag(EntityNode::Flags::VisibleInEditor);
+    }
+
 private:
-    const void* mSelectedItem = nullptr;
+    const game::EntityNode* mSelectedEntityNode           = nullptr;
+    const game::EntityNodeClass* mSelectedEntityClassNode = nullptr;
+    const game::SceneNodeClass* mSelectedSceneNode        = nullptr;
     const game::FRect mViewRect;
     bool mPlaying        = false;
-    bool mDrawSelection  = false;
-    bool mDrawIndicators = true;
     bool mDrawVectors    = false;
+    bool mDrawScene      = false;
     glm::mat4 mView;
 };
 

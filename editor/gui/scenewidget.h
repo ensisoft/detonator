@@ -167,7 +167,7 @@ namespace gui
         void UpdateResourceReferences();
         void SetSpatialIndexParams();
         void SetSceneBoundary();
-        game::SceneNodeClass* SelectNode(const QPoint& click_point, glm::vec2* hitpos);
+        game::SceneNodeClass* SelectNode(const QPoint& click_point);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;
     private:
