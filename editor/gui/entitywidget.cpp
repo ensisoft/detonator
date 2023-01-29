@@ -2356,9 +2356,10 @@ void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
     if (node == nullptr)
         return;
 
-    const bool visibility = node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
-    node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, !visibility);
-    item->SetIconMode(visibility ? QIcon::Disabled : QIcon::Normal);
+    const bool visibility = !node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
+    node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, visibility);
+    item->SetIcon(visibility ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
+    mUI.tree->Update();
 }
 
 void EntityWidget::NewResourceAvailable(const app::Resource* resource)
