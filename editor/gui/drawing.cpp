@@ -51,34 +51,140 @@ void DrawLine(const gfx::Transform& view,
     gfx::DrawLine(painter, gfx::FPoint(s.x, s.y), gfx::FPoint(d.x, d.y), gfx::Color::DarkYellow, 2.0f);
 }
 
-void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& view)
+ToolHotspot TestToolHotspot(gfx::Transform& trans, const gfx::FRect& box, const glm::vec4& view_pos)
+{
+    // basic idea for tool hot spot testing (in the corners of some selection rectangle)
+    // is to take the incoming view coordinate and transform that by the inverse transform
+    // from view coord to model coord and then compare whether it's inside the box(es) or not.
+
+    // decompose the incoming transformation matrix
+    // in order to figure out the scaling factor. we'll use the inverse
+    // scale for the indicators in order to keep them a constant size
+    // regardless of the scene node's scaling.
+    glm::vec3 scale;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::quat orientation;
+    glm::decompose(trans.GetAsMatrix(), scale, orientation, translation, skew, perspective);
+
+    glm::vec4 rotate_hit_pos;
+    glm::vec4 resize_hit_pos;
+    glm::vec4 remove_hit_pos;
+
+    // rotation circle
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(box.GetPosition());
+        rotate_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
+    trans.Pop();
+
+    if (rotate_hit_pos.x >= 0.0f && rotate_hit_pos.x <= 1.0f &&
+        rotate_hit_pos.y >= 0.0f && rotate_hit_pos.y <= 1.0f)
+        return ToolHotspot::Rotate;
+
+    const auto [_0, _1, _2, bottom_right] = box.GetCorners();
+
+    // resize box
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(bottom_right);
+        trans.Translate(-10.0f/scale.x, -10.0f/scale.y);
+        resize_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
+    trans.Pop();
+
+    if (resize_hit_pos.x >= 0.0f && resize_hit_pos.x <= 1.0f &&
+        resize_hit_pos.y >= 0.0f && resize_hit_pos.y <= 1.0f)
+        return ToolHotspot::Resize;
+
+    remove_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
+    if (box.TestPoint(remove_hit_pos.x, remove_hit_pos.y))
+        return ToolHotspot::Remove;
+
+    return ToolHotspot::None;
+}
+
+void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& box)
+{
+    // all the transformations below are relative to the scene node
+    // (the incoming transformation)
+
+    // decompose the incoming transformation matrix
+    // in order to figure out the scaling factor. we'll use the inverse
+    // scale for the indicators in order to keep them a constant size
+    // regardless of the scene node's scaling.
+    glm::vec3 scale;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::quat orientation;
+    glm::decompose(trans.GetAsMatrix(), scale, orientation, translation, skew, perspective);
+
+    // selection rect
+    trans.Push();
+        trans.Scale(box.GetSize());
+        trans.Translate(box.GetPosition());
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+    trans.Pop();
+
+    // rotation circle
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(box.GetPosition());
+        painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 2.0f), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+    trans.Pop();
+
+    const auto [_0, _1, _2, bottom_right] = box.GetCorners();
+
+    // resize box
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(bottom_right);
+        trans.Translate(-10.0f/scale.x, -10.0f/scale.y);
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+    trans.Pop();
+}
+
+void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& box)
+{
+    trans.Push();
+        trans.Scale(box.GetSize());
+        trans.Translate(box.GetPosition());
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+    trans.Pop();
+}
+
+void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 {
     // draw the X vector
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
-    view.Pop();
+    trans.Push();
+        trans.Scale(100.0f, 5.0f);
+        trans.Translate(0.0f, -2.5f);
+        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
+    trans.Pop();
 
     // draw the Y vector
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(-50.0f, -2.5f);
-        view.Rotate(math::Pi * 0.5f);
-        view.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(), view, gfx::CreateMaterialFromColor(gfx::Color::Red));
-    view.Pop();
+    trans.Push();
+        trans.Scale(100.0f, 5.0f);
+        trans.Translate(-50.0f, -2.5f);
+        trans.Rotate(math::Pi * 0.5f);
+        trans.Translate(0.0f, 50.0f);
+        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
+    trans.Pop();
 
-    view.Push();
-        view.Scale(2.5f, 2.5f);
-        view.Translate(-1.25f, -1.25f);
-        painter.Draw(gfx::RoundRectangle(), view, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
-    view.Pop();
+    trans.Push();
+        trans.Scale(2.5f, 2.5f);
+        trans.Translate(-1.25f, -1.25f);
+        painter.Draw(gfx::RoundRectangle(), trans, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
+    trans.Pop();
 }
 
 void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer)
 {
-    //static auto green = gfx::Create
     static auto green = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
     static auto red   = std::make_shared<gfx::MaterialClassInst>(
@@ -116,6 +222,87 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
         view.Translate(-1.25f, -1.25f);
         //painter.Draw(gfx::RoundRectangle(), view, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
     view.Pop();
+}
+
+void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer)
+{
+    static const auto green  = std::make_shared<gfx::MaterialClassInst>(
+            gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static const auto outline = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
+    static const auto circle  = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
+
+    const auto width  = rect.GetWidth();
+    const auto height = rect.GetHeight();
+
+    trans.Push();
+        trans.Scale(width, height);
+        trans.Translate(-width*0.5f, -height*0.5f);
+        engine::DrawPacket selection;
+        selection.transform = trans.GetAsMatrix();
+        selection.material  = green;
+        selection.drawable  = outline;
+        selection.entity_node_layer = layer;
+        packets.push_back(selection);
+    trans.Pop();
+
+
+    // decompose the matrix in order to get the combined scaling component
+    // so that we can use the inverse scale to keep the resize and rotation
+    // indicators always with same size.
+    const auto& mat = trans.GetAsMatrix();
+    glm::vec3 scale;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::quat orientation;
+    glm::decompose(mat, scale, orientation, translation, skew,  perspective);
+
+    // draw the resize indicator. (lower right corner box)
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(width*0.5f-10.0f/scale.x, height*0.5f-10.0f/scale.y);
+        engine::DrawPacket sizing_box;
+        sizing_box.transform = trans.GetAsMatrix();
+        sizing_box.material  = green;
+        sizing_box.drawable  = outline;
+        sizing_box.entity_node_layer = layer;
+        packets.push_back(sizing_box);
+    trans.Pop();
+
+    // draw the rotation indicator. (upper left corner circle)
+    trans.Push();
+        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
+        trans.Translate(-width*0.5f, -height*0.5f);
+        engine::DrawPacket rotation_circle;
+        rotation_circle.transform = trans.GetAsMatrix();
+        rotation_circle.material  = green;
+        rotation_circle.drawable  = circle;
+        rotation_circle.entity_node_layer = layer;
+        packets.push_back(rotation_circle);
+    trans.Pop();
+}
+
+void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer)
+{
+    static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
+            gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
+    static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
+
+    const auto width  = rect.GetWidth();
+    const auto height = rect.GetHeight();
+
+    trans.Push();
+        trans.Scale(rect.GetSize());
+        trans.Translate(-width*0.5, -height*0.5);
+        engine::DrawPacket box;
+        box.transform         = trans.GetAsMatrix();
+        box.material          = yellow;
+        box.drawable          = shape;
+        box.scene_node_layer  = 0;
+        box.entity_node_layer = layer;
+        box.pass              = game::RenderPass::Draw;
+        packets.push_back(box);
+    trans.Pop();
 }
 
 void SetGridColor(const gfx::Color4f& color)
