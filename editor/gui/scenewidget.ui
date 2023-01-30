@@ -1891,6 +1891,33 @@
     <string>Add a new entity reference variable.</string>
    </property>
   </action>
+  <action name="actionNodeFind">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/find.png</normaloff>:/32x32_ico_png/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="toolTip">
+    <string>Locate and jump to node in the scene</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/find.png</normaloff>:/32x32_ico_png/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Node</string>
+   </property>
+   <property name="toolTip">
+    <string>Find node in the scene</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

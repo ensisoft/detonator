@@ -359,6 +359,7 @@ add_executable(Detonator
     editor/gui/dlgsettings.h
     editor/gui/dlgsettings.ui
     editor/gui/dlgsettings.cpp
+    editor/gui/dlgfindentity.ui
     editor/gui/dlgentity.h
     editor/gui/dlgentity.ui
     editor/gui/dlgentity.cpp

@@ -20,18 +20,20 @@
 
 #include "warnpush.h"
 #  include "ui_scenewidget.h"
+#  include "ui_dlgfindentity.h"
 #  include <QMenu>
+#  include <QDialog>
 #  include <boost/circular_buffer.hpp>
 #include "warnpop.h"
 
 #include <memory>
 #include <string>
 
-#include "editor/gui/mainwidget.h"
-#include "editor/gui/treemodel.h"
 #include "game/scene.h"
 #include "game/fwd.h"
 #include "engine/renderer.h"
+#include "editor/gui/mainwidget.h"
+#include "editor/gui/treemodel.h"
 
 namespace gfx {
     class Painter;
@@ -46,6 +48,35 @@ namespace gui
 {
     class TreeWidget;
     class MouseTool;
+
+    class DlgFindEntity : public QDialog
+    {
+        Q_OBJECT
+
+    public:
+        DlgFindEntity(QWidget* parent, const game::SceneClass& klass);
+       ~DlgFindEntity();
+
+        const game::SceneNodeClass* GetNode() const
+        { return mNode; }
+
+    private slots:
+        void on_btnAccept_clicked();
+        void on_btnCancel_clicked();
+        void on_filter_textChanged(const QString&);
+    private:
+        virtual bool eventFilter(QObject* destination, QEvent* event) override;
+    private:
+        Ui::DlgFindEntity mUI;
+    private:
+        class TableModel;
+        class TableProxy;
+        const game::SceneClass& mScene;
+        std::unique_ptr<TableModel> mModel;
+        std::unique_ptr<TableProxy> mProxy;
+        const game::SceneNodeClass* mNode = nullptr;
+    };
+
 
     class SceneWidget : public MainWidget
     {
@@ -104,6 +135,7 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionFind_triggered();
         void on_actionNodeEdit_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeBreakLink_triggered();
@@ -111,6 +143,7 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
+        void on_actionNodeFind_triggered();
         void on_actionEntityVarRef_triggered();
         void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
@@ -167,6 +200,7 @@ namespace gui
         void UpdateResourceReferences();
         void SetSpatialIndexParams();
         void SetSceneBoundary();
+        void FindNode(const game::SceneNodeClass* node);
         game::SceneNodeClass* SelectNode(const QPoint& click_point);
         game::SceneNodeClass* GetCurrentNode();
         const game::SceneNodeClass* GetCurrentNode() const;
@@ -201,12 +235,15 @@ namespace gui
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mSceneTime   = 0.0;
-        double mViewTransformStartTime = 0.0;
+        double mViewRotationStartTime = 0.0;
+        double mViewTranslationStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
+        glm::vec2 mViewTranslationStart;
         bool mCameraWasLoaded = false;
         std::unique_ptr<game::Tilemap> mTilemap;
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::SceneClass> mUndoStack;
+
     };
 }
