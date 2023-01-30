@@ -1,7 +1,7 @@
-GAMESTUDIO AUDIO
+DETONATOR 2D AUDIO 🎼
 =====================
 
-Overview
+Overview 💭
 ---------------------
 The audio subsystem is divided into following core components that take part in playing audio.
 
@@ -40,7 +40,7 @@ Currently supported PCM formats:
 * 32bit floating point (All backends)
 * Various sample rates from 8k to 96k (depending on the underlying audio device support)
 
-Audio Graphs
+Audio Graphs 🤔
 -------------
 The goal is to be able to create an audio system that can be used to not only playback simple audio files but to also
 add/create various audio effects (such as echo, delay etc.) in realtime during the said playback.
@@ -69,8 +69,8 @@ for playback.
 
 See [elements](element.h) for a list of audio elements.
 
-Other
--------------
+Third Party Libs 📚
+-------------------
 Audio system depends on the following 3rd party libraries:
 * libsndfile
   - Used to decode .flac, .ogg (vorbis) and .wav files
