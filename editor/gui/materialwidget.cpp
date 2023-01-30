@@ -214,14 +214,14 @@ bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) c
         case Actions::CanReloadShaders:
             return true;
         case Actions::CanZoomIn: {
-            const auto max = mUI.zoom->maximum();
-            const auto val = mUI.zoom->value();
+            const float max = mUI.zoom->maximum();
+            const float val = GetValue(mUI.zoom);
             return val < max;
         }
         break;
         case Actions::CanZoomOut: {
-            const auto min = mUI.zoom->minimum();
-            const auto val = mUI.zoom->value();
+            const float min = mUI.zoom->minimum();
+            const float val = GetValue(mUI.zoom);
             return val > min;
         }
         break;
