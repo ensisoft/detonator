@@ -1,31 +1,36 @@
-DETONATOR 2D
+DETONATOR 2D 🤘🏻😎💥
 ===================
-A 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such as puzzle games,
-platformers and side scrollers. Eventually support is planned for tile based games too for real time strategy/tactics.
+An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
+as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  🍄🧩🗺️
 
-![Screenshot](editor/resource/splash.gif "Bandit demo")
+![Screenshot](editor/resource/splash.gif "Bandit demo")  
 
-This readme and other readme files, are for developers and cover information related to developing and building the engine itself.<br>
+
+This readme and other readme files, are for developers and cover information related to developing and building the engine itself.
 For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
 
-Other readmes:
-  * [Audio](audio/README.md "Audio readme")
+This project would not be possible without the following: 🙏 
+* Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
+* Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com") 
+
+Other (subsystem) readmes:
+  * [Audio](audio/README.md "Audio readme") 🎼
   * [Graphics](graphics/README.md "Graphics readme") (todo)
-  * [Game](game/README.md "Game readme") (todo)
+  * [Game](game/README.md "Game readme") (todo) 👾
   * [Engine](engine/README.md "Engine readme") (todo)
   * [UI](uikit/README.md "UIKit readme") 
-  * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
+  * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme") 
 
 
 Currently, supported major features:
 * Qt5 based WYSIWYG editor
-* Text rendering
+* Text rendering (vector and bitmap)
 * Various primitive shapes, custom polygon shapes
-* Material system
-* Particle system
+* Material system with built-in materials and with custom shaders
+* Particle system with projectile and linear motion
 * Entity system with animation tracks
 * Audio engine with approx. dozen audio elements
-* Lua based scripting for entities, scenes, "main" game logic and UIs
+* Lua based scripting for entities, scenes and UIs
 * Built-in Lua script editor with code formatting and API help
 * Scene builder
 * Styleable UI system (JSON style files *and* material system integration) 
@@ -34,26 +39,31 @@ Currently, supported major features:
 * Game content packaging for native and HTML5/WASM (with Emscripten)
 * Resource archives, export and import between projects (in zip)
 * Tilemap importer, several handy dialogs for materials, fonts, colors etc.
+* Several tools for texture packing, font map packing, etc.
 
 Currently, not yet 100% complete major features:
-* Tilemaps 
-  * TODO: Lua APIs
-  * TODO: Tilemap related algorithms such as path finding
-  * TODO: Compression etc. performance improvements
-  * TODO: Rendering performance improvements and fixes
+* Continued work on tilemaps 
+  * Lua APIs for data access etc.
+  * Related algorithms such as path finding
+  * Compression etc. performance improvements
+  * Rendering performance improvements and fixes
 
 Planned major features not yet implemented:
 * Partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
-* OpenGL ES3 backend and WebGL2
+* OpenGL ES3 backend and WebGL2 support
 * Android support (TBD)
 * Mobile web + touch screen support 
-
+* Post-processing effects such as bloom, custom render passes
+* Vector fields, fluid sims, more elaborate particle effects
+* Plenty of asset baking features
+* Acceleration structures for game subsystems such as physics and rendering
+  
 Planned minor features not yet implemented:
 * See issues for more details
 
 ![Screenshot](screens/editor-animation.png "Entity editor")
-Create your animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
-of nodes with various attachments for physics, rendering and text display. Animation tracks allow changing the properties
+Create animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
+of nodes with various attachments for physics, rendering, text display etc. Animation tracks allow changing the properties
 of the nodes and transforming the tree itself over time. Each entity type can then be associated with a Lua script where
 you can write your entity specific game play code.
 
@@ -89,10 +99,15 @@ and knobs that control the particle effect.
 During the development the game is available for play in the editor. It's possible to do live edits to the
 game content in the editor and see the changes take place in the play window.
 
-Build Instructions
+Build Instructions 👨🏼‍💻
 ==================
 
-WASM
+![Screenshot](logo/cmake.png)
+![Screenshot](logo/linux.png)
+![Screenshot](logo/win10.png)
+![Screenshot](logo/emscripten.png)
+
+WASM (Emscripten)
 ------------------------------
 Building to WASM currently supported only for the engine but not the editor.
 The build is separated from the main engine build and is in emscripten/ folder.
@@ -116,7 +131,7 @@ On Linux
   $ ./emsdk activate 3.0.0
   $ source ./emsdk_env.sh
 ```
--- Check your Emscripten installation
+- Check your Emscripten installation
 ```
   $ which emcc
   $ /home/user/emsdk/upstream/emscripten/emcc
@@ -147,7 +162,7 @@ On Windows
   $ emsdk.bat activate 3.0.0
   $ emsdk_env.bat
 ```
--- Check your Emscripten and Ninja installation
+- Check your Emscripten and Ninja installation
 ```
   $ where emcc
   $ C:\coding\detonator\emsdk\upstream\emscripten\emcc
@@ -178,7 +193,7 @@ The .js file contains the JavaScript glue code needed to manhandle the WASM code
 when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
 game's output directory.
 
-![Screenshot](logo/linux.png) Linux
+Linux
 -------------------------------------
 - Install the dev packages.
   (for Ubuntu based systems)
@@ -234,7 +249,7 @@ you can try edit ~/.conan/settings.yaml
   $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
   $ make -j16 install
 ```
-Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
+- Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
 For example:
 ```
   $ cd detonator/audio/test/
@@ -242,7 +257,7 @@ For example:
   $ kcaghegrind cachegrind.out.XXXXX
 ```
 
-Alternative instructions for build using Ninja, Clang and Mold linker (optional)
+- Alternative instructions for build using Ninja, Clang and Mold linker (optional)
 ```
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
@@ -258,8 +273,7 @@ Alternative instructions for build using Ninja, Clang and Mold linker (optional)
   $ ninja -j16 install
 ```
 
-
-![Screenshot](logo/win10.png) Windows
+Windows
 ---------------------------------
 
 These build instructions are for MSVS 2019 Community Edition and for 64bit build.
@@ -310,10 +324,10 @@ This means that in order to link to 3rd party libraries the debug versions of th
 ```
 
 
-The Boring Documentation
-=======================
+The Boring Documentation 🙄
+=========================
 
-Workflow and getting started
+Workflow and getting started 📔
 ----------------------------
 Going from a git clone to a running game is known as the "build workflow". This involves various steps
 involving the source tree of the engine, the source tree of the game, the runtime assets provided with the
@@ -374,8 +388,8 @@ The above flow is essentially the same for all platforms across Windows/Linux an
 host application (emscripten/main.cpp) creates the WebGL context through JS APIs and there's no shared library for the engine
 but rather all the engine code is built into the same WASM blob with the loader/host application.
 
-Running (Unit) Tests
---------------------
+Running (Unit) Tests 🫣
+-----------------------
 There'a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
 a "*unit_test_*" is a unit test. There's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)  
 In order to run tests after a successful build:
@@ -414,7 +428,7 @@ Use --help for more information.
   $ ./graphics_test --help 
 ```
 
-Coding Convention & Design
+Coding Convention & Design 💭
 --------------------------
 - todo: c++ objects that represent classes
 - todo: asserts/logging/exceptions
