@@ -39,25 +39,12 @@ DlgOpen::DlgOpen(QWidget* parent, app::Workspace& workspace)
     : QDialog(parent)
     , mWorkspace(workspace)
 {
+    mProxy.setSourceModel(&mWorkspace);
+    mProxy.SetModel(&mWorkspace);
     mUI.setupUi(this);
+    mUI.tableView->setModel(&mProxy);
+    SelectRow(mUI.tableView, 0);
 
-    const auto num_resources = mWorkspace.GetNumResources();
-    for (size_t i=0; i<num_resources; ++i)
-    {
-        const auto& resource = mWorkspace.GetResource(i);
-        if (resource.IsPrimitive())
-            continue;
-        QListWidgetItem* item = new QListWidgetItem();
-        item->setIcon(resource.GetIcon());
-        item->setText(resource.GetName());
-        item->setData(Qt::UserRole, (unsigned)i);
-        mUI.listWidget->addItem(item);
-    }
-
-    if (num_resources)
-    {
-        mUI.listWidget->setCurrentItem(mUI.listWidget->item(0));
-    }
     // capture some special key presses in order to move the
     // selection (current item) in the list widget more conveniently.
     mUI.filter->installEventFilter(this);
@@ -65,12 +52,10 @@ DlgOpen::DlgOpen(QWidget* parent, app::Workspace& workspace)
 
 app::Resource* DlgOpen::GetSelected()
 {
-    QList<QListWidgetItem*> items = mUI.listWidget->selectedItems();
-    if (items.isEmpty())
+    const auto& index = GetSelectedIndex(mUI.tableView);
+    if (!index.isValid())
         return nullptr;
-
-    const auto index = items[0]->data(Qt::UserRole).toUInt();
-    return &mWorkspace.GetResource(index);
+    return &mWorkspace.GetResource(index.row());
 }
 
 void DlgOpen::SetOpenMode(const QString& mode)
@@ -95,32 +80,9 @@ void DlgOpen::on_btnCancel_clicked()
 
 void DlgOpen::on_filter_textChanged(const QString& text)
 {
-    // shitty but ok, just rebuild the tree.
-    mUI.listWidget->clear();
-
-    unsigned matches = 0;
-
-    const auto num_resources = mWorkspace.GetNumResources();
-    for (size_t i=0; i<num_resources; ++i)
-    {
-        const auto& resource = mWorkspace.GetResource(i);
-        if (resource.IsPrimitive())
-            continue;
-        const auto& name = resource.GetName().toLower();
-        if (name.contains(text))
-        {
-            QListWidgetItem* item = new QListWidgetItem();
-            item->setIcon(resource.GetIcon());
-            item->setText(resource.GetName());
-            item->setData(Qt::UserRole, (unsigned)i);
-            mUI.listWidget->addItem(item);
-            matches++;
-        }
-    }
-    if (matches)
-    {
-        mUI.listWidget->setCurrentItem(mUI.listWidget->item(0));
-    }
+    mProxy.SetFilterString(text);
+    mProxy.invalidate();
+    SelectRow(mUI.tableView, 0);
 }
 
 void DlgOpen::on_listWidget_itemDoubleClicked(QListWidgetItem*)
@@ -136,7 +98,7 @@ bool DlgOpen::eventFilter(QObject* destination, QEvent* event)
         return false;
     else if (event->type() != QEvent::KeyPress)
         return false;
-    else if (mUI.listWidget->count() == 0)
+    else if (mWorkspace.GetNumUserDefinedResources() == 0)
         return false;
 
     const auto* key = static_cast<QKeyEvent*>(event);
@@ -151,21 +113,21 @@ bool DlgOpen::eventFilter(QObject* destination, QEvent* event)
         return true;
     }
 
-    int current = mUI.listWidget->currentIndex().row();
-    if (current == -1)
-        current = 0;
+    int current = GetSelectedRow(mUI.tableView);
+
+    const auto max = GetCount(mUI.tableView);
 
     if (ctrl && key->key() == Qt::Key_N)
-        current = math::wrap(0, mUI.listWidget->count()-1, current+1);
+        current = math::wrap(0, max-1, current+1);
     else if (ctrl && key->key() == Qt::Key_P)
-        current = math::wrap(0, mUI.listWidget->count()-1, current-1);
+        current = math::wrap(0, max-1, current-1);
     else if (key->key() == Qt::Key_Up)
-        current = math::wrap(0, mUI.listWidget->count()-1, current-1);
+        current = math::wrap(0, max-1, current-1);
     else if (key->key() == Qt::Key_Down)
-        current = math::wrap(0, mUI.listWidget->count()-1, current+1);
+        current = math::wrap(0, max-1, current+1);
     else return false;
 
-    mUI.listWidget->setCurrentItem(mUI.listWidget->item(current));
+    SelectRow(mUI.tableView, current);
     return true;
 }
 

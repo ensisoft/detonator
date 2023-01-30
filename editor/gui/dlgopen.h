@@ -49,6 +49,7 @@ namespace gui
         Ui::DlgOpen mUI;
     private:
         app::Workspace& mWorkspace;
+        app::WorkspaceProxy mProxy;
     };
 } // namespace
 
