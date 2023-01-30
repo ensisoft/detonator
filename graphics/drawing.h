@@ -22,6 +22,7 @@
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
+#include "graphics/transform.h"
 
 // This is the simple drawing API that provides auxiliary drawing
 // functionality mostly useful for drawing stuff outside the actual
@@ -60,7 +61,6 @@ namespace gfx
 {
 
 class Painter;
-class Transform;
 class Material;
 class Drawable;
 
