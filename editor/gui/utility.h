@@ -163,7 +163,8 @@ inline void SetImage(QLabel* label, const QPixmap& pixmap)
     else label->setPixmap(pixmap.scaledToHeight(lbl_height));
 }
 
-inline QModelIndexList GetSelection(QTableView* view)
+// Get the selection index list mapped to the source
+inline QModelIndexList GetSelection(const QTableView* view)
 {
     const auto* data_model = view->model();
     const auto& selection  = view->selectionModel()->selectedRows();
@@ -175,6 +176,23 @@ inline QModelIndexList GetSelection(QTableView* view)
         return ret;
     }
     return selection;
+}
+
+inline QModelIndex GetSelectedIndex(const QTableView* view)
+{
+    const auto& list = GetSelection(view);
+    if (list.isEmpty())
+        return QModelIndex();
+    return list[0];
+}
+
+// Get the selected row in the view. (not mapped)
+inline int GetSelectedRow(const QTableView* view)
+{
+    const auto& selection  = view->selectionModel()->selectedRows();
+    if (selection.isEmpty())
+        return -1;
+    return selection[0].row();
 }
 
 inline void SelectRow(QTableView* view, int row)
@@ -1344,9 +1362,17 @@ inline bool GetUserProperty(const Resource& res, const PropertyKey& key, gui::Gf
 }
 
 template<typename Widget>
-inline int GetCount(Widget* widget)
+inline int GetCount(const Widget* widget)
 {
     return widget->count();
+}
+
+inline int GetCount(const QTableView* view)
+{
+    const auto* data_model = view->model();
+    if (const auto* proxy = qobject_cast<const QSortFilterProxyModel*>(data_model))
+        return proxy->rowCount();
+    return data_model->rowCount();
 }
 
 inline bool MustHaveInput(QComboBox* box)

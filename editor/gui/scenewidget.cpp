@@ -24,6 +24,7 @@
 #  include <QMessageBox>
 #  include <QFile>
 #  include <QTextStream>
+#  include <QAbstractTableModel>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
@@ -33,6 +34,17 @@
 #include <unordered_set>
 #include <cmath>
 
+#include "base/assert.h"
+#include "base/format.h"
+#include "base/math.h"
+#include "data/json.h"
+#include "base/transform.h"
+#include "game/treeop.h"
+#include "graphics/painter.h"
+#include "graphics/material.h"
+#include "graphics/transform.h"
+#include "graphics/drawing.h"
+#include "graphics/types.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
@@ -48,19 +60,148 @@
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/clipboard.h"
-#include "base/assert.h"
-#include "base/format.h"
-#include "base/math.h"
-#include "data/json.h"
-#include "graphics/painter.h"
-#include "graphics/material.h"
-#include "graphics/transform.h"
-#include "graphics/drawing.h"
-#include "graphics/types.h"
-#include "game/treeop.h"
 
 namespace gui
 {
+
+class DlgFindEntity::TableModel : public QAbstractTableModel
+{
+public:
+    TableModel(const game::SceneClass& klass)
+      : mScene(klass)
+    {}
+    virtual QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto& node = mScene.GetNode(index.row());
+        const auto& entity_klass = node.GetEntityClass();
+        if (role == Qt::DisplayRole)
+        {
+            if (index.column() == 0) return app::toString(node.GetName());
+            else if (index.column() == 1) {
+                if (entity_klass)
+                    return app::toString(entity_klass->GetName());
+                else return "*Deleted Class*";
+            }
+        }
+        return QVariant();
+    }
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            if (section == 0) return "Name";
+            else if (section == 1) return "Class";
+        }
+        return QVariant();
+    }
+    virtual int rowCount(const QModelIndex&) const override
+    {
+        return static_cast<int>(mScene.GetNumNodes());
+    }
+    virtual int columnCount(const QModelIndex&) const override
+    {
+        return 2;
+    }
+private:
+    const game::SceneClass& mScene;
+};
+
+class DlgFindEntity::TableProxy : public QSortFilterProxyModel
+{
+public:
+    TableProxy(const game::SceneClass& klass)
+      : mScene(klass)
+    {}
+
+    void SetFilterString(const QString& string)
+    { mFilterString = string; }
+protected:
+    virtual bool filterAcceptsRow(int row, const QModelIndex&) const override
+    {
+        if (mFilterString.isEmpty())
+            return true;
+
+        const auto& node = mScene.GetNode(row);
+        const auto& name = app::FromUtf8(node.GetName());
+        if (name.contains(mFilterString, Qt::CaseInsensitive))
+            return true;
+        const auto& entity_klass = node.GetEntityClass();
+        if (!entity_klass)
+            return false;
+        const auto& klass_name = app::FromUtf8(entity_klass->GetName());
+        return klass_name.contains(mFilterString, Qt::CaseInsensitive);
+    }
+private:
+    QString mFilterString;
+    const game::SceneClass& mScene;
+};
+
+
+DlgFindEntity::DlgFindEntity(QWidget* parent, const game::SceneClass& klass)
+  : QDialog(parent)
+  , mScene(klass)
+{
+    mModel.reset(new TableModel(mScene));
+    mProxy.reset(new TableProxy(mScene));
+    mProxy->setSourceModel(mModel.get());
+
+    mUI.setupUi(this);
+    mUI.filter->installEventFilter(this);
+    mUI.tableView->setModel(mProxy.get());
+    mProxy->invalidate();
+}
+
+DlgFindEntity::~DlgFindEntity() = default;
+
+void DlgFindEntity::on_btnAccept_clicked()
+{
+    const auto current = GetSelectedIndex(mUI.tableView);
+    if (current.isValid())
+        mNode = &mScene.GetNode(current.row());
+
+    accept();
+}
+void DlgFindEntity::on_btnCancel_clicked()
+{
+    reject();
+}
+
+void DlgFindEntity::on_filter_textChanged(const QString&)
+{
+    mProxy->SetFilterString(GetValue(mUI.filter));
+    mProxy->invalidate();
+    SelectRow(mUI.tableView, 0);
+}
+
+bool DlgFindEntity::eventFilter(QObject* destination, QEvent* event)
+{
+    if (destination != mUI.filter)
+        return false;
+    else if (event->type() != QEvent::KeyPress)
+        return false;
+    else if (mScene.GetNumNodes() == 0)
+        return false;
+
+    const auto* key = static_cast<QKeyEvent*>(event);
+    const bool ctrl = key->modifiers() & Qt::ControlModifier;
+    const bool shift = key->modifiers() & Qt::ShiftModifier;
+
+    int current = GetSelectedRow(mUI.tableView);
+
+    const auto max = GetCount(mUI.tableView);
+    if (ctrl && key->key() == Qt::Key_N)
+        current = math::wrap(0, max-1, current+1);
+    else if (ctrl && key->key() == Qt::Key_P)
+        current = math::wrap(0, max-1, current-1);
+    else if (key->key() == Qt::Key_Up)
+        current = math::wrap(0, max-1, current-1);
+    else if (key->key() == Qt::Key_Down)
+        current = math::wrap(0, max-1, current+1);
+    else return false;
+
+    SelectRow(mUI.tableView, current);
+    return true;
+}
 
 // todo: refactor this and the similar model from EntityWidget into
 // some reusable class
@@ -478,6 +619,8 @@ void SceneWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNodePlace);
     bar.addSeparator();
     bar.addAction(mEntities->menuAction());
+    bar.addSeparator();
+    bar.addAction(mUI.actionFind);
 }
 void SceneWidget::AddActions(QMenu& menu)
 {
@@ -491,6 +634,7 @@ void SceneWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNodePlace);
     menu.addSeparator();
     menu.addAction(mEntities->menuAction());
+    menu.addAction(mUI.actionFind);
 }
 
 bool SceneWidget::SaveState(Settings& settings) const
@@ -974,6 +1118,19 @@ void SceneWidget::on_actionSave_triggered()
     mOriginalHash = mState.scene.GetHash();
 }
 
+void SceneWidget::on_actionFind_triggered()
+{
+    DlgFindEntity dlg(this, mState.scene);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    const auto* node = dlg.GetNode();
+    if (node == nullptr)
+        return;
+
+    FindNode(node);
+}
+
 void SceneWidget::on_actionNodeEdit_triggered()
 {
     if (auto* node = GetCurrentNode())
@@ -1056,6 +1213,14 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
         node->SetLayer(layer - 1);
     }
     DisplayCurrentNodeProperties();
+}
+
+void SceneWidget::on_actionNodeFind_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        FindNode(node);
+    }
 }
 
 void SceneWidget::on_actionEntityVarRef_triggered()
@@ -1297,16 +1462,16 @@ void SceneWidget::on_btnViewPlus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
-    mViewTransformRotation  = value;
-    mViewTransformStartTime = mCurrentTime;
+    mViewTransformRotation = value;
+    mViewRotationStartTime = mCurrentTime;
 }
 
 void SceneWidget::on_btnViewMinus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
-    mViewTransformRotation  = value;
-    mViewTransformStartTime = mCurrentTime;
+    mViewTransformRotation = value;
+    mViewRotationStartTime = mCurrentTime;
 }
 
 void SceneWidget::on_btnViewReset_clicked()
@@ -1314,16 +1479,18 @@ void SceneWidget::on_btnViewReset_clicked()
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto rotation = mUI.rotation->value();
-    mState.camera_offset_x = width * 0.5f;
-    mState.camera_offset_y = height * 0.5f;
-    mViewTransformRotation = rotation;
-    mViewTransformStartTime = mCurrentTime;
+    mViewRotationStartTime    = mCurrentTime;
+    mViewTranslationStartTime = mCurrentTime;
+    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
+    mViewTransformRotation    = rotation;
+    mState.camera_offset_x    = width * 0.5f;
+    mState.camera_offset_y    = height * 0.5f;
     // set new camera offset to the center of the widget.
-    mUI.translateX->setValue(0);
-    mUI.translateY->setValue(0);
-    mUI.scaleX->setValue(1.0f);
-    mUI.scaleY->setValue(1.0f);
-    mUI.rotation->setValue(0);
+    SetValue(mUI.translateX, 0.0f);
+    SetValue(mUI.translateY, 0.0f);
+    SetValue(mUI.scaleX,     1.0f);
+    SetValue(mUI.scaleY,     1.0f);
+    SetValue(mUI.rotation,   0.0f);
 }
 
 void SceneWidget::on_widgetColor_colorChanged(QColor color)
@@ -1485,6 +1652,7 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     mUI.actionNodeMoveUpLayer->setEnabled(node != nullptr);
     mUI.actionNodeBreakLink->setEnabled(node != nullptr && tree.GetParent(node));
     mUI.actionNodeEdit->setEnabled(node != nullptr);
+    mUI.actionNodeFind->setEnabled(node != nullptr);
     mUI.actionEntityVarRef->setEnabled(node != nullptr);
 
     QMenu menu(this);
@@ -1492,6 +1660,7 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNodeMoveDownLayer);
     menu.addAction(mUI.actionNodeDuplicate);
     menu.addAction(mUI.actionNodeBreakLink);
+    menu.addAction(mUI.actionNodeFind);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeEdit);
     menu.addSeparator();
@@ -1596,9 +1765,12 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewRotationStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
+    const auto view_translation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTranslationStartTime);
+    const auto view_translation = math::interpolate(mViewTranslationStart, glm::vec2(mState.camera_offset_x, mState.camera_offset_y),
+        view_translation_time, math::Interpolation::Cosine);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -1607,7 +1779,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
     view.Rotate(qDegreesToRadians(view_rotation_angle));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    view.Translate(view_translation);
 
     painter.SetViewport(0, 0, width, height);
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
@@ -2171,6 +2343,40 @@ void SceneWidget::SetSceneBoundary()
         mState.scene.SetTopBoundary(GetValue(mUI.spinTopBoundary));
     if (GetValue(mUI.chkBottomBoundary))
         mState.scene.SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
+}
+
+void SceneWidget::FindNode(const game::SceneNodeClass* node)
+{
+    const auto& entity_klass = node->GetEntityClass();
+    if (!entity_klass)
+        return;
+
+    const float width  = mUI.widget->width();
+    const float height = mUI.widget->height();
+
+    // need to find camera_offset x and y such that the transformation
+    // of the scene node center point maps to a window coord xy, such
+    // that x=width*0.5 and y=height*0.5
+
+    base::Transform view;
+    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
+    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
+    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    // this is the info that needs to be found. offset_x = ?? offset_y = ??
+    // view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+
+    // excluding the translation from the transformation matrix gives
+    // us the coordinate with other properties and the translation that
+    // would be needed is just the offset between the center xy and the
+    // mapped node center point vector.
+    const auto& pos_in_scene = mState.scene.MapCoordsFromNodeBox(0.0f, 0.0f, node);
+    const auto& pos_in_view  = view * glm::vec4(pos_in_scene.x, pos_in_scene.y, 0.0f, 1.0f);
+    const auto translation   = glm::vec4(width*0.5, height*0.5, 0.0f, 0.0f) - pos_in_view;
+    mViewTranslationStartTime = mCurrentTime;
+    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
+    mState.camera_offset_x    = translation.x;
+    mState.camera_offset_y    = translation.y;
+    DisplayCurrentCameraLocation();
 }
 
 game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
