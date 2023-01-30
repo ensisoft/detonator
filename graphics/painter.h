@@ -28,6 +28,7 @@
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
+#include "graphics/transform.h"
 
 namespace gfx
 {
@@ -35,7 +36,6 @@ namespace gfx
     class Device;
     class Drawable;
     class Material;
-    class Transform;
     class RenderPass;
 
     // Painter class implements some algorithms for

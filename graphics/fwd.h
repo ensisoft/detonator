@@ -25,7 +25,6 @@ namespace gfx
     class MaterialClass;
     class Drawable;
     class DrawableClass;
-    class Transform;
     class Device;
     class IBitmap;
     class IBitmapGenerator;
@@ -43,3 +42,8 @@ namespace gfx
     class BuiltInMaterialClass;
 
 } // namespace
+
+namespace base
+{
+    class Transform;
+}
