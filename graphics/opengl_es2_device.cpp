@@ -817,9 +817,8 @@ public:
         }
         if (EnableIf(GL_DEPTH_TEST, state.depth_test != State::DepthTest::Disabled))
         {
-            GLenum depth_test;
             if (state.depth_test == State::DepthTest::LessOrEQual)
-                GL_CALL(glDepthFunc(depth_test));
+                GL_CALL(glDepthFunc(GL_LEQUAL));
             else BUG("Unknown GL depth test mode.");
         }
 
