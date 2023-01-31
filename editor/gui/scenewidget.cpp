@@ -677,8 +677,8 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
 
-    auto ret  = game::SceneClass::FromJson(json);
-    mState.scene  = std::move(ret.value());
+    if (!mState.scene.FromJson(json))
+        WARN("Failed to restore scene state.");
 
     UpdateResourceReferences();
     DisplaySceneProperties();
@@ -734,11 +734,10 @@ void SceneWidget::Cut(Clipboard& clipboard)
         game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
         }, json, node);
+
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.ToString());
-
         NOTE("Copied JSON to application clipboard.");
-        DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
 
         mState.scene.DeleteNode(node);
         mUI.tree->Rebuild();
@@ -754,11 +753,10 @@ void SceneWidget::Copy(Clipboard& clipboard) const
         game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
          }, json, node);
+
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.ToString());
-
         NOTE("Copied JSON to application clipboard.");
-        DEBUG("Copied scene node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
     }
 }
 void SceneWidget::Paste(const Clipboard& clipboard)
@@ -787,10 +785,10 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     bool error = false;
     game::SceneClass::RenderTree tree;
     game::RenderTreeFromJson(tree, [&nodes, &error](const data::Reader& data) {
-        auto ret = game::SceneNodeClass::FromJson(data);
-        if (ret.has_value()) {
-            auto node = std::make_unique<game::SceneNodeClass>(ret->Clone());
-            node->SetName(base::FormatString("Copy of %1", ret->GetName()));
+        game::SceneNodeClass ret;
+        if (ret.FromJson(data)) {
+            auto node = std::make_unique<game::SceneNodeClass>(ret.Clone());
+            node->SetName(base::FormatString("Copy of %1", ret.GetName()));
             nodes.push_back(std::move(node));
             return nodes.back().get();
         }

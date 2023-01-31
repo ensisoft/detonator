@@ -25,7 +25,6 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <optional>
 #include <variant>
 #include <tuple>
 #include <unordered_map>
@@ -468,8 +467,8 @@ namespace game
                         TilemapData& dst) const;
 
         void IntoJson(data::Writer& data) const;
+        bool FromJson(const data::Reader& data);
 
-        static TilemapLayerClass FromJson(const data::Reader& data);
         static bool HasRenderComponent(Type type);
         static bool HasDataComponent(Type type);
         static unsigned GetMaxPaletteIndex(Type type);
@@ -812,7 +811,7 @@ namespace game
 
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<TilemapClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         std::string mId;
         std::string mName;

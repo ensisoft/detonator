@@ -842,7 +842,7 @@ namespace gfx
         // Serialize the class into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load the class from JSON. Returns true on success.
-        virtual bool FromJson2(const data::Reader& data) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
         // Create an exact bitwise copy of this material class.
         virtual std::unique_ptr<MaterialClass> Copy() const = 0;
         // Create a similar clone of this material class but with unique id.
@@ -887,7 +887,7 @@ namespace gfx
         inline const CustomMaterialClass* AsCustom() const
         { return MaterialCast<const CustomMaterialClass>(this); }
 
-        static std::unique_ptr<MaterialClass> FromJson(const data::Reader& data);
+        static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data);
     protected:
         MaterialClass() = default;
         MaterialClass& operator=(const MaterialClass&) = default;
@@ -1006,7 +1006,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson2(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         Color4f mColor = gfx::Color::White;
     };
@@ -1067,7 +1067,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson2(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
                                 gfx::Color::White, gfx::Color::White};
@@ -1189,7 +1189,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson2(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
         virtual void FinishPacking(const TexturePacker* packer) override;
         SpriteClass& operator=(const SpriteClass&);
@@ -1294,7 +1294,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson2(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
         virtual void FinishPacking(const TexturePacker* packer) override;
         TextureMap2DClass& operator=(const TextureMap2DClass&);
@@ -1426,7 +1426,7 @@ namespace gfx
         virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
         virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson2(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
         virtual void BeginPacking(TexturePacker* packer) const override;
         virtual void FinishPacking(const TexturePacker* packer) override;
         virtual bool TestFlag(Flags flag) const override

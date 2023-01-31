@@ -62,15 +62,16 @@ void SetFlagActuatorClass::IntoJson(data::Writer& data) const
 
 bool SetFlagActuatorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",        &mId);
-    data.Read("name",      &mName);
-    data.Read("node",      &mNodeId);
-    data.Read("flag",      &mFlagName);
-    data.Read("starttime", &mStartTime);
-    data.Read("duration",  &mDuration);
-    data.Read("action",    &mFlagAction);
-    data.Read("flags",     &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",        &mId);
+    ok &= data.Read("name",      &mName);
+    ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("flag",      &mFlagName);
+    ok &= data.Read("starttime", &mStartTime);
+    ok &= data.Read("duration",  &mDuration);
+    ok &= data.Read("action",    &mFlagAction);
+    ok &= data.Read("flags",     &mFlags);
+    return ok;
 }
 
 std::size_t KinematicActuatorClass::GetHash() const
@@ -103,16 +104,17 @@ void KinematicActuatorClass::IntoJson(data::Writer& data) const
 
 bool KinematicActuatorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",               &mId);
-    data.Read("name",             &mName);
-    data.Read("node",             &mNodeId);
-    data.Read("method",           &mInterpolation);
-    data.Read("starttime",        &mStartTime);
-    data.Read("duration",         &mDuration);
-    data.Read("linear_velocity",  &mEndLinearVelocity);
-    data.Read("angular_velocity", &mEndAngularVelocity);
-    data.Read("flags",            &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",               &mId);
+    ok &= data.Read("name",             &mName);
+    ok &= data.Read("node",             &mNodeId);
+    ok &= data.Read("method",           &mInterpolation);
+    ok &= data.Read("starttime",        &mStartTime);
+    ok &= data.Read("duration",         &mDuration);
+    ok &= data.Read("linear_velocity",  &mEndLinearVelocity);
+    ok &= data.Read("angular_velocity", &mEndAngularVelocity);
+    ok &= data.Read("flags",            &mFlags);
+    return ok;
 }
 
 size_t SetValueActuatorClass::GetHash() const
@@ -145,16 +147,17 @@ void SetValueActuatorClass::IntoJson(data::Writer& data) const
 
 bool SetValueActuatorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",        &mId);
-    data.Read("cname",     &mName);
-    data.Read("node",      &mNodeId);
-    data.Read("method",    &mInterpolation);
-    data.Read("name",      &mParamName);
-    data.Read("starttime", &mStartTime);
-    data.Read("duration",  &mDuration);
-    data.Read("value",     &mEndValue);
-    data.Read("flags",     &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",        &mId);
+    ok &= data.Read("cname",     &mName);
+    ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("method",    &mInterpolation);
+    ok &= data.Read("name",      &mParamName);
+    ok &= data.Read("starttime", &mStartTime);
+    ok &= data.Read("duration",  &mDuration);
+    ok &= data.Read("value",     &mEndValue);
+    ok &= data.Read("flags",     &mFlags);
+    return ok;
 }
 
 void TransformActuatorClass::IntoJson(data::Writer& data) const
@@ -174,18 +177,19 @@ void TransformActuatorClass::IntoJson(data::Writer& data) const
 
 bool TransformActuatorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",        &mId);
-    data.Read("name",      &mName);
-    data.Read("node",      &mNodeId);
-    data.Read("starttime", &mStartTime);
-    data.Read("duration",  &mDuration);
-    data.Read("position",  &mEndPosition);
-    data.Read("size",      &mEndSize);
-    data.Read("scale",     &mEndScale);
-    data.Read("rotation",  &mEndRotation);
-    data.Read("method",    &mInterpolation);
-    data.Read("flags",     &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",        &mId);
+    ok &= data.Read("name",      &mName);
+    ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("starttime", &mStartTime);
+    ok &= data.Read("duration",  &mDuration);
+    ok &= data.Read("position",  &mEndPosition);
+    ok &= data.Read("size",      &mEndSize);
+    ok &= data.Read("scale",     &mEndScale);
+    ok &= data.Read("rotation",  &mEndRotation);
+    ok &= data.Read("method",    &mInterpolation);
+    ok &= data.Read("flags",     &mFlags);
+    return ok;
 }
 
 std::size_t TransformActuatorClass::GetHash() const
@@ -225,23 +229,24 @@ void MaterialActuatorClass::IntoJson(data::Writer& data) const
 
 bool MaterialActuatorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",       &mId);
-    data.Read("cname",    &mName);
-    data.Read("node",     &mNodeId);
-    data.Read("method",   &mInterpolation);
-    data.Read("start",    &mStartTime);
-    data.Read("duration", &mDuration);
-    data.Read("flags",    &mFlags);
+    bool ok = true;
+    ok &= data.Read("id",       &mId);
+    ok &= data.Read("cname",    &mName);
+    ok &= data.Read("node",     &mNodeId);
+    ok &= data.Read("method",   &mInterpolation);
+    ok &= data.Read("start",    &mStartTime);
+    ok &= data.Read("duration", &mDuration);
+    ok &= data.Read("flags",    &mFlags);
     for (unsigned i=0; i<data.GetNumChunks("params"); ++i)
     {
         const auto& chunk = data.GetReadChunk("params", i);
         std::string name;
         MaterialParam  value;
-        chunk->Read("name", &name);
-        chunk->Read("value", &value);
+        ok &= chunk->Read("name",  &name);
+        ok &= chunk->Read("value", &value);
         mMaterialParams[std::move(name)] = value;
     }
-    return true;
+    return ok;
 }
 std::size_t MaterialActuatorClass::GetHash() const
 {
@@ -856,42 +861,48 @@ void AnimationClass::IntoJson(data::Writer& data) const
     }
 }
 
-// static
-std::optional<AnimationClass> AnimationClass::FromJson(const data::Reader& data)
+bool AnimationClass::FromJson(const data::Reader& data)
 {
-    AnimationClass ret;
-    if (!data.Read("id", &ret.mId) ||
-        !data.Read("name", &ret.mName) ||
-        !data.Read("duration", &ret.mDuration) ||
-        !data.Read("delay", &ret.mDelay) ||
-        !data.Read("looping", &ret.mLooping))
-        return std::nullopt;
+    bool ok = true;
+    ok &= data.Read("id",       &mId);
+    ok &= data.Read("name",     &mName);
+    ok &= data.Read("duration", &mDuration);
+    ok &= data.Read("delay",    &mDelay);
+    ok &= data.Read("looping",  &mLooping);
 
     for (unsigned i=0; i<data.GetNumChunks("actuators"); ++i)
     {
-        const auto& meta = data.GetReadChunk("actuators", i);
         ActuatorClass::Type type;
-        if (!meta->Read("type", &type))
-            return std::nullopt;
-        std::shared_ptr<ActuatorClass> actuator;
-        if (type == ActuatorClass::Type::Transform)
-            actuator = std::make_shared<TransformActuatorClass>();
-        else if (type == ActuatorClass::Type::SetValue)
-            actuator = std::make_shared<SetValueActuatorClass>();
-        else if (type == ActuatorClass::Type::Kinematic)
-            actuator = std::make_shared<KinematicActuatorClass>();
-        else if (type == ActuatorClass::Type::SetFlag)
-            actuator = std::make_shared<SetFlagActuatorClass>();
-        else if (type == ActuatorClass::Type::Material)
-            actuator = std::make_shared<MaterialActuatorClass>();
-        else BUG("Unknown actuator type.");
+        const auto& meta_chunk = data.GetReadChunk("actuators", i);
+        const auto& data_chunk = meta_chunk->GetReadChunk("actuator");
+        if (data_chunk && meta_chunk->Read("type", &type))
+        {
+            std::shared_ptr<ActuatorClass> actuator;
+            if (type == ActuatorClass::Type::Transform)
+                actuator = std::make_shared<TransformActuatorClass>();
+            else if (type == ActuatorClass::Type::SetValue)
+                actuator = std::make_shared<SetValueActuatorClass>();
+            else if (type == ActuatorClass::Type::Kinematic)
+                actuator = std::make_shared<KinematicActuatorClass>();
+            else if (type == ActuatorClass::Type::SetFlag)
+                actuator = std::make_shared<SetFlagActuatorClass>();
+            else if (type == ActuatorClass::Type::Material)
+                actuator = std::make_shared<MaterialActuatorClass>();
+            else BUG("Unknown actuator type.");
 
-        const auto& act = meta->GetReadChunk("actuator");
-        if (!act || !actuator->FromJson(*act))
-            return std::nullopt;
-        ret.mActuators.push_back(actuator);
+            mActuators.push_back(actuator);
+            if (actuator->FromJson(*data_chunk))
+                continue;
+
+            WARN("Animation actuator failed to load completely. [animation='%1']", mName);
+        }
+        else if (!data_chunk)
+            WARN("Missing actuator data chunk. [animation='%1']", mName);
+        else WARN("Unrecognized animation actuator type. [animation='%1']", mName);
+
+        ok = false;
     }
-    return ret;
+    return ok;
 }
 
 AnimationClass AnimationClass::Clone() const

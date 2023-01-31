@@ -722,8 +722,8 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.zoom);
     settings.LoadWidget("UI", mUI.widget);
 
-    auto window = uik::Window::FromJson(json);
-    mState.window = std::move(window.value());
+    if (!mState.window.FromJson(json))
+        WARN("Failed to restore window state.");
 
     if (!LoadStyleQuiet(mState.window.GetStyleName()))
         mState.window.SetStyleName("");
@@ -788,11 +788,11 @@ void UIWidget::Cut(Clipboard& clipboard)
 
         clipboard.SetText(json.ToString());
         clipboard.SetType("application/json/ui");
+        NOTE("Copied JSON to application clipboard.");
 
         mState.window.DeleteWidget(widget);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
-        NOTE("Copied JSON to application clipboard.");
     }
 }
 void UIWidget::Copy(Clipboard& clipboard)  const

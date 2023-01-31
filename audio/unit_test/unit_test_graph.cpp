@@ -643,17 +643,17 @@ void unit_test_graph_class()
         // serialization
         data::JsonObject json;
         klass.IntoJson(json);
-        auto other = audio::GraphClass::FromJson(json);
-        TEST_REQUIRE(other.has_value());
-        TEST_REQUIRE(other->GetNumElements() == 2);
-        TEST_REQUIRE(other->GetNumLinks() == 1);
-        TEST_REQUIRE(other->FindElementById(zero.id)->name == "zero");
-        TEST_REQUIRE(other->FindElementById(zero.id)->type == "ZeroSource");
-        TEST_REQUIRE(other->FindElementById(zero.id)->args.size() == 1);
-        TEST_REQUIRE(*audio::FindElementArg<audio::Format>(other->FindElementById(zero.id)->args, "format") == test_format);
-        TEST_REQUIRE(other->FindLinkById(link.id)->src_element == zero.id);
-        TEST_REQUIRE(other->FindLinkById(link.id)->dst_element == gain.id);
-        TEST_REQUIRE(other->GetHash() == klass.GetHash());
+        audio::GraphClass other;
+        TEST_REQUIRE(other.FromJson(json));
+        TEST_REQUIRE(other.GetNumElements() == 2);
+        TEST_REQUIRE(other.GetNumLinks() == 1);
+        TEST_REQUIRE(other.FindElementById(zero.id)->name == "zero");
+        TEST_REQUIRE(other.FindElementById(zero.id)->type == "ZeroSource");
+        TEST_REQUIRE(other.FindElementById(zero.id)->args.size() == 1);
+        TEST_REQUIRE(*audio::FindElementArg<audio::Format>(other.FindElementById(zero.id)->args, "format") == test_format);
+        TEST_REQUIRE(other.FindLinkById(link.id)->src_element == zero.id);
+        TEST_REQUIRE(other.FindLinkById(link.id)->dst_element == gain.id);
+        TEST_REQUIRE(other.GetHash() == klass.GetHash());
 
         // instance creation.
         audio::Graph graph(klass);

@@ -120,7 +120,7 @@ bool LoadResources(const char* type,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
                    app::MigrationLog* log = nullptr)
 {
-    DEBUG("Loading %1", type);
+    DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
@@ -136,15 +136,15 @@ bool LoadResources(const char* type,
         }
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
-        std::optional<ClassType> ret = ClassType::FromJson(*chunk);
-        if (!ret.has_value())
+        ClassType ret;
+        if (!ret.FromJson(*chunk))
         {
-            ERROR("Failed to load resource. [name='%1']", name);
+            WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
             success = false;
-            continue;
         }
-        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret.value()), app::FromUtf8(name)));
-        DEBUG("Loaded resource. [name='%1']", name);
+
+        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret), app::FromUtf8(name)));
+        DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
 }
@@ -155,7 +155,7 @@ bool LoadMaterials(const char* type,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
                    app::MigrationLog* log = nullptr)
 {
-    DEBUG("Loading %1", type);
+    DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
@@ -171,15 +171,15 @@ bool LoadMaterials(const char* type,
         }
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
-        auto ret = ClassType::FromJson(*chunk);
+        auto ret = ClassType::ClassFromJson(*chunk);
         if (!ret)
         {
-            ERROR("Failed to load material. [name='%1']", name);
+            WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
             success = false;
-            continue;
         }
+
         vector.push_back(std::make_unique<app::MaterialResource>(std::move(ret), app::FromUtf8(name)));
-        DEBUG("Loaded material. [name='%1']", name);
+        DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
 }
@@ -1896,25 +1896,25 @@ AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
 bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
 {
     data::JsonFile file;
-    const auto [ok, error] = file.Load(app::ToUtf8(filename));
-    if (!ok)
+    const auto [json_ok, error] = file.Load(app::ToUtf8(filename));
+    if (!json_ok)
     {
-        ERROR("Failed to load JSON content file '%1'", filename);
-        ERROR("JSON file load error '%1'", error);
+        ERROR("Failed to load workspace JSON content file. [file='%1', error='%2']", filename, error);
         return false;
     }
     data::JsonObject root = file.GetRootObject();
 
-    LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
-    LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources, log);
-    LoadResources<gfx::PolygonClass>("shapes", root, mResources, log);
-    LoadResources<game::EntityClass>("entities", root, mResources, log);
-    LoadResources<game::SceneClass>("scenes", root, mResources, log);
-    LoadResources<game::TilemapClass>("tilemaps", root, mResources, log);
-    LoadResources<Script>("scripts", root, mResources, log);
-    LoadResources<DataFile>("data_files", root, mResources, log);
-    LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log);
-    LoadResources<uik::Window>("uis", root, mResources, log);
+    bool ok = true;
+    ok &= LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
+    ok &= LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources, log);
+    ok &= LoadResources<gfx::PolygonClass>("shapes", root, mResources, log);
+    ok &= LoadResources<game::EntityClass>("entities", root, mResources, log);
+    ok &= LoadResources<game::SceneClass>("scenes", root, mResources, log);
+    ok &= LoadResources<game::TilemapClass>("tilemaps", root, mResources, log);
+    ok &= LoadResources<Script>("scripts", root, mResources, log);
+    ok &= LoadResources<DataFile>("data_files", root, mResources, log);
+    ok &= LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log);
+    ok &= LoadResources<uik::Window>("uis", root, mResources, log);
 
     // create an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.

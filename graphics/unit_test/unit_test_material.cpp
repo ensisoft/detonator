@@ -77,7 +77,7 @@ void unit_test_maps()
         sprite.IntoJson(json);
 
         gfx::SpriteMap other;
-        other.FromJson(json);
+        TEST_REQUIRE(other.FromJson(json));
         TEST_REQUIRE(other.GetHash() == sprite.GetHash());
         TEST_REQUIRE(other.GetFps() == real::float32(10.0f));
         TEST_REQUIRE(other.GetSamplerName(0) == "kTexture0");
@@ -139,7 +139,7 @@ void unit_test_color()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::MaterialClass::FromJson(json);
+        auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
@@ -192,7 +192,7 @@ void unit_test_gradient()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::MaterialClass::FromJson(json);
+        auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
@@ -265,7 +265,7 @@ void unit_test_texture()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::MaterialClass::FromJson(json);
+        auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
@@ -394,7 +394,7 @@ void unit_test_sprite()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::MaterialClass::FromJson(json);
+        auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());
@@ -534,7 +534,7 @@ void unit_test_custom()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::MaterialClass::FromJson(json);
+        auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId() == klass.GetId());

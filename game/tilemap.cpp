@@ -739,47 +739,48 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
     data.Write("default", std::move(chunk));
 }
 
-// static
-TilemapLayerClass TilemapLayerClass::FromJson(const data::Reader& data)
+bool TilemapLayerClass::FromJson(const data::Reader& data)
 {
-    TilemapLayerClass ret;
-    Type type;
-    data.Read("type",     &type);
-    data.Read("id",       &ret.mId);
-    data.Read("name",     &ret.mName);
-    data.Read("data_uri", &ret.mDataUri);
-    data.Read("data_id",  &ret.mDataId);
-    data.Read("flags",    &ret.mFlags);
-    data.Read("storage",  &ret.mStorage);
-    data.Read("cache",    &ret.mCache);
-    data.Read("rez",      &ret.mResolution);
+    bool ok = true;
+    ok &= data.Read("id",       &mId);
+    ok &= data.Read("name",     &mName);
+    ok &= data.Read("data_uri", &mDataUri);
+    ok &= data.Read("data_id",  &mDataId);
+    ok &= data.Read("flags",    &mFlags);
+    ok &= data.Read("storage",  &mStorage);
+    ok &= data.Read("cache",    &mCache);
+    ok &= data.Read("rez",      &mResolution);
 
     for (unsigned i=0; i<data.GetNumChunks("palette"); ++i)
     {
         std::string material;
         unsigned key = 0;
         const auto& chunk = data.GetReadChunk("palette", i);
-        chunk->Read("index", &key);
-        chunk->Read("value", &material);
-        ret.mPalette[key] = std::move(material);
+        ok &= chunk->Read("index", &key);
+        ok &= chunk->Read("value", &material);
+        mPalette[key] = std::move(material);
     }
 
-    ret.SetType(type);
+    Type type;
+    if (!data.Read("type", &type))
+        return false;
+
+    SetType(type);
 
     unsigned hi = 0;
     unsigned lo = 0;
     auto chunk = data.GetReadChunk("default");
     if (chunk)
     {
-        chunk->Read("hi_bits", &hi);
-        chunk->Read("lo_bits", &lo);
+        ok &= chunk->Read("hi_bits", &hi);
+        ok &= chunk->Read("lo_bits", &lo);
     }
     const uint32_t value = ((hi & 0xffff) << 16) | (lo & 0xffff);
     std::visit([&value](auto& variant_value) {
         std::memcpy(&variant_value, &value, sizeof(variant_value));
-    }, ret.mDefault);
+    }, mDefault);
 
-    return ret;
+    return ok;
 }
 
 // static
@@ -1145,25 +1146,27 @@ void TilemapClass::IntoJson(data::Writer& data) const
     }
 }
 
-// static
-std::optional<TilemapClass> TilemapClass::FromJson(const data::Reader& data)
+bool TilemapClass::FromJson(const data::Reader& data)
 {
-    TilemapClass ret;
-    data.Read("id",          &ret.mId);
-    data.Read("name",        &ret.mName);
-    data.Read("script",      &ret.mScriptFile);
-    data.Read("width",       &ret.mWidth);
-    data.Read("height",      &ret.mHeight);
-    data.Read("tile_width",  &ret.mTileWidth);
-    data.Read("tile_height", &ret.mTileHeight);
+    bool ok = true;
+    ok &= data.Read("id",          &mId);
+    ok &= data.Read("name",        &mName);
+    ok &= data.Read("script",      &mScriptFile);
+    ok &= data.Read("width",       &mWidth);
+    ok &= data.Read("height",      &mHeight);
+    ok &= data.Read("tile_width",  &mTileWidth);
+    ok &= data.Read("tile_height", &mTileHeight);
 
     for (unsigned i=0; i<data.GetNumChunks("layers"); ++i)
     {
         const auto& chunk = data.GetReadChunk("layers", i);
-        auto layer = std::make_shared<TilemapLayerClass>(TilemapLayerClass::FromJson(*chunk));
-        ret.mLayers.push_back(layer);
+        auto layer = std::make_shared<TilemapLayerClass>();
+        if (!layer->FromJson(*chunk))
+            WARN("Failed to load tilemap layer. [map='%1', layer='%2']", mName, layer->GetName());
+
+        mLayers.push_back(layer);
     }
-    return ret;
+    return ok;
 }
 
 Tilemap::Tilemap(const std::shared_ptr<const TilemapClass>& klass)

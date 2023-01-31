@@ -205,40 +205,37 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
     {
         auto chunk = data.NewWriteChunk();
         chunk->Write("id", value.id);
-        //chunk->Write("value", value.value);
         ScriptVar::IntoJson(value.value, *chunk);
         data.AppendChunk("values", std::move(chunk));
     }
 }
 
-// static
-std::optional<SceneNodeClass> SceneNodeClass::FromJson(const data::Reader& data)
+bool SceneNodeClass::FromJson(const data::Reader& data)
 {
-    SceneNodeClass ret;
-    data.Read("id",                      &ret.mClassId);
-    data.Read("entity",                  &ret.mEntityId);
-    data.Read("name",                    &ret.mName);
-    data.Read("position",                &ret.mPosition);
-    data.Read("scale",                   &ret.mScale);
-    data.Read("rotation",                &ret.mRotation);
-    data.Read("flag_val_bits",           &ret.mFlagValBits);
-    data.Read("flag_set_bits",           &ret.mFlagSetBits);
-    data.Read("layer",                   &ret.mLayer);
-    data.Read("parent_render_tree_node", &ret.mParentRenderTreeNodeId);
-    data.Read("idle_animation_id",       &ret.mIdleAnimationId);
-    data.Read("lifetime",                &ret.mLifetime);
-    data.Read("tag",                     &ret.mTagString);
+    bool ok = true;
+    ok &= data.Read("id",                      &mClassId);
+    ok &= data.Read("entity",                  &mEntityId);
+    ok &= data.Read("name",                    &mName);
+    ok &= data.Read("position",                &mPosition);
+    ok &= data.Read("scale",                   &mScale);
+    ok &= data.Read("rotation",                &mRotation);
+    ok &= data.Read("flag_val_bits",           &mFlagValBits);
+    ok &= data.Read("flag_set_bits",           &mFlagSetBits);
+    ok &= data.Read("layer",                   &mLayer);
+    ok &= data.Read("parent_render_tree_node", &mParentRenderTreeNodeId);
+    ok &= data.Read("idle_animation_id",       &mIdleAnimationId);
+    ok &= data.Read("lifetime",                &mLifetime);
+    ok &= data.Read("tag",                     &mTagString);
 
     for (unsigned i=0; i<data.GetNumChunks("values"); ++i)
     {
         const auto& chunk = data.GetReadChunk("values", i);
         ScriptVarValue value;
-        chunk->Read("id", &value.id);
-        //chunk->Read("value", &value.value);
-        ScriptVar::FromJson(*chunk, &value.value);
-        ret.mScriptVarValues.push_back(std::move(value));
+        ok &= chunk->Read("id",           &value.id);
+        ok &= ScriptVar::FromJson(*chunk, &value.value);
+        mScriptVarValues.push_back(std::move(value));
     }
-    return ret;
+    return ok;
 }
 
 SceneClass::SceneClass()
@@ -830,64 +827,66 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("render_tree", std::move(chunk));
 }
 
-// static
-std::optional<SceneClass> SceneClass::FromJson(const data::Reader& data)
+bool SceneClass::FromJson(const data::Reader& data)
 {
-    SceneClass ret;
-    data.Read("id", &ret.mClassId);
-    data.Read("name", &ret.mName);
-    data.Read("script_file", &ret.mScriptFile);
-    data.Read("tilemap", &ret.mTilemap);
-    data.Read("dynamic_spatial_index", &ret.mDynamicSpatialIndex);
+    bool ok = true;
+    ok &= data.Read("id",                    &mClassId);
+    ok &= data.Read("name",                  &mName);
+    ok &= data.Read("script_file",           &mScriptFile);
+    ok &= data.Read("tilemap",               &mTilemap);
+    ok &= data.Read("dynamic_spatial_index", &mDynamicSpatialIndex);
+    ok &= data.Read("left_boundary",         &mLeftBoundary);
+    ok &= data.Read("right_boundary",        &mRightBoundary);
+    ok &= data.Read("top_boundary",          &mTopBoundary);
+    ok &= data.Read("bottom_boundary",       &mBottomBoundary);
 
     if (data.HasValue("dynamic_spatial_rect"))
     {
         base::FRect rect;
-        if (!data.Read("dynamic_spatial_rect", &rect))
-            return std::nullopt;
-        ret.mDynamicSpatialRect = rect;
+        if (data.Read("dynamic_spatial_rect", &rect))
+            mDynamicSpatialRect = rect;
+        else WARN("Failed to load scene spatial rect property. [scene='%1']", mName);
     }
-    if (ret.mDynamicSpatialIndex == SpatialIndex::QuadTree)
+    if (mDynamicSpatialIndex == SpatialIndex::QuadTree)
     {
         QuadTreeArgs quadtree_args;
         if (data.Read("quadtree_max_items", &quadtree_args.max_items) &&
             data.Read("quadtree_max_levels", &quadtree_args.max_levels))
-            ret.mDynamicSpatialIndexArgs = quadtree_args;
+            mDynamicSpatialIndexArgs = quadtree_args;
+        else WARN("Failed to load scene quadtree property. [scene='%1']", mName);
     }
-
-    if (ret.mDynamicSpatialIndex == SpatialIndex::DenseGrid)
+    if (mDynamicSpatialIndex == SpatialIndex::DenseGrid)
     {
         DenseGridArgs densegrid_args;
         if (data.Read("dense_grid_rows", &densegrid_args.num_rows) &&
             data.Read("dense_grid_cols", &densegrid_args.num_cols))
-            ret.mDynamicSpatialIndexArgs = densegrid_args;
+            mDynamicSpatialIndexArgs = densegrid_args;
+        else WARN("Failed to load scene spatial dense grid property. [scene='%1']", mName);
     }
-    data.Read("left_boundary",   &ret.mLeftBoundary);
-    data.Read("right_boundary",  &ret.mRightBoundary);
-    data.Read("top_boundary",    &ret.mTopBoundary);
-    data.Read("bottom_boundary", &ret.mBottomBoundary);
 
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
         const auto& chunk = data.GetReadChunk("nodes", i);
-        std::optional<SceneNodeClass> node = SceneNodeClass::FromJson(*chunk);
-        if (!node.has_value())
-            return std::nullopt;
-        ret.mNodes.push_back(std::make_unique<SceneNodeClass>(std::move(node.value())));
+        auto node = std::make_unique<SceneNodeClass>();
+        if (!node->FromJson(*chunk))
+            WARN("Failed to load scene node. [scene='%1', node='%2']", mName, node->GetName());
+
+        mNodes.push_back(std::move(node));
     }
     for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
     {
         const auto& chunk = data.GetReadChunk("vars", i);
-        std::optional<ScriptVar> var = ScriptVar::FromJson(*chunk);
-        if (!var.has_value())
-            return std::nullopt;
-        ret.mScriptVars.push_back(std::move(var.value()));
+        ScriptVar var;
+        if (var.FromJson(*chunk))
+            mScriptVars.push_back(std::move(var));
+        else WARN("Failed to load scene script variable. [scene='%1', var='%2']", mName, var.GetName());
     }
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
-        return std::nullopt;
-    RenderTreeFromJson(ret.mRenderTree, game::TreeNodeFromJson(ret.mNodes), *chunk);
-    return ret;
+        return false;
+
+    RenderTreeFromJson(mRenderTree, game::TreeNodeFromJson(mNodes), *chunk);
+    return ok;
 }
 SceneClass SceneClass::Clone() const
 {

@@ -24,7 +24,6 @@
 
 #include <variant>
 #include <string>
-#include <optional>
 #include <vector>
 
 #include "base/assert.h"
@@ -192,13 +191,12 @@ namespace game
         // Serialize into JSON.
         void IntoJson(data::Writer& data) const;
 
+        bool FromJson(const data::Reader& data);
+
         static size_t GetHash(const VariantType& variant);
         static size_t GetArraySize(const VariantType& variant);
         static void IntoJson(const VariantType& variant, data::Writer& writer);
-        static void FromJson(const data::Reader& reader, VariantType* variant);
-
-        static std::optional<ScriptVar> FromJson(const data::Reader& data);
-
+        static bool FromJson(const data::Reader& reader, VariantType* variant);
         static Type GetTypeFromVariant(const VariantType& variant);
 
         template<typename T>

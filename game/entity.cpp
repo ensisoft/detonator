@@ -58,14 +58,13 @@ void SpatialNodeClass::IntoJson(data::Writer& data) const
     data.Write("shape", mShape);
     data.Write("flags", mFlags);
 }
-// static
-std::optional<SpatialNodeClass> SpatialNodeClass::FromJson(const data::Reader& data)
+
+bool SpatialNodeClass::FromJson(const data::Reader& data)
 {
-    SpatialNodeClass ret;
-    if (!data.Read("shape", &ret.mShape) ||
-        !data.Read("flags", &ret.mFlags))
-        return std::nullopt;
-    return ret;
+    bool ok = true;
+    ok &= data.Read("shape", &mShape);
+    ok &= data.Read("flags", &mFlags);
+    return ok;
 }
 
 std::size_t FixtureClass::GetHash() const
@@ -92,18 +91,17 @@ void FixtureClass::IntoJson(data::Writer& data) const
     data.Write("restitution", mRestitution);
 }
 
-// static
-std::optional<FixtureClass> FixtureClass::FromJson(const data::Reader& data)
+bool FixtureClass::FromJson(const data::Reader& data)
 {
-    FixtureClass ret;
-    data.Read("shape",       &ret.mCollisionShape);
-    data.Read("flags",       &ret.mBitFlags);
-    data.Read("polygon",     &ret.mPolygonShapeId);
-    data.Read("rigid_body",  &ret.mRigidBodyNodeId);
-    data.Read("friction",    &ret.mFriction);
-    data.Read("density",     &ret.mDensity);
-    data.Read("restitution", &ret.mRestitution);
-    return ret;
+    bool ok = true;
+    ok &= data.Read("shape",       &mCollisionShape);
+    ok &= data.Read("flags",       &mBitFlags);
+    ok &= data.Read("polygon",     &mPolygonShapeId);
+    ok &= data.Read("rigid_body",  &mRigidBodyNodeId);
+    ok &= data.Read("friction",    &mFriction);
+    ok &= data.Read("density",     &mDensity);
+    ok &= data.Read("restitution", &mRestitution);
+    return ok;
 }
 
 std::size_t RigidBodyItemClass::GetHash() const
@@ -133,21 +131,20 @@ void RigidBodyItemClass::IntoJson(data::Writer& data) const
     data.Write("linear_damping",  mLinearDamping);
     data.Write("density",         mDensity);
 }
-// static
-std::optional<RigidBodyItemClass> RigidBodyItemClass::FromJson(const data::Reader& data)
+
+bool RigidBodyItemClass::FromJson(const data::Reader& data)
 {
-    RigidBodyItemClass ret;
-    if (!data.Read("simulation",      &ret.mSimulation)  ||
-        !data.Read("shape",           &ret.mCollisionShape)  ||
-        !data.Read("flags",           &ret.mBitFlags)  ||
-        !data.Read("polygon",         &ret.mPolygonShapeId)  ||
-        !data.Read("friction",        &ret.mFriction)  ||
-        !data.Read("restitution",     &ret.mRestitution)  ||
-        !data.Read("angular_damping", &ret.mAngularDamping)  ||
-        !data.Read("linear_damping",  &ret.mLinearDamping)  ||
-        !data.Read("density",         &ret.mDensity))
-        return std::nullopt;
-    return ret;
+    bool ok = true;
+    ok &= data.Read("simulation",      &mSimulation);
+    ok &= data.Read("shape",           &mCollisionShape);
+    ok &= data.Read("flags",           &mBitFlags);
+    ok &= data.Read("polygon",         &mPolygonShapeId);
+    ok &= data.Read("friction",        &mFriction);
+    ok &= data.Read("restitution",     &mRestitution);
+    ok &= data.Read("angular_damping", &mAngularDamping);
+    ok &= data.Read("linear_damping",  &mLinearDamping);
+    ok &= data.Read("density",         &mDensity);
+    return ok;
 }
 
 DrawableItemClass::DrawableItemClass()
@@ -238,42 +235,33 @@ bool ReadMaterialParam(const data::Reader& data, DrawableItemClass::MaterialPara
     return true;
 }
 
-// static
-std::optional<DrawableItemClass> DrawableItemClass::FromJson(const data::Reader& data)
+bool DrawableItemClass::FromJson(const data::Reader& data)
 {
-    DrawableItemClass ret;
-    if (!data.Read("flags",       &ret.mBitFlags) ||
-        !data.Read("material",    &ret.mMaterialId) ||
-        !data.Read("drawable",    &ret.mDrawableId) ||
-        !data.Read("layer",       &ret.mLayer) ||
-        !data.Read("linewidth",   &ret.mLineWidth) ||
-        !data.Read("renderpass",  &ret.mRenderPass) ||
-        !data.Read("renderstyle", &ret.mRenderStyle) ||
-        !data.Read("timescale",   &ret.mTimeScale))
-        return std::nullopt;
+    bool ok = true;
+    ok &= data.Read("flags",       &mBitFlags);
+    ok &= data.Read("material",    &mMaterialId);
+    ok &= data.Read("drawable",    &mDrawableId);
+    ok &= data.Read("layer",       &mLayer);
+    ok &= data.Read("linewidth",   &mLineWidth);
+    ok &= data.Read("renderpass",  &mRenderPass);
+    ok &= data.Read("renderstyle", &mRenderStyle);
+    ok &= data.Read("timescale",   &mTimeScale);
 
     for (unsigned i=0; i<data.GetNumChunks("material_params"); ++i)
     {
-        MaterialParam param;
         const auto& chunk = data.GetReadChunk("material_params", i);
-        std::string name;
-        if (!chunk->Read("name", &name))
-            return std::nullopt;
 
-        // note: the order of vec2/3/4 reading is important since
-        // vec4 parses as vec3/2 and vec3 parses as vec2.
-        // this should be fixed in data/json.cpp
-        if (ReadMaterialParam<float>(*chunk, param) ||
-            ReadMaterialParam<int>(*chunk, param) ||
-            ReadMaterialParam<glm::vec4>(*chunk, param) ||
-            ReadMaterialParam<glm::vec3>(*chunk, param) ||
-            ReadMaterialParam<glm::vec2>(*chunk, param) ||
-            ReadMaterialParam<Color4f>(*chunk, param))
-        {
-            ret.mMaterialParams[std::move(name)] = std::move(param);
-        } else return std::nullopt;
+        MaterialParam param;
+        std::string name;
+        bool chunk_ok = true;
+        chunk_ok &= chunk->Read("name",  &name);
+        chunk_ok &= chunk->Read("value", &param);
+        if (chunk_ok)
+            mMaterialParams[std::move(name)] = param;
+
+        ok &= chunk_ok;
     }
-    return ret;
+    return ok;
 }
 
 size_t TextItemClass::GetHash() const
@@ -308,23 +296,22 @@ void TextItemClass::IntoJson(data::Writer& data) const
     data.Write("text_color",       mTextColor);
 }
 
-// static
-std::optional<TextItemClass> TextItemClass::FromJson(const data::Reader& data)
+
+bool TextItemClass::FromJson(const data::Reader& data)
 {
-    TextItemClass ret;
-    if (!data.Read("flags",            &ret.mBitFlags) ||
-        !data.Read("horizontal_align", &ret.mHAlign) ||
-        !data.Read("vertical_align",   &ret.mVAlign) ||
-        !data.Read("layer",            &ret.mLayer) ||
-        !data.Read("text",             &ret.mText) ||
-        !data.Read("font_name",        &ret.mFontName) ||
-        !data.Read("font_size",        &ret.mFontSize) ||
-        !data.Read("raster_width",     &ret.mRasterWidth) ||
-        !data.Read("raster_height",    &ret.mRasterHeight) ||
-        !data.Read("line_height",      &ret.mLineHeight) ||
-        !data.Read("text_color",       &ret.mTextColor))
-        return std::nullopt;
-    return ret;
+    bool ok = true;
+    ok &= data.Read("flags",            &mBitFlags);
+    ok &= data.Read("horizontal_align", &mHAlign);
+    ok &= data.Read("vertical_align",   &mVAlign);
+    ok &= data.Read("layer",            &mLayer);
+    ok &= data.Read("text",             &mText);
+    ok &= data.Read("font_name",        &mFontName);
+    ok &= data.Read("font_size",        &mFontSize);
+    ok &= data.Read("raster_width",     &mRasterWidth);
+    ok &= data.Read("raster_height",    &mRasterHeight);
+    ok &= data.Read("line_height",      &mLineHeight);
+    ok &= data.Read("text_color",       &mTextColor);
+    return ok;
 }
 
 EntityNodeClass::EntityNodeClass()
@@ -506,57 +493,37 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
     }
 }
 
-// static
-std::optional<EntityNodeClass> EntityNodeClass::FromJson(const data::Reader& data)
+template<typename T>
+bool ComponentClassFromJson(const std::string& node, const char* name, const data::Reader& data, std::shared_ptr<T>& klass)
 {
-    EntityNodeClass ret;
-    if (!data.Read("class",    &ret.mClassId) ||
-        !data.Read("name",     &ret.mName) ||
-        !data.Read("position", &ret.mPosition) ||
-        !data.Read("scale",    &ret.mScale) ||
-        !data.Read("size",     &ret.mSize) ||
-        !data.Read("rotation", &ret.mRotation) ||
-        !data.Read("flags",    &ret.mBitFlags))
-        return std::nullopt;
+    if (const auto& chunk = data.GetReadChunk(name))
+    {
+        klass = std::make_shared<T>();
+        if (!klass->FromJson(*chunk))
+        {
+            WARN("Entity node class component failed to load. [node=%1, component='%2']",  node, name);
+            return false;
+        }
+    }
+    return true;
+}
 
-    if (const auto& chunk = data.GetReadChunk("rigid_body"))
-    {
-        auto body = RigidBodyItemClass::FromJson(*chunk);
-        if (!body.has_value())
-            return std::nullopt;
-        ret.mRigidBody = std::make_shared<RigidBodyItemClass>(std::move(body.value()));
-    }
-
-    if (const auto& chunk = data.GetReadChunk("drawable_item"))
-    {
-        auto draw = DrawableItemClass::FromJson(*chunk);
-        if (!draw.has_value())
-            return std::nullopt;
-        ret.mDrawable = std::make_shared<DrawableItemClass>(std::move(draw.value()));
-    }
-
-    if (const auto& chunk = data.GetReadChunk("text_item"))
-    {
-        auto text = TextItemClass::FromJson(*chunk);
-        if (!text.has_value())
-            return std::nullopt;
-        ret.mTextItem = std::make_shared<TextItemClass>(std::move(text.value()));
-    }
-    if (const auto& chunk = data.GetReadChunk("spatial_node"))
-    {
-        auto node = SpatialNodeClass::FromJson(*chunk);
-        if (!node.has_value())
-            return std::nullopt;
-        ret.mSpatialNode = std::make_shared<SpatialNodeClass>(std::move(node.value()));
-    }
-    if (const auto& chunk = data.GetReadChunk("fixture"))
-    {
-        auto node = FixtureClass::FromJson(*chunk);
-        if (!node.has_value())
-            return std::nullopt;
-        ret.mFixture = std::make_shared<FixtureClass>(std::move(node.value()));
-    }
-    return ret;
+bool EntityNodeClass::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("class",    &mClassId);
+    ok &= data.Read("name",     &mName);
+    ok &= data.Read("position", &mPosition);
+    ok &= data.Read("scale",    &mScale);
+    ok &= data.Read("size",     &mSize);
+    ok &= data.Read("rotation", &mRotation);
+    ok &= data.Read("flags",    &mBitFlags);
+    ok &= ComponentClassFromJson(mName, "rigid_body",    data, mRigidBody);
+    ok &= ComponentClassFromJson(mName, "drawable_item", data, mDrawable);
+    ok &= ComponentClassFromJson(mName, "text_item",     data, mTextItem);
+    ok &= ComponentClassFromJson(mName, "spatial_node",  data, mSpatialNode);
+    ok &= ComponentClassFromJson(mName, "fixture",       data, mFixture);
+    return ok;
 }
 
 EntityNodeClass EntityNodeClass::Clone() const
@@ -571,18 +538,18 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     if (this == &other)
         return *this;
     EntityNodeClass tmp(other);
-    mClassId   = std::move(tmp.mClassId);
-    mName      = std::move(tmp.mName);
-    mPosition  = std::move(tmp.mPosition);
-    mScale     = std::move(tmp.mScale);
-    mSize      = std::move(tmp.mSize);
-    mRotation  = std::move(tmp.mRotation);
-    mRigidBody = std::move(tmp.mRigidBody);
-    mDrawable  = std::move(tmp.mDrawable);
-    mTextItem  = std::move(tmp.mTextItem);
+    mClassId     = std::move(tmp.mClassId);
+    mName        = std::move(tmp.mName);
+    mPosition    = std::move(tmp.mPosition);
+    mScale       = std::move(tmp.mScale);
+    mSize        = std::move(tmp.mSize);
+    mRotation    = std::move(tmp.mRotation);
+    mRigidBody   = std::move(tmp.mRigidBody);
+    mDrawable    = std::move(tmp.mDrawable);
+    mTextItem    = std::move(tmp.mTextItem);
     mSpatialNode = std::move(tmp.mSpatialNode);
-    mFixture = std::move(tmp.mFixture);
-    mBitFlags  = std::move(tmp.mBitFlags);
+    mFixture     = std::move(tmp.mFixture);
+    mBitFlags    = std::move(tmp.mBitFlags);
     return *this;
 }
 
@@ -617,16 +584,16 @@ EntityNode::EntityNode(const EntityNode& other)
 
 EntityNode::EntityNode(EntityNode&& other)
 {
-    mClass     = std::move(other.mClass);
-    mInstId    = std::move(other.mInstId);
-    mName      = std::move(other.mName);
-    mScale     = std::move(other.mScale);
-    mSize      = std::move(other.mSize);
-    mPosition  = std::move(other.mPosition);
-    mRotation  = std::move(other.mRotation);
-    mRigidBody = std::move(other.mRigidBody);
-    mDrawable  = std::move(other.mDrawable);
-    mTextItem  = std::move(other.mTextItem);
+    mClass       = std::move(other.mClass);
+    mInstId      = std::move(other.mInstId);
+    mName        = std::move(other.mName);
+    mScale       = std::move(other.mScale);
+    mSize        = std::move(other.mSize);
+    mPosition    = std::move(other.mPosition);
+    mRotation    = std::move(other.mRotation);
+    mRigidBody   = std::move(other.mRigidBody);
+    mDrawable    = std::move(other.mDrawable);
+    mTextItem    = std::move(other.mTextItem);
     mSpatialNode = std::move(other.mSpatialNode);
     mFixture     = std::move(other.mFixture);
 }
@@ -1219,13 +1186,14 @@ std::size_t EntityClass::GetHash() const
 
 void EntityClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mClassId);
-    data.Write("name", mName);
-    data.Write("tag", mTag);
-    data.Write("idle_track", mIdleTrackId);
+    data.Write("id",          mClassId);
+    data.Write("name",        mName);
+    data.Write("tag",         mTag);
+    data.Write("idle_track",  mIdleTrackId);
     data.Write("script_file", mScriptFile);
-    data.Write("flags", mFlags);
-    data.Write("lifetime", mLifetime);
+    data.Write("flags",       mFlags);
+    data.Write("lifetime",    mLifetime);
+
     for (const auto& node : mNodes)
     {
         auto chunk = data.NewWriteChunk();
@@ -1274,81 +1242,85 @@ void EntityClass::IntoJson(data::Writer& data) const
     data.Write("render_tree", std::move(chunk));
 }
 
-// static
-std::optional<EntityClass> EntityClass::FromJson(const data::Reader& data)
+bool EntityClass::FromJson(const data::Reader& data)
 {
-    EntityClass ret;
-    data.Read("id",          &ret.mClassId);
-    data.Read("name",        &ret.mName);
-    data.Read("tag",         &ret.mTag);
-    data.Read("idle_track",  &ret.mIdleTrackId);
-    data.Read("script_file", &ret.mScriptFile);
-    data.Read("flags",       &ret.mFlags);
-    data.Read("lifetime",    &ret.mLifetime);
+    bool ok = true;
+    ok &= data.Read("id",          &mClassId);
+    ok &= data.Read("name",        &mName);
+    ok &= data.Read("tag",         &mTag);
+    ok &= data.Read("idle_track",  &mIdleTrackId);
+    ok &= data.Read("script_file", &mScriptFile);
+    ok &= data.Read("flags",       &mFlags);
+    ok &= data.Read("lifetime",    &mLifetime);
 
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
         const auto& chunk = data.GetReadChunk("nodes", i);
-        std::optional<EntityNodeClass> node = EntityNodeClass::FromJson(*chunk);
-        if (!node.has_value())
-            return std::nullopt;
-        ret.mNodes.push_back(std::make_shared<EntityNodeClass>(std::move(node.value())));
+        auto klass = std::make_shared<EntityNodeClass>();
+        mNodes.push_back(klass);
+        if (!klass->FromJson(*chunk)) {
+            WARN("Failed to load entity class node. [entity=%1', node='%1']", mName, klass->GetName());
+            ok = false;
+        }
     }
     for (unsigned i=0; i<data.GetNumChunks("tracks"); ++i)
     {
         const auto& chunk = data.GetReadChunk("tracks", i);
-        std::optional<AnimationClass> track = AnimationClass::FromJson(*chunk);
-        if (!track.has_value())
-            return std::nullopt;
-        ret.mAnimations.push_back(std::make_shared<AnimationClass>(std::move(track.value())));
+        auto klass = std::make_shared<AnimationClass>();
+        mAnimations.push_back(klass);
+        if (!klass->FromJson(*chunk)) {
+            WARN("Failed to load entity animation track. [entity='%1', animation='%2']", mName, klass->GetName());
+            ok = false;
+        }
     }
     for (unsigned i=0; i<data.GetNumChunks("vars"); ++i)
     {
         const auto& chunk = data.GetReadChunk("vars", i);
-        std::optional<ScriptVar> var = ScriptVar::FromJson(*chunk);
-        if (!var.has_value())
-            return std::nullopt;
-        ret.mScriptVars.push_back(std::make_shared<ScriptVar>(var.value()));
+        auto var = std::make_shared<ScriptVar>();
+        if (!var->FromJson(*chunk)) {
+            WARN("Failed to load entity script variable. [entity='%1', var='%2']", mName, var->GetName());
+            ok = false;
+        } else mScriptVars.push_back(var);
     }
     for (unsigned i=0; i<data.GetNumChunks("joints"); ++i)
     {
         const auto& chunk = data.GetReadChunk("joints", i);
         auto joint = std::make_shared<PhysicsJoint>();
         auto& jref = *joint;
-        chunk->Read("id", &jref.id);
-        chunk->Read("type", &jref.type);
-        chunk->Read("src_node_id", &jref.src_node_id);
-        chunk->Read("dst_node_id", &jref.dst_node_id);
-        chunk->Read("src_node_anchor_point", &jref.src_node_anchor_point);
-        chunk->Read("dst_node_anchor_point", &jref.dst_node_anchor_point);
-        chunk->Read("name", &jref.name);
+        ok &= chunk->Read("id",                    &jref.id);
+        ok &= chunk->Read("type",                  &jref.type);
+        ok &= chunk->Read("src_node_id",           &jref.src_node_id);
+        ok &= chunk->Read("dst_node_id",           &jref.dst_node_id);
+        ok &= chunk->Read("src_node_anchor_point", &jref.src_node_anchor_point);
+        ok &= chunk->Read("dst_node_anchor_point", &jref.dst_node_anchor_point);
+        ok &= chunk->Read("name",                  &jref.name);
         if (jref.type == PhysicsJointType::Distance)
         {
             DistanceJointParams params;
-            chunk->Read("damping", &params.damping);
-            chunk->Read("stiffness", &params.stiffness);
+            ok &= chunk->Read("damping", &params.damping);
+            ok &= chunk->Read("stiffness", &params.stiffness);
             if (chunk->HasValue("min_dist"))
             {
                 float value = 0.0f;
-                chunk->Read("min_dist", &value);
+                ok &= chunk->Read("min_dist", &value);
                 params.min_distance = value;
             }
             if (chunk->HasValue("max_dist"))
             {
                 float value = 0.0f;
-                chunk->Read("max_dist", &value);
+                ok &= chunk->Read("max_dist", &value);
                 params.max_distance = value;
             }
             joint->params = params;
         }
-        ret.mJoints.push_back(std::move(joint));
+        mJoints.push_back(std::move(joint));
     }
 
     const auto& chunk = data.GetReadChunk("render_tree");
     if (!chunk)
-        return std::nullopt;
-    RenderTreeFromJson(ret.mRenderTree, game::TreeNodeFromJson(ret.mNodes), *chunk);
-    return ret;
+        return false;
+    RenderTreeFromJson(mRenderTree, game::TreeNodeFromJson(mNodes), *chunk);
+    return ok;
 }
 
 EntityClass EntityClass::Clone() const

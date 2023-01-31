@@ -779,9 +779,10 @@ bool TilemapWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Tilemap", mUI.cmbGrid);
     settings.LoadWidget("Tilemap", mUI.zoom);
 
-    auto ret = game::TilemapClass::FromJson(json);
-    mState.klass = std::make_shared<game::TilemapClass>(*ret);
-    mState.map   = game::CreateTilemap(mState.klass);
+    mState.klass = std::make_shared<game::TilemapClass>();
+    if (mState.klass->FromJson(json))
+        WARN("Failed to restore tilemap state.");
+    mState.map  = game::CreateTilemap(mState.klass);
 
     mTools.clear();
 

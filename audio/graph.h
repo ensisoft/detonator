@@ -48,6 +48,7 @@ namespace audio
             std::string dst_element;
             std::string dst_port;
         };
+        GraphClass() = default;
         GraphClass(const std::string& name, const std::string& id);
         GraphClass(const std::string& name);
 
@@ -126,7 +127,7 @@ namespace audio
         }
 
         void IntoJson(data::Writer& writer) const;
-        static std::optional<GraphClass> FromJson(const data::Reader& reader);
+        bool FromJson(const data::Reader& reader);
     private:
         std::string mName;
         std::string mId;

@@ -20,7 +20,6 @@
 
 #include <string>
 #include <memory>
-#include <optional>
 #include <functional>
 #include <vector>
 
@@ -386,7 +385,7 @@ namespace uik
 
         Window& operator=(const Window& other);
 
-        static std::optional<Window> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         enum class MouseEventType {
             ButtonPress, ButtonRelease, MouseMove
