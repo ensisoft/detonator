@@ -52,7 +52,7 @@ void unit_test_polygon_data()
         data::JsonObject json;
         klass.IntoJson(json);
         gfx::PolygonClass copy;
-        TEST_REQUIRE(copy.LoadFromJson(json));
+        TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetNumVertices() == 1);
         TEST_REQUIRE(copy.GetNumDrawCommands() == 1);
         TEST_REQUIRE(copy.GetVertex(0) == v0);
@@ -290,12 +290,12 @@ void unit_test_particle_engine_data()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->GetId() == klass.GetId());
-        TEST_REQUIRE(ret->GetHash() == klass.GetHash());
+        gfx::KinematicsParticleEngineClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetId() == klass.GetId());
+        TEST_REQUIRE(ret.GetHash() == klass.GetHash());
 
-        const auto& p = ret->GetParams();
+        const auto& p = ret.GetParams();
         TEST_REQUIRE(p.motion                           == gfx::KinematicsParticleEngineClass::Motion::Projectile);
         TEST_REQUIRE(p.mode                             == gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous);
         TEST_REQUIRE(p.boundary                         == gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill);

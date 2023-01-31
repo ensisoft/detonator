@@ -223,8 +223,8 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Polygon", mUI.cmbGrid);
     settings.LoadWidget("Polygon", mUI.widget);
 
-    auto ret = gfx::PolygonClass::FromJson(json);
-    mPolygon = std::move(ret.value());
+    if (!mPolygon.FromJson(json))
+        WARN("Failed to restore polygon shape state.");
 
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());

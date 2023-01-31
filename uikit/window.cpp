@@ -821,28 +821,26 @@ Window& Window::operator=(const Window& other)
     return *this;
 }
 
-// static
-std::optional<Window> Window::FromJson(const data::Reader& data)
+bool Window::FromJson(const data::Reader& data)
 {
-    Window ret;
-    data.Read("id",   &ret.mId);
-    data.Read("name", &ret.mName);
-    data.Read("script_file", &ret.mScriptFile);
-    if (!data.Read("style_file", &ret.mStyleFile))
-        data.Read("style", &ret.mStyleFile); // old version before style_string and style_file
-    data.Read("style_string", &ret.mStyleString);
-    data.Read("keymap_file", &ret.mKeyMapFile);
-    data.Read("flags", &ret.mFlags);
+    bool ok = true;
+    data.Read("id",           &mId);
+    data.Read("name",         &mName);
+    data.Read("script_file",  &mScriptFile);
+    data.Read("style_string", &mStyleString);
+    data.Read("keymap_file",  &mKeyMapFile);
+    data.Read("flags",        &mFlags);
+    if (!data.Read("style_file", &mStyleFile))
+        data.Read("style", &mStyleFile); // old version before style_string and style_file
 
     if (!data.GetNumChunks("widgets"))
-        return ret;
+        return ok;
 
     const auto& chunk = data.GetReadChunk("widgets", 0);
     if (!chunk)
-        return ret;
-    if (!RenderTreeFromJson(*chunk, ret.mRenderTree, ret.mWidgets))
-        return std::nullopt;
-    return ret;
+        return ok;
+    ok &= RenderTreeFromJson(*chunk, mRenderTree, mWidgets);
+    return ok;
 }
 
 std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state, bool is_mouse_press)

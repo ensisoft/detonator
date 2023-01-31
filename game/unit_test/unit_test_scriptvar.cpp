@@ -34,13 +34,13 @@ int test_main(int argc, char* argv[])
         data::JsonObject json;
         var.IntoJson(json);
 
-        auto ret = game::ScriptVar::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->IsReadOnly() == false);
-        TEST_REQUIRE(ret->IsArray() == false);
-        TEST_REQUIRE(ret->GetName() == "foo");
-        TEST_REQUIRE(ret->GetType() == game::ScriptVar::Type::String);
-        TEST_REQUIRE(ret->GetValue<std::string>() == "blabla");
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == false);
+        TEST_REQUIRE(ret.IsArray() == false);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::String);
+        TEST_REQUIRE(ret.GetValue<std::string>() == "blabla");
     }
 
     {
@@ -56,15 +56,15 @@ int test_main(int argc, char* argv[])
         data::JsonObject json;
         var.IntoJson(json);
 
-        auto ret = game::ScriptVar::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->IsReadOnly() == false);
-        TEST_REQUIRE(ret->IsArray() == true);
-        TEST_REQUIRE(ret->GetName() == "foo");
-        TEST_REQUIRE(ret->GetType() == game::ScriptVar::Type::Integer);
-        TEST_REQUIRE(ret->GetArray<int>()[0] == 1);
-        TEST_REQUIRE(ret->GetArray<int>()[1] == 2);
-        TEST_REQUIRE(ret->GetArray<int>()[2] == 6);
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == false);
+        TEST_REQUIRE(ret.IsArray() == true);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::Integer);
+        TEST_REQUIRE(ret.GetArray<int>()[0] == 1);
+        TEST_REQUIRE(ret.GetArray<int>()[1] == 2);
+        TEST_REQUIRE(ret.GetArray<int>()[2] == 6);
     }
 
     {
@@ -82,14 +82,14 @@ int test_main(int argc, char* argv[])
 
         data::JsonObject json;
         var.IntoJson(json);
-        auto ret = game::ScriptVar::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->IsReadOnly() == true);
-        TEST_REQUIRE(ret->IsArray() == true);
-        TEST_REQUIRE(ret->GetName() == "foo");
-        TEST_REQUIRE(ret->GetType() == game::ScriptVar::Type::Vec2);
-        TEST_REQUIRE(ret->GetArray<glm::vec2>()[0] == data[0]);
-        TEST_REQUIRE(ret->GetArray<glm::vec2>()[1] == data[1]);
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == true);
+        TEST_REQUIRE(ret.IsArray() == true);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::Vec2);
+        TEST_REQUIRE(ret.GetArray<glm::vec2>()[0] == data[0]);
+        TEST_REQUIRE(ret.GetArray<glm::vec2>()[1] == data[1]);
 
     }
 
@@ -101,9 +101,12 @@ int test_main(int argc, char* argv[])
 
         data::JsonObject json;
         var.IntoJson(json);
-        auto ret = game::ScriptVar::FromJson(json);
-        TEST_REQUIRE(ret->GetArray<bool>()[0] == data[0]);
-        TEST_REQUIRE(ret->GetArray<bool>()[1] == data[1]);
+        game::ScriptVar ret;
+
+        ret.FromJson(json);
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetArray<bool>()[0] == data[0]);
+        TEST_REQUIRE(ret.GetArray<bool>()[1] == data[1]);
 
     }
 
@@ -115,9 +118,11 @@ int test_main(int argc, char* argv[])
 
         data::JsonObject json;
         var.IntoJson(json);
-        auto ret = game::ScriptVar::FromJson(json);
-        TEST_REQUIRE(ret->GetArray<game::ScriptVar::EntityReference>()[0].id == refs[0].id);
-        TEST_REQUIRE(ret->GetArray<game::ScriptVar::EntityReference>()[1].id == refs[1].id);
+
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetArray<game::ScriptVar::EntityReference>()[0].id == refs[0].id);
+        TEST_REQUIRE(ret.GetArray<game::ScriptVar::EntityReference>()[1].id == refs[1].id);
     }
 
     return 0;

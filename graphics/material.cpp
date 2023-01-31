@@ -209,12 +209,13 @@ void detail::TextureFileSource::IntoJson(data::Writer& data) const
 }
 bool detail::TextureFileSource::FromJson(const data::Reader& data)
 {
-    data.Read("id",   &mId);
-    data.Read("file", &mFile);
-    data.Read("name", &mName);
-    data.Read("flags", &mFlags);
-    data.Read("colorspace", &mColorSpace);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",         &mId);
+    ok &= data.Read("file",       &mFile);
+    ok &= data.Read("name",       &mName);
+    ok &= data.Read("flags",      &mFlags);
+    ok &= data.Read("colorspace", &mColorSpace);
+    return ok;
 }
 
 void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
@@ -232,26 +233,27 @@ void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
 }
 bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 {
+    bool ok = true;
     unsigned width = 0;
     unsigned height = 0;
     unsigned depth = 0;
     std::string base64;
-    if (!data.Read("id",     &mId) ||
-        !data.Read("name",   &mName) ||
-        !data.Read("width",  &width) ||
-        !data.Read("height", &height) ||
-        !data.Read("depth",  &depth) ||
-        !data.Read("data",   &base64))
-        return false;
+    ok &= data.Read("id",     &mId);
+    ok &= data.Read("name",   &mName);
+    ok &= data.Read("width",  &width);
+    ok &= data.Read("height", &height);
+    ok &= data.Read("depth",  &depth);
+    ok &= data.Read("data",   &base64);
+
     const auto& bits = base64::Decode(base64);
-    if (depth == 1)
+    if (depth == 1 && bits.size() == width*height)
         mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*) &bits[0], width, height);
-    else if (depth == 3)
+    else if (depth == 3 && bits.size() == width*height*3)
         mBitmap = std::make_shared<RgbBitmap>((const RGB*) &bits[0], width, height);
-    else if (depth == 4)
+    else if (depth == 4 && bits.size() == width*height*4)
         mBitmap = std::make_shared<RgbaBitmap>((const RGBA*) &bits[0], width, height);
     else return false;
-    return true;
+    return ok;
 }
 
 void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
@@ -266,16 +268,21 @@ void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
 bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
 {
     IBitmapGenerator::Function function;
-    if (!data.Read("id", &mId) ||
-        !data.Read("name", &mName) ||
-        !data.Read("function", &function))
+    bool ok = true;
+    ok &= data.Read("id",       &mId);
+    ok &= data.Read("name",     &mName);
+    if (!data.Read("function", &function))
         return false;
+
     if (function == IBitmapGenerator::Function::Noise)
         mGenerator = std::make_unique<NoiseBitmapGenerator>();
+    else BUG("Unhandled bitmap generator type.");
+
     const auto& chunk = data.GetReadChunk("generator");
     if (!chunk || !mGenerator->FromJson(*chunk))
         return false;
-    return true;
+
+    return ok;
 }
 
 
@@ -298,17 +305,16 @@ void detail::TextureTextBufferSource::IntoJson(data::Writer& data) const
 }
 bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
 {
-    if (!data.Read("name", &mName) ||
-        !data.Read("id", &mId))
-        return false;
+    bool ok = true;
+    ok &= data.Read("name", &mName);
+    ok &= data.Read("id",   &mId);
+
     const auto& chunk = data.GetReadChunk("buffer");
     if (!chunk)
         return false;
-    auto ret = TextBuffer::FromJson(*chunk);
-    if (!ret.has_value())
-        return false;
-    mTextBuffer = std::move(ret.value());
-    return true;
+
+    ok &= mTextBuffer.FromJson(*chunk);
+    return ok;
 }
 
 SpriteMap* TextureMap::AsSpriteMap()
@@ -536,39 +542,39 @@ void SpriteMap::IntoJson(data::Writer& data) const
 }
 bool SpriteMap::FromJson(const data::Reader& data)
 {
-    data.Read("fps", &mFps);
-    data.Read("sampler_name0", &mSamplerName[0]);
-    data.Read("sampler_name1", &mSamplerName[1]);
-    data.Read("rect_name0", &mRectUniformName[0]);
-    data.Read("rect_name1", &mRectUniformName[1]);
-    data.Read("looping", &mLooping);
+    bool ok = true;
+    ok &= data.Read("fps",           &mFps);
+    ok &= data.Read("sampler_name0", &mSamplerName[0]);
+    ok &= data.Read("sampler_name1", &mSamplerName[1]);
+    ok &= data.Read("rect_name0",    &mRectUniformName[0]);
+    ok &= data.Read("rect_name1",    &mRectUniformName[1]);
+    ok &= data.Read("looping",       &mLooping);
 
     for (unsigned i=0; i<data.GetNumChunks("textures"); ++i)
     {
         const auto& chunk = data.GetReadChunk("textures", i);
         TextureSource::Source type;
-        Sprite sprite;
-        if (!chunk->Read("type", &type) ||
-            !chunk->Read("rect", &sprite.rect))
-            return false;
-        std::unique_ptr<TextureSource> source;
-        if (type == TextureSource::Source::Filesystem)
-            source = std::make_unique<detail::TextureFileSource>();
-        else if (type == TextureSource::Source::TextBuffer)
-            source = std::make_unique<detail::TextureTextBufferSource>();
-        else if (type == TextureSource::Source::BitmapBuffer)
-            source = std::make_unique<detail::TextureBitmapBufferSource>();
-        else if (type == TextureSource::Source::BitmapGenerator)
-            source = std::make_unique<detail::TextureBitmapGeneratorSource>();
-        else BUG("???");
+        if (chunk->Read("type", &type))
+        {
+            std::unique_ptr<TextureSource> source;
+            if (type == TextureSource::Source::Filesystem)
+                source = std::make_unique<detail::TextureFileSource>();
+            else if (type == TextureSource::Source::TextBuffer)
+                source = std::make_unique<detail::TextureTextBufferSource>();
+            else if (type == TextureSource::Source::BitmapBuffer)
+                source = std::make_unique<detail::TextureBitmapBufferSource>();
+            else if (type == TextureSource::Source::BitmapGenerator)
+                source = std::make_unique<detail::TextureBitmapGeneratorSource>();
+            else BUG("Unhandled texture source type.");
 
-        if (!source->FromJson(*chunk))
-            return false;
-
-        sprite.source = std::move(source);
-        mSprites.push_back(std::move(sprite));
+            Sprite sprite;
+            ok &= source->FromJson(*chunk);
+            ok &= chunk->Read("rect", &sprite.rect);
+            sprite.source = std::move(source);
+            mSprites.push_back(std::move(sprite));
+        }
     }
-    return true;
+    return ok;
 }
 
 SpriteMap& SpriteMap::operator=(const SpriteMap& other)
@@ -666,16 +672,19 @@ void TextureMap2D::IntoJson(data::Writer& data) const
 }
 bool TextureMap2D::FromJson(const data::Reader& data)
 {
-    data.Read("rect", &mRect);
-    data.Read("sampler_name", &mSamplerName);
-    data.Read("rect_name", &mRectUniformName);
+    bool ok = true;
+    ok &= data.Read("rect",         &mRect);
+    ok &= data.Read("sampler_name", &mSamplerName);
+    ok &= data.Read("rect_name",    &mRectUniformName);
 
     const auto& texture = data.GetReadChunk("texture");
     if (!texture)
-        return true;
+        return false;
+
     TextureSource::Source type;
     if (!texture->Read("type", &type))
         return false;
+
     std::unique_ptr<TextureSource> source;
     if (type == TextureSource::Source::Filesystem)
         source = std::make_unique<detail::TextureFileSource>();
@@ -685,12 +694,12 @@ bool TextureMap2D::FromJson(const data::Reader& data)
         source = std::make_unique<detail::TextureBitmapBufferSource>();
     else if (type == TextureSource::Source::BitmapGenerator)
         source = std::make_unique<detail::TextureBitmapGeneratorSource>();
-    else BUG("???");
+    else BUG("Unhandled texture source type.");
 
     if (!source->FromJson(*texture))
         return false;
     mSource = std::move(source);
-    return true;
+    return ok;
 }
 
 TextureSource* TextureMap2D::FindTextureSourceById(const std::string& id)
@@ -754,11 +763,12 @@ TextureMap2D& TextureMap2D::operator=(const TextureMap2D& other)
 }
 
 // static
-std::unique_ptr<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
+std::unique_ptr<MaterialClass> MaterialClass::ClassFromJson(const data::Reader& data)
 {
     Type type;
     if (!data.Read("type", &type))
         return nullptr;
+
     std::unique_ptr<MaterialClass> klass;
     if (type == Type::Color)
         klass.reset(new ColorClass);
@@ -770,9 +780,10 @@ std::unique_ptr<MaterialClass> MaterialClass::FromJson(const data::Reader& data)
         klass.reset(new TextureMap2DClass);
     else if (type == Type::Custom)
         klass.reset(new CustomMaterialClass);
-    else BUG("???");
-    if (!klass->FromJson2(data))
-        return nullptr;
+    else BUG("Unhandled material class type.");
+
+    // todo: change the API so that we can also return the OK value.
+    bool ok = klass->FromJson(data);
     return klass;
 }
 
@@ -854,16 +865,17 @@ void ColorClass::IntoJson(data::Writer& data) const
     data.Write("color",   mColor);
     data.Write("flags",   mFlags);
 }
-bool ColorClass::FromJson2(const data::Reader& data)
+bool ColorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",      &mClassId);
-    data.Read("name",    &mName);
-    data.Read("surface", &mSurfaceType);
-    data.Read("gamma",   &mGamma);
-    data.Read("static",  &mStatic);
-    data.Read("color",   &mColor);
-    data.Read("flags",   &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",      &mClassId);
+    ok &= data.Read("name",    &mName);
+    ok &= data.Read("surface", &mSurfaceType);
+    ok &= data.Read("gamma",   &mGamma);
+    ok &= data.Read("static",  &mStatic);
+    ok &= data.Read("color",   &mColor);
+    ok &= data.Read("flags",   &mFlags);
+    return ok;
 }
 
 Shader* GradientClass::GetShader(const State& state, Device& device) const
@@ -990,20 +1002,21 @@ void GradientClass::IntoJson(data::Writer& data) const
     data.Write("offset",     mOffset);
     data.Write("flags",      mFlags);
 }
-bool GradientClass::FromJson2(const data::Reader& data)
+bool GradientClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",         &mClassId);
-    data.Read("name",       &mName);
-    data.Read("surface",    &mSurfaceType);
-    data.Read("gamma",      &mGamma);
-    data.Read("static",     &mStatic);
-    data.Read("color_map0", &mColorMap[0]);
-    data.Read("color_map1", &mColorMap[1]);
-    data.Read("color_map2", &mColorMap[2]);
-    data.Read("color_map3", &mColorMap[3]);
-    data.Read("offset",     &mOffset);
-    data.Read("flags",      &mFlags);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",         &mClassId);
+    ok &= data.Read("name",       &mName);
+    ok &= data.Read("surface",    &mSurfaceType);
+    ok &= data.Read("gamma",      &mGamma);
+    ok &= data.Read("static",     &mStatic);
+    ok &= data.Read("color_map0", &mColorMap[0]);
+    ok &= data.Read("color_map1", &mColorMap[1]);
+    ok &= data.Read("color_map2", &mColorMap[2]);
+    ok &= data.Read("color_map3", &mColorMap[3]);
+    ok &= data.Read("offset",     &mOffset);
+    ok &= data.Read("flags",      &mFlags);
+    return ok;
 }
 
 SpriteClass::SpriteClass(const SpriteClass& other, bool copy)
@@ -1283,46 +1296,47 @@ void SpriteClass::ApplyStaticState(const State& state, Device& device, Program& 
 
 void SpriteClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type", Type::Sprite);
-    data.Write("id", mClassId);
-    data.Write("name", mName);
-    data.Write("surface", mSurfaceType);
-    data.Write("gamma", mGamma);
-    data.Write("static", mStatic);
-    data.Write("blending", mBlendFrames);
-    data.Write("color", mBaseColor);
+    data.Write("type",               Type::Sprite);
+    data.Write("id",                 mClassId);
+    data.Write("name",               mName);
+    data.Write("surface",            mSurfaceType);
+    data.Write("gamma",              mGamma);
+    data.Write("static",             mStatic);
+    data.Write("blending",           mBlendFrames);
+    data.Write("color",              mBaseColor);
     data.Write("texture_min_filter", mMinFilter);
     data.Write("texture_mag_filter", mMagFilter);
-    data.Write("texture_wrap_x", mWrapX);
-    data.Write("texture_wrap_y", mWrapY);
-    data.Write("texture_scale",  mTextureScale);
-    data.Write("texture_velocity", mTextureVelocity);
-    data.Write("texture_rotation", mTextureRotation);
-    data.Write("particle_action", mParticleAction);
-    data.Write("flags", mFlags);
+    data.Write("texture_wrap_x",     mWrapX);
+    data.Write("texture_wrap_y",     mWrapY);
+    data.Write("texture_scale",      mTextureScale);
+    data.Write("texture_velocity",   mTextureVelocity);
+    data.Write("texture_rotation",   mTextureRotation);
+    data.Write("particle_action",    mParticleAction);
+    data.Write("flags",              mFlags);
     mSprite.IntoJson(data);
 }
 
-bool SpriteClass::FromJson2(const data::Reader& data)
+bool SpriteClass::FromJson(const data::Reader& data)
 {
-    data.Read("id", &mClassId);
-    data.Read("name", &mName);
-    data.Read("surface", &mSurfaceType);
-    data.Read("gamma", &mGamma);
-    data.Read("static", &mStatic);
-    data.Read("blending", &mBlendFrames);
-    data.Read("color", &mBaseColor);
-    data.Read("texture_min_filter", &mMinFilter);
-    data.Read("texture_mag_filter", &mMagFilter);
-    data.Read("texture_wrap_x", &mWrapX);
-    data.Read("texture_wrap_y", &mWrapY);
-    data.Read("texture_scale",  &mTextureScale);
-    data.Read("texture_velocity", &mTextureVelocity);
-    data.Read("texture_rotation", &mTextureRotation);
-    data.Read("particle_action", &mParticleAction);
-    data.Read("flags", &mFlags);
-    mSprite.FromJson(data);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",                 &mClassId);
+    ok &= data.Read("name",               &mName);
+    ok &= data.Read("surface",            &mSurfaceType);
+    ok &= data.Read("gamma",              &mGamma);
+    ok &= data.Read("static",             &mStatic);
+    ok &= data.Read("blending",           &mBlendFrames);
+    ok &= data.Read("color",              &mBaseColor);
+    ok &= data.Read("texture_min_filter", &mMinFilter);
+    ok &= data.Read("texture_mag_filter", &mMagFilter);
+    ok &= data.Read("texture_wrap_x",     &mWrapX);
+    ok &= data.Read("texture_wrap_y",     &mWrapY);
+    ok &= data.Read("texture_scale",      &mTextureScale);
+    ok &= data.Read("texture_velocity",   &mTextureVelocity);
+    ok &= data.Read("texture_rotation",   &mTextureRotation);
+    ok &= data.Read("particle_action",    &mParticleAction);
+    ok &= data.Read("flags",              &mFlags);
+    ok &= mSprite.FromJson(data);
+    return ok;
 }
 
 void SpriteClass::BeginPacking(TexturePacker* packer) const
@@ -1679,44 +1693,45 @@ void TextureMap2DClass::ApplyStaticState(const State& state, Device& device, Pro
 
 void TextureMap2DClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type", Type::Texture);
-    data.Write("id", mClassId);
-    data.Write("name", mName);
-    data.Write("surface", mSurfaceType);
-    data.Write("gamma", mGamma);
-    data.Write("static", mStatic);
-    data.Write("color", mBaseColor);
+    data.Write("type",               Type::Texture);
+    data.Write("id",                 mClassId);
+    data.Write("name",               mName);
+    data.Write("surface",            mSurfaceType);
+    data.Write("gamma",              mGamma);
+    data.Write("static",             mStatic);
+    data.Write("color",              mBaseColor);
     data.Write("texture_min_filter", mMinFilter);
     data.Write("texture_mag_filter", mMagFilter);
-    data.Write("texture_wrap_x", mWrapX);
-    data.Write("texture_wrap_y", mWrapY);
-    data.Write("texture_scale",  mTextureScale);
-    data.Write("texture_velocity", mTextureVelocity);
-    data.Write("texture_rotation", mTextureRotation);
-    data.Write("particle_action", mParticleAction);
-    data.Write("flags", mFlags);
+    data.Write("texture_wrap_x",     mWrapX);
+    data.Write("texture_wrap_y",     mWrapY);
+    data.Write("texture_scale",      mTextureScale);
+    data.Write("texture_velocity",   mTextureVelocity);
+    data.Write("texture_rotation",   mTextureRotation);
+    data.Write("particle_action",    mParticleAction);
+    data.Write("flags",              mFlags);
     mTexture.IntoJson(data);
 }
 
-bool TextureMap2DClass::FromJson2(const data::Reader& data)
+bool TextureMap2DClass::FromJson(const data::Reader& data)
 {
-    data.Read("id", &mClassId);
-    data.Read("name", &mName);
-    data.Read("surface", &mSurfaceType);
-    data.Read("gamma", &mGamma);
-    data.Read("static", &mStatic);
-    data.Read("color", &mBaseColor);
-    data.Read("texture_min_filter", &mMinFilter);
-    data.Read("texture_mag_filter", &mMagFilter);
-    data.Read("texture_wrap_x", &mWrapX);
-    data.Read("texture_wrap_y", &mWrapY);
-    data.Read("texture_scale",  &mTextureScale);
-    data.Read("texture_velocity", &mTextureVelocity);
-    data.Read("texture_rotation", &mTextureRotation);
-    data.Read("particle_action", &mParticleAction);
-    data.Read("flags", &mFlags);
-    mTexture.FromJson(data);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",                 &mClassId);
+    ok &= data.Read("name",               &mName);
+    ok &= data.Read("surface",            &mSurfaceType);
+    ok &= data.Read("gamma",              &mGamma);
+    ok &= data.Read("static",             &mStatic);
+    ok &= data.Read("color",              &mBaseColor);
+    ok &= data.Read("texture_min_filter", &mMinFilter);
+    ok &= data.Read("texture_mag_filter", &mMagFilter);
+    ok &= data.Read("texture_wrap_x",     &mWrapX);
+    ok &= data.Read("texture_wrap_y",     &mWrapY);
+    ok &= data.Read("texture_scale",      &mTextureScale);
+    ok &= data.Read("texture_velocity",   &mTextureVelocity);
+    ok &= data.Read("texture_rotation",   &mTextureRotation);
+    ok &= data.Read("particle_action",    &mParticleAction);
+    ok &= data.Read("flags",              &mFlags);
+    ok &= mTexture.FromJson(data);
+    return ok;
 }
 
 void TextureMap2DClass::BeginPacking(TexturePacker* packer) const
@@ -2123,28 +2138,27 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
     }
 }
 
-bool CustomMaterialClass::FromJson2(const data::Reader& data)
+bool CustomMaterialClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",         &mClassId);
-    data.Read("name",       &mName);
-    data.Read("shader_uri", &mShaderUri);
-    data.Read("shader_src", &mShaderSrc);
-    data.Read("surface",    &mSurfaceType);
-    data.Read("min_filter", &mMinFilter);
-    data.Read("mag_filter", &mMagFilter);
-    data.Read("wrap_x",     &mWrapX);
-    data.Read("wrap_y",     &mWrapY);
-    data.Read("flags",      &mFlags);
+    bool ok = true;
+    ok &= data.Read("id",         &mClassId);
+    ok &= data.Read("name",       &mName);
+    ok &= data.Read("shader_uri", &mShaderUri);
+    ok &= data.Read("shader_src", &mShaderSrc);
+    ok &= data.Read("surface",    &mSurfaceType);
+    ok &= data.Read("min_filter", &mMinFilter);
+    ok &= data.Read("mag_filter", &mMagFilter);
+    ok &= data.Read("wrap_x",     &mWrapX);
+    ok &= data.Read("wrap_y",     &mWrapY);
+    ok &= data.Read("flags",      &mFlags);
 
     for (unsigned i=0; i<data.GetNumChunks("uniforms"); ++i)
     {
         Uniform uniform;
         const auto& chunk = data.GetReadChunk("uniforms", i);
         std::string name;
-        if (!chunk->Read("name", &name))
-            return false;
-        if (!chunk->Read("value", &uniform))
-            return false;
+        ok &= chunk->Read("name", &name);
+        ok &= chunk->Read("value", &uniform);
         mUniforms[std::move(name)] = std::move(uniform);
     }
     for (unsigned i=0; i<data.GetNumChunks("texture_maps"); ++i)
@@ -2152,20 +2166,21 @@ bool CustomMaterialClass::FromJson2(const data::Reader& data)
         const auto& chunk = data.GetReadChunk("texture_maps", i);
         std::string name;
         TextureMap::Type type;
-        if (!chunk->Read("name", &name) ||
-            !chunk->Read("type", &type))
-            return false;
-        std::unique_ptr<TextureMap> map;
-        if (type == TextureMap::Type::Texture2D)
-            map.reset(new TextureMap2D);
-        else if (type == TextureMap::Type::Sprite)
-            map.reset(new SpriteMap);
-        else BUG("wot");
-        if (!map->FromJson(*chunk))
-            return false;
-        mTextureMaps[name] = std::move(map);
+        if (chunk->Read("type", &type) &&
+            chunk->Read("name", &name))
+        {
+            std::unique_ptr<TextureMap> map;
+            if (type == TextureMap::Type::Texture2D)
+                map.reset(new TextureMap2D);
+            else if (type == TextureMap::Type::Sprite)
+                map.reset(new SpriteMap);
+            else BUG("Unhandled texture map type.");
+
+            ok &= map->FromJson(*chunk);
+            mTextureMaps[name] = std::move(map);
+        } else ok = false;
     }
-    return true;
+    return ok;
 }
 void CustomMaterialClass::BeginPacking(TexturePacker* packer) const
 {

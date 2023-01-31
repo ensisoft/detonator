@@ -38,16 +38,18 @@ void write_primitive_array(const char* array, const game::ScriptVar::VariantType
     writer.Write(array, &value[0], value.size());
 }
 template<typename PrimitiveType>
-void read_primitive_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
+bool read_primitive_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
 {
+    bool ok = true;
     std::vector<PrimitiveType> arr;
     for (unsigned i=0; i<reader.GetNumItems(array); ++i)
     {
         PrimitiveType item;
-        reader.Read(array, i, &item);
+        ok &= reader.Read(array, i, &item);
         arr.push_back(std::move(item));
     }
     *variant = std::move(arr);
+    return ok;
 }
 
 template<typename ObjectType>
@@ -64,42 +66,48 @@ void write_object_array(const char* array, const game::ScriptVar::VariantType& v
 }
 
 template<typename ObjectType>
-void read_object_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
+bool read_object_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
 {
+    bool ok = true;
     std::vector<ObjectType> ret;
     for (unsigned i=0; i<reader.GetNumChunks(array); ++i)
     {
         const auto& chunk = reader.GetReadChunk(array, i);
         ObjectType obj;
-        chunk->Read("object", &obj);
+        ok &= chunk->Read("object", &obj);
         ret.push_back(std::move(obj));
     }
     *variant = std::move(ret);
+    return ok;
 }
 
-void read_bool_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
+bool read_bool_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
 {
+    bool ok = true;
     std::vector<bool> arr;
     for (unsigned i=0; i<reader.GetNumItems(array); ++i)
     {
         int value = 0;
-        reader.Read(array, i, &value);
+        ok &= reader.Read(array, i, &value);
         arr.push_back(value == 1 ? true : false);
     }
     *variant = std::move(arr);
+    return ok;
 }
 
 template<typename T>
-void read_reference_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
+bool read_reference_array(const char* array, const data::Reader& reader, game::ScriptVar::VariantType* variant)
 {
+    bool ok = true;
     std::vector<T> ret;
     for (unsigned i=0; i<reader.GetNumItems(array); ++i)
     {
         T reference;
-        reader.Read(array, i, &reference.id);
+        ok &= reader.Read(array, i, &reference.id);
         ret.push_back(std::move(reference));
     }
     *variant = std::move(ret);
+    return ok;
 }
 
 void write_bool_array(const char* array, const game::ScriptVar::VariantType& variant, data::Writer& writer)
@@ -183,11 +191,22 @@ size_t ScriptVar::GetArraySize() const
 
 void ScriptVar::IntoJson(data::Writer& writer) const
 {
-    writer.Write("id", mId);
-    writer.Write("name", mName);
+    writer.Write("id",       mId);
+    writer.Write("name",     mName);
     writer.Write("readonly", mReadOnly);
-    writer.Write("array", mIsArray);
+    writer.Write("array",    mIsArray);
     IntoJson(mData, writer);
+}
+
+bool ScriptVar::FromJson(const data::Reader& reader)
+{
+    bool ok = true;
+    ok &= reader.Read("id",       &mId);
+    ok &= reader.Read("name",     &mName);
+    ok &= reader.Read("readonly", &mReadOnly);
+    ok &= reader.Read("array",    &mIsArray);
+    ok &= FromJson(reader,        &mData);
+    return ok;
 }
 
 // static
@@ -249,7 +268,7 @@ void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
     else BUG("Unhandled script variable type.");
 }
 // static
-void ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
+bool ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
 {
     // migration path from a single variant to a variant of arrays
     using OldVariant = std::variant<bool, float, int, std::string, glm::vec2>;
@@ -271,34 +290,25 @@ void ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
     else
     {
         if (reader.HasArray("strings"))
-            read_primitive_array<std::string>("strings", reader, variant);
+            return read_primitive_array<std::string>("strings", reader, variant);
         else if (reader.HasArray("ints"))
-            read_primitive_array<int>("ints", reader, variant);
+            return read_primitive_array<int>("ints", reader, variant);
         else if (reader.HasArray("floats"))
-            read_primitive_array<float>("floats", reader, variant);
+            return read_primitive_array<float>("floats", reader, variant);
         else if (reader.HasArray("bools"))
-            read_bool_array("bools", reader, variant);
+            return read_bool_array("bools", reader, variant);
         else if (reader.HasArray("vec2s"))
-            read_object_array<glm::vec2>("vec2s", reader, variant);
+            return read_object_array<glm::vec2>("vec2s", reader, variant);
         else if (reader.HasArray("entity_refs"))
-            read_reference_array<EntityReference>("entity_refs", reader, variant);
+            return read_reference_array<EntityReference>("entity_refs", reader, variant);
         else if (reader.HasArray("entity_node_refs"))
-            read_reference_array<EntityNodeReference>("entity_node_refs", reader, variant);
-        else BUG("Unhandled script variable type.");
+            return read_reference_array<EntityNodeReference>("entity_node_refs", reader, variant);
+        else return false;
     }
+    return true;
 }
 
-// static
-std::optional<ScriptVar> ScriptVar::FromJson(const data::Reader& reader)
-{
-    ScriptVar ret;
-    reader.Read("id", &ret.mId);
-    reader.Read("name", &ret.mName);
-    reader.Read("readonly", &ret.mReadOnly);
-    reader.Read("array", &ret.mIsArray);
-    FromJson(reader, &ret.mData);
-    return ret;
-}
+
 // static
 ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
 {

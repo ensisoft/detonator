@@ -29,6 +29,7 @@
 #include <memory>
 #include <variant>
 #include <algorithm>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
@@ -188,9 +189,8 @@ namespace game
         // Serialize node into JSON.
         void IntoJson(data::Writer& data) const;
 
-        // Load node and its properties from JSON. Returns nullopt
-        // if there was a problem.
-        static std::optional<SceneNodeClass> FromJson(const data::Reader& data);
+        // Load node and its properties from JSON.
+        bool FromJson(const data::Reader& data);
     private:
         // The node's unique class id.
         std::string mClassId;
@@ -482,9 +482,8 @@ namespace game
 
         // Serialize the scene into JSON.
         void IntoJson(data::Writer& data) const;
-
-        // Load the SceneClass from JSOn. Returns std::nullopt if there was a problem.
-        static std::optional<SceneClass> FromJson(const data::Reader& data);
+        // Load the SceneClass from JSON
+        bool FromJson(const data::Reader& data);
 
         // Make a clone of this scene. The cloned scene will
         // have all the same property values as its source

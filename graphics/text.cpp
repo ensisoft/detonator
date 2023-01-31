@@ -995,14 +995,13 @@ void TextBuffer::IntoJson(data::Writer& data) const
     data.AppendChunk("texts", std::move(chunk));
 }
 
-// static
-std::optional<TextBuffer> TextBuffer::FromJson(const data::Reader& data)
+bool TextBuffer::FromJson(const data::Reader& data)
 {
-    TextBuffer buffer;
-    data.Read("width", &buffer.mBufferWidth);
-    data.Read("height", &buffer.mBufferHeight);
-    data.Read("horizontal_alignment", &buffer.mHorizontalAlign);
-    data.Read("vertical_alignment", &buffer.mVerticalAlign);
+    bool ok = true;
+    ok &= data.Read("width",                &mBufferWidth);
+    ok &= data.Read("height",               &mBufferHeight);
+    ok &= data.Read("horizontal_alignment", &mHorizontalAlign);
+    ok &= data.Read("vertical_alignment",   &mVerticalAlign);
 
     if (data.GetNumChunks("texts"))
     {
@@ -1010,14 +1009,14 @@ std::optional<TextBuffer> TextBuffer::FromJson(const data::Reader& data)
         // removes the array and only has one chunk
         const auto& chunk = data.GetReadChunk("texts", 0);
         Text text;
-        chunk->Read("string",      &text.text);
-        chunk->Read("font_file",   &text.font);
-        chunk->Read("font_size",   &text.fontsize);
-        chunk->Read("line_height", &text.lineheight);
-        chunk->Read("underline",   &text.underline);
-        buffer.mText = std::move(text);
+        ok &= chunk->Read("string",      &text.text);
+        ok &= chunk->Read("font_file",   &text.font);
+        ok &= chunk->Read("font_size",   &text.fontsize);
+        ok &= chunk->Read("line_height", &text.lineheight);
+        ok &= chunk->Read("underline",   &text.underline);
+        mText = std::move(text);
     }
-    return buffer;
+    return ok;
 }
 
 }  //namespace

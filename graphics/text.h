@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <optional>
 
 #include "base/assert.h"
 #include "base/utility.h"
@@ -178,7 +177,7 @@ namespace gfx
         void IntoJson(data::Writer& data) const;
 
         // Load a TextBuffer from JSON.
-        static std::optional<TextBuffer> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         // static raster buffer (bitmap) width or 0 if size to content is wanted.
         unsigned mBufferWidth  = 0;

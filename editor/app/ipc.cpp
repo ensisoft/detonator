@@ -254,10 +254,11 @@ std::unique_ptr<Resource> CreateResource(const char* type, const data::Reader& d
     const auto& chunk = data.GetReadChunk(type, 0);
     if (!chunk)
         return nullptr;
-    std::optional<ClassType> ret = ClassType::FromJson(*chunk);
-    if (!ret.has_value())
+    ClassType klass;
+    if (!klass.FromJson(*chunk))
         return nullptr;
-    return std::make_unique<GameResource<ClassType>>(std::move(ret.value()), FromUtf8(name));
+
+    return std::make_unique<GameResource<ClassType>>(std::move(klass), FromUtf8(name));
 }
 
 template<>
@@ -266,7 +267,7 @@ std::unique_ptr<Resource> CreateResource<gfx::MaterialClass>(const char* type, c
     const auto& chunk = data.GetReadChunk("materials", 0);
     if (!chunk)
         return nullptr;
-    auto ret = gfx::MaterialClass::FromJson(*chunk);
+    auto ret = gfx::MaterialClass::ClassFromJson(*chunk);
     if (!ret)
         return nullptr;
     return std::make_unique<MaterialResource>(std::move(ret), FromUtf8(name));

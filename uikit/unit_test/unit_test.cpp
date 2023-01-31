@@ -538,14 +538,14 @@ void unit_test_window()
         // for debugging
         //std::cout << json.ToString();
 
-        auto ret = uik::Window::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->GetName() == "window");
-        TEST_REQUIRE(ret->GetStyleName() == "window_style.json");
-        TEST_REQUIRE(ret->GetStyleString() == "style string");
-        TEST_REQUIRE(ret->GetScriptFile() == "123sgsss");
-        TEST_REQUIRE(ret->GetNumWidgets() == 5);
-        TEST_REQUIRE(ret->GetHash() == win.GetHash());
+        uik::Window ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetName() == "window");
+        TEST_REQUIRE(ret.GetStyleName() == "window_style.json");
+        TEST_REQUIRE(ret.GetStyleString() == "style string");
+        TEST_REQUIRE(ret.GetScriptFile() == "123sgsss");
+        TEST_REQUIRE(ret.GetNumWidgets() == 5);
+        TEST_REQUIRE(ret.GetHash() == win.GetHash());
     }
 
     // serialize without any widgets
@@ -556,9 +556,9 @@ void unit_test_window()
         // for debugging
         std::cout << json.ToString();
 
-        auto ret = uik::Window::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->GetHash() == win.GetHash());
+        uik::Window ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetHash() == win.GetHash());
     }
 }
 

@@ -128,41 +128,35 @@ void GraphClass::IntoJson(data::Writer& writer) const
     }
 }
 
-// static
-std::optional<GraphClass> GraphClass::FromJson(const data::Reader& reader)
+bool GraphClass::FromJson(const data::Reader& reader)
 {
-    std::string name;
-    std::string id;
-    if (!reader.Read("name", &name) ||
-        !reader.Read("id",   &id))
-        return std::nullopt;
-
-    GraphClass ret(name, id);
-    if (!reader.Read("src_elem_id",   &ret.mSrcElemId) ||
-        !reader.Read("src_elem_port", &ret.mSrcElemPort))
-        return std::nullopt;
+    bool ok = true;
+    ok &= reader.Read("name",          &mName);
+    ok &= reader.Read("id",            &mId);
+    ok &= reader.Read("src_elem_id",   &mSrcElemId);
+    ok &= reader.Read("src_elem_port", &mSrcElemPort);
 
     for (unsigned i=0; i<reader.GetNumChunks("links"); ++i)
     {
         const auto& chunk = reader.GetReadChunk("links", i);
         Link link;
-        chunk->Read("id",       &link.id);
-        chunk->Read("src_elem", &link.src_element);
-        chunk->Read("src_port", &link.src_port);
-        chunk->Read("dst_elem", &link.dst_element);
-        chunk->Read("dst_port", &link.dst_port);
-        ret.mLinks.push_back(std::move(link));
+        ok &= chunk->Read("id",       &link.id);
+        ok &= chunk->Read("src_elem", &link.src_element);
+        ok &= chunk->Read("src_port", &link.src_port);
+        ok &= chunk->Read("dst_elem", &link.dst_element);
+        ok &= chunk->Read("dst_port", &link.dst_port);
+        mLinks.push_back(std::move(link));
     }
     for (unsigned i=0; i<reader.GetNumChunks("elements"); ++i)
     {
         const auto& chunk = reader.GetReadChunk("elements", i);
         Element elem;
-        chunk->Read("id",   &elem.id);
-        chunk->Read("name", &elem.name);
-        chunk->Read("type", &elem.type);
+        ok &= chunk->Read("id",   &elem.id);
+        ok &= chunk->Read("name", &elem.name);
+        ok &= chunk->Read("type", &elem.type);
         const auto* desc = FindElementDesc(elem.type);
         if (desc == nullptr)
-            return std::nullopt;
+            continue;
         // copy over the list of arguments from the descriptor.
         // this conveniently gives us the argument names *and*
         // the expected types for reading the variant args back
@@ -172,27 +166,27 @@ std::optional<GraphClass> GraphClass::FromJson(const data::Reader& reader)
         {
             const auto& name = "arg_" + pair.first;
             auto& variant = pair.second;
-            std::visit([&chunk, &name](auto& variant_value) {
-                chunk->Read(name.c_str(), &variant_value);
+            std::visit([&chunk, &name, &ok](auto& variant_value) {
+                ok &= chunk->Read(name.c_str(), &variant_value);
             }, variant);
         }
         for (unsigned i=0; i<chunk->GetNumChunks("output_ports"); ++i)
         {
             const auto& port_chunk = chunk->GetReadChunk("output_ports", i);
             PortDesc port;
-            port_chunk->Read("name", &port.name);
+            ok &= port_chunk->Read("name", &port.name);
             elem.output_ports.push_back(std::move(port));
         }
         for (unsigned i=0; i<chunk->GetNumChunks("input_ports"); ++i)
         {
             const auto& port_chunk = chunk->GetReadChunk("input_ports", i);
             PortDesc port;
-            port_chunk->Read("name", &port.name);
+            ok &= port_chunk->Read("name", &port.name);
             elem.input_ports.push_back(std::move(port));
         }
-        ret.mElements.push_back(std::move(elem));
+        mElements.push_back(std::move(elem));
     }
-    return ret;
+    return ok;
 }
 
 Graph::Graph(const std::string& name, const std::string& id)

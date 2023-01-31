@@ -852,12 +852,13 @@ void SectorClass::IntoJson(data::Writer& data) const
     data.Write("name",       mName);
     data.Write("percentage", mPercentage);
 }
-bool SectorClass::LoadFromJson(const data::Reader& data)
+bool SectorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",         &mId);
-    data.Read("name",       &mName);
-    data.Read("percentage", &mPercentage);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",         &mId);
+    ok &= data.Read("name",       &mName);
+    ok &= data.Read("percentage", &mPercentage);
+    return ok;
 }
 
 std::string RoundRectangleClass::GetProgramId(const Environment&) const
@@ -1090,12 +1091,13 @@ void RoundRectangleClass::IntoJson(data::Writer& data) const
     data.Write("radius", mRadius);
 }
 
-bool RoundRectangleClass::LoadFromJson(const data::Reader& data)
+bool RoundRectangleClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",     &mId);
-    data.Read("name",   &mName);
-    data.Read("radius", &mRadius);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",     &mId);
+    ok &= data.Read("name",   &mName);
+    ok &= data.Read("radius", &mRadius);
+    return ok;
 }
 
 std::string GridClass::GetProgramId(const Environment&) const
@@ -1190,14 +1192,15 @@ void GridClass::IntoJson(data::Writer& data) const
     data.Write("border_lines",     mBorderLines);
 }
 
-bool GridClass::LoadFromJson(const data::Reader& data)
+bool GridClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",               &mId);
-    data.Read("name",             &mName);
-    data.Read("vertical_lines",   &mNumVerticalLines);
-    data.Read("horizontal_lines", &mNumHorizontalLines);
-    data.Read("border_lines",     &mBorderLines);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",               &mId);
+    ok &= data.Read("name",             &mName);
+    ok &= data.Read("vertical_lines",   &mNumVerticalLines);
+    ok &= data.Read("horizontal_lines", &mNumHorizontalLines);
+    ok &= data.Read("border_lines",     &mBorderLines);
+    return ok;
 }
 
 void PolygonClass::Clear()
@@ -1342,42 +1345,28 @@ void PolygonClass::IntoJson(data::Writer& data) const
     }
 }
 
-bool PolygonClass::LoadFromJson(const data::Reader& data)
+bool PolygonClass::FromJson(const data::Reader& data)
 {
-    auto ret = PolygonClass::FromJson(data);
-    if (!ret.has_value())
-        return false;
-    auto& val = ret.value();
-    mId           = std::move(val.mId);
-    mVertices     = std::move(val.mVertices);
-    mDrawCommands = std::move(val.mDrawCommands);
-    mStatic       = val.mStatic;
-    return true;
-}
-
-// static
-std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
-{
-    PolygonClass ret;
-    data.Read("id",     &ret.mId);
-    data.Read("name",   &ret.mName);
-    data.Read("static", &ret.mStatic);
+    bool ok = true;
+    ok &= data.Read("id",     &mId);
+    ok &= data.Read("name",   &mName);
+    ok &= data.Read("static", &mStatic);
 
     for (unsigned i=0; i<data.GetNumChunks("vertices"); ++i)
     {
         const auto& chunk = data.GetReadChunk("vertices", i);
         float x, y, s, t;
-        chunk->Read("x", &x);
-        chunk->Read("y", &y);
-        chunk->Read("s", &s);
-        chunk->Read("t", &t);
+        ok &= chunk->Read("x", &x);
+        ok &= chunk->Read("y", &y);
+        ok &= chunk->Read("s", &s);
+        ok &= chunk->Read("t", &t);
 
         Vertex vertex;
         vertex.aPosition.x = x;
         vertex.aPosition.y = y;
         vertex.aTexCoord.x = s;
         vertex.aTexCoord.y = t;
-        ret.mVertices.push_back(vertex);
+        mVertices.push_back(vertex);
     }
     for (unsigned i=0; i<data.GetNumChunks("draws"); ++i)
     {
@@ -1385,15 +1374,15 @@ std::optional<PolygonClass> PolygonClass::FromJson(const data::Reader& data)
         unsigned offset = 0;
         unsigned count  = 0;
         DrawCommand cmd;
-        chunk->Read("type",   &cmd.type);
-        chunk->Read("offset", &offset);
-        chunk->Read("count",  &count);
+        ok &=  chunk->Read("type",   &cmd.type);
+        ok &=  chunk->Read("offset", &offset);
+        ok &=  chunk->Read("count",  &count);
 
         cmd.offset = offset;
         cmd.count  = count;
-        ret.mDrawCommands.push_back(cmd);
+        mDrawCommands.push_back(cmd);
     }
-    return ret;
+    return ok;
 }
 
 void PolygonClass::UpdateVertex(const Vertex& vert, size_t index)
@@ -1486,12 +1475,13 @@ void CursorClass::IntoJson(data::Writer& data) const
     data.Write("name",  mName);
     data.Write("shape", mShape);
 }
-bool CursorClass::LoadFromJson(const data::Reader& data)
+bool CursorClass::FromJson(const data::Reader& data)
 {
-    data.Read("id",    &mId);
-    data.Read("name",  &mName);
-    data.Read("shape", &mShape);
-    return true;
+    bool ok = true;
+    ok &= data.Read("id",    &mId);
+    ok &= data.Read("name",  &mName);
+    ok &= data.Read("shape", &mShape);
+    return ok;
 }
 
 std::string Cursor::GetProgramId(const Environment& env) const
@@ -1821,91 +1811,80 @@ void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceStat
 
 void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id", mId);
-    data.Write("name", mName);
-    data.Write("direction", mParams.direction);
-    data.Write("placement", mParams.placement);
-    data.Write("shape", mParams.shape);
-    data.Write("coordinate_space", mParams.coordinate_space);
-    data.Write("motion", mParams.motion);
-    data.Write("mode", mParams.mode);
-    data.Write("boundary", mParams.boundary);
-    data.Write("delay", mParams.delay);
-    data.Write("min_time", mParams.min_time);
-    data.Write("max_time", mParams.max_time);
-    data.Write("num_particles", mParams.num_particles);
-    data.Write("min_lifetime", mParams.min_lifetime);
-    data.Write("max_lifetime", mParams.max_lifetime);
-    data.Write("max_xpos", mParams.max_xpos);
-    data.Write("max_ypos", mParams.max_ypos);
-    data.Write("init_rect_xpos", mParams.init_rect_xpos);
-    data.Write("init_rect_ypos", mParams.init_rect_ypos);
-    data.Write("init_rect_width", mParams.init_rect_width);
-    data.Write("init_rect_height", mParams.init_rect_height);
-    data.Write("min_velocity", mParams.min_velocity);
-    data.Write("max_velocity", mParams.max_velocity);
+    data.Write("id",                           mId);
+    data.Write("name",                         mName);
+    data.Write("direction",                    mParams.direction);
+    data.Write("placement",                    mParams.placement);
+    data.Write("shape",                        mParams.shape);
+    data.Write("coordinate_space",             mParams.coordinate_space);
+    data.Write("motion",                       mParams.motion);
+    data.Write("mode",                         mParams.mode);
+    data.Write("boundary",                     mParams.boundary);
+    data.Write("delay",                        mParams.delay);
+    data.Write("min_time",                     mParams.min_time);
+    data.Write("max_time",                     mParams.max_time);
+    data.Write("num_particles",                mParams.num_particles);
+    data.Write("min_lifetime",                 mParams.min_lifetime);
+    data.Write("max_lifetime",                 mParams.max_lifetime);
+    data.Write("max_xpos",                     mParams.max_xpos);
+    data.Write("max_ypos",                     mParams.max_ypos);
+    data.Write("init_rect_xpos",               mParams.init_rect_xpos);
+    data.Write("init_rect_ypos",               mParams.init_rect_ypos);
+    data.Write("init_rect_width",              mParams.init_rect_width);
+    data.Write("init_rect_height",             mParams.init_rect_height);
+    data.Write("min_velocity",                 mParams.min_velocity);
+    data.Write("max_velocity",                 mParams.max_velocity);
     data.Write("direction_sector_start_angle", mParams.direction_sector_start_angle);
-    data.Write("direction_sector_size", mParams.direction_sector_size);
-    data.Write("min_point_size", mParams.min_point_size);
-    data.Write("max_point_size", mParams.max_point_size);
-    data.Write("min_alpha", mParams.min_alpha);
-    data.Write("max_alpha", mParams.max_alpha);
-    data.Write("growth_over_time", mParams.rate_of_change_in_size_wrt_time);
-    data.Write("growth_over_dist", mParams.rate_of_change_in_size_wrt_dist);
-    data.Write("alpha_over_time", mParams.rate_of_change_in_alpha_wrt_time);
-    data.Write("alpha_over_dist", mParams.rate_of_change_in_alpha_wrt_dist);
-    data.Write("gravity", mParams.gravity);
+    data.Write("direction_sector_size",        mParams.direction_sector_size);
+    data.Write("min_point_size",               mParams.min_point_size);
+    data.Write("max_point_size",               mParams.max_point_size);
+    data.Write("min_alpha",                    mParams.min_alpha);
+    data.Write("max_alpha",                    mParams.max_alpha);
+    data.Write("growth_over_time",             mParams.rate_of_change_in_size_wrt_time);
+    data.Write("growth_over_dist",             mParams.rate_of_change_in_size_wrt_dist);
+    data.Write("alpha_over_time",              mParams.rate_of_change_in_alpha_wrt_time);
+    data.Write("alpha_over_dist",              mParams.rate_of_change_in_alpha_wrt_dist);
+    data.Write("gravity",                      mParams.gravity);
 }
 
-bool KinematicsParticleEngineClass::LoadFromJson(const data::Reader& data)
+bool KinematicsParticleEngineClass::FromJson(const data::Reader& data)
 {
-    auto ret = FromJson(data);
-    if (!ret.has_value())
-        return false;
-    const auto& val = ret.value();
-    mParams = val.mParams;
-    return true;
-}
-
-// static
-std::optional<KinematicsParticleEngineClass> KinematicsParticleEngineClass::FromJson(const data::Reader& data)
-{
-    KinematicsParticleEngineClass ret;
-    data.Read("id",                           &ret.mId);
-    data.Read("name",                         &ret.mName);
-    data.Read("direction",                    &ret.mParams.direction);
-    data.Read("placement",                    &ret.mParams.placement);
-    data.Read("shape",                        &ret.mParams.shape);
-    data.Read("coordinate_space",             &ret.mParams.coordinate_space);
-    data.Read("motion",                       &ret.mParams.motion);
-    data.Read("mode",                         &ret.mParams.mode);
-    data.Read("boundary",                     &ret.mParams.boundary);
-    data.Read("delay",                        &ret.mParams.delay);
-    data.Read("min_time",                     &ret.mParams.min_time);
-    data.Read("max_time",                     &ret.mParams.max_time);
-    data.Read("num_particles",                &ret.mParams.num_particles);
-    data.Read("min_lifetime",                 &ret.mParams.min_lifetime) ;
-    data.Read("max_lifetime",                 &ret.mParams.max_lifetime);
-    data.Read("max_xpos",                     &ret.mParams.max_xpos);
-    data.Read("max_ypos",                     &ret.mParams.max_ypos);
-    data.Read("init_rect_xpos",               &ret.mParams.init_rect_xpos);
-    data.Read("init_rect_ypos",               &ret.mParams.init_rect_ypos);
-    data.Read("init_rect_width",              &ret.mParams.init_rect_width);
-    data.Read("init_rect_height",             &ret.mParams.init_rect_height);
-    data.Read("min_velocity",                 &ret.mParams.min_velocity);
-    data.Read("max_velocity",                 &ret.mParams.max_velocity);
-    data.Read("direction_sector_start_angle", &ret.mParams.direction_sector_start_angle);
-    data.Read("direction_sector_size",        &ret.mParams.direction_sector_size);
-    data.Read("min_point_size",               &ret.mParams.min_point_size);
-    data.Read("max_point_size",               &ret.mParams.max_point_size);
-    data.Read("min_alpha",                    &ret.mParams.min_alpha);
-    data.Read("max_alpha",                    &ret.mParams.max_alpha);
-    data.Read("growth_over_time",             &ret.mParams.rate_of_change_in_size_wrt_time);
-    data.Read("growth_over_dist",             &ret.mParams.rate_of_change_in_size_wrt_dist);
-    data.Read("alpha_over_time",              &ret.mParams.rate_of_change_in_alpha_wrt_time);
-    data.Read("alpha_over_dist",              &ret.mParams.rate_of_change_in_alpha_wrt_dist);
-    data.Read("gravity",                      &ret.mParams.gravity);
-    return ret;
+    bool ok = true;
+    ok &= data.Read("id",                           &mId);
+    ok &= data.Read("name",                         &mName);
+    ok &= data.Read("direction",                    &mParams.direction);
+    ok &= data.Read("placement",                    &mParams.placement);
+    ok &= data.Read("shape",                        &mParams.shape);
+    ok &= data.Read("coordinate_space",             &mParams.coordinate_space);
+    ok &= data.Read("motion",                       &mParams.motion);
+    ok &= data.Read("mode",                         &mParams.mode);
+    ok &= data.Read("boundary",                     &mParams.boundary);
+    ok &= data.Read("delay",                        &mParams.delay);
+    ok &= data.Read("min_time",                     &mParams.min_time);
+    ok &= data.Read("max_time",                     &mParams.max_time);
+    ok &= data.Read("num_particles",                &mParams.num_particles);
+    ok &= data.Read("min_lifetime",                 &mParams.min_lifetime) ;
+    ok &= data.Read("max_lifetime",                 &mParams.max_lifetime);
+    ok &= data.Read("max_xpos",                     &mParams.max_xpos);
+    ok &= data.Read("max_ypos",                     &mParams.max_ypos);
+    ok &= data.Read("init_rect_xpos",               &mParams.init_rect_xpos);
+    ok &= data.Read("init_rect_ypos",               &mParams.init_rect_ypos);
+    ok &= data.Read("init_rect_width",              &mParams.init_rect_width);
+    ok &= data.Read("init_rect_height",             &mParams.init_rect_height);
+    ok &= data.Read("min_velocity",                 &mParams.min_velocity);
+    ok &= data.Read("max_velocity",                 &mParams.max_velocity);
+    ok &= data.Read("direction_sector_start_angle", &mParams.direction_sector_start_angle);
+    ok &= data.Read("direction_sector_size",        &mParams.direction_sector_size);
+    ok &= data.Read("min_point_size",               &mParams.min_point_size);
+    ok &= data.Read("max_point_size",               &mParams.max_point_size);
+    ok &= data.Read("min_alpha",                    &mParams.min_alpha);
+    ok &= data.Read("max_alpha",                    &mParams.max_alpha);
+    ok &= data.Read("growth_over_time",             &mParams.rate_of_change_in_size_wrt_time);
+    ok &= data.Read("growth_over_dist",             &mParams.rate_of_change_in_size_wrt_dist);
+    ok &= data.Read("alpha_over_time",              &mParams.rate_of_change_in_alpha_wrt_time);
+    ok &= data.Read("alpha_over_dist",              &mParams.rate_of_change_in_alpha_wrt_dist);
+    ok &= data.Read("gravity",                      &mParams.gravity);
+    return ok;
 }
 
 std::size_t KinematicsParticleEngineClass::GetHash() const

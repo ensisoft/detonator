@@ -107,13 +107,14 @@ void BaseWidget::IntoJson(data::Writer& data) const
 
 bool BaseWidget::FromJson(const data::Reader& data)
 {
-    data.Read("id",        &mId);
-    data.Read("name",      &mName);
-    data.Read("style",     &mStyle);
-    data.Read("position",  &mPosition);
-    data.Read("size",      &mSize);
-    data.Read("flags",     &mFlags);
-    data.Read("tab_index", &mTabIndex);
+    bool ok = true;
+    ok &= data.Read("id",        &mId);
+    ok &= data.Read("name",      &mName);
+    ok &= data.Read("style",     &mStyle);
+    ok &= data.Read("position",  &mPosition);
+    ok &= data.Read("size",      &mSize);
+    ok &= data.Read("flags",     &mFlags);
+    ok &= data.Read("tab_index", &mTabIndex);
     if (data.HasArray("style_properties"))
     {
         StylePropertyMap props;
@@ -122,8 +123,8 @@ bool BaseWidget::FromJson(const data::Reader& data)
             const auto& chunk = data.GetReadChunk("style_properties", i);
             std::string key;
             StyleProperty val;
-            chunk->Read("key", &key);
-            chunk->Read("val", &val);
+            ok &= chunk->Read("key", &key);
+            ok &= chunk->Read("val", &val);
             props[key] = std::move(val);
         }
         mStyleProperties = std::move(props);
@@ -136,13 +137,13 @@ bool BaseWidget::FromJson(const data::Reader& data)
             const auto& chunk = data.GetReadChunk("style_materials", i);
             std::string key;
             std::string val;
-            chunk->Read("key", &key);
-            chunk->Read("val", &val);
+            ok &= chunk->Read("key", &key);
+            ok &= chunk->Read("val", &val);
             materials[key] = std::move(val);
         }
         mStyleMaterials = std::move(materials);
     }
-    return true;
+    return ok;
 }
 
 void BaseWidget::SetStyleProperty(const std::string& key, const StyleProperty& prop)
@@ -480,10 +481,11 @@ void SpinBoxModel::IntoJson(data::Writer& data) const
 }
 bool SpinBoxModel::FromJson(const data::Reader& data)
 {
-    data.Read("value", &mValue);
-    data.Read("min", &mMinVal);
-    data.Read("max", &mMaxVal);
-    return true;
+    bool ok = true;
+    ok &= data.Read("value", &mValue);
+    ok &= data.Read("min", &mMinVal);
+    ok &= data.Read("max", &mMaxVal);
+    return ok;
 }
 
 WidgetAction SpinBoxModel::PollAction(const PollStruct& poll)
@@ -664,9 +666,10 @@ void LabelModel::IntoJson(data::Writer& data) const
 }
 bool LabelModel::FromJson(const data::Reader& data)
 {
-    data.Read("text", &mText);
-    data.Read("line_height", &mLineHeight);
-    return true;
+    bool ok = true;
+    ok &= data.Read("text", &mText);
+    ok &= data.Read("line_height", &mLineHeight);
+    return ok;
 }
 
 size_t PushButtonModel::GetHash(size_t hash) const
@@ -704,8 +707,8 @@ void PushButtonModel::IntoJson(data::Writer& data)  const
 
 bool PushButtonModel::FromJson(const data::Reader& data)
 {
-    data.Read("text", &mText);
-    return true;
+    return data.Read("text", &mText);
+
 }
 
 WidgetAction PushButtonModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
@@ -803,10 +806,11 @@ void CheckBoxModel::IntoJson(data::Writer& data) const
 }
 bool CheckBoxModel::FromJson(const data::Reader& data)
 {
-    data.Read("text", &mText);
-    data.Read("checked", &mChecked);
-    data.Read("check", &mCheck);
-    return true;
+    bool ok = true;
+    ok &= data.Read("text", &mText);
+    ok &= data.Read("checked", &mChecked);
+    ok &= data.Read("check", &mCheck);
+    return ok;
 }
 
 WidgetAction CheckBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
@@ -960,8 +964,7 @@ void ToggleBoxModel::IntoJson(data::Writer& data) const
 }
 bool ToggleBoxModel::FromJson(const data::Reader& data)
 {
-    data.Read("checked", &mChecked);
-    return true;
+    return data.Read("checked", &mChecked);
 }
 
 WidgetAction ToggleBoxModel::PollAction(const PollStruct& poll)
@@ -1072,10 +1075,11 @@ void RadioButtonModel::IntoJson(data::Writer& data) const
 }
 bool RadioButtonModel::FromJson(const data::Reader& data)
 {
-    data.Read("text", &mText);
-    data.Read("selected", &mSelected);
-    data.Read("check", &mCheck);
-    return true;
+    bool ok = true;
+    ok &= data.Read("text", &mText);
+    ok &= data.Read("selected", &mSelected);
+    ok &= data.Read("check", &mCheck);
+    return ok;
 }
 
 WidgetAction RadioButtonModel::PollAction(const PollStruct& poll)
@@ -1197,8 +1201,7 @@ void GroupBoxModel::IntoJson(data::Writer& data) const
 }
 bool GroupBoxModel::FromJson(const data::Reader& data)
 {
-    data.Read("text", &mText);
-    return true;
+    return data.Read("text", &mText);
 }
 
 } // namespace detail

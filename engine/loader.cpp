@@ -814,14 +814,14 @@ bool LoadContent(const data::Reader& data, const char* type,
         std::string name;
         chunk->Read("resource_id", &id);
         chunk->Read("resource_name", &name);
-        std::optional<Implementation> ret = Implementation::FromJson(*chunk);
-        if (!ret.has_value())
+        Implementation klass;
+        if (!klass.FromJson(*chunk))
         {
             ERROR("Failed to load game class. [type='%1', name='%2]", type, name);
             return false;
         }
 
-        out[id] = std::make_shared<Implementation>(std::move(ret.value()));
+        out[id] = std::make_shared<Implementation>(std::move(klass));
         if (namemap)
             (*namemap)[name] = id;
         DEBUG("Loaded new game class. [type='%1', name='%2']", type, name);
@@ -840,7 +840,7 @@ bool LoadMaterials(const data::Reader& data, const char* type,
         std::string name;
         chunk->Read("resource_id", &id);
         chunk->Read("resource_name", &name);
-        auto ret = gfx::MaterialClass::FromJson(*chunk);
+        auto ret = gfx::MaterialClass::ClassFromJson(*chunk);
         if (!ret)
         {
             ERROR("Failed to load game class. [type='%1', name='%2'].", type, name);

@@ -1317,7 +1317,6 @@ void AudioWidget::Copy(Clipboard& clipboard) const
             json.AppendChunk("links", std::move(chunk));
         }
     }
-
     clipboard.SetType("application/json/audio-element");
     clipboard.SetText(json.ToString());
     NOTE("Copied JSON to application clipboard.");

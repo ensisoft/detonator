@@ -361,8 +361,10 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     // restore entity
     {
-        auto ret = game::EntityClass::FromJson(entity);
-        auto klass = std::move(ret.value());
+        game::EntityClass klass;
+        if (!klass.FromJson(entity))
+            WARN("Failed to restore entity class state.");
+
         auto hash = klass.GetHash();
         mState.entity = FindSharedEntity(hash);
         if (!mState.entity)
@@ -374,9 +376,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     }
     // restore the track state.
     {
-        auto ret = game::AnimationClass::FromJson(track);
-        auto klass    = std::move(ret.value());
-        mState.track  = std::make_shared<game::AnimationClass>(std::move(klass));
+        mState.track = std::make_shared<game::AnimationClass>();
+        if (!mState.track->FromJson(track))
+            WARN("Failed to restore entity animation track state.");
     }
 
     mEntity = game::CreateEntityInstance(mState.entity);

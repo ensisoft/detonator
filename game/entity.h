@@ -100,7 +100,7 @@ namespace game
 
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<SpatialNodeClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         Shape mShape = Shape::AABB;
         base::bitflag<Flags> mFlags;
@@ -174,7 +174,7 @@ namespace game
 
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<FixtureClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         CollisionShape  mCollisionShape = CollisionShape::Box;
         base::bitflag<Flags> mBitFlags;
@@ -287,7 +287,7 @@ namespace game
 
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<RigidBodyItemClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         Simulation mSimulation = Simulation::Dynamic;
         CollisionShape mCollisionShape = CollisionShape::Box;
@@ -415,7 +415,7 @@ namespace game
         { mMaterialParams.clear(); }
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<DrawableItemClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         // item's bit flags.
         base::bitflag<Flags> mBitFlags;
@@ -531,7 +531,7 @@ namespace game
 
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<TextItemClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
     private:
         // item's bit flags
         base::bitflag<Flags> mBitFlags;
@@ -1061,12 +1061,13 @@ namespace game
         // Serialize the node into JSON.
         void IntoJson(data::Writer& data) const;
         // Load the node's properties from the given JSON object.
-        static std::optional<EntityNodeClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
         // Make a new unique copy of this node class object
         // with all the same properties but with a different/unique ID.
         EntityNodeClass Clone() const;
 
         EntityNodeClass& operator=(const EntityNodeClass& other);
+
     private:
         // the resource id.
         std::string mClassId;
@@ -1595,7 +1596,7 @@ namespace game
         // Serialize the entity into JSON.
         void IntoJson(data::Writer& data) const;
 
-        static std::optional<EntityClass> FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data);
 
         EntityClass Clone() const;
 

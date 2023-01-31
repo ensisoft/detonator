@@ -74,15 +74,15 @@ namespace app
                 ret.mId = base::RandomString(10);
                 return std::make_unique<FileResource>(ret);
             }
-            static std::optional<FileResource> FromJson(const data::Reader& data)
+            bool FromJson(const data::Reader& data)
             {
-                FileResource ret;
-                data.Read("id",    &ret.mId);
-                data.Read("name",  &ret.mName);
-                data.Read("uri",   &ret.mFileURI);
-                data.Read("owner", &ret.mOwnerId);
-                data.Read("type",  &ret.mTypeTag);
-                return ret;
+                bool ok = true;
+                ok &= data.Read("id",    &mId);
+                ok &= data.Read("name",  &mName);
+                ok &= data.Read("uri",   &mFileURI);
+                ok &= data.Read("owner", &mOwnerId);
+                ok &= data.Read("type",  &mTypeTag);
+                return ok;
             }
         public:
             // ID of the resource.

@@ -443,8 +443,9 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.zoom);
     settings.LoadWidget("Particle", mUI.widget);
 
-    auto ret = gfx::KinematicsParticleEngineClass::FromJson(json);
-    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(std::move(ret.value()));
+    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>();
+    if (!mClass->FromJson(json))
+        WARN("Failed to restore particle engine state.");
 
     SetValue(mUI.ID, mClass->GetId());
     SetValue(mUI.materials, ListItemId(material));

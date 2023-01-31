@@ -810,10 +810,9 @@ namespace game
         // Serialize into JSON.
         void IntoJson(data::Writer& json) const;
 
-        // Try to create new instance of AnimationClass based on the data
-        // loaded from JSON. On failure returns std::nullopt otherwise returns
-        // an instance of the class object.
-        static std::optional<AnimationClass> FromJson(const data::Reader& data);
+        // Load from JSOn. Returns true on success or false to indicate that
+        // some data failed to load.
+        bool FromJson(const data::Reader& data);
 
         AnimationClass Clone() const;
         // Do a deep copy on the assignment of a new object.

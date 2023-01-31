@@ -315,7 +315,8 @@ void test_tilemap_layer()
         klass.IntoJson(json);
         //std::cout << json.ToString();
 
-        auto ret = game::TilemapLayerClass::FromJson(json);
+        game::TilemapLayerClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.GetHash() == klass.GetHash());
         TEST_REQUIRE(ret.GetName() == "foobar");
         TEST_REQUIRE(ret.GetId()  == "1231xxx");
@@ -403,14 +404,15 @@ void test_tilemap_class()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        auto ret = game::TilemapClass::FromJson(json);
-        TEST_REQUIRE(ret->GetHash() == klass.GetHash());
-        TEST_REQUIRE(ret->GetName() == "foobar");
-        TEST_REQUIRE(ret->GetScriptFile() == "foobar.lua");
-        TEST_REQUIRE(ret->GetMapWidth() == 200);
-        TEST_REQUIRE(ret->GetMapHeight() == 240);
-        TEST_REQUIRE(ret->GetTileWidth() == 5.0f);
-        TEST_REQUIRE(ret->GetTileHeight() == 8.0f);
+        game::TilemapClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetHash() == klass.GetHash());
+        TEST_REQUIRE(ret.GetName() == "foobar");
+        TEST_REQUIRE(ret.GetScriptFile() == "foobar.lua");
+        TEST_REQUIRE(ret.GetMapWidth() == 200);
+        TEST_REQUIRE(ret.GetMapHeight() == 240);
+        TEST_REQUIRE(ret.GetTileWidth() == 5.0f);
+        TEST_REQUIRE(ret.GetTileHeight() == 8.0f);
     }
 
     {
@@ -791,7 +793,8 @@ void test_tilemaplayer_class_default_serialize(const Type& def)
         klass.IntoJson(json);
         //std::cout << json.ToString();
 
-        auto ret = game::TilemapLayerClass::FromJson(json);
+        game::TilemapLayerClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.GetType() == type);
         TEST_REQUIRE(ret.GetDefaultTileValue<Type>() == def);
     }

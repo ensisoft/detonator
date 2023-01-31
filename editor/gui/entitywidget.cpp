@@ -689,8 +689,10 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.zoom);
     settings.LoadWidget("Entity", mUI.widget);
 
-    auto ret   = game::EntityClass::FromJson(json);
-    auto klass = std::move(ret.value());
+    game::EntityClass klass;
+    if (!klass.FromJson(json))
+        WARN("Failed to restore entity state.");
+
     auto hash  = klass.GetHash();
     mState.entity = FindSharedEntity(hash);
     if (!mState.entity)
@@ -777,9 +779,7 @@ void EntityWidget::Cut(Clipboard& clipboard)
 
         clipboard.SetType("application/json/entity/node");
         clipboard.SetText(json.ToString());
-
         NOTE("Copied JSON to application clipboard.");
-        DEBUG("Copied entity node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
 
         mState.entity->DeleteNode(node);
         mUI.tree->Rebuild();
@@ -801,9 +801,7 @@ void EntityWidget::Copy(Clipboard& clipboard) const
 
         clipboard.SetType("application/json/entity");
         clipboard.SetText(json.ToString());
-
         NOTE("Copied JSON to application clipboard.");
-        DEBUG("Copied entity node '%1' ('%2') to the clipboard.", node->GetId(), node->GetName());
     }
 }
 void EntityWidget::Paste(const Clipboard& clipboard)
@@ -836,14 +834,15 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     bool error = false;
     game::EntityClass::RenderTree tree;
     game::RenderTreeFromJson(tree, [&nodes, &error, &comments, &clipboard](const data::Reader& data) {
-        auto ret = game::EntityNodeClass::FromJson(data);
-        if (ret.has_value())
+
+        game::EntityNodeClass ret;
+        if (ret.FromJson(data))
         {
-            auto node = std::make_unique<game::EntityNodeClass>(ret->Clone());
-            node->SetName(base::FormatString("Copy of %1", ret->GetName()));
+            auto node = std::make_unique<game::EntityNodeClass>(ret.Clone());
+            node->SetName(base::FormatString("Copy of %1", ret.GetName()));
 
             QString comment;
-            if (clipboard.GetProperty("comment_" + ret->GetId(), &comment))
+            if (clipboard.GetProperty("comment_" + ret.GetId(), &comment))
                 comments[node->GetId()] = comment;
 
             nodes.push_back(std::move(node));

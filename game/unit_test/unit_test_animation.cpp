@@ -664,14 +664,14 @@ void unit_test_animation_track()
         data::JsonObject json;
         track.IntoJson(json);
 
-        auto ret = game::AnimationClass::FromJson(json);
-        TEST_REQUIRE(ret.has_value());
-        TEST_REQUIRE(ret->GetNumActuators() == 1);
-        TEST_REQUIRE(ret->IsLooping()       == true);
-        TEST_REQUIRE(ret->GetName()         == "test");
-        TEST_REQUIRE(ret->GetDuration()     == real::float32(10.0f));
-        TEST_REQUIRE(ret->GetId()           == track.GetId());
-        TEST_REQUIRE(ret->GetHash()         == track.GetHash());
+        game::AnimationClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetNumActuators() == 1);
+        TEST_REQUIRE(ret.IsLooping()       == true);
+        TEST_REQUIRE(ret.GetName()         == "test");
+        TEST_REQUIRE(ret.GetDuration()     == real::float32(10.0f));
+        TEST_REQUIRE(ret.GetId()           == track.GetId());
+        TEST_REQUIRE(ret.GetHash()         == track.GetHash());
     }
 
     // copy assignment and copy ctor

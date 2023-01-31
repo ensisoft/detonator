@@ -127,7 +127,7 @@ namespace gfx
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
         // otherwise false.
-        virtual bool LoadFromJson(const data::Reader& data) = 0;
+        virtual bool FromJson(const data::Reader& data) = 0;
     private:
     };
 
@@ -264,11 +264,12 @@ namespace gfx
                 writer.Write("id",   mId);
                 writer.Write("name", mName);
             }
-            virtual bool LoadFromJson(const data::Reader& reader) override
+            virtual bool FromJson(const data::Reader& reader) override
             {
-                reader.Read("id",   &mId);
-                reader.Read("name", &mName);
-                return true;
+                bool ok = true;
+                ok &= reader.Read("id",   &mId);
+                ok &= reader.Read("name", &mName);
+                return ok;
             }
         protected:
             std::string mId;
@@ -412,7 +413,7 @@ namespace gfx
         { return Type::Sector; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         float mPercentage = 0.25f;
     };
@@ -491,7 +492,7 @@ namespace gfx
         { return Type::RoundRectangle; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         float mRadius = 0.05;
     };
@@ -579,7 +580,7 @@ namespace gfx
         { return Type::Grid; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;
@@ -722,10 +723,7 @@ namespace gfx
         { return Type::Polygon; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
-
-        // Load from JSON
-        static std::optional<PolygonClass> FromJson(const data::Reader& data);
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
@@ -797,7 +795,7 @@ namespace gfx
         { return Type::Cursor; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         Shape mShape = Shape::Arrow;
     };
@@ -1091,9 +1089,7 @@ namespace gfx
         { return DrawableClass::Type::KinematicsParticleEngine; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
-        virtual bool LoadFromJson(const data::Reader& data) override;
-        // Load from JSON
-        static std::optional<KinematicsParticleEngineClass> FromJson(const data::Reader& data);
+        virtual bool FromJson(const data::Reader& data) override;
     private:
         void InitParticles(const Environment& env, InstanceState& state, size_t num) const;
         void KillParticle(InstanceState& state, size_t i) const;

@@ -179,7 +179,13 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.cmbModel);
     settings.LoadWidget("Material", mUI.widget);
     settings.LoadWidget("Material", mUI.kTime);
-    mMaterial = gfx::MaterialClass::FromJson(json);
+
+    mMaterial = gfx::MaterialClass::ClassFromJson(json);
+    if (!mMaterial)
+    {
+        WARN("Failed to restore material state.");
+        mMaterial = std::make_shared<gfx::ColorClass>();
+    }
 
     ApplyShaderDescription();
     GetMaterialProperties();
