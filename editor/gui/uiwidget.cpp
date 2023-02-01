@@ -786,6 +786,7 @@ void UIWidget::Cut(Clipboard& clipboard)
         const auto& tree = mState.window.GetRenderTree();
         uik::RenderTreeIntoJson(tree, json, widget);
 
+        clipboard.Clear();
         clipboard.SetText(json.ToString());
         clipboard.SetType("application/json/ui");
         NOTE("Copied JSON to application clipboard.");
@@ -803,6 +804,7 @@ void UIWidget::Copy(Clipboard& clipboard)  const
         const auto& tree = mState.window.GetRenderTree();
         uik::RenderTreeIntoJson(tree, json, widget);
 
+        clipboard.Clear();
         clipboard.SetText(json.ToString());
         clipboard.SetType("application/json/ui");
         NOTE("Copied JSON to application clipboard.");

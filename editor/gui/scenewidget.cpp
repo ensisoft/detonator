@@ -735,6 +735,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
             node->IntoJson(writer);
         }, json, node);
 
+        clipboard.Clear();
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
@@ -754,6 +755,7 @@ void SceneWidget::Copy(Clipboard& clipboard) const
             node->IntoJson(writer);
          }, json, node);
 
+        clipboard.Clear();
         clipboard.SetType("application/json/scene_node");
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
