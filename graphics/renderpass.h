@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "base/hash.h"
 #include "graphics/device.h"
 #include "graphics/types.h"
 
@@ -64,6 +65,8 @@ namespace gfx
 
         virtual void Finish(Device& device) const {}
 
+        virtual std::string ModifySource(Device& device, std::string source) const;
+        virtual std::size_t GetHash() const = 0;
         virtual std::string GetName() const = 0;
         virtual Type GetType() const = 0;
     private:
@@ -75,6 +78,8 @@ namespace gfx
         public:
             virtual void Begin(Device& device, State* state) const override;
 
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, "generic-color-pass"); }
             virtual std::string GetName() const override
             { return "GenericColor"; }
             virtual Type GetType() const override
@@ -109,6 +114,8 @@ namespace gfx
             {}
             virtual void Begin(Device& device, State* state) const override;
 
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, "stencil-mask-pass"); }
             virtual std::string GetName() const override
             { return "Stencil"; }
             virtual Type GetType() const override
@@ -128,6 +135,8 @@ namespace gfx
             {}
             virtual void Begin(Device& device, State* state) const override;
 
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, "stencil-test-color-pass"); }
             virtual std::string GetName() const override
             { return "StencilMaskColorWrite"; }
             virtual Type GetType() const override

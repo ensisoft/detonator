@@ -175,9 +175,9 @@ private:
                         const Drawable::Environment& drawable_environment,
                         const Material::Environment& material_environment)
     {
-        const auto & name = drawable.GetProgramId(drawable_environment) + "/" +
-                            material.GetProgramId(material_environment);
-        Program* program = mDevice->FindProgram(name);
+        const auto& id = drawable.GetProgramId(drawable_environment) + "/" +
+                         material.GetProgramId(material_environment);
+        Program* program = mDevice->FindProgram(id);
         if (!program)
         {
             Shader* drawable_shader = drawable.GetShader(drawable_environment, *mDevice);
@@ -187,10 +187,13 @@ private:
             if (!material_shader || !material_shader->IsValid())
                 return nullptr;
 
+            const auto& name = drawable_shader->GetName() + "/" +
+                               material_shader->GetName();
+
             std::vector<const Shader*> shaders;
             shaders.push_back(drawable_shader);
             shaders.push_back(material_shader);
-            program = mDevice->MakeProgram(name);
+            program = mDevice->MakeProgram(id);
             program->SetName(name);
             program->Build(shaders);
             if (program->IsValid())
