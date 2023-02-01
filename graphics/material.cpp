@@ -806,7 +806,11 @@ void main()
 {
   vec4 color = kBaseColor;
   color.a *= vParticleAlpha;
-  gl_FragColor = pow(color, vec4(kGamma));
+
+  // gamma (in)correction.
+  color.rgb = pow(color.rgb, vec3(kGamma));
+
+  gl_FragColor = color;
 }
 )";
     auto* shader = device.MakeShader(GetProgramId(state));
@@ -915,7 +919,11 @@ void main()
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
   color.a *= vParticleAlpha;
-  gl_FragColor = pow(color, vec4(kGamma));
+
+  // gamma (in)correction
+  color.rgb = pow(color.rgb, vec3(kGamma));
+
+  gl_FragColor = color;
 }
 )";
 
@@ -1146,7 +1154,9 @@ void main()
     color.a *= vParticleAlpha;
 
     // apply gamma (in)correction.
-    gl_FragColor = pow(color, vec4(kGamma));
+    color.rgb = pow(color.rgb, vec3(kGamma));
+
+    gl_FragColor = color;
 }
 )";
     auto* shader = device.MakeShader(GetProgramId(state));
@@ -1556,11 +1566,13 @@ void main()
     // either modulate/mask texture color with base color
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
-    vec4 col = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
-    col.a *= vParticleAlpha;
+    vec4 color = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
+    color.a *= vParticleAlpha;
 
     // apply gamma (in)correction.
-    gl_FragColor = pow(col, vec4(kGamma));
+    color.rgb = pow(color.rgb, vec3(kGamma));
+
+    gl_FragColor = color;
 }
 )";
     auto* shader = device.MakeShader(GetProgramId(state));
