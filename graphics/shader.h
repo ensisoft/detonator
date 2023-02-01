@@ -38,6 +38,9 @@ namespace gfx
         // Set a (human-readable) name for the shader object.
         // Used for improved debug/log messages.
         virtual void SetName(const std::string& name) {}
+        // Get the (human-readable) name for the shader object.
+        // Used for improved debug/log messages.
+        virtual std::string GetName() const { return ""; }
     private:
     };
 

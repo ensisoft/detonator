@@ -19,6 +19,17 @@
 #include "graphics/device.h"
 
 namespace gfx {
+std::string RenderPass::ModifySource(Device& device, std::string source) const
+{
+    constexpr auto* render_pass_source = R"(
+vec4 RenderPass(vec4 color) {
+    return color;
+}
+)";
+    source += render_pass_source;
+    return source;
+}
+
 namespace detail {
 void GenericRenderPass::Begin(Device& device, State* state) const
 {

@@ -1854,7 +1854,7 @@ private:
             {
                 ASSERT(shader->IsValid());
                 GL_CALL(glAttachShader(prog,
-                    static_cast<const ShaderImpl*>(shader)->GetName()));
+                    static_cast<const ShaderImpl*>(shader)->GetHandle()));
             }
             GL_CALL(glLinkProgram(prog));
             GL_CALL(glValidateProgram(prog));
@@ -2275,8 +2275,10 @@ private:
         { return mShader != 0; }
         virtual void SetName(const std::string& name) override
         { mName = name; }
+        virtual std::string GetName() const override
+        { return mName; }
 
-        GLuint GetName() const
+        GLuint GetHandle() const
         { return mShader; }
 
     private:

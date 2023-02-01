@@ -806,6 +806,8 @@ namespace gfx
             // The instance uniforms will take precedence over the uniforms
             // set in the class whenever they're set.
             const UniformMap* uniforms = nullptr;
+            // the current render pass in which the material is used.
+            const RenderPass* render_pass = nullptr;
         };
 
         virtual ~MaterialClass() = default;

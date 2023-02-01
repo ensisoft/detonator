@@ -792,15 +792,14 @@ Shader* ColorClass::GetShader(const State& state, Device& device) const
     if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
-constexpr auto* src = R"(
+std::string source(R"(
 #version 100
 precision mediump float;
-
 uniform vec4 kBaseColor;
 uniform float kGamma;
-
-// per vertex alpha.
 varying float vParticleAlpha;
+
+vec4 RenderPass(vec4 color);
 
 void main()
 {
@@ -810,15 +809,23 @@ void main()
   // gamma (in)correction.
   color.rgb = pow(color.rgb, vec3(kGamma));
 
-  gl_FragColor = color;
+  gl_FragColor = RenderPass(color);
+
 }
-)";
+)");
+
+    if (mStatic)
+    {
+        ShaderData data;
+        data.gamma      = mGamma;
+        data.base_color = mColor;
+        source = FoldUniforms(source, data);
+    }
+    source = state.render_pass->ModifySource(device, std::move(source));
+
     auto* shader = device.MakeShader(GetProgramId(state));
-    ShaderData data;
-    data.gamma      = mGamma;
-    data.base_color = mColor;
     shader->SetName(mStatic ? mName : "ColorShader");
-    shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
+    shader->CompileSource(source);
     return shader;
 }
 size_t ColorClass::GetHash() const
@@ -837,6 +844,7 @@ size_t ColorClass::GetHash() const
 std::string ColorClass::GetProgramId(const State& state) const
 {
     size_t hash = base::hash_combine(0, "color");
+    hash = base::hash_combine(hash, state.render_pass->GetHash());
     if (mStatic)
     {
         hash = base::hash_combine(hash, mGamma);
@@ -860,7 +868,7 @@ void ColorClass::ApplyStaticState(const State&, Device& device, Program& prog) c
 }
 void ColorClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type", Type::Color);
+    data.Write("type",    Type::Color);
     data.Write("id",      mClassId);
     data.Write("name",    mName);
     data.Write("surface", mSurfaceType);
@@ -887,7 +895,7 @@ Shader* GradientClass::GetShader(const State& state, Device& device) const
     if (auto* shader = device.FindShader(GetProgramId(state)))
         return shader;
 
-constexpr auto* src = R"(
+std::string source(R"(
 #version 100
 precision highp float;
 
@@ -900,9 +908,9 @@ uniform float kGamma;
 uniform float kRenderPoints;
 
 varying vec2 vTexCoord;
-
 varying float vParticleAlpha;
 
+vec4 RenderPass(vec4 color);
 
 vec4 MixGradient(vec2 coords)
 {
@@ -918,25 +926,31 @@ void main()
   coords = (coords - kOffset) + vec2(0.5, 0.5);
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
+
   color.a *= vParticleAlpha;
 
   // gamma (in)correction
   color.rgb = pow(color.rgb, vec3(kGamma));
 
-  gl_FragColor = color;
+  gl_FragColor = RenderPass(color);
 }
-)";
+)");
+    if (mStatic)
+    {
+        ShaderData data;
+        data.gamma = mGamma;
+        data.color_map[0] = mColorMap[0];
+        data.color_map[1] = mColorMap[1];
+        data.color_map[2] = mColorMap[2];
+        data.color_map[3] = mColorMap[3];
+        data.gradient_offset = mOffset;
+        source = FoldUniforms(source, data);
+    }
+    source = state.render_pass->ModifySource(device, source);
 
     auto* shader = device.MakeShader(GetProgramId(state));
-    ShaderData data;
-    data.gamma = mGamma;
-    data.color_map[0] = mColorMap[0];
-    data.color_map[1] = mColorMap[1];
-    data.color_map[2] = mColorMap[2];
-    data.color_map[3] = mColorMap[3];
-    data.gradient_offset = mOffset;
     shader->SetName(mStatic ? mName : "GradientShader");
-    shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
+    shader->CompileSource(source);
     return shader;
 }
 size_t GradientClass::GetHash() const
@@ -955,10 +969,11 @@ size_t GradientClass::GetHash() const
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
-std::string GradientClass::GetProgramId(const State&) const
+std::string GradientClass::GetProgramId(const State& state) const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, "gradient");
+    hash = base::hash_combine(hash, state.render_pass->GetHash());
     if (mStatic)
     {
         hash = base::hash_combine(hash, mGamma);
@@ -1054,7 +1069,7 @@ Shader* SpriteClass::GetShader(const State& state, Device& device) const
         return shader;
 
     // todo: maybe pack some of shader uniforms
-constexpr auto* src = R"(
+    std::string source(R"(
 #version 100
 precision highp float;
 
@@ -1115,6 +1130,8 @@ vec2 RotateCoords(vec2 coords)
     return coords;
 }
 
+vec4 RenderPass(vec4 color);
+
 void main()
 {
     // for texture coords we need either the coords from the
@@ -1156,17 +1173,23 @@ void main()
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
 
-    gl_FragColor = color;
+    gl_FragColor = RenderPass(color);
 }
-)";
+)");
+    if (mStatic)
+    {
+        ShaderData data;
+        data.gamma = mGamma;
+        data.texture_scale = mTextureScale;
+        data.texture_velocity = mTextureVelocity;
+        data.texture_rotation = mTextureRotation;
+        source = FoldUniforms(source, data);
+    }
+    source = state.render_pass->ModifySource(device, std::move(source));
+
     auto* shader = device.MakeShader(GetProgramId(state));
-    ShaderData data;
-    data.gamma            = mGamma;
-    data.texture_scale    = mTextureScale;
-    data.texture_velocity = mTextureVelocity;
-    data.texture_rotation = mTextureRotation;
     shader->SetName(mStatic ? mName : "SpriteShader");
-    shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
+    shader->CompileSource(source);
     return shader;
 }
 
@@ -1193,10 +1216,11 @@ std::size_t SpriteClass::GetHash() const
     return hash;
 }
 
-std::string SpriteClass::GetProgramId(const State&) const
+std::string SpriteClass::GetProgramId(const State& state) const
 {
     size_t hash = 0;
-    base::hash_combine(hash, "sprite");
+    hash = base::hash_combine(hash, "sprite");
+    hash = base::hash_combine(hash, state.render_pass->GetHash());
     if (mStatic)
     {
         hash = base::hash_combine(hash, mGamma);
@@ -1477,7 +1501,7 @@ Shader* TextureMap2DClass::GetShader(const State& state, Device& device) const
         return shader;
 
 // todo: pack some of the uniforms ?
-constexpr auto* src = R"(
+    std::string source(R"(
 #version 100
 precision highp float;
 
@@ -1536,6 +1560,8 @@ vec2 RotateCoords(vec2 coords)
     return coords;
 }
 
+vec4 RenderPass(vec4 color);
+
 void main()
 {
     // for texture coords we need either the coords from the
@@ -1572,18 +1598,24 @@ void main()
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
 
-    gl_FragColor = color;
+    gl_FragColor = RenderPass(color);
 }
-)";
+)");
+    if (mStatic)
+    {
+        ShaderData data;
+        data.gamma            = mGamma;
+        data.base_color       = mBaseColor;
+        data.texture_scale    = mTextureScale;
+        data.texture_velocity = mTextureVelocity;
+        data.texture_rotation = mTextureRotation;
+        source = FoldUniforms(source, data);
+    }
+    source = state.render_pass->ModifySource(device, std::move(source));
+
     auto* shader = device.MakeShader(GetProgramId(state));
-    ShaderData data;
-    data.gamma            = mGamma;
-    data.base_color       = mBaseColor;
-    data.texture_scale    = mTextureScale;
-    data.texture_velocity = mTextureVelocity;
-    data.texture_rotation = mTextureRotation;
     shader->SetName(mStatic ? mName : "Texture2DShader");
-    shader->CompileSource(mStatic ? FoldUniforms(src, data) : src);
+    shader->CompileSource(source);
     return shader;
 }
 std::size_t TextureMap2DClass::GetHash() const
@@ -1607,10 +1639,11 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mTexture.GetHash());
     return hash;
 }
-std::string TextureMap2DClass::GetProgramId(const State&) const
+std::string TextureMap2DClass::GetProgramId(const State& state) const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, "texture");
+    hash = base::hash_combine(hash, state.render_pass->GetHash());
     if (mStatic)
     {
         hash = base::hash_combine(hash, mGamma);
@@ -1948,7 +1981,7 @@ Shader* CustomMaterialClass::GetShader(const State& state, Device& device) const
     if (!mShaderSrc.empty())
     {
         shader->SetName("CustomShaderSource");
-        if (!shader->CompileSource(mShaderSrc))
+        if (!shader->CompileSource(state.render_pass->ModifySource(device, mShaderSrc)))
         {
             ERROR("Failed to compile custom material shader source. [class='%1']", mName);
             return nullptr;
@@ -1967,7 +2000,7 @@ Shader* CustomMaterialClass::GetShader(const State& state, Device& device) const
 
         const char* beg = (const char*)buffer->GetData();
         const char* end = beg + buffer->GetSize();
-        if (!shader->CompileSource(std::string(beg, end)))
+        if (!shader->CompileSource(state.render_pass->ModifySource(device, std::string(beg, end))))
         {
             ERROR("Failed to compile custom material shader source. [name='%1', uri='%2']", mName, mShaderUri);
             return nullptr;
@@ -2277,6 +2310,7 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
+    state.render_pass   = env.render_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
     mClass->ApplyDynamicState(state, device, program);
@@ -2300,6 +2334,7 @@ void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device,
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
+    state.render_pass   = env.render_pass;
     return mClass->ApplyStaticState(state, device, program);
 }
 
@@ -2311,6 +2346,7 @@ std::string MaterialClassInst::GetProgramId(const Environment& env) const
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
+    state.render_pass   = env.render_pass;
     return mClass->GetProgramId(state);
 }
 
@@ -2324,26 +2360,36 @@ Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) con
         // to the stencil buffer (by discarding fragments) to create a way to
         // use the texture as a stencil mask. This would then need to be implemented
         // in the Sprite and TextureMap classes separately.
-        constexpr auto* src = R"(
+        size_t hash = 0;
+        hash = base::hash_combine(hash, "stencil-shader");
+        hash = base::hash_combine(hash, env.render_pass->GetHash());
+        const auto id = std::to_string(hash);
+
+        auto* shader = device.FindShader(id);
+        if (shader)
+            return shader;
+
+        std::string source(R"(
 #version 100
 precision mediump float;
+
+vec4 RenderPass(vec4);
+
 void main() {
-   gl_FragColor = vec4(1.0);
+   gl_FragColor = RenderPass(vec4(1.0));
 }
-)";
-        auto* shader = device.FindShader("stencil-shader");
-        if (shader == nullptr)
-        {
-            shader = device.MakeShader("stencil-shader");
-            shader->SetName("stencil-shader");
-            shader->CompileSource(src);
-        }
+)");
+        source = env.render_pass->ModifySource(device, std::move(source));
+        shader = device.MakeShader(id);
+        shader->SetName("StencilShader");
+        shader->CompileSource(source);
         return shader;
     }
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
+    state.render_pass   = env.render_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
     return mClass->GetShader(state, device);
@@ -2427,9 +2473,11 @@ uniform sampler2D kTexture;
 uniform vec4 kColor;
 uniform float kTime;
 varying vec2 vTexCoord;
+vec4 RenderPass(vec4);
 void main() {
    float alpha = texture2D(kTexture, vTexCoord).a;
-   gl_FragColor = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
+   vec4 color = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
+   gl_FragColor = RenderPass(color);
 }
         )";
 constexpr auto* text_shader_texture = R"(
@@ -2437,44 +2485,51 @@ constexpr auto* text_shader_texture = R"(
 precision highp float;
 uniform sampler2D kTexture;
 varying vec2 vTexCoord;
+vec4 RenderPass(vec4);
 void main() {
     mat3 flip = mat3(vec3(1.0,  0.0, 0.0),
                      vec3(0.0, -1.0, 0.0),
                      vec3(0.0,  1.0, 0.0));
     vec3 tex = flip * vec3(vTexCoord.xy, 1.0);
-    gl_FragColor = texture2D(kTexture, tex.xy);
+    vec4 color = texture2D(kTexture, tex.xy);
+    gl_FragColor = RenderPass(color);
 }
     )";
+    const auto* pass = env.render_pass;
+
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
-        auto* shader = device.MakeShader("text-shader-bitmap");
-        shader->CompileSource(text_shader_bitmap);
-        shader->SetName("text-shader-bitmap");
+        auto* shader = device.MakeShader(GetProgramId(env));
+        shader->CompileSource(pass->ModifySource(device, text_shader_bitmap));
+        shader->SetName("BitmapTextShader");
         return shader;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
-        auto* shader = device.MakeShader("text-shader-texture");
-        shader->CompileSource(text_shader_texture);
-        shader->SetName("text-shader-texture");
+        auto* shader = device.MakeShader(GetProgramId(env));
+        shader->CompileSource(pass->ModifySource(device, text_shader_texture));
+        shader->SetName("TextureTextShader");
         return shader;
     } else if (format == TextBuffer::RasterFormat::None)
         return nullptr;
     else BUG("Unhandled texture raster format.");
     return nullptr;
 }
-std::string TextMaterial::GetProgramId(const Environment&) const
+std::string TextMaterial::GetProgramId(const Environment& env) const
 {
+    size_t hash = 0;
+    hash = base::hash_combine(hash, env.render_pass->GetHash());
+
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
-        return "text-shader-bitmap";
+        hash = base::hash_combine(hash, "text-shader-bitmap");
     else if (format == TextBuffer::RasterFormat::Texture)
-        return "text-shader-texture";
+        hash = base::hash_combine(hash, "text-shader-texture");
     else if (format == TextBuffer::RasterFormat::None)
-        return "text-shader-none";
+        hash = base::hash_combine(hash, "text-shader-none");
     else BUG("Unhandled texture raster format.");
-    return "";
+    return std::to_string(hash);
 }
 std::string TextMaterial::GetClassId() const
 { return {}; }
