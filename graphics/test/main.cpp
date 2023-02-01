@@ -1565,11 +1565,9 @@ public:
             gfx::TextBuffer buff(300, 200);
             buff.SetText("Hello World!", "fonts/AtariFontFullVersion.ttf", 20);
 
-            gfx::TextureMap2DClass material;
-            material.SetTexture(gfx::CreateTextureFromText(buff));
-            material.SetBaseColor(gfx::Color::DarkGray);
-            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            painter.Draw(gfx::Rectangle(), transform, gfx::MaterialClassInst(material));
+            gfx::TextMaterial material(std::move(buff));
+            material.SetColor(gfx::Color::DarkGray);
+            painter.Draw(gfx::Rectangle(), transform, material);
         }
 
         // modulate text color based on time
