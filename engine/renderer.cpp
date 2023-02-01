@@ -684,7 +684,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.drawable  = paint_node.text_drawable;
             packet.material  = paint_node.text_material;
             packet.transform = transform.GetAsMatrix();
-            packet.pass      = RenderPass::Draw;
+            packet.pass      = RenderPass::DrawColor;
             packet.entity_node_layer = text->GetLayer();
             packet.scene_node_layer  = entity.GetLayer();
             if (!hook || hook->InspectPacket(&node, packet))
@@ -754,8 +754,9 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
     }
 
     struct Layer {
-        std::vector<gfx::Painter::DrawShape> draw_list;
-        std::vector<gfx::Painter::DrawShape> mask_list;
+        std::vector<gfx::Painter::DrawShape> draw_color_list;
+        std::vector<gfx::Painter::DrawShape> mask_cover_list;
+        std::vector<gfx::Painter::DrawShape> mask_expose_list;
     };
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -765,9 +766,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
 
     for (auto& packet : packets)
     {
-        if (packet.pass == RenderPass::Draw && !packet.material)
-            continue;
-        else if (!packet.drawable)
+        if (!packet.material || !packet.drawable)
             continue;
 
         const auto scene_layer_index = packet.scene_node_layer;
@@ -781,38 +780,66 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
             entity_scene_layer.resize(entity_node_layer_index + 1);
 
         Layer& entity_layer = entity_scene_layer[entity_node_layer_index];
-        if (packet.pass == RenderPass::Draw)
+        if (packet.pass == RenderPass::DrawColor)
         {
             gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
-            entity_layer.draw_list.push_back(shape);
+            entity_layer.draw_color_list.push_back(shape);
         }
-        else if (packet.pass == RenderPass::Mask)
+        else if (packet.pass == RenderPass::MaskCover)
         {
             gfx::Painter::DrawShape shape;
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
-            entity_layer.mask_list.push_back(shape);
+            entity_layer.mask_cover_list.push_back(shape);
+        }
+        else if (packet.pass == RenderPass::MaskExpose)
+        {
+            gfx::Painter::DrawShape shape;
+            shape.transform = &packet.transform;
+            shape.drawable  = packet.drawable.get();
+            shape.material  = packet.material.get();
+            entity_layer.mask_expose_list.push_back(shape);
         }
     }
     for (const auto& scene_layer : layers)
     {
         for (const auto& entity_layer : scene_layer)
         {
-            if (!entity_layer.mask_list.empty())
+            if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
-                const gfx::detail::StencilMaskPass mask(1, 0);
-                const gfx::detail::StencilTestColorWritePass cover(1);
-                painter.Draw(entity_layer.mask_list, mask);
-                painter.Draw(entity_layer.draw_list, cover);
+                const gfx::detail::StencilMaskPass stencil_cover(gfx::detail::StencilClearValue(1),
+                                                                 gfx::detail::StencilWriteValue(0));
+                const gfx::detail::StencilMaskPass stencil_expose(gfx::detail::StencilWriteValue(1));
+                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
+
+                painter.Draw(entity_layer.mask_cover_list, stencil_cover);
+                painter.Draw(entity_layer.mask_expose_list, stencil_expose);
+                painter.Draw(entity_layer.draw_color_list, cover);
             }
-            else if (!entity_layer.draw_list.empty())
+            else if (!entity_layer.mask_cover_list.empty())
+            {
+                const gfx::detail::StencilMaskPass stencil_cover(gfx::detail::StencilClearValue(1),
+                                                                 gfx::detail::StencilWriteValue(0));
+                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
+                painter.Draw(entity_layer.mask_cover_list, stencil_cover);
+                painter.Draw(entity_layer.draw_color_list, cover);
+            }
+            else if (!entity_layer.mask_expose_list.empty())
+            {
+                const gfx::detail::StencilMaskPass stencil_expose(gfx::detail::StencilClearValue(0),
+                                                                 gfx::detail::StencilWriteValue(1));
+                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
+                painter.Draw(entity_layer.mask_expose_list, stencil_expose);
+                painter.Draw(entity_layer.draw_color_list, cover);
+            }
+            else if (!entity_layer.draw_color_list.empty())
             {
                 const gfx::detail::GenericRenderPass pass;
-                painter.Draw(entity_layer.draw_list, pass);
+                painter.Draw(entity_layer.draw_color_list, pass);
             }
         }
     }

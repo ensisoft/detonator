@@ -242,7 +242,7 @@ private:
     {
         if (const auto* draw = node.GetDrawable())
         {
-            if (draw->GetRenderPass() == game::RenderPass::Draw &&
+            if (draw->GetRenderPass() == game::RenderPass::DrawColor &&
                 draw->TestFlag(game::DrawableItemClass::Flags::VisibleInGame))
                 return true;
         }

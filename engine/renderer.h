@@ -49,7 +49,7 @@ namespace engine
         int entity_node_layer = 0;
         int scene_node_layer = 0;
         // the render pass this draw belongs to.
-        game::RenderPass pass = game::RenderPass::Draw;
+        game::RenderPass pass = game::RenderPass::DrawColor;
     };
 
     template<typename Node>

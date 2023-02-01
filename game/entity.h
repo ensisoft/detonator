@@ -430,7 +430,7 @@ namespace game
         // scaler value for changing the time delta values
         // applied to the drawable (material)
         float mTimeScale = 1.0f;
-        RenderPass mRenderPass = RenderPass::Draw;
+        RenderPass mRenderPass = RenderPass::DrawColor;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
         MaterialParamMap mMaterialParams;
     };
