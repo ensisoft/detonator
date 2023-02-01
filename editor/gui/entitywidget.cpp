@@ -2793,7 +2793,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsMaterial, QString(""));
     SetValue(mUI.dsDrawable, QString(""));
     SetValue(mUI.dsLayer, 0);
-    SetValue(mUI.dsRenderPass, game::DrawableItemClass::RenderPass::Draw);
+    SetValue(mUI.dsRenderPass, game::DrawableItemClass::RenderPass::DrawColor);
     SetValue(mUI.dsRenderStyle, game::DrawableItemClass::RenderStyle::Solid);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);

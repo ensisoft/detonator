@@ -29,7 +29,8 @@ void GenericRenderPass::Begin(Device& device, State* state) const
 
 void StencilMaskPass::Begin(Device& device, State* state) const
 {
-    device.ClearStencil(mStencilClearValue);
+    if (mStencilClearValue.has_value())
+        device.ClearStencil(mStencilClearValue.value());
     state->write_color   = false;
     state->depth_test    = DepthTest::Disabled;
     state->stencil_func  = StencilFunc::PassAlways;

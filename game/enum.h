@@ -21,8 +21,9 @@
 namespace game {
 
     enum class RenderPass {
-        Draw,
-        Mask
+        DrawColor,
+        MaskCover,
+        MaskExpose
     };
 
     enum class RenderStyle {

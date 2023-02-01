@@ -20,6 +20,7 @@
 
 #include <string>
 #include <cstdint>
+#include <optional>
 
 #include "graphics/device.h"
 #include "graphics/types.h"
@@ -81,12 +82,30 @@ namespace gfx
         private:
         };
 
+        template<unsigned>
+        struct StencilValue {
+            uint8_t value;
+            StencilValue() = default;
+            StencilValue(uint8_t val) : value(val) {}
+            inline operator uint8_t () const { return value; }
+        };
+
+        using StencilClearValue = StencilValue<0>;
+        using StencilWriteValue = StencilValue<1>;
+        using StencilPassValue  = StencilValue<2>;
+
         class StencilMaskPass : public RenderPass
         {
         public:
-            StencilMaskPass(uint8_t clear_value, uint8_t write_value)
-                : mStencilClearValue(clear_value)
-                , mStencilWriteValue(write_value)
+            using ClearValue = StencilClearValue;
+            using WriteValue = StencilWriteValue;
+
+            StencilMaskPass(ClearValue clear_value, WriteValue write_value)
+               : mStencilClearValue(clear_value)
+               , mStencilWriteValue(write_value)
+            {}
+            StencilMaskPass(WriteValue write_value)
+              : mStencilWriteValue(write_value)
             {}
             virtual void Begin(Device& device, State* state) const override;
 
@@ -95,14 +114,16 @@ namespace gfx
             virtual Type GetType() const override
             { return Type::Stencil; }
         private:
-            const uint8_t mStencilClearValue = 1;
-            const uint8_t mStencilWriteValue = 1;
+            const std::optional<ClearValue> mStencilClearValue;
+            const WriteValue mStencilWriteValue = 1;
         };
 
         class StencilTestColorWritePass : public RenderPass
         {
         public:
-            explicit StencilTestColorWritePass(uint8_t stencil_pass_value)
+            using PassValue = StencilPassValue;
+
+            explicit StencilTestColorWritePass(PassValue stencil_pass_value)
               : mStencilRefValue(stencil_pass_value)
             {}
             virtual void Begin(Device& device, State* state) const override;
@@ -112,7 +133,7 @@ namespace gfx
             virtual Type GetType() const override
             { return Type::Color; }
         private:
-            const uint8_t mStencilRefValue;
+            const PassValue mStencilRefValue;
         };
 
     } // namespace

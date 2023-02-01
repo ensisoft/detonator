@@ -300,7 +300,6 @@ void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>
         box.drawable          = shape;
         box.scene_node_layer  = 0;
         box.entity_node_layer = layer;
-        box.pass              = game::RenderPass::Draw;
         packets.push_back(box);
     trans.Pop();
 }
