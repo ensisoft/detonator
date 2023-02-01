@@ -777,6 +777,7 @@ void EntityWidget::Cut(Clipboard& clipboard)
             mComments.erase(node->GetId());
         }, json, node);
 
+        clipboard.Clear();
         clipboard.SetType("application/json/entity/node");
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
@@ -799,6 +800,7 @@ void EntityWidget::Copy(Clipboard& clipboard) const
                 clipboard.SetProperty("comment_" + node->GetId(), *comment);
         }, json, node);
 
+        clipboard.Clear();
         clipboard.SetType("application/json/entity");
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
