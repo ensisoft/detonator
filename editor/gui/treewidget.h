@@ -24,6 +24,7 @@
 #  include <QString>
 #  include <QIcon>
 #  include <QAbstractScrollArea>
+#  include <QtUiPlugin/QDesignerExportWidget>
 #include "warnpop.h"
 
 #include <vector>
@@ -38,10 +39,10 @@ class QKeyEvent;
 
 namespace gui
 {
-    // Thanks to the brain damaged shit that is QTreeView (seriously, how in the fuck
+    // Thanks to the brain-damaged shit that is QTreeView (seriously, how in the fuck
     // do you even make it support drag&drop within the widget ??)
     // we implement our own tree widget that makes world sane again.
-    class TreeWidget : public QAbstractScrollArea
+    class DESIGNER_PLUGIN_EXPORT TreeWidget : public QAbstractScrollArea
     {
         Q_OBJECT
 
@@ -111,7 +112,7 @@ namespace gui
         };
 
         // ctor.
-        TreeWidget(QWidget* parent);
+        explicit TreeWidget(QWidget* parent = nullptr);
 
         // Rebuild the widget's item tree. This will ask the
         // TreeModel to provide a new flattened list of TreeItems
@@ -150,7 +151,7 @@ namespace gui
         void dragEvent(TreeItem* item, TreeItem* target);
         void clickEvent(TreeItem* item);
 
-    private:
+    protected:
         virtual void paintEvent(QPaintEvent* event) override;
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;

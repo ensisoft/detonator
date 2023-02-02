@@ -23,6 +23,7 @@
 #  include <QObject>
 #  include <QString>
 #  include <QIcon>
+#  include <QtUiPlugin/QDesignerExportWidget>
 #include "warnpop.h"
 
 #include <vector>
@@ -37,12 +38,16 @@ class QKeyEvent;
 
 namespace gui
 {
-    class RangeWidget : public QWidget
+    class DESIGNER_PLUGIN_EXPORT RangeWidget : public QWidget
     {
         Q_OBJECT
 
+        Q_PROPERTY(qreal lo READ GetLo WRITE SetLo DESIGNABLE true)
+        Q_PROPERTY(qreal hi READ GetHi WRITE SetHi DESIGNABLE true)
+        Q_PROPERTY(qreal exponent READ GetExponent WRITE SetExponent DESIGNABLE true)
+        Q_PROPERTY(qreal scale    READ GetScale    WRITE SetScale    DESIGNABLE true)
     public:
-        RangeWidget(QWidget* parent);
+        explicit RangeWidget(QWidget* parent = nullptr);
 
         float GetLo() const;
         float GetHi() const;
@@ -51,12 +56,16 @@ namespace gui
 
         void SetScale(float scale)
         { mScale = scale; }
+        float GetScale() const
+        { return mScale; }
         void SetExponent(float exponent)
         { mExponent = exponent; }
+        float GetExponent() const
+        { return mExponent; }
     signals:
         void RangeChanged(float lo, float hi);
 
-    private:
+    protected:
         virtual void paintEvent(QPaintEvent* event) override;
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;
@@ -67,6 +76,7 @@ namespace gui
         virtual void resizeEvent(QResizeEvent* resize) override;
         virtual void focusInEvent(QFocusEvent* focus) override;
         virtual void focusOutEvent(QFocusEvent* focus) override;
+
     private:
         float mScale = 0.0f;
         float mExponent = 1.0f;

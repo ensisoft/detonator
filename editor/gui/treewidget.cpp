@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define LOGTAG "widget"
-
 #include "config.h"
 
 #include "warnpush.h"
@@ -36,7 +34,6 @@
 #  include <QDebug>
 #include "warnpop.h"
 
-#include "editor/app/eventlog.h"
 #include "treewidget.h"
 
 namespace {
@@ -104,6 +101,9 @@ TreeWidget::TreeWidget(QWidget* parent) : QAbstractScrollArea(parent)
 
 void TreeWidget::Rebuild()
 {
+    if (!mModel)
+        return;
+
     const QString id = mSelected ? mSelected->GetId() : "";
 
     mSelected = nullptr;
@@ -349,7 +349,7 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent* mickey)
             return;
 
         auto& target = mItems[landing_index];
-        DEBUG("Item '%1' dragged onto '%2'", item.GetText(), target.GetText());
+        //DEBUG("Item '%1' dragged onto '%2'", item.GetText(), target.GetText());
         emit dragEvent(&item, &target);
 
         break;

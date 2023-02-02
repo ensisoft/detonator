@@ -1,4 +1,4 @@
-DETONATOR 2D 🤘🏻😎💥
+DETONATOR 2D 💥💣
 ===================
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  🍄🧩🗺️
@@ -323,8 +323,19 @@ This means that in order to link to 3rd party libraries the debug versions of th
   $ cmake --install . --config Debug
 ```
 
+Build the Qt5 Designer plugin for the DETONATOR custom widgets. This is *optional*.
 
-The Boring Documentation 🙄
+```
+  $ cd editor\gui\qt
+  $ mkdir build
+  $ cmake -G "Visual Studio 16 2019" -DCMAKE-BUILD_TYPE=Release
+  $ cmake --build . --config Release
+  $ cmake --install . --config Release
+```
+
+If everything went smoothly you'll now have DETONATOR custom widgets in the Qt5 designer.
+
+The Boring Documentation 🥱
 =========================
 
 Workflow and getting started 📔
@@ -429,13 +440,13 @@ Use --help for more information.
 ```
 
 Coding Convention & Design 💭
---------------------------
+----------------------------
 - todo: c++ objects that represent classes
 - todo: asserts/logging/exceptions
 - todo: callbacks
 
-Tracing & Profiling
--------------------
+Tracing & Profiling 💭
+----------------------
 What follows is only specific to Linux. I don't know the tools for doing this on Windows.
 
 The engine has very primitive tracing built in. Most of the top-level subsystem calls to update all subsystems and to render
