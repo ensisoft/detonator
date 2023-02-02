@@ -362,6 +362,7 @@ public:
         RESOLVE(glClearStencil);
         RESOLVE(glClearDepthf);
         RESOLVE(glBlendFunc);
+        RESOLVE(glDepthFunc);
         RESOLVE(glViewport);
         RESOLVE(glDrawArrays);
         RESOLVE(glGetAttribLocation);
