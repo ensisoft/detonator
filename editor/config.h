@@ -30,3 +30,7 @@
                       "Sami Väisänen"   \
 
 
+// define this macro to be a dummy. used in the editor custom widgets
+// that are also built into a QDesigner plugin. The plugin build
+// requires export/import crap, whereas the editor build doesn't.
+#define DESIGNER_PLUGIN_EXPORT

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define LOGTAG "widget"
-
 #include "config.h"
 
 #include "warnpush.h"
@@ -37,8 +35,7 @@
 #include "warnpop.h"
 
 #include "base/math.h"
-#include "editor/gui/rangewidget.h"
-#include "editor/app/eventlog.h"
+#include "rangewidget.h"
 
 namespace {
     constexpr auto Margin = 5.0f;
@@ -202,8 +199,6 @@ void RangeWidget::mousePressEvent(QMouseEvent* mickey)
     mDragStart = mickey->pos();
 
     update();
-
-    //DEBUG("Dragging %1", mDragging);
 }
 
 void RangeWidget::mouseReleaseEvent(QMouseEvent* mickey)
