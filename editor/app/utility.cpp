@@ -26,6 +26,7 @@
 #  include <QTextStream>
 #  include <QRandomGenerator>
 #  include <QApplication>
+#  include <QStyle>
 #include "warnpop.h"
 
 #if defined(LINUX_OS)
@@ -37,7 +38,7 @@
 #include <cstring>
 
 #include "base/utility.h"
-#include "utility.h"
+#include "editor/app/utility.h"
 
 namespace {
 
@@ -57,6 +58,86 @@ QString ToNativeSeparators(QString p)
 } // namespace
 namespace app
 {
+
+
+bool SetTheme(const QString& name)
+{
+#if defined (WINDOWS_OS)
+    class IKvantumThemeChanger
+    {
+    public:
+        virtual ~IKvantumThemeChanger() = default;
+        virtual bool setTheme(void* kvantum_style, const QString& config, const QString& svg, const QString& color_config) = 0;
+    };
+    QStyle* kvantum = QApplication::style();
+    if (kvantum)
+    {
+        // this hack is done so that this executable doesn't need to
+        // link against kvantum.dll
+        QVariant hack = kvantum->property("__kvantum_theme_hack");
+        if (!hack.isValid())
+            return false;
+
+        void* ptr = qvariant_cast<void*>(hack);
+        auto* theme_changer = static_cast<IKvantumThemeChanger*>(ptr);
+        bool ret = true;
+        if (name == "glassy")
+        {
+            if (!theme_changer->setTheme(kvantum,
+                ":Glassy/Glassy.kvconfig",
+                ":Glassy/Glassy.svg",
+                ":Glassy/Glassy.colors"))
+                return false;
+        }
+        else if (name == "darklines")
+        {
+            if (!theme_changer->setTheme(kvantum,
+                ":DarkLines/DarkLines.kvconfig",
+                ":DarkLines/DarkLines.svg",
+                ":DarkLines/DarkLines.colors"))
+                return false;
+        }
+        else if (name == "kvantum-curves")
+        {
+            if (!theme_changer->setTheme(kvantum,
+                ":KvCurves/KvCurves.kvconfig",
+                ":KvCurves/KvCurves.svg",
+                ":KvCurves/KvCurves.colors"))
+                return false;
+        }
+        else if (name == "kvantum-dark-red") {
+            if (!theme_changer->setTheme(kvantum,
+                ":KvDarkRed/KvDarkRed.kvconfig",
+                ":KvDarkRed/KvDarkRed.svg",
+                ":KvDarkRed/KvDarkRed.colors"))
+                return false;
+        }
+        else if (name == "glow-dark")
+        {
+            if (!theme_changer->setTheme(kvantum,
+                ":kvGlowDark/kvGlowDark.kvconfig",
+                ":kvGlowDark/kvGlowDark.svg",
+                ":kvGlowDark/kvGlowDark.colors"))
+                return false;
+        }
+        QApplication::setPalette(kvantum->standardPalette());
+        return true;
+    }
+    return false;
+#else
+    return true;
+#endif
+}
+
+bool SetStyle(const QString& name)
+{
+    QStyle* style = QApplication::setStyle(name);
+    if (style == nullptr)
+        return false;
+
+    QApplication::setPalette(style->standardPalette());
+    return true;
+}
 
 std::vector<Resolution> ListResolutions()
 {

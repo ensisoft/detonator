@@ -300,12 +300,9 @@ void MainWindow::LoadSettings()
     settings.GetValue("ScriptWidget", "lua_format_on_save", &script_widget_settings.lua_format_on_save);
     ScriptWidget::SetDefaultSettings(script_widget_settings);
 
-    QStyle* style = QApplication::setStyle(mSettings.style_name);
-    if (style == nullptr) {
-        WARN("No such application style '%1'", mSettings.style_name);
-    } else {
-        QApplication::setPalette(style->standardPalette());
-        DEBUG("Application style set to '%1'", mSettings.style_name);
+    if (!mSettings.style_name.isEmpty())
+    {
+        app::SetStyle(mSettings.style_name);
     }
     DEBUG("Loaded application settings.");
 }
@@ -825,6 +822,11 @@ void MainWindow::CloseWorkspace()
 void MainWindow::showWindow()
 {
     show();
+
+    if (!mSettings.style_name.isEmpty())
+    {
+        app::SetTheme(mSettings.style_name);
+    }
 }
 
 void MainWindow::iterateGameLoop()
@@ -1893,13 +1895,24 @@ void MainWindow::on_actionSettings_triggered()
     if (current_style == mSettings.style_name)
         return;
 
-    QStyle* style = QApplication::setStyle(mSettings.style_name);
-    if (style == nullptr) {
-        WARN("No such application style '%1'", mSettings.style_name);
-    } else {
-        mApplication.setStyleSheet("");
-        QApplication::setPalette(style->standardPalette());
-        DEBUG("Application style set to '%1'", mSettings.style_name);
+    app::SetStyle(mSettings.style_name);
+    app::SetTheme(mSettings.style_name);
+
+    // restyle the wigets.
+    const QWidgetList topLevels = QApplication::topLevelWidgets();
+    for (QWidget* widget : topLevels)
+    {
+        // this is needed with Qt >= 5.13.1 but is harmless otherwise
+        widget->setAttribute(Qt::WA_NoSystemBackground, false);
+        widget->setAttribute(Qt::WA_TranslucentBackground, false);
+    }
+
+    // Qt5 has QEvent::ThemeChange
+    const QWidgetList widgets = QApplication::allWidgets();
+    for (QWidget* widget : widgets)
+    {
+        QEvent event(QEvent::ThemeChange);
+        QApplication::sendEvent(widget, &event);
     }
 }
 
