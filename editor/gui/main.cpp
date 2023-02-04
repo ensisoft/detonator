@@ -77,10 +77,6 @@ void copyright()
     INFO("https://github.com/mbasaglia/Qt-Color-Widgets");
     INFO("Qt Color Widgets");
 
-    INFO("Copyright (c) 2013-2019 Colin Duquesnoy");
-    INFO("https://github.com/ColinDuquesnoy/QDarkStyleSheet");
-    INFO("QDarkStyleSheet Dark Qt style 2.8");
-
     INFO("Copyright (c) 2019-2020 Waqar Ahmed -- <waqar.17a@gmail.com>");
     INFO("https://github.com/Waqar144/QSourceHighlite");
     INFO("Qt syntax highlighter");
@@ -285,18 +281,17 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
 
     if (!style.empty())
     {
-        QStyle* pstyle = QApplication::setStyle(app::FromUtf8(style));
-        if (pstyle == nullptr) {
-            WARN("No such application style. [style='%1']", style);
-        } else {
-            QApplication::setPalette(pstyle->standardPalette());
-            DEBUG("Applied application style. [style='%1']", style);
-        }
+        app::SetStyle(app::FromUtf8(style));
     }
 
     gui::ViewWindow window(app);
     window.show();
     window.Connect(app::FromUtf8(ipc_socket));
+
+    if (!style.empty())
+    {
+        app::SetTheme(app::FromUtf8(style));
+    }
 
     EventLoop(app, window);
 }

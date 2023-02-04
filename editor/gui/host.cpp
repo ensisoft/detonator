@@ -230,13 +230,7 @@ void Main(int argc, char* argv[])
 
     if (!style.empty())
     {
-        QStyle* pstyle = QApplication::setStyle(app::FromUtf8(style));
-        if (pstyle == nullptr) {
-            WARN("No such application style '%1'", style);
-        } else {
-            QApplication::setPalette(pstyle->standardPalette());
-            DEBUG("Application style set to '%1'", style);
-        }
+        app::SetStyle(app::FromUtf8(style));
     }
 
     app::Workspace workspace(app::FromUtf8(wsdir));
@@ -266,6 +260,11 @@ void Main(int argc, char* argv[])
     window.LoadState();
     if (!window.LoadGame())
         return;
+
+    if (!style.empty())
+    {
+        app::SetTheme(app::FromUtf8(style));
+    }
 
     // main game loop.
     unsigned frame = 0;

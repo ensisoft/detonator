@@ -49,6 +49,9 @@
 namespace app
 {
 
+bool SetStyle(const QString& name);
+bool SetTheme(const QString& name);
+
 struct Resolution {
     QString name;
     unsigned width  = 0;
