@@ -127,8 +127,10 @@ namespace gui
         void SaveWidget(const QString& module, const QGroupBox* grp);
         void SaveWidget(const QString& module, const QCheckBox* chk);
         void SaveWidget(const QString& module, const QSplitter* splitter);
+        void SaveWidget(const QString& module, const gui::CollapsibleWidget* widget);
 
         // Load the state of a widget.
+        void LoadWidget(const QString& module, gui::CollapsibleWidget* widget) const;
         void LoadWidget(const QString& module, gui::GfxWidget* widget) const;
         void LoadWidget(const QString& module, QSplitter* splitter) const;
         void LoadWidget(const QString& module, QTableView* table) const;

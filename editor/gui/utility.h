@@ -45,6 +45,7 @@
 #include "editor/app/resource.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/timewidget.h"
+#include "editor/gui/collapsible_widget.h"
 #include "editor/gui/uniform.h"
 
 // general dumping ground for utility type of functionality
@@ -985,7 +986,9 @@ inline void GetUIValue(QComboBox* cmb, QString* out)
 }
 #endif // __MSVC__
 
-
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const gui::CollapsibleWidget* widget)
+{ res.SetProperty(key + "_collapsed", widget->IsCollapsed()); }
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QComboBox* cmb)
 { res.SetProperty(key, cmb->currentText()); }
@@ -1057,6 +1060,9 @@ inline void SetProperty(Resource& res, const PropertyKey& key, size_t value)
 #endif
 
 // user properties.
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const gui::CollapsibleWidget* widget)
+{ res.SetUserProperty(key + "_collapsed", widget->IsCollapsed()); }
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QSplitter* splitter)
 { res.SetUserProperty(key, splitter->saveState()); }
@@ -1347,6 +1353,19 @@ inline bool GetUserProperty(const Resource& res, const PropertyKey& key, color_w
     }
     return false;
 }
+
+template<typename Resource>
+inline bool GetUserProperty(const Resource& res, const PropertyKey& key, gui::CollapsibleWidget* widget)
+{
+    bool collapsed = false;
+    if (res.GetUserProperty(key + "_collapsed", &collapsed))
+    {
+        widget->Collapse(collapsed);
+        return true;
+    }
+    return false;
+}
+
 
 template<typename Resource>
 inline bool GetUserProperty(const Resource& res, const PropertyKey& key, gui::GfxWidget* widget)

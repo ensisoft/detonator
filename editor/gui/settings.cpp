@@ -201,6 +201,11 @@ void Settings::SaveWidget(const QString& module, const gui::GfxWidget* widget)
     }
 }
 
+void Settings::SaveWidget(const QString& module, const gui::CollapsibleWidget* widget)
+{
+    SetValue(module, widget->objectName(), widget->IsCollapsed());
+}
+
 void Settings::SaveWidget(const QString& module, const color_widgets::ColorSelector* color)
 {
     SetValue(module, color->objectName(), color->color());
@@ -238,6 +243,13 @@ void Settings::SaveWidget(const QString& module, const QSplitter* splitter)
 {
     const auto& state = splitter->saveState();
     SetValue(module, splitter->objectName(), QString::fromLatin1(state.toBase64()));
+}
+
+void Settings::LoadWidget(const QString& module, gui::CollapsibleWidget* widget) const
+{
+    bool collapsed = GetValue(module, widget->objectName(), widget->IsCollapsed());
+
+    widget->Collapse(collapsed);
 }
 
 void Settings::LoadWidget(const QString& module, gui::GfxWidget* widget) const
