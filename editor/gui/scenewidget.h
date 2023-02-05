@@ -145,6 +145,9 @@ namespace gui
         void on_actionNodeMoveDownLayer_triggered();
         void on_actionNodeFind_triggered();
         void on_actionEntityVarRef_triggered();
+        void on_actionScriptVarAdd_triggered();
+        void on_actionScriptVarDel_triggered();
+        void on_actionScriptVarEdit_triggered();
         void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
         void on_btnAddScript_clicked();
@@ -172,6 +175,7 @@ namespace gui
         void on_btnNodePlus90_clicked();
         void on_btnNodeMinus90_clicked();
         void on_tree_customContextMenuRequested(QPoint);
+        void on_scriptVarList_customContextMenuRequested(QPoint);
 
         void PlaceNewEntity();
         void TreeCurrentNodeChangedEvent();
@@ -238,7 +242,7 @@ namespace gui
         double mViewRotationStartTime = 0.0;
         double mViewTranslationStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
-        glm::vec2 mViewTranslationStart;
+        glm::vec2 mViewTranslationStart = {0.0f, 0.0f};
         bool mCameraWasLoaded = false;
         std::unique_ptr<game::Tilemap> mTilemap;
         // Undo "stack" with fixed capacity that begins

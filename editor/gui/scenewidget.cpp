@@ -531,6 +531,12 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.ID, mState.scene.GetId());
     SetValue(mUI.name, mState.scene.GetName());
 
+    // Using context menu for now but leaving these buttons
+    // around in case they make a come back later....
+    SetVisible(mUI.btnNewScriptVar,    false);
+    SetVisible(mUI.btnEditScriptVar,   false);
+    SetVisible(mUI.btnDeleteScriptVar, false);
+
     RebuildMenus();
     RebuildCombos();
 
@@ -575,6 +581,11 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    GetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
+    GetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
+    GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
+    GetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
+    GetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
     mCameraWasLoaded = true;
 
     UpdateResourceReferences();
@@ -655,6 +666,11 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.cmbGrid);
     settings.SaveWidget("Scene", mUI.zoom);
     settings.SaveWidget("Scene", mUI.widget);
+    settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
+    settings.SaveWidget("Scene", mUI.sceneBoundsGroup);
+    settings.SaveWidget("Scene", mUI.sceneIndexGroup);
+    settings.SaveWidget("Scene", mUI.quadTreeGroup);
+    settings.SaveWidget("Scene", mUI.denseGridGroup);
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -676,6 +692,11 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.cmbGrid);
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
+    settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
+    settings.LoadWidget("Scene", mUI.sceneBoundsGroup);
+    settings.LoadWidget("Scene", mUI.sceneIndexGroup);
+    settings.LoadWidget("Scene", mUI.quadTreeGroup);
+    settings.LoadWidget("Scene", mUI.denseGridGroup);
 
     if (!mState.scene.FromJson(json))
         WARN("Failed to restore scene state.");
@@ -1113,6 +1134,11 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "right_boundary", mUI.spinRightBoundary);
     SetUserProperty(resource, "top_boundary", mUI.spinTopBoundary);
     SetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
+    SetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
+    SetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
+    SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
+    SetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
+    SetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene.GetHash();
@@ -1252,6 +1278,19 @@ void SceneWidget::on_actionEntityVarRef_triggered()
         SetEnabled(mUI.btnEditScriptVar, true);
         SetEnabled(mUI.btnDeleteScriptVar, true);
     }
+}
+
+void SceneWidget::on_actionScriptVarAdd_triggered()
+{
+    on_btnNewScriptVar_clicked();
+}
+void SceneWidget::on_actionScriptVarDel_triggered()
+{
+    on_btnDeleteScriptVar_clicked();
+}
+void SceneWidget::on_actionScriptVarEdit_triggered()
+{
+    on_btnEditScriptVar_clicked();
 }
 
 void SceneWidget::on_btnEditScript_clicked()
@@ -1667,6 +1706,15 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEntityVarRef);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
+    menu.exec(QCursor::pos());
+}
+
+void SceneWidget::on_scriptVarList_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionScriptVarAdd);
+    menu.addAction(mUI.actionScriptVarEdit);
+    menu.addAction(mUI.actionScriptVarDel);
     menu.exec(QCursor::pos());
 }
 
@@ -2124,23 +2172,30 @@ void SceneWidget::DisplaySceneProperties()
     const auto index = mState.scene.GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
     {
-        SetEnabled(mUI.spatialIndex, false);
+        SetEnabled(mUI.spRectX,        false);
+        SetEnabled(mUI.spRectY,        false);
+        SetEnabled(mUI.spRectW,        false);
+        SetEnabled(mUI.spRectH,        false);
+        SetEnabled(mUI.quadTreePage,   false);
+        SetEnabled(mUI.denseGridPage,  false);
     }
     else if (index == game::SceneClass::SpatialIndex::QuadTree)
     {
-        SetEnabled(mUI.spatialIndex, true);
-        SetEnabled(mUI.spQuadMaxLevels, true);
-        SetEnabled(mUI.spQuadMaxItems,  true);
-        SetEnabled(mUI.spDenseGridCols, false);
-        SetEnabled(mUI.spDenseGridRows, false);
+        SetEnabled(mUI.spRectX,        true);
+        SetEnabled(mUI.spRectY,        true);
+        SetEnabled(mUI.spRectW,        true);
+        SetEnabled(mUI.spRectH,        true);
+        SetEnabled(mUI.quadTreePage,   true);
+        SetEnabled(mUI.denseGridPage,  false);
     }
     else if (index == game::SceneClass::SpatialIndex::DenseGrid)
     {
-        SetEnabled(mUI.spatialIndex, true);
-        SetEnabled(mUI.spQuadMaxLevels, false);
-        SetEnabled(mUI.spQuadMaxItems,  false);
-        SetEnabled(mUI.spDenseGridCols, true);
-        SetEnabled(mUI.spDenseGridRows, true);
+        SetEnabled(mUI.spRectX,        true);
+        SetEnabled(mUI.spRectY,        true);
+        SetEnabled(mUI.spRectW,        true);
+        SetEnabled(mUI.spRectH,        true);
+        SetEnabled(mUI.quadTreePage,   false);
+        SetEnabled(mUI.denseGridPage,  true);
     }
 
     if (const auto* rect = mState.scene.GetDynamicSpatialRect())

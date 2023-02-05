@@ -458,6 +458,9 @@ add_executable(Detonator
     editor/gui/scriptwidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
+    editor/gui/collapsible_widget.h
+    editor/gui/collapsible_widget.ui
+    editor/gui/collapsible_widget.cpp
     editor/gui/treewidget.h
     editor/gui/treewidget.cpp
     editor/gui/timelinewidget.h
@@ -728,6 +731,9 @@ add_executable(unit_test_gui
         editor/app/eventlog.cpp
         editor/gui/settings.cpp
         editor/gui/unit_test/unit_test.cpp
+        editor/gui/collapsible_widget.h
+        editor/gui/collapsible_widget.ui
+        editor/gui/collapsible_widget.cpp
         third_party/base64/base64.cpp)
 target_compile_definitions(unit_test_gui PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
