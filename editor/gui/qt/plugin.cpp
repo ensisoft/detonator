@@ -19,11 +19,17 @@
 #include <QIcon>
 #include <QString>
 #include <QtPlugin>
+#include <QtDesigner/QExtensionFactory>
+#include <QtDesigner/QExtensionManager>
+#include <QtDesigner/QDesignerFormEditorInterface>
+#include <QtDesigner/QDesignerFormWindowInterface>
+#include <QtDesigner/QDesignerContainerExtension>
+#include <QtDesigner/QDesignerPropertySheetExtension>
 
 #include "plugin.h"
-
 #include "../rangewidget.h"
 #include "../treewidget.h"
+#include "../collapsible_widget.h"
 
 RangeWidgetPlugin::RangeWidgetPlugin(QObject* parent)
   : QObject(parent)
@@ -150,14 +156,177 @@ void TreeWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
     initialized = true;
 }
 
+CollapsibleWidgetPlugin::CollapsibleWidgetPlugin(QObject* parent)
+  : QObject(parent)
+{
+    //qDebug("CollapsibleWidgetPlugin::CollapsibleWidgetPlugin");
+}
+
+bool CollapsibleWidgetPlugin::isContainer() const
+{
+    return true;
+}
+bool CollapsibleWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon CollapsibleWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString CollapsibleWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::CollapsibleWidget\" name=\"fooWidget\">\n"
+           "  <widget class=\"QWidget\" name=\"page\" />\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>300</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "<customwidgets>\n"
+               "<customwidget>\n"
+                 "<class>\"gui::CollapsibleWidget\"</class>\n"
+                 "<extends>QWidget</extends>\n"
+                 "<addpagemethod>AddPage</addpagemethod>\n"
+               "</customwidget>\n"
+           "</customwidgets>\n"
+           "</ui>\n";
+}
+QString CollapsibleWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString CollapsibleWidgetPlugin::includeFile() const
+{
+    return "collapsible_widget.h";
+}
+
+QString CollapsibleWidgetPlugin::name() const
+{
+    return "gui::CollapsibleWidget";
+}
+QString CollapsibleWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString CollapsibleWidgetPlugin::whatsThis() const
+{
+    return "";
+}
+QWidget* CollapsibleWidgetPlugin::createWidget(QWidget *parent)
+{
+    //qDebug("CollapsibleWidgetPlugin::createWidget");
+    return new gui::CollapsibleWidget(parent);
+}
+void CollapsibleWidgetPlugin::initialize(QDesignerFormEditorInterface* formEditor)
+{
+    if (initialized)
+        return;
+
+    QExtensionManager* manager = formEditor->extensionManager();
+    QExtensionFactory* factory = new CollapsibleWidgetExtensionFactory(manager);
+
+    Q_ASSERT(manager != 0);
+    manager->registerExtensions(factory, Q_TYPEID(QDesignerContainerExtension));
+
+    initialized = true;
+    //qDebug("CollapsibleWidgetPlugin::initialize");
+}
+
 MyCustomWidgets::MyCustomWidgets(QObject* parent)
   : QObject(parent)
 {
     widgets.append(new RangeWidgetPlugin(this));
     widgets.append(new TreeWidgetPlugin(this));
+    widgets.append(new CollapsibleWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
 {
     return widgets;
 }
+
+
+
+CollapsibleWidgetContainerExtension::CollapsibleWidgetContainerExtension(gui::CollapsibleWidget *widget, QObject *parent)
+    : QObject(parent)
+    , myWidget(widget)
+{
+}
+bool CollapsibleWidgetContainerExtension::canAddWidget() const
+{
+    // This should return false for containers that have a single, fixed page, for example QScrollArea or QDockWidget.
+
+    return false;
+}
+void CollapsibleWidgetContainerExtension::addWidget(QWidget *widget)
+{
+    // Adds the given page to the container by appending it to the extension's list of pages.
+    //qDebug("CollapsibleWidgetContainerExtension::addWidget, widget=%p");
+    myWidget->AddPage(widget);
+}
+int CollapsibleWidgetContainerExtension::count() const
+{
+    // Returns the number of pages in the container.
+
+    //qDebug("CollapsibleWidgetContainerExtension::count");
+    return myWidget->GetCount();
+
+}
+int CollapsibleWidgetContainerExtension::currentIndex() const
+{
+    // Returns the index of the currently selected page in the container.
+    //qDebug("CollapsibleWidgetContainer::currentIndex");
+    return mCurrentIndex;
+}
+
+
+void CollapsibleWidgetContainerExtension::insertWidget(int index, QWidget *widget)
+{
+    //qDebug("CollapsibleWidgetContainer::insertWidget, index=%d, widget=%p", index, widget);
+}
+bool CollapsibleWidgetContainerExtension::canRemove(int index) const
+{
+    //qDebug("CollapsibleWidgetContainer::canRemove, index=%d", index);
+    return false;
+}
+
+void CollapsibleWidgetContainerExtension::remove(int index)
+{
+    //qDebug("CollapsibleWidgetContainer::remove, index=%d", index);
+}
+void CollapsibleWidgetContainerExtension::setCurrentIndex(int index)
+{
+    //qDebug("CollapsibleWidgetContainer::setCurrentIndex, index=%d", index);
+}
+QWidget* CollapsibleWidgetContainerExtension::widget(int index) const
+{
+    //qDebug("CollapsibleWidgetContainer::widget, index=%d, myWidget=%p", index, myWidget);
+    return myWidget->GetWidget(index);
+}
+
+CollapsibleWidgetExtensionFactory::CollapsibleWidgetExtensionFactory(QExtensionManager *parent)
+  : QExtensionFactory(parent)
+{}
+
+QObject *CollapsibleWidgetExtensionFactory::createExtension(QObject *object,
+                                                            const QString &iid,
+                                                            QObject *parent) const
+{
+    auto *widget = qobject_cast<gui::CollapsibleWidget*>(object);
+
+    //qDebug("CollapsibleWidgetExtensionFactory: object=%p, class='%s', widget=%p", object, object->metaObject()->className(), widget);
+
+    if (widget && (iid == Q_TYPEID(QDesignerContainerExtension)))
+        return new CollapsibleWidgetContainerExtension(widget, parent);
+
+    //qDebug("CollapsibleWidgetExtensionFactory null return");
+    return nullptr;
+}
+//! [1]

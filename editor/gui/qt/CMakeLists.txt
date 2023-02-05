@@ -30,7 +30,10 @@ add_library(DetonatorQtDesignerPlugin SHARED
     ../rangewidget.h
     ../rangewidget.cpp
     ../treewidget.h
-    ../treewidget.cpp)
+    ../treewidget.cpp
+    ../collapsible_widget.h
+    ../collapsible_widget.ui
+    ../collapsible_widget.cpp)
 
 target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../../../")
