@@ -21,6 +21,12 @@
 #include <QObject>
 #include <QtUiPlugin/QDesignerCustomWidgetInterface>
 #include <QtUiPlugin/QDesignerCustomWidgetCollectionInterface>
+#include <QtDesigner/QExtensionFactory>
+#include <QtDesigner/QDesignerContainerExtension>
+
+namespace gui {
+    class CollapsibleWidget;
+} // namespace
 
 // to export a single plugin use
 // Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetInterface")
@@ -79,6 +85,31 @@ private:
     bool initialized = false;
 };
 
+class CollapsibleWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
+{
+    Q_OBJECT
+    Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+public:
+    CollapsibleWidgetPlugin(QObject* parent = nullptr);
+
+    virtual bool isContainer() const override;
+    virtual bool isInitialized() const override;
+    virtual QIcon icon() const override;
+    virtual QString domXml() const override;
+    virtual QString group() const override;
+    virtual QString includeFile() const override;
+    virtual QString name() const override;
+    virtual QString toolTip() const override;
+    virtual QString whatsThis() const override;
+    virtual QWidget *createWidget(QWidget *parent) override;
+    virtual void initialize(QDesignerFormEditorInterface *core) override;
+private:
+    bool initialized = false;
+};
+
+// this class is the interface implementation for combining multiple widget plugins
+// i.e. QDesignerCustomWidgetInterface implementations in a single library (.dll or .so)
 class MyCustomWidgets: public QObject, public QDesignerCustomWidgetCollectionInterface
 {
     Q_OBJECT
@@ -92,4 +123,43 @@ public:
 
 private:
     QList<QDesignerCustomWidgetInterface*> widgets;
+};
+
+QT_BEGIN_NAMESPACE
+class QExtensionManager;
+QT_END_NAMESPACE
+
+class CollapsibleWidgetContainerExtension : public QObject,
+                                            public QDesignerContainerExtension
+{
+    Q_OBJECT
+    Q_INTERFACES(QDesignerContainerExtension)
+
+public:
+    explicit CollapsibleWidgetContainerExtension(gui::CollapsibleWidget *widget, QObject *parent);
+
+    bool canAddWidget() const override;
+    void addWidget(QWidget *widget) override;
+    int count() const override;
+    int currentIndex() const override;
+    void insertWidget(int index, QWidget *widget) override;
+    bool canRemove(int index) const override;
+    void remove(int index) override;
+    void setCurrentIndex(int index) override;
+    QWidget *widget(int index) const override;
+
+private:
+    int mCurrentIndex = 0;
+    gui::CollapsibleWidget *myWidget = nullptr;
+};
+
+class CollapsibleWidgetExtensionFactory : public QExtensionFactory
+{
+    Q_OBJECT
+
+public:
+    explicit CollapsibleWidgetExtensionFactory(QExtensionManager *parent = nullptr);
+
+protected:
+    QObject *createExtension(QObject *object, const QString &iid, QObject *parent) const override;
 };
