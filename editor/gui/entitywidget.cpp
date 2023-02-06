@@ -481,6 +481,18 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
 
+    // Using context menus for now but leaving these buttons
+    // around in case they make a come back later...
+    SetVisible(mUI.btnNewScriptVar, false);
+    SetVisible(mUI.btnEditScriptVar, false);
+    SetVisible(mUI.btnDeleteScriptVar, false);
+    SetVisible(mUI.btnNewJoint, false);
+    SetVisible(mUI.btnEditJoint, false);
+    SetVisible(mUI.btnDeleteJoint, false);
+    SetVisible(mUI.btnNewTrack, false);
+    SetVisible(mUI.btnEditTrack, false);
+    SetVisible(mUI.btnDeleteTrack, false);
+
     RebuildMenus();
     RebuildCombos();
 
@@ -573,7 +585,7 @@ void EntityWidget::Initialize(const UISettings& settings)
 void EntityWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties, false);
-    SetVisible(mUI.tabWidget,      false);
+    SetVisible(mUI.scrollArea,     false);
     SetVisible(mUI.transform,      false);
     SetVisible(mUI.lblHelp,        false);
     SetVisible(mUI.renderTree,     false);
@@ -1313,6 +1325,45 @@ void EntityWidget::on_actionNodeRename_triggered()
         SetValue(mUI.nodeName, name);
         mUI.tree->Rebuild();
     }
+}
+
+void EntityWidget::on_actionScriptVarAdd_triggered()
+{
+    on_btnNewScriptVar_clicked();
+}
+void EntityWidget::on_actionScriptVarDel_triggered()
+{
+    on_btnDeleteScriptVar_clicked();
+}
+void EntityWidget::on_actionScriptVarEdit_triggered()
+{
+    on_btnEditScriptVar_clicked();
+}
+
+void EntityWidget::on_actionJointAdd_triggered()
+{
+    on_btnNewJoint_clicked();
+}
+void EntityWidget::on_actionJointDel_triggered()
+{
+    on_btnDeleteJoint_clicked();
+}
+void EntityWidget::on_actionJointEdit_triggered()
+{
+    on_btnEditJoint_clicked();
+}
+
+void EntityWidget::on_actionAnimationAdd_triggered()
+{
+    on_btnNewTrack_clicked();
+}
+void EntityWidget::on_actionAnimationDel_triggered()
+{
+    on_btnDeleteTrack_clicked();
+}
+void EntityWidget::on_actionAnimationEdit_triggered()
+{
+    on_btnEditTrack_clicked();
 }
 
 void EntityWidget::on_entityName_textChanged(const QString& text)
@@ -2331,6 +2382,33 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNodeComment);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
+    menu.exec(QCursor::pos());
+}
+
+void EntityWidget::on_scriptVarList_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionScriptVarAdd);
+    menu.addAction(mUI.actionScriptVarEdit);
+    menu.addAction(mUI.actionScriptVarDel);
+    menu.exec(QCursor::pos());
+}
+
+void EntityWidget::on_jointList_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionJointAdd);
+    menu.addAction(mUI.actionJointEdit);
+    menu.addAction(mUI.actionJointDel);
+    menu.exec(QCursor::pos());
+}
+
+void EntityWidget::on_trackList_customContextMenuRequested(QPoint)
+{
+    QMenu menu(this);
+    menu.addAction(mUI.actionAnimationAdd);
+    menu.addAction(mUI.actionAnimationEdit);
+    menu.addAction(mUI.actionAnimationDel);
     menu.exec(QCursor::pos());
 }
 
