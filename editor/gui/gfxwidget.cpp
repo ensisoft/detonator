@@ -267,14 +267,13 @@ void GfxWindow::paintGL()
         }
         gfx::Rectangle rect(gfx::Drawable::Style::Outline, 2.0f);
         gfx::Transform transform;
-        transform.Resize(width(), height());
+        transform.Resize(width()-2.0f, height()-2.0f);
+        transform.Translate(1.0f, 1.0f);
         mCustomGraphicsPainter->Draw(rect, transform, gfx::MaterialClassInst(material));
     }
 
     if (WindowMouseCursor == MouseCursor::Custom)
     {
-
-
         static std::shared_ptr<gfx::ColorClass> cursor_material;
         if (!cursor_material)
         {
