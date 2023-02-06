@@ -177,7 +177,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "Fj66N4PDUG",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -214,7 +214,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "sUAHqYkAPp",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -367,7 +367,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "8UZOHE5ijx",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -481,7 +481,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "LPH6tgo9eN",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1363,10 +1363,12 @@
   "uis": [
     {
       "flags": {
+        "EnableVirtualKeys": false,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
       "id": "id5BsoCSrO",
+      "keymap_file": "app://ui/keymap/default.json",
       "name": "MainMenu",
       "resource_id": "id5BsoCSrO",
       "resource_name": "MainMenu",

@@ -76,7 +76,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "gzjp7PwMQd",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -193,7 +193,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "ezvBTHxrAX",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -280,7 +280,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -367,7 +367,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -454,7 +454,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "WTNfneUmHx",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -541,7 +541,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "pQ2O7Ekypd",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -611,7 +611,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "7uTDp9S0mt",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -698,7 +698,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "uLZlHEU5XW",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -785,7 +785,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -872,7 +872,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -959,7 +959,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1046,7 +1046,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "MBEoxQ9SGX",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1133,7 +1133,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "sX94tG9WhR",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1220,7 +1220,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jqIuU0kASH",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1307,7 +1307,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "FW5N4w5d3Z",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1394,7 +1394,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "kyLTH2YAJY",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1481,7 +1481,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1568,7 +1568,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "zgwqXHtABU",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1638,7 +1638,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "RhslGRtQQR",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1725,7 +1725,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "wrSRezqUfj",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1795,7 +1795,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QR14nEb7T3",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1865,7 +1865,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "IPqp1SooOX",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1935,7 +1935,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "AgxrO05Kqg",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2042,7 +2042,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "RnL44evfW5",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2079,7 +2079,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "w26YsP04pJ",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2116,7 +2116,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "mgo2XI2toK",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2153,7 +2153,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "f2rOXhvzDy",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2190,7 +2190,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "90E8gRgYDP",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2227,7 +2227,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "9aRwE7zov7",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3066,7 +3066,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3103,7 +3103,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3140,7 +3140,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3177,7 +3177,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3393,7 +3393,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3430,7 +3430,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3467,7 +3467,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3504,7 +3504,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3768,7 +3768,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3830,8 +3830,8 @@
         "LimitLifetime": false,
         "TickEntity": true,
         "UpdateEntity": true,
-        "VisibleInEditor": false,
-        "VisibleInGame": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
@@ -3892,7 +3892,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3929,7 +3929,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -3966,7 +3966,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4003,7 +4003,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4040,7 +4040,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4077,7 +4077,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4179,7 +4179,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "IM3dwFG7wS",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4249,7 +4249,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "bvJqe9fGu5",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4319,7 +4319,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4356,7 +4356,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "ezvBTHxrAX",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4393,7 +4393,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4430,7 +4430,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4467,7 +4467,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4504,7 +4504,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4541,7 +4541,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4578,7 +4578,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4615,7 +4615,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4652,7 +4652,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "WTNfneUmHx",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4726,7 +4726,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4763,7 +4763,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4800,7 +4800,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4837,7 +4837,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -4874,7 +4874,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5021,7 +5021,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "Ca4GgRWjP2",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5091,7 +5091,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "xrUzM3pdBZ",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5161,7 +5161,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "AgxrO05Kqg",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5198,7 +5198,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "l6vR7abMmW",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5235,7 +5235,7 @@
             "layer": 2,
             "linewidth": 1.0,
             "material": "X6Q2aN3uWm",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5340,7 +5340,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "2ynNMbWOK3",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5492,7 +5492,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "2ynNMbWOK3",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5562,7 +5562,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "nLUoQRjXrg",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5649,7 +5649,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "oTLKJxJ07d",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -5729,7 +5729,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "nLUoQRjXrg",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },

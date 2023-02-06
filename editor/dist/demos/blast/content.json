@@ -390,7 +390,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HnopPLXPe5",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -427,7 +427,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HnopPLXPe5",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -464,7 +464,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HnopPLXPe5",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -501,7 +501,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "rrmZfWe97e",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -647,7 +647,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HyJsrevpdz",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -684,7 +684,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HyJsrevpdz",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -916,7 +916,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "kqbXBoi7yD",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1006,7 +1006,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "nQUmTOnClw",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1063,7 +1063,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "EgsgPADEqi",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1100,7 +1100,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "EgsgPADEqi",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1137,7 +1137,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "EgsgPADEqi",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1174,7 +1174,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "EgsgPADEqi",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1211,7 +1211,7 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "EgsgPADEqi",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1445,7 +1445,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "CopZZzjQd4",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 0.20000000298023224
           },
@@ -1515,7 +1515,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "lOfMr3YBtI",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1629,7 +1629,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "TNyQSW6bB6",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1699,7 +1699,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "1lANs9A0yJ",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1769,7 +1769,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "s4zt0bFnAL",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1859,7 +1859,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "vg5yQskPIv",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1956,7 +1956,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "r9CF1o27zZ",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 2.0
           },
@@ -1993,7 +1993,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "HyJsrevpdz",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2381,7 +2381,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "vg5yQskPIv",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2499,7 +2499,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5YQ8ZqObX7",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -2569,7 +2569,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_White",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
