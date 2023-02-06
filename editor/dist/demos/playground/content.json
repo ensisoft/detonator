@@ -32,7 +32,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Red",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -119,7 +119,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Gray",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -206,7 +206,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkGreen",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -354,7 +354,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkRed",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -441,7 +441,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Bronze",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -549,7 +549,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkGreen",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -603,7 +603,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkGreen",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -745,7 +745,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Gray",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -832,7 +832,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkYellow",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -910,7 +910,7 @@
           },
           "dst_node_id": "xAMylSIBUS",
           "id": "LEjOF45og2",
-          "name": "",
+          "name": "Joint",
           "src_node_anchor_point": {
             "x": 0.0,
             "y": 0.0
@@ -938,7 +938,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_checkerboard",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -992,7 +992,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkCyan",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1084,7 +1084,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Red",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1154,7 +1154,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkGreen",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },
@@ -1208,7 +1208,7 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_DarkYellow",
-            "renderpass": "Draw",
+            "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
           },

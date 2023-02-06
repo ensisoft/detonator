@@ -13,7 +13,8 @@
         "checked_for_packing": 1
     },
     "2sWxF1jCqU": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_S17SJNDFPG": ""
     },
     "2ynNMbWOK3": {
         "checked_for_packing": 1
@@ -29,7 +30,8 @@
         "checked_for_packing": 1
     },
     "7WjAKJb7hY": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_z91WmstalU": ""
     },
     "7lSTOyhTqF": {
         "checked_for_packing": 1
@@ -45,13 +47,15 @@
         "material": "RnL44evfW5"
     },
     "8Prh114uxP": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_KTWTPjswtn": ""
     },
     "90E8gRgYDP": {
         "checked_for_packing": 1
     },
     "9LU4RC9DH0": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_RaWnULHEHq": ""
     },
     "9aRwE7zov7": {
         "checked_for_packing": 1
@@ -63,7 +67,8 @@
         "checked_for_packing": 1
     },
     "DOzd15fNMX": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_C8Zo9jLx2t": ""
     },
     "Dm9UM2yky9": {
         "checked_for_packing": 1
@@ -223,10 +228,12 @@
         "material": "bvJqe9fGu5"
     },
     "Fm5ByqI6xo": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_2X1vo3R61U": ""
     },
     "GaQT22N3OL": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_066mSwAYNb": ""
     },
     "HFSA8Yezdr": {
         "checked_for_packing": 1,
@@ -238,7 +245,8 @@
         }
     },
     "HpAo2l11sT": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_uZd3FvpM9D": ""
     },
     "IM3dwFG7wS": {
         "checked_for_packing": 1
@@ -356,7 +364,8 @@
         "checked_for_packing": 1
     },
     "SFrJwO771l": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_gLEkpUMPMY": ""
     },
     "SId1upp3XQ": {
         "checked_for_packing": 1
@@ -423,13 +432,15 @@
         "checked_for_packing": 1
     },
     "bOtC7Fnmmp": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_WxXttNKwyJ": ""
     },
     "bvJqe9fGu5": {
         "checked_for_packing": 1
     },
     "d8ZPi5y9Ps": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_aky1XfEBAy": ""
     },
     "dJKagvO0jM": {
         "checked_for_packing": 1
@@ -463,7 +474,8 @@
         "checked_for_packing": 1
     },
     "g3TRakI9ob": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_nyU7LB2bT7": ""
     },
     "gUmNEBelRm": {
         "checked_for_packing": 1,
@@ -477,6 +489,7 @@
         "comment_l2p8ir9ZhN": ""
     },
     "gzjp7PwMQd": {
+        "checked_for_packing": 1
     },
     "iFATbhg5NM": {
         "checked_for_packing": 1
@@ -633,7 +646,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "512",
