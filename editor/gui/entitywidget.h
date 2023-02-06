@@ -106,6 +106,15 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeComment_triggered();
         void on_actionNodeRename_triggered();
+        void on_actionScriptVarAdd_triggered();
+        void on_actionScriptVarDel_triggered();
+        void on_actionScriptVarEdit_triggered();
+        void on_actionJointAdd_triggered();
+        void on_actionJointDel_triggered();
+        void on_actionJointEdit_triggered();
+        void on_actionAnimationAdd_triggered();
+        void on_actionAnimationDel_triggered();
+        void on_actionAnimationEdit_triggered();
         void on_entityName_textChanged(const QString& text);
         void on_entityTag_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
@@ -213,6 +222,9 @@ namespace gui
         void on_spatialNode_toggled(bool on);
         void on_fixture_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
+        void on_scriptVarList_customContextMenuRequested(QPoint);
+        void on_jointList_customContextMenuRequested(QPoint);
+        void on_trackList_customContextMenuRequested(QPoint);
 
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
