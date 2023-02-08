@@ -968,7 +968,9 @@
   ],
   "scenes": [
     {
-      "dynamic_spatial_index": "Disabled",
+      "dense_grid_cols": 4,
+      "dense_grid_rows": 4,
+      "dynamic_spatial_index": "DenseGrid",
       "dynamic_spatial_rect": {
         "h": 0.0,
         "w": 0.0,

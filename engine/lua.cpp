@@ -1321,21 +1321,22 @@ void LuaRuntime::Init()
     {
         mGameEnv = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
 
-        const auto& main_game_script = base::JoinPath(mLuaPath, mGameScript);
-        DEBUG("Loading main game script. [file='%1']", main_game_script);
+        const auto& script_uri  = mGameScript;
+        const auto& script_buff = mDataLoader->LoadEngineDataUri(script_uri);
+        DEBUG("Loading main game script. [uri='%1']", script_uri);
 
-        const auto buffer = mDataLoader->LoadEngineDataFile(main_game_script);
-        if (!buffer)
+        if (!script_buff)
         {
-            ERROR("Failed to load main game script data. [file='%1']", main_game_script);
+            ERROR("Failed to load main game script file. [uri='%1']", script_uri);
             throw std::runtime_error("failed to load main game script.");
         }
-        const auto& view = sol::string_view((const char*) buffer->GetData(), buffer->GetSize());
+        const auto& script_file = script_buff->GetName();
+        const auto& view = sol::string_view((const char*)script_buff->GetData(), script_buff->GetSize());
         auto result = mLuaState->script(view, *mGameEnv);
         if (!result.valid())
         {
             const sol::error err = result;
-            ERROR("Lua script error. [file='%1', error='%2']", main_game_script, err.what());
+            ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
             // throwing here is just too convenient way to propagate the Lua
             // specific error message up the stack without cluttering the interface,
             // and when running the engine inside the editor we really want to

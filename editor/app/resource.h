@@ -55,6 +55,13 @@ namespace app
         virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) = 0;
         virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const = 0;
         virtual std::string MapUri(const std::string& uri) const = 0;
+        virtual bool HasMapping(const std::string& uri) const = 0;
+
+        inline bool HasMapping(const QString& uri) const
+        { return HasMapping(ToUtf8(uri)); }
+        virtual std::string MapUri(const QString& uri) const
+        { return MapUri(ToUtf8(uri)); }
+
     private:
     };
 
