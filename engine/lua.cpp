@@ -1048,6 +1048,10 @@ LuaRuntime::~LuaRuntime()
     mLuaState.reset();
 }
 
+void LuaRuntime::SetEditingMode(bool editing)
+{ mEditingMode = editing; }
+void LuaRuntime::SetPreviewMode(bool preview)
+{ mPreviewMode = preview; }
 void LuaRuntime::SetClassLibrary(const ClassLibrary* classlib)
 { mClassLib = classlib; }
 void LuaRuntime::SetPhysicsEngine(const PhysicsEngine* engine)
@@ -1101,6 +1105,8 @@ void LuaRuntime::Init()
     BindUIK(*mLuaState);
     BindGameLib(*mLuaState);
 
+    (*mLuaState)["PreviewMode"] = mPreviewMode;
+    (*mLuaState)["EditingMode"] = mEditingMode;
     (*mLuaState)["Audio"]    = mAudioEngine;
     (*mLuaState)["Physics"]  = mPhysicsEngine;
     (*mLuaState)["ClassLib"] = mClassLib;

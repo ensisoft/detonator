@@ -53,6 +53,12 @@ namespace engine
         using Action = engine::Action;
 
         virtual ~GameRuntime() = default;
+        // Set flag to indicate that the current game launch is an
+        // editor launch, i.e. edit/design time.
+        virtual void SetEditingMode(bool editing) = 0;
+        // Set a flag to indicate that the current game launch is a
+        // preview launch, i.e. edit/design time preview of some resource.
+        virtual void SetPreviewMode(bool preview) = 0;
         // Set the default transient key-value store that can be
         // used by the game to store non-persistent data for the
         // duration of the game play.
