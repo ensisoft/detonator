@@ -2103,6 +2103,19 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     script.addAction(mUI.actionNewSceneScript);
     script.addAction(mUI.actionNewUIScript);
 
+    QMenu import;
+    import.setTitle("Import");
+    import.addAction(mUI.actionImportTiles);
+    import.addSeparator();
+    import.addAction(mUI.actionImportFiles);
+    import.addAction(mUI.actionImportJSON);
+    import.addAction(mUI.actionImportZIP);
+
+    QMenu export_;
+    export_.setTitle("Export");
+    export_.addAction(mUI.actionExportJSON);
+    export_.addAction(mUI.actionExportZIP);
+
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
     menu.addAction(mUI.actionNewParticleSystem);
@@ -2114,11 +2127,6 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewAudioGraph);
     menu.addMenu(&script);
     menu.addSeparator();
-    menu.addAction(mUI.actionImportFiles);
-    menu.addAction(mUI.actionImportTiles);
-    menu.addAction(mUI.actionImportJSON);
-    menu.addAction(mUI.actionImportZIP);
-    menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
@@ -2127,8 +2135,9 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionDuplicateResource);
     menu.addAction(mUI.actionDeleteResource);
     menu.addSeparator();
-    menu.addAction(mUI.actionExportJSON);
-    menu.addAction(mUI.actionExportZIP);
+    menu.addMenu(&import);
+    menu.addSeparator();
+    menu.addMenu(&export_);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());

@@ -1332,6 +1332,16 @@
     <property name="title">
      <string>Workspace</string>
     </property>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <addaction name="actionImportTiles"/>
+     <addaction name="separator"/>
+     <addaction name="actionImportFiles"/>
+     <addaction name="actionImportJSON"/>
+     <addaction name="actionImportZIP"/>
+    </widget>
     <addaction name="actionNewMaterial"/>
     <addaction name="actionNewParticleSystem"/>
     <addaction name="actionNewCustomShape"/>
@@ -1342,13 +1352,12 @@
     <addaction name="actionNewAudioGraph"/>
     <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
-    <addaction name="separator"/>
-    <addaction name="actionImportTiles"/>
-    <addaction name="actionImportFiles"/>
-    <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
+    <addaction name="menuImport"/>
+    <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
+    <addaction name="separator"/>
     <addaction name="actionProjectSettings"/>
     <addaction name="separator"/>
     <addaction name="actionProjectPlay"/>
@@ -1713,7 +1722,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Settings ...</string>
+    <string>Editor Settings ...</string>
    </property>
   </action>
   <action name="actionReloadTextures">
@@ -1766,7 +1775,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Package ...</string>
+    <string>Package Project ...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -1790,7 +1799,7 @@
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>New ...</string>
+    <string>New Resource ...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -1802,7 +1811,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Settings ...</string>
+    <string>Project Settings ...</string>
    </property>
    <property name="toolTip">
     <string>Workspace settings</string>
@@ -1814,7 +1823,10 @@
      <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
    </property>
    <property name="text">
-    <string>Play</string>
+    <string>Play Game</string>
+   </property>
+   <property name="toolTip">
+    <string>Play the game!</string>
    </property>
    <property name="shortcut">
     <string>F4</string>
@@ -1988,7 +2000,7 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string>Import Files ...</string>
+    <string> Files ...</string>
    </property>
    <property name="toolTip">
     <string>Import files as resources</string>
@@ -2012,7 +2024,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>Export Json ...</string>
+    <string>Json...</string>
    </property>
    <property name="toolTip">
     <string>Export resources as JSON</string>
@@ -2072,7 +2084,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>Import Json ...</string>
+    <string> Json...</string>
    </property>
    <property name="toolTip">
     <string>Import resources from JSON</string>
@@ -2141,7 +2153,7 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string>Import Tiles ...</string>
+    <string>Tileset...</string>
    </property>
    <property name="toolTip">
     <string>Import new tiles from a packed tilemap</string>
@@ -2156,7 +2168,7 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string>Import Zip ...</string>
+    <string>Resource Pack...</string>
    </property>
    <property name="toolTip">
     <string>Import resources from a zip package</string>
@@ -2168,7 +2180,7 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string>Export Zip ...</string>
+    <string>Resource Pack...</string>
    </property>
    <property name="toolTip">
     <string>Export selected resources into a zip package</string>
