@@ -77,6 +77,7 @@ enum TextAlign {
 };
 
 enum TextProp {
+    None      = 0x0,
     Underline = 0x1,
     Blinking  = 0x2
 };
@@ -89,7 +90,7 @@ void DrawTextRect(Painter& painter,
     const FRect& rect,
     const Color4f& color,
     unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
-    unsigned properties = 0x0,
+    unsigned properties = TextProp::None,
     float line_height = 1.0f);
 
 // Draw a rectangle filled with the desired color or material.
