@@ -46,6 +46,8 @@ namespace engine
                    const std::string& game_name);
        ~LuaRuntime();
 
+        virtual void SetEditingMode(bool editing) override;
+        virtual void SetPreviewMode(bool preview) override;
         virtual void SetClassLibrary(const ClassLibrary* classlib) override;
         virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
         virtual void SetAudioEngine(const AudioEngine* engine) override;
@@ -109,6 +111,8 @@ namespace engine
         game::Scene* mScene = nullptr;
         uik::Window* mWindow = nullptr;
         FRect mView;
+        bool mEditingMode = false;
+        bool mPreviewMode = false;
     };
 
     void BindUtil(sol::state& L);

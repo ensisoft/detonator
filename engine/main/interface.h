@@ -268,6 +268,8 @@ namespace engine
         { return true; }
 
         struct InitParams {
+            // true if doing a "preview" of some game resource.
+            bool preview_mode = false;
             // true if running in an "editor mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.

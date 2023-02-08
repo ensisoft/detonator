@@ -92,6 +92,8 @@ public:
         mRuntime->SetStateStore(&mStateStore);
         mRuntime->SetAudioEngine(mAudio.get());
         mRuntime->SetDataLoader(mEngineDataLoader);
+        mRuntime->SetEditingMode(init.editing_mode);
+        mRuntime->SetPreviewMode(init.preview_mode);
         mRuntime->Init();
         mUIStyle.SetClassLibrary(mClasslib);
         mUIStyle.SetDataLoader(mEngineDataLoader);
