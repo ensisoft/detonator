@@ -279,6 +279,13 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
+    virtual bool HasMapping(const std::string& uri) const override
+    {
+        if (mUriMapping.find(uri) != mUriMapping.end())
+            return true;
+        return false;
+    }
+
     bool CopyFile(const QString& src_file, const std::string& dir, QString*  dst_name)
     {
         // copy file from the zip into the workspace directory.
@@ -462,6 +469,12 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
+    virtual bool HasMapping(const std::string& uri) const override
+    {
+        if (mUriMapping.find(uri) != mUriMapping.end())
+            return true;
+        return false;
+    }
 
     void WriteText(const std::string& text, const char* name)
     {
@@ -599,6 +612,15 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
+    virtual bool HasMapping(const std::string& uri) const override
+    {
+        if (mUriMapping.find(uri) != mUriMapping.end())
+            return true;
+        return false;
+    }
+    using app::ResourcePacker::HasMapping;
+    using app::ResourcePacker::MapUri;
+
     QString WriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len)
     {
         if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
@@ -3338,6 +3360,17 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["audio"], "sample_type", mSettings.audio_sample_type);
         base::JsonWrite(json["audio"], "buffer_size", mSettings.audio_buffer_size);
         base::JsonWrite(json["audio"], "pcm_caching", mSettings.enable_audio_pcm_caching);
+
+        // This is a lazy workaround for the fact that the unit tests don't set up the
+        // game script properly as a script object in the workspace. This means there's
+        // no proper script copying/URI mapping taking place for the game script.
+        // So we check here for the real workspace to see if there's a mapping and if so
+        // then replace the original game script value with the mapped script URI.
+        if (file_packer.HasMapping(mSettings.game_script))
+        {
+            base::JsonWrite(json["application"], "game_script", file_packer.MapUri(mSettings.game_script));
+        }
+
         const auto& str = json.dump(2);
         if (json_file.write(&str[0], str.size()) == -1)
         {

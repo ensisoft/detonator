@@ -613,7 +613,7 @@ namespace app
             // what are the units for the mouse pointer size.
             MousePointerUnits mouse_pointer_units = MousePointerUnits::Pixels;
             // name of the game's main script
-            QString game_script = "game.lua";
+            QString game_script = "ws://lua/game.lua";
             // Audio PCM data type.
             audio::SampleType audio_sample_type = audio::SampleType::Float32;
             // Number of audio output channels. 1 = monoaural, 2 stereo.
