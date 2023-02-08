@@ -435,4 +435,14 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
     ShowMessage(hallelujah, painter);
 }
 
+void ShowInstruction(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
+{
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 20,
+                      rect,
+                      gfx::Color::Silver,
+                      gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
+                      gfx::TextProp::None,
+                      2.0f);
+}
+
 } // namespace
