@@ -290,12 +290,22 @@ void DlgFontMap::OnPaintScene(gfx::Painter& painter, double secs)
 {
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    if (!mMaterial)
-        return;
-
     const float width  = mUI.widget->width();
     const float height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
+
+    if (!mMaterial)
+    {
+        ShowInstruction(
+            "INSTRUCTIONS\n"
+            "1. Select pre-generated font character texture map.\n"
+            "2. Assign key presses to each character.\n",
+            gfx::FRect(0, 0, width, height),
+            painter);
+        return;
+    }
+
+
 
     const float zoom   = GetValue(mUI.zoom);
     const float img_width  = mWidth * zoom;
