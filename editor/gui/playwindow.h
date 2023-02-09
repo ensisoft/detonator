@@ -84,9 +84,15 @@ namespace gui
         // and visibility of status bar and dock widget) in the
         // current Workspace.
         void SaveState();
-    private slots:
-        void DoAppInit();
+
+        void ShowWithWAR();
+
+    public slots:
         void ActivateWindow();
+
+    private slots:
+        void InitGame();
+        void InitPreview();
         void SelectResolution();
         void on_actionPause_toggled(bool val);
         void on_actionClose_triggered();
@@ -115,7 +121,9 @@ namespace gui
         bool InFullScreen() const;
         void SetFullScreen(bool fullscreen);
         void SetDebugOptions() const;
+        void SetEngineConfig() const;
         void Barf(const std::string& msg);
+        bool LoadLibrary();
 
     private:
         class WindowContext;

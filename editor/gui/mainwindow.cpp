@@ -2356,9 +2356,9 @@ void MainWindow::on_actionProjectPlay_triggered()
         {
             auto window = std::make_unique<PlayWindow>(*mWorkspace);
             window->LoadState();
-            window->show();
-            if (!window->LoadGame())
-                return;
+            window->ShowWithWAR();
+            window->LoadGame();
+
             mPlayWindow = std::move(window);
             emit newAcceleratedWindowOpen();
             QCoreApplication::postEvent(this, new IterateGameLoopEvent);
@@ -2366,7 +2366,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         else
         {
             // bring to the top of the window stack.
-            mPlayWindow->raise();
+            mPlayWindow->ActivateWindow();
         }
     }
 }
