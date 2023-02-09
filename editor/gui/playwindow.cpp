@@ -694,45 +694,15 @@ void PlayWindow::NonGameTick()
 
 bool PlayWindow::LoadGame()
 {
-    TemporaryCurrentDirChange cwd(mGameWorkingDir);
-
-    const auto& settings = mWorkspace.GetProjectSettings();
-    const auto& library  = mWorkspace.MapFileToFilesystem(settings.GetApplicationLibrary());
-    mLibrary.setFileName(library);
-    mLibrary.setLoadHints(QLibrary::ResolveAllSymbolsHint);
-    if (!mLibrary.load())
-    {
-        ERROR("Failed to load library '%1' (%2)", library, mLibrary.errorString());
-        return false;
-    }
-
-    mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
-    mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
-    if (!mGameLibCreateEngine)
-        ERROR("Failed to resolve 'Gamestudio_CreateEngine'.");
-    else if (!mGameLibSetGlobalLogger)
-        ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
-    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
+    if (!LoadLibrary())
         return false;
 
-    // right now we only have a UI for toggling the debug logs,
-    // so keep everything else turned on
-    const auto log_debug = GetValue(mUI.actionToggleDebugLog);
-    const auto log_warn  = true;
-    const auto log_info  = true;
-    const auto log_error = true;
-    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
+    // Another workaround for Qt bugs has been created and the timer
+    // based workaround is now here only for posterity.
+    //QTimer::singleShot(10, this, &PlayWindow::InitGame);
 
-    std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
-    if (!engine)
-    {
-        ERROR("Failed to create engine instance.");
-        return false;
-    }
-    mEngine = std::move(engine);
-
-    // do one time delayed init on timer.
-    QTimer::singleShot(10, this, &PlayWindow::DoAppInit);
+    // call directly now.
+    InitGame();
     return true;
 }
 
@@ -816,25 +786,72 @@ void PlayWindow::LoadState()
     SetValue(mUI.logFilterCaseSensitive, log_filter_case_sens);
     SetValue(mUI.actionViewStatusbar, show_status_bar);
     SetValue(mUI.actionViewEventlog, show_eventlog);
-    mUI.statusbar->setVisible(show_status_bar);
-    mUI.dockWidget->setVisible(show_eventlog);
+    SetVisible(mUI.statusbar, show_status_bar);
+    SetVisible(mUI.dockWidget, show_eventlog);
 }
 
-void PlayWindow::SaveState()
+void PlayWindow::SaveState(const QString& key_prefix)
 {
-    mWorkspace.SetUserProperty("play_window_show_statusbar", mUI.statusbar->isVisible());
-    mWorkspace.SetUserProperty("play_window_show_eventlog", mUI.dockWidget->isVisible());
-    mWorkspace.SetUserProperty("play_window_geometry", saveGeometry());
-    mWorkspace.SetUserProperty("play_window_toolbar_and_dock_state", saveState());
-    mWorkspace.SetUserProperty("play_window_log_bits", mAppEventLog.GetShowBits());
-    mWorkspace.SetUserProperty("play_window_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
-    mWorkspace.SetUserProperty("play_window_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
-    mWorkspace.SetUserProperty("play_window_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
-    mWorkspace.SetUserProperty("play_window_log_filter", (QString)GetValue(mUI.logFilter));
-    mWorkspace.SetUserProperty("play_window_log_filter_case_sensitive", (bool)GetValue(mUI.logFilterCaseSensitive));
+    mWorkspace.SetUserProperty(key_prefix + "_show_statusbar", mUI.statusbar->isVisible());
+    mWorkspace.SetUserProperty(key_prefix + "_show_eventlog", mUI.dockWidget->isVisible());
+    mWorkspace.SetUserProperty(key_prefix + "_geometry", saveGeometry());
+    mWorkspace.SetUserProperty(key_prefix + "_toolbar_and_dock_state", saveState());
+    mWorkspace.SetUserProperty(key_prefix + "_log_bits", mAppEventLog.GetShowBits());
+    mWorkspace.SetUserProperty(key_prefix + "_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
+    mWorkspace.SetUserProperty(key_prefix + "_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
+    mWorkspace.SetUserProperty(key_prefix + "_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
+    mWorkspace.SetUserProperty(key_prefix + "_log_filter", (QString)GetValue(mUI.logFilter));
+    mWorkspace.SetUserProperty(key_prefix + "_log_filter_case_sensitive", (bool)GetValue(mUI.logFilterCaseSensitive));
 }
 
-void PlayWindow::DoAppInit()
+void PlayWindow::ShowWithWAR()
+{
+    // This code tries to workaround Qt bugs related to the QWindow
+    // that we're using as the OpenGL rendering surface here.
+    // Issues are: things like raise() or requestActive or setWindowTitle
+    // don't always work. Seems like issues are probably related to X11 and
+    // whether the window is mapped or not, i.e. calling those functions
+    // "too soon" fails and the keyboard focus persistently stays on the
+    // log filter QLineEdit. #%"%¤½!"#!
+
+    // show *this* window.
+    show();
+
+    clearFocus();
+    mUI.log->clearFocus();
+    mUI.logFilter->clearFocus();
+
+    for (unsigned i=0; i<1000; ++i)
+    {
+        const bool is_visible = mSurface->isVisible();
+        const bool has_size = mSurface->width() && mSurface->height();
+        if (is_visible && has_size)
+            break;
+
+        qApp->processEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    // put the QWindow (used as OpenGL rendering surface) on top and try
+    // to give it the initial keyboard focus. Without this the keyboard
+    // focus is on the log filter QLineEdit which is annoying since the
+    // initial key presses don't go the game.
+    mSurface->raise();
+    mSurface->requestActivate();
+
+    // Random timer interval to the rescue! Go Qt!
+    QTimer::singleShot(100, [this]() {
+        mUI.log->clearFocus();
+        mUI.logFilter->clearFocus();
+        this->clearFocus();
+        mSurface->raise();
+        mSurface->requestActivate();
+    });
+}
+
+// This function is very similar with InitPreview but subtly different
+// so make sure you cross-check changes properly.
+void PlayWindow::InitGame()
 {
     if (!mEngine)
         return;
@@ -882,6 +899,7 @@ void PlayWindow::DoAppInit()
 
         engine::Engine::InitParams params;
         params.editing_mode     = true; // allow changes to "static" content take place.
+        params.preview_mode     = false;
         params.game_script      = app::ToUtf8(settings.game_script);
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();
@@ -889,33 +907,7 @@ void PlayWindow::DoAppInit()
         params.surface_height   = mSurface->height();
         mEngine->Init(params);
 
-        engine::Engine::EngineConfig config;
-        config.ticks_per_second   = settings.ticks_per_second;
-        config.updates_per_second = settings.updates_per_second;
-        config.physics.enabled    = settings.enable_physics;
-        config.physics.num_velocity_iterations = settings.num_velocity_iterations;
-        config.physics.num_position_iterations = settings.num_position_iterations;
-        config.physics.gravity       = settings.physics_gravity;
-        config.physics.scale         = settings.physics_scale;
-        config.default_mag_filter    = settings.default_mag_filter;
-        config.default_min_filter    = settings.default_min_filter;
-        config.clear_color           = ToGfx(settings.clear_color);
-        config.mouse_cursor.show     = settings.mouse_pointer_visible;
-        config.mouse_cursor.material = app::ToUtf8(settings.mouse_pointer_material);
-        config.mouse_cursor.drawable = app::ToUtf8(settings.mouse_pointer_drawable);
-        config.mouse_cursor.hotspot  = settings.mouse_pointer_hotspot;
-        config.mouse_cursor.size     = settings.mouse_pointer_size;
-        if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Pixels)
-            config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Pixels;
-        else if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Units)
-            config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
-        else BUG("Unhandled mouse cursor/pointer units.");
-        config.audio.sample_type     = settings.audio_sample_type;
-        config.audio.sample_rate     = settings.audio_sample_rate;
-        config.audio.buffer_size     = settings.audio_buffer_size;
-        config.audio.channels        = settings.audio_channels;
-        config.audio.enable_pcm_caching = settings.enable_audio_pcm_caching;
-        mEngine->SetEngineConfig(config);
+        SetEngineConfig();
 
         if (!mEngine->Load())
         {
@@ -925,17 +917,6 @@ void PlayWindow::DoAppInit()
 
         mEngine->Start();
         mTimer.Start();
-
-        // try to give the keyboard focus to the window
-        // looks like this has to be done through a timer again.
-        // calling the functions below directly don't achieve the
-        // desired effect.
-        //mSurface->setKeyboardGrabEnabled(true);
-        //mSurface->raise();
-        //mSurface->requestActivate();
-        // set a timer to try to activate for keyboard input after some delay.
-        QTimer::singleShot(100, this, &PlayWindow::ActivateWindow);
-
         mFrameTimer.start();
         mInitDone = true;
 
@@ -945,7 +926,7 @@ void PlayWindow::DoAppInit()
     }
     catch (const std::exception& e)
     {
-        DEBUG("Exception in engine init.");
+        ERROR("Exception in engine init. [what='%1']", e.what());
         Barf(e.what());
     }
 }
@@ -1345,6 +1326,40 @@ void PlayWindow::SetDebugOptions() const
     mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
 }
 
+void PlayWindow::SetEngineConfig() const
+{
+    const auto& settings = mWorkspace.GetProjectSettings();
+
+    engine::Engine::EngineConfig config;
+    config.ticks_per_second                = settings.ticks_per_second;
+    config.updates_per_second              = settings.updates_per_second;
+    config.physics.enabled                 = settings.enable_physics;
+    config.physics.num_velocity_iterations = settings.num_velocity_iterations;
+    config.physics.num_position_iterations = settings.num_position_iterations;
+    config.physics.gravity                 = settings.physics_gravity;
+    config.physics.scale                   = settings.physics_scale;
+    config.default_mag_filter              = settings.default_mag_filter;
+    config.default_min_filter              = settings.default_min_filter;
+    config.clear_color                     = ToGfx(settings.clear_color);
+    config.mouse_cursor.show               = settings.mouse_pointer_visible;
+    config.mouse_cursor.material           = app::ToUtf8(settings.mouse_pointer_material);
+    config.mouse_cursor.drawable           = app::ToUtf8(settings.mouse_pointer_drawable);
+    config.mouse_cursor.hotspot            = settings.mouse_pointer_hotspot;
+    config.mouse_cursor.size               = settings.mouse_pointer_size;
+    config.audio.sample_type               = settings.audio_sample_type;
+    config.audio.sample_rate               = settings.audio_sample_rate;
+    config.audio.buffer_size               = settings.audio_buffer_size;
+    config.audio.channels                  = settings.audio_channels;
+    config.audio.enable_pcm_caching        = settings.enable_audio_pcm_caching;
+    if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Pixels)
+        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Pixels;
+    else if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Units)
+        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
+    else BUG("Unhandled mouse cursor/pointer units.");
+
+    mEngine->SetEngineConfig(config);
+}
+
 void PlayWindow::Barf(const std::string& msg)
 {
     mEngine.reset();
@@ -1355,5 +1370,51 @@ void PlayWindow::Barf(const std::string& msg)
     SetEnabled(mUI.menuApplication, false);
     SetEnabled(mUI.menuSurface,     false);
 }
+
+bool PlayWindow::LoadLibrary()
+{
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+    const auto& settings = mWorkspace.GetProjectSettings();
+    const auto& library  = mWorkspace.MapFileToFilesystem(settings.GetApplicationLibrary());
+    mLibrary.setFileName(library);
+    mLibrary.setLoadHints(QLibrary::ResolveAllSymbolsHint);
+    if (!mLibrary.load())
+    {
+        Barf("Failed to load engine library.");
+        ERROR("Failed to load engine library. [file='%1, error='%2']", library, mLibrary.errorString());
+        return false;
+    }
+
+    mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
+    mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
+    if (!mGameLibCreateEngine)
+        ERROR("Failed to resolve 'Gamestudio_CreateEngine'.");
+    else if (!mGameLibSetGlobalLogger)
+        ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
+    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
+    {
+        Barf("Failed to resolve engine library entry points.");
+        return false;
+    }
+
+    // right now we only have a UI for toggling the debug logs,
+    // so keep everything else turned on
+    const auto log_debug = GetValue(mUI.actionToggleDebugLog);
+    const auto log_warn  = true;
+    const auto log_info  = true;
+    const auto log_error = true;
+    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
+
+    std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
+    if (!engine)
+    {
+        Barf("Failed to create engine instance.");
+        ERROR("Failed to create engine instance.");
+        return false;
+    }
+    mEngine = std::move(engine);
+    return true;
+}
+
 
 } // namespace

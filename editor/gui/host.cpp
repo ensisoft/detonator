@@ -256,7 +256,7 @@ void Main(int argc, char* argv[])
     }
 
     gui::PlayWindow window(workspace);
-    window.show();
+    window.ShowWithWAR();
     window.LoadState();
     if (!window.LoadGame())
         return;
