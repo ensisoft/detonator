@@ -55,7 +55,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        PlayWindow(app::Workspace& workspace);
+        PlayWindow(app::Workspace& workspace, bool is_separate_process = false);
        ~PlayWindow();
 
         // Returns true if the user has closed the window.
@@ -68,31 +68,40 @@ namespace gui
         // Do periodic low frequency tick.
         void NonGameTick();
 
-        // Load the game library and launch the game.
+        // Load the game library and launch the game from the beginning.
         // Returns true if successful or false if some problem happened.
         bool LoadGame();
+        // Load the game library and begin a limited game launch in a
+        // preview mode. In preview mode instead of running the main game
+        // script, i.e. the actual game script we run another script, the
+        // "preview script" instead.
+        bool LoadPreview(const std::shared_ptr<const game::EntityClass>& entity);
+        bool LoadPreview(const std::shared_ptr<const game::SceneClass>& scene);
 
         // Shut down the game and unload the library.
         void Shutdown();
 
-        // Load the window state (window size/position
-        // and visibility of status bar and dock widget) from the
-        // current Workspace.
-        void LoadState();
+        // Load the previous window state including window position, widget visibility
+        // status bar and dock widget state from the current workspace when possible.
+        // If no previous state is available under the given property keys (with the prefix)
+        // it's assumed that this is the first launch and defaults invented. The optional
+        // parent widget (his is a MainWindow so there's no Qt parent) is used to
+        // center the play window around the parent when no previous state exists.
+        void LoadState(const QString& key_prefix, const QWidget* parent = nullptr);
 
-        // Save the current window state (window size/position
-        // and visibility of status bar and dock widget) in the
-        // current Workspace.
-        void SaveState();
+        // Save the current window state including window position, widget visibility,
+        // status bar and dock widget state in the current workspce using the given
+        // property key prefix for all the properties. The same values can then be
+        // retrieved (and the state restored) by calling LoadState.
+        void SaveState(const QString& key_prefix);
 
         void ShowWithWAR();
-
     public slots:
         void ActivateWindow();
 
     private slots:
         void InitGame();
-        void InitPreview();
+        void InitPreview(const QString& script);
         void SelectResolution();
         void on_actionPause_toggled(bool val);
         void on_actionClose_triggered();
@@ -129,6 +138,7 @@ namespace gui
         class WindowContext;
         class ResourceLoader;
         class SessionLogger;
+        class ClassLibrary;
     private:
         Ui::PlayWindow mUI;
     private:
@@ -173,6 +183,9 @@ namespace gui
         // URIs to files based on the workspace configuration for 
         // the game playing (i.e. the working folder)
         std::unique_ptr<ResourceLoader> mResourceLoader;
+        // Class library proxy for intercepting special resource names
+        // when doing resource previews.
+        std::unique_ptr<ClassLibrary> mClassLibrary;
         // timer to measure the passing of time.
         base::ElapsedTimer mTimer;
         // Current number of frames within the last second.

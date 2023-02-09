@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
 #  include <QtWidgets>
+#  include <QMainWindow>
 #  include <QString>
 #  include <QColor>
 #  include <QSignalBlocker>
@@ -151,6 +152,16 @@ inline void Decrement(QDoubleSpinBox* spin, float value = 1.0f)
 {
     QSignalBlocker s(spin);
     spin->setValue(spin->value() - value);
+}
+
+inline void SetWindowTitle(QMainWindow* window, const app::AnyString& title)
+{
+    window->setWindowTitle(title);
+}
+
+inline void SetWindowTitle(QDialog* dialog, const app::AnyString& title)
+{
+    dialog->setWindowTitle(title);
 }
 
 inline void SetImage(QLabel* label, const QPixmap& pixmap)

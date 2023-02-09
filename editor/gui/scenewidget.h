@@ -23,6 +23,7 @@
 #  include "ui_dlgfindentity.h"
 #  include <QMenu>
 #  include <QDialog>
+#  include <glm/vec2.hpp>
 #  include <boost/circular_buffer.hpp>
 #include "warnpop.h"
 
@@ -48,6 +49,7 @@ namespace gui
 {
     class TreeWidget;
     class MouseTool;
+    class PlayWindow;
 
     class DlgFindEntity : public QDialog
     {
@@ -136,6 +138,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionFind_triggered();
+        void on_actionPreview_triggered();
         void on_actionNodeEdit_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeBreakLink_triggered();
@@ -220,7 +223,7 @@ namespace gui
             Playing, Paused, Stopped
         };
         struct State {
-            game::SceneClass scene;
+            std::shared_ptr<game::SceneClass> scene;
             engine::Renderer renderer;
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
@@ -248,6 +251,8 @@ namespace gui
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::SceneClass> mUndoStack;
+
+        std::unique_ptr<PlayWindow> mPreview;
 
     };
 }

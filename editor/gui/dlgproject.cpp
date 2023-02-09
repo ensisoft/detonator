@@ -117,6 +117,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkDebugShowMsg, mSettings.debug_show_msg);
     SetUIValue(mUI.chkDebugDraw, mSettings.debug_draw);
     SetUIValue(mUI.chkDebugPrintFps, mSettings.debug_print_fps);
+    SetUIValue(mUI.edtPreviewEntityScript, mSettings.preview_entity_script);
+    SetUIValue(mUI.edtPreviewSceneScript, mSettings.preview_scene_script);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -182,6 +184,8 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkDebugPrintFps, &mSettings.debug_print_fps);
     mSettings.mouse_pointer_material = GetItemId(mUI.mouseMaterial);
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
+    GetUIValue(mUI.edtPreviewEntityScript, &mSettings.preview_entity_script);
+    GetUIValue(mUI.edtPreviewSceneScript, &mSettings.preview_scene_script);
 
     QString library;
     GetUIValue(mUI.edtAppLibrary, &library);
@@ -224,6 +228,25 @@ void DlgProject::on_btnSelectMaterial_clicked()
         return;
 
     SetValue(mUI.mouseMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+}
+
+void DlgProject::on_btnSelectPreviewEntityScript_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Script"), "",
+        tr("Lua scripts (*.lua)"));
+    if (file.isEmpty())
+        return;
+    SetValue(mUI.edtPreviewEntityScript, mWorkspace.MapFileToWorkspace(file));
+}
+void DlgProject::on_btnSelectPreviewSceneScript_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Script"), "",
+        tr("Lua scripts (*.lua)"));
+    if (file.isEmpty())
+        return;
+    SetValue(mUI.edtPreviewSceneScript, mWorkspace.MapFileToWorkspace(file));
 }
 
 } // namespace

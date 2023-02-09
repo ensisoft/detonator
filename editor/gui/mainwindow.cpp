@@ -710,7 +710,7 @@ bool MainWindow::SaveWorkspace()
     }
     if (mPlayWindow)
     {
-        mPlayWindow->SaveState();
+        mPlayWindow->SaveState("play_window");
     }
 
     if (!mWorkspace->SaveWorkspace())
@@ -2355,7 +2355,7 @@ void MainWindow::on_actionProjectPlay_triggered()
         if (!mPlayWindow)
         {
             auto window = std::make_unique<PlayWindow>(*mWorkspace);
-            window->LoadState();
+            window->LoadState("play_window");
             window->ShowWithWAR();
             window->LoadGame();
 
@@ -2447,7 +2447,7 @@ void MainWindow::RefreshUI()
     {
         if (mPlayWindow->IsClosed())
         {
-            mPlayWindow->SaveState();
+            mPlayWindow->SaveState("play_window");
             mPlayWindow->Shutdown();
             mPlayWindow->close();
             mPlayWindow.reset();

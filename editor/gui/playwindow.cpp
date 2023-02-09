@@ -435,7 +435,88 @@ private:
     QString mLogTag;
 };
 
-PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEventQueue(200)
+class PlayWindow::ClassLibrary : public engine::ClassLibrary
+{
+public:
+    ClassLibrary(const app::Workspace& workspace)
+      : mWorkspace(workspace)
+    {}
+    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
+    {
+        return mWorkspace.FindAudioGraphClassById(id);
+    }
+    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
+    {
+        return mWorkspace.FindAudioGraphClassByName(name);
+    }
+    virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
+    {
+        return mWorkspace.FindUIByName(name);
+    }
+    virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
+    {
+        return mWorkspace.FindUIById(id);
+    }
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
+    {
+        return mWorkspace.FindMaterialClassByName(name);
+    }
+    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
+    {
+        return mWorkspace.FindMaterialClassById(id);
+    }
+    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override
+    {
+        return mWorkspace.FindDrawableClassById(id);
+    }
+    virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
+    {
+        if (name == "_entity_preview_")
+            return mEntityPreview;
+        return mWorkspace.FindEntityClassByName(name);
+    }
+    virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override
+    {
+        if (id == "_entity_preview_")
+            return mEntityPreview;
+        return mWorkspace.FindEntityClassById(id);
+    }
+    virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override
+    {
+        if (name == "_entity_preview_scene_")
+            return mEntityPreviewScene;
+        else if (name == "_scene_preview_")
+            return mScenePreview;
+        return mWorkspace.FindSceneClassByName(name);
+    }
+    virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override
+    {
+        if (id == "_entity_preview_scene_")
+            return mEntityPreviewScene;
+        else if (id == "_scene_preview_")
+            return mScenePreview;
+        return mWorkspace.FindSceneClassById(id);
+    }
+    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override
+    {
+        return mWorkspace.FindTilemapClassById(id);
+    }
+    void SetScenePreview(const std::shared_ptr<const game::SceneClass>& scene)
+    { mScenePreview = scene; }
+    void SetEntityPreviewScene(const std::shared_ptr<const game::SceneClass>& klass)
+    { mEntityPreviewScene = klass; }
+    void SetEntityPreview(const std::shared_ptr<const game::EntityClass>& klass)
+    { mEntityPreview = klass; }
+
+private:
+    const app::Workspace& mWorkspace;
+    std::shared_ptr<const game::SceneClass> mEntityPreviewScene;
+    std::shared_ptr<const game::EntityClass> mEntityPreview;
+    std::shared_ptr<const game::SceneClass> mScenePreview;
+};
+
+
+PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mWorkspace(workspace), mEventQueue(200)
 {
     DEBUG("Create PlayWindow");
     mLogger = std::make_unique<SessionLogger>();
@@ -470,7 +551,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     game_default_res->setData(-1);
     connect(game_default_res, &QAction::triggered, this, &PlayWindow::SelectResolution);
 
-    setWindowTitle(settings.application_name);
+    SetWindowTitle(this, settings.application_name);
     mLogger->SetLogTag(settings.application_name);
 
     mHostWorkingDir = QDir::currentPath();
@@ -498,10 +579,20 @@ PlayWindow::PlayWindow(app::Workspace& workspace) : mWorkspace(workspace), mEven
     format.setStencilBufferSize(8);
     format.setDepthBufferSize(24);
     format.setSamples(settings.multisample_sample_count);
-    format.setSwapInterval(settings.window_vsync ? 1 : 0);
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     format.setColorSpace(settings.config_srgb ? QSurfaceFormat::ColorSpace::sRGBColorSpace
                                               : QSurfaceFormat::ColorSpace::DefaultColorSpace);
+
+    // So the problem is that if the play window is being used from the editor's main
+    // process setting swap interval will jank things unexpectedly because the thread
+    // will block on swap. this does not play ball with having multiple OpenGL windows.
+    // If there's another OpenGL window (such as GfxWidget) that has swap interval set
+    // to 1 (i.e. VSYNC) then the frame rate will halve. (two waits on swap...)
+    // When running in process and using vsync the rendering should be moved into a
+    // separate thread, or then we just simply ignore the flag.
+    if (is_separate_process)
+        format.setSwapInterval(settings.window_vsync ? 1 : 0);
+    else format.setSwapInterval(0);
 
     mSurface = new QWindow();
     mSurface->setFormat(format);
@@ -706,6 +797,56 @@ bool PlayWindow::LoadGame()
     return true;
 }
 
+bool PlayWindow::LoadPreview(const std::shared_ptr<const game::EntityClass>& entity)
+{
+    if (!LoadLibrary())
+        return false;
+
+    mClassLibrary = std::make_unique<ClassLibrary>(mWorkspace);
+    mClassLibrary->SetEntityPreview(entity);
+    // when doing a preview for an entity we must setup a temporary / dummy scene
+    // in order to be able to spawn the entity into the scene in case none exist
+    // by this special name.
+    const auto& name = entity->GetName();
+    if (auto klass = mWorkspace.FindSceneClassByName(base::FormatString("_%1_preview_scene_", name)))
+        mClassLibrary->SetEntityPreviewScene(klass);
+    else if (auto klass = mWorkspace.FindSceneClassByName("_entity_preview_scene_"))
+        mClassLibrary->SetEntityPreviewScene(klass);
+    else {
+        auto dummy_klass = std::make_shared<game::SceneClass>();
+        dummy_klass->SetName("_entity_preview_scene_");
+        mClassLibrary->SetEntityPreviewScene(dummy_klass);
+    }
+
+    // haha, this also doesn't work.. how in the f**k is this even possible??
+    //SetWindowTitle(this, entity->GetName());
+
+    QTimer::singleShot(10, [entity, this]() {
+        SetWindowTitle(this, entity->GetName());
+    });
+
+    const auto& settings = mWorkspace.GetProjectSettings();
+    InitPreview(settings.preview_entity_script);
+    return true;
+}
+
+bool PlayWindow::LoadPreview(const std::shared_ptr<const game::SceneClass>& scene)
+{
+    if(!LoadLibrary())
+        return false;
+
+    mClassLibrary = std::make_unique<ClassLibrary>(mWorkspace);
+    mClassLibrary->SetScenePreview(scene);
+
+    QTimer::singleShot(10, [scene, this]() {
+        SetWindowTitle(this, scene->GetName());
+    });
+
+    const auto& settings = mWorkspace.GetProjectSettings();
+    InitPreview(settings.preview_scene_script);
+    return true;
+}
+
 void PlayWindow::Shutdown()
 {
     mContext.makeCurrent(mSurface);
@@ -735,20 +876,27 @@ void PlayWindow::Shutdown()
     mGameLibSetGlobalLogger = nullptr;
 }
 
-void PlayWindow::LoadState()
+void PlayWindow::LoadState(const QString& key_prefix, const QWidget* parent)
 {
-    // if this is the first time the project is launched then
+    // IMPORTANT:
+    // Keep in mind that if LoadState is called *before* the window is shown
+    // the status bars, event logs etc. are *not* visible, which means their visibility
+    // cannot be used as the proper initial state. But if LoadState is called after the window
+    // is visible then the UX is a bit janky since the window will first appear in
+    // the default size and then be re-adjusted, so it'd be better to set the window
+    // size before showing the window.
+
+    // If this is the first time the project/game is launched then
     // resize the rendering surface to the initial size specified
-    // in the project settings. otherwise use the size saved from
-    // the previous run.
-    // note that the application is later able to request
-    // a different size however. (See the requests processing)
-    const auto& project = mWorkspace.GetProjectSettings();
-    const auto& window_geometry = mWorkspace.GetUserProperty("play_window_geometry", QByteArray());
-    const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty("play_window_toolbar_and_dock_state", QByteArray());
-    const unsigned log_bits = mWorkspace.GetUserProperty("play_window_log_bits", mAppEventLog.GetShowBits());
-    const QString log_filter = mWorkspace.GetUserProperty("play_window_log_filter", QString());
-    const bool log_filter_case_sens = mWorkspace.GetUserProperty("play_window_log_filter_case_sensitive", true);
+    // in the project settings. Otherwise, use the size saved in
+    // the user properties after the previous run. Note that in either
+    // case the game itself is able to request a different window size
+    // as well as try to go into full screen mode.
+    const auto& window_geometry        = mWorkspace.GetUserProperty(key_prefix + "_geometry", QByteArray());
+    const auto& toolbar_and_dock_state = mWorkspace.GetUserProperty(key_prefix + "_toolbar_and_dock_state", QByteArray());
+    const unsigned log_bits            = mWorkspace.GetUserProperty(key_prefix + "_log_bits", mAppEventLog.GetShowBits());
+    const auto& log_filter             = mWorkspace.GetUserProperty(key_prefix + "_log_filter", QString());
+    const bool log_filter_case_sens    = mWorkspace.GetUserProperty(key_prefix + "_log_filter_case_sensitive", true);
     mAppEventLog.SetFilterStr(log_filter, log_filter_case_sens);
     mAppEventLog.SetShowBits(log_bits);
     mAppEventLog.invalidate();
@@ -766,19 +914,33 @@ void PlayWindow::LoadState()
     // try to resize. See the comments above.
     if (window_geometry.isEmpty())
     {
-        ResizeSurface(project.window_width, project.window_height);
+        // Do this on the timer so that we hopefully have the QSurface
+        // with initial size. if we try to get the size without window
+        // being shown the size will be 0!
+        QTimer::singleShot(100, [this, parent]() {
+            const auto& settings = mWorkspace.GetProjectSettings();
+            ResizeSurface(settings.window_width, settings.window_height);
+
+            // resize and relocate on the desktop, by default the window seems
+            // to be at a position that requires it to be immediately used and
+            // resize by the user. ugh
+            if (parent)
+            {
+                const auto width  = this->width();
+                const auto height = this->height();
+                const auto parent_pos = parent->mapToGlobal(parent->pos());
+                const auto xpos = parent_pos.x() + (parent->width() - width) / 2;
+                const auto ypos = parent_pos.y() + (parent->height() - height) / 2;
+                this->move(xpos, ypos);
+            }
+        });
     }
 
-    const bool show_status_bar = mWorkspace.GetUserProperty("play_window_show_statusbar",
-       mUI.statusbar->isVisible());
-    const bool show_eventlog = mWorkspace.GetUserProperty("play_window_show_eventlog",
-        mUI.dockWidget->isVisible());
-    const bool debug_draw = mWorkspace.GetUserProperty("play_window_debug_draw",
-       mUI.actionToggleDebugDraw->isChecked());
-    const bool debug_log = mWorkspace.GetUserProperty("play_window_debug_log",
-       mUI.actionToggleDebugLog->isChecked());
-    const bool debug_msg = mWorkspace.GetUserProperty("play_window_debug_msg",
-       mUI.actionToggleDebugMsg->isChecked());
+    const bool show_status_bar = mWorkspace.GetUserProperty(key_prefix + "_show_statusbar", true);
+    const bool show_eventlog   = mWorkspace.GetUserProperty(key_prefix + "_show_eventlog", true);
+    const bool debug_draw      = mWorkspace.GetUserProperty(key_prefix + "_debug_draw", mUI.actionToggleDebugDraw->isChecked());
+    const bool debug_log       = mWorkspace.GetUserProperty(key_prefix + "_debug_log", mUI.actionToggleDebugLog->isChecked());
+    const bool debug_msg       = mWorkspace.GetUserProperty(key_prefix + "_debug_msg", mUI.actionToggleDebugMsg->isChecked());
     SetValue(mUI.actionToggleDebugMsg, debug_msg);
     SetValue(mUI.actionToggleDebugLog, debug_log);
     SetValue(mUI.actionToggleDebugDraw, debug_draw);
@@ -901,6 +1063,74 @@ void PlayWindow::InitGame()
         params.editing_mode     = true; // allow changes to "static" content take place.
         params.preview_mode     = false;
         params.game_script      = app::ToUtf8(settings.game_script);
+        params.application_name = app::ToUtf8(settings.application_name);
+        params.context          = mWindowContext.get();
+        params.surface_width    = mSurface->width();
+        params.surface_height   = mSurface->height();
+        mEngine->Init(params);
+
+        SetEngineConfig();
+
+        if (!mEngine->Load())
+        {
+            Barf("Engine failed to load. Please see the log for more details.");
+            return;
+        }
+
+        mEngine->Start();
+        mTimer.Start();
+        mFrameTimer.start();
+        mInitDone = true;
+
+        SetEnabled(mUI.toolBar,         true);
+        SetEnabled(mUI.menuApplication, true);
+        SetEnabled(mUI.menuSurface,     true);
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Exception in engine init. [what='%1']", e.what());
+        Barf(e.what());
+    }
+}
+
+// This function is very similar with InitGame but subtly different
+// so make sure you cross-check changes properly.
+void PlayWindow::InitPreview(const QString& script)
+{
+    if (!mEngine)
+        return;
+
+    // assumes that the current working directory has not been changed!
+    const auto& host_app_path = QCoreApplication::applicationFilePath();
+
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+    try
+    {
+        mContext.makeCurrent(mSurface);
+
+        const auto& settings = mWorkspace.GetProjectSettings();
+
+        // we're going to skip calling ParseArgs here for now.
+
+        SetDebugOptions();
+
+        engine::Engine::Environment env;
+        env.classlib           = mClassLibrary.get(); // use the proxy
+        env.engine_loader      = mResourceLoader.get();
+        env.graphics_loader    = mResourceLoader.get();
+        env.audio_loader       = mResourceLoader.get();
+        env.game_loader        = mResourceLoader.get();
+        env.directory          = app::ToUtf8(mGameWorkingDir);
+        // User home and game home will be unset for now.
+        // todo: maybe use some temp folder ?
+        // env.user_home          = ...
+        // env.game_home          = ...
+        mEngine->SetEnvironment(env);
+
+        engine::Engine::InitParams params;
+        params.editing_mode     = true; // allow changes to "static" content take place.
+        params.preview_mode     = true; // yes, we're doing preview now!
+        params.game_script      = app::ToUtf8(script);
         params.application_name = app::ToUtf8(settings.application_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();

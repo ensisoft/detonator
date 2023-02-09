@@ -47,6 +47,7 @@ namespace gui
 {
     class TreeWidget;
     class MouseTool;
+    class PlayWindow;
 
     class EntityWidget : public MainWidget
     {
@@ -90,6 +91,7 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
+        void on_actionPreview_triggered();
         void on_actionNewRect_triggered();
         void on_actionNewCircle_triggered();
         void on_actionNewSemiCircle_triggered();
@@ -303,5 +305,7 @@ namespace gui
         boost::circular_buffer<game::EntityClass> mUndoStack;
         // map entity nodes to associated comments (if any)
         std::unordered_map<std::string, QString> mComments;
+
+        std::unique_ptr<PlayWindow> mPreview;
     };
 }
