@@ -53,12 +53,15 @@ namespace engine
         using Action = engine::Action;
 
         virtual ~GameRuntime() = default;
+        // Set rendering surface size.
+        virtual void SetSurfaceSize(unsigned width, unsigned height) {}
+
         // Set flag to indicate that the current game launch is an
         // editor launch, i.e. edit/design time.
-        virtual void SetEditingMode(bool editing) = 0;
+        virtual void SetEditingMode(bool editing) {}
         // Set a flag to indicate that the current game launch is a
         // preview launch, i.e. edit/design time preview of some resource.
-        virtual void SetPreviewMode(bool preview) = 0;
+        virtual void SetPreviewMode(bool preview) {}
         // Set the default transient key-value store that can be
         // used by the game to store non-persistent data for the
         // duration of the game play.

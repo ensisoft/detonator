@@ -1047,6 +1047,16 @@ LuaRuntime::~LuaRuntime()
     mGameEnv.reset();
     mLuaState.reset();
 }
+void LuaRuntime::SetSurfaceSize(unsigned int width, unsigned int height)
+{
+    if (mLuaState)
+    {
+        (*mLuaState)["SurfaceWidth"]  = width;
+        (*mLuaState)["SurfaceHeight"] = height;
+        if (mPreviewMode || mEditingMode && mGameEnv)
+            CallLua((*mGameEnv)["OnRenderingSurfaceResized"], width, height);
+    }
+}
 
 void LuaRuntime::SetEditingMode(bool editing)
 { mEditingMode = editing; }

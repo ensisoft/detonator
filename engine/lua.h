@@ -46,6 +46,7 @@ namespace engine
                    const std::string& game_name);
        ~LuaRuntime();
 
+        virtual void SetSurfaceSize(unsigned width, unsigned height) override;
         virtual void SetEditingMode(bool editing) override;
         virtual void SetPreviewMode(bool preview) override;
         virtual void SetClassLibrary(const ClassLibrary* classlib) override;
