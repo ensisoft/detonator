@@ -41,6 +41,8 @@ namespace gui
         void on_btnResetClearColor_clicked();
         void on_btnResetDebugFont_clicked();
         void on_btnSelectMaterial_clicked();
+        void on_btnSelectPreviewEntityScript_clicked();
+        void on_btnSelectPreviewSceneScript_clicked();
     private:
         Ui::DlgProject mUI;
     private:

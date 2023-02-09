@@ -627,6 +627,10 @@ namespace app
             using DefaultAudioIOStrategy = engine::FileResourceLoader::DefaultAudioIOStrategy;
             DefaultAudioIOStrategy desktop_audio_io_strategy = DefaultAudioIOStrategy::Automatic;
             DefaultAudioIOStrategy wasm_audio_io_strategy = DefaultAudioIOStrategy::Automatic;
+            // Which script to run when previewing an entity.
+            QString preview_entity_script = "app://scripts/preview/entity.lua";
+            // Which script to run when previewing a scene.
+            QString preview_scene_script = "app://scripts/preview/scene.lua";
         };
 
         const ProjectSettings& GetProjectSettings() const

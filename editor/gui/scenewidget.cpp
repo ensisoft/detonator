@@ -60,6 +60,7 @@
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/clipboard.h"
+#include "editor/gui/playwindow.h"
 
 namespace gui
 {
@@ -414,8 +415,8 @@ public:
         node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
         // leave this empty for the class default to take place.
         // node.SetIdleAnimationId(mClass->GetIdleTrackId());
-        auto* child = mState.scene.AddNode(std::move(node));
-        mState.scene.LinkChild(nullptr, child);
+        auto* child = mState.scene->AddNode(std::move(node));
+        mState.scene->LinkChild(nullptr, child);
         mState.view->Rebuild();
         mState.view->SelectItemById(app::FromUtf8(child->GetId()));
         mState.last_placed_entity = app::FromUtf8(mClass->GetId());
@@ -450,7 +451,7 @@ private:
         for (size_t i=0; i<10000; ++i)
         {
             QString suggestion = QString("%1_%2").arg(name).arg(i);
-            if (mState.scene.FindNodeByName(app::ToUtf8(suggestion)) == nullptr)
+            if (mState.scene->FindNodeByName(app::ToUtf8(suggestion)) == nullptr)
                 return app::ToUtf8(suggestion);
         }
         return "???";
@@ -478,8 +479,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 {
     DEBUG("Create SceneWidget");
 
-    mRenderTree.reset(new TreeModel(mState.scene));
-    mScriptVarModel.reset(new ScriptVarModel(mState.scene));
+    mState.scene = std::make_shared<game::SceneClass>();
+
+    mRenderTree.reset(new TreeModel(*mState.scene));
+    mScriptVarModel.reset(new ScriptVarModel(*mState.scene));
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
@@ -508,12 +511,12 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mEntities->menuAction()->setIcon(QIcon("icons:entity.png"));
     mEntities->menuAction()->setText("Entities");
 
-    mState.scene.SetName("My Scene");
+    mState.scene->SetName("My Scene");
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
     mState.view = mUI.tree;
-    mOriginalHash = mState.scene.GetHash();
+    mOriginalHash = mState.scene->GetHash();
 
     // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &SceneWidget::TreeCurrentNodeChangedEvent);
@@ -528,8 +531,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
-    SetValue(mUI.ID, mState.scene.GetId());
-    SetValue(mUI.name, mState.scene.GetName());
+    SetValue(mUI.ID, mState.scene->GetId());
+    SetValue(mUI.name, mState.scene->GetName());
 
     // Using context menu for now but leaving these buttons
     // around in case they make a come back later....
@@ -553,8 +556,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     const game::SceneClass* content = nullptr;
     resource.GetContent(&content);
 
-    mState.scene = *content;
-    mOriginalHash = mState.scene.GetHash();
+    *mState.scene = *content;
+    mOriginalHash = mState.scene->GetHash();
     mScriptVarModel->Reset();
 
     GetUserProperty(resource, "zoom", mUI.zoom);
@@ -593,7 +596,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     DisplaySceneProperties();
     DisplayCurrentCameraLocation();
 
-    mRenderTree.reset(new TreeModel(mState.scene));
+    mRenderTree.reset(new TreeModel(*mState.scene));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
 }
@@ -622,10 +625,11 @@ void SceneWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
-    bar.addSeparator();
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionNodePlace);
     bar.addSeparator();
@@ -637,10 +641,11 @@ void SceneWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
-    menu.addSeparator();
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPreview);
     menu.addSeparator();
     menu.addAction(mUI.actionNodePlace);
     menu.addSeparator();
@@ -651,7 +656,7 @@ void SceneWidget::AddActions(QMenu& menu)
 bool SceneWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
-    mState.scene.IntoJson(json);
+    mState.scene->IntoJson(json);
     settings.SetValue("Scene", "content", json);
     settings.SetValue("Scene", "hash", mOriginalHash);
     settings.SetValue("Scene", "camera_offset_x", mState.camera_offset_x);
@@ -698,7 +703,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.quadTreeGroup);
     settings.LoadWidget("Scene", mUI.denseGridGroup);
 
-    if (!mState.scene.FromJson(json))
+    if (!mState.scene->FromJson(json))
         WARN("Failed to restore scene state.");
 
     UpdateResourceReferences();
@@ -707,7 +712,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     DisplayCurrentCameraLocation();
 
     mScriptVarModel->Reset();
-    mRenderTree.reset(new TreeModel(mState.scene));
+    mRenderTree.reset(new TreeModel(*mState.scene));
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     return true;
@@ -751,7 +756,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
     if (auto* node = GetCurrentNode())
     {
         data::JsonObject json;
-        const auto& tree = mState.scene.GetRenderTree();
+        const auto& tree = mState.scene->GetRenderTree();
         game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
         }, json, node);
@@ -761,7 +766,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
 
-        mState.scene.DeleteNode(node);
+        mState.scene->DeleteNode(node);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
     }
@@ -771,7 +776,7 @@ void SceneWidget::Copy(Clipboard& clipboard) const
     if (const auto* node = GetCurrentNode())
     {
         data::JsonObject json;
-        const auto& tree = mState.scene.GetRenderTree();
+        const auto& tree = mState.scene->GetRenderTree();
         game::RenderTreeIntoJson(tree, [](data::Writer& writer, const auto* node) {
             node->IntoJson(writer);
          }, json, node);
@@ -851,7 +856,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         // moving the unique ptr means that node address stays the same
         // thus the tree is still valid!
         node->SetEntity(mState.workspace->FindEntityClassById(node->GetEntityId()));
-        mState.scene.AddNode(std::move(node));
+        mState.scene->AddNode(std::move(node));
     }
     nodes.clear();
     // walk the tree and link the nodes into the scene.
@@ -859,7 +864,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         if (node == nullptr)
             return;
         auto* parent = tree.GetParent(node);
-        mState.scene.LinkChild(parent, node);
+        mState.scene->LinkChild(parent, node);
     });
 
     mUI.tree->Rebuild();
@@ -875,10 +880,10 @@ void SceneWidget::Undo()
     }
     // if the timer has run the top of the undo stack
     // is the same copy as the actual scene object.
-    if (mUndoStack.back().GetHash() == mState.scene.GetHash())
+    if (mUndoStack.back().GetHash() == mState.scene->GetHash())
         mUndoStack.pop_back();
 
-    mState.scene = mUndoStack.back();
+    *mState.scene = mUndoStack.back();
     mState.view->Rebuild();
     mUndoStack.pop_back();
     mScriptVarModel->Reset();
@@ -912,25 +917,47 @@ void SceneWidget::ReloadTextures()
 }
 void SceneWidget::Shutdown()
 {
+    if (mPreview)
+    {
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
     mUI.widget->dispose();
 }
 void SceneWidget::Update(double secs)
 {
+    if (mPreview && mPreview->IsClosed())
+    {
+        mPreview->SaveState("preview_window");
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
     if (mPlayState == PlayState::Playing)
     {
-        mState.renderer.Update(mState.scene, mSceneTime, secs);
+        mState.renderer.Update(*mState.scene, mSceneTime, secs);
         mSceneTime += secs;
     }
     mCurrentTime += secs;
 }
 void SceneWidget::Render()
 {
+    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
+    if (mPreview && !mPreview->IsClosed())
+    {
+        mPreview->RunGameLoopOnce();
+    }
+    // call for the widget to paint, it will set its own OpenGL context on this thread
+    // and everything should be fine.
     mUI.widget->triggerPaint();
 }
 
 bool SceneWidget::HasUnsavedChanges() const
 {
-    if (mOriginalHash == mState.scene.GetHash())
+    if (mOriginalHash == mState.scene->GetHash())
         return false;
     return true;
 }
@@ -948,6 +975,11 @@ bool SceneWidget::OnEscape()
 
 void SceneWidget::Refresh()
 {
+    if (mPreview && !mPreview->IsClosed())
+    {
+        mPreview->NonGameTick();
+    }
+
     // don't take an undo snapshot while the mouse tool is in
     // action.
     if (mCurrentTool)
@@ -959,13 +991,13 @@ void SceneWidget::Refresh()
 
     if (mUndoStack.empty())
     {
-        mUndoStack.push_back(mState.scene);
+        mUndoStack.push_back(*mState.scene);
     }
-    const auto curr_hash = mState.scene.GetHash();
+    const auto curr_hash = mState.scene->GetHash();
     const auto undo_hash = mUndoStack.back().GetHash();
     if (curr_hash != undo_hash)
     {
-        mUndoStack.push_back(mState.scene);
+        mUndoStack.push_back(*mState.scene);
         DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
     }
 }
@@ -988,18 +1020,18 @@ bool SceneWidget::GetStats(Stats* stats) const
 
 void SceneWidget::on_name_textChanged(const QString&)
 {
-    mState.scene.SetName(GetValue(mUI.name));
+    mState.scene->SetName(GetValue(mUI.name));
 }
 
 void SceneWidget::on_cmbScripts_currentIndexChanged(int)
 {
-    mState.scene.SetScriptFileId(GetItemId(mUI.cmbScripts));
+    mState.scene->SetScriptFileId(GetItemId(mUI.cmbScripts));
     SetEnabled(mUI.btnEditScript, true);
 }
 
 void SceneWidget::on_cmbTilemaps_currentIndexChanged(int)
 {
-    mState.scene.SetTilemapId(GetItemId(mUI.cmbTilemaps));
+    mState.scene->SetTilemapId(GetItemId(mUI.cmbTilemaps));
     SetEnabled(mUI.btnEditMap, true);
 }
 
@@ -1141,12 +1173,12 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
 
     mState.workspace->SaveResource(resource);
-    mOriginalHash = mState.scene.GetHash();
+    mOriginalHash = mState.scene->GetHash();
 }
 
 void SceneWidget::on_actionFind_triggered()
 {
-    DlgFindEntity dlg(this, mState.scene);
+    DlgFindEntity dlg(this, *mState.scene);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1155,6 +1187,22 @@ void SceneWidget::on_actionFind_triggered()
         return;
 
     FindNode(node);
+}
+
+void SceneWidget::on_actionPreview_triggered()
+{
+    if (mPreview)
+    {
+        mPreview->ActivateWindow();
+    }
+    else
+    {
+        auto preview = std::make_unique<PlayWindow>(*mState.workspace);
+        preview->LoadState("preview_window", this);
+        preview->ShowWithWAR();
+        preview->LoadPreview(mState.scene);
+        mPreview = std::move(preview);
+    }
 }
 
 void SceneWidget::on_actionNodeEdit_triggered()
@@ -1174,7 +1222,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        mState.scene.DeleteNode(node);
+        mState.scene->DeleteNode(node);
 
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
@@ -1186,8 +1234,8 @@ void SceneWidget::on_actionNodeBreakLink_triggered()
     if (auto* node = GetCurrentNode())
     {
         node->SetParentRenderTreeNodeId("");
-        mState.scene.BreakChild(node);
-        mState.scene.LinkChild(nullptr, node);
+        mState.scene->BreakChild(node);
+        mState.scene->LinkChild(nullptr, node);
         mUI.tree->Rebuild();
     }
 }
@@ -1212,7 +1260,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
 {
     if (const auto* node = GetCurrentNode())
     {
-        auto* dupe = mState.scene.DuplicateNode(node);
+        auto* dupe = mState.scene->DuplicateNode(node);
         // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
@@ -1255,9 +1303,9 @@ void SceneWidget::on_actionEntityVarRef_triggered()
     {
         std::vector<ResourceListItem> entities;
         std::vector<ResourceListItem> nodes;
-        for (size_t i = 0; i < mState.scene.GetNumNodes(); ++i)
+        for (size_t i = 0; i < mState.scene->GetNumNodes(); ++i)
         {
-            const auto& node = mState.scene.GetNode(i);
+            const auto& node = mState.scene->GetNode(i);
             ResourceListItem item;
             item.name = app::FromUtf8(node.GetName());
             item.id   = app::FromUtf8(node.GetId());
@@ -1303,7 +1351,7 @@ void SceneWidget::on_btnEditScript_clicked()
 
 void SceneWidget::on_btnResetScript_clicked()
 {
-    mState.scene.ResetScriptFile();
+    mState.scene->ResetScriptFile();
     SetValue(mUI.cmbScripts, -1);
     SetEnabled(mUI.btnEditScript, false);
 }
@@ -1398,7 +1446,7 @@ void SceneWidget::on_btnAddScript_clicked()
     script.SetFileURI(app::ToUtf8(fileuri));
     app::ScriptResource resource(script, name);
     mState.workspace->SaveResource(resource);
-    mState.scene.SetScriptFileId(script.GetId());
+    mState.scene->SetScriptFileId(script.GetId());
 
     ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
@@ -1422,14 +1470,14 @@ void SceneWidget::on_btnAddMap_clicked()
     emit OpenNewWidget(widget);
 
     QString id = widget->GetId();
-    mState.scene.SetTilemapId(app::ToUtf8(id));
+    mState.scene->SetTilemapId(app::ToUtf8(id));
     SetValue(mUI.cmbTilemaps, ListItemId(id));
     SetEnabled(mUI.btnEditMap, true);
 }
 
 void SceneWidget::on_btnResetMap_clicked()
 {
-    mState.scene.ResetTilemap();
+    mState.scene->ResetTilemap();
     SetValue(mUI.cmbTilemaps, -1);
     SetEnabled(mUI.btnEditMap, false);
     mTilemap.reset();
@@ -1439,9 +1487,9 @@ void SceneWidget::on_btnNewScriptVar_clicked()
 {
     std::vector<ResourceListItem> entities;
     std::vector<ResourceListItem> nodes;
-    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene.GetNode(i);
+        const auto& node = mState.scene->GetNode(i);
         ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
@@ -1465,9 +1513,9 @@ void SceneWidget::on_btnEditScriptVar_clicked()
 
     std::vector<ResourceListItem> entities;
     std::vector<ResourceListItem> nodes;
-    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene.GetNode(i);
+        const auto& node = mState.scene->GetNode(i);
         ResourceListItem item;
         item.name = app::FromUtf8(node.GetName());
         item.id   = app::FromUtf8(node.GetId());
@@ -1476,7 +1524,7 @@ void SceneWidget::on_btnEditScriptVar_clicked()
 
     // single selection for now.
     const auto index = items[0];
-    game::ScriptVar var = mState.scene.GetScriptVar(index.row());
+    game::ScriptVar var = mState.scene->GetScriptVar(index.row());
     DlgScriptVar dlg(nodes, entities, this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
@@ -1492,7 +1540,7 @@ void SceneWidget::on_btnDeleteScriptVar_clicked()
     // single selection for now.
     const auto index = items[0];
     mScriptVarModel->DeleteVariable(index.row());
-    const auto vars = mState.scene.GetNumScriptVars();
+    const auto vars = mState.scene->GetNumScriptVars();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
 }
@@ -1683,7 +1731,7 @@ void SceneWidget::on_btnNodeMinus90_clicked()
 
 void SceneWidget::on_tree_customContextMenuRequested(QPoint)
 {
-    const auto& tree = mState.scene.GetRenderTree();
+    const auto& tree = mState.scene->GetRenderTree();
     const auto* node = GetCurrentNode();
     mUI.actionNodeDuplicate->setEnabled(node != nullptr);
     mUI.actionNodeDelete->setEnabled(node != nullptr);
@@ -1736,7 +1784,7 @@ void SceneWidget::TreeCurrentNodeChangedEvent()
 }
 void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
-    auto& tree = mState.scene.GetRenderTree();
+    auto& tree = mState.scene->GetRenderTree();
     auto* src_value = static_cast<game::SceneNodeClass*>(item->GetUserData());
     auto* dst_value = static_cast<game::SceneNodeClass*>(target->GetUserData());
 
@@ -1745,7 +1793,7 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
         return;
 
     const bool retain_world_transform = true;
-    mState.scene.ReparentChild(dst_value, src_value, retain_world_transform);
+    mState.scene->ReparentChild(dst_value, src_value, retain_world_transform);
 
 }
 void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
@@ -1782,10 +1830,10 @@ void SceneWidget::ResourceUpdated(const app::Resource* resource)
     if (!resource->IsTilemap())
         return;
 
-    if (!mState.scene.HasTilemap())
+    if (!mState.scene->HasTilemap())
         return;
 
-    const auto& mapId = mState.scene.GetTilemapId();
+    const auto& mapId = mState.scene->GetTilemapId();
     if (mapId != resource->GetIdUtf8())
         return;
 
@@ -1849,9 +1897,9 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     hook.SetDrawVectors(true);
     hook.SetViewMatrix(view.GetAsMatrix());
 
-    if (mState.scene.HasTilemap())
+    if (mState.scene->HasTilemap())
     {
-        const auto& mapId = mState.scene.GetTilemapId();
+        const auto& mapId = mState.scene->GetTilemapId();
         if (!mTilemap || mTilemap->GetClassId() != mapId)
         {
             auto klass = mState.workspace->GetTilemapClassById(mapId);
@@ -1869,15 +1917,15 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         mState.renderer.Draw(*mTilemap, viewport, painter, scene);
     }
 
-    mState.renderer.Draw(mState.scene, painter, scene, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, painter, scene, &hook, &hook);
 
-    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene.GetNode(i);
+        const auto& node = mState.scene->GetNode(i);
         const auto& entity_klass = node.GetEntityClass();
         if (entity_klass)
             continue;
-        const auto& pos = mState.scene.MapCoordsFromNodeBox(0.0f, 0.0f, &node);
+        const auto& pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, &node);
         ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), painter);
     }
 
@@ -1949,20 +1997,20 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
             if (!entity_klass)
                 return;
             const auto& box  = entity_klass->GetBoundingRect();
-            view.Push(mState.scene.FindNodeTransform(current));
+            view.Push(mState.scene->FindNodeTransform(current));
 
             const auto hotspot = TestToolHotspot(view, box, glm::vec4(click_point.x(), click_point.y(), 0.0f, 1.0));
             if (hotspot == ToolHotspot::Resize)
-                mCurrentTool.reset(new ScaleRenderTreeNodeTool(mState.scene, current));
+                mCurrentTool.reset(new ScaleRenderTreeNodeTool(*mState.scene, current));
             else if (hotspot == ToolHotspot::Rotate)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(mState.scene, current));
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, current));
             view.Pop();
         }
         if (!mCurrentTool)
         {
             if (auto* selection = SelectNode(click_point))
             {
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(mState.scene, selection, snap, grid_size));
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size));
                 mUI.tree->SelectItemById(app::FromUtf8(selection->GetId()));
             }
             else
@@ -2127,7 +2175,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
 
         int link_index = -1;
-        if (const auto* parent = mState.scene.GetRenderTree().GetParent(node))
+        if (const auto* parent = mState.scene->GetRenderTree().GetParent(node))
         {
             const auto& klass = parent->GetEntityClass();
             if (!klass)
@@ -2158,18 +2206,18 @@ void SceneWidget::DisplayCurrentNodeProperties()
 
 void SceneWidget::DisplaySceneProperties()
 {
-    const auto vars = mState.scene.GetNumScriptVars();
+    const auto vars = mState.scene->GetNumScriptVars();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
     SetEnabled(mUI.btnDeleteScriptVar, vars > 0);
-    SetValue(mUI.name, mState.scene.GetName());
-    SetValue(mUI.ID, mState.scene.GetId());
-    SetValue(mUI.cmbScripts, ListItemId(mState.scene.GetScriptFileId()));
-    SetValue(mUI.cmbTilemaps, ListItemId(mState.scene.GetTilemapId()));
-    SetValue(mUI.cmbSpatialIndex, mState.scene.GetDynamicSpatialIndex());
-    SetEnabled(mUI.btnEditScript, mState.scene.HasScriptFile());
-    SetEnabled(mUI.btnEditMap, mState.scene.HasTilemap());
+    SetValue(mUI.name, mState.scene->GetName());
+    SetValue(mUI.ID, mState.scene->GetId());
+    SetValue(mUI.cmbScripts, ListItemId(mState.scene->GetScriptFileId()));
+    SetValue(mUI.cmbTilemaps, ListItemId(mState.scene->GetTilemapId()));
+    SetValue(mUI.cmbSpatialIndex, mState.scene->GetDynamicSpatialIndex());
+    SetEnabled(mUI.btnEditScript, mState.scene->HasScriptFile());
+    SetEnabled(mUI.btnEditMap, mState.scene->HasTilemap());
 
-    const auto index = mState.scene.GetDynamicSpatialIndex();
+    const auto index = mState.scene->GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
     {
         SetEnabled(mUI.spRectX,        false);
@@ -2198,7 +2246,7 @@ void SceneWidget::DisplaySceneProperties()
         SetEnabled(mUI.denseGridPage,  true);
     }
 
-    if (const auto* rect = mState.scene.GetDynamicSpatialRect())
+    if (const auto* rect = mState.scene->GetDynamicSpatialRect())
     {
         SetValue(mUI.spRectX, rect->GetX());
         SetValue(mUI.spRectY, rect->GetY());
@@ -2206,13 +2254,13 @@ void SceneWidget::DisplaySceneProperties()
         SetValue(mUI.spRectH, rect->GetHeight());
     }
 
-    if (const auto* ptr = mState.scene.GetQuadTreeArgs())
+    if (const auto* ptr = mState.scene->GetQuadTreeArgs())
     {
         SetValue(mUI.spQuadMaxLevels, ptr->max_levels);
-        SetValue(mUI.spQuadMaxItems, ptr->max_items);
+        SetValue(mUI.spQuadMaxItems,  ptr->max_items);
     }
 
-    if (const auto* ptr = mState.scene.GetDenseGridArgs())
+    if (const auto* ptr = mState.scene->GetDenseGridArgs())
     {
         SetValue(mUI.spDenseGridRows, ptr->num_rows);
         SetValue(mUI.spDenseGridCols, ptr->num_cols);
@@ -2227,25 +2275,25 @@ void SceneWidget::DisplaySceneProperties()
     SetEnabled(mUI.spinTopBoundary,    false);
     SetEnabled(mUI.spinBottomBoundary, false);
 
-    if (const auto* ptr = mState.scene.GetLeftBoundary())
+    if (const auto* ptr = mState.scene->GetLeftBoundary())
     {
         SetValue(mUI.spinLeftBoundary, *ptr);
         SetValue(mUI.chkLeftBoundary, true);
         SetEnabled(mUI.spinLeftBoundary, true);
     }
-    if (const auto* ptr = mState.scene.GetRightBoundary())
+    if (const auto* ptr = mState.scene->GetRightBoundary())
     {
         SetValue(mUI.spinRightBoundary, *ptr);
         SetValue(mUI.chkRightBoundary, true);
         SetEnabled(mUI.spinRightBoundary, true);
     }
-    if (const auto* ptr = mState.scene.GetTopBoundary())
+    if (const auto* ptr = mState.scene->GetTopBoundary())
     {
         SetValue(mUI.spinTopBoundary, *ptr);
         SetValue(mUI.chkTopBoundary, true);
         SetEnabled(mUI.spinTopBoundary, true);
     }
-    if (const auto* ptr = mState.scene.GetBottomBoundary())
+    if (const auto* ptr = mState.scene->GetBottomBoundary())
     {
         SetValue(mUI.spinBottomBoundary, *ptr);
         SetValue(mUI.chkBottomBoundary, true);
@@ -2316,9 +2364,9 @@ void SceneWidget::RebuildCombos()
 
 void SceneWidget::UpdateResourceReferences()
 {
-    for (size_t i=0; i<mState.scene.GetNumNodes(); ++i)
+    for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        auto& node = mState.scene.GetNode(i);
+        auto& node = mState.scene->GetNode(i);
         auto klass = mState.workspace->FindEntityClassById(node.GetEntityId());
         if (!klass)
         {
@@ -2332,23 +2380,23 @@ void SceneWidget::UpdateResourceReferences()
         // resolve the runtime entity klass object reference.
         node.SetEntity(klass);
     }
-    if (mState.scene.HasScriptFile())
+    if (mState.scene->HasScriptFile())
     {
-        const auto& scriptId = mState.scene.GetScriptFileId();
+        const auto& scriptId = mState.scene->GetScriptFileId();
         if (!mState.workspace->IsValidScript(scriptId))
         {
             WARN("Scene script is no longer available. [script='%1']", scriptId);
-            mState.scene.ResetScriptFile();
+            mState.scene->ResetScriptFile();
             SetEnabled(mUI.btnEditScript, false);
         }
     }
-    if (mState.scene.HasTilemap())
+    if (mState.scene->HasTilemap())
     {
-        const auto& mapId = mState.scene.GetTilemapId();
+        const auto& mapId = mState.scene->GetTilemapId();
         if (!mState.workspace->IsValidTilemap(mapId))
         {
             WARN("Scene tilemap is no longer available. [map='%1']", mapId);
-            mState.scene.ResetTilemap();
+            mState.scene->ResetTilemap();
             SetEnabled(mUI.btnEditMap, false);
         }
     }
@@ -2356,48 +2404,48 @@ void SceneWidget::UpdateResourceReferences()
 
 void SceneWidget::SetSpatialIndexParams()
 {
-    mState.scene.SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
+    mState.scene->SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
 
-    if (const auto* ptr = mState.scene.GetDynamicSpatialRect())
+    if (const auto* ptr = mState.scene->GetDynamicSpatialRect())
     {
         auto rect = *ptr;
         rect.SetX(GetValue(mUI.spRectX));
         rect.SetY(GetValue(mUI.spRectY));
         rect.SetWidth(GetValue(mUI.spRectW));
         rect.SetHeight(GetValue(mUI.spRectH));
-        mState.scene.SetDynamicSpatialRect(rect);
+        mState.scene->SetDynamicSpatialRect(rect);
     }
-    if (const auto* ptr = mState.scene.GetQuadTreeArgs())
+    if (const auto* ptr = mState.scene->GetQuadTreeArgs())
     {
         auto args = *ptr;
         args.max_levels = GetValue(mUI.spQuadMaxLevels);
         args.max_items  = GetValue(mUI.spQuadMaxItems);
-        mState.scene.SetDynamicSpatialIndexArgs(args);
+        mState.scene->SetDynamicSpatialIndexArgs(args);
     }
-    if (const auto* ptr = mState.scene.GetDenseGridArgs())
+    if (const auto* ptr = mState.scene->GetDenseGridArgs())
     {
         auto args = *ptr;
         args.num_cols = GetValue(mUI.spDenseGridCols);
         args.num_rows = GetValue(mUI.spDenseGridRows);
-        mState.scene.SetDynamicSpatialIndexArgs(args);
+        mState.scene->SetDynamicSpatialIndexArgs(args);
     }
 }
 
 void SceneWidget::SetSceneBoundary()
 {
-    mState.scene.ResetLeftBoundary();
-    mState.scene.ResetRightBoundary();
-    mState.scene.ResetTopBoundary();
-    mState.scene.ResetBottomBoundary();
+    mState.scene->ResetLeftBoundary();
+    mState.scene->ResetRightBoundary();
+    mState.scene->ResetTopBoundary();
+    mState.scene->ResetBottomBoundary();
 
     if (GetValue(mUI.chkLeftBoundary))
-        mState.scene.SetLeftBoundary(GetValue(mUI.spinLeftBoundary));
+        mState.scene->SetLeftBoundary(GetValue(mUI.spinLeftBoundary));
     if (GetValue(mUI.chkRightBoundary))
-        mState.scene.SetRightBoundary(GetValue(mUI.spinRightBoundary));
+        mState.scene->SetRightBoundary(GetValue(mUI.spinRightBoundary));
     if (GetValue(mUI.chkTopBoundary))
-        mState.scene.SetTopBoundary(GetValue(mUI.spinTopBoundary));
+        mState.scene->SetTopBoundary(GetValue(mUI.spinTopBoundary));
     if (GetValue(mUI.chkBottomBoundary))
-        mState.scene.SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
+        mState.scene->SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
 }
 
 void SceneWidget::FindNode(const game::SceneNodeClass* node)
@@ -2424,7 +2472,7 @@ void SceneWidget::FindNode(const game::SceneNodeClass* node)
     // us the coordinate with other properties and the translation that
     // would be needed is just the offset between the center xy and the
     // mapped node center point vector.
-    const auto& pos_in_scene = mState.scene.MapCoordsFromNodeBox(0.0f, 0.0f, node);
+    const auto& pos_in_scene = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, node);
     const auto& pos_in_view  = view * glm::vec4(pos_in_scene.x, pos_in_scene.y, 0.0f, 1.0f);
     const auto translation   = glm::vec4(width*0.5, height*0.5, 0.0f, 0.0f) - pos_in_view;
     mViewTranslationStartTime = mCurrentTime;
@@ -2448,7 +2496,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
 
     std::vector<game::SceneNodeClass*> hit_nodes;
     std::vector<glm::vec2> hit_positions;
-    mState.scene.CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_positions);
+    mState.scene->CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_positions);
     if (hit_nodes.empty())
         return nullptr;
 
@@ -2509,7 +2557,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
     auto& painter = mUI.widget->getPainter();
     auto& device = mUI.widget->getDevice();
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(mState.scene, painter, view, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, painter, view, &hook, &hook);
 
     {
         // for debugging.

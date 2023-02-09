@@ -53,6 +53,7 @@
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/dlgjoint.h"
 #include "editor/gui/clipboard.h"
+#include "editor/gui/playwindow.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -604,10 +605,11 @@ void EntityWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
-    bar.addSeparator();
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewRoundRect);
@@ -627,10 +629,11 @@ void EntityWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
-    menu.addSeparator();
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPreview);
     menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
     menu.addAction(mUI.actionNewRoundRect);
@@ -965,10 +968,25 @@ void EntityWidget::ReloadTextures()
 }
 void EntityWidget::Shutdown()
 {
+    if (mPreview)
+    {
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
     mUI.widget->dispose();
 }
 void EntityWidget::Update(double secs)
 {
+    if (mPreview && mPreview->IsClosed())
+    {
+        mPreview->SaveState("preview_window");
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
     if (mPlayState == PlayState::Playing)
     {
         mState.renderer.Update(*mState.entity, mEntityTime, secs);
@@ -978,6 +996,13 @@ void EntityWidget::Update(double secs)
 }
 void EntityWidget::Render()
 {
+    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
+    if (mPreview && !mPreview->IsClosed())
+    {
+        mPreview->RunGameLoopOnce();
+    }
+    // call for the widget to paint, it will set its own OpenGL context on this thread
+    // and everything should be fine.
     mUI.widget->triggerPaint();
 }
 
@@ -990,6 +1015,11 @@ bool EntityWidget::HasUnsavedChanges() const
 
 void EntityWidget::Refresh()
 {
+    if (mPreview && !mPreview->IsClosed())
+    {
+        mPreview->NonGameTick();
+    }
+
     // don't take an undo snapshot while the mouse tool is in
     // action.
     if (mCurrentTool)
@@ -1136,6 +1166,23 @@ void EntityWidget::on_actionSave_triggered()
     mState.workspace->SaveResource(resource);
     mOriginalHash = ComputeHash();
 }
+
+void EntityWidget::on_actionPreview_triggered()
+{
+    if (mPreview)
+    {
+        mPreview->ActivateWindow();
+    }
+    else
+    {
+        auto preview = std::make_unique<PlayWindow>(*mState.workspace);
+        preview->LoadState("preview_window", this);
+        preview->ShowWithWAR();
+        preview->LoadPreview(mState.entity);
+        mPreview = std::move(preview);
+    }
+}
+
 void EntityWidget::on_actionNewRect_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_rect"));
@@ -2507,6 +2554,10 @@ void EntityWidget::InitScene(unsigned width, unsigned height)
 
 void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 {
+    // WARNING, if you use the preview window here to draw the underlying
+    // OpenGL Context will change unexpectedly and then drawing below
+    // will trigger OpenGL errors.
+
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);

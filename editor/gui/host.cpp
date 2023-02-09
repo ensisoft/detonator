@@ -254,10 +254,10 @@ void Main(int argc, char* argv[])
         QObject::connect(&workspace, &app::Workspace::UserPropertyUpdated,
                          &ipc, &app::IPCClient::UserPropertyUpdated);
     }
-
-    gui::PlayWindow window(workspace);
+    constexpr auto is_separate_process = true;
+    gui::PlayWindow window(workspace, is_separate_process);
     window.ShowWithWAR();
-    window.LoadState();
+    window.LoadState("play_window");
     if (!window.LoadGame())
         return;
 
@@ -287,7 +287,7 @@ void Main(int argc, char* argv[])
     window.NonGameTick();
     base::FlushGlobalLog();
 
-    window.SaveState();
+    window.SaveState("play_window");
     window.Shutdown();
     gfx::SetResourceLoader(nullptr);
     DEBUG("Exiting...");
