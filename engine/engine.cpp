@@ -95,6 +95,7 @@ public:
         mRuntime->SetEditingMode(init.editing_mode);
         mRuntime->SetPreviewMode(init.preview_mode);
         mRuntime->Init();
+        mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
         mUIStyle.SetClassLibrary(mClasslib);
         mUIStyle.SetDataLoader(mEngineDataLoader);
         mUIPainter.SetPainter(mPainter.get());
@@ -567,6 +568,7 @@ public:
         mSurfaceWidth = width;
         mSurfaceHeight = height;
         mPainter->SetSurfaceSize(width, height);
+        mRuntime->SetSurfaceSize(width, height);
     }
     virtual void OnEnterFullScreen() override
     {
