@@ -27,9 +27,73 @@
 #include <QtDesigner/QDesignerPropertySheetExtension>
 
 #include "plugin.h"
+#include "../spinboxwidget.h"
 #include "../rangewidget.h"
 #include "../treewidget.h"
 #include "../collapsible_widget.h"
+
+DoubleSpinBoxWidgetPlugin::DoubleSpinBoxWidgetPlugin(QObject* parent)
+  : QObject(parent)
+{}
+
+bool DoubleSpinBoxWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool DoubleSpinBoxWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon DoubleSpinBoxWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString DoubleSpinBoxWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::DoubleSpinBox\" name=\"spinBox\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>100</width>\n"
+           "    <height>30</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString DoubleSpinBoxWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString DoubleSpinBoxWidgetPlugin::includeFile() const
+{
+    return "spinboxwidget.h";
+}
+
+QString DoubleSpinBoxWidgetPlugin::name() const
+{
+    return "gui::DoubleSpinBox";
+}
+QString DoubleSpinBoxWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString DoubleSpinBoxWidgetPlugin::whatsThis() const
+{
+    return toolTip();
+}
+QWidget* DoubleSpinBoxWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::DoubleSpinBox(parent);
+}
+void DoubleSpinBoxWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
 
 RangeWidgetPlugin::RangeWidgetPlugin(QObject* parent)
   : QObject(parent)
@@ -245,6 +309,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new RangeWidgetPlugin(this));
     widgets.append(new TreeWidgetPlugin(this));
     widgets.append(new CollapsibleWidgetPlugin(this));
+    widgets.append(new DoubleSpinBoxWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
