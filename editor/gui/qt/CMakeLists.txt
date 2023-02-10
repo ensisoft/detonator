@@ -27,6 +27,9 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(DetonatorQtDesignerPlugin SHARED
     plugin.cpp
     plugin.h
+   ../spinboxwidget.cpp
+   ../spinboxwidget.h
+   ../doublespinbox.ui
     ../rangewidget.h
     ../rangewidget.cpp
     ../treewidget.h
