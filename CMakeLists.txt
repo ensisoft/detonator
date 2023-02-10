@@ -458,6 +458,9 @@ add_executable(Detonator
     editor/gui/scriptwidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
+    editor/gui/spinboxwidget.h
+    editor/gui/doublespinbox.ui
+    editor/gui/spinboxwidget.cpp
     editor/gui/collapsible_widget.h
     editor/gui/collapsible_widget.ui
     editor/gui/collapsible_widget.cpp

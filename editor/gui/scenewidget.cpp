@@ -1077,39 +1077,19 @@ void SceneWidget::on_spDenseGridCols_valueChanged(int)
 {
     SetSpatialIndexParams();
 }
-void SceneWidget::on_chkLeftBoundary_stateChanged(int)
-{
-    SetEnabled(mUI.spinLeftBoundary, GetValue(mUI.chkLeftBoundary));
-    SetSceneBoundary();
-}
-void SceneWidget::on_chkRightBoundary_stateChanged(int)
-{
-    SetEnabled(mUI.spinRightBoundary, GetValue(mUI.chkRightBoundary));
-    SetSceneBoundary();
-}
-void SceneWidget::on_chkTopBoundary_stateChanged(int)
-{
-    SetEnabled(mUI.spinTopBoundary, GetValue(mUI.chkTopBoundary));
-    SetSceneBoundary();
-}
-void SceneWidget::on_chkBottomBoundary_stateChanged(int)
-{
-    SetEnabled(mUI.spinBottomBoundary, GetValue(mUI.chkBottomBoundary));
-    SetSceneBoundary();
-}
-void SceneWidget::on_spinLeftBoundary_valueChanged(double value)
+void SceneWidget::on_spinLeftBoundary_valueChanged(bool has_value, double value)
 {
     SetSceneBoundary();
 }
-void SceneWidget::on_spinRightBoundary_valueChanged(double value)
+void SceneWidget::on_spinRightBoundary_valueChanged(bool has_value, double value)
 {
     SetSceneBoundary();
 }
-void SceneWidget::on_spinTopBoundary_valueChanged(double value)
+void SceneWidget::on_spinTopBoundary_valueChanged(bool has_value, double value)
 {
     SetSceneBoundary();
 }
-void SceneWidget::on_spinBottomBoundary_valueChanged(double value)
+void SceneWidget::on_spinBottomBoundary_valueChanged(bool has_value, double value)
 {
     SetSceneBoundary();
 }
@@ -2217,6 +2197,11 @@ void SceneWidget::DisplaySceneProperties()
     SetEnabled(mUI.btnEditScript, mState.scene->HasScriptFile());
     SetEnabled(mUI.btnEditMap, mState.scene->HasTilemap());
 
+    mUI.spinLeftBoundary->ClearValue();
+    mUI.spinRightBoundary->ClearValue();
+    mUI.spinTopBoundary->ClearValue();
+    mUI.spinBottomBoundary->ClearValue();
+
     const auto index = mState.scene->GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
     {
@@ -2266,38 +2251,21 @@ void SceneWidget::DisplaySceneProperties()
         SetValue(mUI.spDenseGridCols, ptr->num_cols);
     }
 
-    SetValue(mUI.chkLeftBoundary,   false);
-    SetValue(mUI.chkRightBoundary,  false);
-    SetValue(mUI.chkTopBoundary,    false);
-    SetValue(mUI.chkBottomBoundary, false);
-    SetEnabled(mUI.spinLeftBoundary,   false);
-    SetEnabled(mUI.spinRightBoundary,  false);
-    SetEnabled(mUI.spinTopBoundary,    false);
-    SetEnabled(mUI.spinBottomBoundary, false);
-
     if (const auto* ptr = mState.scene->GetLeftBoundary())
     {
         SetValue(mUI.spinLeftBoundary, *ptr);
-        SetValue(mUI.chkLeftBoundary, true);
-        SetEnabled(mUI.spinLeftBoundary, true);
     }
     if (const auto* ptr = mState.scene->GetRightBoundary())
     {
         SetValue(mUI.spinRightBoundary, *ptr);
-        SetValue(mUI.chkRightBoundary, true);
-        SetEnabled(mUI.spinRightBoundary, true);
     }
     if (const auto* ptr = mState.scene->GetTopBoundary())
     {
         SetValue(mUI.spinTopBoundary, *ptr);
-        SetValue(mUI.chkTopBoundary, true);
-        SetEnabled(mUI.spinTopBoundary, true);
     }
     if (const auto* ptr = mState.scene->GetBottomBoundary())
     {
         SetValue(mUI.spinBottomBoundary, *ptr);
-        SetValue(mUI.chkBottomBoundary, true);
-        SetEnabled(mUI.spinBottomBoundary, true);
     }
 }
 
@@ -2438,14 +2406,14 @@ void SceneWidget::SetSceneBoundary()
     mState.scene->ResetTopBoundary();
     mState.scene->ResetBottomBoundary();
 
-    if (GetValue(mUI.chkLeftBoundary))
-        mState.scene->SetLeftBoundary(GetValue(mUI.spinLeftBoundary));
-    if (GetValue(mUI.chkRightBoundary))
-        mState.scene->SetRightBoundary(GetValue(mUI.spinRightBoundary));
-    if (GetValue(mUI.chkTopBoundary))
-        mState.scene->SetTopBoundary(GetValue(mUI.spinTopBoundary));
-    if (GetValue(mUI.chkBottomBoundary))
-        mState.scene->SetBottomBoundary(GetValue(mUI.spinBottomBoundary));
+    if (const auto& left = mUI.spinLeftBoundary->GetValue())
+        mState.scene->SetLeftBoundary(left.value());
+    if (const auto& right = mUI.spinRightBoundary->GetValue())
+        mState.scene->SetRightBoundary(right.value());
+    if (const auto& top = mUI.spinTopBoundary->GetValue())
+        mState.scene->SetTopBoundary(top.value());
+    if (const auto& bottom = mUI.spinBottomBoundary->GetValue())
+        mState.scene->SetBottomBoundary(bottom.value());
 }
 
 void SceneWidget::FindNode(const game::SceneNodeClass* node)

@@ -125,14 +125,10 @@ namespace gui
         void on_spQuadMaxItems_valueChanged(int);
         void on_spDenseGridRows_valueChanged(int);
         void on_spDenseGridCols_valueChanged(int);
-        void on_chkLeftBoundary_stateChanged(int);
-        void on_chkRightBoundary_stateChanged(int);
-        void on_chkTopBoundary_stateChanged(int);
-        void on_chkBottomBoundary_stateChanged(int);
-        void on_spinLeftBoundary_valueChanged(double value);
-        void on_spinRightBoundary_valueChanged(double value);
-        void on_spinTopBoundary_valueChanged(double value);
-        void on_spinBottomBoundary_valueChanged(double value);
+        void on_spinLeftBoundary_valueChanged(bool has_value, double value);
+        void on_spinRightBoundary_valueChanged(bool has_value, double value);
+        void on_spinTopBoundary_valueChanged(bool has_value, double value);
+        void on_spinBottomBoundary_valueChanged(bool has_value, double value);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
@@ -251,8 +247,8 @@ namespace gui
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::SceneClass> mUndoStack;
-
+        // Preview window (if any)
         std::unique_ptr<PlayWindow> mPreview;
-
+        // keyboard movement velocities.
     };
 }
