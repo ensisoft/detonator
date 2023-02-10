@@ -56,7 +56,14 @@ private:
 class TestLoader : public engine::Loader {
 public:
     EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
-    { return nullptr; }
+    {
+        if (base::Contains(uri, "this-file-doesnt exist"))
+            return nullptr;
+
+        if (base::StartsWith(uri, "fs://"))
+            return std::make_shared<TestData>(uri.substr(5));
+        return nullptr;
+    }
     EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
         if (base::StartsWith(filename, "this-file-doesnt-exist"))
@@ -1192,7 +1199,7 @@ end
 
         TestLoader loader;
 
-        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "fs://game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
         game.Init();
         TEST_REQUIRE(game.LoadGame());
@@ -1224,7 +1231,7 @@ end
     )");
         TestLoader loader;
 
-        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "fs://game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
         game.Init();
         TEST_REQUIRE(game.LoadGame());
@@ -1249,7 +1256,7 @@ endkasd
     {
         TestLoader loader;
 
-        engine::LuaRuntime game("", "this-file-doesnt-exist.lua", "", "");
+        engine::LuaRuntime game("", "fs://this-file-doesnt-exist.lua", "", "");
         game.SetDataLoader(&loader);
         TEST_EXCEPTION(game.Init());
     }
@@ -1257,7 +1264,7 @@ endkasd
     // broken Lua code in file.
     {
         TestLoader loader;
-        engine::LuaRuntime game("", "broken.lua", "", "");
+        engine::LuaRuntime game("", "fs://broken.lua", "", "");
         game.SetDataLoader(&loader);
         TEST_EXCEPTION(game.Init());
     }
@@ -1271,7 +1278,7 @@ function LoadGame()
 end
     )");
         TestLoader loader;
-        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "fs://game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
         TEST_EXCEPTION(game.Init());
 
@@ -1286,7 +1293,7 @@ function LoadGame()
 end
     )");
         TestLoader loader;
-        engine::LuaRuntime game("", "game_main_script_test.lua", "", "");
+        engine::LuaRuntime game("", "fs://game_main_script_test.lua", "", "");
         game.SetDataLoader(&loader);
         TEST_EXCEPTION(game.Init());
     }
