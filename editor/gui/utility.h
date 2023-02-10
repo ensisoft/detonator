@@ -48,6 +48,7 @@
 #include "editor/gui/timewidget.h"
 #include "editor/gui/collapsible_widget.h"
 #include "editor/gui/uniform.h"
+#include "editor/gui/spinboxwidget.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -268,6 +269,13 @@ EnumT EnumFromCombo(const QComboBox* combo)
     const auto& val = magic_enum::enum_cast<EnumT>(name);
     ASSERT(val.has_value());
     return val.value();
+}
+
+
+inline void SetValue(gui::DoubleSpinBox* spin, double value)
+{
+    QSignalBlocker s(spin);
+    spin->SetValue(value);
 }
 
 inline void SetValue(QProgressBar* bar, int value)
@@ -1072,6 +1080,14 @@ inline void SetProperty(Resource& res, const PropertyKey& key, size_t value)
 
 // user properties.
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const gui::DoubleSpinBox* spin)
+{
+    if (spin->HasValue())
+        res.SetUserProperty(key + "_value", spin->GetValue().value());
+    else res.DeleteUserProperty(key + "_value");
+}
+
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const gui::CollapsibleWidget* widget)
 { res.SetUserProperty(key + "_collapsed", widget->IsCollapsed()); }
 template<typename Resource>
@@ -1360,6 +1376,18 @@ inline bool GetUserProperty(const Resource& res, const PropertyKey& key, color_w
     if (res.GetUserProperty(key, &value))
     {
         color->setColor(value);
+        return true;
+    }
+    return false;
+}
+
+template<typename Resource>
+inline bool GetUserProperty(const Resource& res, const PropertyKey& key, gui::DoubleSpinBox* widget)
+{
+    double value = 0.0;
+    if (res.GetUserProperty(key + "_value", &value))
+    {
+        widget->SetValue(value);
         return true;
     }
     return false;

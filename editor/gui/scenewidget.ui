@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1889</width>
-    <height>1398</height>
+    <width>1898</width>
+    <height>1400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -266,7 +266,7 @@
              <x>0</x>
              <y>0</y>
              <width>340</width>
-             <height>777</height>
+             <height>779</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -391,147 +391,151 @@
               </property>
               <widget class="QWidget" name="sceneBoundsPage">
                <layout class="QGridLayout" name="gridLayout_11">
-                <item row="4" column="1">
-                 <widget class="QDoubleSpinBox" name="spinBottomBoundary">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="suffix">
-                   <string/>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-10000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>10000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>10.000000000000000</double>
-                  </property>
-                  <property name="stepType">
-                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                  </property>
-                 </widget>
-                </item>
                 <item row="1" column="1">
-                 <widget class="QDoubleSpinBox" name="spinLeftBoundary">
+                 <widget class="gui::DoubleSpinBox" name="spinLeftBoundary">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="suffix">
-                   <string/>
+                  <property name="specialValueText" stdset="0">
+                   <string>Unbounded</string>
                   </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-10000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>10000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>10.000000000000000</double>
-                  </property>
-                  <property name="stepType">
+                  <property name="stepType" stdset="0">
                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                   </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QDoubleSpinBox" name="spinTopBoundary">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="suffix">
-                   <string/>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
+                  <property name="minimum" stdset="0">
                    <double>-10000.000000000000000</double>
                   </property>
-                  <property name="maximum">
+                  <property name="maximum" stdset="0">
                    <double>10000.000000000000000</double>
                   </property>
-                  <property name="singleStep">
+                  <property name="singleStep" stdset="0">
                    <double>10.000000000000000</double>
                   </property>
-                  <property name="stepType">
-                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  <property name="hasValue" stdset="0">
+                   <bool>false</bool>
                   </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QDoubleSpinBox" name="spinRightBoundary">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                  <property name="showClearButton" stdset="0">
+                   <bool>true</bool>
                   </property>
-                  <property name="suffix">
-                   <string/>
-                  </property>
-                  <property name="decimals">
-                   <number>1</number>
-                  </property>
-                  <property name="minimum">
-                   <double>-10000.000000000000000</double>
-                  </property>
-                  <property name="maximum">
-                   <double>10000.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>10.000000000000000</double>
-                  </property>
-                  <property name="stepType">
-                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QCheckBox" name="chkRightBoundary">
-                  <property name="text">
-                   <string>Right</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QCheckBox" name="chkTopBoundary">
-                  <property name="text">
-                   <string>Top</string>
+                  <property name="clearButtonIcon" stdset="0">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QCheckBox" name="chkLeftBoundary">
+                 <widget class="QLabel" name="label_15">
                   <property name="text">
                    <string>Left</string>
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="0">
-                 <widget class="QCheckBox" name="chkBottomBoundary">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                <item row="2" column="1">
+                 <widget class="gui::DoubleSpinBox" name="spinRightBoundary">
+                  <property name="specialValueText" stdset="0">
+                   <string>Unbounded</string>
                   </property>
+                  <property name="stepType" stdset="0">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                  <property name="minimum" stdset="0">
+                   <double>-10000.000000000000000</double>
+                  </property>
+                  <property name="maximum" stdset="0">
+                   <double>10000.000000000000000</double>
+                  </property>
+                  <property name="singleStep" stdset="0">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="hasValue" stdset="0">
+                   <bool>false</bool>
+                  </property>
+                  <property name="showClearButton" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="clearButtonIcon" stdset="0">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
+                   <string>Right</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="gui::DoubleSpinBox" name="spinTopBoundary">
+                  <property name="specialValueText" stdset="0">
+                   <string>Unbounded</string>
+                  </property>
+                  <property name="stepType" stdset="0">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                  <property name="minimum" stdset="0">
+                   <double>-10000.000000000000000</double>
+                  </property>
+                  <property name="maximum" stdset="0">
+                   <double>10000.000000000000000</double>
+                  </property>
+                  <property name="singleStep" stdset="0">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="hasValue" stdset="0">
+                   <bool>false</bool>
+                  </property>
+                  <property name="showClearButton" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="clearButtonIcon" stdset="0">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_17">
+                  <property name="text">
+                   <string>Top</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="gui::DoubleSpinBox" name="spinBottomBoundary">
+                  <property name="specialValueText" stdset="0">
+                   <string>Unbounded</string>
+                  </property>
+                  <property name="stepType" stdset="0">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                  <property name="minimum" stdset="0">
+                   <double>-10000.000000000000000</double>
+                  </property>
+                  <property name="maximum" stdset="0">
+                   <double>10000.000000000000000</double>
+                  </property>
+                  <property name="singleStep" stdset="0">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="hasValue" stdset="0">
+                   <bool>false</bool>
+                  </property>
+                  <property name="showClearButton" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="clearButtonIcon" stdset="0">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_24">
                   <property name="text">
                    <string>Bottom</string>
                   </property>
@@ -2048,6 +2052,11 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>gui::DoubleSpinBox</class>
+   <extends>QWidget</extends>
+   <header>spinboxwidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -2068,14 +2077,6 @@
   <tabstop>sceneVariablesGroup</tabstop>
   <tabstop>scriptVarList</tabstop>
   <tabstop>sceneBoundsGroup</tabstop>
-  <tabstop>spinBottomBoundary</tabstop>
-  <tabstop>spinLeftBoundary</tabstop>
-  <tabstop>spinTopBoundary</tabstop>
-  <tabstop>spinRightBoundary</tabstop>
-  <tabstop>chkRightBoundary</tabstop>
-  <tabstop>chkTopBoundary</tabstop>
-  <tabstop>chkLeftBoundary</tabstop>
-  <tabstop>chkBottomBoundary</tabstop>
   <tabstop>sceneIndexGroup</tabstop>
   <tabstop>spRectW</tabstop>
   <tabstop>spRectH</tabstop>

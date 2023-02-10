@@ -389,6 +389,8 @@ namespace app
             *out = qvariant_cast<T>(ret);
             return true;
         }
+        void DeleteProperty(const PropertyKey& key)
+        { mProperties.remove(key);  }
 
         // User specific workspace properties.
         bool HasUserProperty(const PropertyKey& name) const
@@ -454,6 +456,8 @@ namespace app
             *out = QByteArray::fromBase64(base64.toLatin1());
             return true;
         }
+        void DeleteUserProperty(const PropertyKey& key)
+        { mUserProperties.remove(key); }
 
         // Project settings.
         struct ProjectSettings {
