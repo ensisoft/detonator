@@ -30,10 +30,9 @@
 #include "engine/main/interface.h"
 #include "base/logging.h"
 #include "base/format.h"
-
 #include "audio/graph.h"
 #include "audio/loader.h"
-
+#include "device/device.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -43,14 +42,11 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
-
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/state.h"
-
 #include "game/entity.h"
 #include "game/scene.h"
-
 #include "engine/audio.h"
 #include "engine/classlib.h"
 #include "engine/renderer.h"
@@ -984,7 +980,7 @@ public:
 
     virtual void Init(const InitParams& init) override
     {
-        mDevice  = gfx::Device::Create(init.context);
+        mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mPainter->SetEditingMode(false);

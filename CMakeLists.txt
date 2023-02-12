@@ -166,14 +166,13 @@ add_library(DataLib
     data/json.cpp
     data/io.cpp)
 add_library(GfxLib
+    device/opengles.cpp
     graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
     graphics/renderpass.cpp
     graphics/image.cpp
-    graphics/device.cpp
-    graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
     graphics/loader.cpp
@@ -197,14 +196,13 @@ add_library(UiLib
     uikit/window.cpp)
 
 add_library(GfxLibTesting
+    device/opengles.cpp
     graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
     graphics/renderpass.cpp
     graphics/image.cpp
-    graphics/device.cpp
-    graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
     graphics/loader.cpp
@@ -590,13 +588,12 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 # graphics test application. Uses the graphics APIs to draw stuff.
 # needs DETERMINISTIC_RANDOM flag
 add_executable(graphics_test
+    device/opengles.cpp
     graphics/bitmap.cpp
     graphics/material.cpp
     graphics/renderpass.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
-    graphics/device.cpp
-    graphics/opengl_es2_device.cpp
     graphics/painter.cpp
     graphics/text.cpp
     graphics/loader.cpp

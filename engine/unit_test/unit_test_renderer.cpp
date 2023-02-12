@@ -19,7 +19,7 @@
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
-
+#include "device/device.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
@@ -71,7 +71,7 @@ bool TestPixelCount(const gfx::Bitmap<Pixel>& bmp, const gfx::URect& area, gfx::
 }
 
 // setup context for headless rendering.
-class TestContext : public gfx::Device::Context
+class TestContext : public dev::Context
 {
 public:
     TestContext(unsigned w, unsigned h)
@@ -219,10 +219,14 @@ void main() {
 private:
 };
 
+std::shared_ptr<gfx::Device> CreateDevice()
+{
+    return dev::CreateDevice(std::make_shared<TestContext>(256, 256))->GetSharedGraphicsDevice();
+}
 
 void unit_test_drawable_item()
 {
-    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
+    auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
     painter->SetOrthographicProjection(256, 256);
@@ -477,7 +481,7 @@ void unit_test_text_item()
 
 void unit_test_entity_layering()
 {
-    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
+    auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
     painter->SetOrthographicProjection(256, 256);
@@ -564,7 +568,7 @@ void unit_test_scene_layering()
 
 void unit_test_entity_lifecycle()
 {
-    auto device = gfx::Device::Create(std::make_shared<TestContext>(256, 256));
+    auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
     painter->SetOrthographicProjection(256, 256);

@@ -29,11 +29,12 @@
 #include <thread>
 #include <chrono>
 
-#include "editor/app/eventlog.h"
+#include "device/device.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
-#include "utility.h"
-#include "gfxwidget.h"
+#include "editor/app/eventlog.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/gfxwidget.h"
 
 // Sync to VBLANK and multiple OpenGL Contexts:
 //
@@ -90,7 +91,7 @@ namespace {
     // a global flag for toggling vsync on/off.
     bool should_have_vsync = false;
     std::weak_ptr<QOpenGLContext> shared_context;
-    std::weak_ptr<gfx::Device> shared_device;
+    std::weak_ptr<gfx::Device> shared_gfx_device;
     // current surfaces ugh.
     std::unordered_set<gui::GfxWindow*> surfaces;
 }// namespace
@@ -367,7 +368,7 @@ void GfxWindow::doInit()
     mContext = context;
     mContext->makeCurrent(this);
 
-    class WindowContext : public gfx::Device::Context
+    class WindowContext : public dev::Context
     {
     public:
         WindowContext(QOpenGLContext* context) : mContext(context)
@@ -388,14 +389,15 @@ void GfxWindow::doInit()
         QOpenGLContext* mContext = nullptr;
     };
 
-    auto device = shared_device.lock();
-    if (!device)
+    auto gfx_device = shared_gfx_device.lock();
+    if (!gfx_device)
     {
         // create custom painter for fancier shader based effects.
-        device = gfx::Device::Create(std::make_shared<WindowContext>(mContext.get()));
-        shared_device = device;
+        auto dev = dev::CreateDevice(std::make_shared<WindowContext>(mContext.get()));
+        gfx_device = dev->GetSharedGraphicsDevice();
+        shared_gfx_device = gfx_device;
     }
-    mCustomGraphicsDevice  = device;
+    mCustomGraphicsDevice  = gfx_device;
     mCustomGraphicsPainter = gfx::Painter::Create(mCustomGraphicsDevice);
     // this magic flag here turns all statics into "non-statics"
     // and lets resources that we create with static flags to
@@ -477,7 +479,7 @@ void GfxWindow::clearColorChanged(QColor color)
 // static
 void GfxWindow::CleanGarbage()
 {
-    auto device = shared_device.lock();
+    auto device = shared_gfx_device.lock();
     if (!device)
         return;
     device->CleanGarbage(120, gfx::Device::GCFlags::Textures |

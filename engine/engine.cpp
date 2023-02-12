@@ -80,7 +80,7 @@ public:
         mAudio->SetClassLibrary(mClasslib);
         mAudio->SetLoader(mAudioLoader);
         mAudio->Start();
-        mDevice  = gfx::Device::Create(init.context);
+        mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mPainter->SetEditingMode(init.editing_mode);

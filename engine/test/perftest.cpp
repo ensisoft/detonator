@@ -29,6 +29,7 @@
 #include "audio/format.h"
 #include "audio/loader.h"
 #include "audio/graph.h"
+#include "device/device.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
 #include "engine/audio.h"
@@ -46,7 +47,7 @@ bool enable_pcm_caching=false;
 bool enable_file_caching=false;
 
 // setup context for headless rendering.
-class TestContext : public gfx::Device::Context
+class TestContext : public dev::Context
 {
 public:
     TestContext(unsigned w, unsigned h)
@@ -364,7 +365,7 @@ int test_main(int argc, char* argv[])
     constexpr auto SurfaceHeight = 768;
     const bool screenshot = opt.WasGiven("--screenshot");
 
-    auto graphics_device = gfx::Device::Create(std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight));
+    auto graphics_device = dev::CreateDevice(std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight))->GetSharedGraphicsDevice();
     auto graphics_painter = gfx::Painter::Create(graphics_device);
     graphics_painter->SetSurfaceSize(SurfaceWidth, SurfaceHeight);
     graphics_painter->SetEditingMode(false);

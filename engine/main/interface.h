@@ -36,6 +36,7 @@
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "engine/color.h"
+#include "device/device.h"
 #include "graphics/device.h"
 #include "graphics/loader.h"
 #include "wdk/events.h"
@@ -280,7 +281,7 @@ namespace engine
             std::string application_name;
             // context is the current rendering context that can be used
             // to create the graphics device(s).
-            gfx::Device::Context* context = nullptr;
+            dev::Context* context = nullptr;
             // Width (in pixels) of the current rendering surface such as a window
             // or an off-screen buffer.
             unsigned surface_width = 0;

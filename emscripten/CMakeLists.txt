@@ -58,6 +58,7 @@ add_executable(GameEngine
     ../engine/renderer.cpp
     ../engine/state.cpp
     ../engine/ui.cpp
+    ../device/opengles.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp
     ../graphics/drawable.cpp
@@ -66,8 +67,6 @@ add_executable(GameEngine
     ../graphics/drawing.cpp
     ../graphics/bitmap.cpp
     ../graphics/text.cpp
-    ../graphics/opengl_es2_device.cpp
-    ../graphics/device.cpp
     ../wdk/wdk/keys.cpp
     ../uikit/window.cpp
     ../uikit/widget.cpp
