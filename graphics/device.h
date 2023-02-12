@@ -119,50 +119,7 @@ namespace gfx
             float line_width = 1.0f;
         };
 
-        // OpenGL graphics context. The context is the interface for the device
-        // to resolve the (possibly context specific) OpenGL entry points.
-        // This abstraction allows the device to remain agnostic as to
-        // what kind of windowing system/graphics subsystem is creating the context
-        // and what is the ultimate rendering target (pbuffer, pixmap or window)
-        class Context
-        {
-        public:
-            enum class Version {
-                OpenGL_ES2,
-                OpenGL_ES3,
-                WebGL_1,
-                WebGL_2
-            };
 
-            virtual ~Context() = default;
-            // Display the current contents of the rendering target.
-            virtual void Display() = 0;
-            // Make this context as the current context for the
-            // calling thread.
-            // Note: In OpenGL all the API functions assume
-            // an "implicit" context for the calling thread to be a global
-            // object that is set through the window system integration layer
-            // i.e. through calling some method on  WGL, GLX, EGL or AGL.
-            // So if an application is creating multiple contexts in some thread
-            // before starting to use any particular context it has to be
-            // made the "current content". The context contains all the
-            // OpenGL API state.
-            virtual void MakeCurrent() = 0;
-            // Resolve an OpenGL API function to a function pointer.
-            // Note: The function pointers can indeed be different for
-            // different contexts depending on their specific configuration.
-            // Returns a valid pointer or nullptr if there's no such
-            // function. (For example an extension function is not available).
-            virtual void* Resolve(const char* name) = 0;
-            // Get the context version.
-            virtual Version GetVersion() const = 0;
-            // Check whether the context is a debug context or not.
-            // if the context is a debug context then additional debug
-            // features are enabled when supported by the underlying platform.
-            virtual bool IsDebug() const
-            { return false; }
-        private:
-        };
 
         virtual ~Device() = default;
 
@@ -282,19 +239,7 @@ namespace gfx
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
 
         virtual const Framebuffer* GetCurrentFramebuffer() const = 0;
-
-        // Create a rendering device appropriate for the given OpenGL graphics context.
-        // Context should be a valid non-null context object.
-        static
-        std::shared_ptr<Device> Create(std::shared_ptr<Context> context);
-        static
-        std::shared_ptr<Device> Create(Context* context);
     private:
     };
-
-    namespace detail {
-        std::shared_ptr<Device> CreateOpenGLES2Device(std::shared_ptr<gfx::Device::Context> context);
-        std::shared_ptr<Device> CreateOpenGLES2Device(gfx::Device::Context* context);
-    }
 
 } // namespace

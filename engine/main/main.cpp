@@ -50,6 +50,7 @@
 #include "base/json.h"
 #include "base/trace.h"
 #include "data/json.h"
+#include "device/device.h"
 #include "engine/main/interface.h"
 #include "engine/classlib.h"
 #include "wdk/opengl/config.h"
@@ -192,7 +193,7 @@ std::string GenerateGameHome(const std::string& user_home, const std::string& ti
 }
 
 // Glue class to connect the window and device
-class WindowContext : public gfx::Device::Context
+class WindowContext : public dev::Context
 {
 public:
     WindowContext(const wdk::Config::Attributes& attrs, bool debug)

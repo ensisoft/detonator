@@ -26,6 +26,7 @@
 
 #include "base/logging.h"
 #include "base/format.h"
+#include "device/device.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -1946,7 +1947,7 @@ int main(int argc, char* argv[])
 
     // context integration glue code that puts together
     // wdk::Context and gfx::Device
-    class WindowContext : public gfx::Device::Context
+    class WindowContext : public dev::Context
     {
     public:
         WindowContext(wdk::Config::Multisampling sampling, bool srgb, bool debug)
@@ -2018,8 +2019,9 @@ int main(int argc, char* argv[])
     };
 
     auto context = std::make_shared<WindowContext>(sampling, srgb, debug_context);
-    auto device  = gfx::Device::Create(context);
-    auto painter = gfx::Painter::Create(device);
+    auto dev_device  = dev::CreateDevice(context);
+    auto gfx_device = dev_device->GetSharedGraphicsDevice();
+    auto painter = gfx::Painter::Create(gfx_device);
     painter->SetEditingMode(false);
 
     std::size_t test_index = 0;
@@ -2081,7 +2083,7 @@ int main(int argc, char* argv[])
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
         {
             static unsigned screenshot_number = 0;
-            const auto& rgba = device->ReadColorBuffer(window.GetSurfaceWidth(),
+            const auto& rgba = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
                 window.GetSurfaceHeight());
 
             const auto& name = "demo_" + std::to_string(screenshot_number) + ".png";
@@ -2126,15 +2128,15 @@ int main(int argc, char* argv[])
                 for (int step=0; step<534; ++step)
                     test->Update(dt);
 
-                device->BeginFrame();
-                device->ClearColor(gfx::Color::Black);
+                gfx_device->BeginFrame();
+                gfx_device->ClearColor(gfx::Color::Black);
                 painter->SetViewport(0, 0, surface_width, surface_height);
                 painter->SetSurfaceSize(surface_width, surface_height);
                 painter->SetOrthographicProjection(surface_width , surface_height);
                 // render the test.
                 test->Render(*painter);
 
-                const gfx::Bitmap<gfx::RGBA>& result = device->ReadColorBuffer(window.GetSurfaceWidth(),
+                const gfx::Bitmap<gfx::RGBA>& result = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
                     window.GetSurfaceHeight());
 
                 const auto& resultfile = base::FormatString("Result_%1_%2_%3_.png", test->GetName(), i, sampling);
@@ -2142,8 +2144,8 @@ int main(int argc, char* argv[])
                 const auto& deltafile  = base::FormatString("Delta_%1_%2_%3_.png", test->GetName(), i, sampling);
                 if (!base::FileExists(goldfile) || issue_gold)
                 {
-                    device->EndFrame(true /*display*/);
-                    device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
+                    gfx_device->EndFrame(true /*display*/);
+                    gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
                     // the result is the new gold image. should be eye balled and verified.
                     gfx::WritePNG(result, goldfile);
                     INFO("Wrote new gold file. '%1'", goldfile);
@@ -2196,8 +2198,8 @@ int main(int argc, char* argv[])
                     stop_for_input = false;
                 }
 
-                device->EndFrame(true /* display */);
-                device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
+                gfx_device->EndFrame(true /* display */);
+                gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
 
                 if (stop_for_input && user_interaction)
                 {
@@ -2261,16 +2263,16 @@ int main(int argc, char* argv[])
             for (auto& test : tests)
                 test->Update(secs);
 
-            device->BeginFrame();
-            device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
+            gfx_device->BeginFrame();
+            gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
             painter->SetViewport(0, 0, surface_width, surface_height);
             painter->SetSurfaceSize(surface_width, surface_height);
             painter->SetOrthographicProjection(surface_width , surface_height);
             // render the current test
             tests[test_index]->Render(*painter);
 
-            device->EndFrame(true /*display*/);
-            device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
+            gfx_device->EndFrame(true /*display*/);
+            gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
 
             // process incoming (window) events
             wdk::native_event_t event;

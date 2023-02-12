@@ -27,6 +27,7 @@
 #include "base/utility.h"
 #include "data/json.h"
 #include "wdk/events.h"
+#include "device/device.h"
 #include "engine/main/interface.h"
 #include "engine/loader.h"
 
@@ -92,7 +93,7 @@ std::string GenerateGameHome(const std::string& user_home, const std::string& ti
 #endif
 }
 
-class WebGLContext : public gfx::Device::Context
+class WebGLContext : public dev::Context
 {
 public:
     // WebGL power preference.

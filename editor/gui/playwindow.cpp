@@ -32,6 +32,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
+#include "device/device.h"
 #include "audio/loader.h"
 #include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
@@ -189,7 +190,7 @@ wdk::Keysym MapVirtualKey(int from_qt)
 namespace gui
 {
 
-class PlayWindow::WindowContext : public gfx::Device::Context
+class PlayWindow::WindowContext : public dev::Context
 {
 public:
     WindowContext(QOpenGLContext* context, QWindow* surface)

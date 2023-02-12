@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 #include "graphics/color4f.h"
 #include "graphics/loader.h"
 #include "graphics/framebuffer.h"
+#include "device/device.h"
 
 // WebGL
 #define WEBGL_DEPTH_STENCIL_ATTACHMENT 0x821A
@@ -219,11 +220,6 @@ void GL_APIENTRY DebugCallback(GLenum source,
         ERROR("GL error detected. %1", message);
 }
 
-} // namespace
-
-namespace gfx
-{
-
 // This struct holds the OpenGL ES 2.0 entry points that
 // we need in this device implementation.
 //
@@ -335,10 +331,12 @@ struct OpenGLFunctions
 // try to keep this implementation free of Qt in
 // order to promote portability to possibly emscripten
 // or Qt free implementation.
-class OpenGLES2GraphicsDevice : public Device
+class OpenGLES2GraphicsDevice : public std::enable_shared_from_this<OpenGLES2GraphicsDevice>
+                              , public gfx::Device
+                              , public dev::Device
 {
 public:
-    OpenGLES2GraphicsDevice(Context* context)
+    OpenGLES2GraphicsDevice(dev::Context* context)
         : mContext(context)
     {
     #define RESOLVE(x) mGL.x = reinterpret_cast<decltype(mGL.x)>(mContext->Resolve(#x));
@@ -495,7 +493,7 @@ public:
             INFO("Debug output is enabled.");
         }
     }
-    OpenGLES2GraphicsDevice(std::shared_ptr<Context> context)
+    OpenGLES2GraphicsDevice(std::shared_ptr<dev::Context> context)
         : OpenGLES2GraphicsDevice(context.get())
     {
         mContextImpl = context;
@@ -517,7 +515,7 @@ public:
        }
     }
 
-    virtual void ClearColor(const Color4f& color) override
+    virtual void ClearColor(const gfx::Color4f& color) override
     {
         if (!SetupFBO())
             return;
@@ -541,7 +539,7 @@ public:
         GL_CALL(glClearDepthf(value));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     }
-    virtual void ClearColorDepth(const Color4f& color, float depth) override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth) override
     {
         if (!SetupFBO())
             return;
@@ -550,7 +548,7 @@ public:
         GL_CALL(glClearDepthf(depth));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
     }
-    virtual void ClearColorDepthStencil(const Color4f&  color, float depth, int stencil) override
+    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil) override
     {
         if (!SetupFBO())
             return;
@@ -570,7 +568,7 @@ public:
         mDefaultMagTextureFilter = filter;
     }
 
-    virtual Shader* FindShader(const std::string& name) override
+    virtual gfx::Shader* FindShader(const std::string& name) override
     {
         auto it = mShaders.find(name);
         if (it == std::end(mShaders))
@@ -578,7 +576,7 @@ public:
         return it->second.get();
     }
 
-    virtual Shader* MakeShader(const std::string& name) override
+    virtual gfx::Shader* MakeShader(const std::string& name) override
     {
         auto shader = std::make_unique<ShaderImpl>(mGL);
         auto* ret   = shader.get();
@@ -586,7 +584,7 @@ public:
         return ret;
     }
 
-    virtual Program* FindProgram(const std::string& name) override
+    virtual gfx::Program* FindProgram(const std::string& name) override
     {
         auto it = mPrograms.find(name);
         if (it == std::end(mPrograms))
@@ -594,7 +592,7 @@ public:
         return it->second.get();
     }
 
-    virtual Program* MakeProgram(const std::string& name) override
+    virtual gfx::Program* MakeProgram(const std::string& name) override
     {
         auto program = std::make_unique<ProgImpl>(mGL);
         auto* ret    = program.get();
@@ -603,7 +601,7 @@ public:
         return ret;
     }
 
-    virtual Geometry* FindGeometry(const std::string& name) override
+    virtual gfx::Geometry* FindGeometry(const std::string& name) override
     {
         auto it = mGeoms.find(name);
         if (it == std::end(mGeoms))
@@ -611,7 +609,7 @@ public:
         return it->second.get();
     }
 
-    virtual Geometry* MakeGeometry(const std::string& name) override
+    virtual gfx::Geometry* MakeGeometry(const std::string& name) override
     {
         auto geometry = std::make_unique<GeomImpl>(this);
         auto* ret = geometry.get();
@@ -620,7 +618,7 @@ public:
         return ret;
     }
 
-    virtual Texture* FindTexture(const std::string& name) override
+    virtual gfx::Texture* FindTexture(const std::string& name) override
     {
         auto it = mTextures.find(name);
         if (it == std::end(mTextures))
@@ -628,7 +626,7 @@ public:
         return it->second.get();
     }
 
-    virtual Texture* MakeTexture(const std::string& name) override
+    virtual gfx::Texture* MakeTexture(const std::string& name) override
     {
         auto texture = std::make_unique<TextureImpl>(mGL, *this);
         auto* ret = texture.get();
@@ -642,14 +640,14 @@ public:
         ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
-    virtual Framebuffer* FindFramebuffer(const std::string& name) override
+    virtual gfx::Framebuffer* FindFramebuffer(const std::string& name) override
     {
         auto it = mFBOs.find(name);
         if (it == std::end(mFBOs))
             return nullptr;
         return it->second.get();
     }
-    virtual Framebuffer* MakeFramebuffer(const std::string& name) override
+    virtual gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
     {
         auto fbo = std::make_unique<FramebufferImpl>(name, mGL, *this);
         auto* ret = fbo.get();
@@ -687,12 +685,12 @@ public:
         mFBOs.clear();
     }
 
-    virtual void SetFramebuffer(const Framebuffer* fbo) override
+    virtual void SetFramebuffer(const gfx::Framebuffer* fbo) override
     {
         mFBO = (FramebufferImpl*)fbo;
     }
 
-    virtual void Draw(const Program& program, const Geometry& geometry, const State& state) override
+    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
     {
         if (!SetupFBO())
             return;
@@ -737,7 +735,7 @@ public:
                 GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
             else if (const auto* ptr = std::get_if<glm::vec4>(&value))
                 GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
-            else if (const auto* ptr = std::get_if<Color4f>(&value))
+            else if (const auto* ptr = std::get_if<gfx::Color4f>(&value))
                 GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
             else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix2>(&value))
                 GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
@@ -834,16 +832,16 @@ public:
         GLenum default_texture_mag_filter = GL_NONE;
         switch (mDefaultMinTextureFilter)
         {
-            case Device::MinFilter::Nearest:   default_texture_min_filter = GL_NEAREST; break;
-            case Device::MinFilter::Linear:    default_texture_min_filter = GL_LINEAR;  break;
-            case Device::MinFilter::Mipmap:    default_texture_min_filter = GL_NEAREST_MIPMAP_NEAREST; break;
-            case Device::MinFilter::Bilinear:  default_texture_min_filter = GL_NEAREST_MIPMAP_LINEAR; break;
-            case Device::MinFilter::Trilinear: default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
+            case gfx::Device::MinFilter::Nearest:   default_texture_min_filter = GL_NEAREST; break;
+            case gfx::Device::MinFilter::Linear:    default_texture_min_filter = GL_LINEAR;  break;
+            case gfx::Device::MinFilter::Mipmap:    default_texture_min_filter = GL_NEAREST_MIPMAP_NEAREST; break;
+            case gfx::Device::MinFilter::Bilinear:  default_texture_min_filter = GL_NEAREST_MIPMAP_LINEAR; break;
+            case gfx::Device::MinFilter::Trilinear: default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
         }
         switch (mDefaultMagTextureFilter)
         {
-            case Device::MagFilter::Nearest: default_texture_mag_filter = GL_NEAREST; break;
-            case Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
+            case gfx::Device::MagFilter::Nearest: default_texture_mag_filter = GL_NEAREST; break;
+            case gfx::Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
         }
 
         // set program texture bindings
@@ -917,42 +915,42 @@ public:
             GLenum texture_mag_filter = GL_NONE;
             switch (texture->GetMinFilter())
             {
-                case Texture::MinFilter::Default:
+                case gfx::Texture::MinFilter::Default:
                     texture_min_filter = default_texture_min_filter;
                     break;
-                case Texture::MinFilter::Nearest:
+                case gfx::Texture::MinFilter::Nearest:
                     texture_min_filter = GL_NEAREST;
                     break;
-                case Texture::MinFilter::Linear:
+                case gfx::Texture::MinFilter::Linear:
                     texture_min_filter = GL_LINEAR;
                     break;
-                case Texture::MinFilter::Mipmap:
+                case gfx::Texture::MinFilter::Mipmap:
                     texture_min_filter = GL_NEAREST_MIPMAP_NEAREST;
                     break;
-                case Texture::MinFilter::Bilinear:
+                case gfx::Texture::MinFilter::Bilinear:
                     texture_min_filter = GL_NEAREST_MIPMAP_LINEAR;
                     break;
-                case Texture::MinFilter::Trilinear:
+                case gfx::Texture::MinFilter::Trilinear:
                     texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
                     break;
             }
             switch (texture->GetMagFilter())
             {
-                case Texture::MagFilter::Default:
+                case gfx::Texture::MagFilter::Default:
                     texture_mag_filter = default_texture_mag_filter;
                     break;
-                case Texture::MagFilter::Nearest:
+                case gfx::Texture::MagFilter::Nearest:
                     texture_mag_filter = GL_NEAREST;
                     break;
-                case Texture::MagFilter::Linear:
+                case gfx::Texture::MagFilter::Linear:
                     texture_mag_filter = GL_LINEAR;
                     break;
             }
             ASSERT(texture_min_filter != GL_NONE);
             ASSERT(texture_mag_filter != GL_NONE);
 
-            GLenum texture_wrap_x = texture->GetWrapX() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-            GLenum texture_wrap_y = texture->GetWrapY() == Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            GLenum texture_wrap_x = texture->GetWrapX() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            GLenum texture_wrap_y = texture->GetWrapY() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
 
 #if defined(WEBGL)
             bool force_webgl_linear = false;
@@ -1079,15 +1077,15 @@ public:
             const auto type   = draw.type;
             const auto offset = draw.offset;
 
-            if (type == Geometry::DrawType::Triangles)
+            if (type == gfx::Geometry::DrawType::Triangles)
                 GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
-            else if (type == Geometry::DrawType::Points)
+            else if (type == gfx::Geometry::DrawType::Points)
                 GL_CALL(glDrawArrays(GL_POINTS, offset, count));
-            else if (type == Geometry::DrawType::TriangleFan)
+            else if (type == gfx::Geometry::DrawType::TriangleFan)
                 GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
-            else if (type == Geometry::DrawType::Lines)
+            else if (type == gfx::Geometry::DrawType::Lines)
                 GL_CALL(glDrawArrays(GL_LINES, offset, count));
-            else if (type == Geometry::DrawType::LineLoop)
+            else if (type == gfx::Geometry::DrawType::LineLoop)
                 GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
             else BUG("Unknown draw primitive type.");
         }
@@ -1180,7 +1178,7 @@ public:
         // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
         for (auto& buff : mBuffers)
         {
-            if (buff.usage == Geometry::Usage::Stream)
+            if (buff.usage == gfx::Geometry::Usage::Stream)
             {
                 GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
                 GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
@@ -1219,9 +1217,9 @@ public:
         }
     }
 
-    virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
     {
-        Bitmap<RGBA> bmp(width, height);
+        gfx::Bitmap<gfx::RGBA> bmp(width, height);
 
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
         GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -1231,10 +1229,10 @@ public:
         return bmp;
     }
 
-    virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y,
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y,
                                          unsigned width, unsigned height) const override
     {
-        Bitmap<RGBA> bmp(width, height);
+        gfx::Bitmap<gfx::RGBA> bmp(width, height);
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
         GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                 (void*)bmp.GetDataPtr()));
@@ -1246,17 +1244,17 @@ public:
         std::memset(stats, 0, sizeof(*stats));
         for (const auto& buffer : mBuffers)
         {
-            if (buffer.usage == Geometry::Usage::Static)
+            if (buffer.usage == gfx::Geometry::Usage::Static)
             {
                 stats->static_vbo_mem_alloc += buffer.capacity;
                 stats->static_vbo_mem_use   += buffer.offset;
             }
-            else if (buffer.usage == Geometry::Usage::Dynamic)
+            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
             {
                 stats->dynamic_vbo_mem_alloc += buffer.capacity;
                 stats->dynamic_vbo_mem_use   += buffer.offset;
             }
-            else if (buffer.usage == Geometry::Usage::Stream)
+            else if (buffer.usage == gfx::Geometry::Usage::Stream)
             {
                 stats->streaming_vbo_mem_alloc += buffer.capacity;
                 stats->streaming_vbo_mem_use   += buffer.offset;
@@ -1275,10 +1273,15 @@ public:
         caps->max_fbo_height        = max_fbo_size;
         caps->max_fbo_width         = max_fbo_size;
     }
-    virtual const Framebuffer* GetCurrentFramebuffer() const override
+    virtual const gfx::Framebuffer* GetCurrentFramebuffer() const override
     { return mCurrentFBO; }
 
-    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, Geometry::Usage usage)
+    virtual gfx::Device* AsGraphicsDevice() override
+    { return this; }
+    virtual std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() override
+    { return shared_from_this(); }
+
+    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, gfx::Geometry::Usage usage)
     {
         // there are 3 different types of buffers and each have their
         // own allocation strategy:
@@ -1315,17 +1318,17 @@ public:
         GLenum flag = GL_NONE;
         size_t capacity = 0;
 
-        if (usage == Geometry::Usage::Static)
+        if (usage == gfx::Geometry::Usage::Static)
         {
             flag = GL_STATIC_DRAW;
             capacity = std::max(size_t(1024 * 1024), bytes);
         }
-        else if (usage == Geometry::Usage::Stream)
+        else if (usage == gfx::Geometry::Usage::Stream)
         {
             flag = GL_STREAM_DRAW;
             capacity = std::max(size_t(1024 * 1024), bytes);
         }
-        else if (usage == Geometry::Usage::Dynamic)
+        else if (usage == gfx::Geometry::Usage::Dynamic)
         {
             flag = GL_DYNAMIC_DRAW;
             capacity = bytes;
@@ -1357,24 +1360,24 @@ public:
         DEBUG("Allocated new vertex buffer. [vbo=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
         return {mBuffers.size()-1, 0};
     }
-    void FreeBuffer(size_t index, size_t offset, size_t bytes, Geometry::Usage usage)
+    void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage)
     {
         ASSERT(index < mBuffers.size());
         auto& buffer = mBuffers[index];
         ASSERT(buffer.refcount > 0);
         buffer.refcount--;
 
-        if (buffer.usage == Geometry::Usage::Static || buffer.usage == Geometry::Usage::Dynamic)
+        if (buffer.usage == gfx::Geometry::Usage::Static || buffer.usage == gfx::Geometry::Usage::Dynamic)
         {
             if (buffer.refcount == 0)
                 buffer.offset = 0;
         }
-        if (usage == Geometry::Usage::Static)
+        if (usage == gfx::Geometry::Usage::Static)
             DEBUG("Free vertex data. [vbo=%1, bytes=%2, offset=%3, type=%4, refs=%5]", buffer.name,
                   bytes, offset, buffer.usage, buffer.refcount);
     }
 
-    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, Geometry::Usage usage)
+    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, gfx::Geometry::Usage usage)
     {
         ASSERT(index < mBuffers.size());
         auto& buffer = mBuffers[index];
@@ -1382,7 +1385,7 @@ public:
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
         GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
 
-        if (buffer.usage == Geometry::Usage::Static)
+        if (buffer.usage == gfx::Geometry::Usage::Static)
         {
             const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
             DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, offset=%3, full=%4%, type=%5]", buffer.name,
@@ -1474,7 +1477,7 @@ private:
 
     using TextureUnits = std::vector<TextureUnit>;
 
-    class TextureImpl : public Texture
+    class TextureImpl : public gfx::Texture
     {
     public:
         TextureImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
@@ -1538,12 +1541,12 @@ private:
             // the texture needs to be converted into linear color space.
             // todo: convert to normalized linear floats ? converting to
             // linear u8 loses perceptible precision
-            std::unique_ptr<IBitmap> linear;
+            std::unique_ptr<gfx::IBitmap> linear;
             if (bytes)
             {
                 if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
                 {
-                    BitmapReadView<RGB> view((const RGB*) bytes, xres, yres);
+                    gfx::BitmapReadView<gfx::RGB> view((const gfx::RGB*) bytes, xres, yres);
                     linear = ConvertToLinear(view);
                     bytes = linear->GetDataPtr();
                     sizeFormat = GL_RGB;
@@ -1551,7 +1554,7 @@ private:
                 }
                 else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
                 {
-                    BitmapReadView<RGBA> view((const RGBA*) bytes, xres, yres);
+                    gfx::BitmapReadView<gfx::RGBA> view((const gfx::RGBA*) bytes, xres, yres);
                     linear = ConvertToLinear(view);
                     bytes = linear->GetDataPtr();
                     sizeFormat = GL_RGBA;
@@ -1675,9 +1678,9 @@ private:
         void GenerateMips(const void* bytes, unsigned xres, unsigned yres, Format format)
         {
             if (format == Format::sRGB)
-                GenerateMipsFrom_sRGB<RGB>(bytes, xres, yres, GL_SRGB_EXT);
+                GenerateMipsFrom_sRGB<gfx::RGB>(bytes, xres, yres, GL_SRGB_EXT);
             else if (format == Format::sRGBA)
-                GenerateMipsFrom_sRGB<RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
+                GenerateMipsFrom_sRGB<gfx::RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
             else GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
         }
         template<typename T_rgb>
@@ -1690,7 +1693,7 @@ private:
             // been loaded, so the next level is level 1
 
             // level 0 view
-            BitmapReadView<T_rgb> view((const T_rgb*)bytes, xres, yres);
+            gfx::BitmapReadView<T_rgb> view((const T_rgb*)bytes, xres, yres);
 
             auto level  = 1u;
             auto mipmap = GenerateNextMipmap(view, true);
@@ -1732,7 +1735,7 @@ private:
         bool mFBOBound  = false;
     };
 
-    class GeomImpl : public Geometry
+    class GeomImpl : public gfx::Geometry
     {
     public:
         GeomImpl(OpenGLES2GraphicsDevice* device) : mDevice(device)
@@ -1765,7 +1768,7 @@ private:
             cmd.count  = count;
             mDrawCommands.push_back(cmd);
         }
-        virtual void SetVertexLayout(const VertexLayout& layout) override
+        virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
         { mLayout = layout; }
 
         virtual void Upload(const void* data, size_t bytes, Usage usage) override
@@ -1817,7 +1820,7 @@ private:
         { return mDrawCommands.size(); }
         const DrawCommand& GetDrawCommand(size_t index) const
         { return mDrawCommands[index]; }
-        const VertexLayout& GetVertexLayout() const
+        const gfx::VertexLayout& GetVertexLayout() const
         { return mLayout; }
     private:
         OpenGLES2GraphicsDevice* mDevice = nullptr;
@@ -1829,10 +1832,10 @@ private:
         std::size_t mBufferIndex  = 0;
         std::size_t mHash = 0;
         Usage mBufferUsage = Usage::Static;
-        VertexLayout mLayout;
+        gfx::VertexLayout mLayout;
     };
 
-    class ProgImpl : public Program
+    class ProgImpl : public gfx::Program
     {
     public:
         ProgImpl(const OpenGLFunctions& funcs) : mGL(funcs)
@@ -1846,7 +1849,7 @@ private:
                 DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
             }
         }
-        virtual bool Build(const std::vector<const Shader*>& shaders) override
+        virtual bool Build(const std::vector<const gfx::Shader*>& shaders) override
         {
             GLuint prog = mGL.glCreateProgram();
             DEBUG("Created new GL program object. [name='%1', handle='%2']", mName, prog);
@@ -1982,7 +1985,7 @@ private:
                 ret.hash = hash;
             }
         }
-        virtual void SetUniform(const char* name, const Color4f& color) override
+        virtual void SetUniform(const char* name, const gfx::Color4f& color) override
         {
             auto& ret = GetUniform(name);
             if (ret.location == -1)
@@ -2048,7 +2051,7 @@ private:
             }
         }
 
-        virtual void SetTexture(const char* sampler, unsigned unit, const Texture& texture) override
+        virtual void SetTexture(const char* sampler, unsigned unit, const gfx::Texture& texture) override
         {
             auto ret = GetUniform(sampler);
 
@@ -2205,7 +2208,7 @@ private:
         mutable std::size_t mFrameNumber = 0;
     };
 
-    class ShaderImpl : public Shader
+    class ShaderImpl : public gfx::Shader
     {
     public:
         ShaderImpl(const OpenGLFunctions& funcs) : mGL(funcs)
@@ -2292,7 +2295,7 @@ private:
     };
     struct Extensions;
 
-    class FramebufferImpl : public Framebuffer
+    class FramebufferImpl : public gfx::Framebuffer
     {
     public:
         FramebufferImpl(const std::string& name, const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
@@ -2331,7 +2334,7 @@ private:
             mConfig = conf;
         }
 
-        virtual void SetColorTarget(Texture* texture) override
+        virtual void SetColorTarget(gfx::Texture* texture) override
         {
             if (mColorTarget)
                 mColorTarget->SetFBOTarget(false);
@@ -2342,7 +2345,7 @@ private:
                 mColorTarget->SetFBOTarget(true);
         }
 
-        virtual void SetResolveTarget(Texture* texture) override
+        virtual void SetResolveTarget(gfx::Texture* texture) override
         {
             if (mResolveTarget)
                 mResolveTarget->SetFBOTarget(false);
@@ -2354,7 +2357,7 @@ private:
                 mResolveTarget->SetFBOTarget(true);
         }
 
-        virtual void Resolve(Texture** color) const override
+        virtual void Resolve(gfx::Texture** color) const override
         {
             ASSERT(mColorTarget);
             if (color)
@@ -2378,7 +2381,7 @@ private:
                 if (!mColorTarget)
                 {
                     mColor = std::make_unique<TextureImpl>(mGL, mDevice);
-                    mColor->Upload(nullptr, mConfig.width, mConfig.height, Texture::Format::RGBA, false /*mips*/);
+                    mColor->Upload(nullptr, mConfig.width, mConfig.height, gfx::Texture::Format::RGBA, false /*mips*/);
                     mColor->SetName("FBO/" + mName + "/color0");
                     mColorTarget = mColor.get();
                 }
@@ -2475,7 +2478,7 @@ private:
             }
             else if (mConfig.format == Format::ColorRGBA8_Depth24_Stencil8)
             {
-                if (mDevice.mContext->GetVersion() == Device::Context::Version::OpenGL_ES2)
+                if (mDevice.mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
                 {
                     if (!mDevice.mExtensions.OES_packed_depth_stencil)
                     {
@@ -2534,13 +2537,13 @@ private:
         bool mBindResolve = true;
     };
 private:
-    std::map<std::string, std::unique_ptr<Geometry>> mGeoms;
-    std::map<std::string, std::unique_ptr<Shader>> mShaders;
-    std::map<std::string, std::unique_ptr<Program>> mPrograms;
-    std::map<std::string, std::unique_ptr<Texture>> mTextures;
-    std::map<std::string, std::unique_ptr<Framebuffer>> mFBOs;
-    std::shared_ptr<Context> mContextImpl;
-    Context* mContext = nullptr;
+    std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
+    std::map<std::string, std::unique_ptr<gfx::Shader>> mShaders;
+    std::map<std::string, std::unique_ptr<gfx::Program>> mPrograms;
+    std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
+    std::map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
+    std::shared_ptr<dev::Context> mContextImpl;
+    dev::Context* mContext = nullptr;
     std::size_t mFrameNumber = 0;
     OpenGLFunctions mGL;
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
@@ -2549,7 +2552,7 @@ private:
     TextureUnits mTextureUnits;
 
     struct VertexBuffer {
-        Geometry::Usage usage = Geometry::Usage::Static;
+        gfx::Geometry::Usage usage = gfx::Geometry::Usage::Static;
         GLuint name     = 0;
         size_t capacity = 0;
         size_t offset   = 0;
@@ -2565,15 +2568,27 @@ private:
     std::optional<FramebufferImpl*> mFBO;
 };
 
-namespace detail {
-std::shared_ptr<Device> CreateOpenGLES2Device(std::shared_ptr<gfx::Device::Context> context)
-{
-    return std::make_shared<OpenGLES2GraphicsDevice>(context);
-}
-std::shared_ptr<Device> CreateOpenGLES2Device(gfx::Device::Context* context)
-{
-    return std::make_shared<OpenGLES2GraphicsDevice>(context);
-}
 } // namespace
+
+namespace dev {
+
+std::shared_ptr<Device> CreateDevice(std::shared_ptr<dev::Context> context)
+{
+    if (context->GetVersion() == Context::Version::OpenGL_ES2)
+        return std::make_shared<OpenGLES2GraphicsDevice>(context);
+    else if (context->GetVersion() == Context::Version::WebGL_1)
+        return std::make_shared<OpenGLES2GraphicsDevice>(context);
+
+    return nullptr;
+}
+std::shared_ptr<Device> CreateDevice(dev::Context* context)
+{
+    if (context->GetVersion() == Context::Version::OpenGL_ES2)
+        return std::make_shared<OpenGLES2GraphicsDevice>(context);
+    else if (context->GetVersion() == Context::Version::WebGL_1)
+        return std::make_shared<OpenGLES2GraphicsDevice>(context);
+
+    return nullptr;
+}
 
 } // namespace
