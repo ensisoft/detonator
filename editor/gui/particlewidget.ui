@@ -1059,10 +1059,10 @@
            </widget>
           </item>
           <item row="5" column="1" colspan="2">
-           <widget class="gui::RangeWidget" name="pointsize" native="true">
+           <widget class="gui::RangeWidget" name="pointsize">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>0</width>
               <height>25</height>
              </size>
             </property>
@@ -1134,10 +1134,10 @@
            </widget>
           </item>
           <item row="1" column="1" colspan="2">
-           <widget class="gui::RangeWidget" name="velocity" native="true">
+           <widget class="gui::RangeWidget" name="velocity">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>0</width>
               <height>25</height>
              </size>
             </property>
@@ -1234,10 +1234,10 @@
            </widget>
           </item>
           <item row="3" column="1" colspan="2">
-           <widget class="gui::RangeWidget" name="lifetime" native="true">
+           <widget class="gui::RangeWidget" name="lifetime">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>0</width>
               <height>25</height>
              </size>
             </property>
@@ -1247,10 +1247,10 @@
            </widget>
           </item>
           <item row="7" column="1" colspan="2">
-           <widget class="gui::RangeWidget" name="alpha" native="true">
+           <widget class="gui::RangeWidget" name="alpha">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>0</width>
               <height>25</height>
              </size>
             </property>
@@ -1629,15 +1629,15 @@
    <header>color_selector.hpp</header>
   </customwidget>
   <customwidget>
-   <class>gui::GfxWidget</class>
-   <extends>QWidget</extends>
-   <header>gfxwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>gui::RangeWidget</class>
    <extends>QWidget</extends>
    <header>rangewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
