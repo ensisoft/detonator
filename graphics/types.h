@@ -55,4 +55,17 @@ namespace gfx
         return ret;
     }
 
+    template<unsigned>
+    struct StencilValue {
+        uint8_t value;
+        StencilValue() = default;
+        StencilValue(uint8_t val) : value(val) {}
+        inline operator uint8_t () const { return value; }
+    };
+
+    using StencilClearValue = StencilValue<0>;
+    using StencilWriteValue = StencilValue<1>;
+    using StencilPassValue  = StencilValue<2>;
+
+
 } // gfx

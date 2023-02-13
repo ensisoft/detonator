@@ -171,7 +171,7 @@ add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
-    graphics/renderpass.cpp
+    graphics/shaderpass.cpp
     graphics/image.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -201,7 +201,7 @@ add_library(GfxLibTesting
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
-    graphics/renderpass.cpp
+    graphics/shaderpass.cpp
     graphics/image.cpp
     graphics/painter.cpp
     graphics/text.cpp
@@ -591,7 +591,7 @@ add_executable(graphics_test
     device/opengles.cpp
     graphics/bitmap.cpp
     graphics/material.cpp
-    graphics/renderpass.cpp
+    graphics/shaderpass.cpp
     graphics/drawable.cpp
     graphics/drawing.cpp
     graphics/painter.cpp

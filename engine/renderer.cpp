@@ -811,35 +811,35 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         {
             if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
-                const gfx::detail::StencilMaskPass stencil_cover(gfx::detail::StencilClearValue(1),
-                                                                 gfx::detail::StencilWriteValue(0));
-                const gfx::detail::StencilMaskPass stencil_expose(gfx::detail::StencilWriteValue(1));
-                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
+                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
+                                                         gfx::StencilWriteValue(0), painter);
+                const gfx::StencilMaskPass stencil_expose(gfx::StencilWriteValue(1), painter);
+                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
 
-                painter.Draw(entity_layer.mask_cover_list, stencil_cover);
-                painter.Draw(entity_layer.mask_expose_list, stencil_expose);
-                painter.Draw(entity_layer.draw_color_list, cover);
+                stencil_cover.Draw(entity_layer.mask_cover_list);
+                stencil_expose.Draw(entity_layer.mask_expose_list);
+                cover.Draw(entity_layer.draw_color_list);
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
-                const gfx::detail::StencilMaskPass stencil_cover(gfx::detail::StencilClearValue(1),
-                                                                 gfx::detail::StencilWriteValue(0));
-                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
-                painter.Draw(entity_layer.mask_cover_list, stencil_cover);
-                painter.Draw(entity_layer.draw_color_list, cover);
+                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
+                                                         gfx::StencilWriteValue(0), painter);
+                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
+                stencil_cover.Draw(entity_layer.mask_cover_list);
+                cover.Draw(entity_layer.draw_color_list);
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
-                const gfx::detail::StencilMaskPass stencil_expose(gfx::detail::StencilClearValue(0),
-                                                                 gfx::detail::StencilWriteValue(1));
-                const gfx::detail::StencilTestColorWritePass cover(gfx::detail::StencilPassValue(1));
-                painter.Draw(entity_layer.mask_expose_list, stencil_expose);
-                painter.Draw(entity_layer.draw_color_list, cover);
+                const gfx::StencilMaskPass stencil_expose(gfx::StencilClearValue(0),
+                                                          gfx::StencilWriteValue(1), painter);
+                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
+                stencil_expose.Draw(entity_layer.mask_expose_list);
+                cover.Draw(entity_layer.draw_color_list);
             }
             else if (!entity_layer.draw_color_list.empty())
             {
-                const gfx::detail::GenericRenderPass pass;
-                painter.Draw(entity_layer.draw_color_list, pass);
+                const gfx::GenericRenderPass pass(painter);
+                pass.Draw(entity_layer.draw_color_list);
             }
         }
     }
