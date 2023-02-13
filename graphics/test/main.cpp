@@ -479,15 +479,17 @@ public:
             mask.Translate(200 + std::cos(mTime) * 200, 200 + std::sin(mTime) * 200);
 
             // Clear stencil to all 1s and then write to 0 when fragment is written.
-            const gfx::detail::StencilMaskPass stencil(1, 0);
-            painter.Draw(gfx::Circle(), mask, gfx::CreateMaterialFromColor(gfx::Color::White), stencil);
+            gfx::MaterialClassInst material_instance(material);
+
+            const gfx::StencilMaskPass stencil(1, 0, painter);
+            stencil.Draw(gfx::Circle(), mask, material_instance);
 
             // write fragments only where stencil has value 1
-            const gfx::detail::StencilTestColorWritePass cover(1);
+            const gfx::StencilTestColorWritePass cover(1, painter);
 
             gfx::Transform shape;
             shape.Resize(1024, 768);
-            painter.Draw(gfx::Rectangle(), shape, gfx::MaterialClassInst(material), cover);
+            cover.Draw(gfx::Rectangle(), shape, material_instance);
         }
     }
     virtual void Update(float dts) override

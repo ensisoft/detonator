@@ -59,6 +59,7 @@ add_executable(GameEngine
     ../engine/state.cpp
     ../engine/ui.cpp
     ../device/opengles.cpp
+    ../graphics/shaderpass.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp
     ../graphics/drawable.cpp

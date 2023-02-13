@@ -29,14 +29,15 @@
 #include "graphics/types.h"
 #include "graphics/color4f.h"
 #include "graphics/transform.h"
+#include "graphics/device.h"
 
 namespace gfx
 {
     // fwd declarations
-    class Device;
     class Drawable;
     class Material;
-    class RenderPass;
+    class ShaderPass;
+    class Framebuffer;
 
     // Painter class implements some algorithms for
     // drawing different types of objects on the screen.
@@ -87,39 +88,49 @@ namespace gfx
         // Get the current projection matrix.
         virtual const glm::mat4& GetProjMatrix() const = 0;
 
-        // Clear the render target with the given clear color.
-        // You probably want to do this as the first step before
-        // doing any other drawing.
-        virtual void Clear(const Color4f& color) = 0;
+        virtual void SetRenderTarget(Framebuffer* framebuffer) = 0;
 
-        // Legacy immediate mode draw function.
-        // Draw the shape with the material and transformation immediately in the
-        // current render target. This used the default/generic render pass which
-        // - writes color buffer
-        // - doesn't do depth testing
-        // - doesn't do stencil testing
-        // Using this function is inefficient and requires the correct draw order
-        // to be managed by the caller since depth testing isn't used. Using this
-        // function is not efficient since the device state is changed on every draw
-        // to the required state. If possible prefer the vector format which allows
-        // to draw multiple objects at once.
-        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& mat) = 0;
+        // Clear the current render target color buffer with the given clear color.
+        virtual void ClearColor(const Color4f& color) = 0;
 
-        // Similar to the legacy draw except that allows the device state to be
-        // changed through a render pass object. The render pass object can be
-        // used to control which render target buffers are modified and how.
-        virtual void Draw(const Drawable& shape, const Transform& transform, const Material& material, const RenderPass& pass) = 0;
+        // Clear the current render target stencil buffer with the given stencil value.
+        virtual void ClearStencil(const StencilClearValue& stencil) = 0;
+
+        using StencilFunc = Device::State::StencilFunc;
+        using StencilOp   = Device::State::StencilOp;
+        using DepthTest   = Device::State::DepthTest;
+
+        struct RenderPassState {
+            bool write_color = true;
+            StencilOp stencil_op = StencilOp::DontModify;
+            // the stencil test function.
+            StencilFunc  stencil_func  = StencilFunc::Disabled;
+            // what to do when the stencil test fails.
+            StencilOp    stencil_fail  = StencilOp::DontModify;
+            // what to do when the stencil test passes.
+            StencilOp    stencil_dpass = StencilOp::DontModify;
+            // what to do when the stencil test passes but depth test fails.
+            StencilOp    stencil_dfail = StencilOp::DontModify;
+            // todo:
+            std::uint8_t stencil_mask  = 0xff;
+            // todo:
+            std::uint8_t stencil_ref   = 0x0;
+
+            DepthTest  depth_test = DepthTest::LessOrEQual;
+        };
 
         struct DrawShape {
             const glm::mat4* transform = nullptr;
             const Drawable* drawable   = nullptr;
             const Material* material   = nullptr;
         };
+        using DrawList = std::vector<DrawShape>;
+
         // Draw multiple objects inside a render pass. Each object has a drawable shape
         // which provides the geometrical information of the object to be drawn. A material
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        virtual void Draw(const std::vector<DrawShape>& shapes, const RenderPass& pass) = 0;
+        virtual void Draw(const DrawList& shapes, const RenderPassState& render_pass, const ShaderPass& shader_pass) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
@@ -154,6 +165,29 @@ namespace gfx
 
         inline void ResetViewMatrix()
         { SetViewMatrix(glm::mat4(1.0f)); }
+
+        // Similar to the legacy draw except that allows the device state to be
+        // changed through state and shader pass objects.
+        void Draw(const Drawable& shape,
+                  const Transform& transform,
+                  const Material& material,
+                  const RenderPassState& render_pass,
+                  const ShaderPass& shader_pass);
+
+        // legacy functions.
+
+        // Legacy immediate mode draw function.
+        // Draw the shape with the material and transformation immediately in the
+        // current render target. The following default render target state is used:
+        // - writes color buffer, all channels
+        // - doesn't do depth testing
+        // - doesn't do stencil testing
+        // Using this function is inefficient and requires the correct draw order
+        // to be managed by the caller since depth testing isn't used. Using this
+        // function is not efficient since the device state is changed on every draw
+        // to the required state. If possible prefer the vector format which allows
+        // to draw multiple objects at once.
+        void Draw(const Drawable& shape, const Transform& transform, const Material& mat);
     private:
     };
 

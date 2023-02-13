@@ -18,133 +18,132 @@
 
 #include "config.h"
 
-#include <string>
-#include <cstdint>
 #include <optional>
 
-#include "base/hash.h"
-#include "graphics/device.h"
 #include "graphics/types.h"
+#include "graphics/painter.h"
+#include "graphics/shaderpass.h"
+#include "graphics/transform.h"
 
 namespace gfx
 {
-    class Device;
+    class Material;
+    class Drawable;
 
-    class RenderPass
+    class GenericRenderPass
     {
     public:
-        enum class Type {
-            Color,
-            Stencil
-        };
+        using DrawList = Painter::DrawList;
 
-        using StencilFunc = Device::State::StencilFunc;
-        using StencilOp   = Device::State::StencilOp;
-        using DepthTest   = Device::State::DepthTest;
+        GenericRenderPass(Painter& painter)
+          : mPainter(painter)
+        {}
 
-        struct State {
-            bool write_color = true;
-            StencilOp stencil_op = StencilOp::DontModify;
-            // the stencil test function.
-            StencilFunc  stencil_func  = StencilFunc::Disabled;
-            // what to do when the stencil test fails.
-            StencilOp    stencil_fail  = StencilOp::DontModify;
-            // what to do when the stencil test passes.
-            StencilOp    stencil_dpass = StencilOp::DontModify;
-            // what to do when the stencil test passes but depth test fails.
-            StencilOp    stencil_dfail = StencilOp::DontModify;
-            // todo:
-            std::uint8_t stencil_mask  = 0xff;
-            // todo:
-            std::uint8_t stencil_ref   = 0x0;
-
-            DepthTest  depth_test = DepthTest::LessOrEQual;
-        };
-
-        virtual void Begin(Device& device, State* state) const {}
-
-        virtual void Finish(Device& device) const {}
-
-        virtual std::string ModifySource(Device& device, std::string source) const;
-        virtual std::size_t GetHash() const = 0;
-        virtual std::string GetName() const = 0;
-        virtual Type GetType() const = 0;
+        void Draw(const DrawList& list) const
+        {
+            Painter::RenderPassState state;
+            state.write_color  = true;
+            state.stencil_func = Painter::StencilFunc::Disabled;
+            state.depth_test   = Painter::DepthTest::Disabled;
+            detail::GenericShaderPass pass;
+            mPainter.Draw(list, state, pass);
+        }
     private:
+        Painter& mPainter;
     };
 
-    namespace detail {
-        class GenericRenderPass : public RenderPass
+    class StencilMaskPass
+    {
+    public:
+        using ClearValue = StencilClearValue;
+        using WriteValue = StencilWriteValue;
+        using DrawShape  = Painter::DrawShape;
+        using DrawList   = Painter::DrawList;
+
+        StencilMaskPass(StencilClearValue clear_value, StencilWriteValue write_value, Painter& painter)
+          : mStencilWriteValue(write_value)
+          , mPainter(painter)
         {
-        public:
-            virtual void Begin(Device& device, State* state) const override;
-
-            virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, "generic-color-pass"); }
-            virtual std::string GetName() const override
-            { return "GenericColor"; }
-            virtual Type GetType() const override
-            { return Type::Color; }
-        private:
-        };
-
-        template<unsigned>
-        struct StencilValue {
-            uint8_t value;
-            StencilValue() = default;
-            StencilValue(uint8_t val) : value(val) {}
-            inline operator uint8_t () const { return value; }
-        };
-
-        using StencilClearValue = StencilValue<0>;
-        using StencilWriteValue = StencilValue<1>;
-        using StencilPassValue  = StencilValue<2>;
-
-        class StencilMaskPass : public RenderPass
+            painter.ClearStencil(clear_value);
+        }
+        StencilMaskPass(StencilWriteValue write_value, Painter& painter)
+          : mStencilWriteValue(write_value)
+          , mPainter(painter)
+        {}
+        void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
-        public:
-            using ClearValue = StencilClearValue;
-            using WriteValue = StencilWriteValue;
+            Painter::RenderPassState state;
+            state.write_color   = false;
+            state.depth_test    = Painter::DepthTest::Disabled;
+            state.stencil_func  = Painter::StencilFunc::PassAlways;
+            state.stencil_dpass = Painter::StencilOp::WriteRef;
+            state.stencil_dfail = Painter::StencilOp::WriteRef;
+            state.stencil_ref   = mStencilWriteValue;
+            state.stencil_mask  = 0xff;
 
-            StencilMaskPass(ClearValue clear_value, WriteValue write_value)
-               : mStencilClearValue(clear_value)
-               , mStencilWriteValue(write_value)
-            {}
-            StencilMaskPass(WriteValue write_value)
-              : mStencilWriteValue(write_value)
-            {}
-            virtual void Begin(Device& device, State* state) const override;
-
-            virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, "stencil-mask-pass"); }
-            virtual std::string GetName() const override
-            { return "Stencil"; }
-            virtual Type GetType() const override
-            { return Type::Stencil; }
-        private:
-            const std::optional<ClearValue> mStencilClearValue;
-            const WriteValue mStencilWriteValue = 1;
-        };
-
-        class StencilTestColorWritePass : public RenderPass
+            detail::StencilShaderPass pass;
+            mPainter.Draw(drawable, transform, material, state, pass);
+        }
+        void Draw(const DrawList& list) const
         {
-        public:
-            using PassValue = StencilPassValue;
+            Painter::RenderPassState state;
+            state.write_color   = false;
+            state.depth_test    = Painter::DepthTest::Disabled;
+            state.stencil_func  = Painter::StencilFunc::PassAlways;
+            state.stencil_dpass = Painter::StencilOp::WriteRef;
+            state.stencil_dfail = Painter::StencilOp::WriteRef;
+            state.stencil_ref   = mStencilWriteValue;
+            state.stencil_mask  = 0xff;
 
-            explicit StencilTestColorWritePass(PassValue stencil_pass_value)
-              : mStencilRefValue(stencil_pass_value)
-            {}
-            virtual void Begin(Device& device, State* state) const override;
+            detail::StencilShaderPass pass;
+            mPainter.Draw(list, state, pass);
+        }
+    private:
+        const WriteValue mStencilWriteValue = 1;
+        Painter& mPainter;
+    };
 
-            virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, "stencil-test-color-pass"); }
-            virtual std::string GetName() const override
-            { return "StencilMaskColorWrite"; }
-            virtual Type GetType() const override
-            { return Type::Color; }
-        private:
-            const PassValue mStencilRefValue;
-        };
+    class StencilTestColorWritePass
+    {
+    public:
+        using DrawList = Painter::DrawList;
+        using PassValue = StencilPassValue;
 
-    } // namespace
+        explicit StencilTestColorWritePass(PassValue stencil_pass_value, Painter& painter)
+            : mStencilRefValue(stencil_pass_value)
+            , mPainter(painter)
+        {}
+        void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
+        {
+            Painter::RenderPassState state;
+            state.write_color   = true;
+            state.depth_test    = Painter::DepthTest::Disabled;
+            state.stencil_func  = Painter::StencilFunc::RefIsEqual;
+            state.stencil_dpass = Painter::StencilOp::DontModify;
+            state.stencil_dfail = Painter::StencilOp::DontModify;
+            state.stencil_ref   = mStencilRefValue;
+            state.stencil_mask  = 0xff;
+
+            detail::GenericShaderPass pass;
+            mPainter.Draw(drawable, transform, material, state, pass);
+        }
+        void Draw(const DrawList& list) const
+        {
+            Painter::RenderPassState state;
+            state.write_color   = true;
+            state.depth_test    = Painter::DepthTest::Disabled;
+            state.stencil_func  = Painter::StencilFunc::RefIsEqual;
+            state.stencil_dpass = Painter::StencilOp::DontModify;
+            state.stencil_dfail = Painter::StencilOp::DontModify;
+            state.stencil_ref   = mStencilRefValue;
+            state.stencil_mask  = 0xff;
+
+            detail::GenericShaderPass pass;
+            mPainter.Draw(list, state, pass);
+        }
+    private:
+        const PassValue mStencilRefValue;
+        Painter& mPainter;
+    };
 
 } // namespace

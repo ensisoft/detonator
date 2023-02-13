@@ -196,10 +196,10 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
     mask_transform.Resize(mask_width, mask_height);
     mask_transform.Translate(x + line_width, y + line_width);
 
-    detail::StencilMaskPass mask(1, 0);
-    detail::StencilTestColorWritePass cover(1);
-    painter.Draw(shape, mask_transform, material, mask);
-    painter.Draw(shape, outline_transform, material, cover);
+    const StencilMaskPass mask(1, 0, painter);
+    const StencilTestColorWritePass cover(1, painter);
+    mask.Draw(shape, mask_transform, material);
+    cover.Draw(shape, outline_transform, material);
 }
 
 void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)

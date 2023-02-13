@@ -33,7 +33,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
-#include "graphics/renderpass.h"
+#include "graphics/shaderpass.h"
 #include "graphics/types.h"
 
 namespace gfx
@@ -93,45 +93,35 @@ public:
     {
         return mProjection;
     }
-    virtual void Clear(const Color4f& color) override
+
+    virtual void SetRenderTarget(Framebuffer* framebuffer) override
+    {
+        mDevice->SetFramebuffer(framebuffer);
+    }
+
+    virtual void ClearColor(const Color4f& color) override
     {
         mDevice->ClearColor(color);
     }
 
-    virtual void Draw(const Drawable& drawable, const Transform& transform, const Material& material) override
+    virtual void ClearStencil(const StencilClearValue& stencil) override
     {
-        const detail::GenericRenderPass pass;
-        Draw(drawable, transform, material, pass);
+        mDevice->ClearStencil(stencil.value);
     }
 
-    virtual void Draw(const Drawable& shape, const Transform& transform, const Material& material, const RenderPass& pass) override
+    virtual void Draw(const std::vector<DrawShape>& shapes, const RenderPassState& state, const ShaderPass& pass) override
     {
-        const auto& mat = transform.GetAsMatrix();
-
-        std::vector<DrawShape> shapes;
-        shapes.resize(1);
-        shapes[0].drawable  = &shape;
-        shapes[0].material  = &material;
-        shapes[0].transform = &mat;
-        Draw(shapes, pass);
-    }
-
-    virtual void Draw(const std::vector<DrawShape>& shapes, const RenderPass& pass) override
-    {
-        RenderPass::State render_pass_state;
-        pass.Begin(*mDevice, &render_pass_state);
-
         Device::State device_state;
         device_state.viewport      = MapToDevice(mViewport);
         device_state.scissor       = MapToDevice(mScissor);
-        device_state.stencil_func  = render_pass_state.stencil_func;
-        device_state.stencil_dpass = render_pass_state.stencil_dpass;
-        device_state.stencil_dfail = render_pass_state.stencil_dfail;
-        device_state.stencil_fail  = render_pass_state.stencil_fail;
-        device_state.stencil_mask  = render_pass_state.stencil_mask;
-        device_state.stencil_ref   = render_pass_state.stencil_ref;
-        device_state.bWriteColor   = render_pass_state.write_color;
-        device_state.depth_test    = render_pass_state.depth_test;
+        device_state.stencil_func  = state.stencil_func;
+        device_state.stencil_dpass = state.stencil_dpass;
+        device_state.stencil_dfail = state.stencil_dfail;
+        device_state.stencil_fail  = state.stencil_fail;
+        device_state.stencil_mask  = state.stencil_mask;
+        device_state.stencil_ref   = state.stencil_ref;
+        device_state.bWriteColor   = state.write_color;
+        device_state.depth_test    = state.depth_test;
 
         for (const auto& shape : shapes)
         {
@@ -141,7 +131,7 @@ public:
             drawable_env.view_matrix  = &mViewMatrix;
             drawable_env.proj_matrix  = &mProjection;
             drawable_env.model_matrix = shape.transform;
-            drawable_env.render_pass  = &pass;
+            drawable_env.shader_pass  = &pass;
             Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
             if (geometry == nullptr)
                 continue;
@@ -166,8 +156,6 @@ public:
 
             mDevice->Draw(*program, *geometry, device_state);
         }
-
-        pass.Finish(*mDevice);
     }
 private:
     Program* GetProgram(const Drawable& drawable,
@@ -236,8 +224,8 @@ private:
     glm::mat4 mProjection;
     // current additional view matrix that gets multiplied
     // with the draw transforms. convenient for cases when
-    // when everything that is to be drawn needs to get
-    // transformed in some additional way.
+    // everything that is to be drawn needs to get transformed
+    // in some additional way.
     glm::mat4 mViewMatrix {1.0f};
 };
 
@@ -300,5 +288,32 @@ void Painter::SetSurfaceSize(unsigned width, unsigned height)
 {
     SetSurfaceSize(USize(width, height));
 }
+
+void Painter::Draw(const Drawable& shape,
+                   const Transform& transform,
+                   const Material& material,
+                   const RenderPassState& render_pass,
+                   const ShaderPass& shader_pass)
+{
+    const auto& mat = transform.GetAsMatrix();
+
+    std::vector<DrawShape> shapes;
+    shapes.resize(1);
+    shapes[0].drawable  = &shape;
+    shapes[0].material  = &material;
+    shapes[0].transform = &mat;
+    Draw(shapes, render_pass, shader_pass);
+}
+
+void Painter::Draw(const Drawable& drawable, const Transform& transform, const Material& material)
+{
+    RenderPassState state;
+    state.write_color  = true;
+    state.stencil_func = StencilFunc::Disabled;
+    state.depth_test   = DepthTest::Disabled;
+    detail::GenericShaderPass pass;
+    Draw(drawable, transform, material, state, pass);
+}
+
 
 } // namespace
