@@ -2501,15 +2501,15 @@ void main() {
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
         auto* shader = device.MakeShader(GetProgramId(env));
-        shader->CompileSource(pass->ModifyFragmentSource(device, text_shader_bitmap));
         shader->SetName("BitmapTextShader");
+        shader->CompileSource(pass->ModifyFragmentSource(device, text_shader_bitmap));
         return shader;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
         auto* shader = device.MakeShader(GetProgramId(env));
-        shader->CompileSource(pass->ModifyFragmentSource(device, text_shader_texture));
         shader->SetName("TextureTextShader");
+        shader->CompileSource(pass->ModifyFragmentSource(device, text_shader_texture));
         return shader;
     } else if (format == TextBuffer::RasterFormat::None)
         return nullptr;
