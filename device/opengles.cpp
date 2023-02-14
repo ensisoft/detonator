@@ -863,7 +863,7 @@ public:
         for (size_t i=0; i<num_textures; ++i)
         {
             const auto& sampler = myprog->GetSamplerSetting(i);
-            const auto* texture = sampler.texture;
+            auto* texture = sampler.texture;
             texture->SetFrameStamp(mFrameNumber);
             // if the shader compiler has removed the uniform the location is -1
             // in which case we can skip rest of the work.
@@ -952,34 +952,48 @@ public:
             GLenum texture_wrap_x = texture->GetWrapX() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
             GLenum texture_wrap_y = texture->GetWrapY() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
 
-#if defined(WEBGL)
-            bool force_webgl_linear = false;
-            bool force_webgl_wrap_x = false;
-            bool force_webgl_wrap_y = false;
+            const auto texture_handle = texture->GetHandle();
+            const auto& texture_name  = texture->GetName();
 
-            // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-            const auto width  = texture->GetWidth();
-            const auto height = texture->GetHeight();
-            const auto name   = texture->GetName();
-            if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
+            // do some validation and warning logging if there's something that is wrong.
+            if (texture_min_filter == GL_NEAREST_MIPMAP_NEAREST ||
+                texture_min_filter == GL_NEAREST_MIPMAP_LINEAR ||
+                texture_min_filter == GL_LINEAR_MIPMAP_LINEAR)
             {
-                if (!(texture_min_filter == GL_NEAREST || texture_min_filter == GL_LINEAR))
+                // this case handles both WebGL NPOT textures that don't support mips
+                // and also cases such as render to a texture and using default filtering
+                // when sampling and not having generated mips.
+                if (!texture->HasMips())
                 {
-                    texture_min_filter = GL_LINEAR;
-                    force_webgl_linear = true;
-                }
-                if (texture_wrap_x == GL_REPEAT)
-                {
-                    texture_wrap_x = GL_CLAMP_TO_EDGE;
-                    force_webgl_wrap_x = true;
-                }
-                if (texture_wrap_y == GL_REPEAT)
-                {
-                    texture_wrap_y = GL_CLAMP_TO_EDGE;
-                    force_webgl_wrap_y = true;
+                    WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
+                    texture->SetFilter(gfx::Texture::MinFilter::Linear);
+                    texture_mag_filter = GL_LINEAR;
                 }
             }
-#endif
+
+            if (mContext->GetVersion() == dev::Context::Version::WebGL_1)
+            {
+                // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+                const auto width = texture->GetWidth();
+                const auto height = texture->GetHeight();
+                if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
+                {
+                    if (texture_wrap_x == GL_REPEAT)
+                    {
+                        texture_wrap_x = GL_CLAMP_TO_EDGE;
+                        texture->SetWrapX(gfx::Texture::Wrapping::Clamp);
+                        WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                    }
+                    if (texture_wrap_y == GL_REPEAT)
+                    {
+                        texture_wrap_y = GL_CLAMP_TO_EDGE;
+                        texture->SetWrapY(gfx::Texture::Wrapping::Clamp);
+                        WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                    }
+                }
+            }
+
+
             // if nothing has changed then skip all the work
             if (mTextureUnits[unit].texture    == texture &&
                 mTextureUnits[unit].min_filter == texture_min_filter &&
@@ -990,27 +1004,6 @@ public:
                 // set the texture unit to the sampler
                 GL_CALL(glUniform1i(sampler.location, unit));
                 continue;
-            }
-
-            // set all this dang state here, so we can easily track/understand
-            // which unit the texture is bound to.
-            const auto texture_handle = texture->GetHandle();
-            const auto& texture_name  = texture->GetName();
-
-#if defined(WEBGL)
-            if (force_webgl_linear)
-                WARN("Forcing GL_LINEAR on NPOT texture without mips. [texture='%1']", texture_name);
-            if (force_webgl_wrap_x)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-            if (force_webgl_wrap_y)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-#endif
-            if (texture_mag_filter == GL_NEAREST_MIPMAP_NEAREST ||
-                texture_mag_filter == GL_NEAREST_MIPMAP_LINEAR ||
-                texture_mag_filter == GL_LINEAR_MIPMAP_LINEAR)
-            {
-                if (!texture->HasMips())
-                    WARN("Texture filter requires mips but texture doesn't have any! [texture='%1']", texture_name);
             }
 
             // // first select the desired texture unit.
@@ -1172,7 +1165,7 @@ public:
             impl->BeginFrame();
         }
 
-        // trying to do so called "buffer streaming" by "orphaning" the streaming
+        // trying to do so-called "buffer streaming" by "orphaning" the streaming
         // vertex buffers. this is achieved by re-specifying the contents of the
         // buffer by using nullptr data upload.
         // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
