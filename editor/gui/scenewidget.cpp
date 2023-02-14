@@ -1094,6 +1094,88 @@ void SceneWidget::on_spinBottomBoundary_valueChanged(bool has_value, double valu
     SetSceneBoundary();
 }
 
+void SceneWidget::on_chkEnableBloom_stateChanged(int)
+{
+    if (GetValue(mUI.chkEnableBloom))
+    {
+        game::SceneClass::BloomFilter bloom;
+        mState.scene->SetBloom(bloom);
+    }
+    else
+    {
+        mState.scene->ResetBloom();
+    }
+    DisplaySceneProperties();
+}
+
+void SceneWidget::on_bloomThresholdSpin_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->threshold = value;
+        SetValue(mUI.bloomThresholdSlide, value);
+    }
+}
+
+void SceneWidget::on_bloomRSpin_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->red = value;
+        SetValue(mUI.bloomRSlide, value);
+    }
+}
+void SceneWidget::on_bloomGSpin_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->green = value;
+        SetValue(mUI.bloomGSlide, value);
+    }
+}
+void SceneWidget::on_bloomBSpin_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->blue = value;
+        SetValue(mUI.bloomBSlide, value);
+    }
+}
+
+void SceneWidget::on_bloomThresholdSlide_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->threshold = value;
+        SetValue(mUI.bloomThresholdSpin, value);
+    }
+}
+void SceneWidget::on_bloomRSlide_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->red = value;
+        SetValue(mUI.bloomRSpin, value);
+    }
+}
+void SceneWidget::on_bloomGSlide_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->green = value;
+        SetValue(mUI.bloomGSpin, value);
+    }
+}
+void SceneWidget::on_bloomBSlide_valueChanged(double value)
+{
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->blue = value;
+        SetValue(mUI.bloomBSpin, value);
+    }
+}
+
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -2266,6 +2348,49 @@ void SceneWidget::DisplaySceneProperties()
     if (const auto* ptr = mState.scene->GetBottomBoundary())
     {
         SetValue(mUI.spinBottomBoundary, *ptr);
+    }
+
+    if (const auto* bloom = mState.scene->GetBloom())
+    {
+        SetValue(mUI.chkEnableBloom, true);
+
+        SetValue(mUI.bloomThresholdSpin,  bloom->threshold);
+        SetValue(mUI.bloomThresholdSlide, bloom->threshold);
+        SetValue(mUI.bloomRSpin,          bloom->red);
+        SetValue(mUI.bloomRSlide,         bloom->red);
+        SetValue(mUI.bloomGSpin,          bloom->green);
+        SetValue(mUI.bloomGSlide,         bloom->green);
+        SetValue(mUI.bloomBSpin,          bloom->blue);
+        SetValue(mUI.bloomBSlide,         bloom->blue);
+        SetEnabled(mUI.bloomThresholdSpin,  true);
+        SetEnabled(mUI.bloomThresholdSlide, true);
+        SetEnabled(mUI.bloomRSpin,          true);
+        SetEnabled(mUI.bloomRSlide,         true);
+        SetEnabled(mUI.bloomGSpin,          true);
+        SetEnabled(mUI.bloomGSlide,         true);
+        SetEnabled(mUI.bloomBSpin,          true);
+        SetEnabled(mUI.bloomBSlide,         true);
+    }
+    else
+    {
+        SetValue(mUI.chkEnableBloom, false);
+
+        SetValue(mUI.bloomThresholdSpin,  0.0);
+        SetValue(mUI.bloomThresholdSlide, 0.0);
+        SetValue(mUI.bloomRSpin,          0.0);
+        SetValue(mUI.bloomRSlide,         0.0);
+        SetValue(mUI.bloomGSpin,          0.0);
+        SetValue(mUI.bloomGSlide,         0.0);
+        SetValue(mUI.bloomBSpin,          0.0);
+        SetValue(mUI.bloomBSlide,         0.0);
+        SetEnabled(mUI.bloomThresholdSpin,  false);
+        SetEnabled(mUI.bloomThresholdSlide, false);
+        SetEnabled(mUI.bloomRSpin,          false);
+        SetEnabled(mUI.bloomRSlide,         false);
+        SetEnabled(mUI.bloomGSpin,          false);
+        SetEnabled(mUI.bloomGSlide,         false);
+        SetEnabled(mUI.bloomBSpin,          false);
+        SetEnabled(mUI.bloomBSlide,         false);
     }
 }
 

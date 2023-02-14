@@ -128,6 +128,12 @@ void unit_test_scene_class()
     quadtree.max_levels = 8;
     quadtree.max_items = 10;
 
+    game::SceneClass::BloomFilter bloom;
+    bloom.threshold = 1.0f;
+    bloom.red       = 2.0f;
+    bloom.green     = 3.0f;
+    bloom.blue      = 4.0f;
+
     game::SceneClass klass;
     klass.SetName("my scene");
     klass.SetTilemapId("map123");
@@ -139,6 +145,7 @@ void unit_test_scene_class()
     klass.SetRightBoundary(200.0f);
     klass.SetTopBoundary(300.0f);
     klass.SetBottomBoundary(-300.0f);
+    klass.SetBloom(bloom);
 
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
@@ -213,6 +220,10 @@ void unit_test_scene_class()
     TEST_REQUIRE(*klass.GetRightBoundary()  == real::float32(200.0f));
     TEST_REQUIRE(*klass.GetTopBoundary()    == real::float32(300.0f));
     TEST_REQUIRE(*klass.GetBottomBoundary() == real::float32(-300.0f));
+    TEST_REQUIRE(klass.GetBloom()->threshold == real::float32(1.0f));
+    TEST_REQUIRE(klass.GetBloom()->red       == real::float32(2.0f));
+    TEST_REQUIRE(klass.GetBloom()->green     == real::float32(3.0f));
+    TEST_REQUIRE(klass.GetBloom()->blue      == real::float32(4.0f));
 
     klass.LinkChild(nullptr, klass.FindNodeByName("root"));
     klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
@@ -260,6 +271,10 @@ void unit_test_scene_class()
         TEST_REQUIRE(*ret.GetRightBoundary()  == real::float32(200.0f));
         TEST_REQUIRE(*ret.GetTopBoundary()    == real::float32(300.0f));
         TEST_REQUIRE(*ret.GetBottomBoundary() == real::float32(-300.0f));
+        TEST_REQUIRE(ret.GetBloom()->threshold == real::float32(1.0f));
+        TEST_REQUIRE(ret.GetBloom()->red       == real::float32(2.0f));
+        TEST_REQUIRE(ret.GetBloom()->green     == real::float32(3.0f));
+        TEST_REQUIRE(ret.GetBloom()->blue      == real::float32(4.0f));
         TEST_REQUIRE(WalkTree(ret) == "root child_1 child_2");
     }
 

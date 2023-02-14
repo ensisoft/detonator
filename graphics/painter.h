@@ -87,12 +87,11 @@ namespace gfx
         virtual const glm::mat4& GetViewMatrix() const = 0;
         // Get the current projection matrix.
         virtual const glm::mat4& GetProjMatrix() const = 0;
-
-        virtual void SetRenderTarget(Framebuffer* framebuffer) = 0;
-
+        // Get the current configured render surface size. See the comments in the
+        // SetSurfaceSize regarding the meaning of this setting.
+        virtual USize GetSurfaceSize() const = 0;
         // Clear the current render target color buffer with the given clear color.
         virtual void ClearColor(const Color4f& color) = 0;
-
         // Clear the current render target stencil buffer with the given stencil value.
         virtual void ClearStencil(const StencilClearValue& stencil) = 0;
 

@@ -129,6 +129,16 @@ namespace gui
         void on_spinRightBoundary_valueChanged(bool has_value, double value);
         void on_spinTopBoundary_valueChanged(bool has_value, double value);
         void on_spinBottomBoundary_valueChanged(bool has_value, double value);
+        void on_chkEnableBloom_stateChanged(int);
+        void on_bloomThresholdSpin_valueChanged(double);
+        void on_bloomRSpin_valueChanged(double);
+        void on_bloomGSpin_valueChanged(double);
+        void on_bloomBSpin_valueChanged(double);
+        void on_bloomThresholdSlide_valueChanged(double);
+        void on_bloomRSlide_valueChanged(double);
+        void on_bloomGSlide_valueChanged(double);
+        void on_bloomBSlide_valueChanged(double);
+
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();

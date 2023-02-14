@@ -37,11 +37,18 @@
 #include "game/types.h"
 #include "game/tilemap.h"
 #include "engine/renderer.h"
+#include "engine/graphics.h"
 
 using namespace game;
 
 namespace engine
 {
+
+Renderer::Renderer(const ClassLibrary* classlib)
+  : mClassLib(classlib)
+{
+    mEffects.set(Effects::Bloom, false);
+}
 
 void Renderer::BeginFrame()
 {
@@ -753,16 +760,12 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         packet.scene_node_layer  += std::abs(first_scene_node_layer_index);
     }
 
-    struct Layer {
-        std::vector<gfx::Painter::DrawShape> draw_color_list;
-        std::vector<gfx::Painter::DrawShape> mask_cover_list;
-        std::vector<gfx::Painter::DrawShape> mask_expose_list;
-    };
+
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
     // Thus, to have the right ordering both indices of each
     // render packet must be considered!
-    std::vector<std::vector<Layer>> layers;
+    std::vector<std::vector<RenderLayer>> layers;
 
     for (auto& packet : packets)
     {
@@ -779,7 +782,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         if (entity_node_layer_index >= entity_scene_layer.size())
             entity_scene_layer.resize(entity_node_layer_index + 1);
 
-        Layer& entity_layer = entity_scene_layer[entity_node_layer_index];
+        RenderLayer& entity_layer = entity_scene_layer[entity_node_layer_index];
         if (packet.pass == RenderPass::DrawColor)
         {
             gfx::Painter::DrawShape shape;
@@ -805,44 +808,17 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
             entity_layer.mask_expose_list.push_back(shape);
         }
     }
-    for (const auto& scene_layer : layers)
-    {
-        for (const auto& entity_layer : scene_layer)
-        {
-            if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
-            {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), painter);
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilWriteValue(1), painter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
 
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
-            }
-            else if (!entity_layer.mask_cover_list.empty())
-            {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), painter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                cover.Draw(entity_layer.draw_color_list);
-            }
-            else if (!entity_layer.mask_expose_list.empty())
-            {
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilClearValue(0),
-                                                          gfx::StencilWriteValue(1), painter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), painter);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
-            }
-            else if (!entity_layer.draw_color_list.empty())
-            {
-                const gfx::GenericRenderPass pass(painter);
-                pass.Draw(entity_layer.draw_color_list);
-            }
-        }
-    }
+    const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
+    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
+
+    if (IsEnabled(Effects::Bloom))
+        bloom.Draw(layers);
+
+    MainRenderPass main(painter);
+    main.Draw(layers);
+    main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr);
+
 }
 
 template<typename LayerType>

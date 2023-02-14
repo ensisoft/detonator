@@ -102,6 +102,8 @@ public:
         mUIPainter.SetStyle(&mUIStyle);
         mRenderer.SetClassLibrary(mClasslib);
         mRenderer.SetEditingMode(init.editing_mode);
+        mRenderer.SetName("Engine");
+        mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
         mPhysics.SetClassLibrary(mClasslib);
     }
     virtual bool Load() override
@@ -880,6 +882,20 @@ private:
             mPhysics.CreateWorld(*mScene);
         }
         mRenderer.CreateScene(*mScene);
+        if (const auto* bloom = mScene->GetBloom())
+        {
+            engine::Renderer::BloomParams bloom_params;
+            bloom_params.threshold = bloom->threshold;
+            bloom_params.red       = bloom->red;
+            bloom_params.green     = bloom->green;
+            bloom_params.blue      = bloom->blue;
+            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
+            mRenderer.SetBloom(bloom_params);
+        }
+        else
+        {
+            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
+        }
 
         const auto& klass = mScene->GetClass();
         if (klass.HasTilemap())

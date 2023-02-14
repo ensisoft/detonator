@@ -58,7 +58,9 @@ add_executable(GameEngine
     ../engine/renderer.cpp
     ../engine/state.cpp
     ../engine/ui.cpp
+    ../engine/graphics.cpp
     ../device/opengles.cpp
+    ../graphics/algo.cpp
     ../graphics/shaderpass.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp

@@ -259,6 +259,7 @@ SceneClass::SceneClass(const SceneClass& other)
     mRightBoundary           = other.mRightBoundary;
     mTopBoundary             = other.mTopBoundary;
     mBottomBoundary          = other.mBottomBoundary;
+    mBloomFilter             = other.mBloomFilter;
 
     for (const auto& node : other.mNodes)
     {
@@ -683,6 +684,7 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mRightBoundary);
     hash = base::hash_combine(hash, mTopBoundary);
     hash = base::hash_combine(hash, mBottomBoundary);
+    hash = base::hash_combine(hash, mBloomFilter);
 
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
@@ -809,6 +811,15 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("right_boundary",  mRightBoundary);
     data.Write("top_boundary",    mTopBoundary);
     data.Write("bottom_boundary", mBottomBoundary);
+    if (const auto* bloom = GetBloom())
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("threshold", bloom->threshold);
+        chunk->Write("red", bloom->red);
+        chunk->Write("green", bloom->green);
+        chunk->Write("blue",  bloom->blue);
+        data.Write("bloom", std::move(chunk));
+    }
 
     for (const auto& node : mNodes)
     {
@@ -839,6 +850,18 @@ bool SceneClass::FromJson(const data::Reader& data)
     ok &= data.Read("right_boundary",        &mRightBoundary);
     ok &= data.Read("top_boundary",          &mTopBoundary);
     ok &= data.Read("bottom_boundary",       &mBottomBoundary);
+
+    if (data.HasValue("bloom"))
+    {
+        BloomFilter bloom;
+        const auto& chunk = data.GetReadChunk("bloom");
+        if (chunk->Read("threshold", &bloom.threshold) &&
+            chunk->Read("red",       &bloom.red) &&
+            chunk->Read("green",     &bloom.green) &&
+            chunk->Read("blue",      &bloom.blue))
+            mBloomFilter = bloom;
+        else WARN("Failed to load scene bloom filter property. [scene='%1']", mName);
+    }
 
     if (data.HasValue("dynamic_spatial_rect"))
     {
@@ -937,6 +960,7 @@ SceneClass SceneClass::Clone() const
     ret.mRightBoundary           = mRightBoundary;
     ret.mTopBoundary             = mTopBoundary;
     ret.mBottomBoundary          = mBottomBoundary;
+    ret.mBloomFilter             = mBloomFilter;
     ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
         return map[node];
     });
@@ -963,6 +987,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     mRightBoundary           = std::move(tmp.mRightBoundary);
     mTopBoundary             = std::move(tmp.mTopBoundary);
     mBottomBoundary          = std::move(tmp.mBottomBoundary);
+    mBloomFilter             = std::move(tmp.mBloomFilter);
     return *this;
 }
 

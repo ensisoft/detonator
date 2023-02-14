@@ -49,6 +49,7 @@
 #include "editor/gui/collapsible_widget.h"
 #include "editor/gui/uniform.h"
 #include "editor/gui/spinboxwidget.h"
+#include "editor/gui/doubleslider.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -647,6 +648,12 @@ inline void SetMinMax(QDoubleSpinBox* spin, double min, double max)
     spin->setMaximum(max);
 }
 
+inline void SetValue(gui::DoubleSlider* slider, double value)
+{
+    QSignalBlocker s(slider);
+    slider->SetValue(value);
+}
+
 inline void SetValue(QSlider* slider, int value)
 {
     QSignalBlocker s(slider);
@@ -941,6 +948,15 @@ struct SliderValueGetter
     const QSlider* slider = nullptr;
 };
 
+struct DoubleSliderValueGetter
+{
+    operator double() const
+    { return slider->GetValue(); }
+    const gui::DoubleSlider* slider = nullptr;
+};
+
+inline DoubleSliderValueGetter GetValue(const gui::DoubleSlider* slider)
+{ return DoubleSliderValueGetter { slider }; }
 inline SliderValueGetter GetValue(const QSlider* slider)
 { return SliderValueGetter { slider }; }
 inline ActionValueGetter GetValue(const QAction* action)
