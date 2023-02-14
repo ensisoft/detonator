@@ -28,6 +28,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "base/bitflag.h"
 #include "graphics/fwd.h"
 #include "game/tilemap.h"
 #include "game/entity.h"
@@ -57,15 +58,14 @@ namespace engine
     {
     public:
         virtual ~EntityDrawHook() = default;
-        // This is a hook function to inspect and  modify the the draw packet produced by the
+        // This is a hook function to inspect and  modify the draw packet produced by the
         // given animation node. The return value can be used to indicate filtering.
-        // If the function returns false the packet is dropped. Otherwise it's added to the
-        // current drawlist with any possible modifications.
+        // If the function returns false the packet is dropped. Otherwise, it's added to the
+        // current draw list with any possible modifications.
         virtual bool InspectPacket(const Node* node, DrawPacket& packet) { return true; }
-        // This is a hook function to append extra draw packets to the current drawlist
-        // based on the node.
-        // Transform is the combined transformation hierarchy containing the transformations
-        // from this current node to "view".
+        // This is a hook function to append extra draw packets to the current draw list
+        // based on the node. Transform is the combined transformation hierarchy containing
+        // the transformations from this current node to "view".
         virtual void AppendPackets(const Node* node, gfx::Transform& trans, std::vector<DrawPacket>& packets) {}
     protected:
     };
@@ -89,12 +89,32 @@ namespace engine
     class Renderer
     {
     public:
-        Renderer(const ClassLibrary* classlib = nullptr)
-          : mClassLib(classlib) {}
+        enum class Effects {
+            Bloom
+        };
+
+        struct BloomParams {
+            float threshold = 0.0f;
+            float red   = 0.0f;
+            float green = 0.0f;
+            float blue  = 0.0f;
+        };
+
+        Renderer(const ClassLibrary* classlib = nullptr);
+
+        void SetBloom(const BloomParams& bloom)
+        { mBloom = bloom; }
         void SetClassLibrary(const ClassLibrary* classlib)
         { mClassLib = classlib; }
         void SetEditingMode(bool on_off)
         { mEditingMode = on_off; }
+        void SetName(const std::string& name)
+        { mRendererName = name; }
+        void EnableEffect(Effects effect, bool enabled)
+        { mEffects.set(effect, enabled); }
+
+        bool IsEnabled(Effects effect) const
+        { return mEffects.test(effect); }
 
         void BeginFrame();
 
@@ -221,8 +241,11 @@ namespace engine
             std::shared_ptr<gfx::Drawable> drawable;
         };
         using LayerPalette = std::vector<TilemapNode>;
+        std::string mRendererName;
         std::vector<LayerPalette> mTilemapPalette;
+        base::bitflag<Effects> mEffects;
         bool mEditingMode = false;
+        BloomParams mBloom;
     };
 
 } // namespace

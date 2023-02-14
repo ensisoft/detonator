@@ -39,13 +39,12 @@ namespace gfx
           : mPainter(painter)
         {}
 
-        void Draw(const DrawList& list) const
+        void Draw(const DrawList& list, const ShaderPass& pass = detail::GenericShaderPass()) const
         {
             Painter::RenderPassState state;
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
-            detail::GenericShaderPass pass;
             mPainter.Draw(list, state, pass);
         }
     private:

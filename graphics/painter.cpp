@@ -63,7 +63,7 @@ public:
     }
     virtual void SetSurfaceSize(const USize& size) override
     {
-        mSurfacesize = ISize(size);
+        mSurfaceSize = size;
     }
     virtual void SetViewport(const IRect& viewport) override
     {
@@ -93,12 +93,10 @@ public:
     {
         return mProjection;
     }
-
-    virtual void SetRenderTarget(Framebuffer* framebuffer) override
+    virtual USize GetSurfaceSize() const override
     {
-        mDevice->SetFramebuffer(framebuffer);
+        return mSurfaceSize;
     }
-
     virtual void ClearColor(const Color4f& color) override
     {
         mDevice->ClearColor(color);
@@ -200,11 +198,13 @@ private:
     {
         if (rect.IsEmpty())
             return rect;
+        const int surface_width  = mSurfaceSize.GetWidth();
+        const int surface_height = mSurfaceSize.GetHeight();
         // map from window coordinates (top left origin) to device
         // coords (bottom left origin)
         const auto bottom = rect.GetY() + rect.GetHeight();
         const auto x = rect.GetX();
-        const auto y = mSurfacesize.GetHeight() - bottom;
+        const auto y = surface_height - bottom;
         return IRect(x, y, rect.GetWidth(), rect.GetHeight());
     }
 private:
@@ -213,7 +213,7 @@ private:
 private:
     bool mEditingMode = false;
     // Expected Size of the rendering surface.
-    ISize mSurfacesize;
+    USize mSurfaceSize;
     // the viewport setting for mapping the NDC coordinates
     // into some region of the rendering surface.
     IRect mViewport;

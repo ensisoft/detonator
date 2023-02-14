@@ -190,6 +190,7 @@ add_library(EngineLib
     engine/audio.cpp
     engine/renderer.cpp
     engine/physics.cpp
+    engine/graphics.cpp
     engine/ui.cpp
     engine/state.cpp)
 add_library(UiLib
@@ -460,6 +461,9 @@ add_executable(Detonator
     editor/gui/scriptwidget.cpp
     editor/gui/settings.h
     editor/gui/settings.cpp
+    editor/gui/doubleslider.h
+    editor/gui/doubleslider.ui
+    editor/gui/doubleslider.cpp
     editor/gui/spinboxwidget.h
     editor/gui/doublespinbox.ui
     editor/gui/spinboxwidget.cpp
@@ -780,6 +784,7 @@ add_library(EngineLibTesting
     engine/audio.cpp
     engine/physics.cpp
     engine/renderer.cpp
+    engine/graphics.cpp
     engine/lua.cpp
     engine/state.cpp)
 target_include_directories(GameLibTesting   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")

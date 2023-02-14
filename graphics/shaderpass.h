@@ -35,7 +35,8 @@ namespace gfx
     public:
         enum class Type {
             Color,
-            Stencil
+            Stencil,
+            Custom
         };
         virtual std::string ModifyFragmentSource(Device& device, std::string source) const;
         virtual std::string ModifyVertexSource(Device& device, std::string source) const;

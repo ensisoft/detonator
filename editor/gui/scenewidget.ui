@@ -394,7 +394,7 @@
                 <item row="1" column="1">
                  <widget class="gui::DoubleSpinBox" name="spinLeftBoundary">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -897,6 +897,220 @@
                    <number>4</number>
                   </property>
                  </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="gui::CollapsibleWidget" name="effectsGroup">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="collapsed" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="text" stdset="0">
+               <string>Rendering effects</string>
+              </property>
+              <property name="frameShape" stdset="0">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <widget class="QWidget" name="page_2">
+               <layout class="QGridLayout" name="gridLayout_6">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_37">
+                  <property name="text">
+                   <string>Flags</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QCheckBox" name="chkEnableBloom">
+                  <property name="text">
+                   <string>Enable bloom effect</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <widget class="gui::CollapsibleWidget" name="bloomGroup">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="collapsed" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="text" stdset="0">
+               <string>Bloom effect</string>
+              </property>
+              <property name="frameShape" stdset="0">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <widget class="QWidget" name="page">
+               <layout class="QGridLayout" name="gridLayout_5">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_30">
+                  <property name="text">
+                   <string>Bloom threshold</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <item>
+                   <widget class="QDoubleSpinBox" name="bloomRSpin">
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="gui::DoubleSlider" name="bloomRSlide">
+                    <property name="maximum" stdset="0">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep" stdset="0">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QLabel" name="label_36">
+                  <property name="text">
+                   <string>B channel weight</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <item>
+                   <widget class="QDoubleSpinBox" name="bloomGSpin">
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="gui::DoubleSlider" name="bloomGSlide">
+                    <property name="maximum" stdset="0">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep" stdset="0">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="1" column="1">
+                 <layout class="QVBoxLayout" name="verticalLayout_15">
+                  <item>
+                   <widget class="QDoubleSpinBox" name="bloomThresholdSpin">
+                    <property name="maximum">
+                     <double>3.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="gui::DoubleSlider" name="bloomThresholdSlide">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximum" stdset="0">
+                     <double>3.000000000000000</double>
+                    </property>
+                    <property name="singleStep" stdset="0">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_31">
+                  <property name="text">
+                   <string>R channel weight</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="label_27">
+                  <property name="text">
+                   <string>G channel weight</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <layout class="QVBoxLayout" name="verticalLayout_13">
+                  <item>
+                   <widget class="QDoubleSpinBox" name="bloomBSpin">
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.100000000000000</double>
+                    </property>
+                    <property name="stepType">
+                     <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="gui::DoubleSlider" name="bloomBSlide">
+                    <property name="maximum" stdset="0">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep" stdset="0">
+                     <double>0.100000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -2057,6 +2271,11 @@
    <header>spinboxwidget.h</header>
   </customwidget>
   <customwidget>
+   <class>gui::DoubleSlider</class>
+   <extends>QWidget</extends>
+   <header>doubleslider.h</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -2089,9 +2308,16 @@
   <tabstop>denseGridGroup</tabstop>
   <tabstop>spDenseGridRows</tabstop>
   <tabstop>spDenseGridCols</tabstop>
-  <tabstop>btnNewScriptVar</tabstop>
-  <tabstop>btnEditScriptVar</tabstop>
-  <tabstop>btnDeleteScriptVar</tabstop>
+  <tabstop>effectsGroup</tabstop>
+  <tabstop>chkEnableBloom</tabstop>
+  <tabstop>bloomGroup</tabstop>
+  <tabstop>bloomThresholdSpin</tabstop>
+  <tabstop>bloomRSpin</tabstop>
+  <tabstop>bloomRSlide</tabstop>
+  <tabstop>bloomGSpin</tabstop>
+  <tabstop>bloomGSlide</tabstop>
+  <tabstop>bloomBSpin</tabstop>
+  <tabstop>bloomBSlide</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
@@ -2100,6 +2326,9 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnViewReset</tabstop>
+  <tabstop>btnNewScriptVar</tabstop>
+  <tabstop>btnEditScriptVar</tabstop>
+  <tabstop>btnDeleteScriptVar</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
@@ -2124,6 +2353,7 @@
   <tabstop>nodeRotation</tabstop>
   <tabstop>btnNodePlus90</tabstop>
   <tabstop>btnNodeMinus90</tabstop>
+  <tabstop>bloomThresholdSlide</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

@@ -239,6 +239,13 @@ namespace game
         using RenderTreeNode  = SceneNodeClass;
         using RenderTreeValue = SceneNodeClass;
 
+        struct BloomFilter {
+            float threshold = 0.98f;
+            float red   = 0.2126f;
+            float green = 0.7252f;
+            float blue  = 0.0722f;
+        };
+
         enum class SpatialIndex {
             Disabled,
             QuadTree,
@@ -439,6 +446,15 @@ namespace game
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
         void SetDynamicSpatialRect(const FRect& rect);
 
+        void SetBloom(const BloomFilter& bloom)
+        { mBloomFilter = bloom; }
+        const BloomFilter* GetBloom() const
+        { return base::GetOpt(mBloomFilter); }
+        BloomFilter* GetBloom()
+        { return base::GetOpt(mBloomFilter); }
+        void ResetBloom()
+        { mBloomFilter.reset(); }
+
         void SetLeftBoundary(float value)
         { mLeftBoundary = value; }
         void SetRightBoundary(float value)
@@ -524,6 +540,8 @@ namespace game
         std::optional<float> mRightBoundary;
         std::optional<float> mTopBoundary;
         std::optional<float> mBottomBoundary;
+
+        std::optional<BloomFilter> mBloomFilter;
     };
 
     // Scene is the runtime representation of a scene based on some scene class
@@ -540,6 +558,7 @@ namespace game
         using RenderTreeNode  = Entity;
         using RenderTreeValue = Entity;
         using SpatialIndex    = game::SpatialIndex<EntityNode>;
+        using BloomFilter     = SceneClass::BloomFilter;
 
         Scene(std::shared_ptr<const SceneClass> klass);
         Scene(const SceneClass& klass);
@@ -715,6 +734,9 @@ namespace game
         { return mClass->GetName(); }
         std::string GetClassId() const
         { return mClass->GetId(); }
+
+        const BloomFilter* GetBloom() const
+        { return mClass->GetBloom(); }
 
         // Get access to the scene class object.
         const SceneClass& GetClass() const
