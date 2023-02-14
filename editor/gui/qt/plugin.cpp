@@ -27,10 +27,73 @@
 #include <QtDesigner/QDesignerPropertySheetExtension>
 
 #include "plugin.h"
+#include "../doubleslider.h"
 #include "../spinboxwidget.h"
 #include "../rangewidget.h"
 #include "../treewidget.h"
 #include "../collapsible_widget.h"
+
+DoubleSliderWidgetPlugin::DoubleSliderWidgetPlugin(QObject* parent)
+  : QObject(parent)
+{}
+
+bool DoubleSliderWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool DoubleSliderWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon DoubleSliderWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString DoubleSliderWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::DoubleSlider\" name=\"slider\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>100</width>\n"
+           "    <height>18</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString DoubleSliderWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString DoubleSliderWidgetPlugin::includeFile() const
+{
+    return "doubleslider.h";
+}
+
+QString DoubleSliderWidgetPlugin::name() const
+{
+    return "gui::DoubleSlider";
+}
+QString DoubleSliderWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString DoubleSliderWidgetPlugin::whatsThis() const
+{
+    return toolTip();
+}
+QWidget* DoubleSliderWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::DoubleSlider(parent);
+}
+void DoubleSliderWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
 
 DoubleSpinBoxWidgetPlugin::DoubleSpinBoxWidgetPlugin(QObject* parent)
   : QObject(parent)
@@ -310,6 +373,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new TreeWidgetPlugin(this));
     widgets.append(new CollapsibleWidgetPlugin(this));
     widgets.append(new DoubleSpinBoxWidgetPlugin(this));
+    widgets.append(new DoubleSliderWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
