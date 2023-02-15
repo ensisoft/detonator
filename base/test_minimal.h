@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,32 +18,170 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstdarg>
 #include <stdexcept>
+#include <cstring>
+#include <functional>
 
-#if defined(_MSC_VER)
+#include "base/platform.h"
+#include "base/assert.h"
+
+#if defined(WINDOWS_OS)
 #  include <Windows.h> // for DebugBreak
+#elif defined(POSIX_OS)
+#  include <signal.h> // for raise/signal
 #endif
 
 namespace test {
 
-static
-void blurb_failure(const char* expression,
+// Note that this class does *not* derive from std::exception
+// on purpose so that the test code that would catch std::exceptions
+// wont catch this.
+class Fatality {
+public:
+    Fatality(const char* expression,
+             const char* file,
+             const char* function,
+             int line)
+      : mExpression(expression)
+      , mFile(file)
+      , mFunc(function)
+      , mLine(line)
+    {}
+public:
+    const char* mExpression = nullptr;
+    const char* mFile       = nullptr;
+    const char* mFunc       = nullptr;
+    const int mLine         = 0;
+};
+
+static unsigned ErrorCount = 0;
+static bool EnableFatality = true;
+
+enum class Color {
+    Error, Warning, Success, Message, Info
+};
+
+static void print(Color color, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+#if defined(LINUX_OS)
+    if (color == Color::Error)
+        std::printf("\033[%dm", 31);
+    else if (color == Color::Warning)
+        std::printf("\033[%dm", 93);
+    else if (color == Color::Success)
+        std::printf("\033[%dm", 32);
+    else if (color == Color::Info)
+        std::printf("\033[%dm", 97);
+    std::vprintf(fmt, args);
+    std::printf("\033[m");
+#elif defined(WINDOWS_OS)
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO console = {0};
+    GetConsoleScreenBufferInfo(out, &console);
+
+    if (color == Color::Error)
+        SetConsoleTextAttribute(out, FOREGROUND_RED | FOREGROUND_INTENSITY);
+    else if (color == Color::Warning)
+        SetConsoleTextAttribute(out, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    else if (color == Color::Success)
+        SetConsoleTextAttribute(out, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    else if (color == Color::Info)
+        SetConsoleTextAttribute(out, FOREGROUND_INTENSITY);
+
+    std::vprintf(fmt, args);
+    
+    SetConsoleTextAttribute(out, console.wAttributes);
+#endif
+
+    va_end(args);
+
+    std::fflush(stdout);
+}
+
+static void blurb_failure(const char* expression,
     const char* file,
     const char* function,
     int line, bool fatality)
 {
-    std::printf("\n%s(%d): %s failed in function: '%s'\n", file, line, expression, function);
-    if (fatality)
-    {
-#if defined(_MSC_VER)
-        DebugBreak();
-#elif defined(__GNUG__)
-        __builtin_trap();
-#endif
-        std::abort();
-    }
+    ++ErrorCount;
 
+    // strip the path from the filename
+#if defined(POSIX_OS)
+    const char* p = file;
+    while (*file) {
+        if (*file == '/')
+            p = file + 1;
+        ++file;
+    }
+    file = p;
+#elif defined(WINDOWS_OS)
+    const char* p = file;
+    while (*file) {
+        if (*file == '\\')
+            p = file + 1;
+        ++file;
+    }
+    file = p;
+#endif
+
+    if (fatality && EnableFatality)
+    {
+        if (debug::has_debugger())
+        {
+#if defined(WINDOWS_OS)
+            DebugBreak();
+#elif defined(POSIX_OS)
+            ::raise(SIGTRAP);
+#endif
+        }
+        // instead of exiting/aborting the process here throw an exception
+        // for unwinding the stack back to test_main which can then report
+        // the total test case tally. I know.. this won't work if exceptions
+        // are disabled (because bla bla bluh bluh) or if there's a catch block
+        // that would manage to catch this exception.
+        throw Fatality(expression, file, function, line);
+    }
+    test::print(Color::Warning, "\n%s(%d): %s failed in function: '%s'\n\n", file, line, expression, function);
 }
+
+class TestCaseReporter {
+public:
+    TestCaseReporter(const char* file, const char* name)
+      : mFile(file)
+      , mName(name)
+    {
+        // skip over the return type in the function name
+        mName = std::strstr(name, " ");
+        mName++;
+        // skip over calling convention declaration
+        if (std::strstr(mName, "__cdecl ") == mName)
+            mName += std::strlen("__cdecl ");
+
+        // use the current number of errors to realize if the
+        // current test case failed or not
+        mErrors = ErrorCount;
+    }
+   ~TestCaseReporter()
+    {
+        // printing all this information here so that the non-fatal
+        // test failures print their message *before* the name and result
+        // of the test execution.
+        test::print(test::Color::Message, "Running ");
+        test::print(test::Color::Info, "'%s' ", mName);
+
+        if (mErrors == ErrorCount)
+            test::print(test::Color::Success, "OK\n");
+        else test::print(test::Color::Warning, "Fail\n");
+    }
+private:
+    const char* mFile = nullptr;
+    const char* mName = nullptr;
+    unsigned mErrors = 0;
+};
 
 } // test
 
@@ -57,10 +195,8 @@ void blurb_failure(const char* expression,
     ? ((void)0) \
     : (test::blurb_failure(#expr, __FILE__, __FUNCTION__, __LINE__, true))
 
-
 #define TEST_MESSAGE(msg, ...) \
-    std::printf("%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
-    std::fflush(stdout)
+    test::print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
 
 #define TEST_EXCEPTION(expr) \
     try { \
@@ -70,28 +206,39 @@ void blurb_failure(const char* expression,
     catch (const std::exception& e) \
     {}
 
+#define TEST_CASE \
+    test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__);
 
 int test_main(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
+    for (int i=1; i<argc; ++i)
+    {
+        if (!std::strcmp(argv[i], "--disable-fatality") ||
+            !std::strcmp(argv[i], "-df"))
+            test::EnableFatality = false;
+    }
+
     try
     {
         test_main(argc, argv);
-        std::printf("\nSuccess!\n");
+        if (test::ErrorCount)
+            test::print(test::Color::Warning, "\nTests completed with errors.\n");
+        else test::print(test::Color::Success, "\nSuccess!\n");
+    }
+    catch (const test::Fatality& fatality)
+    {
+        test::print(test::Color::Error, "\n%s(%d): %s failed in function: '%s'\n",
+                    fatality.mFile, fatality.mLine, fatality.mExpression, fatality.mFunc);
+        test::print(test::Color::Warning, "\nTesting finished early on fatality.\n");
+        return 1;
     }
     catch (const std::exception & e)
     {
-        std::printf("Tests didn't run to completion because an exception occurred!\n\n");
-        std::printf("%s\n", e.what());
+        test::print(test::Color::Error, "\nTests didn't run to completion because an exception occurred!\n\n");
+        test::print(test::Color::Error, "%s\n", e.what());
         return 1;
     }
-    return 0;
+    return test::ErrorCount ? 1 : 0;
 }
-
-#define TEST_BARK() \
-    std::printf("%s", __FUNCTION__); \
-    std::fflush(stdout)
-
-
-#define TEST_CUSTOM
