@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ namespace debug
     [[noreturn]]
     void do_assert(const char* expression, const char* file, const char* func, int line);
 
+    // Force a breakpoint when having a debugger attached or otherwise abort
     [[noreturn]]
     void do_break();
 
