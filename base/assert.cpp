@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,9 +33,18 @@
 #  include <sys/wait.h>
 #  include <sys/ptrace.h>
 #  include <unistd.h>
+#  include <fcntl.h>
+#  include <cstring>
+#endif
+
+#if defined(POSIX_OS)
+#  include <signal.h>
 #endif
 
 #include <iostream>
+
+#include "base/platform.h"
+#include "base/assert.h"
 
 // So where is my core file?
 // check that core file is unlimited
@@ -66,13 +75,15 @@ namespace debug
 
 void do_break()
 {
+    if (has_debugger())
+    {
 #if defined(WINDOWS_OS)
-    DebugBreak();
-#else
-    // not implemented since we cannot detect
-    // the presence of a debugger reliably.
-    std::abort();
+        DebugBreak();
+#elif defined(POSIX_OS)
+        ::raise(SIGTRAP);
 #endif
+    }
+    std::abort();
 }
 
 void do_assert(const char* expression, const char* file, const char* func, int line)
@@ -199,62 +210,34 @@ bool has_debugger()
 #if defined(WINDOWS_OS)
     return (IsDebuggerPresent() == TRUE);
 #elif defined(LINUX_OS)
-    // this doesn't work reliably, so we just do the same
-    // as standard assert() does on linux, simply abort
+    // SO to the rescue.
+    // https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb
 
+    char buf[4096];
 
-    // int fds[2];
-    // if (pipe(fds) == -1)
-    //     std::abort(); // horrors
+    const int status_fd = ::open("/proc/self/status", O_RDONLY);
+    if (status_fd == -1)
+        return false;
 
-    // const pid_t child = fork();
-    // if (child == -1)
-    //     std::abort(); // horrors
+    const ssize_t num_read = ::read(status_fd, buf, sizeof(buf) - 1);
+    ::close(status_fd);
 
-    // if(child == 0)
-    // {
-    //     int we_have_tracer = 1;
+    if (num_read <= 0)
+        return false;
 
-    //     const pid_t parent = getppid();
+    buf[num_read] = '\0';
+    constexpr char tracerPidString[] = "TracerPid:";
+    const auto tracer_pid_ptr = ::strstr(buf, tracerPidString);
+    if (!tracer_pid_ptr)
+        return false;
 
-    //     // try attaching to the parent process. if this works
-    //     // then nobody is tracing the parent, hence it cannot
-    //     // be debugged either.
-    //     if (ptrace(PTRACE_ATTACH, parent, NULL, NULL))
-    //     {
-    //         waitpid(parent, NULL, 0);
-    //         ptrace(PTRACE_CONT, NULL, NULL);
-
-    //         // detach
-    //         ptrace(PTRACE_DETACH, parent, NULL, NULL);
-
-    //         we_have_tracer = 0;
-    //     }
-    //     // communicate result back to the parent.
-    //     // note that we can't directly use the exit status code
-    //     // since a non-zero exit code will cause problems with tools
-    //     // such as boost.unit test.
-    //     write(fds[1], &we_have_tracer, sizeof(int));
-
-    //     _exit(0);
-    // }
-
-    // // the parent will wait for the result from the child
-    // // checking if the tracer succeeds or not.
-    // int status = 0;
-
-    // waitpid(child, &status, 0);
-
-    // int we_have_tracer = 0;
-    // read(fds[0], &we_have_tracer, sizeof(int));
-
-    // printf("we_have_tracer:%d\n", we_have_tracer);
-
-    // close(fds[0]);
-    // close(fds[1]);
-
-    // return we_have_tracer == 1;
-
+    for (const char* characterPtr = tracer_pid_ptr + sizeof(tracerPidString) - 1; characterPtr <= buf + num_read; ++characterPtr)
+    {
+        if (::isspace(*characterPtr))
+            continue;
+        else
+            return ::isdigit(*characterPtr) != 0 && *characterPtr != '0';
+    }
     return false;
 #elif defined(WEB_OS)
     return false;
