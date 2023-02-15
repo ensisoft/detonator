@@ -242,6 +242,11 @@ RGB::RGB(Color c)
             g = 127;
             b = 50;
             break;
+        case Color::Transparent:
+            r = 0;
+            g = 0;
+            b = 0;
+            break;
     }
 } // ctor
 
