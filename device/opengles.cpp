@@ -1398,19 +1398,23 @@ public:
             }
             else if (mCurrentFBO->IsReady())
             {
-                if (!mCurrentFBO->Complete())
+                if (!mCurrentFBO->Complete(true))
                     return false;
             }
             else
             {
                 if (!mCurrentFBO->Create())
                     return false;
-                if (!mCurrentFBO->Complete())
+                if (!mCurrentFBO->Complete(false))
                     return false;
             }
         }
         if (mCurrentFBO)
+        {
+            if (!mCurrentFBO->Complete(false))
+                return false;
             mCurrentFBO->SetFrameStamp(mFrameNumber);
+        }
         return true;
     }
 private:
@@ -2372,9 +2376,11 @@ private:
         virtual Format GetFormat() const override
         { return mConfig.format; }
 
-        bool Complete()
+        bool Complete(bool bind_buffer)
         {
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+            if (bind_buffer)
+                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+
             if (!mBindColor && !mBindResolve)
                 return true;
 
@@ -2383,8 +2389,8 @@ private:
                 if (!mColorTarget)
                 {
                     mColor = std::make_unique<TextureImpl>(mGL, mDevice);
-                    mColor->Upload(nullptr, mConfig.width, mConfig.height, gfx::Texture::Format::RGBA, false /*mips*/);
                     mColor->SetName("FBO/" + mName + "/color0");
+                    mColor->Upload(nullptr, mConfig.width, mConfig.height, gfx::Texture::Format::RGBA, false /*mips*/);
                     mColorTarget = mColor.get();
                 }
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColorTarget->GetHandle(), 0));

@@ -103,6 +103,23 @@ gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* f
     return prog;
 }
 
+gfx::Geometry* MakeQuad(gfx::Device& dev)
+{
+    auto* geom = dev.MakeGeometry("quad");
+    const gfx::Vertex verts[] = {
+        { {-1,  1}, {0, 1} },
+        { {-1, -1}, {0, 0} },
+        { { 1, -1}, {1, 0} },
+
+        { {-1,  1}, {0, 1} },
+        { { 1, -1}, {1, 0} },
+        { { 1,  1}, {1, 1} }
+    };
+    geom->SetVertexBuffer(verts, 6);
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    return geom;
+}
+
 std::shared_ptr<gfx::Device> CreateDevice()
 {
     return dev::CreateDevice(std::make_shared<TestContext>(10, 10))->GetSharedGraphicsDevice();
@@ -110,6 +127,8 @@ std::shared_ptr<gfx::Device> CreateDevice()
 
 void unit_test_device()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     // test clear color.
@@ -159,6 +178,8 @@ void unit_test_device()
 
 void unit_test_shader()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     // junk
@@ -214,6 +235,8 @@ void main() {
 
 void unit_test_texture()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* texture = dev->MakeTexture("foo");
@@ -248,6 +271,8 @@ void unit_test_texture()
 
 void unit_test_program()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* prog = dev->MakeProgram("foo");
@@ -313,6 +338,8 @@ void main() {
 
 void unit_test_render_fbo(gfx::Framebuffer::Format format)
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
     TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
 
@@ -457,6 +484,8 @@ void main() {
 
 void unit_test_render_color_only()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     dev->BeginFrame();
@@ -515,6 +544,8 @@ void main() {
 
 void unit_test_render_with_single_texture()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     gfx::Bitmap<gfx::RGBA> data(4, 4);
@@ -601,6 +632,8 @@ void main() {
 
 void unit_test_render_with_multiple_textures()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     // setup 4 textures and the output from fragment shader
@@ -692,6 +725,8 @@ void main() {
 
 void unit_test_render_set_float_uniforms()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
@@ -813,6 +848,8 @@ void main() {
 
 void unit_test_render_set_int_uniforms()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto *geom = dev->MakeGeometry("geom");
@@ -898,6 +935,8 @@ void main() {
 }
 void unit_test_render_set_matrix2x2_uniform()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
@@ -964,6 +1003,8 @@ void main() {
 
 void unit_test_render_set_matrix3x3_uniform()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
@@ -1030,6 +1071,8 @@ void main() {
 
 void unit_test_render_set_matrix4x4_uniform()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
@@ -1098,6 +1141,8 @@ void main() {
 
 void unit_test_uniform_sampler_optimize_bug()
 {
+    TEST_CASE
+
     // shader code doesn't actually use the material, the sampler/uniform location
     // is thus -1 and no texture will be set.
     auto dev = CreateDevice();
@@ -1167,6 +1212,8 @@ void main() {
 
 void unit_test_clean_textures()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     gfx::Device::State state;
@@ -1321,6 +1368,8 @@ void main() {
 
 void unit_test_render_dynamic()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     dev->BeginFrame();
@@ -1420,6 +1469,8 @@ void main() {
 
 void unit_test_buffer_allocation()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     char junk_data[512] = {0};
@@ -1575,6 +1626,8 @@ void unit_test_buffer_allocation()
 
 void unit_test_empty_draw_lost_uniform_bug()
 {
+    TEST_CASE
+
     // if a uniform is set in the program and the program
     // is used to draw but the geometry is "empty" the
     // uniform doesn't get set to the program but the hash
@@ -1651,6 +1704,8 @@ void main() {
 
 void unit_test_max_texture_units_single_texture()
 {
+    TEST_CASE
+
     // create enough textures to saturate all texture units.
     // then do enough draws to have all texture units become used.
     // then check that textures get evicted/rebound properly.
@@ -1749,6 +1804,8 @@ void main() {
 
 void unit_test_max_texture_units_many_textures()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
 
     gfx::Device::DeviceCaps caps = {};
@@ -1884,6 +1941,8 @@ void main() {
 // keeps growing incorrectly.
 void unit_test_repeated_uniform_bug()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1943,6 +2002,8 @@ void main() {
 // leading to the FBO becoming incomplete.
 void unit_test_fbo_texture_delete_bug()
 {
+    TEST_CASE
+
     auto dev = CreateDevice();
     auto* fbo = dev->MakeFramebuffer("fbo");
 
@@ -1984,6 +2045,91 @@ void unit_test_fbo_texture_delete_bug()
 
 }
 
+// Test that changing the FBO's color buffer without changing the
+// device FBO works as expected. I.e. the FBO is set on the device
+// with one color target, then the color target is changed in the FBO
+// but the FBO itself remains the same on the device.
+void unit_test_fbo_change_color_target_bug()
+{
+    TEST_CASE
+
+    auto dev = CreateDevice();
+    auto* fbo = dev->MakeFramebuffer("fbo");
+
+    auto* red = dev->MakeTexture("red");
+    red->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA);
+    red->SetName("red");
+
+    auto* green = dev->MakeTexture("green");
+    green->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA);
+    green->SetName("green");
+
+    gfx::Framebuffer::Config conf;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    conf.width  = 10;
+    conf.height = 10;
+    fbo->SetConfig(conf);
+
+    dev->BeginFrame();
+
+    fbo->SetColorTarget(red);
+    dev->SetFramebuffer(fbo);
+    dev->ClearColor(gfx::Color::Red);
+
+    fbo->SetColorTarget(green);
+    dev->ClearColor(gfx::Color::Green);
+
+    dev->EndFrame();
+
+    // red texture should now be red and green texture should now be green.
+    // setup a program to sample from textures
+    auto* program = MakeTestProgram(*dev,
+R"(#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+  vTexCoord = aTexCoord;
+})",
+R"(#version 100
+precision mediump float;
+varying vec2 vTexCoord;
+uniform sampler2D kTexture;
+void main() {
+  gl_FragColor = texture2D(kTexture, vTexCoord.xy);
+})", "p1");
+
+    auto* quad = MakeQuad(*dev);
+
+    gfx::Device::State state;
+    state.bWriteColor  = true;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    dev->BeginFrame();
+    dev->SetFramebuffer(nullptr);
+    program->SetTextureCount(1);
+    program->SetTexture("kTexture", 0, *red);
+    dev->Draw(*program, *quad, state);
+    dev->EndFrame();
+
+    const auto& result_red = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(result_red.Compare(gfx::Color::Red));
+
+    dev->BeginFrame();
+    dev->SetFramebuffer(nullptr);
+    program->SetTextureCount(1);
+    program->SetTexture("kTexture", 0, *green);
+    dev->Draw(*program, *quad, state);
+    dev->EndFrame();
+
+    const auto& result_green = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(result_green.Compare(gfx::Color::Green));
+}
+
+
 int test_main(int argc, char* argv[])
 {
     unit_test_device();
@@ -2012,5 +2158,6 @@ int test_main(int argc, char* argv[])
     unit_test_empty_draw_lost_uniform_bug();
     unit_test_repeated_uniform_bug();
     unit_test_fbo_texture_delete_bug();
+    unit_test_fbo_change_color_target_bug();
     return 0;
 }
