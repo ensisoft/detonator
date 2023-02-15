@@ -314,6 +314,7 @@ void main() {
 void unit_test_render_fbo(gfx::Framebuffer::Format format)
 {
     auto dev = CreateDevice();
+    TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex verts[] = {
@@ -384,6 +385,7 @@ void main() {
             dev->SetFramebuffer(fbo);
             dev->ClearColor(gfx::Color::Red);
             dev->Draw(*p0, *geom, state);
+            TEST_REQUIRE(dev->GetCurrentFramebuffer() == fbo);
 
             // render using the second program and sample from the FBO texture.
             gfx::Texture* color = nullptr;
@@ -396,6 +398,7 @@ void main() {
             dev->SetFramebuffer(nullptr);
             dev->ClearColor(gfx::Color::Blue);
             dev->Draw(*p1, *geom, state);
+            TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
 
             dev->EndFrame();
 

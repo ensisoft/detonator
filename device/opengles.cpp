@@ -687,7 +687,7 @@ public:
 
     virtual void SetFramebuffer(const gfx::Framebuffer* fbo) override
     {
-        mFBO = (FramebufferImpl*)fbo;
+        mSetFramebuffer = (FramebufferImpl*)fbo;
     }
 
     virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
@@ -1387,19 +1387,28 @@ public:
     }
     bool SetupFBO()
     {
-        if (mFBO)
+        if (mSetFramebuffer)
         {
-            auto* fbo = mFBO.value();
-            mFBO.reset();
+            mCurrentFBO = mSetFramebuffer.value();
+            mSetFramebuffer.reset();
 
-            if (fbo == nullptr)
+            if (mCurrentFBO == nullptr)
+            {
                 GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-            else if (fbo && fbo->IsReady())
-                return fbo->Complete();
-            else return fbo->Create() && fbo->Complete();
-
-            mCurrentFBO = fbo;
-        }            
+            }
+            else if (mCurrentFBO->IsReady())
+            {
+                if (!mCurrentFBO->Complete())
+                    return false;
+            }
+            else
+            {
+                if (!mCurrentFBO->Create())
+                    return false;
+                if (!mCurrentFBO->Complete())
+                    return false;
+            }
+        }
         if (mCurrentFBO)
             mCurrentFBO->SetFrameStamp(mFrameNumber);
         return true;
@@ -2558,7 +2567,7 @@ private:
     } mExtensions;
 
     FramebufferImpl* mCurrentFBO = nullptr;
-    std::optional<FramebufferImpl*> mFBO;
+    std::optional<FramebufferImpl*> mSetFramebuffer;
 };
 
 } // namespace
