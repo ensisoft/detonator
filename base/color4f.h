@@ -33,7 +33,7 @@ namespace base
         Yellow,  DarkYellow,
         Gray,    DarkGray, LightGray,
         // some special colors
-        HotPink,
+        HotPink, Transparent,
         Gold,
         Silver,
         Bronze
@@ -63,7 +63,7 @@ namespace base
             // note: we take integers (as opposed to some
             // type unsigned) so that the simple syntax of
             // Color4f(10, 20, 200, 255) works without tricks.
-            // Otherwise the conversion with the floats would
+            // Otherwise, the conversion with the floats would
             // be ambiguous but the ints are a perfect match.
             mRed   = math::clamp(0, 255, red) / 255.0f;
             mGreen = math::clamp(0, 255, green) / 255.0f;
@@ -149,6 +149,11 @@ namespace base
                     mGreen = 0.498f;
                     mBlue  = 0.196f;
                     break;
+                case Color::Transparent:
+                    mRed   = 0.0f;
+                    mGreen = 0.0f;
+                    mBlue  = 0.0f;
+                    mAlpha = 0.0f;
             }
         }
 
