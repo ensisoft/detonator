@@ -98,11 +98,6 @@ namespace gfx
         // error this function should return empty shared pointer.
         // The returned bitmap can be potentially immutably shared.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
-        // Create a similar clone of this texture source but
-        // with unique id.
-        virtual std::unique_ptr<TextureSource> Clone() const = 0;
-        // Create an exact bitwise copy of this texture source object.
-        virtual std::unique_ptr<TextureSource> Copy() const = 0;
         // Serialize into JSON object.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
@@ -113,6 +108,19 @@ namespace gfx
         // Finish packing the texture source into the packer.
         // Update the state with the details from the packer.
         virtual void FinishPacking(const TexturePacker* packer) {}
+
+        // Create a similar clone of this texture source but with a new unique ID.
+        inline std::unique_ptr<TextureSource> Clone()
+        {
+            return this->MakeCopy(base::RandomString(10));
+        }
+        // Create an exact bitwise copy of this texture source object.
+        inline std::unique_ptr<TextureSource> Copy()
+        {
+            return this->MakeCopy(GetId());
+        }
+    protected:
+        virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const = 0;
     private:
     };
 
@@ -170,15 +178,6 @@ namespace gfx
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
-            virtual std::unique_ptr<TextureSource> Clone() const override
-            {
-                auto ret = std::make_unique<TextureFileSource>(*this);
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<TextureSource> Copy() const override
-            { return std::make_unique<TextureFileSource>(*this); }
-
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
 
@@ -204,6 +203,13 @@ namespace gfx
             { mFlags.set(flag, on_off); }
             void SetColorSpace(ColorSpace space)
             { mColorSpace = space; }
+        protected:
+            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+            {
+                auto ret = std::make_unique<TextureFileSource>(*this);
+                ret->mId = id;
+                return ret;
+            }
         private:
             std::string mId;
             std::string mFile;
@@ -263,14 +269,6 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
-            virtual std::unique_ptr<TextureSource> Clone() const override
-            {
-                auto ret = std::make_unique<TextureBitmapBufferSource>(*this);
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<TextureSource> Copy() const override
-            { return std::make_unique<TextureBitmapBufferSource>(*this); }
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -304,6 +302,13 @@ namespace gfx
                     return true;
                 }
                 return false;
+            }
+        protected:
+            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+            {
+                auto ret = std::make_unique<TextureBitmapBufferSource>(*this);
+                ret->mId = id;
+                return ret;
             }
         private:
             std::string mId;
@@ -348,14 +353,6 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mGenerator->Generate(); }
-            virtual std::unique_ptr<TextureSource> Clone() const override
-            {
-                auto ret = std::make_unique<TextureBitmapGeneratorSource>(*this);
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<TextureSource> Copy() const override
-            { return std::make_unique<TextureBitmapGeneratorSource>(*this); }
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -374,6 +371,13 @@ namespace gfx
                 // generator is a "universal reference"
                 // Meyer's Item. 24
                 mGenerator = std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator));
+            }
+        protected:
+            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+            {
+                auto ret = std::make_unique<TextureBitmapGeneratorSource>(*this);
+                ret->mId = id;
+                return ret;
             }
         private:
             std::string mId;
@@ -415,14 +419,6 @@ namespace gfx
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
-            virtual std::unique_ptr<TextureSource> Clone() const override
-            {
-                auto ret = std::make_unique<TextureTextBufferSource>(*this);
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<TextureSource> Copy() const override
-            { return std::make_unique<TextureTextBufferSource>(*this); }
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -436,6 +432,14 @@ namespace gfx
             { mTextBuffer = text; }
             void SetTextBuffer(TextBuffer&& text)
             { mTextBuffer = std::move(text); }
+        protected:
+            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+            {
+                auto ret = std::make_unique<TextureTextBufferSource>(*this);
+                ret->mId = id;
+                return ret;
+            }
+
         private:
             TextBuffer mTextBuffer;
             std::string mId;
