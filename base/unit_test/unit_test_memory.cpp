@@ -24,6 +24,8 @@
 #include "base/test_minimal.h"
 #include "base/memory.h"
 
+#include "base/assert.cpp"
+
 struct Foobar {
     int value;
     std::string string;

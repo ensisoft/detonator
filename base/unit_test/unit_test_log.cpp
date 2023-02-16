@@ -23,6 +23,9 @@
 #include "base/test_float.h"
 #include "base/logging.h"
 
+#include "base/assert.cpp"
+#include "base/logging.cpp"
+
 void thread_entry(base::Logger* logger)
 {
     base::SetThreadLog(logger);

@@ -23,6 +23,8 @@
 #include "base/test_float.h"
 #include "base/cmdline.h"
 
+#include "base/assert.cpp"
+
 int test_main(int argc, char* argv[])
 {
     // empty cmdline

@@ -26,6 +26,11 @@
 #include "base/types.h"
 #include "base/trace.h"
 
+#include "base/json.cpp"
+#include "base/utility.cpp"
+#include "base/trace.cpp"
+#include "base/assert.cpp"
+
 bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
 {
     return real::equals(lhs.Red(), rhs.Red()) &&
