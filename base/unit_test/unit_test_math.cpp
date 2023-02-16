@@ -23,6 +23,8 @@
 #include "base/test_float.h"
 #include "base/math.h"
 
+#include "base/assert.cpp"
+
 struct Point2D {
     float x, y;
 };

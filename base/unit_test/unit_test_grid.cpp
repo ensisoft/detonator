@@ -24,6 +24,9 @@
 #include "base/test_help.h"
 #include "base/grid.h"
 
+#include "base/assert.cpp"
+#include "base/utility.cpp"
+
 struct Entity {
     std::string name;
     std::size_t value;
