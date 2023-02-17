@@ -1592,21 +1592,23 @@ private:
 
             if (bytes && mips)
             {
-            #if defined(WEBGL)
-                // WebGL only supports mips with POT textures.
-                // This also means that with NPOT textures only linear or nearest
-                // sampling can be used since mips are not available.
-                // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-                if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
+                if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_1)
+                {
+                    // WebGL only supports mips with POT textures.
+                    // This also means that with NPOT textures only linear or nearest
+                    // sampling can be used since mips are not available.
+                    // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+                    if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
+                    {
+                        GenerateMips(bytes, xres, yres, format);
+                        mHasMips = true;
+                    } else WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, xres, yres);
+                }
+                else
                 {
                     GenerateMips(bytes, xres, yres, format);
                     mHasMips = true;
                 }
-                else WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, xres, yres);
-            #else
-                GenerateMips(bytes, xres, yres, format);
-                mHasMips = true;
-            #endif
             }
 
             mWidth  = xres;
@@ -1659,6 +1661,41 @@ private:
         virtual bool TestFlag(Flags flag) const override
         { return mFlags.test(flag); }
 
+        virtual bool GenerateMips() override
+        {
+            if (mHasMips)
+                return true;
+
+            if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_1)
+            {
+                if (!base::IsPowerOfTwo(mWidth) || !base::IsPowerOfTwo(mHeight))
+                {
+                    WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, mWidth, mHeight);
+                    return false;
+                }
+            }
+            if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
+            {
+                WARN("GL ES2 doesn't support mips on sRGB(A) textures. [texture='%1']", mName);
+                return false;
+            }
+
+            const auto last_unit_index = mDevice.mTextureUnits.size() - 1;
+            const auto texture_unit    = GL_TEXTURE0 + last_unit_index;
+
+            GL_CALL(glActiveTexture(texture_unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
+            GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+            mDevice.mTextureUnits[last_unit_index].texture = this;
+            mDevice.mTextureUnits[last_unit_index].wrap_x = GL_NONE;
+            mDevice.mTextureUnits[last_unit_index].wrap_y = GL_NONE;
+            mDevice.mTextureUnits[last_unit_index].wrap_x = GL_NONE;
+            mDevice.mTextureUnits[last_unit_index].min_filter = GL_NONE;
+            mDevice.mTextureUnits[last_unit_index].mag_filter = GL_NONE;
+            mHasMips = true;
+            return true;
+        }
+
         // internal
         bool IsTransient() const
         { return mFlags.test(Flags::Transient); }
@@ -1694,7 +1731,7 @@ private:
         {
             // if the texture has sRGB format then according to GL_EXT_sRGB
             // no mipmap generation is possible but glGenerateMipmap will return INVALID_OPERATION.
-            // thus with sRGB formats we need to generate the mipmaps manually ourselves.
+            // Thus, with sRGB formats we need to generate the mipmaps manually ourselves.
             // in this function we're expecting that the base level (level 0) has already
             // been loaded, so the next level is level 1
 

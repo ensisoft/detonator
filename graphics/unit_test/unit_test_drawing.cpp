@@ -104,6 +104,11 @@ public:
     {}
     virtual bool TestFlag(Flags flag) const override
     { return false; }
+
+    virtual bool GenerateMips() override
+    {
+        return false;
+    }
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
@@ -500,6 +505,8 @@ private:
 
 void unit_test_material_uniforms()
 {
+    TEST_CASE
+
     // test dynamic program uniforms.
     {
         TestDevice device;
@@ -952,6 +959,8 @@ void unit_test_material_uniforms()
 
 void unit_test_material_textures()
 {
+    TEST_CASE
+
     // test setting basic texture properties.
     {
         TestDevice device;
@@ -1214,6 +1223,9 @@ void unit_test_material_textures()
 
 void unit_test_material_textures_bind_fail()
 {
+
+    TEST_CASE
+
     TestDevice device;
     TestProgram program;
 
@@ -1260,6 +1272,8 @@ void unit_test_material_textures_bind_fail()
 
 void unit_test_material_uniform_folding()
 {
+    TEST_CASE
+
     gfx::detail::GenericShaderPass pass;
     gfx::MaterialClass::State state;
     state.shader_pass = &pass;
@@ -1366,6 +1380,8 @@ void unit_test_material_uniform_folding()
 
 void unit_test_custom_uniforms()
 {
+    TEST_CASE
+
     gfx::CustomMaterialClass klass;
     klass.SetUniform("float", 56.0f);
     klass.SetUniform("int", 123);
@@ -1405,6 +1421,8 @@ void unit_test_custom_uniforms()
 
 void unit_test_custom_textures()
 {
+    TEST_CASE
+
     gfx::CustomMaterialClass klass;
     {
         gfx::RgbBitmap bitmap;
@@ -1466,6 +1484,8 @@ void unit_test_custom_textures()
 
 void unit_test_static_poly()
 {
+    TEST_CASE
+
     gfx::PolygonClass poly;
 
     // polygon is marked static, but we're in edit mode so the
@@ -1538,6 +1558,8 @@ void unit_test_static_poly()
 
 void unit_test_local_particles()
 {
+    TEST_CASE
+
     using K = gfx::KinematicsParticleEngineClass;
     using P = gfx::KinematicsParticleEngineClass::Params;
 
@@ -1804,11 +1826,12 @@ void unit_test_local_particles()
 
 void unit_test_global_particles()
 {
-
+    TEST_CASE
 }
 
 void unit_test_particles()
 {
+    TEST_CASE
 
     // todo: test the following:
     // - emission mode
@@ -1825,6 +1848,8 @@ void unit_test_particles()
 // needs to be created.
 void unit_test_painter_shape_material_pairing()
 {
+    TEST_CASE
+
     TestDevice device;
 
     auto painter = gfx::Painter::Create(&device);
@@ -1854,6 +1879,8 @@ void unit_test_painter_shape_material_pairing()
 // same texture object once onto the device.
 void unit_test_packed_texture_bug()
 {
+    TEST_CASE
+
     gfx::RgbaBitmap bmp;
     bmp.Resize(10, 10);
     bmp.Fill(gfx::Color::HotPink);
