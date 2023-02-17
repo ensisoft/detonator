@@ -242,4 +242,23 @@ namespace gfx
     private:
     };
 
+    class AutoFBO
+    {
+    public:
+        explicit  AutoFBO(Device& device)
+          : mDevice(device)
+        {
+            mCurrent = mDevice.GetCurrentFramebuffer();
+        }
+        ~AutoFBO()
+        {
+            mDevice.SetFramebuffer(mCurrent);
+        }
+        AutoFBO(const AutoFBO&) = delete;
+        AutoFBO& operator=(const AutoFBO&) = delete;
+    private:
+        const Framebuffer* mCurrent = nullptr;
+        Device& mDevice;
+    };
+
 } // namespace
