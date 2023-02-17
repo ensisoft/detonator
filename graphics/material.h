@@ -55,8 +55,7 @@ namespace gfx
     class TextureSource
     {
     public:
-        // Enum to specify what is the underlying data source for
-        // for the texture data.
+        // Enum to specify what is the underlying data source for the texture data.
         enum class Source {
             // Data comes from a file (such as a .png or a .jpg) in the filesystem.
             Filesystem,
@@ -80,24 +79,25 @@ namespace gfx
         virtual Source GetSourceType() const = 0;
         // Get texture source class/resource id.
         virtual std::string GetId() const = 0;
-        // Get the identifier to be used for the GPU side resource.
-        virtual std::string GetGpuId() const
-        { return GetId(); }
         // Get the human-readable / and settable name.
         virtual std::string GetName() const = 0;
         // Get the texture source hash value based on the properties
         // of the texture source object itself *and* its content.
         virtual std::size_t GetHash() const = 0;
-        // Get the hash value based on the content of the texture source.
-        // This hash value only covers the bits of the *content* i.e.
-        // the content of the IBitmap to be generated.
-        virtual std::size_t GetContentHash() const = 0;
         // Set the texture source human-readable name.
         virtual void SetName(const std::string& name) = 0;
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
         // The returned bitmap can be potentially immutably shared.
         virtual std::shared_ptr<IBitmap> GetData() const = 0;
+
+        struct Environment {
+            bool dynamic_content = false;
+        };
+        // Create a texture out of the texture source on the device.
+        // Returns a texture object on success of nullptr on error.
+        virtual Texture* Upload(const Environment& env, Device& device) const = 0;
+
         // Serialize into JSON object.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load state from JSON object. Returns true if successful
@@ -148,36 +148,24 @@ namespace gfx
             { return Source::Filesystem; }
             virtual std::string GetId() const override
             { return mId; }
-            virtual std::string GetGpuId() const override
-            {
-                // using the mFile URI is *not* enough to uniquely
-                // identify this texture object on the GPU because it's
-                // possible that the *same* texture object (same underlying file)
-                // is used with *different* flags in another material.
-                // in other words, "foo.png with premultiplied alpha" must be
-                // a different GPU texture object than "foo.png with straight alpha".
-                size_t hash = 0;
-                hash = base::hash_combine(hash, mFile);
-                hash = base::hash_combine(hash, mColorSpace);
-                hash = base::hash_combine(hash, mFlags.test(Flags::PremulAlpha));
-                return std::to_string(hash);
-            }
             virtual std::string GetName() const override
             { return mName; }
             virtual std::size_t GetHash() const override
             {
-                auto hash = GetContentHash();
+                size_t hash = 0;
+                hash = base::hash_combine(hash, mFile);
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
                 hash = base::hash_combine(hash, mFlags);
                 hash = base::hash_combine(hash, mColorSpace);
                 return hash;
             }
-            virtual std::size_t GetContentHash() const override
-            { return base::hash_combine(0, mFile); }
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
+
+            virtual Texture* Upload(const Environment& env, Device& device) const override;
+
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
 
@@ -251,16 +239,11 @@ namespace gfx
             { return mId; }
             virtual std::size_t GetHash()  const override
             {
-                auto hash = GetContentHash();
-                hash = base::hash_combine(hash, mId);
-                hash = base::hash_combine(hash, mName);
-                return hash;
-            }
-            virtual std::size_t GetContentHash() const override
-            {
                 size_t hash = mBitmap->GetHash();
                 hash = base::hash_combine(hash, mBitmap->GetWidth());
                 hash = base::hash_combine(hash, mBitmap->GetHeight());
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
                 return hash;
             }
             virtual std::string GetName() const override
@@ -269,6 +252,8 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
+
+            virtual Texture* Upload(const Environment& env, Device& device) const override;
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -340,19 +325,19 @@ namespace gfx
             { return mId; }
             virtual std::size_t GetHash() const override
             {
-                auto hash = GetContentHash();
+                auto hash = mGenerator->GetHash();
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
                 return hash;
             }
-            virtual std::size_t GetContentHash() const override
-            { return mGenerator->GetHash(); }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mGenerator->Generate(); }
+
+            virtual Texture* Upload(const Environment& env, Device& device) const override;
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
@@ -407,18 +392,18 @@ namespace gfx
             { return mId; }
             virtual std::size_t GetHash() const override
             {
-                auto hash = GetContentHash();
+                auto hash = mTextBuffer.GetHash();
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
                 return hash;
             }
-            virtual std::size_t GetContentHash() const override
-            { return mTextBuffer.GetHash(); }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override;
+
+            virtual Texture* Upload(const Environment&env, Device& device) const override;
 
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;

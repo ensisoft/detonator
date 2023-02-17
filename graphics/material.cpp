@@ -168,6 +168,48 @@ namespace {
 namespace gfx
 {
 
+Texture* detail::TextureFileSource::Upload(const Environment& env, Device& device) const
+{
+    // using the mFile URI is *not* enough to uniquely
+    // identify this texture object on the GPU because it's
+    // possible that the *same* texture object (same underlying file)
+    // is used with *different* flags in another material.
+    // in other words, "foo.png with premultiplied alpha" must be
+    // a different GPU texture object than "foo.png with straight alpha".
+    size_t gpu_hash = 0;
+    gpu_hash = base::hash_combine(gpu_hash, mFile);
+    gpu_hash = base::hash_combine(gpu_hash, mColorSpace);
+    gpu_hash = base::hash_combine(gpu_hash, mFlags.test(Flags::PremulAlpha));
+    const auto& gpu_id = std::to_string(gpu_hash);
+
+    auto* texture = device.FindTexture(gpu_id);
+    if (texture && !env.dynamic_content)
+        return texture;
+
+    size_t content_hash = 0;
+    if (env.dynamic_content) {
+        content_hash = base::hash_combine(0, mFile);
+        if (texture && texture->GetContentHash() == content_hash)
+            return texture;
+    }
+
+    if (!texture) {
+        texture = device.MakeTexture(gpu_id);
+        texture->SetName(mName);
+    }
+
+    if (const auto& bitmap = GetData())
+    {
+        constexpr auto generate_mips = true;
+        const auto sRGB = mColorSpace == ColorSpace::sRGB;
+        texture->SetContentHash(content_hash);
+        texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
+            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), generate_mips);
+        return texture;
+    }
+    return nullptr;
+}
+
 std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
 {
     DEBUG("Loading texture file. [file='%1']", mFile);
@@ -218,6 +260,35 @@ bool detail::TextureFileSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+Texture* detail::TextureBitmapBufferSource::Upload(const Environment& env, Device& device) const
+{
+    auto* texture = device.FindTexture(mId);
+    if (texture && !env.dynamic_content)
+        return texture;
+
+    size_t content_hash = 0;
+    if (env.dynamic_content) {
+        content_hash = base::hash_combine(content_hash, mBitmap->GetWidth());
+        content_hash = base::hash_combine(content_hash, mBitmap->GetHeight());
+        content_hash = base::hash_combine(content_hash, mBitmap->GetHash());
+        if (texture && texture->GetContentHash() == content_hash)
+            return texture;
+    }
+    if (!texture) {
+        texture = device.MakeTexture(mId);
+        texture->SetName(mName);
+    }
+
+    // todo: assuming linear color space now.
+    constexpr auto sRGB = false;
+    constexpr auto generate_mips = true;
+
+    texture->SetContentHash(content_hash);
+    texture->Upload(mBitmap->GetDataPtr(), mBitmap->GetWidth(), mBitmap->GetHeight(),
+        Texture::DepthToFormat(mBitmap->GetDepthBits(), sRGB), generate_mips);
+    return texture;
+}
+
 void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
 {
     const auto depth = mBitmap->GetDepthBits() / 8;
@@ -256,6 +327,37 @@ bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+Texture* detail::TextureBitmapGeneratorSource::Upload(const Environment& env, Device& device) const
+{
+    auto* texture = device.FindTexture(mId);
+    if (texture && !env.dynamic_content)
+        return texture;
+
+    size_t content_hash = 0;
+    if (env.dynamic_content) {
+        content_hash = mGenerator->GetHash();
+        if (texture && texture->GetContentHash() == content_hash)
+            return texture;
+    }
+    if (!texture) {
+        texture = device.MakeTexture(mId);
+        texture->SetName(mName);
+    }
+
+    // todo: assuming linear color space now
+    constexpr auto sRGB = false;
+    constexpr auto generate_mips = true;
+
+    if (const auto& bitmap = mGenerator->Generate())
+    {
+        texture->SetContentHash(content_hash);
+        texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
+            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), generate_mips);
+        return texture;
+    }
+    return nullptr;
+}
+
 void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
 {
     auto chunk = data.NewWriteChunk();
@@ -285,13 +387,37 @@ bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
     return ok;
 }
 
-
 std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 {
     // since this interface is returning a CPU side bitmap object
     // there's no way to use a texture based (bitmap) font here.
     if (mTextBuffer.GetRasterFormat() == TextBuffer::RasterFormat::Bitmap)
         return mTextBuffer.RasterizeBitmap();
+    return nullptr;
+}
+
+Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device& device) const
+{
+    auto* texture = device.FindTexture(mId);
+    if (texture && !env.dynamic_content)
+        return texture;
+
+    size_t content_hash = 0;
+    if (env.dynamic_content) {
+        content_hash = mTextBuffer.GetHash();
+        if (texture && texture->GetContentHash() == content_hash)
+            return texture;
+    }
+    if (!texture) {
+        texture = device.MakeTexture(mId);
+        texture->SetName(mName);
+    }
+
+    if (const auto& mask = mTextBuffer.RasterizeBitmap())
+    {
+        texture->SetContentHash(content_hash);
+        texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale);
+    }
     return nullptr;
 }
 
@@ -472,48 +598,21 @@ bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundSta
     const unsigned frame_index[2] = {
         first_frame, second_frame
     };
+
+    TextureSource::Environment texture_source_env;
+    texture_source_env.dynamic_content = state.dynamic_content;
+
     for (unsigned i=0; i<2; ++i)
     {
         const auto& sprite  = mSprites[frame_index[i]];
         const auto& source  = sprite.source;
-        const auto& name    = source->GetGpuId();
-        auto* texture = device.FindTexture(name);
-
-        bool needs_upload = false;
-        bool srgb_texture = false;
-        size_t content_hash = 0;
-
-        if (source->GetColorSpace() == TextureSource::ColorSpace::sRGB)
-            srgb_texture = true;
-
-        // check for changes.
-        if (texture && state.dynamic_content) {
-            content_hash = source->GetContentHash();
-            needs_upload = content_hash != texture->GetContentHash();
-        }
-        if (!texture || needs_upload)
+        if (auto* texture = source->Upload(texture_source_env, device))
         {
-            if (!texture)
-                texture = device.MakeTexture(name);
-
-            auto bitmap = source->GetData();
-            if (!bitmap)
-                return false;
-            const auto width  = bitmap->GetWidth();
-            const auto height = bitmap->GetHeight();
-            const auto format = Texture::DepthToFormat(bitmap->GetDepthBits(), srgb_texture);
-            texture->SetName(source->GetName());
-            texture->SetGroup(state.group_tag);
-            texture->Upload(bitmap->GetDataPtr(), width, height, format);
-
-            if (!content_hash)
-                content_hash = source->GetContentHash();
-            texture->SetContentHash(content_hash);
-        }
-        result.textures[i]      = texture;
-        result.rects[i]         = sprite.rect;
-        result.sampler_names[i] = mSamplerName[i];
-        result.rect_names[i]    = mRectUniformName[i];
+            result.textures[i]      = texture;
+            result.rects[i]         = sprite.rect;
+            result.sampler_names[i] = mSamplerName[i];
+            result.rect_names[i]    = mRectUniformName[i];
+        } else return false;
     }
     result.blend_coefficient = blend_coeff;
     return true;
@@ -615,46 +714,19 @@ bool TextureMap2D::BindTextures(const BindingState& state, Device& device, Bound
     if (!mSource)
         return false;
 
-    const auto& source  = mSource;
-    const auto& name    = mSource->GetGpuId();
-    auto* texture = device.FindTexture(name);
+    TextureSource::Environment texture_source_env;
+    texture_source_env.dynamic_content = state.dynamic_content;
 
-    bool needs_upload = false;
-    bool srgb_texture = false;
-    size_t content_hash = 0;
-
-    if (mSource->GetColorSpace() == TextureSource::ColorSpace::sRGB)
-        srgb_texture = true;
-
-    // check for changes.
-    if (texture && state.dynamic_content) {
-        content_hash = source->GetContentHash();
-        needs_upload = content_hash != texture->GetContentHash();
-    }
-    // upload if doesn't exist already or the content has changed.
-    if (!texture || needs_upload)
+    if (auto* texture = mSource->Upload(texture_source_env, device))
     {
-        if (!texture)
-            texture = device.MakeTexture(name);
-
-        auto bitmap = source->GetData();
-        if (!bitmap)
-            return false;
-        const auto width  = bitmap->GetWidth();
-        const auto height = bitmap->GetHeight();
-        const auto format = Texture::DepthToFormat(bitmap->GetDepthBits(), srgb_texture);
-        texture->SetName(mSource->GetName());
-        texture->Upload(bitmap->GetDataPtr(), width, height, format);
-        if (!content_hash)
-            content_hash = source->GetContentHash();
-        texture->SetContentHash(content_hash);
+        result.textures[0]       = texture;
+        result.rects[0]          = mRect;
+        result.sampler_names[0]  = mSamplerName;
+        result.rect_names[0]     = mRectUniformName;
+        result.blend_coefficient = 0;
+        return true;
     }
-    result.textures[0] = texture;
-    result.rects[0]    = mRect;
-    result.blend_coefficient = 0;
-    result.sampler_names[0]  = mSamplerName;
-    result.rect_names[0]     = mRectUniformName;
-    return true;
+    return false;
 }
 void TextureMap2D::IntoJson(data::Writer& data) const
 {
@@ -1260,6 +1332,7 @@ void SpriteClass::ApplyDynamicState(const State& state, Device& device, Program&
         texture->SetFilter(mMagFilter);
         texture->SetWrapX(mWrapX);
         texture->SetWrapY(mWrapY);
+        texture->SetGroup(mClassId);
 
         alpha_mask[i] = texture->GetFormat() == Texture::Format::Grayscale
                         ? 1.0f : 0.0f;
@@ -2112,6 +2185,7 @@ void CustomMaterialClass::ApplyDynamicState(const State& state, Device& device, 
             texture->SetFilter(mMagFilter);
             texture->SetWrapX(mWrapX);
             texture->SetWrapY(mWrapY);
+            texture->SetGroup(mClassId);
 
             const auto& rect = binds.rects[i];
             if (!binds.sampler_names[i].empty())
