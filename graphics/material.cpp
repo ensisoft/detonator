@@ -408,15 +408,30 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
-    if (!texture) {
-        texture = device.MakeTexture(mId);
-        texture->SetName(mName);
-    }
-
-    if (const auto& mask = mTextBuffer.RasterizeBitmap())
+    const auto format = mTextBuffer.GetRasterFormat();
+    if (format == TextBuffer::RasterFormat::Bitmap)
     {
-        texture->SetContentHash(content_hash);
-        texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale);
+        if (!texture)
+        {
+            texture = device.MakeTexture(mId);
+            texture->SetName(mName);
+        }
+
+        if (const auto& mask = mTextBuffer.RasterizeBitmap())
+        {
+            texture->SetContentHash(content_hash);
+            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale);
+        }
+    }
+    else if (format == TextBuffer::RasterFormat::Texture)
+    {
+        texture = mTextBuffer.RasterizeTexture(mId, device);
+        if (texture)
+        {
+            texture->SetContentHash(content_hash);
+            texture->GenerateMips();
+        }
+        return texture;
     }
     return nullptr;
 }
@@ -2479,8 +2494,8 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     raster.blending = RasterState::Blending::Transparent;
 
     const auto hash = mText.GetHash();
-    const auto& name = std::to_string(hash);
-    auto* texture = device.FindTexture(name);
+    const auto& gpu_id = std::to_string(hash);
+    auto* texture = device.FindTexture(gpu_id);
     if (!texture)
     {
         // current text rendering use cases for this TextMaterial
@@ -2497,9 +2512,9 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
             // will then act as a throttle and prevent superfluous
             // attempts to rasterize when the contents of the text
             // buffer have not changed.
-            texture = device.MakeTexture(name);
-            texture->SetName("TextMaterial");
-            texture->SetTransient(true);
+            texture = device.MakeTexture(gpu_id);
+            texture->SetTransient(true); // set transient flag up front to tone down DEBUG noise
+            texture->SetName("FreeTypeText");
 
             auto bitmap = mText.RasterizeBitmap();
             if (!bitmap)
@@ -2510,9 +2525,12 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         }
         else if (format == TextBuffer::RasterFormat::Texture)
         {
-            texture = mText.RasterizeTexture(device);
+            texture = mText.RasterizeTexture(gpu_id, device);
             if (!texture)
                 return;
+            texture->SetTransient(true);
+            texture->SetName("BitmapText");
+            // texture->GenerateMips(); << this would be the place to generate mips if needed.
         } else if (format == TextBuffer::RasterFormat::None)
             return;
         else BUG("Unhandled texture raster format.");

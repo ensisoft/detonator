@@ -694,21 +694,8 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
     return out;
 }
 
-Texture* TextBuffer::RasterizeTexture(Device& device) const
+Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, Device& device) const
 {
-    // create the render target texture that will contain the
-    // rasterized texture after we're done. it'll be used as a
-    // render target (color attachment) in an FBO and we render
-    // to it by drawing quads that sample from the font's texture.
-    const auto& texture_name = std::to_string(GetHash());
-    auto* result_texture = device.FindTexture(texture_name);
-    if (result_texture)
-        return result_texture;
-
-    result_texture = device.MakeTexture(texture_name);
-    result_texture->SetName("BitmapFontRasterTarget");
-    result_texture->SetTransient(true);
-
     // load the bitmap font json descriptor
     static std::unordered_map<std::string, std::unique_ptr<GamestudioBitmapFontGlyphPack>> font_cache;
     auto it = font_cache.find(mText.font);
@@ -726,6 +713,12 @@ Texture* TextBuffer::RasterizeTexture(Device& device) const
     auto* font_texture = font->GetTexture(device);
     if (!font_texture)
         return nullptr;
+
+    // create the render target texture that will contain the
+    // rasterized texture after we're done. it'll be used as a
+    // render target (color attachment) in an FBO, and we render
+    // to it by drawing quads that sample from the font's texture.
+    auto* result_texture = device.MakeTexture(gpu_id);
 
     // setup the glyph array.
     struct Glyph {
@@ -833,7 +826,7 @@ Texture* TextBuffer::RasterizeTexture(Device& device) const
         ypos += mText.lineheight * mText.fontsize;
     }
 
-    result_texture->Upload(nullptr, buffer_width, buffer_height, gfx::Texture::Format::RGBA, false /* mips */);
+    result_texture->Allocate(buffer_width, buffer_height, gfx::Texture::Format::RGBA);
 
     auto* fbo = device.FindFramebuffer("BitmapFontCompositeFBO");
     if (fbo == nullptr)
@@ -931,7 +924,7 @@ void main() {
     program->SetTexture("kGlyphMap", 0, *font_texture);
     program->SetTextureCount(1);
 
-    auto* current = device.GetCurrentFramebuffer();
+    AutoFBO fbo_change(device);
 
     fbo->SetColorTarget(result_texture);
     device.SetFramebuffer(fbo);
@@ -947,8 +940,6 @@ void main() {
     state.viewport    = IRect(0, 0, buffer_width, buffer_height);
     state.stencil_func = Device::State::StencilFunc::Disabled;
     device.Draw(*program, *geometry, state);
-
-    device.SetFramebuffer(current);
     return result_texture;
 }
 
