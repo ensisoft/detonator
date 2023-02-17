@@ -683,11 +683,35 @@ public:
     virtual void DeleteFramebuffers() override
     {
         mFBOs.clear();
+
+        if (mCurrentFBO)
+        {
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+            mCurrentFBO = nullptr;
+        }
     }
 
-    virtual void SetFramebuffer(const gfx::Framebuffer* fbo) override
+    virtual bool SetFramebuffer(const gfx::Framebuffer* fbo) override
     {
-        mSetFramebuffer = (FramebufferImpl*)fbo;
+        auto impl = (FramebufferImpl*)fbo;
+        if (impl == nullptr)
+        {
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        }
+        else if (impl->IsReady())
+        {
+            if (!impl->Complete(true))
+                return false;
+        }
+        else
+        {
+            if (!impl->Create())
+                return false;
+            if (!impl->Complete(false))
+                return false;
+        }
+        mCurrentFBO = impl;
+        return true;
     }
 
     virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
@@ -1387,28 +1411,6 @@ public:
     }
     bool SetupFBO()
     {
-        if (mSetFramebuffer)
-        {
-            mCurrentFBO = mSetFramebuffer.value();
-            mSetFramebuffer.reset();
-
-            if (mCurrentFBO == nullptr)
-            {
-                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-            }
-            else if (mCurrentFBO->IsReady())
-            {
-                if (!mCurrentFBO->Complete(true))
-                    return false;
-            }
-            else
-            {
-                if (!mCurrentFBO->Create())
-                    return false;
-                if (!mCurrentFBO->Complete(false))
-                    return false;
-            }
-        }
         if (mCurrentFBO)
         {
             if (!mCurrentFBO->Complete(false))
@@ -2429,6 +2431,7 @@ private:
                     mColor->SetName("FBO/" + mName + "/color0");
                     mColor->Upload(nullptr, mConfig.width, mConfig.height, gfx::Texture::Format::RGBA, false /*mips*/);
                     mColorTarget = mColor.get();
+                    DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName, mConfig.width, mConfig.height);
                 }
                 GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColorTarget->GetHandle(), 0));
                 mBindColor = false;
@@ -2441,7 +2444,7 @@ private:
             if (ret == GL_FRAMEBUFFER_COMPLETE)
                 return true;
             else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
-                ERROR("Unsupported FBO configuration. [name=%1]", mName);
+                ERROR("Unsupported FBO configuration. [name='%1']", mName);
             else BUG("Incorrect FBO setup.");
             return false;
         }
@@ -2527,7 +2530,7 @@ private:
                 {
                     if (!mDevice.mExtensions.OES_packed_depth_stencil)
                     {
-                        ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found.");
+                        ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found. [name='%1']", mName);
                         return false;
                     }
                     GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
@@ -2550,7 +2553,7 @@ private:
                     //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
                 }
             }
-            DEBUG("New FBO object created. [width=%1, height=%2, format=%3, name=%4]", xres, yres, mConfig.format, mName);
+            DEBUG("Created new frame buffer object. [name='%1', width=%2, height=%3, format=%4]", mName, xres, yres, mConfig.format);
             return true;
         }
         void SetFrameStamp(size_t stamp)
@@ -2610,7 +2613,6 @@ private:
     } mExtensions;
 
     FramebufferImpl* mCurrentFBO = nullptr;
-    std::optional<FramebufferImpl*> mSetFramebuffer;
 };
 
 } // namespace

@@ -420,9 +420,9 @@ public:
     {}
     virtual void DeleteFramebuffers() override
     {}
-    virtual void SetFramebuffer(const gfx::Framebuffer* fbo) override
+    virtual bool SetFramebuffer(const gfx::Framebuffer* fbo) override
     {
-
+        return true;
     }
     virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
     {}
