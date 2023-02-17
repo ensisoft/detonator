@@ -137,7 +137,7 @@ namespace gfx
         // Upload the texture contents from the given CPU side buffer.
         // This will overwrite any previous contents and reshape the texture dimensions.
         // If mips is false (no mipmap generation) the texture minification filter
-        // must be set to not use any mips either.
+        // must be set not to use any mips either.
         virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips=true) = 0;
         // Get the texture width. Initially 0 until Upload is called
         // and new texture contents are uploaded.
@@ -159,6 +159,13 @@ namespace gfx
         virtual void SetGroup(const std::string& name) = 0;
         // Test whether a flag is on or off.
         virtual bool TestFlag(Flags flag) const = 0;
+        // Try to generate texture mip maps based on a previously provided texture data.
+        // This is mostly useful for generating mips after using the texture as render target.
+        // Several constraints on the implementation might prohibit the mip map generation.
+        // In such case the function returns false and the texture will not have any mips.
+        // The caller needs to make sure to deal with the situation, i.e. using a texture
+        // filtering mode that requires no mips.
+        virtual bool GenerateMips() = 0;
 
         // helpers.
         inline void SetTransient(bool on_off)
@@ -170,6 +177,16 @@ namespace gfx
         { return TestFlag(Flags::Transient); }
         inline bool GarbageCollect() const
         { return TestFlag(Flags::GarbageCollect); }
+
+        // Allocate texture storage based on the texture format and dimensions.
+        // The contents of the texture are unspecified and any previous contents
+        // are no longer valid/available. The primary use case for this method is
+        // to be able to allocate texture storage for using the texture as a render
+        // target when rendering to an FBO. Any mipmap generation must then be
+        // performed later after the rendering has completed or then the filtering
+        // mode must be set not to use mips either.
+        void Allocate(unsigned width, unsigned height, Format format)
+        { Upload(nullptr, width, height, format, false); }
 
     protected:
     private:
