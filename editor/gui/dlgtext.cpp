@@ -126,12 +126,32 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     mText.SetAlignment((gfx::TextBuffer::HorizontalAlignment)GetValue(mUI.cmbHAlign));
     if (adjust)
     {
-        const auto& bitmap = mText.RasterizeBitmap();
-        buffer_width  = bitmap->GetWidth();
-        buffer_height = bitmap->GetHeight();
-        SetValue(mUI.bufferWidth, buffer_width);
-        SetValue(mUI.bufferHeight, buffer_height);
-        mText.SetBufferSize(buffer_width, buffer_height);
+        const auto format = mText.GetRasterFormat();
+        if (format == gfx::TextBuffer::RasterFormat::Bitmap)
+        {
+            if (const auto& bitmap = mText.RasterizeBitmap())
+            {
+                buffer_width = bitmap->GetWidth();
+                buffer_height = bitmap->GetHeight();
+                SetValue(mUI.bufferWidth, buffer_width);
+                SetValue(mUI.bufferHeight, buffer_height);
+                mText.SetBufferSize(buffer_width, buffer_height);
+            }
+        }
+        else if (format == gfx::TextBuffer::RasterFormat::Texture)
+        {
+            if (auto* texture = mText.RasterizeTexture("TmpTextRaster", *painter.GetDevice()))
+            {
+                texture->SetTransient(true);
+                texture->SetGarbageCollection(true);
+                texture->SetName("TmpTextRaster");
+                buffer_width = texture->GetWidth();
+                buffer_height = texture->GetHeight();
+                SetValue(mUI.bufferWidth, buffer_width);
+                SetValue(mUI.bufferHeight, buffer_height);
+                mText.SetBufferSize(buffer_width, buffer_height);
+            }
+        }
     }
     if (mMaterial == nullptr)
     {
