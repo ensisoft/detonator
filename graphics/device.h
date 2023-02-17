@@ -187,7 +187,7 @@ namespace gfx
         // Set the render buffer used for the next Draw, Clear and Read commands.
         // If the fbo is nullptr then set the frame buffer to the default fbo 
         // that is the rendering surface of the context.
-        virtual void SetFramebuffer(const Framebuffer* fbo = nullptr) = 0;
+        virtual bool SetFramebuffer(const Framebuffer* fbo = nullptr) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
