@@ -881,7 +881,7 @@ void main() {
     auto* geometry = device.FindGeometry("BitmapFontTextGeometry");
     if (geometry == nullptr)
     {
-        geometry = device.MakeGeometry("BitmapFontGeometry");
+        geometry = device.MakeGeometry("BitmapFontTextGeometry");
     }
 
 
