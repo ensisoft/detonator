@@ -1593,12 +1593,12 @@ namespace gfx
 
     // Create material based on a simple color only.
     ColorClass CreateMaterialClassFromColor(const Color4f& color);
-    // Create a material based on a 2D texture map.
-    TextureMap2DClass CreateMaterialClassFromTexture(const std::string& uri);
-    // Create a sprite from multiple textures.
-    SpriteClass CreateMaterialClassFromSprite(const std::initializer_list<std::string>& textures);
-    // Create a sprite from multiple textures.
-    SpriteClass CreateMaterialClassFromSprite(const std::vector<std::string>& textures);
+    // Create a material based on a single image file.
+    TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri);
+    // Create a sprite from multiple images.
+    SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris);
+    // Create a sprite from multiple images.
+    SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris);
     // Create a sprite from a texture atlas where all the sprite frames
     // are packed inside the single texture.
     SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
@@ -1612,14 +1612,14 @@ namespace gfx
     { return MaterialClassInst(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right)); }
     inline MaterialClassInst CreateMaterialFromColor(const Color4f& color)
     { return MaterialClassInst(CreateMaterialClassFromColor(color)); }
-    inline MaterialClassInst CreateMaterialFromTexture(const std::string& uri)
-    { return MaterialClassInst(CreateMaterialClassFromTexture(uri)); }
-    inline MaterialClassInst CreateMaterialFromSprite(const std::initializer_list<std::string>& textures)
-    { return MaterialClassInst(CreateMaterialClassFromSprite(textures)); }
-    inline MaterialClassInst CreateMaterialFromSprite(const std::vector<std::string>& textures)
-    { return MaterialClassInst(CreateMaterialClassFromSprite(textures)); }
-    inline MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
-    { return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(texture, frames)); }
+    inline MaterialClassInst CreateMaterialFromImage(const std::string& uri)
+    { return MaterialClassInst(CreateMaterialClassFromImage(uri)); }
+    inline MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
+    { return MaterialClassInst(CreateMaterialClassFromImages(uris)); }
+    inline MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris)
+    { return MaterialClassInst(CreateMaterialClassFromImages(uris)); }
+    inline MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
+    { return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(uri, frames)); }
     inline MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
     { return MaterialClassInst(CreateMaterialClassFromText(text)); }
 

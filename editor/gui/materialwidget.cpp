@@ -1879,7 +1879,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         if (dummy)
         {
-            static auto dummy = gfx::CreateMaterialClassFromTexture("app://textures/Checkerboard.png");
+            static auto dummy = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
             painter.Draw(*drawable, transform, gfx::MaterialClassInst(dummy));
         }
         ShowMessage(message, painter);

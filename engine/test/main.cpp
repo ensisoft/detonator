@@ -83,7 +83,7 @@ class HelloWasmTest : public TestCase
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        static auto klass =  gfx::CreateMaterialClassFromTexture("assets/textures/Checkerboard.png");
+        static auto klass =  gfx::CreateMaterialClassFromImage("assets/textures/Checkerboard.png");
 
         gfx::FRect rect;
         rect.Resize(200, 200);
