@@ -1352,7 +1352,7 @@ Workspace::Workspace(const QString& dir)
     // It is used as the initial material when user hasn't selected
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
-    auto checkerboard = gfx::CreateMaterialClassFromTexture("app://textures/Checkerboard.png");
+    auto checkerboard = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
     checkerboard.SetId("_checkerboard");
     mResources.emplace_back(new MaterialResource(std::move(checkerboard), "Checkerboard"));
 

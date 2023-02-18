@@ -53,10 +53,10 @@ public:
     {
         if (name == "uv_test")
             return std::make_shared<gfx::TextureMap2DClass>(
-                    gfx::CreateMaterialClassFromTexture("assets/textures/uv_test_512.png"));
+                    gfx::CreateMaterialClassFromImage("assets/textures/uv_test_512.png"));
         else if (name == "checkerboard")
             return std::make_shared<gfx::TextureMap2DClass>(
-                    gfx::CreateMaterialClassFromTexture("assets/textures/Checkerboard.png"));
+                    gfx::CreateMaterialClassFromImage("assets/textures/Checkerboard.png"));
         else if (name == "color")
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
         else if (name == "object")
@@ -65,7 +65,7 @@ public:
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
         else if (name == "M-6") {
             auto klass =std::make_shared<gfx::TextureMap2DClass>(
-                    gfx::CreateMaterialClassFromTexture("assets/textures/M-6_preview.png"));
+                    gfx::CreateMaterialClassFromImage("assets/textures/M-6_preview.png"));
             klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             return klass;
         }

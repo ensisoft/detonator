@@ -2664,7 +2664,7 @@ ColorClass CreateMaterialClassFromColor(const Color4f& color)
     return material;
 }
 
-TextureMap2DClass CreateMaterialClassFromTexture(const std::string& uri)
+TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri)
 {
     TextureMap2DClass material;
     material.SetTexture(LoadTextureFromFile(uri));
@@ -2672,32 +2672,32 @@ TextureMap2DClass CreateMaterialClassFromTexture(const std::string& uri)
     return material;
 }
 
-SpriteClass CreateMaterialClassFromSprite(const std::initializer_list<std::string>& textures)
+SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris)
 {
     SpriteClass material;
-    for (const auto& texture : textures)
-        material.AddTexture(LoadTextureFromFile(texture));
+    for (const auto& uri : uris)
+        material.AddTexture(LoadTextureFromFile(uri));
 
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     return material;
 }
 
-SpriteClass CreateMaterialClassFromSprite(const std::vector<std::string>& textures)
+SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
 {
     SpriteClass material;
-    for (const auto& texture : textures)
-        material.AddTexture(LoadTextureFromFile(texture));
+    for (const auto& uri : uris)
+        material.AddTexture(LoadTextureFromFile(uri));
 
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     return material;
 }
 
-SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames)
+SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
 {
     SpriteClass material;
     for (size_t i=0; i<frames.size(); ++i)
     {
-        material.AddTexture(LoadTextureFromFile(texture));
+        material.AddTexture(LoadTextureFromFile(uri));
         material.SetTextureRect(i, frames[i]);
     }
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);

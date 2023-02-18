@@ -730,7 +730,7 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
 
     const bool grid = GetValue(mUI.chkGrid);
 
-    auto selection_material_class = gfx::CreateMaterialClassFromTexture("app://textures/accept_icon.png");
+    auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     auto selection_material = gfx::MaterialClassInst(selection_material_class);

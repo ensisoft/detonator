@@ -74,7 +74,7 @@ public:
             painter.SetScissor(10, 10, 300, 300);
 
         gfx::FillRect(painter, gfx::FRect(0, 0, 1024, 768),
-                      gfx::CreateMaterialFromTexture("textures/uv_test_512.png"));
+                      gfx::CreateMaterialFromImage("textures/uv_test_512.png"));
         painter.ClearScissor();
     }
     virtual std::string GetName() const override
@@ -98,7 +98,7 @@ public:
         if (clip)
             painter.SetViewport(10, 10, 300, 300);
 
-        static auto klass = gfx::CreateMaterialFromTexture("textures/uv_test_512.png");
+        static auto klass = gfx::CreateMaterialFromImage("textures/uv_test_512.png");
         gfx::FillRect(painter, gfx::FRect(0, 0, 1024, 768), gfx::MaterialClassInst(klass));
     }
     virtual std::string GetName() const override
@@ -1084,7 +1084,7 @@ public:
     {}
     virtual void Render(gfx::Painter& painter) override
     {
-        auto klass = gfx::CreateMaterialClassFromTexture("textures/uv_test_512.png");
+        auto klass = gfx::CreateMaterialClassFromImage("textures/uv_test_512.png");
         // in order to validate the texture coordinates let's set
         // the filtering to nearest and clamp to edge on sampling
         klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
