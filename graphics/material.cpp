@@ -168,6 +168,27 @@ namespace {
 namespace gfx
 {
 
+Texture* detail::TextureTextureSource::Upload(const Environment& env, Device& device) const
+{
+    return device.FindTexture(mGpuId);
+}
+
+void detail::TextureTextureSource::IntoJson(data::Writer& data) const
+{
+    data.Write("id",     mId);
+    data.Write("name",   mName);
+    data.Write("gpu_id", mGpuId);
+}
+
+bool detail::TextureTextureSource::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("id",     &mId);
+    ok &= data.Read("name",   &mName);
+    ok &= data.Read("gpu_id", &mGpuId);
+    return ok;
+}
+
 Texture* detail::TextureFileSource::Upload(const Environment& env, Device& device) const
 {
     // using the mFile URI is *not* enough to uniquely
@@ -679,6 +700,8 @@ bool SpriteMap::FromJson(const data::Reader& data)
                 source = std::make_unique<detail::TextureBitmapBufferSource>();
             else if (type == TextureSource::Source::BitmapGenerator)
                 source = std::make_unique<detail::TextureBitmapGeneratorSource>();
+            else if (type == TextureSource::Source::Texture)
+                source = std::make_unique<detail::TextureTextureSource>();
             else BUG("Unhandled texture source type.");
 
             Sprite sprite;
@@ -781,6 +804,8 @@ bool TextureMap2D::FromJson(const data::Reader& data)
         source = std::make_unique<detail::TextureBitmapBufferSource>();
     else if (type == TextureSource::Source::BitmapGenerator)
         source = std::make_unique<detail::TextureBitmapGeneratorSource>();
+    else if (type == TextureSource::Source::Texture)
+        source = std::make_unique<detail::TextureTextureSource>();
     else BUG("Unhandled texture source type.");
 
     if (!source->FromJson(*texture))
