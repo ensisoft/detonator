@@ -167,6 +167,7 @@ add_library(DataLib
     data/io.cpp)
 add_library(GfxLib
     device/opengles.cpp
+    graphics/help.cpp
     graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
@@ -198,6 +199,7 @@ add_library(UiLib
 add_library(GfxLibTesting
     device/opengles.cpp
     graphics/bitmap.cpp
+    graphics/help.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
