@@ -65,7 +65,9 @@ namespace gfx
             // Data comes from a bitmap buffer.
             BitmapBuffer,
             // Data comes from a bitmap generator algorithm.
-            BitmapGenerator
+            BitmapGenerator,
+            // Data is already a texture on the device
+            Texture
         };
         enum class ColorSpace {
             Linear, sRGB
@@ -125,6 +127,58 @@ namespace gfx
     };
 
     namespace detail {
+        class TextureTextureSource : public TextureSource
+        {
+        public:
+            TextureTextureSource()
+              : mId(base::RandomString(10))
+            {}
+            TextureTextureSource(std::string gpu_id)
+              : mId(base::RandomString(10))
+              , mGpuId(gpu_id)
+            {}
+
+            virtual ColorSpace GetColorSpace() const override
+            { return ColorSpace::Linear; }
+            virtual Source GetSourceType() const override
+            { return Source::Texture; }
+            virtual std::string GetId() const override
+            { return mId; }
+            virtual std::string GetName() const override
+            { return mName; }
+            virtual std::size_t GetHash() const override
+            {
+                size_t hash = 0;
+                hash = base::hash_combine(hash, mId);
+                hash = base::hash_combine(hash, mName);
+                hash = base::hash_combine(hash, mGpuId);
+                return hash;
+            }
+            virtual void SetName(const std::string& name) override
+            { mName = name; }
+            virtual std::shared_ptr<IBitmap> GetData() const override
+            { return nullptr; }
+            virtual Texture* Upload(const Environment& env, Device& device) const override;
+            virtual void IntoJson(data::Writer& data) const override;
+            virtual bool FromJson(const data::Reader& data) override;
+
+            std::string GetTextureGpuId() const
+            { return mGpuId; }
+            void SetTextureGpuId(std::string gpu_id)
+            { mGpuId = std::move(gpu_id); }
+        protected:
+            virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const override
+            {
+                auto ret = std::make_unique<TextureTextureSource>();
+                ret->mId = std::move(copy_id);
+                return ret;
+            }
+        private:
+            std::string mId;
+            std::string mName;
+            std::string mGpuId;
+        };
+
         // Source texture data from an image file.
         class TextureFileSource : public TextureSource
         {
