@@ -1769,16 +1769,19 @@ void MaterialWidget::GetTextureProperties()
             img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
         else if (depth == 32)
             img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
-        else ERROR_RETURN("Failed to load texture preview. Unexpected bit depth %1", depth);
+        else WARN("Failed to load texture preview. Unexpected bit depth %1.", depth);
 
-        QPixmap pix;
-        pix.convertFromImage(img);
+        if (!img.isNull())
+        {
+            QPixmap pix;
+            pix.convertFromImage(img);
+            SetImage(mUI.texturePreview, pix);
+        }
         SetValue(mUI.textureWidth,  width);
         SetValue(mUI.textureHeight, height);
         SetValue(mUI.textureDepth,  depth);
-        SetImage(mUI.texturePreview, pix);
     }
-    else ERROR_RETURN("Failed to load texture preview.");
+    else WARN("Failed to load texture preview.");
 
     SetValue(mUI.rectX,     rect.GetX());
     SetValue(mUI.rectY,     rect.GetY());
