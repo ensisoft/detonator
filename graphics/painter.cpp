@@ -154,6 +154,8 @@ public:
             device_state.line_width = drawable_raster_state.line_width;
             device_state.culling    = drawable_raster_state.culling;
 
+            pass.ApplyDynamicState(*program, device_state);
+
             mDevice->Draw(*program, *geometry, device_state);
         }
     }

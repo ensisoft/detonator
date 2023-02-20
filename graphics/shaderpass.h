@@ -28,7 +28,7 @@
 
 namespace gfx
 {
-    class Device;
+    class Program;
 
     class ShaderPass
     {
@@ -42,6 +42,7 @@ namespace gfx
         virtual std::size_t GetHash() const = 0;
         virtual std::string GetName() const = 0;
         virtual Type GetType() const = 0;
+        virtual void ApplyDynamicState(Program& program, Device::State& state) const {}
     private:
     };
 
