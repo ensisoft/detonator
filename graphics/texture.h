@@ -17,7 +17,8 @@
 #pragma once
 
 #include "config.h"
-#include "base/assert.h"
+
+#include <string>
 
 namespace gfx
 {
@@ -166,6 +167,8 @@ namespace gfx
         // The caller needs to make sure to deal with the situation, i.e. using a texture
         // filtering mode that requires no mips.
         virtual bool GenerateMips() = 0;
+        // Check whether the texture has mip maps or not.
+        virtual bool HasMips() const = 0;
 
         // helpers.
         inline void SetTransient(bool on_off)

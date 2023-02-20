@@ -1511,10 +1511,8 @@ private:
             {
                 GL_CALL(glGenTextures(1, &mHandle));
                 if (!IsTransient())
-                    DEBUG("New texture object. [name='%1', handle=%2]", mName, mHandle);
+                    DEBUG("Created new texture object. [name='%1', handle=%2]", mName, mHandle);
             }
-            if (!IsTransient())
-                DEBUG("Loading texture. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
 
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
@@ -1604,7 +1602,7 @@ private:
                     {
                         GenerateMips(bytes, xres, yres, format);
                         mHasMips = true;
-                    } else WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, xres, yres);
+                    } else WARN("WebGL doesn't support mips on NPOT textures. [name='%1', size=%2x%3]", mName, xres, yres);
                 }
                 else
                 {
@@ -1622,6 +1620,13 @@ private:
             mDevice.mTextureUnits[last].wrap_y  = GL_NONE;
             mDevice.mTextureUnits[last].min_filter = GL_NONE;
             mDevice.mTextureUnits[last].mag_filter = GL_NONE;
+
+            if (!IsTransient())
+            {
+                if (bytes)
+                    DEBUG("Loaded texture data. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
+                else DEBUG("Allocated texture storage. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
+            }
         }
 
         virtual void SetFlag(Flags flag, bool on_off) override
@@ -1672,13 +1677,13 @@ private:
             {
                 if (!base::IsPowerOfTwo(mWidth) || !base::IsPowerOfTwo(mHeight))
                 {
-                    WARN("WebGL doesn't support mips on NPOT textures. [texture='%1', width=%2, height=%3]", mName, mWidth, mHeight);
+                    WARN("WebGL doesn't support mips on NPOT textures. [naem='%1', size=%2x%3]", mName, mWidth, mHeight);
                     return false;
                 }
             }
             if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
             {
-                WARN("GL ES2 doesn't support mips on sRGB(A) textures. [texture='%1']", mName);
+                WARN("GL ES2 doesn't support mips on sRGB(A) textures. [name='%1']", mName);
                 return false;
             }
 
@@ -1695,16 +1700,20 @@ private:
             mDevice.mTextureUnits[last_unit_index].min_filter = GL_NONE;
             mDevice.mTextureUnits[last_unit_index].mag_filter = GL_NONE;
             mHasMips = true;
+            if (!IsTransient())
+            {
+                DEBUG("Generated mip maps on texture. [name='%1']", mName);
+            }
             return true;
         }
+        virtual bool HasMips() const override
+        { return mHasMips; }
 
         // internal
         bool IsTransient() const
         { return mFlags.test(Flags::Transient); }
         bool GarbageCollect() const
         { return mFlags.test(Flags::GarbageCollect); }
-        bool HasMips() const
-        { return mHasMips; }
         bool IsFBOTarget() const
         { return mFBOBound; }
         void SetFBOTarget(bool yeah)
