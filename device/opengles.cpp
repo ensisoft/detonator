@@ -2359,6 +2359,11 @@ private:
         {}
        ~FramebufferImpl()
         {
+            if (mColorTarget)
+            {
+                mColorTarget->SetFBOTarget(false);
+            }
+
             if (mColor)
             {
                 for (size_t unit=0; unit<mDevice.mTextureUnits.size(); ++unit)
@@ -2379,7 +2384,7 @@ private:
             if (mHandle)
             {
                 GL_CALL(glDeleteFramebuffers(1, &mHandle));
-                DEBUG("Deleted frame buffer object. [handle=%1]", mHandle);
+                DEBUG("Deleted frame buffer object. [name='%1', handle=%2]", mName, mHandle);
             }
         }
         virtual void SetConfig(const Config& conf) override
