@@ -109,6 +109,10 @@ public:
     {
         return false;
     }
+    virtual bool HasMips() const override
+    {
+        return false;
+    }
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
