@@ -276,7 +276,7 @@ namespace gui
                 const glm::vec2& size = mNode->GetSize();
 
                 const auto aspect_ratio = size.x / size.y;
-                const auto new_height = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
+                const auto new_height = math::clamp(0.0f, size.y + mouse_delta.y, size.y + mouse_delta.y);
                 const auto new_width  = new_height * aspect_ratio;
                 mNode->SetSize(glm::vec2(new_width, new_height));
             }
@@ -284,8 +284,8 @@ namespace gui
             {
                 glm::vec2 size = mNode->GetSize();
                 // don't allow negative sizes.
-                size.x = std::clamp(size.x + mouse_delta.x, 0.0f, size.x + mouse_delta.x);
-                size.y = std::clamp(size.y + mouse_delta.y, 0.0f, size.y + mouse_delta.y);
+                size.x = math::clamp(0.0f, size.x + mouse_delta.x, size.x + mouse_delta.x);
+                size.y = math::clamp(0.0f, size.y + mouse_delta.y, size.y + mouse_delta.y);
                 mNode->SetSize(size);
             }
             mPreviousMousePos = mouse_pos_in_node;
