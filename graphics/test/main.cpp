@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -504,6 +504,86 @@ private:
 
 };
 
+class TextureBlurTest : public GraphicsTest
+{
+public:
+    TextureBlurTest()
+    {
+        gfx::TextureMap2DClass material;
+        material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-1024x1024.png");
+            source->SetName("bird-1024x1024.png (blur)");
+            source->SetEffect(gfx::TextureSource::Effect::Blur, true);
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mBlur1024x1024 = gfx::CreateMaterialInstance(material);
+        }
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-1024x1024.png");
+            source->SetName("bird-1024x1024.png (none)");
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mClear1024x1024 = gfx::CreateMaterialInstance(material);
+        }
+
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-512x512.png");
+            source->SetName("bird-512x512.png (blur)");
+            source->SetEffect(gfx::TextureSource::Effect::Blur, true);
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mBlur512x512 = gfx::CreateMaterialInstance(material);
+        }
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-512x512.png");
+            source->SetName("bird-512x512.png (none)");
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mClear512x512 = gfx::CreateMaterialInstance(material);
+        }
+
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-256x256.png");
+            source->SetName("bird-256x256.png (blur)");
+            source->SetEffect(gfx::TextureSource::Effect::Blur, true);
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mBlur256x256 = gfx::CreateMaterialInstance(material);
+        }
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-256x256.png");
+            source->SetName("bird-256x256.png (none)");
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mClear256x256 = gfx::CreateMaterialInstance(material);
+        }
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FillRect(painter, gfx::FRect(100, 100, 256, 256), *mBlur1024x1024);
+        gfx::FillRect(painter, gfx::FRect(100, 400, 256, 256), *mClear1024x1024);
+
+        gfx::FillRect(painter, gfx::FRect(400, 100, 256, 256), *mBlur512x512);
+        gfx::FillRect(painter, gfx::FRect(400, 400, 256, 256), *mClear512x512);
+
+        gfx::FillRect(painter, gfx::FRect(700, 100, 256, 256), *mBlur256x256);
+        gfx::FillRect(painter, gfx::FRect(700, 400, 256, 256), *mClear256x256);
+    }
+    virtual std::string GetName() const override
+    { return "TextureBlurTest"; }
+private:
+    std::unique_ptr<gfx::Material> mBlur1024x1024;
+    std::unique_ptr<gfx::Material> mBlur512x512;
+    std::unique_ptr<gfx::Material> mBlur256x256;
+
+    std::unique_ptr<gfx::Material> mClear1024x1024;
+    std::unique_ptr<gfx::Material> mClear512x512;
+    std::unique_ptr<gfx::Material> mClear256x256;
+};
+
 class GradientTest : public GraphicsTest
 {
 public:
@@ -699,14 +779,14 @@ public:
     {
         mMaterial = std::make_shared<gfx::SpriteClass>();
         mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png"));
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png")).SetName("frame-1.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png")).SetName("frame-2.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png")).SetName("frame-3.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png")).SetName("frame-4.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png")).SetName("frame-5.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png")).SetName("frame-6.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png")).SetName("frame-7.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png")).SetName("frame-8.png");
         mMaterial->SetBlendFrames(false);
         mMaterial->SetFps(10.0f);
     }
@@ -2048,6 +2128,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ShapeTest<gfx::SemiCircle>("SemiCircleShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::Sector>("SectorTest"));
     tests.emplace_back(new TextureTest);
+    tests.emplace_back(new TextureBlurTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new StencilTest);
@@ -2148,7 +2229,7 @@ int main(int argc, char* argv[])
                 {
                     gfx_device->EndFrame(true /*display*/);
                     gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
-                    // the result is the new gold image. should be eye balled and verified.
+                    // the result is the new gold image. should be eye-balled and verified.
                     gfx::WritePNG(result, goldfile);
                     INFO("Wrote new gold file. '%1'", goldfile);
                     continue;
@@ -2251,9 +2332,9 @@ int main(int argc, char* argv[])
             // measure how much time has elapsed since last iteration
             const auto now  = clock::now();
             const auto gone = now - stamp;
-            // if sync to vblank is off then we it's possible that we might be
+            // if sync to vblank is off then it's possible that we might be
             // rendering too fast for milliseconds, let's use microsecond
-            // precision for now. otherwise we'd need to accumulate time worth of
+            // precision for now. otherwise, we'd need to accumulate time worth of
             // several iterations of the loop in order to have an actual time step
             // for updating the animations.
             const auto secs = std::chrono::duration_cast<std::chrono::microseconds>(gone).count() / (1000.0 * 1000.0);
@@ -2289,7 +2370,7 @@ int main(int argc, char* argv[])
             {
                 const auto fps = frames / seconds;
                 const auto [min, max] = std::minmax_element(frame_times.begin(), frame_times.end());
-                INFO("Time: %1s, frames: %2, FPS: %3 min: %4, max: %5", seconds, frames, fps, *min, *max);
+                //INFO("Time: %1s, frames: %2, FPS: %3 min: %4, max: %5", seconds, frames, fps, *min, *max);
                 frame_times.clear();
                 frames = 0.0f;
                 seconds = 0.0f;
