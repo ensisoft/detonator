@@ -832,6 +832,8 @@ void MaterialWidget::on_chkAllowResizing_stateChanged(int)
 { SetTextureFlags(); }
 void MaterialWidget::on_chkPreMulAlpha_stateChanged(int)
 { SetTextureFlags(); }
+void MaterialWidget::on_chkBlurTexture_stateChanged(int)
+{ SetTextureFlags(); }
 
 void MaterialWidget::AddNewTextureMapFromFile()
 {
@@ -1291,6 +1293,7 @@ void MaterialWidget::SetTextureFlags()
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
+            ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
         }
     }
 }
@@ -1727,6 +1730,7 @@ void MaterialWidget::GetTextureProperties()
     SetEnabled(mUI.chkAllowPacking,  false);
     SetEnabled(mUI.chkAllowResizing, false);
     SetEnabled(mUI.chkPreMulAlpha, false);
+    SetEnabled(mUI.chkBlurTexture, false);
     mUI.texturePreview->setPixmap(QPixmap(":texture.png"));
 
     const auto current = mUI.textures->currentRow();
@@ -1795,9 +1799,11 @@ void MaterialWidget::GetTextureProperties()
         SetValue(mUI.chkAllowPacking, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
         SetValue(mUI.chkAllowResizing, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
         SetValue(mUI.chkPreMulAlpha, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
+        SetValue(mUI.chkBlurTexture, ptr->TestEffect(gfx::TextureSource::Effect::Blur));
         SetEnabled(mUI.chkAllowPacking, true);
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha, true);
+        SetEnabled(mUI.chkBlurTexture, true);
     }
 }
 

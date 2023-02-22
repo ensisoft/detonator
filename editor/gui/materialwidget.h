@@ -125,6 +125,7 @@ namespace gui
         void on_chkAllowPacking_stateChanged(int);
         void on_chkAllowResizing_stateChanged(int);
         void on_chkPreMulAlpha_stateChanged(int);
+        void on_chkBlurTexture_stateChanged(int);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
