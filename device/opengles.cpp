@@ -674,10 +674,6 @@ public:
         for (auto& unit : mTextureUnits)
         {
             unit.texture = nullptr;
-            unit.mag_filter = GL_NONE;
-            unit.min_filter = GL_NONE;
-            unit.wrap_x     = GL_NONE;
-            unit.wrap_y     = GL_NONE;
         }
     }
     virtual void DeleteFramebuffers() override
@@ -1018,43 +1014,37 @@ public:
             }
 
 
+            auto texture_state = texture->GetState();
+
             // if nothing has changed then skip all the work
-            if (mTextureUnits[unit].texture    == texture &&
-                mTextureUnits[unit].min_filter == texture_min_filter &&
-                mTextureUnits[unit].mag_filter == texture_mag_filter &&
-                mTextureUnits[unit].wrap_x     == texture_wrap_x &&
-                mTextureUnits[unit].wrap_y     == texture_wrap_y)
+            if (mTextureUnits[unit].texture == texture &&
+                texture_state.min_filter == texture_min_filter &&
+                texture_state.mag_filter == texture_mag_filter &&
+                texture_state.wrap_x == texture_wrap_x &&
+                texture_state.wrap_y == texture_wrap_y)
             {
                 // set the texture unit to the sampler
                 GL_CALL(glUniform1i(sampler.location, unit));
                 continue;
             }
 
-            // // first select the desired texture unit.
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
-
-            // bind the 2D texture.
-            if (mTextureUnits[unit].texture != texture)
-                GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_handle));
-            // set texture parameters, wrapping and min/mag filters.
-            if (mTextureUnits[unit].wrap_x != texture_wrap_x)
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
-            if (mTextureUnits[unit].wrap_y != texture_wrap_y)
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
-            if (mTextureUnits[unit].mag_filter != texture_mag_filter)
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
-            if (mTextureUnits[unit].min_filter != texture_min_filter)
-                GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_handle));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
 
             // set the texture unit to the sampler
             GL_CALL(glUniform1i(sampler.location, unit));
 
-            // store current binding and the sampler state.
-            mTextureUnits[unit].texture    = texture;
-            mTextureUnits[unit].min_filter = texture_min_filter;
-            mTextureUnits[unit].mag_filter = texture_mag_filter;
-            mTextureUnits[unit].wrap_x     = texture_wrap_x;
-            mTextureUnits[unit].wrap_y     = texture_wrap_y;
+            mTextureUnits[unit].texture  = texture;
+
+            texture_state.wrap_x = texture_wrap_x;
+            texture_state.wrap_y = texture_wrap_y;
+            texture_state.mag_filter = texture_mag_filter;
+            texture_state.min_filter = texture_min_filter;
+            texture->SetState(texture_state);
         }
         TRACE_LEAVE(BindTextures);
 
@@ -1471,16 +1461,6 @@ private:
     struct TextureUnit {
         // the texture currently bound to the unit.
         const TextureImpl* texture = nullptr;
-        // the unit's texture filtering setting.
-        // initialized to GL_NONE just to make sure that the first
-        // time the unit is used the settings are applied.
-        GLenum min_filter = GL_NONE;
-        GLenum mag_filter = GL_NONE;
-        // the unit's texture coordinate wrapping settings.
-        // initialized to GL_NONE just to make sure that the first
-        // time the unit is used the settings are applied.
-        GLenum wrap_x = GL_NONE;
-        GLenum wrap_y = GL_NONE;
     };
 
     using TextureUnits = std::vector<TextureUnit>;
@@ -1614,12 +1594,7 @@ private:
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
-            // we trashed this texture unit's texture binding.
             mDevice.mTextureUnits[last].texture = this;
-            mDevice.mTextureUnits[last].wrap_x  = GL_NONE;
-            mDevice.mTextureUnits[last].wrap_y  = GL_NONE;
-            mDevice.mTextureUnits[last].min_filter = GL_NONE;
-            mDevice.mTextureUnits[last].mag_filter = GL_NONE;
 
             if (!IsTransient())
             {
@@ -1677,7 +1652,7 @@ private:
             {
                 if (!base::IsPowerOfTwo(mWidth) || !base::IsPowerOfTwo(mHeight))
                 {
-                    WARN("WebGL doesn't support mips on NPOT textures. [naem='%1', size=%2x%3]", mName, mWidth, mHeight);
+                    WARN("WebGL doesn't support mips on NPOT textures. [name='%1', size=%2x%3]", mName, mWidth, mHeight);
                     return false;
                 }
             }
@@ -1694,11 +1669,6 @@ private:
             GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
             GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
             mDevice.mTextureUnits[last_unit_index].texture = this;
-            mDevice.mTextureUnits[last_unit_index].wrap_x = GL_NONE;
-            mDevice.mTextureUnits[last_unit_index].wrap_y = GL_NONE;
-            mDevice.mTextureUnits[last_unit_index].wrap_x = GL_NONE;
-            mDevice.mTextureUnits[last_unit_index].min_filter = GL_NONE;
-            mDevice.mTextureUnits[last_unit_index].mag_filter = GL_NONE;
             mHasMips = true;
             if (!IsTransient())
             {
@@ -1728,6 +1698,17 @@ private:
         { return mName; }
         const std::string& GetGroup() const
         { return mGroup; }
+
+        struct GLState {
+            GLenum wrap_x = GL_NONE;
+            GLenum wrap_y = GL_NONE;
+            GLenum min_filter = GL_NONE;
+            GLenum mag_filter = GL_NONE;
+        };
+        GLState GetState() const
+        { return mState; }
+        void SetState(const GLState& state)
+        { mState = state; }
     private:
         void GenerateMips(const void* bytes, unsigned xres, unsigned yres, Format format)
         {
@@ -1771,15 +1752,16 @@ private:
         const OpenGLFunctions& mGL;
         OpenGLES2GraphicsDevice& mDevice;
         GLuint mHandle = 0;
+        GLState mState;
     private:
         MinFilter mMinFilter = MinFilter::Default;
         MagFilter mMagFilter = MagFilter::Default;
         Wrapping mWrapX = Wrapping::Repeat;
         Wrapping mWrapY = Wrapping::Repeat;
+        Format mFormat  = Texture::Format::Grayscale;
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
-        Format mFormat = Texture::Format::Grayscale;
         mutable std::size_t mFrameNumber = 0;
         std::size_t mHash = 0;
         std::string mName;
