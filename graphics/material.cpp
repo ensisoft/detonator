@@ -36,6 +36,7 @@
 #include "graphics/resource.h"
 #include "graphics/loader.h"
 #include "graphics/shaderpass.h"
+#include "graphics/algo.h"
 
 //                  == Notes about shaders ==
 // 1. Shaders are specific to a device within compatibility constraints
@@ -189,6 +190,18 @@ bool detail::TextureTextureSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+size_t detail::TextureFileSource::GetHash() const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mFile);
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mColorSpace);
+    hash = base::hash_combine(hash, mEffects);
+    return hash;
+}
+
 Texture* detail::TextureFileSource::Upload(const Environment& env, Device& device) const
 {
     // using the mFile URI is *not* enough to uniquely
@@ -200,7 +213,8 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     size_t gpu_hash = 0;
     gpu_hash = base::hash_combine(gpu_hash, mFile);
     gpu_hash = base::hash_combine(gpu_hash, mColorSpace);
-    gpu_hash = base::hash_combine(gpu_hash, mFlags.test(Flags::PremulAlpha));
+    gpu_hash = base::hash_combine(gpu_hash, mFlags);
+    gpu_hash = base::hash_combine(gpu_hash, mEffects);
     const auto& gpu_id = std::to_string(gpu_hash);
 
     auto* texture = device.FindTexture(gpu_id);
@@ -222,10 +236,24 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     if (const auto& bitmap = GetData())
     {
         constexpr auto generate_mips = true;
+        constexpr auto skip_mips = false;
         const auto sRGB = mColorSpace == ColorSpace::sRGB;
         texture->SetContentHash(content_hash);
         texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
             Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), generate_mips);
+
+        if (mEffects.test(Effect::Blur))
+        {
+            const auto format = texture->GetFormat();
+            if (format == gfx::Texture::Format::RGBA ||
+                format == gfx::Texture::Format::sRGBA)
+            {
+                texture->SetFilter(Texture::MinFilter::Linear);
+                texture->SetFilter(Texture::MagFilter::Linear);
+                algo::ApplyBlur(gpu_id, texture, &device);
+                texture->GenerateMips();
+            } else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
+        }
         return texture;
     }
     return nullptr;
@@ -264,11 +292,12 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
 }
 void detail::TextureFileSource::IntoJson(data::Writer& data) const
 {
-    data.Write("id",   mId);
-    data.Write("file", mFile);
-    data.Write("name", mName);
-    data.Write("flags", mFlags);
+    data.Write("id",         mId);
+    data.Write("file",       mFile);
+    data.Write("name",       mName);
+    data.Write("flags",      mFlags);
     data.Write("colorspace", mColorSpace);
+    data.Write("effects",    mEffects);
 }
 bool detail::TextureFileSource::FromJson(const data::Reader& data)
 {
@@ -278,6 +307,8 @@ bool detail::TextureFileSource::FromJson(const data::Reader& data)
     ok &= data.Read("name",       &mName);
     ok &= data.Read("flags",      &mFlags);
     ok &= data.Read("colorspace", &mColorSpace);
+    if (data.HasValue("effects"))
+        ok &= data.Read("effects", &mEffects);
     return ok;
 }
 

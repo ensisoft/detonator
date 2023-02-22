@@ -73,10 +73,17 @@ namespace gfx
             Linear, sRGB
         };
 
+        enum class Effect {
+            Blur
+        };
+
         virtual ~TextureSource() = default;
         // Get the color space of the texture source's texture content
         virtual ColorSpace GetColorSpace() const
         { return ColorSpace::Linear; }
+        // Get the texture effect if any on the texture.
+        virtual base::bitflag<Effect> GetEffects() const
+        { return base::bitflag<Effect>(0); }
         // Get the type of the source of the texture data.
         virtual Source GetSourceType() const = 0;
         // Get texture source class/resource id.
@@ -88,6 +95,8 @@ namespace gfx
         virtual std::size_t GetHash() const = 0;
         // Set the texture source human-readable name.
         virtual void SetName(const std::string& name) = 0;
+        // Set a texture effect on/off on the texture.
+        virtual void SetEffect(Effect effect, bool on_off) {}
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
         // The returned bitmap can be potentially immutably shared.
@@ -121,6 +130,9 @@ namespace gfx
         {
             return this->MakeCopy(GetId());
         }
+        inline bool TestEffect(Effect effect) const
+        { return GetEffects().test(effect); }
+
     protected:
         virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const = 0;
     private:
@@ -200,22 +212,19 @@ namespace gfx
             { return mColorSpace; }
             virtual Source GetSourceType() const override
             { return Source::Filesystem; }
+            virtual base::bitflag<Effect> GetEffects() const override
+            { return mEffects; }
             virtual std::string GetId() const override
             { return mId; }
             virtual std::string GetName() const override
             { return mName; }
-            virtual std::size_t GetHash() const override
-            {
-                size_t hash = 0;
-                hash = base::hash_combine(hash, mFile);
-                hash = base::hash_combine(hash, mId);
-                hash = base::hash_combine(hash, mName);
-                hash = base::hash_combine(hash, mFlags);
-                hash = base::hash_combine(hash, mColorSpace);
-                return hash;
-            }
             virtual void SetName(const std::string& name) override
             { mName = name; }
+            virtual void SetEffect(Effect effect, bool on_off) override
+            { mEffects.set(effect, on_off); }
+
+            virtual std::size_t GetHash() const override;
+
             virtual std::shared_ptr<IBitmap> GetData() const override;
 
             virtual Texture* Upload(const Environment& env, Device& device) const override;
@@ -257,7 +266,8 @@ namespace gfx
             std::string mFile;
             std::string mName;
             base::bitflag<Flags> mFlags;
-            ColorSpace mColorSpace = ColorSpace::Linear; // default to liaear now for compatibility
+            base::bitflag<Effect> mEffects;
+            ColorSpace mColorSpace = ColorSpace::Linear; // default to linear now for compatibility
         private:
         };
 
@@ -626,16 +636,18 @@ namespace gfx
         SpriteMap(const SpriteMap& other, bool copy);
         SpriteMap(const SpriteMap& other) : SpriteMap(other, true) {}
 
-        void AddTexture(std::unique_ptr<TextureSource> source)
+        TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
         {
             mSprites.emplace_back();
             mSprites.back().source = std::move(source);
+            return *mSprites.back().source;
         }
-        void AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
+        TextureSource& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
         {
             mSprites.emplace_back();
             mSprites.back().source = std::move(source);
             mSprites.back().rect = rect;
+            return *mSprites.back().source;
         }
         void DeleteTexture(size_t index)
         { base::SafeErase(mSprites, index); }
@@ -709,12 +721,16 @@ namespace gfx
         TextureMap2D() = default;
         TextureMap2D(const TextureMap2D& other, bool copy);
         TextureMap2D(const TextureMap2D& other) : TextureMap2D(other, true){}
-        void SetTexture(std::unique_ptr<TextureSource> source)
-        { mSource = std::move(source); }
-        void SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
+        TextureSource& SetTexture(std::unique_ptr<TextureSource> source)
+        {
+            mSource = std::move(source);
+            return *mSource;
+        }
+        TextureSource& SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
         {
             mSource = std::move(source);
             mRect   = rect;
+            return *mSource;
         }
         void SetTextureRect(const FRect& rect)
         { mRect = rect; }
@@ -1131,10 +1147,10 @@ namespace gfx
         {}
         void ResetTextures()
         { mSprite.ResetTextures(); }
-        void AddTexture(std::unique_ptr<TextureSource> source)
-        { mSprite.AddTexture(std::move(source)); }
-        void AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        { mSprite.AddTexture(std::move(source), rect); }
+        TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
+        { return mSprite.AddTexture(std::move(source)); }
+        TextureSource& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
+        { return mSprite.AddTexture(std::move(source), rect); }
         void DeleteTexture(size_t index)
         { mSprite.DeleteTexture(index); }
         void DeleteTextureById(const std::string& id)
