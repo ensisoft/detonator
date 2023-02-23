@@ -573,7 +573,7 @@ QString EntityWidget::GetId() const
     return GetValue(mUI.entityID);
 }
 
-void EntityWidget::Initialize(const UISettings& settings)
+void EntityWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.chkSnap,         settings.snap_to_grid);
     SetValue(mUI.chkShowViewport, settings.show_viewport);

@@ -611,7 +611,7 @@ QString SceneWidget::GetId() const
     return GetValue(mUI.ID);
 }
 
-void SceneWidget::Initialize(const UISettings& settings)
+void SceneWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.chkSnap,         settings.snap_to_grid);
     SetValue(mUI.chkShowViewport, settings.show_viewport);

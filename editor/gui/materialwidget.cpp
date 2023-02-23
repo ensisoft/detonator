@@ -127,7 +127,7 @@ QString MaterialWidget::GetId() const
     return GetValue(mUI.materialID);
 }
 
-void MaterialWidget::Initialize(const UISettings& settings)
+void MaterialWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom, settings.zoom);
 }

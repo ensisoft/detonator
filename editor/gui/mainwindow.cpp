@@ -3113,7 +3113,8 @@ MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource
     }
     else
     {
-        widget->Initialize(mUISettings);
+        widget->InitializeSettings(mUISettings);
+        widget->InitializeContent();
     }
     return widget;
 }
