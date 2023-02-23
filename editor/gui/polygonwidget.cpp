@@ -154,7 +154,7 @@ QString ShapeWidget::GetId() const
     return GetValue(mUI.ID);
 }
 
-void ShapeWidget::Initialize(const UISettings& settings)
+void ShapeWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.cmbGrid,     settings.grid);
     SetValue(mUI.chkSnap,     settings.snap_to_grid);

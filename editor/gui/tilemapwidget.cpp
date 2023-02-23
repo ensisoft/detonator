@@ -673,7 +673,7 @@ QString TilemapWidget::GetId() const
 {
     return app::FromUtf8(mState.klass->GetId());
 }
-void TilemapWidget::Initialize(const UISettings& settings)
+void TilemapWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.chkShowViewport, settings.show_viewport);
     SetValue(mUI.chkShowGrid,     settings.show_grid);

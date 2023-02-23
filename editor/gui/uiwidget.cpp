@@ -514,10 +514,6 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.widgetMoused,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
     connect(mUI.widgetPressed,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
 
-    uik::Form form;
-    form.SetSize(1024, 768);
-    form.SetName("Form");
-
     mState.tree  = mUI.tree;
     mState.style = std::make_unique<engine::UIStyle>();
     mState.style->SetClassLibrary(workspace);
@@ -526,8 +522,6 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.painter.reset(new engine::UIPainter);
     mState.painter->SetStyle(mState.style.get());
     mState.window.SetName("My UI");
-    mState.window.AddWidget(form);
-    mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
 
     LoadStyleQuiet("app://ui/style/default.json");
     LoadKeysQuiet("app://ui/keymap/default.json");
@@ -614,13 +608,23 @@ QString UIWidget::GetId() const
     return GetValue(mUI.windowID);
 }
 
-void UIWidget::Initialize(const UISettings& settings)
+void UIWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom,          settings.zoom);
     SetValue(mUI.cmbGrid,       settings.grid);
     SetValue(mUI.chkSnap,       settings.snap_to_grid);
     SetValue(mUI.chkShowOrigin, settings.show_origin);
     SetValue(mUI.chkShowGrid,   settings.show_grid);
+}
+
+void UIWidget::InitializeContent()
+{
+    uik::Form form;
+    form.SetSize(1024, 768);
+    form.SetName("Form");
+    mState.window.AddWidget(form);
+    mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
+    mOriginalHash = mState.window.GetHash();
 }
 
 void UIWidget::SetViewerMode()

@@ -74,7 +74,11 @@ namespace gui
         virtual QString GetId() const = 0;
 
         // Initialize the widget default UI settings.
-        virtual void Initialize(const UISettings& settings)
+        virtual void InitializeSettings(const UISettings& settings)
+        {}
+
+        // Initialize the default content (if any) in the widget.
+        virtual void InitializeContent()
         {}
 
         // Set the widget in viewer mode where all editing features
