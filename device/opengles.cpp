@@ -438,31 +438,43 @@ public:
         GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units));
         GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_rbo_size));
         DEBUG("OpenGLESGraphicsDevice");
-        DEBUG("GL %1 Vendor: %2, %3",
-            mGL.glGetString(GL_VERSION),
-            mGL.glGetString(GL_VENDOR),
-            mGL.glGetString(GL_RENDERER));
-
         // a little hack to provide the INFO level graphics device
         // information only once.
         static bool have_printed_info = false;
-        if (!have_printed_info)
+        if (have_printed_info)
+        {
+            DEBUG("GL %1 Vendor: %2, %3",
+                  mGL.glGetString(GL_VERSION),
+                  mGL.glGetString(GL_VENDOR),
+                  mGL.glGetString(GL_RENDERER));
+            DEBUG("Stencil bits: %1", stencil_bits);
+            DEBUG("Red bits: %1", red_bits);
+            DEBUG("Blue bits: %1", blue_bits);
+            DEBUG("Green bits: %1", green_bits);
+            DEBUG("Alpha bits: %1", alpha_bits);
+            DEBUG("Depth bits: %1", depth_bits);
+            DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
+            DEBUG("Fragment shader texture units: %1", max_texture_units);
+            DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
+        }
+        else
         {
             INFO("GL %1 Vendor: %2, %3",
-                mGL.glGetString(GL_VERSION),
-                mGL.glGetString(GL_VENDOR),
-                mGL.glGetString(GL_RENDERER));
+                 mGL.glGetString(GL_VERSION),
+                 mGL.glGetString(GL_VENDOR),
+                 mGL.glGetString(GL_RENDERER));
+            INFO("Stencil bits: %1", stencil_bits);
+            INFO("Red bits: %1", red_bits);
+            INFO("Blue bits: %1", blue_bits);
+            INFO("Green bits: %1", green_bits);
+            INFO("Alpha bits: %1", alpha_bits);
+            INFO("Depth bits: %1", depth_bits);
+            INFO("Point size: %1-%2", point_size[0], point_size[1]);
+            INFO("Fragment shader texture units: %1", max_texture_units);
+            INFO("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
             have_printed_info = true;
         }
-        DEBUG("Stencil bits: %1", stencil_bits);
-        DEBUG("Red bits: %1", red_bits);
-        DEBUG("Blue bits: %1", blue_bits);
-        DEBUG("Green bits: %1", green_bits);
-        DEBUG("Alpha bits: %1", alpha_bits);
-        DEBUG("Depth bits: %1", depth_bits);
-        DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
-        DEBUG("Fragment shader texture units: %1", max_texture_units);
-        DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
+
         mTextureUnits.resize(max_texture_units);
 
         // set some initial state
@@ -974,6 +986,11 @@ public:
 
             const auto texture_handle = texture->GetHandle();
             const auto& texture_name  = texture->GetName();
+            auto texture_state = texture->GetState();
+
+            bool force_clamp_x = false;
+            bool force_clamp_y = false;
+            bool force_min_linear = false;
 
             // do some validation and warning logging if there's something that is wrong.
             if (texture_min_filter == GL_NEAREST_MIPMAP_NEAREST ||
@@ -985,9 +1002,9 @@ public:
                 // when sampling and not having generated mips.
                 if (!texture->HasMips())
                 {
-                    WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
-                    texture->SetFilter(gfx::Texture::MinFilter::Linear);
                     texture_min_filter = GL_LINEAR;
+                    texture->SetFilter(gfx::Texture::MinFilter::Linear);
+                    force_min_linear = true;
                 }
             }
 
@@ -1002,19 +1019,16 @@ public:
                     {
                         texture_wrap_x = GL_CLAMP_TO_EDGE;
                         texture->SetWrapX(gfx::Texture::Wrapping::Clamp);
-                        WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                        force_clamp_x = true;
                     }
                     if (texture_wrap_y == GL_REPEAT)
                     {
                         texture_wrap_y = GL_CLAMP_TO_EDGE;
                         texture->SetWrapY(gfx::Texture::Wrapping::Clamp);
-                        WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                        force_clamp_y = true;
                     }
                 }
             }
-
-
-            auto texture_state = texture->GetState();
 
             // if nothing has changed then skip all the work
             if (mTextureUnits[unit].texture == texture &&
@@ -1026,6 +1040,16 @@ public:
                 // set the texture unit to the sampler
                 GL_CALL(glUniform1i(sampler.location, unit));
                 continue;
+            }
+
+            if (!texture->IsTransient())
+            {
+                if (force_min_linear)
+                    WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
+                if (force_clamp_x)
+                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                if (force_clamp_y)
+                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
             }
 
             GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
