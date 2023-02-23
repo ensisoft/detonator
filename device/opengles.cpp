@@ -987,7 +987,7 @@ public:
                 {
                     WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
                     texture->SetFilter(gfx::Texture::MinFilter::Linear);
-                    texture_mag_filter = GL_LINEAR;
+                    texture_min_filter = GL_LINEAR;
                 }
             }
 
