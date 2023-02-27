@@ -85,10 +85,10 @@ namespace gui
                 return nullptr;
             return &mClearColor.value();
         }
-        gfx::Device& getDevice() const
-        { return *mCustomGraphicsDevice; }
-        gfx::Painter& getPainter() const
-        { return *mCustomGraphicsPainter; }
+        gfx::Device* GetDevice() const
+        { return mCustomGraphicsDevice.get(); }
+        gfx::Painter* GetPainter() const
+        { return mCustomGraphicsPainter.get(); }
         gfx::Device::ResourceStats getDeviceResourceStats() const
         {
             gfx::Device::ResourceStats stats;
@@ -210,10 +210,10 @@ namespace gui
 
         const gfx::Color4f* GetClearColor() const
         { return mWindow->GetClearColor(); }
-        gfx::Device& getDevice() const
-        { return mWindow->getDevice(); }
-        gfx::Painter& getPainter() const
-        { return mWindow->getPainter(); }
+        gfx::Device* GetDevice() const
+        { return mWindow ? mWindow->GetDevice() : nullptr; }
+        gfx::Painter* GetPainter() const
+        { return mWindow ? mWindow->GetPainter() : nullptr; }
         gfx::Device::ResourceStats getDeviceResourceStats() const
         { return mWindow->getDeviceResourceStats(); }
 
