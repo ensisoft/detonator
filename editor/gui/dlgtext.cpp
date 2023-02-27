@@ -140,7 +140,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         }
         else if (format == gfx::TextBuffer::RasterFormat::Texture)
         {
-            if (auto* texture = mText.RasterizeTexture("TmpTextRaster", *painter.GetDevice()))
+            if (auto* texture = mText.RasterizeTexture("TmpTextRaster", "TmpTextRaster", *painter.GetDevice()))
             {
                 texture->SetTransient(true);
                 texture->SetGarbageCollection(true);
@@ -158,7 +158,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         mClass = std::make_shared<gfx::TextureMap2DClass>();
         mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mClass->SetBaseColor(gfx::Color::White);
-        mClass->SetTexture(gfx::CreateTextureFromText(mText));
+        mClass->SetTexture(gfx::CreateTextureFromText(mText)).SetName("DlgTextTexture");
         mMaterial = gfx::CreateMaterialInstance(mClass);
     }
     auto* source = mClass->AsTexture()->GetTextureSource();

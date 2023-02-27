@@ -449,7 +449,8 @@ namespace gfx
             {
                 mTextBuffer = std::move(text);
             }
-
+            virtual base::bitflag<Effect> GetEffects() const override
+            {return mEffects; }
             virtual Source GetSourceType() const override
             { return Source::TextBuffer; }
             virtual std::string GetId() const override
@@ -459,12 +460,15 @@ namespace gfx
                 auto hash = mTextBuffer.GetHash();
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
+                hash = base::hash_combine(hash, mEffects);
                 return hash;
             }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
+            virtual void SetEffect(Effect effect, bool on_off) override
+            { mEffects.set(effect, on_off); }
             virtual std::shared_ptr<IBitmap> GetData() const override;
 
             virtual Texture* Upload(const Environment&env, Device& device) const override;
@@ -493,6 +497,7 @@ namespace gfx
             TextBuffer mTextBuffer;
             std::string mId;
             std::string mName;
+            base::bitflag<Effect> mEffects;
         };
 
     } // detail
@@ -1280,10 +1285,10 @@ namespace gfx
         TextureMap2DClass(const TextureMap2DClass& other, bool copy);
         TextureMap2DClass(const TextureMap2DClass& other) : TextureMap2DClass(other, true)
         {}
-        void SetTexture(std::unique_ptr<TextureSource> source)
-        { mTexture.SetTexture(std::move(source)); }
-        void SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        { mTexture.SetTexture(std::move(source), rect); }
+        TextureSource& SetTexture(std::unique_ptr<TextureSource> source)
+        { return mTexture.SetTexture(std::move(source)); }
+        TextureSource& SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
+        { return mTexture.SetTexture(std::move(source), rect); }
         void SetTextureRect(const FRect& rect)
         { mTexture.SetTextureRect(rect); }
         void SetTextureMinFilter(MinTextureFilter filter)

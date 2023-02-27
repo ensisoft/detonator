@@ -456,7 +456,8 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
 
     size_t content_hash = 0;
     if (env.dynamic_content) {
-        content_hash = mTextBuffer.GetHash();
+        content_hash = base::hash_combine(content_hash, mTextBuffer.GetHash());
+        content_hash = base::hash_combine(content_hash, mEffects);
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
@@ -468,22 +469,39 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
             texture = device.MakeTexture(mId);
             texture->SetName(mName);
         }
-
         if (const auto& mask = mTextBuffer.RasterizeBitmap())
         {
+            constexpr auto generate_mips = true;
             texture->SetContentHash(content_hash);
-            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale);
+            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale, generate_mips);
         }
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
-        texture = mTextBuffer.RasterizeTexture(mId, device);
-        if (texture)
+        if (auto* texture = mTextBuffer.RasterizeTexture(mId, mName, device))
         {
+            DEBUG("Rasterized new texture from text buffer. [name='%1']", mName);
+            texture->SetName(mName);
+            texture->SetFilter(Texture::MinFilter::Linear);
+            texture->SetFilter(Texture::MagFilter::Linear);
             texture->SetContentHash(content_hash);
+
+            // The frame buffer render produces a texture that doesn't play nice with
+            // model space texture coordinates right now. Simplest solution for now is
+            // to simply flip it horizontally...
+            algo::FlipTexture(mId, texture, &device, algo::FlipDirection::Horizontal);
+
+            if (mEffects.test(Effect::Blur))
+            {
+                const auto format = texture->GetFormat();
+                if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
+                    algo::ApplyBlur(mId, texture, &device);
+                else WARN("Texture blur is not supported on texture format. [name='%1', format=%2]", mName, format);
+            }
             texture->GenerateMips();
-        }
-        return texture;
+            return texture;
+        } else ERROR("Failed to rasterize texture from text buffer. [name='%1']", mName);
+        return nullptr;
     }
     return nullptr;
 }
@@ -494,6 +512,7 @@ void detail::TextureTextBufferSource::IntoJson(data::Writer& data) const
     mTextBuffer.IntoJson(*chunk);
     data.Write("id", mId);
     data.Write("name", mName);
+    data.Write("effects", mEffects);
     data.Write("buffer", std::move(chunk));
 }
 bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
@@ -501,6 +520,8 @@ bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
     bool ok = true;
     ok &= data.Read("name", &mName);
     ok &= data.Read("id",   &mId);
+    if (data.HasValue("effects"))
+        ok &= data.Read("effects", &mEffects);
 
     const auto& chunk = data.GetReadChunk("buffer");
     if (!chunk)
@@ -2570,7 +2591,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
             // buffer have not changed.
             texture = device.MakeTexture(gpu_id);
             texture->SetTransient(true); // set transient flag up front to tone down DEBUG noise
-            texture->SetName("FreeTypeText");
+            texture->SetName("TextMaterialTexture");
 
             auto bitmap = mText.RasterizeBitmap();
             if (!bitmap)
@@ -2581,11 +2602,11 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         }
         else if (format == TextBuffer::RasterFormat::Texture)
         {
-            texture = mText.RasterizeTexture(gpu_id, device);
+            texture = mText.RasterizeTexture(gpu_id, "TextMaterialTexture", device);
             if (!texture)
                 return;
             texture->SetTransient(true);
-            texture->SetName("BitmapText");
+            texture->SetName("TextMaterialTexture");
             // texture->GenerateMips(); << this would be the place to generate mips if needed.
         } else if (format == TextBuffer::RasterFormat::None)
             return;
