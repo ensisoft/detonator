@@ -18,7 +18,14 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/mat3x3.hpp>
+#include "warnpop.h"
+
 #include <string>
+#include <memory>
+
+#include "graphics/bitmap.h"
 
 namespace gfx
 {
@@ -40,5 +47,17 @@ enum class BlurDirection {
 // will not be in the input texture.
 void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device,
     unsigned iterations = 4, BlurDirection direction = BlurDirection::BiDirectional);
+
+void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix = glm::mat3(1.0f));
+
+enum class FlipDirection {
+    Horizontal,
+    Vertical
+};
+void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, FlipDirection direction);
+
+std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* device);
+
+
 } // namespace
 } // namespace
