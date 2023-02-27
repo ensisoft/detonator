@@ -2449,7 +2449,7 @@ private:
                 {
                     mColor = std::make_unique<TextureImpl>(mGL, mDevice);
                     mColor->SetName("FBO/" + mName + "/color0");
-                    mColor->Upload(nullptr, mConfig.width, mConfig.height, gfx::Texture::Format::RGBA, false /*mips*/);
+                    mColor->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::RGBA);
                     mColorTarget = mColor.get();
                     DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName, mConfig.width, mConfig.height);
                 }
@@ -2465,7 +2465,9 @@ private:
                 return true;
             else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
                 ERROR("Unsupported FBO configuration. [name='%1']", mName);
-            else BUG("Incorrect FBO setup.");
+            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) BUG("Incomplete FBO attachment.");
+            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS) BUG("Incomplete FBO dimensions.");
+            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) BUG("Incomplete FBO, missing attachment.");
             return false;
         }
 
