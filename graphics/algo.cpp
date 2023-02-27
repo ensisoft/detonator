@@ -16,6 +16,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/gtc/type_ptr.hpp>
+#include "warnpop.h"
+
+
 #include <algorithm>
 
 #include "base/assert.h"
@@ -189,5 +194,161 @@ void main() {
 
     fbo->SetColorTarget(nullptr);
 }
+
+void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix)
+{
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = Framebuffer::Format::ColorRGBA8;
+        fbo->SetConfig(conf);
+    }
+    dst->SetFilter(gfx::Texture::MinFilter::Linear);
+    dst->SetFilter(gfx::Texture::MagFilter::Linear);
+    dst->SetWrapX(gfx::Texture::Wrapping::Clamp);
+    dst->SetWrapY(gfx::Texture::Wrapping::Clamp);
+    fbo->SetColorTarget(dst);
+
+    constexpr auto* vertex_src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+uniform mat3 kTextureMatrix;
+varying vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+  vTexCoord   = (kTextureMatrix * vec3(aTexCoord.xy, 1.0)).xy;
+}
+)";
+    constexpr auto* fragment_src = R"(
+#version 100
+precision highp float;
+varying vec2 vTexCoord;
+uniform sampler2D kTexture;
+void main() {
+   gl_FragColor = texture2D(kTexture, vTexCoord);
+}
+)";
+
+    auto* program = device->FindProgram("CopyProgram");
+    if (!program)
+        program = MakeProgram(vertex_src, fragment_src, "CopyProgram", *device);
+
+    program->SetUniform("kTextureMatrix", *(const Program::Matrix3x3*)glm::value_ptr(matrix));
+    program->SetTexture("kTexture", 0, *src);
+    program->SetTextureCount(1);
+
+    auto* quad = MakeFullscreenQuad(*device);
+
+    AutoFBO change(*device);
+    const auto dst_width  = dst->GetWidth();
+    const auto dst_height = dst->GetHeight();
+
+    gfx::Device::State state;
+    state.bWriteColor  = true;
+    state.premulalpha  = false;
+    state.depth_test   = gfx::Device::State::DepthTest::Disabled;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.culling      = gfx::Device::State::Culling::None;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
+    device->SetFramebuffer(fbo);
+    device->Draw(*program, *quad, state);
+}
+
+void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, FlipDirection direction)
+{
+    const auto format = texture->GetFormat();
+
+    // Currently, this is the only supported format due to limitations on the
+    // GL ES2 FBO color buffer target.
+    ASSERT(format == gfx::Texture::Format::RGBA ||
+           format == gfx::Texture::Format::sRGBA);
+
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = Framebuffer::Format::ColorRGBA8;
+        fbo->SetConfig(conf);
+    }
+    auto* tmp = device->FindTexture(gpu_id + "/tmp-color");
+    if (!tmp)
+    {
+        tmp = device->MakeTexture(gpu_id + "/tmp-color");
+        tmp->SetName("AlgoHelperTexture");
+        tmp->SetFilter(gfx::Texture::MinFilter::Linear);
+        tmp->SetFilter(gfx::Texture::MagFilter::Linear);
+        tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
+        tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
+        tmp->SetGarbageCollection(texture->GarbageCollect());
+        tmp->SetTransient(texture->IsTransient());
+    }
+
+    const auto src_width  = texture->GetWidth();
+    const auto src_height = texture->GetHeight();
+    const auto tmp_width  = tmp->GetWidth();
+    const auto tmp_height = tmp->GetHeight();
+    if (tmp_width != src_width || tmp_height != src_height)
+        tmp->Allocate(src_width, src_height, gfx::Texture::Format::RGBA);
+
+    // copy the contents from the source texture into the temp texture.
+    CopyTexture(texture, tmp, device);
+
+    if (direction == FlipDirection::Horizontal)
+    {
+        // copy the contents from the temp texture back into source texture
+        // but with flipped texture coordinates.
+        const auto mat = glm::mat3(glm::vec3(1.0f,  0.0f, 0.0f),
+                                   glm::vec3(0.0f, -1.0f, 0.0f),
+                                   glm::vec3(0.0f,  1.0f, 0.0f));
+        CopyTexture(tmp, texture, device, mat);
+    }
+    else if (direction == FlipDirection::Vertical)
+    {
+        const auto mat = glm::mat3(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                   glm::vec3(0.0f,  1.0f, 0.0f),
+                                   glm::vec3(1.0f,  0.0f, 0.0f));
+        CopyTexture(tmp, texture, device, mat);
+    }
+}
+
+std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* device)
+{
+    const auto format = texture->GetFormat();
+    const auto width  = texture->GetWidth();
+    const auto height = texture->GetHeight();
+
+    // Currently, this is the only supported format due to limitations on the
+    // GL ES2 FBO color buffer target.
+    ASSERT(format == gfx::Texture::Format::RGBA ||
+           format == gfx::Texture::Format::sRGBA);
+
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = Framebuffer::Format::ColorRGBA8;
+        fbo->SetConfig(conf);
+    }
+    fbo->SetColorTarget(const_cast<gfx::Texture*>(texture));
+
+    AutoFBO change(*device);
+    device->SetFramebuffer(fbo);
+    auto bmp = device->ReadColorBuffer(width, height);
+
+    return std::make_unique<RgbaBitmap>(std::move(bmp));
+}
+
 } // namespace
 } // namespace

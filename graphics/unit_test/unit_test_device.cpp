@@ -24,6 +24,7 @@
 
 #include "base/test_minimal.h"
 #include "device/device.h"
+#include "graphics/algo.h"
 #include "graphics/color4f.h"
 #include "graphics/device.h"
 #include "graphics/program.h"
@@ -1930,6 +1931,102 @@ void main() {
 
 }
 
+void unit_test_algo_texture_copy()
+{
+    TEST_CASE
+
+    auto dev = CreateDevice();
+
+    auto* src = dev->MakeTexture("src");
+    auto* dst = dev->MakeTexture("dst");
+
+    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    bmp.Fill(gfx::Color::Red);
+    bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
+    // flip the bitmap now temporarily to match the layout expected by OpenGL
+    bmp.FlipHorizontally();
+    src->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    // flip back to our representation.
+    bmp.FlipHorizontally();
+
+    dst->Allocate(10, 10, gfx::Texture::Format::RGBA);
+
+    gfx::algo::CopyTexture(src, dst, dev.get());
+
+    gfx::Framebuffer::Config conf;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    conf.width  = 10;
+    conf.height = 10;
+    auto* fbo = dev->MakeFramebuffer("test");
+    fbo->SetConfig(conf);
+    fbo->SetColorTarget(dst);
+
+    dev->SetFramebuffer(fbo);
+
+    const auto& ret = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(ret == bmp);
+}
+
+void unit_test_algo_texture_flip()
+{
+    TEST_CASE
+
+    auto dev = CreateDevice();
+
+    auto* tex = dev->MakeTexture("texture");
+
+    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    bmp.Fill(gfx::Color::Red);
+    bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
+    // flip the bitmap now temporarily to match the layout expected by OpenGL
+    bmp.FlipHorizontally();
+    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    // flip back to our presentation.
+    bmp.FlipHorizontally();
+
+    gfx::algo::FlipTexture("texture", tex, dev.get(), gfx::algo::FlipDirection::Horizontal);
+
+    bmp.FlipHorizontally();
+
+    gfx::Framebuffer::Config conf;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    conf.width  = 10;
+    conf.height = 10;
+    auto* fbo = dev->MakeFramebuffer("test");
+    fbo->SetConfig(conf);
+    fbo->SetColorTarget(tex);
+    dev->SetFramebuffer(fbo);
+    const auto& ret = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(ret == bmp);
+
+    // todo: vertical flip test
+}
+
+void unit_test_algo_texture_read()
+{
+    TEST_CASE
+
+    auto dev = CreateDevice();
+
+    auto* tex = dev->MakeTexture("texture");
+
+    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    bmp.Fill(gfx::Color::Red);
+    bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
+    // flip the bitmap now temporarily to match the layout expected by OpenGL
+    bmp.FlipHorizontally();
+    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    // flip back to our presentation.
+    bmp.FlipHorizontally();
+
+    const auto& ret = gfx::algo::ReadTexture(tex, dev.get());
+    TEST_REQUIRE(ret);
+    TEST_REQUIRE(ret->GetDepthBits() == 32);
+    TEST_REQUIRE(ret->GetWidth() == 10);
+    TEST_REQUIRE(ret->GetHeight() == 10);
+    const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
+    TEST_REQUIRE(*rgba_ret == bmp);
+}
 
 // When drawing multiple times within a single frame with either
 // a single material or multiple materials that all map to the same
@@ -2154,6 +2251,10 @@ int test_main(int argc, char* argv[])
     unit_test_buffer_allocation();
     unit_test_max_texture_units_single_texture();
     unit_test_max_texture_units_many_textures();
+    unit_test_algo_texture_copy();
+    unit_test_algo_texture_flip();
+    unit_test_algo_texture_read();
+
     // bugs
     unit_test_empty_draw_lost_uniform_bug();
     unit_test_repeated_uniform_bug();
