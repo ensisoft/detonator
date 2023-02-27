@@ -2647,10 +2647,10 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
         std::size_t mColorIndex = 0;
     };
 
-    auto& painter = mUI.widget->getPainter();
-    auto& device = mUI.widget->getDevice();
+    auto* painter = mUI.widget->GetPainter();
+    auto* device = mUI.widget->GetDevice();
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, painter, view, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, *painter, view, &hook, &hook);
 
     {
         // for debugging.
@@ -2659,7 +2659,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
     }
     const auto surface_width  = mUI.widget->width();
     const auto surface_height = mUI.widget->height();
-    const auto& bitmap = device.ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
+    const auto& bitmap = device->ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
     const auto& pixel  = bitmap.GetPixel(0, 0);
     for (unsigned i=0; i<hit_nodes.size(); ++i)
     {
