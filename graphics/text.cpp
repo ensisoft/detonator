@@ -694,7 +694,7 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
     return out;
 }
 
-Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, Device& device) const
+Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::string& name, Device& device) const
 {
     // load the bitmap font json descriptor
     static std::unordered_map<std::string, std::unique_ptr<GamestudioBitmapFontGlyphPack>> font_cache;
@@ -719,6 +719,7 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, Device& device)
     // render target (color attachment) in an FBO, and we render
     // to it by drawing quads that sample from the font's texture.
     auto* result_texture = device.MakeTexture(gpu_id);
+    result_texture->SetName(name);
 
     // setup the glyph array.
     struct Glyph {

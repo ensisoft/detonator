@@ -70,7 +70,7 @@ namespace gfx
         // Returns nullptr if the rasterization fails.
         std::shared_ptr<AlphaMask> RasterizeBitmap() const;
 
-        Texture* RasterizeTexture(const std::string& gpu_id, Device& device) const;
+        Texture* RasterizeTexture(const std::string& gpu_id, const std::string& name, Device& device) const;
 
         bool ComputeTextMetrics(unsigned* width, unsigned* height) const;
 
