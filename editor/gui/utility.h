@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "base/assert.h"
+#include "graphics/bitmap.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 #include "editor/app/types.h"
@@ -170,11 +171,32 @@ inline void SetImage(QLabel* label, const QPixmap& pixmap)
 {
     const auto lbl_width = label->width();
     const auto lbl_height = label->height();
-    const auto pix_widht = pixmap.width();
+    const auto pix_width = pixmap.width();
     const auto pix_height = pixmap.height();
-    if (pix_widht > pix_height)
+    if (pix_width > pix_height)
         label->setPixmap(pixmap.scaledToWidth(lbl_width));
     else label->setPixmap(pixmap.scaledToHeight(lbl_height));
+}
+
+inline bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
+{
+    if (!bitmap.IsValid())
+        return false;
+    const auto width  = bitmap.GetWidth();
+    const auto height = bitmap.GetHeight();
+    const auto depth  = bitmap.GetDepthBits();
+    QImage img;
+    if (depth == 8)
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
+    else if (depth == 24)
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
+    else if (depth == 32)
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+    else return false;
+    QPixmap pix;
+    pix.convertFromImage(img);
+    SetImage(label, pix);
+    return true;
 }
 
 // Get the selection index list mapped to the source

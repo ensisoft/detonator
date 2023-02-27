@@ -126,6 +126,7 @@ namespace gui
         void on_chkAllowResizing_stateChanged(int);
         void on_chkPreMulAlpha_stateChanged(int);
         void on_chkBlurTexture_stateChanged(int);
+        void on_textureSourceName_textChanged(const QString& text);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();

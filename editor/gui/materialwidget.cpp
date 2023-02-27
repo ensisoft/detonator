@@ -834,6 +834,28 @@ void MaterialWidget::on_chkPreMulAlpha_stateChanged(int)
 { SetTextureFlags(); }
 void MaterialWidget::on_chkBlurTexture_stateChanged(int)
 { SetTextureFlags(); }
+void MaterialWidget::on_textureSourceName_textChanged(const QString& text)
+{
+    const QList<QListWidgetItem*> items = mUI.textures->selectedItems();
+    for (int i=0; i<items.size(); ++i)
+    {
+        auto* item = items[i];
+        const auto index = mUI.textures->row(item);
+        const auto& data = item->data(Qt::UserRole).toString();
+
+        gfx::TextureSource* source = nullptr;
+        if (auto* texture = mMaterial->AsTexture())
+            source = texture->GetTextureSource();
+        else if (auto* sprite = mMaterial->AsSprite())
+            source = sprite->GetTextureSource(index);
+        else if (auto* custom = mMaterial->AsCustom())
+            source = custom->FindTextureSourceById(app::ToUtf8(data));
+        else BUG("Unhandled material type.");
+
+        source->SetName(GetValue(mUI.textureSourceName));
+        item->setText(GetValue(mUI.textureSourceName));
+    }
+}
 
 void MaterialWidget::AddNewTextureMapFromFile()
 {
@@ -1295,6 +1317,10 @@ void MaterialWidget::SetTextureFlags()
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
             ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
         }
+        else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source))
+        {
+            ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
+        }
     }
 }
 
@@ -1465,14 +1491,15 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.wrapY,     gfx::MaterialClass::TextureWrapping::Clamp);
     ClearList(mUI.textures);
 
-    SetEnabled(mUI.textureProp,    false);
-    SetEnabled(mUI.texturePreview, false);
-    SetEnabled(mUI.textureRect,    false);
-    SetValue(mUI.textureFile,   QString(""));
-    SetValue(mUI.textureID,     QString(""));
-    SetValue(mUI.textureWidth,  QString(""));
-    SetValue(mUI.textureHeight, QString(""));
-    SetValue(mUI.textureDepth,  QString(""));
+    SetEnabled(mUI.textureProp,       false);
+    SetEnabled(mUI.texturePreview,    false);
+    SetEnabled(mUI.textureRect,       false);
+    SetValue(mUI.textureSourceFile,   QString(""));
+    SetValue(mUI.textureSourceID,     QString(""));
+    SetValue(mUI.textureSourceName,   QString(""));
+    SetValue(mUI.textureWidth,        QString(""));
+    SetValue(mUI.textureHeight,       QString(""));
+    SetValue(mUI.textureDepth,        QString(""));
     SetValue(mUI.rectX, 0.0f);
     SetValue(mUI.rectY, 0.0f);
     SetValue(mUI.rectW, 1.0f);
@@ -1718,8 +1745,9 @@ void MaterialWidget::GetTextureProperties()
     SetEnabled(mUI.textureProp,    false);
     SetEnabled(mUI.texturePreview, false);
     SetEnabled(mUI.textureRect,    false);
-    SetValue(mUI.textureFile,   QString(""));
-    SetValue(mUI.textureID,     QString(""));
+    SetValue(mUI.textureSourceFile,   QString(""));
+    SetValue(mUI.textureSourceID,     QString(""));
+    SetValue(mUI.textureSourceName,   QString(""));
     SetValue(mUI.textureWidth,  QString(""));
     SetValue(mUI.textureHeight, QString(""));
     SetValue(mUI.textureDepth,  QString(""));
@@ -1763,39 +1791,22 @@ void MaterialWidget::GetTextureProperties()
 
     if (const auto bitmap = source->GetData())
     {
-        const auto width  = bitmap->GetWidth();
-        const auto height = bitmap->GetHeight();
-        const auto depth  = bitmap->GetDepthBits();
-        QImage img;
-        if (depth == 8)
-            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
-        else if (depth == 24)
-            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
-        else if (depth == 32)
-            img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
-        else WARN("Failed to load texture preview. Unexpected bit depth %1.", depth);
-
-        if (!img.isNull())
-        {
-            QPixmap pix;
-            pix.convertFromImage(img);
-            SetImage(mUI.texturePreview, pix);
-        }
-        SetValue(mUI.textureWidth,  width);
-        SetValue(mUI.textureHeight, height);
-        SetValue(mUI.textureDepth,  depth);
-    }
-    else WARN("Failed to load texture preview.");
+        SetImage(mUI.texturePreview, *bitmap);
+        SetValue(mUI.textureWidth,  bitmap->GetWidth());
+        SetValue(mUI.textureHeight, bitmap->GetHeight());
+        SetValue(mUI.textureDepth,  bitmap->GetDepthBits());
+    } else WARN("Failed to load texture preview.");
 
     SetValue(mUI.rectX,     rect.GetX());
     SetValue(mUI.rectY,     rect.GetY());
     SetValue(mUI.rectW,     rect.GetWidth());
     SetValue(mUI.rectH,     rect.GetHeight());
-    SetValue(mUI.textureID, source->GetId());
-    SetValue(mUI.textureFile, QString("N/A"));
+    SetValue(mUI.textureSourceID,   source->GetId());
+    SetValue(mUI.textureSourceName, source->GetName());
+    SetValue(mUI.textureSourceFile, QString("N/A"));
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
     {
-        SetValue(mUI.textureFile, ptr->GetFilename());
+        SetValue(mUI.textureSourceFile, ptr->GetFilename());
         SetValue(mUI.chkAllowPacking, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
         SetValue(mUI.chkAllowResizing, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
         SetValue(mUI.chkPreMulAlpha, ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
@@ -1804,6 +1815,11 @@ void MaterialWidget::GetTextureProperties()
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha, true);
         SetEnabled(mUI.chkBlurTexture, true);
+    }
+    else if (const auto* ptr = dynamic_cast<const gfx::detail::TextureTextBufferSource*>(source))
+    {
+        SetEnabled(mUI.chkBlurTexture, true);
+        SetValue(mUI.chkBlurTexture, ptr->TestEffect(gfx::TextureSource::Effect::Blur));
     }
 }
 
