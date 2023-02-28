@@ -589,6 +589,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
     GetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
     GetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
+    GetUserProperty(resource, "bloom_threshold", &mBloom.threshold);
+    GetUserProperty(resource, "bloom_red",       &mBloom.red);
+    GetUserProperty(resource, "bloom_green",     &mBloom.green);
+    GetUserProperty(resource, "bloom_blue",      &mBloom.blue);
     mCameraWasLoaded = true;
 
     UpdateResourceReferences();
@@ -661,6 +665,10 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SetValue("Scene", "hash", mOriginalHash);
     settings.SetValue("Scene", "camera_offset_x", mState.camera_offset_x);
     settings.SetValue("Scene", "camera_offset_y", mState.camera_offset_y);
+    settings.SetValue("Scene", "bloom_threshold", mBloom.threshold);
+    settings.SetValue("Scene", "bloom_red",   mBloom.red);
+    settings.SetValue("Scene", "bloom_green", mBloom.green);
+    settings.SetValue("Scene", "bloom_blue",  mBloom.blue);
     settings.SaveWidget("Scene", mUI.scaleX);
     settings.SaveWidget("Scene", mUI.scaleY);
     settings.SaveWidget("Scene", mUI.rotation);
@@ -685,6 +693,10 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.GetValue("Scene", "hash", &mOriginalHash);
     settings.GetValue("Scene", "camera_offset_x", &mState.camera_offset_x);
     settings.GetValue("Scene", "camera_offset_y", &mState.camera_offset_y);
+    settings.GetValue("Scene", "bloom_threshold", &mBloom.threshold);
+    settings.GetValue("Scene", "bloom_red",   &mBloom.red);
+    settings.GetValue("Scene", "bloom_green", &mBloom.green);
+    settings.GetValue("Scene", "bloom_blue",  &mBloom.blue);
     mCameraWasLoaded = true;
 
     settings.LoadWidget("Scene", mUI.scaleX);
@@ -1098,11 +1110,12 @@ void SceneWidget::on_chkEnableBloom_stateChanged(int)
 {
     if (GetValue(mUI.chkEnableBloom))
     {
-        game::SceneClass::BloomFilter bloom;
-        mState.scene->SetBloom(bloom);
+        mState.scene->SetBloom(mBloom);
     }
     else
     {
+        if (auto* bloom = mState.scene->GetBloom())
+            mBloom = *bloom;
         mState.scene->ResetBloom();
     }
     DisplaySceneProperties();
@@ -1233,6 +1246,10 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
     SetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
     SetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
+    SetUserProperty(resource, "bloom_threshold", mBloom.threshold);
+    SetUserProperty(resource, "bloom_red",       mBloom.red);
+    SetUserProperty(resource, "bloom_green",     mBloom.green);
+    SetUserProperty(resource, "bloom_blue",      mBloom.blue);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene->GetHash();
@@ -2375,14 +2392,14 @@ void SceneWidget::DisplaySceneProperties()
     {
         SetValue(mUI.chkEnableBloom, false);
 
-        SetValue(mUI.bloomThresholdSpin,  0.0);
-        SetValue(mUI.bloomThresholdSlide, 0.0);
-        SetValue(mUI.bloomRSpin,          0.0);
-        SetValue(mUI.bloomRSlide,         0.0);
-        SetValue(mUI.bloomGSpin,          0.0);
-        SetValue(mUI.bloomGSlide,         0.0);
-        SetValue(mUI.bloomBSpin,          0.0);
-        SetValue(mUI.bloomBSlide,         0.0);
+        SetValue(mUI.bloomThresholdSpin,  mBloom.threshold);
+        SetValue(mUI.bloomThresholdSlide, mBloom.threshold);
+        SetValue(mUI.bloomRSpin,          mBloom.red);
+        SetValue(mUI.bloomRSlide,         mBloom.red);
+        SetValue(mUI.bloomGSpin,          mBloom.green);
+        SetValue(mUI.bloomGSlide,         mBloom.green);
+        SetValue(mUI.bloomBSpin,          mBloom.blue);
+        SetValue(mUI.bloomBSlide,         mBloom.blue);
         SetEnabled(mUI.bloomThresholdSpin,  false);
         SetEnabled(mUI.bloomThresholdSlide, false);
         SetEnabled(mUI.bloomRSpin,          false);
