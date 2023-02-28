@@ -329,7 +329,9 @@ namespace game
             FlipHorizontally,
             // Whether to flip (mirror) the item about the central horizontal axis.
             // This changes the rendering on the direction from top to bottom.
-            FlipVertically
+            FlipVertically,
+            // Contribute to bloom post-processing effect.
+            PP_EnableBloom
         };
         DrawableItemClass();
 
@@ -465,13 +467,16 @@ namespace game
             BlinkText,
             // Set text to underline
             UnderlineText,
-            // Static content, i.e. the text/color/ etc properties
+            // Static content, i.e. the text/color/ etc. properties
             // are not expected to change.
-            StaticContent
+            StaticContent,
+            // Contribute to bloom post-processing effect.
+            PP_EnableBloom
         };
         TextItemClass()
         {
             mBitFlags.set(Flags::VisibleInGame, true);
+            mBitFlags.set(Flags::PP_EnableBloom, true);
         }
         std::size_t GetHash() const;
 

@@ -176,6 +176,7 @@ namespace gui
         void on_dsRestartDrawable_stateChanged(int);
         void on_dsFlipHorizontally_stateChanged(int);
         void on_dsFlipVertically_stateChanged(int);
+        void on_dsBloom_stateChanged(int);
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
         void on_rbPolygon_currentIndexChanged(const QString&);
@@ -203,6 +204,7 @@ namespace gui
         void on_tiUnderline_stateChanged(int);
         void on_tiBlink_stateChanged(int);
         void on_tiStatic_stateChanged(int);
+        void on_tiBloom_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
         void on_fxShape_currentIndexChanged(const QString&);
         void on_fxBody_currentIndexChanged(const QString&);

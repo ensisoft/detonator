@@ -149,12 +149,13 @@ bool RigidBodyItemClass::FromJson(const data::Reader& data)
 
 DrawableItemClass::DrawableItemClass()
 {
-    mBitFlags.set(Flags::VisibleInGame, true);
-    mBitFlags.set(Flags::UpdateDrawable, true);
-    mBitFlags.set(Flags::UpdateMaterial, true);
-    mBitFlags.set(Flags::RestartDrawable, true);
+    mBitFlags.set(Flags::VisibleInGame,    true);
+    mBitFlags.set(Flags::UpdateDrawable,   true);
+    mBitFlags.set(Flags::UpdateMaterial,   true);
+    mBitFlags.set(Flags::RestartDrawable,  true);
     mBitFlags.set(Flags::FlipHorizontally, false);
-    mBitFlags.set(Flags::FlipVertically, false);
+    mBitFlags.set(Flags::FlipVertically,   false);
+    mBitFlags.set(Flags::PP_EnableBloom,   true);
 }
 
 std::size_t DrawableItemClass::GetHash() const

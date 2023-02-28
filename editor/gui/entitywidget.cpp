@@ -2018,6 +2018,11 @@ void EntityWidget::on_dsFlipVertically_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsBloom_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
@@ -2129,6 +2134,11 @@ void EntityWidget::on_tiBlink_stateChanged(int)
 }
 
 void EntityWidget::on_tiStatic_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_tiBloom_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
@@ -2957,6 +2967,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiUnderline, false);
     SetValue(mUI.tiBlink, false);
     SetValue(mUI.tiStatic, false);
+    SetValue(mUI.tiBloom, false);
     SetValue(mUI.spnShape, game::SpatialNodeClass::Shape::AABB);
     SetValue(mUI.fixture, false);
     SetValue(mUI.fxBody, QString(""));
@@ -3006,6 +3017,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsRestartDrawable, item->TestFlag(game::DrawableItemClass::Flags::RestartDrawable));
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
+            SetValue(mUI.dsBloom, item->TestFlag(game::DrawableItemClass::Flags::PP_EnableBloom));
 
             const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
             const auto& drawable = mState.workspace->GetResourceById(GetItemId(mUI.dsDrawable));
@@ -3059,6 +3071,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiUnderline, text->TestFlag(game::TextItemClass::Flags::UnderlineText));
             SetValue(mUI.tiBlink, text->TestFlag(game::TextItemClass::Flags::BlinkText));
             SetValue(mUI.tiStatic, text->TestFlag(game::TextItemClass::Flags::StaticContent));
+            SetValue(mUI.tiBloom, text->TestFlag(game::TextItemClass::Flags::PP_EnableBloom));
         }
         if (const auto* sp = node->GetSpatialNode())
         {
@@ -3172,6 +3185,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, GetValue(mUI.dsRestartDrawable));
         item->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, GetValue(mUI.dsFlipHorizontally));
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
+        item->SetFlag(game::DrawableItemClass::Flags::PP_EnableBloom, GetValue(mUI.dsBloom));
     }
 
     if (auto* body = node->GetRigidBody())
@@ -3210,6 +3224,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::UnderlineText, GetValue(mUI.tiUnderline));
         text->SetFlag(game::TextItemClass::Flags::BlinkText, GetValue(mUI.tiBlink));
         text->SetFlag(game::TextItemClass::Flags::StaticContent, GetValue(mUI.tiStatic));
+        text->SetFlag(game::TextItemClass::Flags::PP_EnableBloom, GetValue(mUI.tiBloom));
     }
     if (auto* fixture = node->GetFixture())
     {
