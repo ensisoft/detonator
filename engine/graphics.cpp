@@ -36,6 +36,11 @@ public:
       : mColor(color)
       , mThreshold(threshold)
     {}
+    virtual bool FilterDraw(void* user) const override
+    {
+        const auto* packet = static_cast<const engine::DrawPacket*>(user);
+        return packet->flags.test(engine::DrawPacket::Flags::PP_Bloom);
+    }
     virtual std::string ModifyFragmentSource(gfx::Device& device, std::string source) const override
     {
         constexpr auto* src = R"(
