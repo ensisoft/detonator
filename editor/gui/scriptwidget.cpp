@@ -937,6 +937,13 @@ void InitDoc()
     DOC_METHOD_0("glm.vec2", "GetLinearVelocity", "Get the current linear velocity (m/s) of the rigid body.");
     DOC_METHOD_0("float", "GetAngularVelocity", "Get the current angular (rotational) velocity (rad/s) of the rigid body.");
     DOC_METHOD_1("void", "Enable", "Enable or disable the body in physics simulation.", "bool", "enabled");
+    DOC_METHOD_1("void", "ApplyImpulse", "Apply linear impulse to the center of the body.<br>"
+                                         "The impulse will be applied on the next iteration of the physics update.",
+                 "glm.vec2", "impulse");
+    DOC_METHOD_2("void", "ApplyImpulse", "Apply linear impulse to the center of the body.<br>"
+                                         "The impulse will be applied on the next iteration of the physics update.",
+                 "float", "x", "float", "y");
+
     DOC_METHOD_1("void", "AdjustLinearVelocity", "Set a value (m/s) to adjust the linear velocity of the the rigid body.<br>"
                                                  "The adjustment will be applied on the next iteration of the physics update",
                  "glm.vec2", "velocity");
