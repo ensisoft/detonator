@@ -940,14 +940,6 @@ void SceneWidget::Shutdown()
 }
 void SceneWidget::Update(double secs)
 {
-    if (mPreview && mPreview->IsClosed())
-    {
-        mPreview->SaveState("preview_window");
-        mPreview->Shutdown();
-        mPreview->close();
-        mPreview.reset();
-    }
-
     if (mPlayState == PlayState::Playing)
     {
         mState.renderer.Update(*mState.scene, mSceneTime, secs);
@@ -957,14 +949,28 @@ void SceneWidget::Update(double secs)
 }
 void SceneWidget::Render()
 {
-    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
-    if (mPreview && !mPreview->IsClosed())
-    {
-        mPreview->RunGameLoopOnce();
-    }
     // call for the widget to paint, it will set its own OpenGL context on this thread
     // and everything should be fine.
     mUI.widget->triggerPaint();
+}
+
+void SceneWidget::RunGameLoopOnce()
+{
+    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
+    if (!mPreview)
+        return;
+
+    if (mPreview->IsClosed())
+    {
+        mPreview->SaveState("preview_window");
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+    else
+    {
+        mPreview->RunGameLoopOnce();
+    }
 }
 
 bool SceneWidget::HasUnsavedChanges() const

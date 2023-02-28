@@ -856,7 +856,17 @@ void MainWindow::iterateGameLoop()
 
     GfxWindow::BeginFrame();
 
-    // render all widgets
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->RunGameLoopOnce();
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        child->RunGameLoopOnce();
+    }
+
     if (mCurrentWidget)
     {
         mCurrentWidget->Render();

@@ -124,6 +124,12 @@ namespace gui
         virtual void Refresh()
         {}
 
+        // A hook for relaying game loop iteration to an object embedded
+        // inside this widget. The embedded object could be something such
+        // as the play window in a preview mode.
+        virtual void RunGameLoopOnce()
+        {}
+
         // Update the widget and the associated animation, simulation
         // etc. data model.
         // This is called at a high frequency that is specified in the
@@ -135,7 +141,7 @@ namespace gui
 
         // Render the contents of the widget. If the widget doesn't have
         // custom accelerated rendering then likely nothing needs to be done.
-        // Otherwise a new frame should be rendered in the accelerated
+        // Otherwise, a new frame should be rendered in the accelerated
         // graphics widget. This is called frequently as part of the application's
         // main update/render loop.
         virtual void Render()

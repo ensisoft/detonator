@@ -74,6 +74,8 @@ namespace gui
 
         void Render();
 
+        void RunGameLoopOnce();
+
         void SetSharedWorkspaceMenu(QMenu* menu);
 
         void Shutdown();

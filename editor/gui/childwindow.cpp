@@ -146,6 +146,16 @@ void ChildWindow::Render()
     UpdateStats();
 }
 
+void ChildWindow::RunGameLoopOnce()
+{
+    if (mPopInRequested || mClosed)
+        return;
+    else if (!mWidget)
+        return;
+
+    mWidget->RunGameLoopOnce();
+}
+
 void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
 {
     mUI.menubar->insertMenu(mUI.menuEdit->menuAction(), menu);

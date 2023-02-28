@@ -979,14 +979,6 @@ void EntityWidget::Shutdown()
 }
 void EntityWidget::Update(double secs)
 {
-    if (mPreview && mPreview->IsClosed())
-    {
-        mPreview->SaveState("preview_window");
-        mPreview->Shutdown();
-        mPreview->close();
-        mPreview.reset();
-    }
-
     if (mPlayState == PlayState::Playing)
     {
         mState.renderer.Update(*mState.entity, mEntityTime, secs);
@@ -996,14 +988,28 @@ void EntityWidget::Update(double secs)
 }
 void EntityWidget::Render()
 {
-    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
-    if (mPreview && !mPreview->IsClosed())
-    {
-        mPreview->RunGameLoopOnce();
-    }
     // call for the widget to paint, it will set its own OpenGL context on this thread
     // and everything should be fine.
     mUI.widget->triggerPaint();
+}
+
+void EntityWidget::RunGameLoopOnce()
+{
+    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
+    if (!mPreview)
+        return;
+
+    if (mPreview->IsClosed())
+    {
+        mPreview->SaveState("preview_window");
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+    else
+    {
+        mPreview->RunGameLoopOnce();
+    }
 }
 
 bool EntityWidget::HasUnsavedChanges() const

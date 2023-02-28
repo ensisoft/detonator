@@ -107,6 +107,7 @@ namespace gui
         virtual void Shutdown() override;
         virtual void Update(double secs) override;
         virtual void Render() override;
+        virtual void RunGameLoopOnce() override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool OnEscape() override;
         virtual void Refresh() override;
