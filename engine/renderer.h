@@ -34,24 +34,11 @@
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tree.h"
+#include "engine/graphics.h"
 
 namespace engine
 {
     class ClassLibrary;
-
-    struct DrawPacket {
-        // shortcut to the node's material.
-        std::shared_ptr<const gfx::Material> material;
-        // shortcut to the node's drawable.
-        std::shared_ptr<const gfx::Drawable> drawable;
-        // transform that pertains to the draw.
-        glm::mat4 transform;
-        // the node layer this draw belongs to.
-        int entity_node_layer = 0;
-        int scene_node_layer = 0;
-        // the render pass this draw belongs to.
-        game::RenderPass pass = game::RenderPass::DrawColor;
-    };
 
     template<typename Node>
     class EntityDrawHook

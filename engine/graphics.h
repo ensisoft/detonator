@@ -18,14 +18,40 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/mat4x4.hpp>
+#include "warnpop.h"
+
 #include <vector>
 #include <string>
+#include <memory>
 
+#include "base/bitflag.h"
 #include "graphics/painter.h"
 #include "graphics/fwd.h"
+#include "game/enum.h"
 
 namespace engine
 {
+    struct DrawPacket {
+        enum class Flags {
+            PP_Bloom
+        };
+        // flags to control the rendering etc.
+        base::bitflag<Flags> flags;
+        // shortcut to the node's material.
+        std::shared_ptr<const gfx::Material> material;
+        // shortcut to the node's drawable.
+        std::shared_ptr<const gfx::Drawable> drawable;
+        // transform that pertains to the draw.
+        glm::mat4 transform;
+        // the node layer this draw belongs to.
+        int entity_node_layer = 0;
+        int scene_node_layer = 0;
+        // the render pass this draw belongs to.
+        game::RenderPass pass = game::RenderPass::DrawColor;
+    };
+
     struct RenderLayer {
         std::vector<gfx::Painter::DrawShape> draw_color_list;
         std::vector<gfx::Painter::DrawShape> mask_cover_list;

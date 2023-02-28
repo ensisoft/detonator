@@ -688,6 +688,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
         {
             DrawPacket packet;
+            packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
             packet.drawable  = paint_node.text_drawable;
             packet.material  = paint_node.text_material;
             packet.transform = transform.GetAsMatrix();
@@ -717,6 +718,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         if (item->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible)
         {
             DrawPacket packet;
+            packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
             packet.material  = paint_node.item_material;
             packet.drawable  = paint_node.item_drawable;
             packet.transform = transform.GetAsMatrix();
@@ -786,6 +788,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         if (packet.pass == RenderPass::DrawColor)
         {
             gfx::Painter::DrawShape shape;
+            shape.user      = &packet;
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
@@ -794,6 +797,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         else if (packet.pass == RenderPass::MaskCover)
         {
             gfx::Painter::DrawShape shape;
+            shape.user      = &packet;
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
@@ -802,6 +806,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
         else if (packet.pass == RenderPass::MaskExpose)
         {
             gfx::Painter::DrawShape shape;
+            shape.user      = &packet;
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
