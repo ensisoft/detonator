@@ -259,6 +259,7 @@ namespace gui
         boost::circular_buffer<game::SceneClass> mUndoStack;
         // Preview window (if any)
         std::unique_ptr<PlayWindow> mPreview;
-        // keyboard movement velocities.
+        // bloom values (if any)
+        game::Scene::BloomFilter mBloom;
     };
 }
