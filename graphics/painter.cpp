@@ -123,6 +123,10 @@ public:
 
         for (const auto& shape : shapes)
         {
+            // Low level draw filtering.
+            if (!pass.FilterDraw(shape.user))
+                continue;
+
             Drawable::Environment drawable_env;
             drawable_env.editing_mode = mEditingMode;
             drawable_env.pixel_ratio  = mPixelRatio;
@@ -152,6 +156,8 @@ public:
             device_state.line_width = drawable_raster_state.line_width;
             device_state.culling    = drawable_raster_state.culling;
 
+            // Do final state setting here. The shader pass can then ultimately decide
+            // on the best program and device state for this draw.
             pass.ApplyDynamicState(*program, device_state);
 
             mDevice->Draw(*program, *geometry, device_state);

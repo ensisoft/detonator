@@ -122,6 +122,10 @@ namespace gfx
             const glm::mat4* transform = nullptr;
             const Drawable* drawable   = nullptr;
             const Material* material   = nullptr;
+            // This is a user defined object pointer that is passed to
+            // ShaderPass::FilterDraw for doing low level shape/draw filtering.
+            // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
+            void* user = nullptr;
         };
         using DrawList = std::vector<DrawShape>;
 
