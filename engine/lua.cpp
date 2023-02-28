@@ -2680,13 +2680,21 @@ void BindGameLib(sol::state& L)
     body["GetLinearVelocity"]     = &RigidBodyItem::GetLinearVelocity;
     body["GetAngularVelocity"]    = &RigidBodyItem::GetAngularVelocity;
     body["Enable"]                = &RigidBodyItem::Enable;
+    body["ApplyImpulse"]          = sol::overload(
+        [](RigidBodyItem& body, const glm::vec2& impulse) {
+            body.ApplyLinearImpulseToCenter(impulse);
+        },
+        [](RigidBodyItem& body, float x, float y) {
+            body.ApplyLinearImpulseToCenter(glm::vec2(x, y));
+        });
+
     body["AdjustLinearVelocity"]  = sol::overload(
-            [](RigidBodyItem& body, const glm::vec2& velocity) {
-                body.AdjustLinearVelocity(velocity);
-            },
-            [](RigidBodyItem& body, float x, float y) {
-                body.AdjustLinearVelocity(glm::vec2(x, y));
-            });
+        [](RigidBodyItem& body, const glm::vec2& velocity) {
+            body.AdjustLinearVelocity(velocity);
+        },
+        [](RigidBodyItem& body, float x, float y) {
+            body.AdjustLinearVelocity(glm::vec2(x, y));
+        });
     body["AdjustAngularVelocity"] = &RigidBodyItem::AdjustAngularVelocity;
     body["TestFlag"]              = &TestFlag<RigidBodyItem>;
     body["SetFlag"]               = &SetFlag<RigidBodyItem>;

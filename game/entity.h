@@ -723,6 +723,9 @@ namespace game
         void SetFlag(Flags flag, bool on_off)
         { mInstanceFlags.set(flag, on_off); }
 
+        void ApplyLinearImpulseToCenter(const glm::vec2& impulse)
+        { mCenterImpulse = impulse; }
+
         // Set a new linear velocity adjustment to be applied
         // on the next update of the physics engine. The velocity
         // is in meters per second.
@@ -733,18 +736,23 @@ namespace game
         // is in radians per second.
         void AdjustAngularVelocity(float radians)
         { mAngularVelocityAdjustment = radians; }
+        bool HasCenterImpulse() const
+        { return mCenterImpulse.has_value(); }
         bool HasLinearVelocityAdjustment() const
         { return mLinearVelocityAdjustment.has_value(); }
         bool HasAngularVelocityAdjustment() const
         { return mAngularVelocityAdjustment.has_value(); }
         float GetAngularVelocityAdjustment() const
-        { return mAngularVelocityAdjustment.value(); }
-        const glm::vec2& GetLinearVelocityAdjustment() const
-        { return mLinearVelocityAdjustment.value(); }
-        void ClearVelocityAdjustments() const
+        { return mAngularVelocityAdjustment.value_or(0.0f); }
+        glm::vec2 GetLinearVelocityAdjustment() const
+        { return mLinearVelocityAdjustment.value_or(glm::vec2(0.0f, 0.0f)); }
+        glm::vec2 GetLinearImpulseToCenter() const
+        { return mCenterImpulse.value_or(glm::vec2(0.0f, 0.0f)); };
+        void ClearPhysicsAdjustments() const
         {
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
+            mCenterImpulse.reset();
         }
         void Enable(bool value)
         { SetFlag(Flags::Enabled, value); }
@@ -779,12 +787,12 @@ namespace game
         float mAngularVelocity = 0.0f;
         // Flags specific to this instance.
         base::bitflag<Flags> mInstanceFlags;
-        // current adjustment to be made to the body's linear
-        // velocity.
+        // Current adjustment to be made to the body's linear velocity.
         mutable std::optional<glm::vec2> mLinearVelocityAdjustment;
-        // current adjustment to be made to the body's angular
-        // velocity.
+        // Current adjustment to be made to the body's angular velocity.
         mutable std::optional<float> mAngularVelocityAdjustment;
+        // Current pending impulse in the center of the body.
+        mutable std::optional<glm::vec2> mCenterImpulse;
     };
 
     class TextItem

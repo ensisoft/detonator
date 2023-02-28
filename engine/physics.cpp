@@ -805,7 +805,10 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                     world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());
                 if (rigid_body->HasLinearVelocityAdjustment())
                     world_body->SetLinearVelocity(ToBox2D(rigid_body->GetLinearVelocityAdjustment()));
-                rigid_body->ClearVelocityAdjustments();
+                if (rigid_body->HasCenterImpulse())
+                    world_body->ApplyLinearImpulseToCenter(ToBox2D(rigid_body->GetLinearImpulseToCenter()), true /*wake*/);
+
+                rigid_body->ClearPhysicsAdjustments();
             }
         }
         virtual void LeaveNode(const EntityNode* node) override
