@@ -105,6 +105,7 @@ public:
         mRenderer.SetName("Engine");
         mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
         mPhysics.SetClassLibrary(mClasslib);
+        mEditingMode = init.editing_mode;
     }
     virtual bool Load() override
     {
@@ -264,6 +265,11 @@ public:
             {
                 TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
             }
+            if (mEditingMode)
+            {
+                ConfigureRendererForScene();
+            }
+
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             if (mDebug.debug_draw && mPhysics.HaveWorld())
@@ -882,20 +888,7 @@ private:
             mPhysics.CreateWorld(*mScene);
         }
         mRenderer.CreateScene(*mScene);
-        if (const auto* bloom = mScene->GetBloom())
-        {
-            engine::Renderer::BloomParams bloom_params;
-            bloom_params.threshold = bloom->threshold;
-            bloom_params.red       = bloom->red;
-            bloom_params.green     = bloom->green;
-            bloom_params.blue      = bloom->blue;
-            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
-            mRenderer.SetBloom(bloom_params);
-        }
-        else
-        {
-            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
-        }
+        ConfigureRendererForScene();
 
         const auto& klass = mScene->GetClass();
         if (klass.HasTilemap())
@@ -1101,6 +1094,24 @@ private:
         }
     }
 
+    void ConfigureRendererForScene()
+    {
+        if (const auto* bloom = mScene->GetBloom())
+        {
+            engine::Renderer::BloomParams bloom_params;
+            bloom_params.threshold = bloom->threshold;
+            bloom_params.red       = bloom->red;
+            bloom_params.green     = bloom->green;
+            bloom_params.blue      = bloom->blue;
+            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
+            mRenderer.SetBloom(bloom_params);
+        }
+        else
+        {
+            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
+        }
+    }
+
 private:
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
@@ -1198,6 +1209,9 @@ private:
     bool mShowDebugs = true;
     // flag to control physics world creation. 
     bool mEnablePhysics = true;
+    // flag to control editing mode (i.e. run by editor and static content
+    // is actually not static).
+    bool mEditingMode = false;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // Debug draw actions.
