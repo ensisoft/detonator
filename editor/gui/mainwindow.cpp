@@ -1499,6 +1499,8 @@ void MainWindow::on_actionImportTiles_triggered()
         return;
 
     DlgTileImport dlg(this, mWorkspace.get());
+    dlg.show();
+    dlg.LoadState();
     dlg.exec();
 }
 
