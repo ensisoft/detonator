@@ -64,6 +64,8 @@ namespace gui
         DlgTileImport(QWidget* parent, app::Workspace* workspace);
        ~DlgTileImport();
 
+        void LoadState();
+
     private slots:
         void on_btnSelectFile_clicked();
         void on_btnSelectAll_clicked();
@@ -86,7 +88,6 @@ namespace gui
         void ToggleSelection();
         void SplitIntoTiles();
         void LoadFile(const QString& file);
-        void LoadState();
         void SaveState();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);

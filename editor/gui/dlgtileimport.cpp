@@ -113,9 +113,8 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
 
     on_cmbCutting_currentIndexChanged(0);
     on_materialType_currentIndexChanged(0);
-
-    LoadState();
 }
+
 DlgTileImport::~DlgTileImport()
 {
     for (auto& tile : mTiles)
@@ -633,8 +632,7 @@ void DlgTileImport::LoadState()
 
     int xpos = 0;
     int ypos = 0;
-
-
+    QString file;
     GetUserProperty(*mWorkspace, "dlg-tile-import-color-space", mUI.cmbColorSpace);
     GetUserProperty(*mWorkspace, "dlg-tile-import-zoom", mUI.zoom);
     GetUserProperty(*mWorkspace, "dlg-tile-import-color", mUI.widget);
@@ -656,9 +654,8 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-offset-y", mUI.offsetY);
     GetUserProperty(*mWorkspace, "dlg-tile-import-xpos", &xpos);
     GetUserProperty(*mWorkspace, "dlg-tile-import-ypos", &ypos);
-
-    QString file;
-    if (GetUserProperty(*mWorkspace, "dlg-tile-import-file", &file))
+    GetUserProperty(*mWorkspace, "dlg-tile-import-file", &file);
+    if (!file.isEmpty())
         LoadFile(file);
 
     mTrackingOffset = QPoint(xpos, ypos);
@@ -699,12 +696,22 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
 {
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    if (!mMaterial)
-        return;
-
     const float width  = mUI.widget->width();
     const float height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
+
+    if (!mMaterial)
+    {
+        ShowInstruction(
+            "INSTRUCTIONS\n"
+            "1. Select a tilemap image file.\n"
+            "2. Adjust the image offsets and tile sizes as needed.\n"
+            "3. Click on any tile to toggle selection.\n"
+            "4. Go to 'Review Tiles' and select options.\n"
+            "5. Click on 'Import' to import the tiles into project.\n",
+            gfx::FRect(0, 0, width, height), painter);
+        return;
+    }
 
     const float zoom   = GetValue(mUI.zoom);
     const float img_width  = mWidth * zoom;
