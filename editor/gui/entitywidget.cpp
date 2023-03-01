@@ -1116,26 +1116,29 @@ void EntityWidget::on_widgetColor_colorChanged(QColor color)
 
 void EntityWidget::on_actionPlay_triggered()
 {
+    // quick restart.
+    if (mPlayState == PlayState::Playing)
+    {
+        mState.renderer.ClearPaintState();
+        mEntityTime = 0.0f;
+        NOTE("Restarted entity '%1' play.", mState.entity->GetName());
+    }
     mPlayState = PlayState::Playing;
-    mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
-    mState.renderer.ClearPaintState();
-    mEntityTime = 0.0f;
 }
 void EntityWidget::on_actionPause_triggered()
 {
     mPlayState = PlayState::Paused;
-    mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(true);
 }
 void EntityWidget::on_actionStop_triggered()
 {
     mPlayState = PlayState::Stopped;
-    mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
+    mEntityTime = 0.0f;
+    mState.renderer.ClearPaintState();
 }
 void EntityWidget::on_actionSave_triggered()
 {
