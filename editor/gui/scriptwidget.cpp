@@ -863,6 +863,7 @@ void InitDoc()
     DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.", "int", "exit_code");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
     DOC_METHOD_1("void", "ShowDeveloperUI", "Show or hide the developer UI when supported by the host app/platform.", "bool", "show");
+    DOC_METHOD_2("void", "EnableEffect", "Enable/disable a rendering effect.", "string", "effect_name", "bool", "on_off");
     DOC_METHOD_1("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
                                         "This method is only available in the game main script.<br>"
                                         "The initial viewport is a viewport without any dimensions.",

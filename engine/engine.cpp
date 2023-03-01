@@ -991,6 +991,14 @@ private:
     {
         mDebugDraws.push_back(draw);
     }
+    void OnAction(const engine::EnableEffectAction& action)
+    {
+        DEBUG("Enable disable rendering effect. [name='%1', value=%2]", action.name, action.value ? "enable" : "disable");
+        if (action.name == "Bloom")
+            mEnableBloom = action.value;
+        else WARN("Unidentified effect name. [effect='%1']", action.name);
+        ConfigureRendererForScene();
+    }
 
     static std::string ModifierString(wdk::bitflag<wdk::Keymod> mods)
     {
@@ -1096,7 +1104,7 @@ private:
 
     void ConfigureRendererForScene()
     {
-        if (const auto* bloom = mScene->GetBloom())
+        if (auto* bloom = mScene->GetBloom(); bloom && mEnableBloom)
         {
             engine::Renderer::BloomParams bloom_params;
             bloom_params.threshold = bloom->threshold;
@@ -1212,6 +1220,8 @@ private:
     // flag to control editing mode (i.e. run by editor and static content
     // is actually not static).
     bool mEditingMode = false;
+    // master switch (controlled by the game) to turn on/off bloom PP effect.
+    bool mEnableBloom = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // Debug draw actions.
