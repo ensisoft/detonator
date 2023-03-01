@@ -2,8 +2,11 @@
   "scripts": [
     {
       "id": "Xg0GdRiaQU",
+      "name": "game",
+      "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     }
   ]
