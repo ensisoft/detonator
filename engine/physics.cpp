@@ -263,14 +263,13 @@ void PhysicsEngine::UpdateWorld(const game::Scene& scene)
         {
             KillEntity(*entity);
         }
-        else if (entity->HasBeenSpawned())
-        {
-            transform.Push(node.node_to_scene);
-                AddEntity(transform.GetAsMatrix(), *entity);
-            transform.Pop();
-        }
         else
         {
+            if (entity->HasBeenSpawned())
+            {
+                AddEntity(transform.GetAsMatrix(), *entity);
+            }
+
             transform.Push(node.node_to_scene);
                 UpdateWorld(transform.GetAsMatrix(), *entity);
             transform.Pop();
