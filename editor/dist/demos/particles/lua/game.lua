@@ -145,6 +145,12 @@ function OnGameEvent(event)
         local args = game.EntityArgs:new()
         args.class = ClassLib:FindEntityClassByName(event.value)
         Scene:SpawnEntity(args, true)
+
+        Game:EnableEffect('Bloom', false)
+        if event.value == 'Fireworks' then
+            Game:EnableEffect('Bloom', true)
+        end
+
     elseif event.message == 'background' then
         local entity = Scene:FindEntityByInstanceName('Background')
         entity:PlayAnimationByName('Toggle')
