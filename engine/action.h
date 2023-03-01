@@ -104,6 +104,10 @@ namespace engine
         Color4f color;
         float width = 1.0f;
     };
+    struct EnableEffectAction {
+        std::string name;
+        bool value = false;
+    };
 
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
@@ -125,6 +129,7 @@ namespace engine
             GrabMouseAction,
             RequestFullScreenAction,
             PostEventAction,
-            ShowDeveloperUIAction>;
+            ShowDeveloperUIAction,
+            EnableEffectAction>;
 
 } // namespace

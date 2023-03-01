@@ -1326,6 +1326,12 @@ void LuaRuntime::Init()
         action.show = show;
         self.mActionQueue.push(action);
     };
+    engine["EnableEffect"] = [](LuaRuntime& self, std::string effect, bool on_off) {
+        EnableEffectAction action;
+        action.name  = effect;
+        action.value = on_off;
+        self.mActionQueue.push(action);
+    };
 
     if (!mGameScript.empty())
     {
