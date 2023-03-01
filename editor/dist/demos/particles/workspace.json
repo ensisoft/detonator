@@ -1,4 +1,18 @@
 {
+    "02kw3C4wix": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "dZDA63fz8X",
+        "transform_height": 36,
+        "transform_rotation": 0,
+        "transform_width": 38,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
     "0BT4ANr30T": {
         "checked_for_packing": 1,
         "local_emitter_h": 0.38,
@@ -18,6 +32,11 @@
     },
     "1RlBexDBsu": {
         "checked_for_packing": 1
+    },
+    "1XgDNiDXTz": {
+        "checked_for_packing": 1,
+        "comment_58zAWbfzpR": "",
+        "comment_AXp3uJ3dLF": ""
     },
     "28lGaDWqAm": {
         "checked_for_packing": 1,
@@ -56,6 +75,20 @@
     "4ZgNL1JNfD": {
         "checked_for_packing": 1
     },
+    "6604Fhgq27": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.05,
+        "local_emitter_w": 0.02,
+        "local_emitter_x": 0.48,
+        "local_emitter_y": 0.09,
+        "material": "dZDA63fz8X",
+        "transform_height": 26,
+        "transform_rotation": 0,
+        "transform_width": 12,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
     "6PwXHnbnzY": {
         "checked_for_packing": 1,
         "local_emitter_h": 1,
@@ -80,7 +113,9 @@
         "checked_for_packing": 1
     },
     "BbEpeqHSYG": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_WP4oD64913": "",
+        "comment_fo1iBtE2PJ": ""
     },
     "BkQRl3PzCr": {
         "checked_for_packing": 1
@@ -141,6 +176,7 @@
     },
     "JUOysDXYJL": {
         "checked_for_packing": 1,
+        "comment_lvqGGnspNa": "",
         "track_zH8aNnYeSH": {
             "4YB78hLjoJ": "PWISTi6pbG",
             "num_timelines": 1,
@@ -179,6 +215,11 @@
     },
     "K9D27CRUwq": {
         "checked_for_packing": 1
+    },
+    "KALE2Cn77Q": {
+        "checked_for_packing": 1,
+        "comment_2QmI7rXsbZ": "",
+        "comment_loTkslEBZQ": ""
     },
     "KSwh4OhJxA": {
         "checked_for_packing": 1,
@@ -253,6 +294,11 @@
         "transform_ypos": 0,
         "use_lifetime": 1
     },
+    "RDi65JlZls": {
+        "checked_for_packing": 1,
+        "comment_ECfe9aS5xS": "",
+        "comment_REyT7HYYhL": ""
+    },
     "SX0ABkBEq9": {
         "checked_for_packing": 1
     },
@@ -260,7 +306,10 @@
         "checked_for_packing": 1
     },
     "UEHaD6hTOe": {
-        "checked_for_packing": 1
+        "comment_EFLTpOBTxf": "",
+        "comment_N2fp3IHYEM": "",
+        "comment_bidH6CXYrb": "",
+        "comment_wLFbL7zKvp": ""
     },
     "X983sNLRSh": {
         "checked_for_packing": 1,
@@ -314,6 +363,14 @@
     "eySa2QEq4I": {
         "checked_for_packing": 1
     },
+    "f3llpkZaRE": {
+        "checked_for_packing": 1
+    },
+    "jaXpNTpHBe": {
+        "checked_for_packing": 1,
+        "comment_e4q4k8PhOs": "this is the launch point for rockets",
+        "comment_qs1jYIlq3l": ""
+    },
     "n6ykHi9xRi": {
         "checked_for_packing": 1,
         "local_emitter_h": 1,
@@ -331,6 +388,9 @@
     "nIkywmIbBJ": {
         "checked_for_packing": 1
     },
+    "nZkUdw95Ds": {
+        "checked_for_packing": 1
+    },
     "obukJs0rJC": {
         "checked_for_packing": 1,
         "local_emitter_h": 0.01,
@@ -344,6 +404,10 @@
         "transform_xpos": 0,
         "transform_ypos": 0,
         "use_lifetime": 1
+    },
+    "om7tHo4XiA": {
+        "comment_ZUCdMli3MR": "",
+        "comment_pfkeOSHYlD": ""
     },
     "pEBDeuBGgb": {
         "checked_for_packing": 1
@@ -364,7 +428,7 @@
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
         "canvas_height": 800,
-        "canvas_mode": "Default",
+        "canvas_mode": "SoftFullScreen",
         "canvas_width": 1200,
         "clear_color": "4280492835",
         "command_line_arguments": "",
@@ -452,11 +516,28 @@
         "comment_nXDrspw3Nd": "",
         "comment_wz8y0ZBNW1": ""
     },
+    "rBqJ2LlkXC": {
+        "checked_for_packing": 1,
+        "local_emitter_h": 0.12,
+        "local_emitter_w": 0.13,
+        "local_emitter_x": 0.45,
+        "local_emitter_y": 0.4,
+        "material": "dZDA63fz8X",
+        "transform_height": 44,
+        "transform_rotation": 0,
+        "transform_width": 40,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
+    },
     "sv05U2SGGE": {
         "checked_for_packing": 1
     },
     "tyNkXUoRPJ": {
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_L30Ob5LLSH": "",
+        "comment_PLozCzYgnd": "",
+        "comment_daXCUJOp0z": ""
     },
     "vIf7bfadSt": {
         "checked_for_packing": 1,
@@ -490,7 +571,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": true,
+        "packing_param_delete_prev": false,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
