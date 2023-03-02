@@ -466,22 +466,15 @@ bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipbo
         case Actions::CanCut:
         case Actions::CanCopy:
         case Actions::CanPaste:
+        case Actions::CanUndo:
             return false;
         case Actions::CanReloadTextures:
         case Actions::CanReloadShaders:
             return true;
-        case Actions::CanZoomIn: {
-            const float max = mUI.zoom->maximum();
-            const float val = GetValue(mUI.zoom);
-            return val < max;
-        } break;
-        case Actions::CanZoomOut: {
-            const float min = mUI.zoom->minimum();
-            const float val = GetValue(mUI.zoom);
-            return val > min;
-        } break;
-        case Actions::CanUndo:
-            return false;
+        case Actions::CanZoomIn:
+            return CanZoomIn(mUI.zoom);
+        case Actions::CanZoomOut:
+            return CanZoomOut(mUI.zoom);
     }
     BUG("Unhandled action query.");
     return false;

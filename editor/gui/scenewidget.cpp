@@ -745,16 +745,10 @@ bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
             return false;
         case Actions::CanUndo:
             return mUndoStack.size() > 1;
-        case Actions::CanZoomIn: {
-                const float max = mUI.zoom->maximum();
-                const float val = GetValue(mUI.zoom);
-                return val < max;
-            } break;
-        case Actions::CanZoomOut: {
-                const float min = mUI.zoom->minimum();
-                const float val = GetValue(mUI.zoom);
-                return val > min;
-            } break;
+        case Actions::CanZoomIn:
+            return CanZoomIn(mUI.zoom);
+        case Actions::CanZoomOut:
+            return CanZoomOut(mUI.zoom);
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
