@@ -109,6 +109,7 @@ namespace gui
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeComment_triggered();
         void on_actionNodeRename_triggered();
+        void on_actionNodeRenameAll_triggered();
         void on_actionScriptVarAdd_triggered();
         void on_actionScriptVarDel_triggered();
         void on_actionScriptVarEdit_triggered();
