@@ -142,7 +142,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>VSYNC (F3)</string>
+          <string>VSYNC</string>
          </property>
         </widget>
        </item>

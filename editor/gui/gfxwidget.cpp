@@ -26,9 +26,6 @@
 #  include <color_dialog.hpp>
 #include "warnpop.h"
 
-#include <thread>
-#include <chrono>
-
 #include "device/device.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
@@ -523,7 +520,7 @@ void GfxWindow::BeginFrame()
     }
 }
 // static
-void GfxWindow::EndFrame(unsigned sleep)
+bool GfxWindow::EndFrame()
 {
     bool did_vsync = false;
 
@@ -542,17 +539,7 @@ void GfxWindow::EndFrame(unsigned sleep)
         if (window->mVsync)
             did_vsync = true;
     }
-    if (should_have_vsync && did_vsync)
-        return;
-
-    if (!did_vsync)
-    {
-        // this is ugly but is there something else we could do?
-        // ideally wait for some time *or* until there's pending user
-        // input/message from the underlying OS.
-        // Maybe a custom QAbstractEventDispatcher implementation could work.
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
-    }
+    return did_vsync;
 }
 // static
 void GfxWindow::SetVSYNC(bool on_off)
@@ -613,8 +600,10 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
             ShowColorDialog();
         else if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F3)
             mWindow->ResetClearColor();
-        else if (key->key() == Qt::Key_F3)
-            toggleVSync();
+        // disable the use of VSYNC setting for now since it doesn't scale well
+        // when having multiple GfxWindows open.
+        //else if (key->key() == Qt::Key_F3)
+        //    toggleVSync();
 
         if (mWindow && onKeyPress)
             return onKeyPress(key);

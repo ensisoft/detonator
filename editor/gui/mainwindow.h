@@ -82,17 +82,17 @@ namespace gui
 
         // Perform one iteration of the "game" loop, update and render
         // all currently open widgets.
-        void iterateGameLoop();
-
-        bool haveAcceleratedWindows() const;
+        void RunGameLoopOnce();
 
         // Returns true when the window has been closed.
-        bool isClosed() const
+        bool IsClosed() const
         { return mIsClosed; }
 
-    signals:
-        void newAcceleratedWindowOpen();
-        void aboutToClose();
+        bool TryVSync() const
+        { return mSettings.vsync; }
+
+        unsigned GetFrameDelay() const
+        { return mSettings.frame_delay; }
 
     private slots:
         void on_menuEdit_aboutToShow();
@@ -183,7 +183,7 @@ namespace gui
         void OpenExternalShader(const QString& file);
         void OpenExternalScript(const QString& file);
         void OpenExternalAudio(const QString& file);
-        void OpenNewWidget(MainWidget* widget);
+        void OpenNewWidget(gui::MainWidget* widget);
         void RefreshWidget();
         void RefreshWidgetActions();
         void OpenResource(const QString& id);
