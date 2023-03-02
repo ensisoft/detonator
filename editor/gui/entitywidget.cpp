@@ -1383,6 +1383,26 @@ void EntityWidget::on_actionNodeRename_triggered()
     }
 }
 
+void EntityWidget::on_actionNodeRenameAll_triggered()
+{
+    bool accepted = false;
+    QString name = "Node %i";
+    name = QInputDialog::getText(this,
+        tr("Rename Node"),
+        tr("Name: "), QLineEdit::Normal, name, &accepted);
+    if (!accepted)
+        return;
+    for (unsigned i=0; i<mState.entity->GetNumNodes(); ++i)
+    {
+        auto& node = mState.entity->GetNode(i);
+        QString node_name = name;
+        node_name.replace("%i", QString::number(i));
+        node.SetName(app::ToUtf8(node_name));
+    }
+    mUI.tree->Rebuild();
+    DisplayCurrentNodeProperties();
+}
+
 void EntityWidget::on_actionScriptVarAdd_triggered()
 {
     on_btnNewScriptVar_clicked();
@@ -2436,6 +2456,7 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     mUI.actionNodeDuplicate->setEnabled(node != nullptr);
     mUI.actionNodeVarRef->setEnabled(node != nullptr);
     mUI.actionNodeComment->setEnabled(node != nullptr);
+    mUI.actionNodeRename->setEnabled(node != nullptr);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
@@ -2443,6 +2464,7 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDuplicate);
     menu.addAction(mUI.actionNodeRename);
+    menu.addAction(mUI.actionNodeRenameAll);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeVarRef);
     menu.addAction(mUI.actionNodeComment);

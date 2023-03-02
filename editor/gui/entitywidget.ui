@@ -3402,6 +3402,18 @@
     <string>F6</string>
    </property>
   </action>
+  <action name="actionNodeRenameAll">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/rename.png</normaloff>:/16x16_ico_png/rename.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rename All</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename all entity nodes</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
