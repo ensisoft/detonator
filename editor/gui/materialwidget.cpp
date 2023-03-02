@@ -213,24 +213,15 @@ bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) c
         case Actions::CanCut:
         case Actions::CanCopy:
         case Actions::CanPaste:
-            return false;
         case Actions::CanUndo:
             return false;
+        case Actions::CanZoomIn:
+            return CanZoomIn(mUI.zoom);
+        case Actions::CanZoomOut:
+            return CanZoomOut(mUI.zoom);
         case Actions::CanReloadTextures:
         case Actions::CanReloadShaders:
             return true;
-        case Actions::CanZoomIn: {
-            const float max = mUI.zoom->maximum();
-            const float val = GetValue(mUI.zoom);
-            return val < max;
-        }
-        break;
-        case Actions::CanZoomOut: {
-            const float min = mUI.zoom->minimum();
-            const float val = GetValue(mUI.zoom);
-            return val > min;
-        }
-        break;
     }
     BUG("Unhandled action query.");
     return false;

@@ -157,6 +157,19 @@ inline void Decrement(QDoubleSpinBox* spin, float value = 1.0f)
     spin->setValue(spin->value() - value);
 }
 
+inline bool CanZoomIn(QDoubleSpinBox* zoom)
+{
+    const float max = zoom->maximum();
+    const float val = zoom->value();
+    return val < max;
+}
+inline bool CanZoomOut(QDoubleSpinBox* zoom)
+{
+    const float min = zoom->minimum();
+    const float val = zoom->value();
+    return val > min;
+}
+
 inline void SetWindowTitle(QMainWindow* window, const app::AnyString& title)
 {
     window->setWindowTitle(title);
