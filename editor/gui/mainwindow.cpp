@@ -28,6 +28,7 @@
 #  include <QStringList>
 #  include <QProcess>
 #  include <QSurfaceFormat>
+#  include <QAbstractEventDispatcher>
 #include "warnpop.h"
 
 #if defined(__GCC__)
@@ -74,6 +75,7 @@
 #include "editor/gui/codewidget.h"
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/types.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -88,19 +90,6 @@ double ElapsedSeconds()
     return std::chrono::duration_cast<std::chrono::microseconds>(gone).count() /
         (1000.0 * 1000.0);
 }
-
-class IterateGameLoopEvent : public QEvent
-{
-public:
-    IterateGameLoopEvent() : QEvent(GetIdentity())
-    {}
-    static QEvent::Type GetIdentity()
-    {
-        static auto id = QEvent::registerEventType();
-        return (QEvent::Type)id;
-    }
-private:
-};
 
 gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspace, const app::Resource* resource = nullptr)
 {
@@ -214,8 +203,6 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     SetValue(mUI.grpHelp, QString("Welcome to %1").arg(APP_TITLE));
     setWindowTitle(APP_TITLE);
     setAcceptDrops(true);
-
-    QCoreApplication::postEvent(this, new IterateGameLoopEvent);
 }
 
 MainWindow::~MainWindow()
@@ -279,7 +266,9 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "mouse_cursor",               &mSettings.mouse_cursor);
     settings.GetValue("Settings", "viewer_geometry",            &mSettings.viewer_geometry);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
-    GfxWindow::SetVSYNC(mSettings.vsync);
+    // disabling the VSYNC setting for now since there are just too many problems
+    // making it scale nicely when having multiple windows.
+    GfxWindow::SetVSYNC(false); // mSettings.vsync
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
@@ -829,7 +818,7 @@ void MainWindow::showWindow()
     }
 }
 
-void MainWindow::iterateGameLoop()
+void MainWindow::RunGameLoopOnce()
 {
     if (!mWorkspace)
         return;
@@ -883,29 +872,10 @@ void MainWindow::iterateGameLoop()
 
     UpdateStats();
 
-    GfxWindow::EndFrame(mSettings.frame_delay);
-    //GfxWindow::CleanGarbage();
+    GfxWindow::EndFrame();
+
     // could be changed through the widget's hotkey handler.
-    mSettings.vsync = GfxWindow::GetVSYNC();
-}
-
-bool MainWindow::haveAcceleratedWindows() const
-{
-    for (int i=0; i<GetCount(mUI.mainTab); ++i)
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        if (widget->IsAccelerated())
-            return true;
-    }
-    for (const auto* child : mChildWindows)
-    {
-        if (!child->IsClosed() && child->IsAccelerated())
-            return true;
-    }
-    if (mPlayWindow)
-        return true;
-
-    return false;
+    //mSettings.vsync = GfxWindow::GetVSYNC();
 }
 
 void MainWindow::on_menuEdit_aboutToShow()
@@ -1468,7 +1438,7 @@ void MainWindow::on_actionNewUIScript_triggered()
 
     auto* widget = new ScriptWidget(mWorkspace.get(), resource);
 
-    emit OpenNewWidget(widget);
+    OpenNewWidget(widget);
 }
 
 void MainWindow::on_actionNewTilemap_triggered()
@@ -1900,7 +1870,8 @@ void MainWindow::on_actionSettings_triggered()
     ScriptWidget::SetDefaultSettings(script_widget_settings);
     TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
-    GfxWindow::SetVSYNC(mSettings.vsync);
+    // disabling this setting for now.
+    //GfxWindow::SetVSYNC(mSettings.vsync);
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
@@ -2372,8 +2343,6 @@ void MainWindow::on_actionProjectPlay_triggered()
             window->LoadGame();
 
             mPlayWindow = std::move(window);
-            emit newAcceleratedWindowOpen();
-            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
         }
         else
         {
@@ -2881,13 +2850,9 @@ bool MainWindow::event(QEvent* event)
             }
         }
     }
-    else if (event->type() == IterateGameLoopEvent::GetIdentity())
+    else if (event->type() == GameLoopEvent::GetIdentity())
     {
-        iterateGameLoop();
-
-        if (haveAcceleratedWindows())
-            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
-
+        RunGameLoopOnce();
         return true;
     }
     return QMainWindow::event(event);
@@ -2927,8 +2892,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
         mDlgImgPack->close();
         mDlgImgPack.reset();
     }
-
-    emit aboutToClose();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* drag)
@@ -3089,11 +3052,6 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         child->show();
 
         mChildWindows.push_back(child);
-        if (child->IsAccelerated())
-        {
-            emit newAcceleratedWindowOpen();
-            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
-        }
         return child;
     }
 
@@ -3106,12 +3064,6 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 
     // rebuild window menu and shortcuts
     UpdateWindowMenu();
-
-    if (widget->IsAccelerated())
-    {
-        emit newAcceleratedWindowOpen();
-        QCoreApplication::postEvent(this, new IterateGameLoopEvent);
-    }
     // no child window
     return nullptr;
 }
@@ -3237,9 +3189,9 @@ void MainWindow::UpdateStats()
     mCurrentWidget->GetStats(&stats);
     SetValue(mUI.statTime, QString::number(stats.time));
     SetVisible(mUI.lblFps,    stats.graphics.valid);
-    SetVisible(mUI.lblVsync,  stats.graphics.valid);
+    //SetVisible(mUI.lblVsync,  stats.graphics.valid);
     SetVisible(mUI.statFps,   stats.graphics.valid);
-    SetVisible(mUI.statVsync, stats.graphics.valid);
+    //SetVisible(mUI.statVsync, stats.graphics.valid);
     SetVisible(mUI.statVBO,   stats.graphics.valid);
     SetVisible(mUI.lblVBO,    stats.graphics.valid);
     if (!stats.graphics.valid)
@@ -3253,7 +3205,7 @@ void MainWindow::UpdateStats()
                            stats.device.dynamic_vbo_mem_alloc;
     SetValue(mUI.statVBO, app::toString("%1/%2", app::Bytes{vbo_use}, app::Bytes{vbo_alloc}));
     SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-    SetValue(mUI.statVsync, GfxWindow::GetVSYNC() ? QString("ON") : QString("OFF"));
+    SetValue(mUI.statVsync, mSettings.vsync  ? QString("ON") : QString("OFF"));
 }
 
 } // namespace

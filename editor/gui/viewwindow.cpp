@@ -40,20 +40,9 @@
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/audiowidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/types.h"
 
 namespace {
-class IterateGameLoopEvent : public QEvent
-{
-public:
-    IterateGameLoopEvent() : QEvent(GetIdentity())
-    {}
-    static QEvent::Type GetIdentity()
-    {
-        static auto id = QEvent::registerEventType();
-        return (QEvent::Type)id;
-    }
-private:
-};
 // returns number of seconds elapsed since the last call
 // of this function.
 double ElapsedSeconds()
@@ -140,11 +129,6 @@ ViewWindow::ViewWindow(QApplication& app) : mApp(app)
 ViewWindow::~ViewWindow()
 {
 
-}
-
-bool ViewWindow::haveAcceleratedWindows() const
-{
-    return mCurrentWidget != nullptr;
 }
 
 void ViewWindow::Connect(const QString& local_ipc_socket)
@@ -250,8 +234,6 @@ void ViewWindow::on_btnClose_clicked()
 
     ShutdownWidget();
     SendWindowState();
-
-    emit aboutToClose();
 }
 
 void ViewWindow::SelectResource(const QItemSelection&, const QItemSelection&)
@@ -278,9 +260,6 @@ void ViewWindow::SelectResource(const QItemSelection&, const QItemSelection&)
     mCurrentWidget = CreateWidget(resource.GetType(), mWorkspace.get(), &resource);
     mCurrentWidget->SetViewerMode();
     mUI.layout->addWidget(mCurrentWidget);
-
-    emit newAcceleratedWindowOpen();
-    QCoreApplication::postEvent(this, new IterateGameLoopEvent());
 }
 
 void ViewWindow::JsonMessageReceived(const QJsonObject& json)
@@ -296,8 +275,10 @@ void ViewWindow::JsonMessageReceived(const QJsonObject& json)
         app::JsonReadSafe(json, "mouse_cursor", &mSettings.mouse_cursor);
         app::JsonReadSafe(json, "vsync",        &mSettings.vsync);
         app::JsonReadSafe(json, "geometry",     &mSettings.viewer_geometry);
-        // set defaults
-        GfxWindow::SetVSYNC(mSettings.vsync);
+
+        // disabling the VSYNC setting for now since there are just too many problems
+        // making it scale nicely when having multiple windows.
+        GfxWindow::SetVSYNC(false); //mSettings.vsync);
         GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
         GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
         gui::SetGridColor(ToGfx(mSettings.grid_color));
@@ -318,13 +299,9 @@ void ViewWindow::JsonMessageReceived(const QJsonObject& json)
 
 bool ViewWindow::event(QEvent* event)
 {
-    if (event->type() == IterateGameLoopEvent::GetIdentity())
+    if (event->type() == GameLoopEvent::GetIdentity())
     {
         IterateGameLoop();
-
-        if (haveAcceleratedWindows())
-            QCoreApplication::postEvent(this, new IterateGameLoopEvent);
-
         return true;
     }
     return QMainWindow::event(event);
@@ -339,8 +316,6 @@ void ViewWindow::closeEvent(QCloseEvent* event)
 
     ShutdownWidget();
     SendWindowState();
-
-    emit aboutToClose();
 }
 
 void ViewWindow::IterateGameLoop()
@@ -366,7 +341,7 @@ void ViewWindow::IterateGameLoop()
 
     GfxWindow::BeginFrame();
     mCurrentWidget->Render();
-    GfxWindow::EndFrame(0 /* frame delay */);
+    GfxWindow::EndFrame();
 }
 
 void ViewWindow::ShutdownWidget()

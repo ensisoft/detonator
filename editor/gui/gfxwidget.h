@@ -139,7 +139,7 @@ namespace gui
         static void CleanGarbage();
 
         static void BeginFrame();
-        static void EndFrame(unsigned sleep);
+        static bool EndFrame();
 
         static void SetVSYNC(bool on_off);
         static bool GetVSYNC();

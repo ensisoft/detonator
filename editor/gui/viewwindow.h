@@ -51,15 +51,16 @@ namespace gui
         ViewWindow(QApplication& app);
        ~ViewWindow();
 
-        bool isClosed() const
+        bool IsClosed() const
         { return mClosed; }
 
-        bool haveAcceleratedWindows() const;
         void Connect(const QString& local_ipc_socket);
 
-    signals:
-        void newAcceleratedWindowOpen();
-        void aboutToClose();
+        unsigned GetFrameDelay() const
+        { return 1; }
+
+        bool TryVSync() const
+        { return false; }
 
     private slots:
         void on_btnDemoBandit_clicked();
