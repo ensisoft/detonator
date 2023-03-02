@@ -28,6 +28,7 @@
 #include <vector>
 #include <stack>
 
+#include "base/bitflag.h"
 #include "base/logging.h"
 #include "base/trace.h"
 #include "game/entity.h"
@@ -105,7 +106,15 @@ public:
         mRenderer.SetName("Engine");
         mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
         mPhysics.SetClassLibrary(mClasslib);
-        mEditingMode = init.editing_mode;
+        mFlags.set(Flags::EditingMode,     init.editing_mode);
+        mFlags.set(Flags::Running,         true);
+        mFlags.set(Flags::Fullscreen,      false);
+        mFlags.set(Flags::BlockKeyboard,   false);
+        mFlags.set(Flags::BlockMouse,      false);
+        mFlags.set(Flags::ShowMouseCursor, true);
+        mFlags.set(Flags::ShowDebugs,      true);
+        mFlags.set(Flags::EnableBloom,     true);
+        mFlags.set(Flags::EnablePhysics,   true);
     }
     virtual bool Load() override
     {
@@ -161,7 +170,6 @@ public:
         mAudio->EnableCaching(conf.audio.enable_pcm_caching);
         DEBUG("Configure audio engine. [format=%1 buff_size=%2ms]", audio_format, conf.audio.buffer_size);
 
-        mEnablePhysics = conf.physics.enabled;
         mPhysics.SetScale(conf.physics.scale);
         mPhysics.SetGravity(conf.physics.gravity);
         mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
@@ -195,8 +203,10 @@ public:
         }
         mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawable);
         mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
-        mShowMouseCursor = conf.mouse_cursor.show;
-        mCursorUnits = conf.mouse_cursor.units;
+        mCursorUnits   = conf.mouse_cursor.units;
+
+        mFlags.set(Flags::ShowMouseCursor, conf.mouse_cursor.show);
+        mFlags.set(Flags::EnablePhysics, conf.physics.enabled);
     }
 
     virtual void Draw() override
@@ -265,7 +275,7 @@ public:
             {
                 TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
             }
-            if (mEditingMode)
+            if (mFlags.test(Flags::EditingMode))
             {
                 ConfigureRendererForScene();
             }
@@ -313,7 +323,7 @@ public:
         }
 
         TRACE_ENTER(DebugDrawing);
-        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mShowMouseCursor)
+        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mFlags.test(Flags::ShowMouseCursor))
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetOrthographicProjection(0, 0, surf_width, surf_height);
@@ -333,7 +343,7 @@ public:
                 mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
         }
-        if (mDebug.debug_show_msg && mShowDebugs)
+        if (mDebug.debug_show_msg && mFlags.test(Flags::ShowDebugs))
         {
             gfx::FRect rect(10, 30, 500, 20);
             for (const auto& print : mDebugPrints)
@@ -352,7 +362,7 @@ public:
         }
         TRACE_LEAVE(DebugDrawing);
 
-        if (mShowMouseCursor)
+        if (mFlags.test(Flags::ShowMouseCursor))
         {
             // scale the cursor size based on the requested units of the cursor size.
             const auto& size   = mCursorUnits == EngineConfig::MouseCursorUnits::Units
@@ -491,7 +501,7 @@ public:
         audio::ClearCaches();
     }
     virtual bool IsRunning() const override
-    { return mRunning; }
+    { return mFlags.test(Flags::Running); }
     virtual wdk::WindowListener* GetWindowListener() override
     { return this; }
 
@@ -581,23 +591,23 @@ public:
     virtual void OnEnterFullScreen() override
     {
         DEBUG("Enter full screen mode.");
-        mFullScreen = true;
+        mFlags.set(Flags::Fullscreen, true);
     }
     virtual void OnLeaveFullScreen() override
     {
         DEBUG("Leave full screen mode.");
-        mFullScreen = false;
+        mFlags.set(Flags::Fullscreen, false);
     }
 
     // WindowListener
     virtual void OnWantClose(const wdk::WindowEventWantClose&) override
     {
         // todo: handle ending play, saving game etc.
-        mRunning = false;
+        mFlags.set(Flags::Running, false);
     }
     virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override
     {
-        if (mBlockKeyboard)
+        if (mFlags.test(Flags::BlockKeyboard))
             return;
 
         SendUIKeyEvent(key, &uik::Window::KeyDown);
@@ -606,7 +616,7 @@ public:
     }
     virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
-        if (mBlockKeyboard)
+        if (mFlags.test(Flags::BlockKeyboard))
             return;
 
         SendUIKeyEvent(key, &uik::Window::KeyUp);
@@ -615,14 +625,16 @@ public:
     }
     virtual void OnChar(const wdk::WindowEventChar& text) override
     {
-        if (mBlockKeyboard)
+        if (mFlags.test(Flags::BlockKeyboard))
             return;
+
         mRuntime->OnChar(text);
     }
     virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
-        if (mBlockMouse)
+        if (mFlags.test(Flags::BlockMouse))
             return;
+
         mCursorPos.x = mouse.window_x;
         mCursorPos.y = mouse.window_y;
 
@@ -634,7 +646,7 @@ public:
     }
     virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
-        if (mBlockMouse)
+        if (mFlags.test(Flags::BlockMouse))
             return;
 
         if (HaveOpenUI())
@@ -645,7 +657,7 @@ public:
     }
     virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
-        if (mBlockMouse)
+        if (mFlags.test(Flags::BlockMouse))
             return;
 
         if (HaveOpenUI())
@@ -882,7 +894,7 @@ private:
     void OnAction(engine::PlayAction& action)
     {
         mScene = std::move(action.scene);
-        if (mEnablePhysics)
+        if (mFlags.test(Flags::EnablePhysics))
         {
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
@@ -950,22 +962,22 @@ private:
     }
     void OnAction(const engine::ShowDebugAction& action)
     {
-        mShowDebugs = action.show;
+        mFlags.set(Flags::ShowDebugs, action.show);
         DEBUG("Show debugs is %1", action.show ? "ON" : "OFF");
     }
     void OnAction(const engine::ShowMouseAction& action)
     {
-        mShowMouseCursor = action.show;
+        mFlags.set(Flags::ShowMouseCursor, action.show);
         DEBUG("Mouse cursor is %1", action.show ? "ON" : "OFF");
     }
     void OnAction(const engine::BlockKeyboardAction& action)
     {
-        mBlockKeyboard = action.block;
+        mFlags.set(Flags::BlockKeyboard, action.block);
         DEBUG("Keyboard block is %1", action.block ? "ON" : "OFF");
     }
     void OnAction(const engine::BlockMouseAction& action)
     {
-        mBlockMouse = action.block;
+        mFlags.set(Flags::BlockMouse, action.block);
         DEBUG("Mouse block is %1", action.block ? "ON" : "OFF");
     }
     void OnAction(const engine::GrabMouseAction& action)
@@ -995,7 +1007,7 @@ private:
     {
         DEBUG("Enable disable rendering effect. [name='%1', value=%2]", action.name, action.value ? "enable" : "disable");
         if (action.name == "Bloom")
-            mEnableBloom = action.value;
+            mFlags.set(Flags::EnableBloom, action.value);
         else WARN("Unidentified effect name. [effect='%1']", action.name);
         ConfigureRendererForScene();
     }
@@ -1104,7 +1116,7 @@ private:
 
     void ConfigureRendererForScene()
     {
-        if (auto* bloom = mScene->GetBloom(); bloom && mEnableBloom)
+        if (auto* bloom = mScene->GetBloom(); bloom && mFlags.test(Flags::EnableBloom))
         {
             engine::Renderer::BloomParams bloom_params;
             bloom_params.threshold = bloom->threshold;
@@ -1121,6 +1133,33 @@ private:
     }
 
 private:
+    enum class Flags {
+        // flag to indicate editing mode, i.e. run by the editor and
+        // any static content is actually not static.
+        EditingMode,
+        // flag to indicate whether the app is still running or not.
+        Running,
+        // flag to indicate whether currently in fullscreen or not.
+        Fullscreen,
+        // flag to control keyboard event blocking. Note that the game
+        // might still be polling the keyboard through a direct call
+        // to read the keyboard state, so the flag  applies only to the
+        // keyboard window events.
+        BlockKeyboard,
+        // flag to control mouse event blocking.
+        BlockMouse,
+        // flag to control whether to show (or not) mouse cursor
+        ShowMouseCursor,
+        // flag to control the debug string printing.
+        ShowDebugs,
+        // flag to control physics world creation.
+        EnablePhysics,
+        // master flag to control bloom PP in the renderer, controlled by the game.
+        EnableBloom
+    };
+    // current engine flags to control execution etc.
+    base::bitflag<Flags> mFlags;
+    // current FBO 0 surface sizes
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;
     // current mouse cursor details
@@ -1177,10 +1216,6 @@ private:
     std::stack<std::shared_ptr<uik::Window>> mUIStack;
     // Transient UI state.
     uik::State mUIState;
-    // flag to indicate whether the app is still running or not.
-    bool mRunning = true;
-    // a flag to indicate whether currently in fullscreen or not.
-    bool mFullScreen = false;
     // current debug options.
     engine::Engine::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
@@ -1205,23 +1240,6 @@ private:
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
     float mActionDelay = 0.0;
-    // when true will discard keyboard events. note that the game
-    // might still be polling the keyboard through a direct call
-    // to read the keyboard state. this applies only to the kv events.
-    bool mBlockKeyboard = false;
-    // block mouse event processing.
-    bool mBlockMouse = false;
-    // whether to show or not mouse cursor
-    bool mShowMouseCursor = true;
-    // flag to control the debug string printing.
-    bool mShowDebugs = true;
-    // flag to control physics world creation. 
-    bool mEnablePhysics = true;
-    // flag to control editing mode (i.e. run by editor and static content
-    // is actually not static).
-    bool mEditingMode = false;
-    // master switch (controlled by the game) to turn on/off bloom PP effect.
-    bool mEnableBloom = true;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // Debug draw actions.
