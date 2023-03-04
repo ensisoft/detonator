@@ -35,8 +35,14 @@
 
 #include "base/snafu.h"
 
-namespace base {
+namespace glm {
+static bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
+{ return real::equals(lhs.x, rhs.x) && real::equals(lhs.y, rhs.y); }
+static bool operator!=(const glm::vec2& lhs, const glm::vec2& rhs)
+{ return !(lhs == rhs); }
+} // glm
 
+namespace base {
 static bool operator==(const Color4f& lhs, const Color4f& rhs)
 {
     return real::equals(lhs.Red(), rhs.Red()) &&
@@ -73,6 +79,9 @@ static bool operator==(const FPoint& lhs, const FPoint& rhs)
 static bool operator!=(const FPoint& lhs, const FPoint& rhs)
 { return !(lhs == rhs); }
 
+} // base
+
+namespace test {
 struct TestTimes {
     unsigned iterations = 0;
     double average = 0.0f;
@@ -129,13 +138,7 @@ static void PrintTestTimes(const char* name, const TestTimes& times)
     test::print(test::Color::Info, "median = %.6f s %6u ms\n", times.median,  unsigned(times.median * 1000u));
 }
 
-} // base
+} // namespace
 
-namespace glm {
-static bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
-{ return real::equals(lhs.x, rhs.x) && real::equals(lhs.y, rhs.y); }
-static bool operator!=(const glm::vec2& lhs, const glm::vec2& rhs)
-{ return !(lhs == rhs); }
 
-} // glm
 
