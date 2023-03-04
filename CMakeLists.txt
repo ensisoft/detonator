@@ -676,9 +676,11 @@ install(TARGETS perf-test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dis
 
 # simple standalone executable to play with lua and sol
 # for testing c++/lua integration strategies.
-add_executable(lua-test engine/test/luatest.cpp)
-target_include_directories(lua-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
+add_executable(lua-test tools/test/luatest.cpp)
 target_link_libraries(lua-test PRIVATE Lua ${CONAN_LIBS})
+
+add_executable(glm-test tools/test/glmtest.cpp)
+target_include_directories(glm-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 
 # unit tests
 enable_testing()
