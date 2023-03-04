@@ -25,6 +25,7 @@
 
 #include "base/platform.h"
 #include "base/assert.h"
+#include "base/bitflag.h"
 
 #if defined(WINDOWS_OS)
 #  include <Windows.h> // for DebugBreak
@@ -33,7 +34,6 @@
 #endif
 
 namespace test {
-
 // Note that this class does *not* derive from std::exception
 // on purpose so that the test code that would catch std::exceptions
 // wont catch this.
@@ -57,6 +57,12 @@ public:
 
 static unsigned ErrorCount = 0;
 static bool EnableFatality = true;
+
+enum class Type {
+    Performance, Feature
+};
+
+base::bitflag<Type> EnabledTests;
 
 enum class Color {
     Error, Warning, Success, Message, Info
@@ -150,9 +156,10 @@ static void blurb_failure(const char* expression,
 
 class TestCaseReporter {
 public:
-    TestCaseReporter(const char* file, const char* name)
+    TestCaseReporter(const char* file, const char* name, Type type)
       : mFile(file)
       , mName(name)
+      , mType(type)
     {
         // skip over the return type in the function name
         mName = std::strstr(name, " ");
@@ -171,15 +178,22 @@ public:
         // test failures print their message *before* the name and result
         // of the test execution.
         test::print(test::Color::Message, "Running ");
-        test::print(test::Color::Info, "'%s' ", mName);
-
-        if (mErrors == ErrorCount)
-            test::print(test::Color::Success, "OK\n");
-        else test::print(test::Color::Warning, "Fail\n");
+        test::print(test::Color::Info, "%-50s", mName);
+        if (EnabledTests.test(mType))
+        {
+            if (mErrors == ErrorCount)
+                test::print(test::Color::Success, "OK\n");
+            else test::print(test::Color::Warning, "Fail\n");
+        }
+        else
+        {
+            test::print(test::Color::Message, "Skipped\n");
+        }
     }
 private:
     const char* mFile = nullptr;
     const char* mName = nullptr;
+    const Type mType;
     unsigned mErrors = 0;
 };
 
@@ -206,26 +220,37 @@ private:
     catch (const std::exception& e) \
     {}
 
-#define TEST_CASE \
-    test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__);
+#define TEST_CASE(type) \
+    test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__, type); \
+    if (!test::EnabledTests.test(type)) \
+        return;                         \
+
 
 int test_main(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
+    test::EnabledTests.set(test::Type::Feature,     true);
+    test::EnabledTests.set(test::Type::Performance, true);
+
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--disable-fatality") ||
             !std::strcmp(argv[i], "-df"))
             test::EnableFatality = false;
+        else if (!std::strcmp(argv[i], "--disable-perf-test") ||
+                 !std::strcmp(argv[i], "-dpt"))
+            test::EnabledTests.set(test::Type::Performance, false);
+        else if (!std::strcmp(argv[i], "--disable-feature-test") ||
+                 !std::strcmp(argv[i], "-dft"))
+            test::EnabledTests.set(test::Type::Feature, false);
     }
-
     try
     {
         test_main(argc, argv);
         if (test::ErrorCount)
-            test::print(test::Color::Warning, "\nTests completed with errors.\n");
-        else test::print(test::Color::Success, "\nSuccess!\n");
+            test::print(test::Color::Warning, "Tests completed with errors.\n");
+        else test::print(test::Color::Success, "Success!\n");
     }
     catch (const test::Fatality& fatality)
     {
