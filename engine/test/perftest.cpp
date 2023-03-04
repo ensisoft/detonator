@@ -409,10 +409,10 @@ int test_main(int argc, char* argv[])
         spec.test->Prepare(engine);
         if (opt.WasGiven("--timing"))
         {
-            const auto& times = base::TimedTest(iterations, [&spec, &engine]() {
+            const auto& times = test::TimedTest(iterations, [&spec, &engine]() {
                 spec.test->Execute(engine);
             } );
-            base::PrintTestTimes(spec.name, times);
+            test::PrintTestTimes(spec.name, times);
         }
         else
         {

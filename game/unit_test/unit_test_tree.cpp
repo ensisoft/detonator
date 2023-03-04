@@ -813,12 +813,12 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
     {
         game::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
 
-        const auto& ret = base::TimedTest(100, [&entities, &tree]() {
+        const auto& ret = test::TimedTest(100, [&entities, &tree]() {
             for (auto& entity : entities)
                 TEST_REQUIRE(tree.Insert(entity.rect, (Entity*)&entity));
             tree.Clear();
         });
-        base::PrintTestTimes("Build QuadTree", ret);
+        test::PrintTestTimes("Build QuadTree", ret);
     }
 
     // build tree once and query several times.
@@ -826,7 +826,7 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
     // for each object checks whether it's in collision
     // with another object. so a naive O(N²) algorithm.
     {
-        const auto baseline = base::TimedTest(10, [&entities]() {
+        const auto baseline = test::TimedTest(10, [&entities]() {
             for (unsigned i = 0; i < entities.size(); ++i) {
                 for (unsigned j = i+1; j < entities.size(); ++j) {
                     const auto& a = entities[i];
@@ -837,7 +837,7 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
                 }
             }
         });
-        base::PrintTestTimes("Baseline O(N²) collision", baseline);
+        test::PrintTestTimes("Baseline O(N²) collision", baseline);
     }
 
     {
@@ -845,7 +845,7 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
         for (auto& entity : entities)
             TEST_REQUIRE(tree.Insert(entity.rect, &entity));
 
-        const auto ret = base::TimedTest(10, [&entities, &tree]() {
+        const auto ret = test::TimedTest(10, [&entities, &tree]() {
             for (const auto& entity : entities) {
                 std::set<Entity*> ret;
                 game::QueryQuadTree(entity.rect, tree, &ret);
@@ -854,7 +854,7 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
                     std::printf("side effect for not optimizing the test away!");
             }
         });
-        base::PrintTestTimes("QuadTree based collision", ret);
+        test::PrintTestTimes("QuadTree based collision", ret);
     }
 }
 
