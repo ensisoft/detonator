@@ -128,7 +128,7 @@ std::shared_ptr<gfx::Device> CreateDevice()
 
 void unit_test_device()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -179,7 +179,7 @@ void unit_test_device()
 
 void unit_test_shader()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -236,7 +236,7 @@ void main() {
 
 void unit_test_texture()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -272,7 +272,7 @@ void unit_test_texture()
 
 void unit_test_program()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -339,7 +339,7 @@ void main() {
 
 void unit_test_render_fbo(gfx::Framebuffer::Format format)
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
     TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
@@ -485,7 +485,7 @@ void main() {
 
 void unit_test_render_color_only()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -545,7 +545,7 @@ void main() {
 
 void unit_test_render_with_single_texture()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -633,7 +633,7 @@ void main() {
 
 void unit_test_render_with_multiple_textures()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -726,7 +726,7 @@ void main() {
 
 void unit_test_render_set_float_uniforms()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -849,7 +849,7 @@ void main() {
 
 void unit_test_render_set_int_uniforms()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -936,7 +936,7 @@ void main() {
 }
 void unit_test_render_set_matrix2x2_uniform()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1004,7 +1004,7 @@ void main() {
 
 void unit_test_render_set_matrix3x3_uniform()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1072,7 +1072,7 @@ void main() {
 
 void unit_test_render_set_matrix4x4_uniform()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1142,7 +1142,7 @@ void main() {
 
 void unit_test_uniform_sampler_optimize_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // shader code doesn't actually use the material, the sampler/uniform location
     // is thus -1 and no texture will be set.
@@ -1213,7 +1213,7 @@ void main() {
 
 void unit_test_clean_textures()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1369,7 +1369,7 @@ void main() {
 
 void unit_test_render_dynamic()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1470,7 +1470,7 @@ void main() {
 
 void unit_test_buffer_allocation()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1627,7 +1627,7 @@ void unit_test_buffer_allocation()
 
 void unit_test_empty_draw_lost_uniform_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // if a uniform is set in the program and the program
     // is used to draw but the geometry is "empty" the
@@ -1705,7 +1705,7 @@ void main() {
 
 void unit_test_max_texture_units_single_texture()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // create enough textures to saturate all texture units.
     // then do enough draws to have all texture units become used.
@@ -1805,7 +1805,7 @@ void main() {
 
 void unit_test_max_texture_units_many_textures()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1933,7 +1933,7 @@ void main() {
 
 void unit_test_algo_texture_copy()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -1969,7 +1969,7 @@ void unit_test_algo_texture_copy()
 
 void unit_test_algo_texture_flip()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -2004,7 +2004,7 @@ void unit_test_algo_texture_flip()
 
 void unit_test_algo_texture_read()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
 
@@ -2038,7 +2038,7 @@ void unit_test_algo_texture_read()
 // keeps growing incorrectly.
 void unit_test_repeated_uniform_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
     dev->BeginFrame();
@@ -2099,7 +2099,7 @@ void main() {
 // leading to the FBO becoming incomplete.
 void unit_test_fbo_texture_delete_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
     auto* fbo = dev->MakeFramebuffer("fbo");
@@ -2148,7 +2148,7 @@ void unit_test_fbo_texture_delete_bug()
 // but the FBO itself remains the same on the device.
 void unit_test_fbo_change_color_target_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
     auto* fbo = dev->MakeFramebuffer("fbo");

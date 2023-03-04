@@ -509,7 +509,7 @@ private:
 
 void unit_test_material_uniforms()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // test dynamic program uniforms.
     {
@@ -963,7 +963,7 @@ void unit_test_material_uniforms()
 
 void unit_test_material_textures()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // test setting basic texture properties.
     {
@@ -1228,7 +1228,7 @@ void unit_test_material_textures()
 void unit_test_material_textures_bind_fail()
 {
 
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     TestDevice device;
     TestProgram program;
@@ -1276,7 +1276,7 @@ void unit_test_material_textures_bind_fail()
 
 void unit_test_material_uniform_folding()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     gfx::detail::GenericShaderPass pass;
     gfx::MaterialClass::State state;
@@ -1384,7 +1384,7 @@ void unit_test_material_uniform_folding()
 
 void unit_test_custom_uniforms()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     gfx::CustomMaterialClass klass;
     klass.SetUniform("float", 56.0f);
@@ -1425,7 +1425,7 @@ void unit_test_custom_uniforms()
 
 void unit_test_custom_textures()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     gfx::CustomMaterialClass klass;
     {
@@ -1488,7 +1488,7 @@ void unit_test_custom_textures()
 
 void unit_test_static_poly()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     gfx::PolygonClass poly;
 
@@ -1562,7 +1562,7 @@ void unit_test_static_poly()
 
 void unit_test_local_particles()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     using K = gfx::KinematicsParticleEngineClass;
     using P = gfx::KinematicsParticleEngineClass::Params;
@@ -1830,12 +1830,12 @@ void unit_test_local_particles()
 
 void unit_test_global_particles()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 }
 
 void unit_test_particles()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     // todo: test the following:
     // - emission mode
@@ -1852,7 +1852,7 @@ void unit_test_particles()
 // needs to be created.
 void unit_test_painter_shape_material_pairing()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     TestDevice device;
 
@@ -1883,7 +1883,7 @@ void unit_test_painter_shape_material_pairing()
 // same texture object once onto the device.
 void unit_test_packed_texture_bug()
 {
-    TEST_CASE
+    TEST_CASE(test::Type::Feature)
 
     gfx::RgbaBitmap bmp;
     bmp.Resize(10, 10);
