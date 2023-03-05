@@ -564,11 +564,9 @@ namespace game
 
         DrawableItem(std::shared_ptr<const DrawableItemClass> klass)
           : mClass(klass)
-        {
-            mInstanceFlags = mClass->GetFlags();
-            mInstanceTimeScale = mClass->GetTimeScale();
-            mMaterialParams = mClass->GetMaterialParams();
-        }
+          , mInstanceFlags(mClass->GetFlags())
+          , mMaterialParams(mClass->GetMaterialParams())
+        {}
         const std::string& GetMaterialId() const
         { return mClass->GetMaterialId(); }
         const std::string& GetDrawableId() const
@@ -674,10 +672,9 @@ namespace game
         using CollisionShape = RigidBodyItemClass::CollisionShape;
 
         RigidBodyItem(std::shared_ptr<const RigidBodyItemClass> klass)
-            : mClass(klass)
-        {
-            mInstanceFlags = mClass->GetFlags();
-        }
+          : mClass(klass)
+          , mInstanceFlags(mClass->GetFlags())
+        {}
 
         Simulation GetSimulation() const
         { return mClass->GetSimulation(); }
