@@ -23,7 +23,6 @@
 
 #include "base/test_minimal.h"
 #include "base/memory.h"
-
 #include "base/assert.cpp"
 
 struct Foobar {
@@ -99,20 +98,22 @@ void unit_test_detail()
 
 void unit_test_pool()
 {
-    std::vector<std::unique_ptr<Foobar, PoolDeleter>> foos;
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16); // 16 x 1 item pool
 
-    for (size_t i=0; i<10; ++i)
+    std::vector<std::unique_ptr<Foobar, PoolDeleter>> foos;
+    for (size_t i=0; i<16; ++i)
     {
-        auto foobar = CreateFoobar(10);
-        foobar->value = i * 100;
+        auto foobar = CreateFoobar(1);
+        foobar->value  = i * 100;
         foobar->string = "foobar: " + std::to_string(i);
         foos.push_back(std::move(foobar));
     }
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 10);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(10).Allocate() == nullptr);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 16);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 0);
+    TEST_REQUIRE(GetFoobarAllocator(1).Allocate() == nullptr);
 
-    for (size_t i=0; i<10; ++i)
+    for (size_t i=0; i<16; ++i)
     {
         const auto& foo = foos[i];
         TEST_REQUIRE(foo->value == i * 100);
@@ -120,14 +121,14 @@ void unit_test_pool()
     }
 
     foos.pop_back();
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 9);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 1);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 15);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 1);
 
-    auto foo = CreateFoobar(10);
+    auto foo = CreateFoobar(1);
     foo->value = 77777;
     foo->string = "string value";
 
-    for (size_t i=0; i<9; ++i)
+    for (size_t i=0; i<15; ++i)
     {
         const auto& foo = foos[i];
         TEST_REQUIRE(foo->value == i * 100);
@@ -138,44 +139,49 @@ void unit_test_pool()
     TEST_REQUIRE(foo->value == 77777);
     TEST_REQUIRE(foo->string == "string value");
 
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 10);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 0);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 16);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 0);
 
     foos.clear();
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 1);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 9);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 1);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 15);
     foo.reset();
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 10);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16);
 
     // scramble the allocation/deallocation order
     std::unordered_map<int, std::unique_ptr<Foobar, PoolDeleter>> foo_map;
 
-    for (size_t i=0; i<10; ++i)
+    for (size_t i=0; i<16; ++i)
     {
-        auto foobar = CreateFoobar(10);
+        auto foobar = CreateFoobar(1);
         foobar->value = i * 100;
         foobar->string = "foobar: " + std::to_string(i);
         foo_map[i] = std::move(foobar);
     }
 
+    foo_map.erase(10);
     foo_map.erase(0);
     foo_map.erase(9);
     foo_map.erase(5);
     foo_map.erase(2);
+    foo_map.erase(13);
     foo_map.erase(1);
     foo_map.erase(8);
+    foo_map.erase(12);
     foo_map.erase(3);
     foo_map.erase(7);
     foo_map.erase(4);
     foo_map.erase(6);
+    foo_map.erase(11);
+    foo_map.erase(14);
+    foo_map.erase(15);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
+    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16);
 
-    TEST_REQUIRE(GetFoobarAllocator(10).GetAllocCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(10).GetFreeCount() == 10);
-
-    for (size_t i=0; i<10; ++i)
+    for (size_t i=0; i<16; ++i)
     {
-        auto foobar = CreateFoobar(10);
+        auto foobar = CreateFoobar(1);
         foobar->value = i * 100;
         foobar->string = "foobar: " + std::to_string(i);
         foo_map[i] = std::move(foobar);
