@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include <algorithm>
 
 #include "base/assert.h"
 
@@ -31,72 +32,75 @@ namespace mem
         return (size + boundary - 1) & ~(boundary - 1);
     }
 
+    namespace detail {
     // Allocate raw memory from the heap using malloc.
-    template<size_t InternalAllocSize>
     class HeapAllocator
     {
     public:
-        HeapAllocator(std::size_t bytes)
+        explicit HeapAllocator(std::size_t bytes)
         {
             mMemory = (std::uint8_t*)std::malloc(bytes);
             if (mMemory == nullptr)
                 throw std::runtime_error("heap allocator no memory");
         }
         HeapAllocator(const HeapAllocator&) = delete;
-       ~HeapAllocator()
+        HeapAllocator(HeapAllocator&& other) noexcept
+          : mMemory(other.mMemory)
+        {
+            other.mMemory = nullptr;
+        }
+       ~HeapAllocator() noexcept
         { std::free(mMemory); }
 
-        void* MapMem(size_t offset)
+        inline void* MapMem(size_t offset) noexcept
         { return mMemory + offset; }
+
+        HeapAllocator& operator=(HeapAllocator&& other) noexcept
+        {
+            HeapAllocator tmp(std::move(other));
+            std::swap(tmp.mMemory, mMemory);
+            return *this;
+        }
 
         HeapAllocator& operator=(const HeapAllocator&) = delete;
     protected:
-        // re-using the underlying memory block for internal
-        // book keeping allocations.
-        inline void* AllocateInternal(size_t index, size_t offset)
+        // re-using the underlying memory block for internal bookkeeping allocations.
+        inline void* AllocateInternal(size_t index, size_t offset) noexcept
         { return mMemory + offset; }
-        inline void FreeInternal(size_t index, size_t offset, void* mem)
+        inline void FreeInternal(size_t index, size_t offset, void* mem) noexcept
         { /* intentionally empty */ }
     private:
         std::uint8_t* mMemory = nullptr;
     };
 
-    namespace detail {
-        // Some bits for memory management book keeping.
-        struct MemoryPoolAllocHeader {
-            // todo: flags used for anything if needed
-            std::uint32_t flags  : 8;
-            // offset into the memory buffer.
-            std::uint32_t offset : 24;
-        };
-        struct MemoryPoolAllocNode {
-            MemoryPoolAllocHeader header;
-            MemoryPoolAllocNode* next = nullptr;
-        };
-    } // detail
+    // Some bits for memory management bookkeeping.
+    struct MemoryPoolAllocHeader {
+        // todo: flags used for anything if needed
+        std::uint32_t flags  : 8;
+        // offset into the memory buffer.
+        std::uint32_t offset : 24;
+    };
+    struct MemoryPoolAllocNode {
+        MemoryPoolAllocHeader header;
+        MemoryPoolAllocNode* next = nullptr;
+    };
 
-    // Implement pooled space management algorithm on top
-    // of a some allocated/reserved space such as VBO or
-    // heap allocated memory block. Fundamentally the
-    // underlying space doesn't need to be CPU addressable
-    // therefore the regions are managed through offsets
-    // into the allocated space. The allocator based object
-    // is also used for allocating the internal book keeping
-    // nodes for the free list. This allows the allocator
-    // to double its allocated memory buffer as the backing
-    // store of the free list nodes when applicable.
-    template<template<size_t InternalAllocSize> class Allocator, size_t ObjectSize>
-    class MemoryPool : public Allocator<sizeof(detail::MemoryPoolAllocNode)>
+    // Implement pooled space management algorithm on top of a some allocated/reserved space such as VBO or
+    // heap allocated memory block. Fundamentally the underlying space doesn't need to be CPU addressable.
+    // Therefore, the regions are managed through offsets into the allocated space. The allocator based object
+    // is also used for allocating the internal bookkeeping nodes for the free list. This allows the allocator
+    // to double its allocated memory buffer as the backing store of the free list nodes when applicable.
+    template<class AllocatorBase, size_t ObjectSize>
+    class MemoryPoolAllocator : public AllocatorBase
     {
     public:
         using AllocNode     = detail::MemoryPoolAllocNode;
         using AllocHeader   = detail::MemoryPoolAllocHeader;
-        using AllocatorBase = Allocator<sizeof(AllocNode)>;
         // todo: fix this if needed.
         static_assert(ObjectSize >= sizeof(AllocNode));
 
         // Construct pool with maximum pool size capacity of objects.
-        MemoryPool(std::size_t pool_size)
+        explicit MemoryPoolAllocator(std::size_t pool_size)
           : AllocatorBase(pool_size * ObjectSize)
           , mPoolSize(pool_size)
         {
@@ -114,11 +118,19 @@ namespace mem
                 AddListNode(node);
             }
         }
+        MemoryPoolAllocator(const MemoryPoolAllocator&) = delete;
+
+        MemoryPoolAllocator(MemoryPoolAllocator&& other) noexcept
+          : AllocatorBase(std::move(other))
+          , mPoolSize(other.mPoolSize)
+          , mFreeList(other.mFreeList)
+        {}
+
         // Try to allocate a new block of memory (space) in the underlying
         // memory allocator object. Returns true if successful and block
         // contains the memory details where the space has been allocated.
         // If no more space was available returns false.
-        bool Allocate(AllocHeader* block)
+        bool Allocate(AllocHeader* block) noexcept
         {
             auto* next = GetNextNode();
             if (!next)
@@ -128,20 +140,27 @@ namespace mem
             return true;
         }
         // Return a block of space back into the pool.
-        void Free(const AllocHeader& block)
+        void Free(const AllocHeader& block) noexcept
         {
             auto* node = NewNode(block.offset / ObjectSize, block.offset);
             node->header.flags  = 0;
             node->header.offset = block.offset;
             AddListNode(node);
         }
+        MemoryPoolAllocator& operator=(MemoryPoolAllocator&& other) noexcept
+        {
+            MemoryPoolAllocator tmp(std::move(other));
+            std::swap(mPoolSize, tmp.mPoolSize);
+            std::swap(mFreeList, tmp.mFreeList);
+            return *this;
+        }
     private:
-        AllocNode* NewNode(size_t index, size_t offset)
+        AllocNode* NewNode(size_t index, size_t offset) noexcept
         {
             void* mem = AllocatorBase::AllocateInternal(index, offset);
             return new(mem) AllocNode;
         }
-        void DeleteNode(AllocNode* node)
+        void DeleteNode(AllocNode* node) noexcept
         {
             const auto header = node->header;
             // using the placement new in NewNode means we're just
@@ -152,7 +171,7 @@ namespace mem
 
         // Get next allocation node from the free list.
         // Returns nullptr if there are no more blocks.
-        AllocNode* GetNextNode()
+        AllocNode* GetNextNode() noexcept
         {
             if (mFreeList == nullptr)
                 return nullptr;
@@ -161,7 +180,7 @@ namespace mem
             return next;
         }
         // Add a new node to the free list.
-        void AddListNode(AllocNode* node)
+        void AddListNode(AllocNode* node) noexcept
         {
             if (mFreeList == nullptr) {
                 node->next = nullptr;
@@ -185,10 +204,10 @@ namespace mem
     class BumpAllocator
     {
     public:
-        BumpAllocator(size_t bytes)
+        explicit BumpAllocator(size_t bytes) noexcept
           : mSize(bytes)
         {}
-        bool Allocate(size_t bytes, size_t* offset)
+        inline bool Allocate(size_t bytes, size_t* offset) noexcept
         {
             if (GetFreeBytes() < bytes)
                 return false;
@@ -196,27 +215,29 @@ namespace mem
             mOffset += bytes;
             return true;
         }
-        void Reset()
+        inline void Reset() noexcept
         { mOffset = 0; }
-        size_t GetFreeBytes() const
+        inline size_t GetFreeBytes() const noexcept
         { return mSize - mOffset; }
-        size_t GetCapacity() const
+        inline size_t GetCapacity() const noexcept
         { return mSize; }
-        size_t GetUsedBytes() const
+        inline size_t GetUsedBytes() const noexcept
         { return mOffset; }
     private:
         const size_t mSize = 0;
         size_t mOffset = 0;
     };
 
-    class HeapBumpAllocator
+    } // detail
+
+    class BumpAllocator
     {
     public:
-        HeapBumpAllocator(size_t bytes)
-            : mAllocator(bytes)
-            , mHeap(bytes)
+        explicit BumpAllocator(size_t bytes)
+          : mAllocator(bytes)
+          , mHeap(bytes)
         {}
-        void* Allocate(size_t bytes)
+        void* Allocate(size_t bytes) noexcept
         {
             bytes = mem::align(bytes, sizeof(intptr_t));
             size_t offset = 0;
@@ -225,37 +246,36 @@ namespace mem
             void* mem = mHeap.MapMem(offset);
             return mem;
         }
-        void Reset()
+        inline void Reset() noexcept
         { mAllocator.Reset(); }
-        size_t GetFreeBytes() const
+        inline size_t GetFreeBytes() const noexcept
         { return mAllocator.GetFreeBytes(); }
-        size_t GetCapacity() const
+        inline size_t GetCapacity() const noexcept
         { return mAllocator.GetCapacity(); }
-        size_t GetUsedBytes() const
+        inline size_t GetUsedBytes() const noexcept
         { return mAllocator.GetUsedBytes(); }
     private:
-        BumpAllocator mAllocator;
-        HeapAllocator<0> mHeap;
+        detail::BumpAllocator mAllocator;
+        detail::HeapAllocator mHeap;
     };
 
     // Fixed allocator (in terms of allocation size) interface.
-    class IFixedAllocator
+    class Allocator
     {
     public:
-        virtual ~IFixedAllocator() = default;
+        virtual ~Allocator() = default;
         virtual void* Allocate() noexcept = 0;
         virtual void Free(void* mem) noexcept = 0;
     private:
-
     };
 
     // Wrapper for combining heap based memory allocation
     // with pool based memory management strategy.
     template<size_t ObjectSize>
-    class HeapMemoryPool : public IFixedAllocator
+    class MemoryPool : public Allocator
     {
     public:
-        HeapMemoryPool(size_t pool_size)
+        explicit MemoryPool(size_t pool_size)
           : mPoolSize(pool_size)
           , mPool(pool_size)
         {}
@@ -265,7 +285,7 @@ namespace mem
             if (!mPool.Allocate(&block))
                 return nullptr;
             void* mem = mPool.MapMem(block.offset);
-            // copy the book keeping information into a fixed memory
+            // copy the bookkeeping information into a fixed memory
             // location in the returned mem pointer for convenience.
             std::memcpy(mem, &block, sizeof(block));
             ++mAllocCount;
@@ -278,9 +298,9 @@ namespace mem
             mPool.Free(block);
             --mAllocCount;
         }
-        size_t GetAllocCount() const
+        inline size_t GetAllocCount() const noexcept
         { return mAllocCount; }
-        size_t GetFreeCount() const
+        inline size_t GetFreeCount() const noexcept
         { return mPoolSize - mAllocCount; }
     private:
         static auto constexpr TotalSize   = ObjectSize + sizeof(detail::MemoryPoolAllocHeader);
@@ -293,7 +313,7 @@ namespace mem
         // object so that the allocation header (which contains
         // the allocation details) can be baked into the actual
         // memory addresses returned by the allocate function.
-        MemoryPool<HeapAllocator, AlignedSize> mPool;
+        detail::MemoryPoolAllocator<detail::HeapAllocator, AlignedSize> mPool;
     };
 
 } // namespace
