@@ -22,6 +22,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
+#include <vector>
 
 #include "base/assert.h"
 
@@ -277,14 +278,34 @@ namespace mem
     public:
         explicit MemoryPool(size_t pool_size)
           : mPoolSize(pool_size)
-          , mPool(pool_size)
-        {}
+        {
+            mPools.emplace_back(pool_size);
+        }
+        MemoryPool(const MemoryPool&) = delete;
+
         virtual void* Allocate() noexcept override
         {
             detail::MemoryPoolAllocHeader block;
-            if (!mPool.Allocate(&block))
-                return nullptr;
-            void* mem = mPool.MapMem(block.offset);
+            size_t index ;
+            for (index=0; index<mPools.size(); ++index)
+            {
+                if (mPools[mCurrentIndex].Allocate(&block))
+                    break;
+
+                mCurrentIndex = (mCurrentIndex + 1) % mPools.size();
+            }
+            if (index == mPools.size())
+            {
+                if (mPools.size() == PoolCount)
+                    return nullptr;
+                mPools.emplace_back(mPoolSize);
+                mCurrentIndex = mPools.size()-1;
+                mPools[mCurrentIndex].Allocate(&block);
+            }
+            void* mem = mPools[mCurrentIndex].MapMem(block.offset);
+            // save the index of the pool in the 4 lowest bits of flags.
+            // 4 bits -> max 16 pools in the vector
+            block.flags = mCurrentIndex & 0xf;
             // copy the bookkeeping information into a fixed memory
             // location in the returned mem pointer for convenience.
             std::memcpy(mem, &block, sizeof(block));
@@ -295,25 +316,35 @@ namespace mem
         {
             detail::MemoryPoolAllocHeader block;
             std::memcpy(&block, (uint8_t*)mem - sizeof(block), sizeof(block));
-            mPool.Free(block);
+
+            const auto pool_index = block.flags & 0xf;
+            ASSERT(pool_index < PoolCount);
+            mPools[pool_index].Free(block);
             --mAllocCount;
         }
         inline size_t GetAllocCount() const noexcept
         { return mAllocCount; }
         inline size_t GetFreeCount() const noexcept
-        { return mPoolSize - mAllocCount; }
+        { return mPoolSize*PoolCount - mAllocCount; }
+
+        MemoryPool& operator=(const MemoryPool&) = delete;
     private:
+        static constexpr auto PoolCount = 16; // using the lowest 4 bits of flags
         static auto constexpr TotalSize   = ObjectSize + sizeof(detail::MemoryPoolAllocHeader);
         static auto constexpr Padding     = TotalSize % sizeof(intptr_t);
-        static auto constexpr AlignedSize = TotalSize + (sizeof(intptr_t) - Padding);
-
-        std::size_t mAllocCount = 0;
-        std::size_t mPoolSize   = 0;
         // Use an object space that is larger than the actual
         // object so that the allocation header (which contains
         // the allocation details) can be baked into the actual
         // memory addresses returned by the allocate function.
-        detail::MemoryPoolAllocator<detail::HeapAllocator, AlignedSize> mPool;
+        static auto constexpr AlignedSize = TotalSize + (sizeof(intptr_t) - Padding);
+
+        using PoolAllocator = detail::MemoryPoolAllocator<detail::HeapAllocator, AlignedSize>;
+
+        std::size_t mAllocCount = 0;
+        std::size_t mPoolSize   = 0;
+        std::size_t mCurrentIndex = 0;
+        // we have maximum PoolCount memory pools
+        std::vector<PoolAllocator> mPools;
     };
 
 } // namespace
