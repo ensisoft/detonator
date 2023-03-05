@@ -22,6 +22,9 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include <cstdio>
+#include <cstdarg>
+
 #include <vector>
 #include <algorithm>
 #include <limits>
@@ -91,7 +94,8 @@ struct TestTimes {
     double total   = 0.0f;
 };
 
-static TestTimes TimedTest(unsigned iterations, std::function<void()> function)
+template<typename TestCallable>
+static TestTimes TimedTest(unsigned iterations, TestCallable function)
 {
     std::vector<double> times;
     times.resize(iterations);
@@ -136,6 +140,22 @@ static void PrintTestTimes(const char* name, const TestTimes& times)
     test::print(test::Color::Info, "max    = %.6f s %6u ms\n", times.maximum, unsigned(times.maximum * 1000u));
     test::print(test::Color::Info, "avg    = %.6f s %6u ms\n", times.average, unsigned(times.average * 1000u));
     test::print(test::Color::Info, "median = %.6f s %6u ms\n", times.median,  unsigned(times.median * 1000u));
+}
+
+static void DevNull(const char* fmt, ...)
+{
+    va_list args;
+    va_start (args, fmt);
+
+#if defined(LINUX_OS)
+    static FILE* dev_null = std::fopen("/dev/null", "w");
+#elif defined(WINDOWS_OS)
+    static FILE* dev_null = std::fopen("nul", "w");
+#else
+#  error unimplemented
+#endif
+    std::vfprintf(dev_null, fmt, args);
+    va_end(args);
 }
 
 } // namespace

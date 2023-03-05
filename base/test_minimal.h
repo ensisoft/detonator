@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <functional>
+#include <vector>
 
 #include "base/platform.h"
 #include "base/assert.h"
@@ -62,7 +63,8 @@ enum class Type {
     Performance, Feature
 };
 
-base::bitflag<Type> EnabledTests;
+base::bitflag<Type> EnabledTestTypes;
+std::vector<std::string> EnabledTestNames;
 
 enum class Color {
     Error, Warning, Success, Message, Info
@@ -154,32 +156,51 @@ static void blurb_failure(const char* expression,
     test::print(Color::Warning, "\n%s(%d): %s failed in function: '%s'\n\n", file, line, expression, function);
 }
 
+static const char* GetTestName(const char* function_name)
+{
+    // skip over the return type in the function name
+    function_name = std::strstr(function_name, " ");
+    function_name++;
+    // skip over calling convention declaration
+    if (std::strstr(function_name, "__cdecl ") == function_name)
+        function_name += std::strlen("__cdecl ");
+    return function_name;
+}
+
+static bool IsEnabledByName(const std::string& name)
+{
+    if (EnabledTestNames.empty())
+        return true;
+
+    for (const auto& str : EnabledTestNames)
+    {
+        if (name.find(str) != std::string::npos)
+            return true;
+    }
+    return false;
+}
+
 class TestCaseReporter {
 public:
-    TestCaseReporter(const char* file, const char* name, Type type)
+    TestCaseReporter(const char* file, const char* func, Type type)
       : mFile(file)
-      , mName(name)
+      , mName(GetTestName(func))
       , mType(type)
     {
-        // skip over the return type in the function name
-        mName = std::strstr(name, " ");
-        mName++;
-        // skip over calling convention declaration
-        if (std::strstr(mName, "__cdecl ") == mName)
-            mName += std::strlen("__cdecl ");
-
         // use the current number of errors to realize if the
         // current test case failed or not
         mErrors = ErrorCount;
     }
    ~TestCaseReporter()
     {
+        const auto enabled_by_type = EnabledTestTypes.test(mType);
+        const auto enabled_by_name = IsEnabledByName(mName);
         // printing all this information here so that the non-fatal
         // test failures print their message *before* the name and result
         // of the test execution.
         test::print(test::Color::Message, "Running ");
         test::print(test::Color::Info, "%-50s", mName);
-        if (EnabledTests.test(mType))
+        if (enabled_by_type && enabled_by_name)
         {
             if (mErrors == ErrorCount)
                 test::print(test::Color::Success, "OK\n");
@@ -222,17 +243,17 @@ private:
 
 #define TEST_CASE(type) \
     test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__, type); \
-    if (!test::EnabledTests.test(type)) \
-        return;                         \
-
+    if (!test::EnabledTestTypes.test(type))                                         \
+        return;                                                                     \
+    if (!test::IsEnabledByName(test::GetTestName(__PRETTY_FUNCTION__)))             \
+        return;
 
 int test_main(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
-    test::EnabledTests.set(test::Type::Feature,     true);
-    test::EnabledTests.set(test::Type::Performance, true);
-
+    test::EnabledTestTypes.set(test::Type::Feature,     true);
+    test::EnabledTestTypes.set(test::Type::Performance, true);
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--disable-fatality") ||
@@ -240,10 +261,13 @@ int main(int argc, char* argv[])
             test::EnableFatality = false;
         else if (!std::strcmp(argv[i], "--disable-perf-test") ||
                  !std::strcmp(argv[i], "-dpt"))
-            test::EnabledTests.set(test::Type::Performance, false);
+            test::EnabledTestTypes.set(test::Type::Performance, false);
         else if (!std::strcmp(argv[i], "--disable-feature-test") ||
                  !std::strcmp(argv[i], "-dft"))
-            test::EnabledTests.set(test::Type::Feature, false);
+            test::EnabledTestTypes.set(test::Type::Feature, false);
+        else if (!std::strcmp(argv[i], "--case") ||
+                 !std::strcmp(argv[i], "-c"))
+            test::EnabledTestNames.emplace_back(argv[i+1]);
     }
     try
     {
