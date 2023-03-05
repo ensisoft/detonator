@@ -14,15 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#pragma once
+
 #include "config.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <stdexcept>
 #include <algorithm>
 #include <vector>
+#include <utility>
+#include <new>
 
 #include "base/assert.h"
 
@@ -42,7 +45,7 @@ namespace mem
         {
             mMemory = (std::uint8_t*)std::malloc(bytes);
             if (mMemory == nullptr)
-                throw std::runtime_error("heap allocator no memory");
+                throw std::bad_alloc();
         }
         HeapAllocator(const HeapAllocator&) = delete;
         HeapAllocator(HeapAllocator&& other) noexcept
@@ -92,7 +95,7 @@ namespace mem
     // is also used for allocating the internal bookkeeping nodes for the free list. This allows the allocator
     // to double its allocated memory buffer as the backing store of the free list nodes when applicable.
     template<class AllocatorBase, size_t ObjectSize>
-    class MemoryPoolAllocator : public AllocatorBase
+    class MemoryPoolAllocator final : public AllocatorBase
     {
     public:
         using AllocNode     = detail::MemoryPoolAllocNode;
@@ -225,55 +228,101 @@ namespace mem
         inline size_t GetUsedBytes() const noexcept
         { return mOffset; }
     private:
-        const size_t mSize = 0;
+        size_t mSize = 0;
         size_t mOffset = 0;
     };
 
     } // detail
 
-    class BumpAllocator
-    {
-    public:
-        explicit BumpAllocator(size_t bytes)
-          : mAllocator(bytes)
-          , mHeap(bytes)
-        {}
-        void* Allocate(size_t bytes) noexcept
-        {
-            bytes = mem::align(bytes, sizeof(intptr_t));
-            size_t offset = 0;
-            if (mAllocator.Allocate(bytes, &offset))
-                return nullptr;
-            void* mem = mHeap.MapMem(offset);
-            return mem;
-        }
-        inline void Reset() noexcept
-        { mAllocator.Reset(); }
-        inline size_t GetFreeBytes() const noexcept
-        { return mAllocator.GetFreeBytes(); }
-        inline size_t GetCapacity() const noexcept
-        { return mAllocator.GetCapacity(); }
-        inline size_t GetUsedBytes() const noexcept
-        { return mAllocator.GetUsedBytes(); }
-    private:
-        detail::BumpAllocator mAllocator;
-        detail::HeapAllocator mHeap;
-    };
-
-    // Fixed allocator (in terms of allocation size) interface.
+    // Allocator interface for hiding actual allocator implementation.
     class Allocator
     {
     public:
         virtual ~Allocator() = default;
-        virtual void* Allocate() noexcept = 0;
+        // Allocate a new block of memory of a certain size. If the allocator
+        // is a fixed size allocator then the size of the bytes requested must
+        // actually match the size configured in the allocator. Returns nullptr
+        // if the allocation failed and there was no more memory available.
+        virtual void* Allocate(size_t bytes) noexcept = 0;
+        // Free a previously allocated memory block.
         virtual void Free(void* mem) noexcept = 0;
+    private:
+    };
+
+    template<typename T>
+    class BumpAllocator final : public Allocator
+    {
+    public:
+        // Explicit byte size
+        explicit BumpAllocator(size_t count)
+          : mAllocator(AlignedSize*count)
+          , mHeap(AlignedSize*count)
+        {}
+        BumpAllocator(const BumpAllocator&&) = delete;
+        BumpAllocator(BumpAllocator&& other) noexcept
+          : mAllocator(std::move(other.mAllocator))
+          , mHeap(std::move(other.mHeap))
+        {}
+        virtual void* Allocate(size_t bytes) noexcept override
+        {
+            ASSERT(bytes == sizeof(T));
+            //bytes = mem::align(bytes, sizeof(intptr_t));
+            bytes = AlignedSize;
+            size_t offset = 0;
+            if (!mAllocator.Allocate(bytes, &offset))
+                return nullptr;
+            void* mem = mHeap.MapMem(offset);
+            return mem;
+        }
+        virtual void Free(void* mem) noexcept override
+        {
+            // this is a dummy since there's no actual freeing of
+            // individual memory blocks but all memory is freed at once.
+        }
+
+        inline void Reset() noexcept
+        { mAllocator.Reset(); }
+        inline size_t GetFreeBytes() const noexcept
+        { return mAllocator.GetFreeBytes(); }
+        inline size_t GetUsedBytes() const noexcept
+        { return mAllocator.GetUsedBytes(); }
+        inline size_t GetSize() const noexcept
+        { return GetUsedBytes() / AlignedSize; }
+        inline size_t GetCapacity() const noexcept
+        { return GetFreeBytes() / AlignedSize; }
+
+        BumpAllocator& operator=(const BumpAllocator&) = delete;
+
+        BumpAllocator& operator=(BumpAllocator&& other) noexcept
+        {
+            BumpAllocator tmp(std::move(other));
+            std::swap(mAllocator, tmp.mAllocator);
+            std::swap(mHeap, tmp.mHeap);
+            return *this;
+        }
+    private:
+        static auto constexpr Padding = sizeof(T) % sizeof(intptr_t);
+        static auto constexpr AlignedSize = sizeof(T) + (sizeof(intptr_t) - Padding);
+
+        detail::BumpAllocator mAllocator;
+        detail::HeapAllocator mHeap;
+    };
+
+
+    class StandardAllocator final : public Allocator
+    {
+    public:
+        virtual void* Allocate(size_t bytes) noexcept override
+        { return operator new(bytes); }
+        virtual void Free(void* mem) noexcept override
+        { operator delete(mem); }
     private:
     };
 
     // Wrapper for combining heap based memory allocation
     // with pool based memory management strategy.
-    template<size_t ObjectSize>
-    class MemoryPool : public Allocator
+    template<typename T>
+    class MemoryPool final : public Allocator
     {
     public:
         explicit MemoryPool(size_t pool_size)
@@ -283,8 +332,9 @@ namespace mem
         }
         MemoryPool(const MemoryPool&) = delete;
 
-        virtual void* Allocate() noexcept override
+        virtual void* Allocate(size_t bytes) noexcept override
         {
+            ASSERT(bytes == sizeof(T));
             detail::MemoryPoolAllocHeader block;
             size_t index ;
             for (index=0; index<mPools.size(); ++index)
@@ -330,7 +380,7 @@ namespace mem
         MemoryPool& operator=(const MemoryPool&) = delete;
     private:
         static constexpr auto PoolCount = 16; // using the lowest 4 bits of flags
-        static auto constexpr TotalSize   = ObjectSize + sizeof(detail::MemoryPoolAllocHeader);
+        static auto constexpr TotalSize   = sizeof(T) + sizeof(detail::MemoryPoolAllocHeader);
         static auto constexpr Padding     = TotalSize % sizeof(intptr_t);
         // Use an object space that is larger than the actual
         // object so that the allocation header (which contains
@@ -346,5 +396,109 @@ namespace mem
         // we have maximum PoolCount memory pools
         std::vector<PoolAllocator> mPools;
     };
+
+    struct StandardAllocatorTag {};
+
+    template<typename T>
+    struct DefaultAllocatorTag {};
+
+    // specialize this type in order to use a specific allocator
+    // with your own types.
+    template<typename AllocatorTag>
+    struct AllocatorInstance;
+
+    template<>
+    struct AllocatorInstance<StandardAllocatorTag> {
+        inline static StandardAllocator& Get() noexcept {
+            static StandardAllocator alloc;
+            return alloc;
+        }
+    };
+
+    template<typename T, typename AllocatorTag=DefaultAllocatorTag<T>>
+    class UniquePtr
+    {
+    public:
+        explicit UniquePtr(T* object) noexcept
+          : mObject(object) {}
+        UniquePtr() = default;
+        UniquePtr(const UniquePtr&) = delete;
+        UniquePtr(UniquePtr&& other) noexcept
+          : mObject(other.mObject)
+        {
+            other.mObject = nullptr;
+        }
+       ~UniquePtr() noexcept
+        {
+            reset();
+        }
+        inline explicit operator bool() const noexcept
+        { return mObject != nullptr; }
+        inline T* operator->() noexcept
+        { return mObject; }
+        inline const T* operator->() const noexcept
+        { return mObject; }
+        inline T& operator*() noexcept
+        { return *mObject; }
+        inline const T& operator*() const noexcept
+        { return *mObject; }
+        inline T* get() noexcept
+        { return mObject; }
+        inline const T* get() const noexcept
+        { return mObject; }
+
+        void reset() noexcept
+        {
+            if (!mObject)
+                return;
+
+            auto& allocator = AllocatorInstance<AllocatorTag>::Get();
+
+            // explicit dtor call to run the destructor.
+            mObject->~T();
+            // free the actual memory
+            allocator.Free((void*)mObject);
+            mObject = nullptr;
+        }
+        T* release() noexcept
+        {
+            auto* ret = mObject;
+            mObject = nullptr;
+            return ret;
+        }
+
+        UniquePtr& operator=(UniquePtr&& other) noexcept
+        {
+            UniquePtr tmp(std::move(other));
+            std::swap(mObject, tmp.mObject);
+            return *this;
+        }
+    private:
+        T* mObject = nullptr;
+    };
+
+    template<typename T, typename Tag=DefaultAllocatorTag<T>, typename... Args>
+    UniquePtr<T, Tag> make_unique(Args&&...args)
+    {
+        auto& allocator = AllocatorInstance<Tag>::Get();
+        void* mem = allocator.Allocate(sizeof(T));
+        if (mem == nullptr)
+            throw std::bad_alloc();
+        try
+        {
+            auto* ptr = new(mem) T(std::forward<Args>(args)...);
+            return UniquePtr<T, Tag>(ptr);
+        }
+        catch (...)
+        {
+            allocator.Free(mem);
+            throw;
+        }
+        // unreachable.
+        return UniquePtr<T, Tag>(nullptr);
+    }
+
+    template<typename T, typename Tag=DefaultAllocatorTag<T>>
+    using unique_ptr = UniquePtr<T, Tag>;
 
 } // namespace

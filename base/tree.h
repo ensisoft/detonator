@@ -324,7 +324,7 @@ namespace base
                     // create the quadrants
                     for (int i = 0; i < 4; ++i)
                     {
-                        void* mem = alloc.Allocate();
+                        void* mem = alloc.Allocate(sizeof(QuadTreeNode));
                         ASSERT(mem);
                         mQuadrants[i] = new (mem) QuadTreeNode(quadrant_rects[i]);
                     }
@@ -457,7 +457,7 @@ namespace base
     {
     public:
         using TreeNode = detail::QuadTreeNode<Object>;
-        using NodePool = mem::MemoryPool<sizeof(TreeNode)>;
+        using NodePool = mem::MemoryPool<TreeNode>;
         static constexpr auto DefaultMaxItems  = 4;
         static constexpr auto DefaultMaxLevels = 3;
 

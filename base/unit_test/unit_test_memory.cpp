@@ -22,50 +22,16 @@
 #include <unordered_map>
 
 #include "base/test_minimal.h"
+#include "base/test_help.h"
 #include "base/memory.h"
+
 #include "base/assert.cpp"
-
-struct Foobar {
-    int value;
-    std::string string;
-};
-using FoobarAllocator = mem::MemoryPool<sizeof(Foobar)>;
-FoobarAllocator& GetFoobarAllocator(size_t pool)
-{
-    static FoobarAllocator allocator(pool);
-    return allocator;
-}
-
-struct PoolDeleter {
-    void operator()(Foobar* f)
-    {
-        auto& alloc = GetFoobarAllocator(0);
-
-        f->~Foobar();
-
-        alloc.Free((void*)f);
-    }
-};
-struct BumpDeleter {
-    void operator()(Foobar* f)
-    {
-        f->~Foobar();
-    }
-};
-
-std::unique_ptr<Foobar, PoolDeleter> CreateFoobar(size_t max)
-{
-    auto& alloc = GetFoobarAllocator(max);
-
-    void* mem = alloc.Allocate();
-    if (!mem)
-        return nullptr;
-
-    return std::unique_ptr<Foobar, PoolDeleter>(new (mem) Foobar);
-}
+#include "base/utility.cpp"
 
 void unit_test_detail()
 {
+    TEST_CASE(test::Type::Feature);
+
     {
         mem::detail::HeapAllocator allocator(1024);
         TEST_REQUIRE(allocator.MapMem(0));
@@ -79,6 +45,11 @@ void unit_test_detail()
     }
 
     {
+        struct Foobar {
+            std::string foobar;
+            unsigned value;
+        };
+
         using PoolAllocator = mem::detail::MemoryPoolAllocator<mem::detail::HeapAllocator, sizeof(Foobar)>;
 
         PoolAllocator::AllocHeader alloc;
@@ -95,119 +66,322 @@ void unit_test_detail()
     }
 }
 
+struct PtrTestType {
+    static unsigned Counter;
+    PtrTestType(const PtrTestType&) = delete;
+    PtrTestType& operator=(const PtrTestType&) = delete;
+    PtrTestType()
+    {
+        ++Counter;
+    }
+    ~PtrTestType()
+    {
+        TEST_REQUIRE(Counter > 0);
+        --Counter;
+    }
+    int value = 0;
+};
+unsigned PtrTestType::Counter = 0;
+
+void unit_test_ptr()
+{
+    TEST_CASE(test::Type::Feature);
+
+    {
+        mem::UniquePtr<PtrTestType, mem::StandardAllocatorTag> ptr;
+        TEST_REQUIRE(!ptr);
+        TEST_REQUIRE(ptr.get() == nullptr);
+    }
+
+    {
+        auto foobar = mem::make_unique<PtrTestType, mem::StandardAllocatorTag>();
+        foobar->value = 123;
+        TEST_REQUIRE(foobar);
+        TEST_REQUIRE(foobar.get());
+        TEST_REQUIRE(PtrTestType::Counter == 1);
+    }
+    TEST_REQUIRE(PtrTestType::Counter == 0);
+
+    // move ctor
+    {
+        auto foobar = mem::make_unique<PtrTestType, mem::StandardAllocatorTag>();
+
+        mem::UniquePtr<PtrTestType, mem::StandardAllocatorTag> other(std::move(foobar));
+        TEST_REQUIRE(other);
+        TEST_REQUIRE(other.get());
+        TEST_REQUIRE(foobar.get() == nullptr);
+        TEST_REQUIRE(PtrTestType::Counter == 1);
+        other.reset();
+        TEST_REQUIRE(PtrTestType::Counter == 0);
+    }
+    // move assignment
+    {
+        auto foobar = mem::make_unique<PtrTestType, mem::StandardAllocatorTag>();
+        auto other = mem::make_unique<PtrTestType, mem::StandardAllocatorTag>();
+        TEST_REQUIRE(PtrTestType::Counter == 2);
+        other = std::move(foobar);
+        TEST_REQUIRE(PtrTestType::Counter == 1);
+        other.reset();
+        TEST_REQUIRE(PtrTestType::Counter == 0);
+    }
+}
+
+struct Entity {
+    std::string string;
+    int value = 0;
+};
+
+struct EntityPoolTag {};
+struct EntityStackTag {};
+
+struct EntityPerfTestPoolTag {};
+struct EntityPerfTestStackTag {};
+
+namespace mem {
+    template<>
+    struct AllocatorInstance<EntityPoolTag> {
+        static mem::MemoryPool<Entity>& Get() noexcept {
+            using AllocatorType = mem::MemoryPool<Entity>;
+            // for testing purposes, the memory pool uses 1 item per pool
+            // for a total of 16 items spread over 16 pools
+            static AllocatorType allocator(1);
+            return allocator;
+        }
+    };
+
+    template<>
+    struct AllocatorInstance<EntityStackTag> {
+        static mem::BumpAllocator<Entity>& Get() noexcept {
+            using AllocatorType = mem::BumpAllocator<Entity>;
+            // space for 1024 entities.
+            static AllocatorType stack (1024);
+            return stack;
+        }
+    };
+
+    template<>
+    struct AllocatorInstance<EntityPerfTestPoolTag> {
+        static mem::MemoryPool<Entity>& Get() noexcept {
+            using AllocatorType = mem::MemoryPool<Entity>;
+            // for testing purposes, the memory pool uses 1 item per pool
+            // for a total of 16 items spread over 16 pools
+            static AllocatorType allocator(1000);
+            return allocator;
+        }
+    };
+
+    template<>
+    struct AllocatorInstance<EntityPerfTestStackTag> {
+        static mem::BumpAllocator<Entity>& Get() noexcept {
+            using AllocatorType = mem::BumpAllocator<Entity>;
+            // for testing purposes, the memory pool uses 1 item per pool
+            // for a total of 16 items spread over 16 pools
+            static AllocatorType stack(1000);
+            return stack;
+        }
+    };
+
+} // namespace
+
+mem::MemoryPool<Entity>& GetEntityPool()
+{
+    return mem::AllocatorInstance<EntityPoolTag>::Get();
+}
+
+mem::BumpAllocator<Entity>& GetEntityStack()
+{
+    return mem::AllocatorInstance<EntityStackTag>::Get();
+}
+
+mem::UniquePtr<Entity, EntityPoolTag> CreateEntity()
+{
+    return mem::make_unique<Entity, EntityPoolTag>();
+}
+
+mem::UniquePtr<Entity, EntityStackTag> CreateStackEntity()
+{
+    return mem::make_unique<Entity, EntityStackTag>();
+}
 
 void unit_test_pool()
 {
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16); // 16 x 1 item pool
+    TEST_CASE(test::Type::Feature);
 
-    std::vector<std::unique_ptr<Foobar, PoolDeleter>> foos;
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 0);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 16); // 16 x 1 item pool
+
+    std::vector<mem::UniquePtr<Entity, EntityPoolTag>> entities;
     for (size_t i=0; i<16; ++i)
     {
-        auto foobar = CreateFoobar(1);
-        foobar->value  = i * 100;
-        foobar->string = "foobar: " + std::to_string(i);
-        foos.push_back(std::move(foobar));
+        auto entity = CreateEntity();
+        entity->value  = i;
+        entity->string = std::to_string(i);
+        entities.push_back(std::move(entity));
     }
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 16);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(1).Allocate() == nullptr);
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 16);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 0);
+    TEST_REQUIRE(GetEntityPool().Allocate(sizeof(Entity)) == nullptr);
 
-    for (size_t i=0; i<16; ++i)
+    // access all entities and their memory
+    for (size_t i=0; i<entities.size(); ++i)
     {
-        const auto& foo = foos[i];
-        TEST_REQUIRE(foo->value == i * 100);
-        TEST_REQUIRE(foo->string == "foobar: " + std::to_string(i));
+        const auto& entity = entities[i];
+        TEST_REQUIRE(entity->value == i);
+        TEST_REQUIRE(entity->string == std::to_string(i));
     }
 
-    foos.pop_back();
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 15);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 1);
+    // make space for one more by deleting the last.
+    entities.pop_back();
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 15);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 1);
 
-    auto foo = CreateFoobar(1);
-    foo->value = 77777;
-    foo->string = "string value";
+    // this is the new guy
+    auto entity = CreateEntity();
+    entity->value = 77777;
+    entity->string = "string value";
 
-    for (size_t i=0; i<15; ++i)
+    // access all previously created entities
+    for (size_t i=0; i<entities.size()-1; ++i)
     {
-        const auto& foo = foos[i];
-        TEST_REQUIRE(foo->value == i * 100);
-        TEST_REQUIRE(foo->string == "foobar: " + std::to_string(i));
-        foo->value = 1;
-        foo->string = "keke";
+        auto& entity = entities[i];
+        TEST_REQUIRE(entity->value == i);
+        TEST_REQUIRE(entity->string == std::to_string(i));
+        entity->value = 1;
+        entity->string = "keke";
     }
-    TEST_REQUIRE(foo->value == 77777);
-    TEST_REQUIRE(foo->string == "string value");
+    TEST_REQUIRE(entity->value == 77777);
+    TEST_REQUIRE(entity->string == "string value");
 
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 16);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 0);
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 16);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 0);
 
-    foos.clear();
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 1);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 15);
-    foo.reset();
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16);
+    entities.clear();
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 1);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 15);
+    entity.reset();
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 0);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 16);
 
-    // scramble the allocation/deallocation order
-    std::unordered_map<int, std::unique_ptr<Foobar, PoolDeleter>> foo_map;
-
-    for (size_t i=0; i<16; ++i)
-    {
-        auto foobar = CreateFoobar(1);
-        foobar->value = i * 100;
-        foobar->string = "foobar: " + std::to_string(i);
-        foo_map[i] = std::move(foobar);
-    }
-
-    foo_map.erase(10);
-    foo_map.erase(0);
-    foo_map.erase(9);
-    foo_map.erase(5);
-    foo_map.erase(2);
-    foo_map.erase(13);
-    foo_map.erase(1);
-    foo_map.erase(8);
-    foo_map.erase(12);
-    foo_map.erase(3);
-    foo_map.erase(7);
-    foo_map.erase(4);
-    foo_map.erase(6);
-    foo_map.erase(11);
-    foo_map.erase(14);
-    foo_map.erase(15);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetAllocCount() == 0);
-    TEST_REQUIRE(GetFoobarAllocator(1).GetFreeCount() == 16);
+    // scramble the allocation/de-allocation order
+    std::unordered_map<int, mem::UniquePtr<Entity, EntityPoolTag>> entity_map;
 
     for (size_t i=0; i<16; ++i)
     {
-        auto foobar = CreateFoobar(1);
-        foobar->value = i * 100;
-        foobar->string = "foobar: " + std::to_string(i);
-        foo_map[i] = std::move(foobar);
+        auto entity = CreateEntity();
+        entity->value  = i;
+        entity->string = std::to_string(i);
+        entity_map[i] = std::move(entity);
+    }
+
+    entity_map.erase(10);
+    entity_map.erase(0);
+    entity_map.erase(9);
+    entity_map.erase(5);
+    entity_map.erase(2);
+    entity_map.erase(13);
+    entity_map.erase(1);
+    entity_map.erase(8);
+    entity_map.erase(12);
+    entity_map.erase(3);
+    entity_map.erase(7);
+    entity_map.erase(4);
+    entity_map.erase(6);
+    entity_map.erase(11);
+    entity_map.erase(14);
+    entity_map.erase(15);
+    TEST_REQUIRE(GetEntityPool().GetAllocCount() == 0);
+    TEST_REQUIRE(GetEntityPool().GetFreeCount() == 16);
+
+    for (size_t i=0; i<16; ++i)
+    {
+        auto entity = CreateEntity();
+        entity->value  = i;
+        entity->string = std::to_string(i);
+        entity_map[i] = std::move(entity);
     }
 }
 
 void unit_test_bump()
 {
-    mem::BumpAllocator allocator(1024);
+    TEST_CASE(test::Type::Feature);
 
-    std::vector<std::unique_ptr<Foobar, BumpDeleter>> vec;
+    TEST_REQUIRE(GetEntityStack().GetCapacity() == 1024);
+    TEST_REQUIRE(GetEntityStack().GetSize() == 0);
 
-    while (void* mem = allocator.Allocate(sizeof(Foobar)))
+    std::vector<mem::UniquePtr<Entity, EntityStackTag>> vec;
+    for (size_t i=0; i<1024; ++i)
     {
-        auto foo = std::unique_ptr<Foobar, BumpDeleter>(new (mem) Foobar);
-        foo->string = "strigigigi";
-        foo->value  = 1223433;
-        vec.push_back(std::move(foo));
+        auto entity = CreateStackEntity();
+        entity->value = i;
+        entity->string = std::to_string(i);
+        vec.push_back(std::move(entity));
     }
+    TEST_REQUIRE(GetEntityStack().GetCapacity() == 0);
+    TEST_REQUIRE(GetEntityStack().GetSize() == 1024);
+    vec.clear();
+    GetEntityStack().Reset();
+    TEST_REQUIRE(GetEntityStack().GetCapacity() == 1024);
+    TEST_REQUIRE(GetEntityStack().GetSize() == 0);
+}
 
+void unit_test_perf_std()
+{
+    TEST_CASE(test::Type::Performance)
+
+    std::vector<std::unique_ptr<Entity>> entities;
+    entities.resize(1000);
+
+    auto ret = test::TimedTest(10000, [&entities]() {
+        for (size_t i = 0; i < 1000; ++i)
+        {
+            auto instance = std::make_unique<Entity>();
+            entities[i] = std::move(instance);
+        }
+    });
+    test::PrintTestTimes("std new", ret);
+}
+
+void unit_test_perf_mem_pool()
+{
+    TEST_CASE(test::Type::Performance)
+    std::vector<mem::unique_ptr<Entity, EntityPerfTestPoolTag>> entities;
+    entities.resize(1000);
+
+    auto ret = test::TimedTest(10000, [&entities]() {
+        for (size_t i = 0; i < 1000; ++i)
+        {
+            auto instance = mem::make_unique<Entity, EntityPerfTestPoolTag>();
+            entities[i] = std::move(instance);
+        }
+    });
+    test::PrintTestTimes("pool", ret);
+}
+
+void unit_test_perf_mem_stack()
+{
+    TEST_CASE(test::Type::Performance)
+    std::vector<mem::unique_ptr<Entity, EntityPerfTestStackTag>> entities;
+    entities.resize(1000);
+
+    auto ret = test::TimedTest(10000, [&entities]() {
+        for (size_t i = 0; i < 1000; ++i)
+        {
+            auto instance = mem::make_unique<Entity, EntityPerfTestStackTag>();
+            entities[i] = std::move(instance);
+        }
+        mem::AllocatorInstance<EntityPerfTestStackTag>::Get().Reset();
+    });
+    test::PrintTestTimes("pool", ret);
 }
 
 int test_main(int argc, char* argv[])
 {
     unit_test_detail();
+    unit_test_ptr();
     unit_test_pool();
     unit_test_bump();
+    unit_test_perf_std();
+    unit_test_perf_mem_pool();
+    unit_test_perf_mem_stack();
     return 0;
 }
