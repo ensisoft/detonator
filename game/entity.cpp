@@ -555,22 +555,35 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
 }
 
 EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
-    : mClass(klass)
+  : mClass(klass)
+  , mInstId(FastId(10))
+  , mName(mClass->GetName())
+  , mPosition(mClass->GetTranslation())
+  , mScale(mClass->GetScale())
+  , mSize(mClass->GetSize())
+  , mRotation(mClass->GetRotation())
 {
-    mInstId = FastId(10);
-    mName   = klass->GetName();
-    Reset();
+    if (mClass->HasDrawable())
+        mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
+    if (mClass->HasRigidBody())
+        mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
+    if (mClass->HasTextItem())
+        mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
+    if (mClass->HasSpatialNode())
+        mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
+    if (mClass->HasFixture())
+        mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
 }
 
 EntityNode::EntityNode(const EntityNode& other)
+  : mClass(other.mClass)
+  , mInstId(other.mInstId)
+  , mName(other.mName)
+  , mPosition(other.mPosition)
+  , mScale(other.mScale)
+  , mSize(other.mSize)
+  , mRotation(other.mRotation)
 {
-    mClass    = other.mClass;
-    mInstId   = other.mInstId;
-    mName     = other.mName;
-    mScale    = other.mScale;
-    mSize     = other.mSize;
-    mPosition = other.mPosition;
-    mRotation = other.mRotation;
     if (other.HasRigidBody())
         mRigidBody = std::make_unique<RigidBodyItem>(*other.GetRigidBody());
     if (other.HasDrawable())
@@ -599,7 +612,8 @@ EntityNode::EntityNode(EntityNode&& other)
     mFixture     = std::move(other.mFixture);
 }
 
-EntityNode::EntityNode(const EntityNodeClass& klass) : EntityNode(std::make_shared<EntityNodeClass>(klass))
+EntityNode::EntityNode(const EntityNodeClass& klass)
+  : EntityNode(std::make_shared<EntityNodeClass>(klass))
 {}
 
 DrawableItem* EntityNode::GetDrawable()
@@ -1431,7 +1445,12 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
 }
 
 Entity::Entity(std::shared_ptr<const EntityClass> klass)
-    : mClass(klass)
+  : mClass(klass)
+  , mInstanceId(FastId(10))
+  , mInstanceTag(klass->GetTag())
+  , mLifetime(klass->GetLifetime())
+  , mFlags(klass->GetFlags())
+  , mIdleTrackId(klass->GetIdleTrackId())
 {
     std::unordered_map<const EntityNodeClass*, EntityNode*> map;
 
@@ -1476,18 +1495,13 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
                            inst_src_node, inst_dst_node);
         mJoints.push_back(std::move(joint));
     }
-
-    mInstanceId  = FastId(10);
-    mIdleTrackId = mClass->GetIdleTrackId();
-    mFlags       = mClass->GetFlags();
-    mLifetime    = mClass->GetLifetime();
-    mInstanceTag = mClass->GetTag();
 }
 
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
-    mInstanceId   = args.id.empty() ? FastId(10) : args.id;
+    if (!args.id.empty())
+        mInstanceId = args.id;
 
     for (auto& node : mNodes)
     {
