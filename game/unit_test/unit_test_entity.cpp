@@ -25,6 +25,7 @@
 #include "base/test_help.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "base/memory.h"
 #include "data/json.h"
 #include "game/entity.h"
 
@@ -63,6 +64,8 @@ std::string WalkTree(const game::Entity& entity)
 
 void unit_test_entity_node()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::DrawableItemClass draw;
     draw.SetDrawableId("rectangle");
     draw.SetMaterialId("test");
@@ -292,6 +295,8 @@ void unit_test_entity_node()
 
 void unit_test_entity_class()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::EntityClass entity;
     entity.SetName("TestEntityClass");
     entity.SetLifetime(5.0f);
@@ -421,7 +426,7 @@ void unit_test_entity_class()
     {
         data::JsonObject json;
         entity.IntoJson(json);
-        std::cout << json.ToString();
+        //std::cout << json.ToString();
         game::EntityClass ret;
         TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.GetName() == "TestEntityClass");
@@ -609,6 +614,8 @@ void unit_test_entity_class()
 
 void unit_test_entity_instance()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::EntityClass klass;
     {
         game::EntityNodeClass node;
@@ -683,6 +690,8 @@ void unit_test_entity_instance()
 
 void unit_test_entity_clone_track_bug()
 {
+    TEST_CASE(test::Type::Feature)
+
     // cloning an entity class with animation track requires
     // remapping the node ids.
     game::EntityNodeClass node;
@@ -709,6 +718,8 @@ void unit_test_entity_clone_track_bug()
 
 void unit_test_entity_class_coords()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::EntityClass entity;
     entity.SetName("test");
 
@@ -872,6 +883,150 @@ void unit_test_entity_class_coords()
 
 }
 
+struct PerfTestDrawableTag{};
+
+namespace mem {
+    template<>
+    struct AllocatorInstance<PerfTestDrawableTag> {
+        static mem::Allocator& Get() noexcept {
+            using Allocator = mem::MemoryPool<game::DrawableItem>;
+            static Allocator allocator(512);
+            return allocator;
+        }
+    };
+
+    template<>
+    struct AllocatorInstance<mem::DefaultAllocatorTag<game::RigidBodyItem>> {
+        static mem::Allocator& Get() noexcept {
+            using AllocatorType = mem::MemoryPool<game::RigidBodyItem>;
+            static AllocatorType allocator(512);
+            return allocator;
+        }
+    };
+    template<>
+    struct AllocatorInstance<mem::DefaultAllocatorTag<game::EntityNode>> {
+        static mem::Allocator& Get() noexcept {
+            using AllocatorType = mem::MemoryPool<game::EntityNode>;
+            static AllocatorType allocator(512);
+            return allocator;
+        }
+    };
+
+} // mem
+
+void perf_test_item_allocation()
+{
+    TEST_CASE(test::Type::Performance)
+
+    auto item = std::make_shared<game::DrawableItemClass>();
+    item->SetDrawableId("rectangle");
+    item->SetMaterialId("test");
+    item->SetRenderPass(game::DrawableItemClass::RenderPass::MaskCover);
+
+    auto std_ret = test::TimedTest(1000, [&item]() {
+        for (size_t i=0; i<1000; ++i) {
+            auto instance = std::make_unique<game::DrawableItem>(item);
+        }
+    });
+    test::PrintTestTimes("standard alloc", std_ret);
+
+    auto mem_ret = test::TimedTest(1000, [&item]() {
+        for (size_t i=0; i<1000; ++i) {
+            auto instance = mem::make_unique<game::DrawableItem, PerfTestDrawableTag>(item);
+        }
+    });
+    test::PrintTestTimes("pooled alloc", mem_ret);
+}
+
+void perf_test_entity_allocation()
+{
+    TEST_CASE(test::Type::Performance)
+
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("TestEntityClass");
+    entity->SetLifetime(5.0f);
+    entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
+    entity->SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
+    entity->SetSriptFileId("script_123.lua");
+    entity->SetTag("foo bar");
+    {
+        game::EntityNodeClass node;
+        node.SetName("body");
+        node.SetTranslation(glm::vec2(10.0f, 10.0f));
+        node.SetSize(glm::vec2(10.0f, 10.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(0.0f);
+
+        game::DrawableItemClass draw;
+        draw.SetDrawableId("rectangle");
+        draw.SetMaterialId("test");
+        draw.SetRenderPass(game::DrawableItemClass::RenderPass::MaskCover);
+        node.SetDrawable(draw);
+
+        game::RigidBodyItemClass body;
+        body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
+        body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
+        body.SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
+        body.SetFriction(2.0f);
+        node.SetRigidBody(body);
+
+        entity->LinkChild(nullptr, entity->AddNode(std::move(node)));
+    }
+
+    auto std_ret = test::TimedTest(1000, [&entity]() {
+        for (size_t i = 0; i < 1000; ++i)
+        {
+            auto instance = std::make_unique<game::Entity>(entity);
+        }
+    });
+    test::PrintTestTimes("standard alloc", std_ret);
+}
+
+// simulate entity update in a tight loop
+void perf_test_entity_update()
+{
+    TEST_CASE(test::Type::Performance)
+
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("TestEntityClass");
+    entity->SetLifetime(5.0f);
+    entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
+    entity->SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
+    entity->SetSriptFileId("script_123.lua");
+    entity->SetTag("foo bar");
+    {
+        game::EntityNodeClass node;
+        node.SetName("body");
+        node.SetTranslation(glm::vec2(10.0f, 10.0f));
+        node.SetSize(glm::vec2(10.0f, 10.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(0.0f);
+
+        game::DrawableItemClass draw;
+        draw.SetDrawableId("rectangle");
+        draw.SetMaterialId("test");
+        draw.SetRenderPass(game::DrawableItemClass::RenderPass::MaskCover);
+        node.SetDrawable(draw);
+
+        entity->LinkChild(nullptr, entity->AddNode(std::move(node)));
+    }
+
+    // create the entities
+    std::vector<std::unique_ptr<game::Entity>> entities;
+    for (size_t i=0; i<10000; ++i)
+    {
+        entities.emplace_back(new game::Entity(entity));
+    }
+
+    auto ret = test::TimedTest(1000, [&entities]() {
+        for (auto& entity : entities) {
+            auto* body = entity->FindNodeByClassName("body");
+            body->Translate(0.01f, 0.01f);
+        }
+    });
+    test::PrintTestTimes("node update", ret);
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_entity_node();
@@ -879,5 +1034,9 @@ int test_main(int argc, char* argv[])
     unit_test_entity_instance();
     unit_test_entity_clone_track_bug();
     unit_test_entity_class_coords();
+
+    perf_test_item_allocation();
+    perf_test_entity_allocation();
+    perf_test_entity_update();
     return 0;
 }
