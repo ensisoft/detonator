@@ -284,7 +284,7 @@ namespace base
                        mQuadrants[2] == nullptr &&
                        mQuadrants[3] == nullptr);
             }
-            bool Insert(const base::FRect& rect, Object object, mem::IFixedAllocator& alloc,
+            bool Insert(const base::FRect& rect, Object object, mem::Allocator& alloc,
                         unsigned max_items, unsigned level)
             {
                 // if the object is not completely within this node's rect
@@ -357,7 +357,7 @@ namespace base
                 }
                 return true;
             }
-            void Clear(mem::IFixedAllocator& alloc)
+            void Clear(mem::Allocator& alloc)
             {
                 mItems.clear();
                 for (int i = 0; i < 4; ++i)
@@ -372,7 +372,7 @@ namespace base
                 }
             }
             template<typename Predicate>
-            void Erase(const Predicate& predicate, mem::IFixedAllocator& alloc, unsigned max_items)
+            void Erase(const Predicate& predicate, mem::Allocator& alloc, unsigned max_items)
             {
                 for (auto it = mItems.begin(); it != mItems.end();)
                 {
@@ -457,7 +457,7 @@ namespace base
     {
     public:
         using TreeNode = detail::QuadTreeNode<Object>;
-        using NodePool = mem::HeapMemoryPool<sizeof(TreeNode)>;
+        using NodePool = mem::MemoryPool<sizeof(TreeNode)>;
         static constexpr auto DefaultMaxItems  = 4;
         static constexpr auto DefaultMaxLevels = 3;
 

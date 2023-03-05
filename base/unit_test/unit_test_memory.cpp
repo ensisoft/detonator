@@ -30,7 +30,7 @@ struct Foobar {
     int value;
     std::string string;
 };
-using FoobarAllocator = mem::HeapMemoryPool<sizeof(Foobar)>;
+using FoobarAllocator = mem::MemoryPool<sizeof(Foobar)>;
 FoobarAllocator& GetFoobarAllocator(size_t pool)
 {
     static FoobarAllocator allocator(pool);
@@ -64,6 +64,38 @@ std::unique_ptr<Foobar, PoolDeleter> CreateFoobar(size_t max)
 
     return std::unique_ptr<Foobar, PoolDeleter>(new (mem) Foobar);
 }
+
+void unit_test_detail()
+{
+    {
+        mem::detail::HeapAllocator allocator(1024);
+        TEST_REQUIRE(allocator.MapMem(0));
+
+        mem::detail::HeapAllocator other(std::move(allocator));
+        TEST_REQUIRE(allocator.MapMem(0) == nullptr);
+
+        mem::detail::HeapAllocator foo(1024);
+        foo = std::move(other);
+        TEST_REQUIRE(other.MapMem(0) == nullptr);
+    }
+
+    {
+        using PoolAllocator = mem::detail::MemoryPoolAllocator<mem::detail::HeapAllocator, sizeof(Foobar)>;
+
+        PoolAllocator::AllocHeader alloc;
+
+        PoolAllocator allocator(1024);
+        TEST_REQUIRE(allocator.Allocate(&alloc));
+
+        PoolAllocator other(std::move(allocator));
+        TEST_REQUIRE(other.Allocate(&alloc));
+
+        PoolAllocator tmp(512);
+        tmp = std::move(other);
+        TEST_REQUIRE(tmp.Allocate(&alloc));
+    }
+}
+
 
 void unit_test_pool()
 {
@@ -152,7 +184,7 @@ void unit_test_pool()
 
 void unit_test_bump()
 {
-    mem::HeapBumpAllocator allocator(1024);
+    mem::BumpAllocator allocator(1024);
 
     std::vector<std::unique_ptr<Foobar, BumpDeleter>> vec;
 
@@ -168,8 +200,8 @@ void unit_test_bump()
 
 int test_main(int argc, char* argv[])
 {
+    unit_test_detail();
     unit_test_pool();
     unit_test_bump();
-
     return 0;
 }
