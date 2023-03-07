@@ -25,8 +25,10 @@
 #include "base/test_help.h"
 #include "base/memory.h"
 
-#include "base/assert.cpp"
-#include "base/utility.cpp"
+#if !defined(UNIT_TEST_BUNDLE)
+  #include "base/assert.cpp"
+  #include "base/utility.cpp"
+#endif
 
 void unit_test_detail()
 {
@@ -376,6 +378,7 @@ void measure_allocation_times()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_detail();
@@ -386,3 +389,4 @@ int test_main(int argc, char* argv[])
     measure_allocation_times();
     return 0;
 }
+) // TEST_MAIN
