@@ -9,7 +9,7 @@ as puzzle games, platformers, side scrollers and tile based real time strategy a
 This readme and other readme files, are for developers and cover information related to developing and building the engine itself.
 For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
 
-This project would not be possible without the following: 🙏 
+This project would not be possible without the following 🙏 
 * Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
 * Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com") 
 
@@ -110,17 +110,17 @@ Build Instructions 👨🏼‍💻
 
 WASM (Emscripten)
 ------------------------------
-Building to WASM currently supported only for the engine but not the editor.
-The build is separated from the main engine build and is in emscripten/ folder.
 
-- Install emscripten (https://emscripten.org/docs/getting_started/downloads.html) Note that the
-  location of emsdk is arbitrary, but I've dumped it into detonator/ so that my IDE (Clion) can
-  easily find the emscripten headers for C++ tooling (the CMakeLists then has a matching include for this).
-- Currently, the target Emscripten version is 3.0.0. Using other version will likely break things.
-- If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases. Drop the ninja.exe for example
-  into the emsdk folder or anywhere on your PATH.
+Some notes about building to WASM.
 
-On Linux
+* Building to WASM is currently supported only for the engine but not the editor.  
+* The build is separated from the main engine build and is in emscripten/ folder.
+  * See emscripten/CMakeLists.txt for build details. 
+* Current Emscripten version is 3.0.0. Using other version will likely break things.
+* If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases. 
+  * Drop the ninja.exe for example into the emsdk/ folder or anywhere on your PATH.
+
+<details><summary>How to build on Linux</summary>
 
 - Install Emscripten
 ```
@@ -151,8 +151,10 @@ On Linux
   $ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
   $ make -j16 install
 ``` 
+</details>
 
-On Windows
+<details><summary>How to build on Windows</summary>
+
 - Install Emscripten
 ```
   $ cd detonator
@@ -188,32 +190,33 @@ On Windows
   $ ninja -j16
   $ ninja -j16 install
 ```
+</details>
 
 If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder. 
 The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine
 when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
 game's output directory.
 
-Linux
+Desktop Linux
 -------------------------------------
-- Install the dev packages.
-  (for Ubuntu based systems)
-```
-  $ sudo apt-get install libboost-dev
-  $ sudo apt-get install qtbase5-dev
-  $ sudo apt-get install libpulse-dev
-```
-- Install Conan build system.
-https://docs.conan.io/en/latest/installation.html
 
-```
-$ conan profile new default --detect
-```
+<details><summary>How to install dependencies</summary>
 
-If conan bitches about "ERROR: invalid setting" (for example when GCC major version changes)
-you can try edit ~/.conan/settings.yaml 
+*See your distro manuals for how to install the packages.*
 
-- Build the project in RELEASE mode
+Install these packages:
+
+- GCC (or Clang) compiler suite
+- CMake build tool
+- Boost C++ libraries
+- Conan package manager
+- Git version control system
+- Qt5 application framework
+  
+</details>
+
+<details><summary>How to build the project in RELEASE</summary>
+
 ```
   $ git clone https://github.com/ensisoft/detonator
   $ cd detonator
@@ -225,8 +228,10 @@ you can try edit ~/.conan/settings.yaml
   $ make -j16 install
   $ ctest -j16
 ```
+</details>
 
-- Build the project in DEBUG mode
+<details><summary>How to build the project in DEBUG</summary>
+
 ```
   $ git clone https://github.com/ensisoft/detonator
   $ cd detonator
@@ -238,6 +243,9 @@ you can try edit ~/.conan/settings.yaml
   $ make -j16 install
   $ ctest -j16
 ```
+</details>
+
+<details><summary>How to build the project in PROFILE</summary>
 
 - Build the project for profiling using valgrind / kcachegrind
 ```
@@ -257,8 +265,12 @@ For example:
   $ valgrind --tool=cachegrind ./audio_test --graph
   $ kcaghegrind cachegrind.out.XXXXX
 ```
+</details>
 
-- Alternative instructions for build using Ninja, Clang and Mold linker (optional)
+<details><summary>How to build with Ninja, Clang and Mold linker (OPTIONAL)</summary>
+
+- These are alternative instructions for build using Ninja, Clang and Mold linker. 
+ 
 ```
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
@@ -273,11 +285,42 @@ For example:
   $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON 
   $ ninja -j16 install
 ```
+</details>
 
-Windows
+<details><summary>How to build Qt5 designer plugin (OPTIONAL)</summary>
+
+```
+  $ cd detonator/editor/gui/qt
+  $ mkdir build
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
+  $ make -j16 
+  $ sudo make install
+```
+
+</details>
+
+<details><summary>Build troubleshooting</summary>
+
+When you create a Conan profile with
+
+```
+$ conan profile new default --detect
+```
+
+If Conan bitches about "ERROR: invalid setting" (for example when GCC major version changes)
+you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit there.
+
+</details>
+
+Desktop Windows
 ---------------------------------
 
 These build instructions are for MSVS 2019 Community Edition and for 64bit build.
+
+<details><summary>How to install dependencies</summary>
+
+- Install Git version control system
+https://git-scm.com/download/win
 
 - Install Microsoft Visual Studio 2019 Community
 https://www.visualstudio.com/downloads/
@@ -288,12 +331,18 @@ http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-
 - Install prebuilt Boost 1.72
 https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
 
-- Install conan package manager
+- Install Conan package manager
 https://docs.conan.io/en/latest/installation.html
 
-- Open "Developer Command Prompt for VS 2019"
+- Install CMake build tool
+https://cmake.org/install/
 
-Build the project in RELEASE mode.
+</details>
+
+
+<details><summary>How to build the project in RELEASE</summary>
+
+- Open "Developer Command Prompt for VS 2019"
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -307,10 +356,14 @@ Build the project in RELEASE mode.
   $ cmake --install . --config Release
 ```
 
-Build the project in DEBUG mode. 
+</details>
 
-* Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels). 
-This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
+<details><summary>How to build the project in DEBUG</summary>
+
+_Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels). 
+This means that in order to link to 3rd party libraries the debug versions of those libraries must be used._
+
+- Open "Developer Command Prompt for VS 2019"
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -324,7 +377,9 @@ This means that in order to link to 3rd party libraries the debug versions of th
   $ cmake --install . --config Debug
 ```
 
-Build the Qt5 Designer plugin for the DETONATOR custom widgets. This is *optional*.
+</details>
+
+<details><summary>How to build Qt5 designer plugin (OPTIONAL)</summary>
 
 ```
   $ cd editor\gui\qt
@@ -334,7 +389,7 @@ Build the Qt5 Designer plugin for the DETONATOR custom widgets. This is *optiona
   $ cmake --install . --config Release
 ```
 
-If everything went smoothly you'll now have DETONATOR custom widgets in the Qt5 designer.
+</details>
 
 The Boring Documentation 🥱
 =========================
@@ -369,61 +424,38 @@ From source code to a running game:
       needed to run the game in the browser. 
 5. After packaging launch your game by running the GameMain executable in the package output directory.
 
-
-System Architecture
--------------------
-![Archicture diagram](docu/stack.png "Stack")
-
-An overview of the runtime architecture:
-
-1. There's a standard game engine that is built into a shared library called GameEngine.dll or libGameEngine.so.
-2. A launcher application called GameMain will read a config.json file. The JSON file contains information about
-   windowing, context creation etc.
-   1. The launcher application will load the engine library and create an <Engine> object instance.
-   2. The launcher application will create the native window system window and also create the Open GL rendering context
-      which it will then give to the engine instance.
-3. The launcher application will then enter the top-level game loop. Inside the loop it will:
-   1. Process any window system window events to handle pending keyboard/mouse etc. events and pass them to the engine as needed.
-   2. Handle events coming from the engine instance. These could be for example requests to toggle full screen mode.
-   3. Accumulate and track time, call functions to Update, Tick and Draw the engine instance.
-
-Inside the game engine the following will take place.
-1. The various subsystems are updated and ticked. These include physics, audio, scripting etc.
-2. The renderer is used to draw the current scene.
-3. The engine will handle the input events (mouse, keyboard) coming from the host process and choose the appropriate action.
-   For example If a UI is being shown the input is passed to the UI subsystem. The inputs are then also passed to the
-   game scripting system and ultimately to your game's Lua scripts.
-4. The engine will handle the incoming events/requests from the game itself. For example the game might request a scene
-   to be loaded or the game to be paused.
-
-The above flow is essentially the same for all platforms across Windows/Linux and HTML5/WASM, except that on the web the
-host application (emscripten/main.cpp) creates the WebGL context through JS APIs and there's no shared library for the engine
-but rather all the engine code is built into the same WASM blob with the loader/host application.
-
 Running (Unit) Tests 🫣
------------------------
+-----------------------------
+
 There's a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
-a "*unit_test_*" is a unit test. There's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)  
-In order to run tests after a successful build:
+a "*unit_test_*" is a unit test.  
+For writing tests there's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)
+
+In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
+or rendering stuff on the screen. The rendering tests rely on a set of *gold images* a.k.a. known good images.
+Currently, the images are provided as part of this repository but there's the problem that because of differences
+in OpenGL implementations it's possible that the rendering output is not exactly the same between various
+vendors/implementations (such as NVIDIA, AMD, Intel etc. Fixing this is a todo for later). The audio tests, however,
+don't have any automated way of verifying the test output.
+
+#### [See this list for known Issues](ISSUES.md)
+
+###On the desktop (Linux/Windows)
+
+<details><summary>How to run all tests</summary>
+  
+*Currently, the expectation is that all cases should pass on Linux. On Windows some tests are unfortunately broken.*  
+* In order to run tests after a successful build:
 
 ```
   $ cd detonator/build
   $ ctest -j16
 ```
-Currently, the expectation is that all cases should pass on Linux. On Windows some of the tests are unfortunately broken.
-In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
-or rendering stuff on the screen. The audio systems do not have any automation for checking for correctness. The graphics tests
-work based on a set of *gold images*. The images are provided as part of this repository but there's the problem that because
-of the differences in OpenGL implementations it's possible that the rendering output is not exactly the same between various
-vendors/implementations (such as NVIDIA, AMD, Intel etc.) This needs to be enhanced so that a set of gold images could be
-tagged with a vendor tag and multiple gold images per test could exist. (This is a todo for later)
+</details>
 
-#### [See this list for known Issues](ISSUES.md)
+<details><summary>How to run audio tests</summary>
 
-It's also possible to run the audio/graphics tests separately.
-
-
-Runs, mp3, ogg, flag and 24bit .wav test. Use --help for more information.
+* Runs, mp3, ogg, flag and 24bit .wav tests. Use --help for more information.
 ```
   $ cd detonator/audio/test
   $ ./audio_test --mp3 --ogg --flac --24bit
@@ -431,16 +463,49 @@ Runs, mp3, ogg, flag and 24bit .wav test. Use --help for more information.
   $ ./audio_test --help
 ```
 
-Runs all tests with MSAA4. Any test rendering that differs from the expected gold image will stop the program for user input
+</details>
+
+<details><summary>How to run graphics tests</summary>
+
+*Any test rendering that differs from the expected gold image will stop the program for user input
 (press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels 
-that were not the same between result and gold and the result will be actual rendering result in whole. 
-Use --help for more information.
+that were not the same between result and gold and the result will be actual rendering result.* 
+
+* Run all tests with MSAA4. Use --help for more information
+
 ```
   $ cd detonator/graphics/test/dist
   $ ./graphics_test --test --msaa4
   $ ...
   $ ./graphics_test --help 
 ```
+
+</details>
+
+###On the Web (WASM+HTML5)
+*Currently, only some unit tests are available on the web. More tests will be enabled as needed.* 
+
+<details><summary>How to run unit tests</summary>
+
+The detonator/emscripten/bin folder should contain the following build artifacts:
+ * unit-test.html
+ * UnitTest.js
+ * UnitTest.wasm 
+
+Launch a web server for serving the test HTML page.
+
+```
+  $ cd detonator/emscripten/bin
+  $ python -m http.server
+```
+
+Open your web browser and navigate to http://localhost:8000/unit-test.html.
+
+</details>
+
+System Architecture
+-------------------
+#### [See this document](ARCHITECTURE.md)
 
 Coding Convention & Design 💭
 ----------------------------
