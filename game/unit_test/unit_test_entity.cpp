@@ -1027,6 +1027,7 @@ void measure_entity_update_time()
     test::PrintTestTimes("node update", ret);
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_entity_node();
@@ -1040,3 +1041,4 @@ int test_main(int argc, char* argv[])
     measure_entity_update_time();
     return 0;
 }
+) // TEST_MAIN

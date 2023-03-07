@@ -25,6 +25,29 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/libsamplera
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/lua/src")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 
+add_executable(UnitTest
+    ../base/test_minimal.cpp
+    ../base/unit_test/unit_test_memory.cpp
+    ../game/unit_test/unit_test_entity.cpp
+    ../base/logging.cpp
+    ../base/assert.cpp
+    ../base/json.cpp
+    ../base/utility.cpp
+    ../data/json.cpp
+    ../game/scriptvar.cpp
+    ../game/animation.cpp
+    ../game/entity.cpp
+    ../game/scene.cpp)
+target_compile_definitions(UnitTest PRIVATE UNIT_TEST_BUNDLE)
+target_compile_options(UnitTest PRIVATE -O3)
+target_compile_options(UnitTest PRIVATE -fexceptions)
+target_compile_options(UnitTest PRIVATE -fbracket-depth=1024)
+target_link_options(UnitTest PRIVATE -sWASM)
+target_link_options(UnitTest PRIVATE -sALLOW_MEMORY_GROWTH)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
+
 add_executable(GameEngine
     main.cpp
     ../audio/loader.cpp
