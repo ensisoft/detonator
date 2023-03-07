@@ -16,28 +16,29 @@
 
 #pragma once
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstdarg>
-#include <stdexcept>
-#include <cstring>
-#include <functional>
 #include <vector>
+#include <string>
+#include <stdexcept>
 
 #include "base/platform.h"
-#include "base/assert.h"
 #include "base/bitflag.h"
 
-#if defined(WINDOWS_OS)
-#  include <Windows.h> // for DebugBreak
-#elif defined(POSIX_OS)
-#  include <signal.h> // for raise/signal
-#endif
-
 namespace test {
+// Interface for wrapping multiple "test_main" functions behind an interface.
+// This allows a test executable to be built with multiple tests bundled in
+// together into a single binary and each test_main is turned into a method
+// call instead of being a global function.
+// See the macro UNIT_TEST_USE_MAIN_BUNDLE
+struct TestBundle
+{
+    virtual int test_main(int argc, char* argv[]) = 0;
+
+    std::string name;
+};
+
 // Note that this class does *not* derive from std::exception
 // on purpose so that the test code that would catch std::exceptions
-// wont catch this.
+// won't catch this.
 class Fatality {
 public:
     Fatality(const char* expression,
@@ -56,129 +57,33 @@ public:
     const int mLine         = 0;
 };
 
-static unsigned ErrorCount = 0;
-static bool EnableFatality = true;
-
 enum class Type {
-    Performance, Feature
+    Performance, Feature, Other
 };
-
-base::bitflag<Type> EnabledTestTypes;
-std::vector<std::string> EnabledTestNames;
 
 enum class Color {
     Error, Warning, Success, Message, Info
 };
 
-static void print(Color color, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
+extern base::bitflag<Type> EnabledTestTypes;
+extern std::vector<std::string> EnabledTestNames;
+extern std::vector<TestBundle*> TestBundles;
+extern unsigned ErrorCount;
 
-#if defined(LINUX_OS)
-    if (color == Color::Error)
-        std::printf("\033[%dm", 31);
-    else if (color == Color::Warning)
-        std::printf("\033[%dm", 93);
-    else if (color == Color::Success)
-        std::printf("\033[%dm", 32);
-    else if (color == Color::Info)
-        std::printf("\033[%dm", 97);
-    std::vprintf(fmt, args);
-    std::printf("\033[m");
-#elif defined(WINDOWS_OS)
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO console = {0};
-    GetConsoleScreenBufferInfo(out, &console);
+// Produce printed message into some output device such as stdout.
+void Print(Color color, const char* fmt, ...);
+// Extract simple bundle name from the filename provided by the __FILE__ macro.
+std::string GetBundleName(const char* source_file_name);
+// Extract simple filename from the filename provided by the __FILE__ macro.
+const char* GetFileName(const char* source_file_name);
+// Extract a simple function name from the function name provided by the __PRETTY_FUNCTION__ macro.
+const char* GetTestName(const char* function_name);
+// Process a testing failure.
+void BlurpFailure(const char* expression, const char* file, const char* function, int line, bool fatality);
 
-    if (color == Color::Error)
-        SetConsoleTextAttribute(out, FOREGROUND_RED | FOREGROUND_INTENSITY);
-    else if (color == Color::Warning)
-        SetConsoleTextAttribute(out, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-    else if (color == Color::Success)
-        SetConsoleTextAttribute(out, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-    else if (color == Color::Info)
-        SetConsoleTextAttribute(out, FOREGROUND_INTENSITY);
-
-    std::vprintf(fmt, args);
-    
-    SetConsoleTextAttribute(out, console.wAttributes);
-#endif
-
-    va_end(args);
-
-    std::fflush(stdout);
-}
-
-static void blurb_failure(const char* expression,
-    const char* file,
-    const char* function,
-    int line, bool fatality)
-{
-    ++ErrorCount;
-
-    // strip the path from the filename
-#if defined(POSIX_OS)
-    const char* p = file;
-    while (*file) {
-        if (*file == '/')
-            p = file + 1;
-        ++file;
-    }
-    file = p;
-#elif defined(WINDOWS_OS)
-    const char* p = file;
-    while (*file) {
-        if (*file == '\\')
-            p = file + 1;
-        ++file;
-    }
-    file = p;
-#endif
-
-    if (fatality && EnableFatality)
-    {
-        if (debug::has_debugger())
-        {
-#if defined(WINDOWS_OS)
-            DebugBreak();
-#elif defined(POSIX_OS)
-            ::raise(SIGTRAP);
-#endif
-        }
-        // instead of exiting/aborting the process here throw an exception
-        // for unwinding the stack back to test_main which can then report
-        // the total test case tally. I know.. this won't work if exceptions
-        // are disabled (because bla bla bluh bluh) or if there's a catch block
-        // that would manage to catch this exception.
-        throw Fatality(expression, file, function, line);
-    }
-    test::print(Color::Warning, "\n%s(%d): %s failed in function: '%s'\n\n", file, line, expression, function);
-}
-
-static const char* GetTestName(const char* function_name)
-{
-    // skip over the return type in the function name
-    function_name = std::strstr(function_name, " ");
-    function_name++;
-    // skip over calling convention declaration
-    if (std::strstr(function_name, "__cdecl ") == function_name)
-        function_name += std::strlen("__cdecl ");
-    return function_name;
-}
-
-static bool IsEnabledByName(const std::string& name)
-{
-    if (EnabledTestNames.empty())
-        return true;
-
-    for (const auto& str : EnabledTestNames)
-    {
-        if (name.find(str) != std::string::npos)
-            return true;
-    }
-    return false;
-}
+bool IsEnabledByName(const std::string& name);
+bool IsEnabledByType(Type type);
+void AddBundle(TestBundle* bundle);
 
 class TestCaseReporter {
 public:
@@ -193,22 +98,22 @@ public:
     }
    ~TestCaseReporter()
     {
-        const auto enabled_by_type = EnabledTestTypes.test(mType);
+        const auto enabled_by_type = IsEnabledByType(mType);
         const auto enabled_by_name = IsEnabledByName(mName);
         // printing all this information here so that the non-fatal
         // test failures print their message *before* the name and result
         // of the test execution.
-        test::print(test::Color::Message, "Running ");
-        test::print(test::Color::Info, "%-50s", mName);
+        test::Print(test::Color::Message, "Running ");
+        test::Print(test::Color::Info, "%-50s", mName);
         if (enabled_by_type && enabled_by_name)
         {
             if (mErrors == ErrorCount)
-                test::print(test::Color::Success, "OK\n");
-            else test::print(test::Color::Warning, "Fail\n");
+                test::Print(test::Color::Success, "OK\n");
+            else test::Print(test::Color::Warning, "Fail\n");
         }
         else
         {
-            test::print(test::Color::Message, "Skipped\n");
+            test::Print(test::Color::Message, "Skipped\n");
         }
     }
 private:
@@ -223,15 +128,15 @@ private:
 #define TEST_CHECK(expr) \
     (expr) \
     ? ((void)0) \
-    : (test::blurb_failure(#expr, __FILE__, __FUNCTION__, __LINE__, false))
+    : (test::BlurpFailure(#expr, __FILE__, __FUNCTION__, __LINE__, false))
 
 #define TEST_REQUIRE(expr) \
     (expr) \
     ? ((void)0) \
-    : (test::blurb_failure(#expr, __FILE__, __FUNCTION__, __LINE__, true))
+    : (test::BlurpFailure(#expr, __FILE__, __FUNCTION__, __LINE__, true))
 
 #define TEST_MESSAGE(msg, ...) \
-    test::print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
+    test::Print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
 
 #define TEST_EXCEPTION(expr) \
     try { \
@@ -243,51 +148,32 @@ private:
 
 #define TEST_CASE(type) \
     test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__, type); \
-    if (!test::EnabledTestTypes.test(type))                                         \
+    if (!test::IsEnabledByType(type))                                               \
         return;                                                                     \
     if (!test::IsEnabledByName(test::GetTestName(__PRETTY_FUNCTION__)))             \
         return;
 
-int test_main(int argc, char* argv[]);
+// When using a test bundle the test_main is no longer a global function
+// but instead becomes a member function that implements/overrides the
+// TestBundle::test_main method. A single object is then automatically
+// created and appended to the global list of test bundles to be run.
+#if defined(UNIT_TEST_BUNDLE)
+  #define EXPORT_TEST_MAIN(main)                                                    \
+      namespace {                                                                   \
+        struct PrivateTestBundle : public test::TestBundle {                        \
+          main                                                                      \
+          PrivateTestBundle() {                                                     \
+            test::AddBundle(this);                                                  \
+            name = test::GetBundleName(__FILE__);                                   \
+          }                                                                         \
+        } test_bundle;                                                              \
+      } // namespace
+#else
+  #define EXPORT_TEST_MAIN(main) main
+  // automatically include the definitions for keeping the compilation
+  // of existing unit tests simple and without having to explicitly
+  // add the source file in the build rules.
+  #include "base/test_minimal.cpp"
+#endif
 
-int main(int argc, char* argv[])
-{
-    test::EnabledTestTypes.set(test::Type::Feature,     true);
-    test::EnabledTestTypes.set(test::Type::Performance, true);
-    for (int i=1; i<argc; ++i)
-    {
-        if (!std::strcmp(argv[i], "--disable-fatality") ||
-            !std::strcmp(argv[i], "-df"))
-            test::EnableFatality = false;
-        else if (!std::strcmp(argv[i], "--disable-perf-test") ||
-                 !std::strcmp(argv[i], "-dpt"))
-            test::EnabledTestTypes.set(test::Type::Performance, false);
-        else if (!std::strcmp(argv[i], "--disable-feature-test") ||
-                 !std::strcmp(argv[i], "-dft"))
-            test::EnabledTestTypes.set(test::Type::Feature, false);
-        else if (!std::strcmp(argv[i], "--case") ||
-                 !std::strcmp(argv[i], "-c"))
-            test::EnabledTestNames.emplace_back(argv[i+1]);
-    }
-    try
-    {
-        test_main(argc, argv);
-        if (test::ErrorCount)
-            test::print(test::Color::Warning, "Tests completed with errors.\n");
-        else test::print(test::Color::Success, "Success!\n");
-    }
-    catch (const test::Fatality& fatality)
-    {
-        test::print(test::Color::Error, "\n%s(%d): %s failed in function: '%s'\n",
-                    fatality.mFile, fatality.mLine, fatality.mExpression, fatality.mFunc);
-        test::print(test::Color::Warning, "\nTesting finished early on fatality.\n");
-        return 1;
-    }
-    catch (const std::exception & e)
-    {
-        test::print(test::Color::Error, "\nTests didn't run to completion because an exception occurred!\n\n");
-        test::print(test::Color::Error, "%s\n", e.what());
-        return 1;
-    }
-    return test::ErrorCount ? 1 : 0;
-}
+
