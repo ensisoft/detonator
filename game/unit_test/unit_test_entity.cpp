@@ -914,9 +914,9 @@ namespace mem {
 
 } // mem
 
-void perf_test_item_allocation()
+void measure_item_allocation_time()
 {
-    TEST_CASE(test::Type::Performance)
+    TEST_CASE(test::Type::Other)
 
     auto item = std::make_shared<game::DrawableItemClass>();
     item->SetDrawableId("rectangle");
@@ -938,9 +938,9 @@ void perf_test_item_allocation()
     test::PrintTestTimes("pooled alloc", mem_ret);
 }
 
-void perf_test_entity_allocation()
+void measure_entity_allocation_time()
 {
-    TEST_CASE(test::Type::Performance)
+    TEST_CASE(test::Type::Other)
 
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("TestEntityClass");
@@ -983,9 +983,9 @@ void perf_test_entity_allocation()
 }
 
 // simulate entity update in a tight loop
-void perf_test_entity_update()
+void measure_entity_update_time()
 {
-    TEST_CASE(test::Type::Performance)
+    TEST_CASE(test::Type::Other)
 
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("TestEntityClass");
@@ -1035,8 +1035,8 @@ int test_main(int argc, char* argv[])
     unit_test_entity_clone_track_bug();
     unit_test_entity_class_coords();
 
-    perf_test_item_allocation();
-    perf_test_entity_allocation();
-    perf_test_entity_update();
+    measure_item_allocation_time();
+    measure_entity_allocation_time();
+    measure_entity_update_time();
     return 0;
 }

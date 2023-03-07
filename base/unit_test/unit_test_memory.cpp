@@ -324,54 +324,56 @@ void unit_test_bump()
     TEST_REQUIRE(GetEntityStack().GetSize() == 0);
 }
 
-void unit_test_perf_std()
+// do some tests comparing different allocation strategies
+void measure_allocation_times()
 {
-    TEST_CASE(test::Type::Performance)
+    TEST_CASE(test::Type::Other)
 
-    std::vector<std::unique_ptr<Entity>> entities;
-    entities.resize(1000);
+    // standard new
+    {
+        std::vector<std::unique_ptr<Entity>> entities;
+        entities.resize(1000);
 
-    auto ret = test::TimedTest(10000, [&entities]() {
-        for (size_t i = 0; i < 1000; ++i)
-        {
-            auto instance = std::make_unique<Entity>();
-            entities[i] = std::move(instance);
-        }
-    });
-    test::PrintTestTimes("std new", ret);
-}
+        auto ret = test::TimedTest(10000, [&entities]() {
+            for (size_t i = 0; i < 1000; ++i)
+            {
+                auto instance = std::make_unique<Entity>();
+                entities[i] = std::move(instance);
+            }
+        });
+        test::PrintTestTimes("std alloc", ret);
+    }
 
-void unit_test_perf_mem_pool()
-{
-    TEST_CASE(test::Type::Performance)
-    std::vector<mem::unique_ptr<Entity, EntityPerfTestPoolTag>> entities;
-    entities.resize(1000);
+    // using memory pool + heap
+    {
+        std::vector<mem::unique_ptr<Entity, EntityPerfTestPoolTag>> entities;
+        entities.resize(1000);
 
-    auto ret = test::TimedTest(10000, [&entities]() {
-        for (size_t i = 0; i < 1000; ++i)
-        {
-            auto instance = mem::make_unique<Entity, EntityPerfTestPoolTag>();
-            entities[i] = std::move(instance);
-        }
-    });
-    test::PrintTestTimes("pool", ret);
-}
+        auto ret = test::TimedTest(10000, [&entities]() {
+            for (size_t i = 0; i < 1000; ++i)
+            {
+                auto instance = mem::make_unique<Entity, EntityPerfTestPoolTag>();
+                entities[i] = std::move(instance);
+            }
+        });
+        test::PrintTestTimes("pool", ret);
+    }
 
-void unit_test_perf_mem_stack()
-{
-    TEST_CASE(test::Type::Performance)
-    std::vector<mem::unique_ptr<Entity, EntityPerfTestStackTag>> entities;
-    entities.resize(1000);
+    // using stack allocator
+    {
+        std::vector<mem::unique_ptr<Entity, EntityPerfTestStackTag>> entities;
+        entities.resize(1000);
 
-    auto ret = test::TimedTest(10000, [&entities]() {
-        for (size_t i = 0; i < 1000; ++i)
-        {
-            auto instance = mem::make_unique<Entity, EntityPerfTestStackTag>();
-            entities[i] = std::move(instance);
-        }
-        mem::AllocatorInstance<EntityPerfTestStackTag>::Get().Reset();
-    });
-    test::PrintTestTimes("pool", ret);
+        auto ret = test::TimedTest(10000, [&entities]() {
+            for (size_t i = 0; i < 1000; ++i)
+            {
+                auto instance = mem::make_unique<Entity, EntityPerfTestStackTag>();
+                entities[i] = std::move(instance);
+            }
+            mem::AllocatorInstance<EntityPerfTestStackTag>::Get().Reset();
+        });
+        test::PrintTestTimes("stack", ret);
+    }
 }
 
 int test_main(int argc, char* argv[])
@@ -380,8 +382,7 @@ int test_main(int argc, char* argv[])
     unit_test_ptr();
     unit_test_pool();
     unit_test_bump();
-    unit_test_perf_std();
-    unit_test_perf_mem_pool();
-    unit_test_perf_mem_stack();
+
+    measure_allocation_times();
     return 0;
 }
