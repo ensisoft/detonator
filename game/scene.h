@@ -68,26 +68,26 @@ namespace game
             SetFlag(Flags::VisibleInEditor, true);
         }
         // class setters.
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         {
             mFlagValBits.set(flag, on_off);
             mFlagSetBits.set(flag, true);
         }
-        void SetTranslation(const glm::vec2& pos)
+        void SetTranslation(const glm::vec2& pos) noexcept
         { mPosition = pos; }
-        void SetTranslation(float x, float y)
+        void SetTranslation(float x, float y) noexcept
         { mPosition = glm::vec2(x, y); }
-        void SetScale(const glm::vec2& scale)
+        void SetScale(const glm::vec2& scale) noexcept
         { mScale = scale; }
-        void SetScale(float sx, float sy)
+        void SetScale(float sx, float sy) noexcept
         { mScale = glm::vec2(sx, sy); }
-        void SetRotation(float rotation)
+        void SetRotation(float rotation) noexcept
         { mRotation = rotation; }
         void SetEntityId(const std::string& id)
         { mEntityId = id; }
         void SetName(const std::string& name)
         { mName = name; }
-        void SetLayer(int layer)
+        void SetLayer(int layer) noexcept
         { mLayer = layer; }
         void SetTag(const std::string& tag)
         { mTagString = tag; }
@@ -100,12 +100,12 @@ namespace game
             mEntityId = klass->GetId();
             mEntity   = klass;
         }
-        void ResetEntity()
+        void ResetEntity() noexcept
         {
             mEntityId.clear();
             mEntity.reset();
         }
-        void ResetEntityParams()
+        void ResetEntityParams() noexcept
         {
             mIdleAnimationId.clear();
             mLifetime.reset();
@@ -113,57 +113,57 @@ namespace game
             mFlagValBits.clear();
             mScriptVarValues.clear();
         }
-        void ResetLifetime()
+        void ResetLifetime() noexcept
         { mLifetime.reset(); }
-        void SetLifetime(double lifetime)
+        void SetLifetime(double lifetime) noexcept
         { mLifetime = lifetime; }
-        void ResetTag()
+        void ResetTag() noexcept
         { mTagString.reset(); }
 
         // class getters.
-        glm::vec2 GetTranslation() const
+        const glm::vec2& GetTranslation() const noexcept
         { return mPosition; }
-        glm::vec2 GetScale() const
+        const glm::vec2& GetScale() const noexcept
         { return mScale; }
-        float GetRotation() const
+        float GetRotation() const noexcept
         { return mRotation; }
-        std::string GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
-        std::string GetId() const
+        const std::string& GetId() const noexcept
         { return mClassId; }
-        std::string GetEntityId() const
+        const std::string& GetEntityId() const noexcept
         { return mEntityId; }
-        std::string GetIdleAnimationId() const
+        const std::string& GetIdleAnimationId() const noexcept
         { return mIdleAnimationId; }
-        std::string GetParentRenderTreeNodeId() const
+        const std::string& GetParentRenderTreeNodeId() const noexcept
         { return mParentRenderTreeNodeId; }
-        std::shared_ptr<const EntityClass> GetEntityClass() const
+        std::shared_ptr<const EntityClass> GetEntityClass() const noexcept
         { return mEntity; }
-        const std::string* GetTag() const
+        const std::string* GetTag() const noexcept
         { return mTagString ? &mTagString.value() : nullptr; }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mFlagValBits.test(flag); }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mLayer; }
-        double GetLifetime() const
+        double GetLifetime() const noexcept
         { return mLifetime.value_or(0.0); }
-        bool HasSpecifiedParentNode() const
+        bool HasSpecifiedParentNode() const noexcept
         { return !mParentRenderTreeNodeId.empty(); }
-        bool HasIdleAnimationSetting() const
+        bool HasIdleAnimationSetting() const noexcept
         { return !mIdleAnimationId.empty(); }
-        bool HasLifetimeSetting() const
+        bool HasLifetimeSetting() const noexcept
         { return mLifetime.has_value(); }
-        bool HasFlagSetting(Flags flag) const
+        bool HasFlagSetting(Flags flag) const noexcept
         { return mFlagSetBits.test(flag); }
-        bool HasTag() const
+        bool HasTag() const noexcept
         { return mTagString.has_value(); }
-        void ClearFlagSetting(Flags flag)
+        void ClearFlagSetting(Flags flag) noexcept
         { mFlagSetBits.set(flag, false); }
-        std::size_t GetNumScriptVarValues() const
+        std::size_t GetNumScriptVarValues() const noexcept
         { return mScriptVarValues.size(); }
-        ScriptVarValue& GetGetScriptVarValue(size_t index)
+        ScriptVarValue& GetGetScriptVarValue(size_t index) noexcept
         { return base::SafeIndex(mScriptVarValues, index); }
-        const ScriptVarValue& GetScriptVarValue(size_t index) const
+        const ScriptVarValue& GetScriptVarValue(size_t index) const noexcept
         { return base::SafeIndex(mScriptVarValues, index); }
         void AddScriptVarValue(const ScriptVarValue& value)
         { mScriptVarValues.push_back(value);}
@@ -409,29 +409,29 @@ namespace game
         // Get the object hash value based on the property values.
         std::size_t GetHash() const;
         // Return number of scene nodes contained in the scene.
-        std::size_t GetNumNodes() const
+        std::size_t GetNumNodes() const noexcept
         { return mNodes.size();}
-        std::size_t GetNumScriptVars() const
+        std::size_t GetNumScriptVars() const noexcept
         { return mScriptVars.size(); }
         // Get the scene class object id.
-        std::string GetId() const
+        const std::string& GetId() const noexcept
         { return mClassId; }
         // Get the human-readable name of the class.
-        std::string GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
         // Get the associated script file ID.
-        std::string GetScriptFileId() const
+        const std::string& GetScriptFileId() const noexcept
         { return mScriptFile; }
-        std::string GetTilemapId() const
+        const std::string& GetTilemapId() const noexcept
         { return mTilemap; }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
-        RenderTree& GetRenderTree()
+        RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
-        const RenderTree& GetRenderTree() const
+        const RenderTree& GetRenderTree() const noexcept
         { return mRenderTree; }
-        SpatialIndex GetDynamicSpatialIndex() const
+        SpatialIndex GetDynamicSpatialIndex() const noexcept
         { return mDynamicSpatialIndex; }
         const FRect* GetDynamicSpatialRect() const;
         const QuadTreeArgs* GetQuadTreeArgs() const;
@@ -446,54 +446,54 @@ namespace game
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
         void SetDynamicSpatialRect(const FRect& rect);
 
-        void SetBloom(const BloomFilter& bloom)
+        void SetBloom(const BloomFilter& bloom) noexcept
         { mBloomFilter = bloom; }
-        const BloomFilter* GetBloom() const
+        const BloomFilter* GetBloom() const noexcept
         { return base::GetOpt(mBloomFilter); }
-        BloomFilter* GetBloom()
+        BloomFilter* GetBloom() noexcept
         { return base::GetOpt(mBloomFilter); }
-        void ResetBloom()
+        void ResetBloom() noexcept
         { mBloomFilter.reset(); }
 
-        void SetLeftBoundary(float value)
+        void SetLeftBoundary(float value)  noexcept
         { mLeftBoundary = value; }
-        void SetRightBoundary(float value)
+        void SetRightBoundary(float value) noexcept
         { mRightBoundary = value; }
-        void SetTopBoundary(float value)
+        void SetTopBoundary(float value) noexcept
         { mTopBoundary = value; }
-        void SetBottomBoundary(float value)
+        void SetBottomBoundary(float value) noexcept
         { mBottomBoundary = value; }
-        void SetName(const std::string& name)
+        void SetName(const std::string& name) noexcept
         { mName = name; }
         void SetScriptFileId(const std::string& file)
         { mScriptFile = file; }
         void SetTilemapId(const std::string& map)
         { mTilemap = map; }
-        bool HasScriptFile() const
+        bool HasScriptFile() const noexcept
         { return !mScriptFile.empty(); }
-        bool HasTilemap() const
+        bool HasTilemap() const noexcept
         { return !mTilemap.empty(); }
-        bool IsDynamicSpatialIndexEnabled() const
+        bool IsDynamicSpatialIndexEnabled() const noexcept
         { return mDynamicSpatialIndex != SpatialIndex::Disabled; }
-        bool HasLeftBoundary() const
+        bool HasLeftBoundary() const noexcept
         { return mLeftBoundary.has_value(); }
-        bool HasRightBoundary() const
+        bool HasRightBoundary() const noexcept
         { return mRightBoundary.has_value(); }
-        bool HasTopBoundary() const
+        bool HasTopBoundary() const noexcept
         { return mTopBoundary.has_value(); }
-        bool HasBottomBoundary() const
+        bool HasBottomBoundary() const noexcept
         { return mBottomBoundary.has_value(); }
-        void ResetScriptFile()
+        void ResetScriptFile() noexcept
         { mScriptFile.clear(); }
-        void ResetTilemap()
+        void ResetTilemap() noexcept
         { mTilemap.clear(); }
-        void ResetLeftBoundary()
+        void ResetLeftBoundary() noexcept
         { mLeftBoundary.reset(); }
-        void ResetRightBoundary()
+        void ResetRightBoundary() noexcept
         { mRightBoundary.reset(); }
-        void ResetTopBoundary()
+        void ResetTopBoundary() noexcept
         { mTopBoundary.reset(); }
-        void ResetBottomBoundary()
+        void ResetBottomBoundary() noexcept
         { mBottomBoundary.reset(); }
 
         // Serialize the scene into JSON.
@@ -714,34 +714,40 @@ namespace game
         inline void QuerySpatialNodes(const FPoint& point, std::vector<const EntityNode*>* result) const
         { query_spatial_nodes(point, result); }
 
-        const SpatialIndex* GetSpatialIndex() const
+        const SpatialIndex* GetSpatialIndex() const noexcept
         { return mSpatialIndex.get(); }
         // Get the scene's render tree (scene graph). The render tree defines
         // the relative transformations and the transformation hierarchy of the
         // scene class nodes in the scene.
-        RenderTree& GetRenderTree()
+        RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
-        const RenderTree& GetRenderTree() const
+        const RenderTree& GetRenderTree() const noexcept
         { return mRenderTree; }
-        double GetTime() const
+        // Get current scene runtime in seconds since the scene was first created.
+        double GetTime() const noexcept
         { return mCurrentTime; }
-        bool HasSpatialIndex() const
+        // Check whether the scene has a spatial index or not.
+        bool HasSpatialIndex() const noexcept
         { return !!mSpatialIndex; }
         // Get the current number of entities in the scene.
-        size_t GetNumEntities() const
+        size_t GetNumEntities() const noexcept
         { return mEntities.size(); }
-        std::string GetClassName() const
+        // Get the scene's class name.
+        const std::string& GetClassName() const noexcept
         { return mClass->GetName(); }
-        std::string GetClassId() const
+        // Get the scenes' class ID.
+        const std::string& GetClassId() const noexcept
         { return mClass->GetId(); }
-
-        const BloomFilter* GetBloom() const
+        // Check whether the scene has a script file ID or not.
+        const std::string& GetScriptFileId() const noexcept
+        { return mClass->GetScriptFileId(); }
+        // Get the bloom filter settings if any.
+        const BloomFilter* GetBloom() const noexcept
         { return mClass->GetBloom(); }
-
         // Get access to the scene class object.
-        const SceneClass& GetClass() const
+        const SceneClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const SceneClass* operator->() const
+        const SceneClass* operator->() const noexcept
         { return mClass.get(); }
         // Disabled.
         Scene& operator=(const Scene&) = delete;

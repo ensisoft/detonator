@@ -87,15 +87,15 @@ namespace game
         };
         SpatialNodeClass();
         std::size_t GetHash() const;
-        Shape GetShape() const
+        Shape GetShape() const noexcept
         { return mShape; }
-        void SetShape(Shape shape)
+        void SetShape(Shape shape) noexcept
         { mShape = shape; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        base::bitflag<Flags> GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
 
         void IntoJson(data::Writer& data) const;
@@ -117,7 +117,7 @@ namespace game
             // simulation under forces etc.
             Sensor
         };
-        FixtureClass()
+        FixtureClass() noexcept
         {
             mBitFlags.set(Flags::Sensor, true);
         }
@@ -125,49 +125,49 @@ namespace game
         { mPolygonShapeId = id; }
         void SetRigidBodyNodeId(const std::string& id)
         { mRigidBodyNodeId = id; }
-        void SetCollisionShape(CollisionShape shape)
+        void SetCollisionShape(CollisionShape shape) noexcept
         { mCollisionShape = shape; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        void SetFriction(float value)
+        void SetFriction(float value) noexcept
         { mFriction = value; }
-        void SetDensity(float value)
+        void SetDensity(float value) noexcept
         { mDensity = value; }
-        void SetRestitution(float value)
+        void SetRestitution(float value) noexcept
         { mRestitution = value; }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
-        bool HasFriction() const
+        bool HasFriction() const noexcept
         { return mFriction.has_value(); }
-        bool HasDensity() const
+        bool HasDensity() const noexcept
         { return mDensity.has_value(); }
-        bool HasRestitution() const
+        bool HasRestitution() const noexcept
         { return mRestitution.has_value(); }
-        bool HasPolygonShapeId() const
+        bool HasPolygonShapeId() const noexcept
         { return !mPolygonShapeId.empty(); }
-        const float* GetFriction() const
+        const float* GetFriction() const noexcept
         { return base::GetOpt(mFriction); }
-        const float* GetDensity() const
+        const float* GetDensity() const noexcept
         { return base::GetOpt(mDensity); }
-        const float* GetRestitution() const
+        const float* GetRestitution() const noexcept
         { return base::GetOpt(mRestitution); }
-        const base::bitflag<Flags>& GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
-        CollisionShape GetCollisionShape() const
+        CollisionShape GetCollisionShape() const noexcept
         { return mCollisionShape; }
-        const std::string& GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const noexcept
         { return mPolygonShapeId; }
-        const std::string& GetRigidBodyNodeId() const
+        const std::string& GetRigidBodyNodeId() const noexcept
         {return mRigidBodyNodeId; }
-        void ResetRigidBodyId()
+        void ResetRigidBodyId() noexcept
         { mRigidBodyNodeId.clear(); }
-        void ResetPolygonShapeId()
+        void ResetPolygonShapeId() noexcept
         { mPolygonShapeId.clear(); }
-        void ResetFriction()
+        void ResetFriction() noexcept
         { mFriction.reset(); }
-        void ResetDensity()
+        void ResetDensity() noexcept
         { mDensity.reset(); }
-        void ResetRestitution()
+        void ResetRestitution() noexcept
         { mRestitution.reset(); }
 
         std::size_t GetHash() const;
@@ -235,7 +235,7 @@ namespace game
             // Useful for things such as player character that should stay "upright
             DiscardRotation
         };
-        RigidBodyItemClass()
+        RigidBodyItemClass() noexcept
         {
             mBitFlags.set(Flags::Enabled, true);
             mBitFlags.set(Flags::CanSleep, true);
@@ -243,44 +243,44 @@ namespace game
 
         std::size_t GetHash() const;
 
-        Simulation GetSimulation() const
+        Simulation GetSimulation() const noexcept
         { return mSimulation; }
-        CollisionShape GetCollisionShape() const
+        CollisionShape GetCollisionShape() const noexcept
         { return mCollisionShape; }
-        float GetFriction() const
+        float GetFriction() const noexcept
         { return mFriction; }
-        float GetRestitution() const
+        float GetRestitution() const noexcept
         { return mRestitution; }
-        float GetAngularDamping() const
+        float GetAngularDamping() const noexcept
         { return mAngularDamping; }
-        float GetLinearDamping() const
+        float GetLinearDamping() const noexcept
         { return mLinearDamping; }
-        float GetDensity() const
+        float GetDensity() const noexcept
         { return mDensity; }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
-        const std::string& GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const noexcept
         { return mPolygonShapeId; }
-        void ResetPolygonShapeId()
+        void ResetPolygonShapeId() noexcept
         { mPolygonShapeId.clear(); }
-        const base::bitflag<Flags>& GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
 
-        void SetCollisionShape(CollisionShape shape)
+        void SetCollisionShape(CollisionShape shape) noexcept
         { mCollisionShape = shape; }
-        void SetSimulation(Simulation simulation)
+        void SetSimulation(Simulation simulation) noexcept
         { mSimulation = simulation; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        void SetFriction(float value)
+        void SetFriction(float value) noexcept
         { mFriction = value; }
-        void SetRestitution(float value)
+        void SetRestitution(float value) noexcept
         { mRestitution = value; }
-        void SetAngularDamping(float value)
+        void SetAngularDamping(float value) noexcept
         { mAngularDamping = value; }
-        void SetLinearDamping(float value)
+        void SetLinearDamping(float value) noexcept
         { mLinearDamping = value; }
-        void SetDensity(float value)
+        void SetDensity(float value) noexcept
         { mDensity = value; }
         void SetPolygonShapeId(const std::string& id)
         { mPolygonShapeId = id; }
@@ -342,24 +342,24 @@ namespace game
         { mDrawableId = klass; }
         void SetMaterialId(const std::string& klass)
         { mMaterialId = klass; }
-        void SetLayer(int layer)
+        void SetLayer(int layer) noexcept
         { mLayer = layer; }
-        void ResetMaterial()
+        void ResetMaterial() noexcept
         {
             mMaterialId.clear();
             mMaterialParams.clear();
         }
-        void ResetDrawable()
+        void ResetDrawable() noexcept
         { mDrawableId.clear(); }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        void SetLineWidth(float width)
+        void SetLineWidth(float width) noexcept
         { mLineWidth = width; }
-        void SetRenderPass(RenderPass pass)
+        void SetRenderPass(RenderPass pass) noexcept
         { mRenderPass = pass; }
-        void SetRenderStyle(RenderStyle style)
+        void SetRenderStyle(RenderStyle style) noexcept
         { mRenderStyle = style; }
-        void SetTimeScale(float scale)
+        void SetTimeScale(float scale) noexcept
         { mTimeScale = scale; }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
         { mMaterialParams[name] = value; }
@@ -369,51 +369,51 @@ namespace game
         { mMaterialParams = std::move(params); }
 
         // class getters.
-        const std::string& GetDrawableId() const
+        const std::string& GetDrawableId() const noexcept
         { return mDrawableId; }
-        const std::string& GetMaterialId() const
+        const std::string& GetMaterialId() const noexcept
         { return mMaterialId; }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mLayer; }
-        float GetLineWidth() const
+        float GetLineWidth() const noexcept
         { return mLineWidth; }
-        float GetTimeScale() const
+        float GetTimeScale() const noexcept
         { return mTimeScale; }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
-        RenderPass GetRenderPass() const
+        RenderPass GetRenderPass() const noexcept
         { return mRenderPass; }
-        RenderStyle GetRenderStyle() const
+        RenderStyle GetRenderStyle() const noexcept
         { return mRenderStyle; }
-        const base::bitflag<Flags>& GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
-        MaterialParamMap GetMaterialParams()
+        MaterialParamMap GetMaterialParams() noexcept
         { return mMaterialParams; }
-        const MaterialParamMap& GetMaterialParams() const
+        const MaterialParamMap& GetMaterialParams() const noexcept
         { return mMaterialParams; }
-        bool HasMaterialParam(const std::string& name) const
+        bool HasMaterialParam(const std::string& name) const noexcept
         { return base::SafeFind(mMaterialParams, name) != nullptr; }
-        MaterialParam* FindMaterialParam(const std::string& name)
+        MaterialParam* FindMaterialParam(const std::string& name) noexcept
         { return base::SafeFind(mMaterialParams, name); }
-        const MaterialParam* FindMaterialParam(const std::string& name) const
+        const MaterialParam* FindMaterialParam(const std::string& name) const noexcept
         { return base::SafeFind(mMaterialParams, name); }
         template<typename T>
-        T* GetMaterialParamValue(const std::string& name)
+        T* GetMaterialParamValue(const std::string& name) noexcept
         {
             if (auto* ptr = base::SafeFind(mMaterialParams, name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
         template<typename T>
-        const T* GetMaterialParamValue(const std::string& name) const
+        const T* GetMaterialParamValue(const std::string& name) const noexcept
         {
             if (auto* ptr = base::SafeFind(mMaterialParams, name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
-        void DeleteMaterialParam(const std::string& name)
+        void DeleteMaterialParam(const std::string& name) noexcept
         { mMaterialParams.erase(name); }
-        void ClearMaterialParams()
+        void ClearMaterialParams() noexcept
         { mMaterialParams.clear(); }
         void IntoJson(data::Writer& data) const;
 
@@ -483,55 +483,55 @@ namespace game
         // class setters
         void SetText(const std::string& text)
         { mText = text; }
-        void SetText(std::string&& text)
+        void SetText(std::string&& text) noexcept
         { mText = std::move(text); }
         void SetFontName(const std::string& font)
         { mFontName = font; }
-        void SetFontSize(unsigned size)
+        void SetFontSize(unsigned size) noexcept
         { mFontSize = size; }
-        void SetLayer(int layer)
+        void SetLayer(int layer) noexcept
         { mLayer = layer; }
-        void SetLineHeight(float height)
+        void SetLineHeight(float height) noexcept
         { mLineHeight = height; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        void SetAlign(VerticalTextAlign align)
+        void SetAlign(VerticalTextAlign align) noexcept
         { mVAlign = align; }
-        void SetAlign(HorizontalTextAlign align)
+        void SetAlign(HorizontalTextAlign align) noexcept
         { mHAlign = align; }
-        void SetTextColor(const Color4f& color)
+        void SetTextColor(const Color4f& color) noexcept
         { mTextColor = color; }
-        void SetRasterWidth(unsigned width)
+        void SetRasterWidth(unsigned width) noexcept
         { mRasterWidth = width;}
-        void SetRasterHeight(unsigned height)
+        void SetRasterHeight(unsigned height) noexcept
         { mRasterHeight = height; }
 
         // class getters
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
-        bool IsStatic() const
+        bool IsStatic() const noexcept
         { return TestFlag(Flags::StaticContent); }
-        const Color4f& GetTextColor() const
+        const Color4f& GetTextColor() const noexcept
         { return mTextColor; }
-        const std::string& GetText() const
+        const std::string& GetText() const noexcept
         { return mText; }
-        const std::string& GetFontName() const
+        const std::string& GetFontName() const noexcept
         { return mFontName; }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mLayer; }
-        float GetLineHeight() const
+        float GetLineHeight() const noexcept
         { return mLineHeight; }
-        unsigned GetFontSize() const
+        unsigned GetFontSize() const noexcept
         { return mFontSize; }
-        unsigned GetRasterWidth() const
+        unsigned GetRasterWidth() const noexcept
         { return mRasterWidth; }
-        unsigned GetRasterHeight() const
+        unsigned GetRasterHeight() const noexcept
         { return mRasterHeight; }
-        base::bitflag<Flags> GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
-        HorizontalTextAlign GetHAlign() const
+        HorizontalTextAlign GetHAlign() const noexcept
         { return mHAlign; }
-        VerticalTextAlign GetVAlign() const
+        VerticalTextAlign GetVAlign() const noexcept
         { return mVAlign; }
 
         void IntoJson(data::Writer& data) const;
@@ -567,62 +567,62 @@ namespace game
           , mInstanceFlags(mClass->GetFlags())
           , mMaterialParams(mClass->GetMaterialParams())
         {}
-        const std::string& GetMaterialId() const
+        const std::string& GetMaterialId() const noexcept
         { return mClass->GetMaterialId(); }
-        const std::string& GetDrawableId() const
+        const std::string& GetDrawableId() const noexcept
         { return mClass->GetDrawableId(); }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mClass->GetLayer(); }
-        float GetLineWidth() const
+        float GetLineWidth() const noexcept
         { return mClass->GetLineWidth(); }
-        RenderPass GetRenderPass() const
+        RenderPass GetRenderPass() const noexcept
         { return mClass->GetRenderPass(); }
-        RenderStyle GetRenderStyle() const
+        RenderStyle GetRenderStyle() const noexcept
         { return mClass->GetRenderStyle(); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
-        bool IsVisible() const
+        bool IsVisible() const noexcept
         { return mInstanceFlags.test(Flags::VisibleInGame); }
-        void SetVisible(bool visible)
+        void SetVisible(bool visible) noexcept
         { mInstanceFlags.set(Flags::VisibleInGame, visible); }
-        float GetTimeScale() const
+        float GetTimeScale() const noexcept
         { return mInstanceTimeScale; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mInstanceFlags.set(flag, on_off); }
-        void SetTimeScale(float scale)
+        void SetTimeScale(float scale) noexcept
         { mInstanceTimeScale = scale; }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
         { mMaterialParams[name] = value; }
         MaterialParamMap GetMaterialParams()
         { return mMaterialParams; }
-        const MaterialParamMap& GetMaterialParams() const
+        const MaterialParamMap& GetMaterialParams() const noexcept
         { return mMaterialParams; }
-        bool HasMaterialParam(const std::string& name) const
+        bool HasMaterialParam(const std::string& name) const noexcept
         { return base::SafeFind(mMaterialParams, name) != nullptr; }
-        MaterialParam* FindMaterialParam(const std::string& name)
+        MaterialParam* FindMaterialParam(const std::string& name) noexcept
         { return base::SafeFind(mMaterialParams, name); }
-        const MaterialParam* FindMaterialParam(const std::string& name) const
+        const MaterialParam* FindMaterialParam(const std::string& name) const noexcept
         { return base::SafeFind(mMaterialParams, name); }
         template<typename T>
-        T* GetMaterialParamValue(const std::string& name)
+        T* GetMaterialParamValue(const std::string& name) noexcept
         {
             if (auto* ptr = base::SafeFind(mMaterialParams, name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
         template<typename T>
-        const T* GetMaterialParamValue(const std::string& name) const
+        const T* GetMaterialParamValue(const std::string& name) const noexcept
         {
             if (auto* ptr = base::SafeFind(mMaterialParams, name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
-        void DeleteMaterialParam(const std::string& name)
+        void DeleteMaterialParam(const std::string& name) noexcept
         { mMaterialParams.erase(name); }
 
-        const DrawableItemClass& GetClass() const
+        const DrawableItemClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const DrawableItemClass* operator->() const
+        const DrawableItemClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
@@ -639,25 +639,25 @@ namespace game
         Fixture(std::shared_ptr<const FixtureClass> klass)
           : mClass(klass)
         {}
-        const std::string& GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const noexcept
         { return mClass->GetPolygonShapeId(); }
-        const std::string& GetRigidBodyNodeId() const
+        const std::string& GetRigidBodyNodeId() const noexcept
         { return mClass->GetRigidBodyNodeId(); }
-        const float* GetFriction() const
+        const float* GetFriction() const noexcept
         { return mClass->GetFriction(); }
-        const float* GetDensity() const
+        const float* GetDensity() const noexcept
         { return mClass->GetDensity(); }
-        const float* GetRestitution() const
+        const float* GetRestitution() const noexcept
         { return mClass->GetRestitution(); }
-        const base::bitflag<Flags>& GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mClass->GetFlags(); }
-        CollisionShape GetCollisionShape() const
+        CollisionShape GetCollisionShape() const noexcept
         { return mClass->GetCollisionShape(); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mClass->TestFlag(flag); }
-        const FixtureClass& GetClass() const
+        const FixtureClass& GetClass() const noexcept
         { return *mClass; }
-        const FixtureClass* operator->() const
+        const FixtureClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const FixtureClass> mClass;
@@ -676,97 +676,97 @@ namespace game
           , mInstanceFlags(mClass->GetFlags())
         {}
 
-        Simulation GetSimulation() const
+        Simulation GetSimulation() const noexcept
         { return mClass->GetSimulation(); }
-        CollisionShape GetCollisionShape() const
+        CollisionShape GetCollisionShape() const noexcept
         { return mClass->GetCollisionShape(); }
-        float GetFriction() const
+        float GetFriction() const noexcept
         { return mClass->GetFriction(); }
-        float GetRestitution() const
+        float GetRestitution() const noexcept
         { return mClass->GetRestitution(); }
-        float GetAngularDamping() const
+        float GetAngularDamping() const noexcept
         { return mClass->GetAngularDamping(); }
-        float GetLinearDamping() const
+        float GetLinearDamping() const noexcept
         { return mClass->GetLinearDamping(); }
-        float GetDensity() const
+        float GetDensity() const noexcept
         { return mClass->GetDensity(); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
-        const std::string& GetPolygonShapeId() const
+        const std::string& GetPolygonShapeId() const noexcept
         { return mClass->GetPolygonShapeId(); }
-        base::bitflag<Flags> GetFlags() const
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mInstanceFlags; }
         // Get the current instantaneous linear velocity of the
         // rigid body under the physics simulation.
         // The linear velocity expresses how fast the object is
         // moving and to which direction. It's expressed in meters per second
         // using the physics world coordinate space.
-        const glm::vec2& GetLinearVelocity() const
+        const glm::vec2& GetLinearVelocity() const noexcept
         { return mLinearVelocity; }
         // Get the current instantaneous angular velocity of the
         // rigid body under the physics simulation.
         // The angular velocity expresses how fast the object is rotating
         // around its own center in radians per second.
-        float GetAngularVelocity() const
+        float GetAngularVelocity() const noexcept
         { return mAngularVelocity; }
         // Update the current linear velocity in m/s.
         // The updates are coming from the physics engine.
-        void SetLinearVelocity(const glm::vec2& velocity)
+        void SetLinearVelocity(const glm::vec2& velocity) noexcept
         { mLinearVelocity = velocity; }
         // Update the current angular velocity in r/s
         // The updates are coming from the physics engine.
-        void SetAngularVelocity(float velocity)
+        void SetAngularVelocity(float velocity) noexcept
         { mAngularVelocity = velocity; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mInstanceFlags.set(flag, on_off); }
 
-        void ApplyLinearImpulseToCenter(const glm::vec2& impulse)
+        void ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
         { mCenterImpulse = impulse; }
 
         // Set a new linear velocity adjustment to be applied
         // on the next update of the physics engine. The velocity
         // is in meters per second.
-        void AdjustLinearVelocity(const glm::vec2& velocity)
+        void AdjustLinearVelocity(const glm::vec2& velocity) noexcept
         { mLinearVelocityAdjustment = velocity; }
         // Set a new angular velocity adjustment to be applied
         // on the next update of the physics engine. The velocity
         // is in radians per second.
-        void AdjustAngularVelocity(float radians)
+        void AdjustAngularVelocity(float radians) noexcept
         { mAngularVelocityAdjustment = radians; }
-        bool HasCenterImpulse() const
+        bool HasCenterImpulse() const noexcept
         { return mCenterImpulse.has_value(); }
-        bool HasLinearVelocityAdjustment() const
+        bool HasLinearVelocityAdjustment() const noexcept
         { return mLinearVelocityAdjustment.has_value(); }
-        bool HasAngularVelocityAdjustment() const
+        bool HasAngularVelocityAdjustment() const noexcept
         { return mAngularVelocityAdjustment.has_value(); }
-        float GetAngularVelocityAdjustment() const
+        float GetAngularVelocityAdjustment() const noexcept
         { return mAngularVelocityAdjustment.value_or(0.0f); }
-        glm::vec2 GetLinearVelocityAdjustment() const
+        glm::vec2 GetLinearVelocityAdjustment() const noexcept
         { return mLinearVelocityAdjustment.value_or(glm::vec2(0.0f, 0.0f)); }
-        glm::vec2 GetLinearImpulseToCenter() const
+        glm::vec2 GetLinearImpulseToCenter() const noexcept
         { return mCenterImpulse.value_or(glm::vec2(0.0f, 0.0f)); };
-        void ClearPhysicsAdjustments() const
+        void ClearPhysicsAdjustments() const noexcept
         {
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
             mCenterImpulse.reset();
         }
-        void Enable(bool value)
+        void Enable(bool value) noexcept
         { SetFlag(Flags::Enabled, value); }
-        bool IsEnabled() const
+        bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
-        bool IsSensor() const
+        bool IsSensor() const noexcept
         { return TestFlag(Flags::Sensor); }
-        bool IsBullet() const
+        bool IsBullet() const noexcept
         { return TestFlag(Flags::Bullet); }
-        bool CanSleep() const
+        bool CanSleep() const noexcept
         { return TestFlag(Flags::CanSleep); }
-        bool DiscardRotation() const
+        bool DiscardRotation() const noexcept
         { return TestFlag(Flags::DiscardRotation); }
 
-        const RigidBodyItemClass& GetClass() const
+        const RigidBodyItemClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const RigidBodyItemClass* operator->() const
+        const RigidBodyItemClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const RigidBodyItemClass> mClass;
@@ -807,31 +807,31 @@ namespace game
         }
 
         // instance getters.
-        const Color4f& GetTextColor() const
+        const Color4f& GetTextColor() const noexcept
         { return mTextColor; }
-        const std::string& GetText() const
+        const std::string& GetText() const noexcept
         { return mText; }
-        const std::string& GetFontName() const
+        const std::string& GetFontName() const noexcept
         { return mClass->GetFontName(); }
-        unsigned GetFontSize() const
+        unsigned GetFontSize() const noexcept
         { return mClass->GetFontSize(); }
-        float GetLineHeight() const
+        float GetLineHeight() const noexcept
         { return mClass->GetLineHeight(); }
         int GetLayer() const
         { return mClass->GetLayer(); }
-        unsigned GetRasterWidth() const
+        unsigned GetRasterWidth() const noexcept
         { return mClass->GetRasterWidth(); }
-        unsigned GetRasterHeight() const
+        unsigned GetRasterHeight() const noexcept
         { return mClass->GetRasterHeight(); }
-        HorizontalTextAlign GetHAlign() const
+        HorizontalTextAlign GetHAlign() const noexcept
         { return mClass->GetHAlign(); }
-        VerticalTextAlign GetVAlign() const
+        VerticalTextAlign GetVAlign() const noexcept
         { return mClass->GetVAlign(); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        bool IsStatic() const
+        bool IsStatic() const noexcept
         { return TestFlag(Flags::StaticContent); }
-        std::size_t GetHash() const
+        std::size_t GetHash() const noexcept
         {
             size_t hash = 0;
             hash = base::hash_combine(hash, mText);
@@ -843,17 +843,17 @@ namespace game
         // instance setters.
         void SetText(const std::string& text)
         { mText = text; }
-        void SetText(std::string&& text)
+        void SetText(std::string&& text) noexcept
         { mText = std::move(text); }
-        void SetTextColor(const Color4f& color)
+        void SetTextColor(const Color4f& color) noexcept
         { mTextColor = color; }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
 
         // class access
-        const TextItemClass& GetClass() const
+        const TextItemClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const TextItemClass* operator->() const
+        const TextItemClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const TextItemClass> mClass;
@@ -873,14 +873,14 @@ namespace game
         SpatialNode(std::shared_ptr<const SpatialNodeClass> klass)
           : mClass(klass)
         {}
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mClass->TestFlag(flag); }
-        Shape GetShape() const
+        Shape GetShape() const noexcept
         { return mClass->GetShape(); }
         // class access
-        const SpatialNodeClass& GetClass() const
+        const SpatialNodeClass& GetClass() const noexcept
         { return *mClass; }
-        const SpatialNodeClass* operator->() const
+        const SpatialNodeClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const SpatialNodeClass> mClass;
@@ -901,26 +901,26 @@ namespace game
         EntityNodeClass(EntityNodeClass&& other);
 
         // Get the class id.
-        const std::string& GetId() const
+        const std::string& GetId() const noexcept
         { return mClassId; }
         // Get the human-readable name for this class.
-        const std::string& GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
         // Get the hash value based on the class object properties.
         std::size_t GetHash() const;
 
         // Get the node's translation relative to its parent node.
-        const glm::vec2& GetTranslation() const
+        const glm::vec2& GetTranslation() const noexcept
         { return mPosition; }
         // Get the node's scale factor. The scale factor applies to
         // whole hierarchy of nodes.
-        const glm::vec2& GetScale() const
+        const glm::vec2& GetScale() const noexcept
         { return mScale; }
         // Get the node's box size.
-        const glm::vec2& GetSize() const
+        const glm::vec2& GetSize() const noexcept
         { return mSize;}
         // Get node's rotation relative to its parent node.
-        float GetRotation() const
+        float GetRotation() const noexcept
         { return mRotation; }
         // Set the human-readable node name.
         void SetName(const std::string& name)
@@ -928,30 +928,30 @@ namespace game
         // Set the node's scale. The scale applies to all
         // the subsequent hierarchy, i.e. all the nodes that
         // are in the tree under this node.
-        void SetScale(const glm::vec2& scale)
+        void SetScale(const glm::vec2& scale) noexcept
         { mScale = scale; }
-        void SetScale(float sx, float sy)
+        void SetScale(float sx, float sy) noexcept
         { mScale = glm::vec2(sx, sy); }
         // Set the node's translation relative to the parent
         // of this node.
-        void SetTranslation(const glm::vec2& vec)
+        void SetTranslation(const glm::vec2& vec) noexcept
         { mPosition = vec; }
-        void SetTranslation(float x, float y)
+        void SetTranslation(float x, float y) noexcept
         { mPosition = glm::vec2(x, y); }
         // Set the node's containing box size.
         // The size is used to for example to figure out
         // the dimensions of rigid body collision shape (if any)
         // and to resize the drawable object.
-        void SetSize(const glm::vec2& size)
+        void SetSize(const glm::vec2& size) noexcept
         { mSize = size; }
-        void SetSize(float width, float height)
+        void SetSize(float width, float height) noexcept
         { mSize = glm::vec2(width, height); }
         // Set the starting rotation in radians around the z axis.
-        void SetRotation(float angle)
+        void SetRotation(float angle) noexcept
         { mRotation = angle;}
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
 
         // Attach a rigid body to this node class.
@@ -975,85 +975,85 @@ namespace game
         // Create and attach a fixture with default settings.
         void CreateFixture();
 
-        void RemoveDrawable()
+        void RemoveDrawable() noexcept
         { mDrawable.reset(); }
-        void RemoveRigidBody()
+        void RemoveRigidBody() noexcept
         { mRigidBody.reset(); }
-        void RemoveTextItem()
+        void RemoveTextItem() noexcept
         { mTextItem.reset(); }
-        void RemoveSpatialNode()
+        void RemoveSpatialNode() noexcept
         { mSpatialNode.reset(); }
-        void RemoveFixture()
+        void RemoveFixture() noexcept
         { mFixture.reset(); }
 
         // Get the rigid body shared class object if any.
-        std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const
+        std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const noexcept
         { return mRigidBody; }
         // Get the drawable shared class object if any.
-        std::shared_ptr<const DrawableItemClass> GetSharedDrawable() const
+        std::shared_ptr<const DrawableItemClass> GetSharedDrawable() const noexcept
         { return mDrawable; }
         // Get the text item class object if any.
-        std::shared_ptr<const TextItemClass> GetSharedTextItem() const
+        std::shared_ptr<const TextItemClass> GetSharedTextItem() const noexcept
         { return mTextItem; }
         // Get the spatial index node if any.
-        std::shared_ptr<const SpatialNodeClass> GetSharedSpatialNode() const
+        std::shared_ptr<const SpatialNodeClass> GetSharedSpatialNode() const noexcept
         { return mSpatialNode; }
         // Get the fixture class if any
-        std::shared_ptr<const FixtureClass> GetSharedFixture() const
+        std::shared_ptr<const FixtureClass> GetSharedFixture() const noexcept
         { return mFixture; }
 
         // Returns true if a rigid body has been set for this class.
-        bool HasRigidBody() const
+        bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
         // Returns true if a drawable object has been set for this class.
-        bool HasDrawable() const
+        bool HasDrawable() const noexcept
         { return !!mDrawable; }
-        bool HasTextItem() const
+        bool HasTextItem() const noexcept
         { return !!mTextItem; }
-        bool HasSpatialNode() const
+        bool HasSpatialNode() const noexcept
         { return !!mSpatialNode; }
-        bool HasFixture() const
+        bool HasFixture() const noexcept
         { return !!mFixture; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
-        RigidBodyItemClass* GetRigidBody()
+        RigidBodyItemClass* GetRigidBody() noexcept
         { return mRigidBody.get(); }
         // Get the drawable shape object if any. If no drawable shape class object
         // has been set then returns nullptr.
-        DrawableItemClass* GetDrawable()
+        DrawableItemClass* GetDrawable() noexcept
         { return mDrawable.get(); }
         // Get the text item object if any. If no text item class object
         // has been set then returns nullptr:
-        TextItemClass* GetTextItem()
+        TextItemClass* GetTextItem() noexcept
         { return mTextItem.get(); }
         // Get the spatial index node if any. If no spatial index node object
         // has been set then returns nullptr.
-        SpatialNodeClass* GetSpatialNode()
+        SpatialNodeClass* GetSpatialNode() noexcept
         { return mSpatialNode.get(); }
         // Get the fixture class object if any. If no fixture has been attached
         // then returns nullptr.
-        FixtureClass* GetFixture()
+        FixtureClass* GetFixture() noexcept
         { return mFixture.get(); }
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
-        const RigidBodyItemClass* GetRigidBody() const
+        const RigidBodyItemClass* GetRigidBody() const noexcept
         { return mRigidBody.get(); }
         // Get the drawable shape object if any. If no drawable shape class object
         // has been set then returns nullptr.
-        const DrawableItemClass* GetDrawable() const
+        const DrawableItemClass* GetDrawable() const noexcept
         { return mDrawable.get(); }
         // Get the text item object if any. If no text item class object
         // has been set then returns nullptr:
-        const TextItemClass* GetTextItem() const
+        const TextItemClass* GetTextItem() const noexcept
         { return mTextItem.get(); }
         // Get the spatial index node if any. If no spatial index node object
         // has been set then returns nullptr.
-        const SpatialNodeClass* GetSpatialNode() const
+        const SpatialNodeClass* GetSpatialNode() const noexcept
         { return mSpatialNode.get(); }
         // Get the fixture class object if any. If no fixture has been attached
         // then returns nullptr.
-        const FixtureClass* GetFixture() const
+        const FixtureClass* GetFixture() const noexcept
         { return mFixture.get(); }
 
         // Get the transform that applies to this node
@@ -1064,7 +1064,7 @@ namespace game
         // and rigid bodies.
         glm::mat4 GetModelTransform() const;
 
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mDrawable ? mDrawable->GetLayer() : 0; }
 
         void Update(float time, float dt);
@@ -1118,49 +1118,49 @@ namespace game
         EntityNode(EntityNode&& other);
 
         // instance setters.
-        void SetScale(const glm::vec2& scale)
+        void SetScale(const glm::vec2& scale) noexcept
         { mScale = scale; }
-        void SetScale(float sx, float sy)
+        void SetScale(float sx, float sy) noexcept
         { mScale = glm::vec2(sx, sy); }
-        void SetSize(const glm::vec2& size)
+        void SetSize(const glm::vec2& size) noexcept
         { mSize = size; }
-        void SetSize(float width, float height)
+        void SetSize(float width, float height) noexcept
         { mSize = glm::vec2(width, height); }
-        void SetTranslation(const glm::vec2& pos)
+        void SetTranslation(const glm::vec2& pos) noexcept
         { mPosition = pos; }
-        void SetTranslation(float x, float y)
+        void SetTranslation(float x, float y) noexcept
         { mPosition = glm::vec2(x, y); }
-        void SetRotation(float rotation)
+        void SetRotation(float rotation) noexcept
         { mRotation = rotation; }
         void SetName(const std::string& name)
         { mName = name; }
-        void SetEntity(Entity* entity)
+        void SetEntity(Entity* entity) noexcept
         { mEntity = entity; }
-        void Translate(const glm::vec2& vec)
+        void Translate(const glm::vec2& vec) noexcept
         { mPosition += vec; }
-        void Translate(float dx, float dy)
+        void Translate(float dx, float dy) noexcept
         { mPosition += glm::vec2(dx, dy); }
-        void Rotate(float dr)
+        void Rotate(float dr) noexcept
         { mRotation += dr; }
 
         // instance getters.
-        const std::string& GetId() const
+        const std::string& GetId() const noexcept
         { return mInstId; }
-        const std::string& GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
-        const glm::vec2& GetTranslation() const
+        const glm::vec2& GetTranslation() const noexcept
         { return mPosition; }
-        const glm::vec2& GetScale() const
+        const glm::vec2& GetScale() const noexcept
         { return mScale; }
-        const glm::vec2& GetSize() const
+        const glm::vec2& GetSize() const noexcept
         { return mSize; }
-        float GetRotation() const
+        float GetRotation() const noexcept
         { return mRotation; }
-        bool TestFlag(Flags flags) const
+        bool TestFlag(Flags flags) const noexcept
         { return mClass->TestFlag(flags); }
-        Entity* GetEntity()
+        Entity* GetEntity() noexcept
         { return mEntity; }
-        const Entity* GetEntity() const
+        const Entity* GetEntity() const noexcept
         { return mEntity; }
 
         // Get the node's drawable item if any. If no drawable
@@ -1191,23 +1191,23 @@ namespace game
         // then returns nullptr.
         const Fixture* GetFixture() const;
 
-        bool HasRigidBody() const
+        bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
-        bool HasDrawable() const
+        bool HasDrawable() const noexcept
         { return !!mDrawable; }
-        bool HasTextItem() const
+        bool HasTextItem() const noexcept
         { return !!mTextItem; }
-        bool HasSpatialNode() const
+        bool HasSpatialNode() const noexcept
         { return !!mSpatialNode; }
-        bool HasFixture() const
+        bool HasFixture() const noexcept
         { return !!mFixture; }
 
         // shortcut for class getters.
-        const std::string& GetClassId() const
+        const std::string& GetClassId() const noexcept
         { return mClass->GetId(); }
-        const std::string& GetClassName() const
+        const std::string& GetClassName() const noexcept
         { return mClass->GetName(); }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mClass->GetLayer(); }
 
         // Reset node's state to initial class state.
@@ -1220,9 +1220,9 @@ namespace game
         // and rigid bodies.
         glm::mat4 GetModelTransform() const;
 
-        const EntityNodeClass& GetClass() const
+        const EntityNodeClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const EntityNodeClass* operator->() const
+        const EntityNodeClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         // the class object.
@@ -1540,9 +1540,9 @@ namespace game
         // exists then nullptr is returned.
         const ScriptVar* FindScriptVarById(const std::string& id) const;
 
-        void SetLifetime(float value)
+        void SetLifetime(float value) noexcept
         { mLifetime = value;}
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
         void SetName(const std::string& name)
         { mName = name; }
@@ -1552,55 +1552,55 @@ namespace game
         { mIdleTrackId = id; }
         void SetSriptFileId(const std::string& file)
         { mScriptFile = file; }
-        void ResetIdleTrack()
+        void ResetIdleTrack() noexcept
         { mIdleTrackId.clear(); }
-        void ResetScriptFile()
+        void ResetScriptFile() noexcept
         { mScriptFile.clear(); }
-        bool HasIdleTrack() const
+        bool HasIdleTrack() const noexcept
         { return !mIdleTrackId.empty(); }
-        bool HasScriptFile() const
+        bool HasScriptFile() const noexcept
         { return !mScriptFile.empty(); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        int GetLayer() const /* stub*/
+        int GetLayer() const noexcept /* stub*/
         { return 0; }
 
-        RenderTree& GetRenderTree()
+        RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
-        const RenderTree& GetRenderTree() const
+        const RenderTree& GetRenderTree() const noexcept
         { return mRenderTree; }
 
         std::size_t GetHash() const;
-        std::size_t GetNumNodes() const
+        std::size_t GetNumNodes() const noexcept
         { return mNodes.size(); }
-        std::size_t GetNumAnimations() const
+        std::size_t GetNumAnimations() const noexcept
         { return mAnimations.size(); }
-        std::size_t GetNumScriptVars() const
+        std::size_t GetNumScriptVars() const noexcept
         { return mScriptVars.size(); }
-        std::size_t GetNumJoints() const
+        std::size_t GetNumJoints() const noexcept
         { return mJoints.size(); }
-        const std::string& GetId() const
+        const std::string& GetId() const noexcept
         { return mClassId; }
-        const std::string& GetIdleTrackId() const
+        const std::string& GetIdleTrackId() const noexcept
         { return mIdleTrackId; }
-        const std::string& GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
-        const std::string& GetTag() const
+        const std::string& GetTag() const noexcept
         { return mTag; }
-        const std::string& GetScriptFileId() const
+        const std::string& GetScriptFileId() const noexcept
         { return mScriptFile; }
-        float GetLifetime() const
+        float GetLifetime() const noexcept
         { return mLifetime; }
-        const base::bitflag<Flags>& GetFlags() const
+        const base::bitflag<Flags>& GetFlags() const noexcept
         { return mFlags; }
 
-        std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const
+        std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const noexcept
         { return mNodes[index]; }
-        std::shared_ptr<const AnimationClass> GetSharedAnimationClass(size_t index) const
+        std::shared_ptr<const AnimationClass> GetSharedAnimationClass(size_t index) const noexcept
         { return mAnimations[index]; }
-        std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const
+        std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const noexcept
         { return mScriptVars[index]; }
-        std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const
+        std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const noexcept
         { return mJoints[index]; }
 
         // Serialize the entity into JSON.
@@ -1846,29 +1846,29 @@ namespace game
               , mSrcNode(src_node)
               , mDstNode(dst_node)
             {}
-            PhysicsJointType GetType() const
+            PhysicsJointType GetType() const noexcept
             { return mClass->type; }
-            const EntityNode* GetSrcNode() const
+            const EntityNode* GetSrcNode() const noexcept
             { return mSrcNode; }
-            const EntityNode* GetDstNode() const
+            const EntityNode* GetDstNode() const noexcept
             { return mDstNode; }
-            const std::string& GetSrcId() const
+            const std::string& GetSrcId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string& GetDstId() const
+            const std::string& GetDstId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string& GetId() const
+            const std::string& GetId() const noexcept
             { return mId; }
-            const std::string& GetName() const
+            const std::string& GetName() const noexcept
             { return mClass->name; }
-            const glm::vec2& GetSrcAnchorPoint() const
+            const glm::vec2& GetSrcAnchorPoint() const noexcept
             { return mClass->src_node_anchor_point; }
-            const glm::vec2& GetDstAnchorPoint() const
+            const glm::vec2& GetDstAnchorPoint() const noexcept
             { return mClass->dst_node_anchor_point; }
-            const PhysicsJointClass* operator->() const
+            const PhysicsJointClass* operator->() const noexcept
             { return mClass.get(); }
-            const PhysicsJointClass& GetClass() const
+            const PhysicsJointClass& GetClass() const noexcept
             { return *mClass; }
-            const PhysicsJointParams& GetParams() const
+            const PhysicsJointParams& GetParams() const noexcept
             { return mClass->params; }
         private:
             std::shared_ptr<const PhysicsJointClass> mClass;
@@ -1891,21 +1891,21 @@ namespace game
 
         void SetTag(const std::string& tag)
         { mInstanceTag = tag; }
-        void SetFlag(ControlFlags flag, bool on_off)
+        void SetFlag(ControlFlags flag, bool on_off) noexcept
         { mControlFlags.set(flag, on_off); }
-        void SetFlag(Flags flag, bool on_off)
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
         void SetParentNodeClassId(const std::string& id)
         { mParentNodeId = id; }
         void SetIdleTrackId(const std::string& id)
         { mIdleTrackId = id; }
-        void SetLayer(int layer)
+        void SetLayer(int layer) noexcept
         { mLayer = layer; }
-        void SetLifetime(double lifetime)
+        void SetLifetime(double lifetime) noexcept
         { mLifetime = lifetime; }
-        void SetScene(Scene* scene)
+        void SetScene(Scene* scene) noexcept
         { mScene = scene; }
-        void SetVisible(bool on_off)
+        void SetVisible(bool on_off) noexcept
         { SetFlag(Flags::VisibleInGame, on_off); }
         void SetTimer(const std::string& name, double when)
         { mTimers.push_back({name, when}); }
@@ -1915,60 +1915,62 @@ namespace game
         { mEvents.push_back(std::move(event)); }
 
         // Get the current track if any. (when IsAnimating is true)
-        Animation* GetCurrentAnimation()
+        Animation* GetCurrentAnimation() noexcept
         { return mCurrentAnimation.get(); }
         // Get the current track if any. (when IsAnimating is true)
-        const Animation* GetCurrentAnimation() const
+        const Animation* GetCurrentAnimation() const noexcept
         { return mCurrentAnimation.get(); }
         // Get the previously completed animation track (if any).
         // This is a transient state that only exists for one
         // iteration of the game loop after the animation is done.
-        const Animation* GetFinishedAnimation() const
+        const Animation* GetFinishedAnimation() const noexcept
         { return mFinishedAnimation.get(); }
         // Get the current scene.
-        const Scene* GetScene() const
+        const Scene* GetScene() const noexcept
         { return mScene; }
-        Scene* GetScene()
+        Scene* GetScene() noexcept
         { return mScene; }
-        double GetLifetime() const
+        double GetLifetime() const noexcept
         { return mLifetime; }
-        double GetTime() const
+        double GetTime() const noexcept
         { return mCurrentTime; }
-        const std::string& GetIdleTrackId() const
+        const std::string& GetIdleTrackId() const noexcept
         { return mIdleTrackId; }
-        const std::string& GetParentNodeClassId() const
+        const std::string& GetParentNodeClassId() const noexcept
         { return mParentNodeId; }
-        const std::string& GetClassId() const
+        const std::string& GetClassId() const noexcept
         { return mClass->GetId(); }
-        const std::string& GetId() const
+        const std::string& GetId() const noexcept
         { return mInstanceId; }
-        const std::string& GetClassName() const
+        const std::string& GetClassName() const noexcept
         { return mClass->GetName(); }
-        const std::string& GetName() const
+        const std::string& GetName() const noexcept
         { return mInstanceName; }
-        const std::string& GetTag() const
+        const std::string& GetTag() const noexcept
         { return mInstanceTag; }
-        std::size_t GetNumNodes() const
+        const std::string& GetScriptFileId() const noexcept
+        { return mClass->GetScriptFileId(); }
+        std::size_t GetNumNodes() const noexcept
         { return mNodes.size(); }
-        std::size_t GetNumJoints() const
+        std::size_t GetNumJoints() const noexcept
         { return mJoints.size(); }
-        int GetLayer() const
+        int GetLayer() const noexcept
         { return mLayer; }
-        bool TestFlag(ControlFlags flag) const
+        bool TestFlag(ControlFlags flag) const noexcept
         { return mControlFlags.test(flag); }
-        bool TestFlag(Flags flag) const
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        bool IsVisible() const
+        bool IsVisible() const noexcept
         { return TestFlag(Flags::VisibleInGame); }
-        bool HasIdleTrack() const
+        bool HasIdleTrack() const noexcept
         { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
-        RenderTree& GetRenderTree()
+        RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
-        const RenderTree& GetRenderTree() const
+        const RenderTree& GetRenderTree() const noexcept
         { return mRenderTree; }
-        const EntityClass& GetClass() const
+        const EntityClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const EntityClass* operator->() const
+        const EntityClass* operator->() const noexcept
         { return mClass.get(); }
         Entity& operator=(const Entity&) = delete;
     private:
