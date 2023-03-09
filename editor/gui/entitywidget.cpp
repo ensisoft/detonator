@@ -1289,6 +1289,7 @@ void EntityWidget::on_actionNodeVarRef_triggered()
         ref.id = node->GetId();
 
         game::ScriptVar var(app::ToUtf8(name), ref);
+        var.SetPrivate(true);
         DlgScriptVar dlg(nodes, entities, this, var);
         if (dlg.exec() == QDialog::Rejected)
             return;
@@ -1715,6 +1716,7 @@ void EntityWidget::on_btnNewScriptVar_clicked()
         nodes.push_back(std::move(item));
     }
     game::ScriptVar var("My_Var", std::string(""));
+    var.SetPrivate(true);
     DlgScriptVar dlg(nodes, entities, this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;

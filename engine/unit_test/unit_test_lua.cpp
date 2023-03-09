@@ -82,6 +82,8 @@ public:
 
 void unit_test_util()
 {
+    TEST_CASE(test::Type::Feature)
+
     sol::state L;
     L.open_libraries();
 
@@ -144,6 +146,8 @@ end
 
 void unit_test_glm()
 {
+    TEST_CASE(test::Type::Feature)
+
     sol::state L;
     L.open_libraries();
     engine::BindGLM(L);
@@ -291,6 +295,8 @@ end
 
 void unit_test_base()
 {
+    TEST_CASE(test::Type::Feature)
+
     // color4f
     {
         sol::state L;
@@ -408,6 +414,8 @@ end
 
 void unit_test_data()
 {
+    TEST_CASE(test::Type::Feature)
+
     sol::state L;
     L.open_libraries();
     engine::BindBase(L);
@@ -524,6 +532,8 @@ end
 
 void unit_test_scene_interface()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("test_entity");
     {
@@ -811,6 +821,8 @@ end
 
 void unit_test_entity_begin_end_play()
 {
+    TEST_CASE(test::Type::Feature)
+
     base::OverwriteTextFile("entity_begin_end_play_test.lua", R"(
 function BeginPlay(entity, scene)
    local event = game.GameEvent:new()
@@ -899,6 +911,8 @@ end
 
 void unit_test_entity_tick_update()
 {
+    TEST_CASE(test::Type::Feature)
+
     base::OverwriteTextFile("entity_tick_update_test.lua", R"(
 function Tick(entity, game_time, dt)
    local event   = game.GameEvent:new()
@@ -973,6 +987,8 @@ end
 
 void unit_test_entity_private_environment()
 {
+    TEST_CASE(test::Type::Feature)
+
     // test that each entity type has their own private
     // lua environment without stomping on each others data!
 
@@ -1041,8 +1057,114 @@ end
 
 }
 
+// Test that scripting variables marked private are only available within
+// the script associated with that entity type.
+void unit_test_entity_private_variable()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // Sol2 seems to have some bug regarding accessing this_environment
+    // which is crucial for checking the access to a private script var.
+    // seems that using a random print provides a workaround (state gets set)
+    // https://github.com/ThePhD/sol2/issues/1464
+
+    // foo can access its own variable in the foo script
+    base::OverwriteTextFile("entity_env_foo_test.lua", R"(
+function Tick(foo, game_time, dt)
+   print('sol2 WAR')
+
+   print('private var', foo.my_private_var)
+   print('public var', foo.my_public_var)
+
+   local event = game.GameEvent:new()
+   event.message = 'foo'
+   event.value   = 'ok'
+   Game:PostEvent(event)
+end
+)");
+
+    // bar cannot access foo's private variable but only a public variable.
+    base::OverwriteTextFile("entity_env_bar_test.lua", R"(
+function try_access_private_var(foo)
+   print('workaround for sol2 bug with this_environment')
+
+  --print('foo private var', foo.my_private_var)
+  local val = foo.my_private_var
+end
+
+function Tick(bar, game_time, dt)
+   local scene = bar:GetScene()
+   local foo = scene:FindEntityByInstanceName('foo')
+
+   if pcall(try_access_private_var, foo) then
+     error('failed testing private variable')
+   end
+
+   print('foo public var', foo.my_public_var)
+
+   local event = game.GameEvent:new()
+   event.message = 'bar'
+   event.value   = 'ok'
+   Game:PostEvent(event)
+end
+)");
+
+    game::ScriptVar private_var("my_private_var", 1.0f);
+    private_var.SetPrivate(true);
+    private_var.SetArray(false);
+    private_var.SetReadOnly(true);
+
+    game::ScriptVar public_var("my_public_var", 2.0f);
+    public_var.SetPrivate(false);
+    public_var.SetArray(false);
+    public_var.SetReadOnly(true);
+
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
+    foo->AddScriptVar(private_var);
+    foo->AddScriptVar(public_var);
+
+    auto bar = std::make_shared<game::EntityClass>();
+    bar->SetName("bar");
+    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+    {
+        game::SceneNodeClass node;
+        node.SetName("bar");
+        node.SetEntity(bar);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    game::Scene instance(scene_class);
+
+    TestLoader loader;
+
+    engine::LuaRuntime script(".", "", "", "");
+    script.SetDataLoader(&loader);
+    script.Init();
+    script.BeginPlay(&instance);
+    script.Tick(0.0, 0.0);
+
+    engine::Action action1;
+    engine::Action action2;
+    TEST_REQUIRE(script.GetNextAction(&action1));
+    TEST_REQUIRE(script.GetNextAction(&action2));
+}
+
 void unit_test_entity_cross_env_call()
 {
+    TEST_CASE(test::Type::Feature)
+
     // call an entity method inside one entity environment
     // from another entity environment.
     base::OverwriteTextFile("entity_env_foo_test.lua", R"(
@@ -1132,6 +1254,8 @@ end
 
 void unit_test_entity_shared_globals()
 {
+    TEST_CASE(test::Type::Feature)
+
     base::OverwriteTextFile("entity_shared_global_test_foo.lua", R"(
 function Tick(entity, game_time, dt)
     _G['foobar'] = 123
@@ -1188,6 +1312,8 @@ end
 
 void unit_test_game_main_script_load_success()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         base::OverwriteTextFile("game_main_script_test.lua", R"(
 function LoadGame()
@@ -1247,6 +1373,8 @@ end
 
 void unit_test_game_main_script_load_failure()
 {
+    TEST_CASE(test::Type::Feature)
+
     base::OverwriteTextFile("broken.lua", R"(
 function Broken()
 endkasd
@@ -1313,6 +1441,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_begin_end_play();
     unit_test_entity_tick_update();
     unit_test_entity_private_environment();
+    unit_test_entity_private_variable();
     unit_test_entity_cross_env_call();
     unit_test_entity_shared_globals();
     unit_test_game_main_script_load_success();

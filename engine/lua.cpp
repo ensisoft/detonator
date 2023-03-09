@@ -619,13 +619,25 @@ sol::object ResolveNodeReferences(game::Entity& entity, const ScriptVar& var, so
 }
 
 template<typename Type>
-sol::object GetScriptVar(Type& object, const char* key, sol::this_state state)
+sol::object GetScriptVar(Type& object, const char* key, sol::this_state state, sol::this_environment this_env)
 {
     using namespace engine;
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (!var)
         throw GameError(base::FormatString("No such variable: '%1'", key));
+    if (var->IsPrivate())
+    {
+        // looks like a sol2 bug. this_env is sometimes nullopt!
+        // https://github.com/ThePhD/sol2/issues/1464
+        if (this_env)
+        {
+            sol::environment& environment(this_env);
+            const std::string script_id = environment["__script_id__"];
+            if (object.GetScriptFileId() != script_id)
+                throw GameError(base::FormatString("Trying to access private variable: '%1'", key));
+        }
+    }
 
     if (var->GetType() == game::ScriptVar::Type::EntityReference)
     {
@@ -638,7 +650,7 @@ sol::object GetScriptVar(Type& object, const char* key, sol::this_state state)
     else return ObjectFromScriptVarValue(*var, state);
 }
 template<typename Type>
-void SetScriptVar(Type& object, const char* key, sol::object value)
+void SetScriptVar(Type& object, const char* key, sol::object value, sol::this_state state, sol::this_environment this_env)
 {
     using namespace engine;
     const ScriptVar* var = object.FindScriptVarByName(key);
@@ -646,6 +658,18 @@ void SetScriptVar(Type& object, const char* key, sol::object value)
         throw GameError(base::FormatString("No such variable: '%1'", key));
     else if (var->IsReadOnly())
         throw GameError(base::FormatString("Trying to write to a read only variable: '%1'", key));
+    else if (var->IsPrivate())
+    {
+        // looks like a sol2 bug. this_env is sometimes nullopt!
+        // https://github.com/ThePhD/sol2/issues/1464
+        if (this_env)
+        {
+            sol::environment& environment(this_env);
+            const std::string script_id = environment["__script_id__"];
+            if (object.GetScriptFileId() != script_id)
+                throw GameError(base::FormatString("Trying to access private variable: '%1'", key));
+        }
+    }
 
     if (value.is<int>() && var->HasType<int>())
         var->SetValue(value.as<int>());
@@ -699,10 +723,10 @@ void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
 
 // WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
 // directly in the call to create new usertype. adding these specializations as a workaround.
-template sol::object GetScriptVar<game::Scene>(game::Scene&, const char*, sol::this_state);
-template sol::object GetScriptVar<game::Entity>(game::Entity&, const char*, sol::this_state);
-template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object);
-template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object);
+template sol::object GetScriptVar<game::Scene>(game::Scene&, const char*, sol::this_state, sol::this_environment);
+template sol::object GetScriptVar<game::Entity>(game::Entity&, const char*, sol::this_state, sol::this_environment);
+template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object, sol::this_state, sol::this_environment);
+template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object, sol::this_state, sol::this_environment);
 
 // shim to help with uik::WidgetCast overload resolution.
 template<typename Widget> inline
@@ -1328,7 +1352,7 @@ void LuaRuntime::Init()
     };
     engine["EnableEffect"] = [](LuaRuntime& self, std::string effect, bool on_off) {
         EnableEffectAction action;
-        action.name  = effect;
+        action.name  = std::move(effect);
         action.value = on_off;
         self.mActionQueue.push(action);
     };
@@ -1336,6 +1360,7 @@ void LuaRuntime::Init()
     if (!mGameScript.empty())
     {
         mGameEnv = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+        (*mGameEnv)["__script_id__"] = "__main__";
 
         const auto& script_uri  = mGameScript;
         const auto& script_buff = mDataLoader->LoadEngineDataUri(script_uri);
@@ -1347,8 +1372,8 @@ void LuaRuntime::Init()
             throw std::runtime_error("failed to load main game script.");
         }
         const auto& script_file = script_buff->GetName();
-        const auto& view = sol::string_view((const char*)script_buff->GetData(), script_buff->GetSize());
-        auto result = mLuaState->script(view, *mGameEnv);
+        const auto& script_view = script_buff->GetStringView();
+        auto result = mLuaState->script(script_view, *mGameEnv);
         if (!result.valid())
         {
             const sol::error err = result;
@@ -1422,9 +1447,14 @@ void LuaRuntime::BeginPlay(Scene* scene)
                 continue;
             }
             auto script_env = std::make_shared<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+            // store the script ID with the script object/environment
+            // this is used when for example checking access to a scripting variable.
+            // i.e. we check that the entity's script ID is the same as the script ID
+            // stored the script environment.
+            (*script_env)["__script_id__"] = script;
+
             const auto& script_file = script_buff->GetName();
-            const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
-                    script_buff->GetSize());
+            const auto& script_view = script_buff->GetStringView();
             const auto& result = mLuaState->script(script_view, *script_env);
             if (!result.valid())
             {
@@ -1455,9 +1485,10 @@ void LuaRuntime::BeginPlay(Scene* scene)
         else
         {
             scene_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+            (*scene_env)["__script_id__"] = script;
+
             const auto& script_file = script_buff->GetName();
-            const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
-                  script_buff->GetSize());
+            const auto& script_view = script_buff->GetStringView();
             const auto& result = mLuaState->script(script_view, *scene_env);
             if (!result.valid())
             {
@@ -1917,11 +1948,16 @@ sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
         ERROR("Failed to load entity class script file. [class='%1', script='%2']", klass.GetName(), script);
         return nullptr;
     }
+    auto script_env = std::make_shared<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+    // store the script ID with the script object/environment
+    // this is used when for example checking access to a scripting variable.
+    // i.e. we check that the entity's script ID is the same as the script ID
+    // stored the script environment.
+    (*script_env)["__script_id__"] = script;
+
     const auto& script_file = script_buff->GetName();
-    const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
-        script_buff->GetSize());
-    auto env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
-    const auto& result = mLuaState->script(script_view, *env);
+    const auto& script_view = script_buff->GetStringView();
+    const auto& result = mLuaState->script(script_view, *script_env);
     if (!result.valid())
     {
         const sol::error err = result;
@@ -1933,7 +1969,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
         throw std::runtime_error(err.what());
     }
     DEBUG("Entity class script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
-    it = mEntityEnvs.insert({klassId, std::move(env)}).first;
+    it = mEntityEnvs.insert({klassId, script_env}).first;
     return it->second.get();
 }
 
@@ -1954,10 +1990,10 @@ sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
         return nullptr;
     }
     const auto& script_file = script_buff->GetName();
-    const auto& script_view = sol::string_view((const char*)script_buff->GetData(),
-        script_buff->GetSize());
-    auto env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
-    const auto& result = mLuaState->script(script_view, *env);
+    const auto& script_view = script_buff->GetStringView();
+    auto script_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+    (*script_env)["__script_id__"] = script;
+    const auto& result = mLuaState->script(script_view, *script_env);
     if (!result.valid())
     {
         const sol::error err = result;
@@ -1969,7 +2005,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
         throw std::runtime_error(err.what());
     }
     DEBUG("UiKit window script loaded. [window='%1', file='%2']", window.GetName(), script_file);
-    it = mWindowEnvs.insert({id, std::move(env)}).first;
+    it = mWindowEnvs.insert({id, std::move(script_env)}).first;
     return it->second.get();
 }
 
