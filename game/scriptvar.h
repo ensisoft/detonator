@@ -49,7 +49,13 @@ namespace game
             // memory consumption. This flag is on by default.
             ReadOnly,
             // Flag to control whether the variable is an array.
-            Array
+            Array,
+            // Flag to control the variable visibility.
+            // Private will restrict the access only to the
+            // script associated with the owner of the variable.
+            // For example when an Entity has a private variable
+            // only the entity script can access it.
+            Private
         };
 
         template<size_t Index>
@@ -92,19 +98,25 @@ namespace game
             mData = std::vector<T>{std::move(value)};
             mFlags.set(Flags::ReadOnly, read_only);
             mFlags.set(Flags::Array, false);
+            mFlags.set(Flags::Private, false);
         }
         template<typename T>
         ScriptVar(std::string name, std::vector<T> array, bool read_only = true)
           : mId(base::RandomString(10))
           , mName(std::move(name))
+          , mData(std::move(array))
         {
-            mData = std::move(array);
             mFlags.set(Flags::ReadOnly, read_only);
             mFlags.set(Flags::Array, true);
+            mFlags.set(Flags::Private, false);
         }
         ScriptVar()
           : mId(base::RandomString(10))
-        {}
+        {
+            mFlags.set(Flags::ReadOnly,true);
+            mFlags.set(Flags::Array,   true);
+            mFlags.set(Flags::Private, false);
+        }
 
         // Get whether the variable is considered read-only/constant
         // in the scripting environment.
@@ -112,6 +124,8 @@ namespace game
         { return mFlags.test(Flags::ReadOnly); }
         bool IsArray() const noexcept
         { return mFlags.test(Flags::Array); }
+        bool IsPrivate() const noexcept
+        { return mFlags.test(Flags::Private); }
         // Get the type of the variable.
         Type GetType() const;
         // Get the script variable ID.
@@ -183,6 +197,8 @@ namespace game
         { mFlags.set(Flags::ReadOnly, read_only); }
         void SetArray(bool array) noexcept
         { mFlags.set(Flags::Array, array); }
+        void SetPrivate(bool priv) noexcept
+        { mFlags.set(Flags::Private, priv); }
         const VariantType& GetVariantValue() const
         { return mData; }
 

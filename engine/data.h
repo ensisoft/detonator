@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <string_view>
+
 #include <cstddef>
 #include <string>
 
@@ -37,6 +39,12 @@ namespace engine
         virtual const void* GetData() const = 0;
         virtual std::size_t GetSize() const = 0;
         virtual std::string GetName() const = 0;
+
+        inline std::string_view GetStringView() const noexcept {
+            const auto* str = static_cast<const char*>(GetData());
+            const auto  len = GetSize();
+            return { str, len };
+        }
     private:
     };
 } // namespace

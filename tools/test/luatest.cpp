@@ -135,7 +135,7 @@ void meta_method_index_test()
     auto foo = L.new_usertype<Foobar>("foo",
 		sol::meta_function::index, &Foobar::GetValue);
     auto bar = L.new_usertype<Doodah>("bar");
-    bar.set_function(sol::meta_function::index, &Foobar::GetValue);
+    bar.set_function(sol::meta_function::index, &Doodah::GetValue);
 
 	L.script(
   "f = foo.new()\n"
@@ -215,10 +215,119 @@ end
 
 }
 
+void environment_variable_test()
+{
+    sol::state L;
+    L.open_libraries();
+
+    sol::environment env(L, sol::create, L.globals());
+
+    // set a string on this environment
+    env["my_var"] = "foobar";
+
+    // sanity checking here. these work as expected.
+    {
+        // ok, works great.
+        std::string value = env["my_var"];
+        if (value != "foobar")
+            std::printf("bonkers!\n");
+
+        // ok, works, great
+        L.script(R"(
+            print(my_var)
+        )", env);
+    }
+
+    L["test"] = [](sol::this_state state, sol::this_environment this_env) {
+        //std::printf("test_func\n");
+        //std::printf("has state = %s\n", state ? "yes" : "no");
+        std::printf("has environment = %s\n", this_env ? "yes" : "no");
+
+        // the problem here is that we can't get the my_var string since
+        // the environment is not set. in other words the implicit conversion
+        // from this_env to sol::environment tries to access std::optional
+        // that doesn't have a value.
+        if (this_env)
+        {
+            sol::environment& env = this_env;
+            std::string str = env["my_var"];
+            std::printf("my_var '%s'\n", str.c_str());
+        }
+    };
+    // env is empty. ok
+    L["test"]();
+
+    // call the same function using a different environment
+    // result -> no environment.
+    env["test"]();
+
+    // ok, try using this type of invocation
+    // still the same result -> no environment
+    {
+        sol::protected_function test_func = L["test"];
+        test_func(env);
+    }
+
+    // ok, try using this type of invocation
+    // still the same result -> no environment
+    {
+        sol::protected_function test_func = env["test"];
+        test_func();
+    }
+
+
+    // calling a script that calls the test function.
+    //  even when passing the env parameter this_env is still nullopt!
+    L.script(R"(
+function some_func()
+   test()
+end
+    )", env);
+
+    env["some_func"]();
+
+}
+
+struct MyEntity {};
+
+std::string GetSomething(MyEntity& entity, const char* key, sol::this_state this_state, sol::this_environment this_env)
+{
+    std::printf("GetSomething, key='%s', has environment = %s\n", key, this_env ? "yes" : "no");
+
+    return "dummy";
+}
+
+void environment_variable_test_entity()
+{
+    sol::state L;
+    L.open_libraries();
+
+    auto entity = L.new_usertype<MyEntity>("MyEntity",
+      sol::meta_function::index, &GetSomething);
+
+    sol::environment env(L, sol::create, L.globals());
+
+    L.script(R"(
+function Tick(entity)
+   --print(entity.test_value)
+   print('hello')
+   local var = entity.test_value
+end
+    )", env);
+
+    MyEntity e;
+
+    env["Tick"](&e);
+
+}
+
 int main(int argc, char* argv[])
 {
     //vector_test();
-    array_type_test();
+    //array_type_test();
+    //environment_variable_test();
+
+    environment_variable_test_entity();
 
     return 0;
 }

@@ -39,6 +39,7 @@ DlgScriptVar::DlgScriptVar(const std::vector<ResourceListItem>& nodes,
     SetValue(mUI.varType,     variable.GetType());
     SetValue(mUI.chkReadOnly, variable.IsReadOnly());
     SetValue(mUI.chkArray,    variable.IsArray());
+    SetValue(mUI.chkPrivate,  variable.IsPrivate());
     SetEnabled(mUI.btnAdd,    variable.IsArray());
     SetEnabled(mUI.btnDel,    variable.IsArray());
     SetList(mUI.cmbEntityNodeRef, nodes);
@@ -58,6 +59,7 @@ void DlgScriptVar::on_btnAccept_clicked()
 
     mVar.SetName(GetValue(mUI.varName));
     mVar.SetReadOnly(GetValue(mUI.chkReadOnly));
+    mVar.SetPrivate(GetValue(mUI.chkPrivate));
     accept();
 }
 void DlgScriptVar::on_btnCancel_clicked()
