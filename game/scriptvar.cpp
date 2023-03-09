@@ -175,8 +175,7 @@ size_t ScriptVar::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mReadOnly);
-    hash = base::hash_combine(hash, mIsArray);
+    hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, GetHash(mData));
     return hash;
 }
@@ -193,8 +192,7 @@ void ScriptVar::IntoJson(data::Writer& writer) const
 {
     writer.Write("id",       mId);
     writer.Write("name",     mName);
-    writer.Write("readonly", mReadOnly);
-    writer.Write("array",    mIsArray);
+    writer.Write("flags",    mFlags);
     IntoJson(mData, writer);
 }
 
@@ -203,9 +201,23 @@ bool ScriptVar::FromJson(const data::Reader& reader)
     bool ok = true;
     ok &= reader.Read("id",       &mId);
     ok &= reader.Read("name",     &mName);
-    ok &= reader.Read("readonly", &mReadOnly);
-    ok &= reader.Read("array",    &mIsArray);
-    ok &= FromJson(reader,        &mData);
+
+    // migrating from separate booleans to a bitflag
+    if (reader.HasValue("flags"))
+    {
+        ok &= reader.Read("flags", &mFlags);
+    }
+    else
+    {
+        bool readonly = false;
+        bool array    = false;
+        ok &= reader.Read("readonly", &readonly);
+        ok &= reader.Read("array", &array);
+        mFlags.set(Flags::ReadOnly, readonly);
+        mFlags.set(Flags::Array, array);
+    }
+
+    ok &= FromJson(reader,&mData);
     return ok;
 }
 
