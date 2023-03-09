@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "base/assert.h"
+#include "base/bitflag.h"
 #include "base/utility.h"
 #include "data/fwd.h"
 
@@ -39,6 +40,17 @@ namespace game
     public:
         static constexpr bool ReadOnly = true;
         static constexpr bool ReadWrite = false;
+
+        // Variable flags.
+        enum class Flags {
+            // Flag to control whether the variable is a read-only/constant
+            // in the scripting environment. Read only variables can be
+            // shared by multiple object instances thus leading to reduced
+            // memory consumption. This flag is on by default.
+            ReadOnly,
+            // Flag to control whether the variable is an array.
+            Array
+        };
 
         template<size_t Index>
         struct ObjectReference {
@@ -76,19 +88,19 @@ namespace game
         ScriptVar(std::string name, T value, bool read_only = true)
           : mId(base::RandomString(10))
           , mName(std::move(name))
-          , mReadOnly(read_only)
-          , mIsArray(false)
         {
-              mData = std::vector<T>{std::move(value)};
+            mData = std::vector<T>{std::move(value)};
+            mFlags.set(Flags::ReadOnly, read_only);
+            mFlags.set(Flags::Array, false);
         }
         template<typename T>
         ScriptVar(std::string name, std::vector<T> array, bool read_only = true)
           : mId(base::RandomString(10))
           , mName(std::move(name))
-          , mReadOnly(read_only)
-          , mIsArray(true)
         {
-              mData = std::move(array);
+            mData = std::move(array);
+            mFlags.set(Flags::ReadOnly, read_only);
+            mFlags.set(Flags::Array, true);
         }
         ScriptVar()
           : mId(base::RandomString(10))
@@ -96,23 +108,23 @@ namespace game
 
         // Get whether the variable is considered read-only/constant
         // in the scripting environment.
-        bool IsReadOnly() const
-        { return mReadOnly; }
-        bool IsArray() const
-        { return mIsArray; }
+        bool IsReadOnly() const noexcept
+        { return mFlags.test(Flags::ReadOnly); }
+        bool IsArray() const noexcept
+        { return mFlags.test(Flags::Array); }
         // Get the type of the variable.
         Type GetType() const;
         // Get the script variable ID.
-        const std::string& GetId() const
+        const std::string& GetId() const noexcept
         { return mId; }
         // Get the script variable name.
-        const std::string& GetName() const
+        const std::string& GetName() const noexcept
         { return mName; }
 
         // Get the actual value. The ScriptVar *must* hold that
         // type internally for the data item.
         template<typename T>
-        T GetValue() const
+        T GetValue() const noexcept
         {
             // returning by value because of vector<bool> returns a temporary.
 
@@ -122,7 +134,7 @@ namespace game
             return array[0];
         }
         template<typename T>
-        std::vector<T>& GetArray() const
+        std::vector<T>& GetArray() const noexcept
         {
             // see the comments below about why this function is marked
             ASSERT(std::holds_alternative<std::vector<T>>(mData));
@@ -141,14 +153,14 @@ namespace game
         void SetArray(std::vector<T> values) const
         {
             ASSERT(std::holds_alternative<std::vector<T>>(mData));
-            ASSERT(mReadOnly == false);
+            ASSERT(!IsReadOnly());
             mData = std::move(values);
         }
         template<typename T>
         void SetValue(T value) const
         {
             ASSERT(std::holds_alternative<std::vector<T>>(mData));
-            ASSERT(mReadOnly == false);
+            ASSERT(!IsReadOnly());
             auto& array = std::get<std::vector<T>>(mData);
             ASSERT(array.size() == 1);
             array[0] = std::move(value);
@@ -167,10 +179,10 @@ namespace game
         { mData = std::move(array); }
         void SetName(const std::string& name)
         { mName = name; }
-        void SetReadOnly(bool read_only)
-        { mReadOnly = read_only; }
-        void SetArray(bool array)
-        { mIsArray = array; }
+        void SetReadOnly(bool read_only) noexcept
+        { mFlags.set(Flags::ReadOnly, read_only); }
+        void SetArray(bool array) noexcept
+        { mFlags.set(Flags::Array, array); }
         const VariantType& GetVariantValue() const
         { return mData; }
 
@@ -219,12 +231,8 @@ namespace game
         std::string mName;
         // the actual data.
         mutable VariantType mData;
-        // whether the variable is a read-only / constant in the
-        // scripting environment. read only variables can be
-        // shared by multiple object instances thus leading to
-        // reduced memory consumption. (hence the default)
-        bool mReadOnly = true;
-        bool mIsArray = false;
+        // variable flags.
+        base::bitflag<Flags> mFlags;
     };
 } // namespace
 
