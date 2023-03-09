@@ -684,6 +684,8 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
     settings.SaveWidget("Scene", mUI.quadTreeGroup);
     settings.SaveWidget("Scene", mUI.denseGridGroup);
+    settings.SaveWidget("Scene", mUI.effectsGroup);
+    settings.SaveWidget("Scene", mUI.bloomGroup);
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -714,6 +716,8 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
     settings.LoadWidget("Scene", mUI.quadTreeGroup);
     settings.LoadWidget("Scene", mUI.denseGridGroup);
+    settings.LoadWidget("Scene", mUI.effectsGroup);
+    settings.LoadWidget("Scene", mUI.bloomGroup);
 
     if (!mState.scene->FromJson(json))
         WARN("Failed to restore scene state.");
