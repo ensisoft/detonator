@@ -299,7 +299,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="gui::CollapsibleWidget" name="fooWidget">
+             <widget class="gui::CollapsibleWidget" name="callbacks">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                 <horstretch>0</horstretch>
@@ -388,7 +388,7 @@
              </widget>
             </item>
             <item>
-             <widget class="gui::CollapsibleWidget" name="fooWidget_2">
+             <widget class="gui::CollapsibleWidget" name="variables">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -457,7 +457,7 @@
              </widget>
             </item>
             <item>
-             <widget class="gui::CollapsibleWidget" name="fooWidget_3">
+             <widget class="gui::CollapsibleWidget" name="animations">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -578,7 +578,7 @@
              </widget>
             </item>
             <item>
-             <widget class="gui::CollapsibleWidget" name="fooWidget_4">
+             <widget class="gui::CollapsibleWidget" name="joints">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -3458,19 +3458,19 @@
   <tabstop>entityTag</tabstop>
   <tabstop>chkKillAtLifetime</tabstop>
   <tabstop>chkKillAtBoundary</tabstop>
-  <tabstop>fooWidget</tabstop>
+  <tabstop>callbacks</tabstop>
   <tabstop>chkTickEntity</tabstop>
   <tabstop>chkUpdateEntity</tabstop>
   <tabstop>chkKeyEvents</tabstop>
   <tabstop>chkMouseEvents</tabstop>
-  <tabstop>fooWidget_2</tabstop>
+  <tabstop>variables</tabstop>
   <tabstop>scriptVarList</tabstop>
-  <tabstop>fooWidget_3</tabstop>
+  <tabstop>animations</tabstop>
   <tabstop>trackList</tabstop>
   <tabstop>idleTrack</tabstop>
   <tabstop>btnAddIdleTrack</tabstop>
   <tabstop>btnResetIdleTrack</tabstop>
-  <tabstop>fooWidget_4</tabstop>
+  <tabstop>joints</tabstop>
   <tabstop>jointList</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>

@@ -681,6 +681,10 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.cmbGrid);
     settings.SaveWidget("Entity", mUI.zoom);
     settings.SaveWidget("Entity", mUI.widget);
+    settings.SaveWidget("Entity", mUI.callbacks);
+    settings.SaveWidget("Entity", mUI.variables);
+    settings.SaveWidget("Entity", mUI.animations);
+    settings.SaveWidget("Entity", mUI.joints);
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -703,6 +707,10 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.cmbGrid);
     settings.LoadWidget("Entity", mUI.zoom);
     settings.LoadWidget("Entity", mUI.widget);
+    settings.LoadWidget("Entity", mUI.callbacks);
+    settings.LoadWidget("Entity", mUI.variables);
+    settings.LoadWidget("Entity", mUI.animations);
+    settings.LoadWidget("Entity", mUI.joints);
 
     game::EntityClass klass;
     if (!klass.FromJson(json))
