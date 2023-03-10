@@ -2169,13 +2169,20 @@ void BindBase(sol::state& L)
         },
         [](const base::FRect& rect, const FPoint& point) {
             return rect.TestPoint(point);
+        },
+        [](const base::FRect& rect, const glm::vec2& point) {
+            return rect.TestPoint(point.x, point.y);
         });
+
     rect["MapToGlobal"] = sol::overload(
         [](const base::FRect& rect, float x, float y) {
             return rect.MapToGlobal(x, y);
         },
         [](const base::FRect& rect, const FPoint& point) {
             return rect.MapToGlobal(point);
+        },
+        [](const base::FRect& rect, const glm::vec2& point) {
+           return rect.MapToGlobal(point.x, point.y);
         });
     rect["MapToLocal"] = sol::overload(
         [](const base::FRect& rect, float x, float y) {
@@ -2183,6 +2190,9 @@ void BindBase(sol::state& L)
         },
         [](const base::FRect& rect, const FPoint& point) {
             return rect.MapToLocal(point);
+        },
+        [](const base::FRect& rect, const glm::vec2& point) {
+            return rect.MapToLocal(point.x, point.y);
         });
     rect["GetQuadrants"]   = &base::FRect::GetQuadrants;
     rect["GetCorners"]     = &base::FRect::GetCorners;

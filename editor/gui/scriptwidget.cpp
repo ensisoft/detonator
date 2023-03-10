@@ -415,15 +415,15 @@ void InitDoc()
     DOC_METHOD_2("bool", "TestPoint", "Test whether the given point is inside the rectangle or not.",
                  "float", "x", "float", "y");
     DOC_METHOD_1("bool", "TestPoint", "Test whether the given point is inside the rectangle or not.",
-                 "base.FPoint", "point");
+                 "base.FPoint|glm.vec2", "point");
     DOC_METHOD_2("base.FPoint", "MapToGlobal", "Map a point relative to the rect origin to a global point.",
                  "float", "x", "float", "y");
     DOC_METHOD_1("base.FPoint", "MapToGlobal", "Map a point relative to the rect origin to a global point.",
-                 "base.FPoint", "point");
+                 "base.FPoint|glm.vec2", "point");
     DOC_METHOD_2("base.FPoint", "MapToLocal", "Map a global point to a local point relative to the rect origin.",
                  "float", "x", "float", "y");
     DOC_METHOD_1("base.FPoint", "MapToLocal", "Map a global point to a local point relative to the rect origin.",
-                 "base.FPoint", "point");
+                 "base.FPoint|glm.vec2", "point");
     DOC_METHOD_0("base.FRect, base.FRect, base.FRect, base.FRect", "GetQuadrants", "Split the rectangle into 4 quadrants.");
     DOC_METHOD_0("base.FPoint, base.FPoint, base.FPoint, base.FPoint", "GetCorners", "Get the 4 corners of the rectangle.");
     DOC_METHOD_0("base.FPoint", "GetCenter", "Get the center point of the rectangle.");
