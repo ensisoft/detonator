@@ -378,6 +378,114 @@ void measure_allocation_times()
     }
 }
 
+struct RefCountEntity : public mem::RefBase {
+    std::string name;
+    glm::vec2 position;
+    float rotation = 0.0f;
+
+    RefCountEntity(const Entity&) = delete;
+    RefCountEntity& operator=(const Entity&) = delete;
+    RefCountEntity() noexcept
+    {
+        ++Counter;
+    }
+   ~RefCountEntity() noexcept
+    {
+        TEST_REQUIRE(Counter > 0);
+        --Counter;
+    }
+    static uint32_t Counter;
+};
+
+uint32_t RefCountEntity::Counter = 0;
+
+
+void unit_test_refcount_lifecycle()
+{
+
+    TEST_CASE(test::Type::Feature)
+
+    mem::SharedPtr<RefCountEntity> entity(new RefCountEntity);
+    TEST_REQUIRE(entity);
+
+    {
+        TEST_REQUIRE(entity->GetRefCount() == 1);
+        TEST_REQUIRE(RefCountEntity::Counter == 1);
+    }
+
+    // copy ctor
+    {
+        mem::SharedPtr<RefCountEntity> copy(entity);
+        TEST_REQUIRE(entity->GetRefCount() == 2);
+        TEST_REQUIRE(RefCountEntity::Counter == 1);
+    }
+
+    // assignment
+    {
+        mem::SharedPtr<RefCountEntity> copy;
+        copy = entity;
+        TEST_REQUIRE(entity->GetRefCount() == 2);
+        TEST_REQUIRE(RefCountEntity::Counter == 1);
+    }
+
+    // assignment to self
+    {
+        entity = entity;
+        TEST_REQUIRE(entity->GetRefCount() == 1);
+        TEST_REQUIRE(RefCountEntity::Counter == 1);
+    }
+
+    entity.reset();
+    TEST_REQUIRE(!entity);
+    TEST_REQUIRE(RefCountEntity::Counter == 0);
+}
+
+void measure_refcount_pointer_times()
+{
+    TEST_CASE(test::Type::Other)
+
+    // std::shared_ptr
+    {
+        auto entity = std::make_shared<RefCountEntity>();
+        std::vector<std::shared_ptr<RefCountEntity>> vector;
+        vector.resize(1000);
+
+        const auto ret = test::TimedTest(10000, [&vector, &entity]() {
+            // copy the same entity ref into the vector.
+            for (unsigned i = 0; i < 1000; ++i)
+            {
+                vector[i] = entity;
+            }
+        });
+        // side effect
+        for (auto& shared_ptr: vector)
+            test::DevNull("%p", shared_ptr.get());
+
+        test::PrintTestTimes("std::shared_ptr", ret);
+    }
+
+    // mem::shared_ptr
+    {
+        mem::shared_ptr<RefCountEntity> entity(new RefCountEntity);
+        std::vector<mem::shared_ptr<RefCountEntity>> vector;
+        vector.resize(1000);
+
+        const auto ret = test::TimedTest(10000, [&vector, &entity]() {
+            // copy the same entity ref into the vector.
+            for (unsigned i = 0; i < 1000; ++i)
+            {
+                vector[i] = entity;
+            }
+        });
+        // side effect
+        for (auto& shared_ptr: vector)
+            test::DevNull("%p", shared_ptr.get());
+
+        test::PrintTestTimes("mem::shared_ptr", ret);
+    }
+}
+
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -386,7 +494,10 @@ int test_main(int argc, char* argv[])
     unit_test_pool();
     unit_test_bump();
 
+    unit_test_refcount_lifecycle();
+
     measure_allocation_times();
+    measure_refcount_pointer_times();
     return 0;
 }
 ) // TEST_MAIN
