@@ -89,6 +89,14 @@ void ChildWindow::ShowNote(const QString& note) const
     mUI.statusBar->showMessage(note, 5000);
 }
 
+bool ChildWindow::LaunchScript(const QString& id)
+{
+    if (!mWidget || mClosed)
+        return false;
+
+    return mWidget->LaunchScript(id);
+}
+
 void ChildWindow::RefreshUI()
 {
     if (mPopInRequested || mClosed)

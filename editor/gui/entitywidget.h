@@ -82,6 +82,7 @@ namespace gui
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
         virtual bool OnEscape() override;
+        virtual bool LaunchScript(const QString& id) override;
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }

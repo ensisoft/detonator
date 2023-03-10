@@ -186,6 +186,7 @@ namespace gui
         void OpenNewWidget(gui::MainWidget* widget);
         void RefreshWidget();
         void RefreshWidgetActions();
+        void LaunchScript(const QString& id);
         void OpenResource(const QString& id);
         void OpenRecentWorkspace();
         void ToggleShowResource();

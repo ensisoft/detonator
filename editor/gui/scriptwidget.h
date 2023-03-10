@@ -72,6 +72,7 @@ namespace gui
         static void GetDefaultSettings(Settings* settings);
 
     private slots:
+        void on_actionPreview_triggered();
         void on_actionSave_triggered();
         void on_actionOpen_triggered();
         void on_actionFindHelp_triggered();

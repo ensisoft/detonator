@@ -1893,6 +1893,8 @@ void ScriptWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionPreview);
+    bar.addSeparator();
     bar.addAction(mUI.actionFindText);
     bar.addAction(mUI.actionReplaceText);
     bar.addSeparator();
@@ -1903,6 +1905,8 @@ void ScriptWidget::AddActions(QToolBar& bar)
 void ScriptWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPreview);
     menu.addSeparator();
     menu.addAction(mUI.actionFindText);
     menu.addAction(mUI.actionReplaceText);
@@ -2034,6 +2038,14 @@ bool ScriptWidget::OnEscape()
 void ScriptWidget::Activate()
 {
     mUI.code->setFocus();
+}
+
+void ScriptWidget::on_actionPreview_triggered()
+{
+    if (mResourceID.isEmpty())
+        return;
+
+    emit RequestScriptLaunch(mResourceID);
 }
 
 void ScriptWidget::on_actionSave_triggered()
