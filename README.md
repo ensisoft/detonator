@@ -440,7 +440,7 @@ don't have any automated way of verifying the test output.
 
 #### [See this list for known Issues](ISSUES.md)
 
-###On the desktop (Linux/Windows)
+### On the desktop (Linux/Windows)
 
 <details><summary>How to run all tests</summary>
   
@@ -482,7 +482,7 @@ that were not the same between result and gold and the result will be actual ren
 
 </details>
 
-###On the Web (WASM+HTML5)
+### On the Web (WASM+HTML5)
 *Currently, only some unit tests are available on the web. More tests will be enabled as needed.* 
 
 <details><summary>How to run unit tests</summary>
