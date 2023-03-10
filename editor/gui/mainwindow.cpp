@@ -2682,6 +2682,36 @@ void MainWindow::RefreshWidgetActions()
     }
 }
 
+void MainWindow::LaunchScript(const QString& id)
+{
+    if (id.isEmpty())
+        return;
+
+    bool did_launch = false;
+
+    for (auto* child : mChildWindows)
+    {
+        if (child->LaunchScript(id))
+            did_launch = true;
+    }
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
+
+        if (widget->LaunchScript(id))
+            did_launch = true;
+    }
+    if (did_launch)
+        return;
+
+    // Currently we need a widget that owns the preview window
+    // for the scene/entity in question for which the script applies.
+    // If no such widget was open there's no way to launch the preview.
+    // This would require either  restructuring the preview mechanism 
+    // Or possibly then opening the widget to open the resource. (seems stupid)
+    NOTE("No current preview available for this script.");
+}
+
 void MainWindow::OpenResource(const QString& id)
 {
     if (id.isEmpty())
@@ -3010,14 +3040,15 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 
     if (!widget->property("_main_window_connected_").toBool())
     {
-        connect(widget, &MainWidget::OpenExternalImage,  this, &MainWindow::OpenExternalImage);
-        connect(widget, &MainWidget::OpenExternalShader, this, &MainWindow::OpenExternalShader);
-        connect(widget, &MainWidget::OpenExternalScript, this, &MainWindow::OpenExternalScript);
-        connect(widget, &MainWidget::OpenExternalAudio,  this, &MainWindow::OpenExternalAudio);
-        connect(widget, &MainWidget::OpenNewWidget,      this, &MainWindow::OpenNewWidget);
-        connect(widget, &MainWidget::RefreshRequest,     this, &MainWindow::RefreshWidget);
-        connect(widget, &MainWidget::OpenResource,       this, &MainWindow::OpenResource);
-        connect(widget, &MainWidget::RefreshActions,     this, &MainWindow::RefreshWidgetActions);
+        connect(widget, &MainWidget::OpenExternalImage,   this, &MainWindow::OpenExternalImage);
+        connect(widget, &MainWidget::OpenExternalShader,  this, &MainWindow::OpenExternalShader);
+        connect(widget, &MainWidget::OpenExternalScript,  this, &MainWindow::OpenExternalScript);
+        connect(widget, &MainWidget::OpenExternalAudio,   this, &MainWindow::OpenExternalAudio);
+        connect(widget, &MainWidget::OpenNewWidget,       this, &MainWindow::OpenNewWidget);
+        connect(widget, &MainWidget::RefreshRequest,      this, &MainWindow::RefreshWidget);
+        connect(widget, &MainWidget::OpenResource,        this, &MainWindow::OpenResource);
+        connect(widget, &MainWidget::RequestScriptLaunch, this, &MainWindow::LaunchScript);
+        connect(widget, &MainWidget::RefreshActions,      this, &MainWindow::RefreshWidgetActions);
         widget->setProperty("_main_window_connected_", true);
     }
 

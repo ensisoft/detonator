@@ -1084,6 +1084,17 @@ bool EntityWidget::OnEscape()
     return true;
 }
 
+bool EntityWidget::LaunchScript(const QString& id)
+{
+    const auto& our_id = (QString) GetItemId(mUI.scriptFile);
+    if (our_id == id)
+    {
+        on_actionPreview_triggered();
+        return true;
+    }
+    return false;
+}
+
 void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties)
 {
     // keep track of the associated track properties 
@@ -1587,7 +1598,7 @@ void EntityWidget::on_btnAddScript_clicked()
     mState.workspace->SaveResource(resource);
     mState.entity->SetSriptFileId(script.GetId());
 
-    ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
+    auto* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
 
     SetValue(mUI.scriptFile, ListItemId(script.GetId()));
@@ -1670,7 +1681,7 @@ void EntityWidget::on_btnEditTrack_clicked()
         auto it = mTrackProperties.find(klass.GetId());
         ASSERT(it != mTrackProperties.end());
         const auto& properties = (*it).second;
-        AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass, properties);
+        auto* widget = new AnimationTrackWidget(mState.workspace, mState.entity, klass, properties);
         widget->SetZoom(GetValue(mUI.zoom));
         widget->SetShowGrid(GetValue(mUI.chkShowGrid));
         widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));

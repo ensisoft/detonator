@@ -210,6 +210,9 @@ namespace gui
         virtual void Save()
         {}
 
+        virtual bool LaunchScript(const QString& script_id)
+        { return false; }
+
         // Returns true if the widget wants to close itself. The caller should
         // not call "ConfirmClose" or anything else on the widget other than shutdown
         // since the widget has made the decision to want to close already.
@@ -269,6 +272,8 @@ namespace gui
         void ActionStateChanged();
         // Open the resource identified by its resource ID in the editor.
         void OpenResource(const QString& id);
+
+        void RequestScriptLaunch(const QString& id);
     private:
         QString mId;
     };

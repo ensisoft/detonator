@@ -83,6 +83,8 @@ namespace gui
         // Show a note in the status bar.
         void ShowNote(const QString& note) const;
 
+        bool LaunchScript(const QString& id);
+
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!
         MainWidget* TakeWidget();
