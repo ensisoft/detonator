@@ -502,7 +502,101 @@ namespace mem
         return UniquePtr<T, Tag>(nullptr);
     }
 
+    // intrusive non-thread safe reference count base
+    class RefBase
+    {
+    public:
+        inline uint32_t Retain() noexcept
+        { return ++mRefCount; }
+
+        [[nodiscard]]
+        inline uint32_t Release() noexcept
+        { return --mRefCount; }
+
+        inline uint32_t GetRefCount() const noexcept
+        { return mRefCount; }
+    protected:
+        ~RefBase() = default;
+    private:
+        uint32_t mRefCount = 0;
+    };
+
+    template<typename T, typename AllocatorTag=StandardAllocatorTag>
+    class SharedPtr
+    {
+    public:
+        explicit SharedPtr(T* object) noexcept
+          : mObject(object)
+        {
+            if (mObject)
+                mObject->Retain();
+        }
+        SharedPtr(const SharedPtr& other) noexcept
+          : mObject(other.mObject)
+        {
+            if (mObject)
+                mObject->Retain();
+        }
+        SharedPtr(SharedPtr&& other) noexcept
+          : mObject(other.mObject)
+        {
+            other.mObject = nullptr;
+        }
+        SharedPtr() = default;
+       ~SharedPtr() noexcept
+        {
+            reset();
+        }
+
+        inline T* get() noexcept
+        { return mObject; }
+        inline const T* get() const noexcept
+        { return mObject; }
+        inline T& operator*() noexcept
+        { return *mObject; }
+        inline const T& operator*() const noexcept
+        { return *mObject; }
+        inline T* operator->() noexcept
+        { return mObject; }
+        inline const T* operator->() const noexcept
+        { return mObject; }
+        explicit inline operator bool() const noexcept
+        { return mObject != nullptr; }
+
+        void reset() noexcept
+        {
+           if (mObject == nullptr || mObject->Release())
+               return;
+
+            auto& allocator = AllocatorInstance<AllocatorTag>::Get();
+
+            mObject->~T();
+
+            allocator.Free((void*)mObject);
+
+            mObject = nullptr;
+        }
+
+        inline SharedPtr& operator=(const SharedPtr& other) noexcept
+        {
+            SharedPtr tmp(other);
+            std::swap(mObject, tmp.mObject);
+            return *this;
+        }
+        inline SharedPtr operator=(SharedPtr&& other) noexcept
+        {
+           SharedPtr tmp(std::move(other));
+           std::swap(mObject, tmp.mObject);
+           return *this;
+        }
+    private:
+        T* mObject = nullptr;
+    };
+
     template<typename T, typename Tag=DefaultAllocatorTag<T>>
     using unique_ptr = UniquePtr<T, Tag>;
+
+    template<typename T, typename Tag=StandardAllocatorTag>
+    using shared_ptr = SharedPtr<T, Tag>;
 
 } // namespace
