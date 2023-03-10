@@ -56,6 +56,7 @@ namespace mem
        ~HeapAllocator() noexcept
         { std::free(mMemory); }
 
+        [[nodiscard]]
         inline void* MapMem(size_t offset) noexcept
         { return mMemory + offset; }
 
@@ -211,6 +212,7 @@ namespace mem
         explicit BumpAllocator(size_t bytes) noexcept
           : mSize(bytes)
         {}
+        [[nodiscard]]
         inline bool Allocate(size_t bytes, size_t* offset) noexcept
         {
             if (GetFreeBytes() < bytes)
@@ -243,6 +245,7 @@ namespace mem
         // is a fixed size allocator then the size of the bytes requested must
         // actually match the size configured in the allocator. Returns nullptr
         // if the allocation failed and there was no more memory available.
+        [[nodiscard]]
         virtual void* Allocate(size_t bytes) noexcept = 0;
         // Free a previously allocated memory block.
         virtual void Free(void* mem) noexcept = 0;
@@ -460,6 +463,7 @@ namespace mem
             allocator.Free((void*)mObject);
             mObject = nullptr;
         }
+        [[nodiscard]]
         T* release() noexcept
         {
             auto* ret = mObject;
