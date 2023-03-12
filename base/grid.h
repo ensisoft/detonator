@@ -21,6 +21,8 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include <type_traits>
+#include <cmath>
 
 #include "base/assert.h"
 #include "base/types.h"
@@ -28,13 +30,37 @@
 
 namespace base
 {
+    namespace detail {
+        template<typename T>
+        struct DenseGridItemTraits {
+            static constexpr auto CacheRect = true;
+        };
+
+        template<typename T, bool CacheRect>
+        struct DenseGridItem;
+
+        template<typename T>
+        struct DenseGridItem<T, true> {
+            base::FRect rect;
+            T object;
+        };
+        template<typename T>
+        struct DenseGridItem<T, false> {
+            T object;
+        };
+    } // namespace
+
     template<typename Object>
     class DenseSpatialGrid
     {
     public:
+        using ItemTraits = detail::DenseGridItemTraits<Object>;
+        using ItemType   = detail::DenseGridItem<Object, ItemTraits::CacheRect>;
+
         static constexpr auto DefaultRows = 10;
         static constexpr auto DefaultCols = 10;
-        DenseSpatialGrid(const FRect& rect, unsigned rows=DefaultRows, unsigned cols=DefaultCols)
+        DenseSpatialGrid() = default;
+        explicit DenseSpatialGrid(const FRect& rect, unsigned rows=DefaultRows, unsigned cols=DefaultCols)
           : mRect(rect)
           , mRows(rows)
           , mCols(cols)
@@ -44,7 +70,7 @@ namespace base
           , mRows(rows)
           , mCols(cols)
         { mGrid.resize(rows*cols); }
-        DenseSpatialGrid(const FSize& size, unsigned rows=DefaultRows, unsigned cols=DefaultCols)
+        explicit DenseSpatialGrid(const FSize& size, unsigned rows=DefaultRows, unsigned cols=DefaultCols)
           : mRect(0.0f, 0.0f, size)
           , mRows(rows)
           , mCols(cols)
@@ -54,103 +80,158 @@ namespace base
           , mRows(rows)
           , mCols(cols)
         { mGrid.resize(rows*cols); }
-        bool Insert(const FRect& rect, Object object)
+
+        void Reshape(const FRect& rect, unsigned rows, unsigned cols) noexcept
+        {
+            mGrid.clear();
+            mGrid.resize(rows * cols);
+            mRect = rect;
+            mRows = rows;
+            mCols = cols;
+        }
+
+        bool Insert(const FRect& rect, Object object) noexcept
         {
             if (!Contains(mRect, rect))
                 return false;
 
-            const auto [row, col] = GetCornerCell(rect);
-            for (unsigned y=row; y<mRows; ++y)
+            const auto sub_rect = Intersect(mRect, rect);
+            const auto map_rect = MapRect(sub_rect);
+            const auto start_y = map_rect.GetY();
+            const auto start_x = map_rect.GetX();
+            const auto end_y = start_y + map_rect.GetHeight();
+            const auto end_x = start_x + map_rect.GetWidth();
+
+            for (unsigned row=start_y; row<end_y; ++row)
             {
-                for (unsigned x=col; x<mCols; ++x)
+                for (unsigned col=start_x; col<end_x; ++col)
                 {
-                    const auto& cell = GetCellRect(y, x);
-                    const auto& intersection = Intersect(cell, rect);
-                    if (intersection.IsEmpty())
-                        break;
-                    Item item;
-                    item.rect   = intersection;
+                    ItemType item;
+                    if constexpr (ItemTraits::CacheRect)
+                        item.rect = rect;
+
                     item.object = std::move(object);
-                    mGrid[y * mCols + x].push_back(std::move(item));
-                }
-                if (y+1<mRows)
-                {
-                    const auto& cell = GetCellRect(y+1, col);
-                    if (!DoesIntersect(cell, rect))
-                        break;
+                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
+                    items.push_back(std::move(item));
                 }
             }
             return true;
         }
         template<typename Predicate>
-        void Erase(const Predicate& predicate)
+        void Erase(Predicate predicate)
         {
             for (auto& items : mGrid)
             {
                 for (auto it=items.begin(); it != items.end();)
                 {
                     auto& item = *it;
-                    if (predicate(item.object, item.rect))
-                        it = items.erase(it);
-                    else ++it;
+                    if constexpr (ItemTraits::CacheRect) {
+                        if (predicate(item.object, item.rect))
+                            it = items.erase(it);
+                        else ++it;
+                    } else {
+                        if (predicate(item.object))
+                            it = items.erase(it);
+                        else ++it;
+                    }
                 }
             }
         }
+        // Erase objects whose rects intersect with the given rectangle.
+        void Erase(const base::FRect& rect) noexcept
+        {
+            const auto sub_rect = Intersect(mRect, rect);
+            if (sub_rect.IsEmpty())
+                return;
 
-        template<typename RetObject>
-        inline void FindObjects(const FRect& rect, std::vector<RetObject>* result) const
-        { find_objects_rect(rect, result); }
-        template<typename RetObject>
-        inline void FindObjects(const FRect& rect, std::set<RetObject>* result) const
-        { find_objects_rect(rect, result); }
-        template<typename RetObject>
-        inline void FindObjects(const FRect& rect, std::unordered_set<Object*> result) const
-        { find_objects_rect(rect, result); }
-        template<typename RetObject>
-        inline void FindObjects(const FPoint& point, std::vector<RetObject>* result) const
-        { find_objects_point(point, result); }
-        template<typename RetObject>
-        inline void FindObjects(const FPoint& point, std::set<RetObject>* result) const
-        { find_objects_point(point, result); }
-        template<typename RetObject>
-        inline void FindObjects(const FPoint& point, std::unordered_set<RetObject>* result) const
-        { find_objects_point(point, result); }
+            const auto map_rect = MapRect(sub_rect);
+            const auto start_y = map_rect.GetY();
+            const auto start_x = map_rect.GetX();
+            const auto end_y = start_y + map_rect.GetHeight();
+            const auto end_x = start_x + map_rect.GetWidth();
 
-        void Clear()
+            for (unsigned row=start_y; row<end_y; ++row)
+            {
+                for (unsigned col=start_x; col<end_x; ++col)
+                {
+                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
+                    for (auto it = items.begin(); it != items.end();)
+                    {
+                        const auto& item = *it;
+                        const auto& item_rect = GetItemRect(item);
+                        if (DoesIntersect(item_rect, sub_rect))
+                            it = items.erase(it);
+                        else ++it;
+                    }
+                }
+            }
+        }
+        // Erase objects whose rects contain the given point.
+        void Erase(const base::FPoint& point)  noexcept
+        {
+            if (!mRect.TestPoint(point))
+                return;
+
+            const auto map = MapPoint(point);
+            const auto row = map.GetY();
+            const auto col = map.GetX();
+            auto& items = base::SafeIndex(mGrid, row * mCols + col);
+            for (auto it = items.begin(); it != items.end(); )
+            {
+                const auto& item = *it;
+                const auto& item_rect = GetItemRect(item);
+                if (item_rect.TestPoint(point))
+                    it = items.erase(it);
+                else ++it;
+            }
+        }
+
+        void Clear() noexcept
         {
             for (auto& list : mGrid)
                 list.clear();
         }
 
-        const FRect& GetItemRect(unsigned row, unsigned col, unsigned item) const
-        {  return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).rect; }
-        Object& GetItemObject(unsigned row, unsigned col, unsigned item)
-        { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
-        const Object& GetItemObject(unsigned row, unsigned col, unsigned item) const
-        { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
-        unsigned GetNumCols() const
-        { return mCols; }
-        unsigned GetNumRows() const
-        { return mRows; }
-    private:
-        std::tuple<unsigned, unsigned> GetCell(const FPoint& point) const
-        {
-            const auto& local = mRect.MapToLocal(point);
-            const auto x = local.GetX();
-            const auto y = local.GetY();
-            const auto cell_width  = mRect.GetWidth() / mCols;
-            const auto cell_height = mRect.GetHeight() / mRows;
-            const unsigned row = y / cell_height;
-            const unsigned col = x / cell_width;
-            ASSERT(row < mRows && col < mCols);
-            return std::make_tuple(row, col);
-        }
+        template<typename RetObject>
+        inline void Find(const FRect& rect, std::vector<RetObject>* result) const
+        { find_objects_by_rect(rect, result); }
+        template<typename RetObject>
+        inline void Find(const FRect& rect, std::set<RetObject>* result) const
+        { find_objects_by_rect(rect, result); }
+        template<typename RetObject>
+        inline void Find(const FRect& rect, std::unordered_set<Object*> result) const
+        { find_objects_by_rect(rect, result); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, std::vector<RetObject>* result) const
+        { find_objects_by_point(point, result); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, std::set<RetObject>* result) const
+        { find_objects_by_point(point, result); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, std::unordered_set<RetObject>* result) const
+        { find_objects_by_point(point, result); }
 
-        std::tuple<unsigned, unsigned> GetCornerCell(const FRect& rect) const
+        Object& GetObject(unsigned row, unsigned col, unsigned item) noexcept
+        { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
+        const Object& GetObject(unsigned row, unsigned col, unsigned item) const noexcept
+        { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
+        unsigned GetNumItems(unsigned row, unsigned col) const noexcept
+        { return base::SafeIndex(mGrid, row*mCols+col).size(); }
+        unsigned GetNumCols() const noexcept
+        { return mCols; }
+        unsigned GetNumRows() const noexcept
+        { return mRows; }
+        unsigned GetNumItems() const noexcept
         {
-            return GetCell(rect.GetPosition());
+            unsigned ret = 0;
+            for (auto& items : mGrid)
+                ret += items.size();
+
+            return ret;
         }
-        FRect GetCellRect(unsigned row, unsigned col) const
+        base::FRect GetRect() const noexcept
+        { return mRect; }
+        base::FRect GetRect(unsigned row, unsigned  col) noexcept
         {
             ASSERT(row < mRows && col < mCols);
             const auto width  = mRect.GetWidth();
@@ -163,62 +244,122 @@ namespace base
             rect.Translate(col * cell_width, row * cell_height);
             return rect;
         }
-        template<typename Container>
-        void find_objects_rect(const FRect& rect, Container* result) const
+        // Map a space rect to a grid cell rect. The incoming rect must
+        // be fully within the current space rect.
+        base::URect MapRect(const FRect& rect) const noexcept
         {
-            if (!Contains(mRect, rect))
+            const auto cell_width = mRect.GetWidth() / mCols;
+            const auto cell_height = mRect.GetHeight() / mRows;
+            const auto xoffset = mRect.GetX();
+            const auto yoffset = mRect.GetY();
+            const auto top_xpos = rect.GetX() - xoffset;
+            const auto top_ypos = rect.GetY() - yoffset;
+            const auto bottom_xpos = top_xpos + rect.GetWidth();
+            const auto bottom_ypos = top_ypos + rect.GetHeight();
+            const auto top_xpos_cell = static_cast<unsigned>(top_xpos / cell_width);
+            const auto top_ypos_cell = static_cast<unsigned>(top_ypos / cell_height);
+
+            // this "obvious" computation is actually incorrect.
+            // mapping the rect from floating point units to discrete cell units
+            // requires rounding the width/height up to whole cells.
+            // For example if rect that covers 2 cells horizontally could have
+            // width of a 1 cell but the mapping in cell rect should have width of 2.
+            //const auto width_cell  = static_cast<unsigned>(std::ceil(rect.GetWidth() / cell_width));
+            //const auto height_cell = static_cast<unsigned>(std::ceil(rect.GetHeight() / cell_height));
+
+            const auto bottom_xpos_cell = math::clamp(0u, mCols, static_cast<unsigned>(std::ceil(bottom_xpos / cell_width)));
+            const auto bottom_ypos_cell = math::clamp(0u, mRows, static_cast<unsigned>(std::ceil(bottom_ypos / cell_height)));
+
+            const auto width_cell  = bottom_xpos_cell - top_xpos_cell;
+            const auto height_cell = bottom_ypos_cell - top_ypos_cell;
+            // sanity
+            ASSERT(top_xpos_cell + width_cell <= mCols);
+            ASSERT(top_ypos_cell + height_cell <= mRows);
+
+            return {top_xpos_cell, top_ypos_cell, width_cell, height_cell};
+        }
+        // Map a point in space to a grid cell. The point must be
+        // within the current space rect.
+        base::UPoint MapPoint(const FPoint& point) const noexcept
+        {
+            const auto cell_width = mRect.GetWidth() / mCols;
+            const auto cell_height = mRect.GetHeight() / mRows;
+            const auto xoffset = mRect.GetX();
+            const auto yoffset = mRect.GetY();
+            const auto xpos = point.GetX() - xoffset;
+            const auto ypos = point.GetY() - yoffset;
+            const auto top_xpos_cell = static_cast<unsigned>(xpos / cell_width);
+            const auto top_ypos_cell = static_cast<unsigned>(ypos / cell_height);
+            // sanity
+            ASSERT(top_xpos_cell < mCols && top_ypos_cell < mRows);
+
+            return {top_xpos_cell, top_ypos_cell};
+        }
+
+        bool IsValid() const noexcept
+        { return mRows && mCols; }
+    private:
+        constexpr static decltype(auto) GetItemRect(const ItemType& item) noexcept
+        {
+            if constexpr (ItemTraits::CacheRect)
+                return item.rect;
+            else return GetODenseGridbjectRect(item.object);
+        }
+        template<typename Container>
+        void find_objects_by_rect(const FRect& rect, Container* result) const
+        {
+            const auto sub_rect = Intersect(mRect, rect);
+            if (sub_rect.IsEmpty())
                 return;
-            const auto [row, col] = GetCornerCell(rect);
-            for (unsigned y=row; y<mRows; ++y)
+
+            const auto map_rect = MapRect(sub_rect);
+            const auto start_y = map_rect.GetY();
+            const auto start_x = map_rect.GetX();
+            const auto end_x = start_x + map_rect.GetWidth();
+            const auto end_y = start_y + map_rect.GetHeight();
+
+            for (unsigned row=start_y; row<end_y; ++row)
             {
-                for (unsigned x=col; x<mCols; ++x)
+                for (unsigned col=start_x; col<end_x; ++col)
                 {
-                    const auto& cell = GetCellRect(y, x);
-                    const auto& intersection = Intersect(cell, rect);
-                    if (intersection.IsEmpty())
-                        break;
-                    auto& items = mGrid[y * mCols + x];
+                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
                     for (auto& item : items)
                     {
-                        if (DoesIntersect(item.rect, intersection))
+                        const auto& item_rect = GetItemRect(item);
+                        if (DoesIntersect(item_rect, sub_rect))
                             store_result(item.object, result);
                     }
                 }
-                if (y+1<mRows)
-                {
-                    const auto& cell = GetCellRect(y+1, col);
-                    if (!DoesIntersect(cell, rect))
-                        break;
-                }
             }
         }
         template<typename Container>
-        void find_objects_point(const FPoint& point, Container* result) const
+        void find_objects_by_point(const FPoint& point, Container* result) const
         {
             if (!mRect.TestPoint(point))
                 return;
-            const auto [row, col] = GetCell(point);
+            const auto map = MapPoint(point);
+            const auto col = map.GetX();
+            const auto row = map.GetY();
             auto& items = mGrid[row * mCols + col];
-            for (auto& item : items) {
-                if (item.rect.TestPoint(point))
+            for (auto& item : items)
+            {
+                const auto& item_rect = GetItemRect(item);
+                if (item_rect.TestPoint(point))
                     store_result(item.object, result);
             }
         }
+
         template<typename SrcObject, typename RetObject> inline
-        void store_result(SrcObject object, std::vector<RetObject>* vector) const
+        static void store_result(SrcObject object, std::vector<RetObject>* vector)
         { vector->push_back(std::move(object)); }
         template<typename SrcObject, typename RetObject> inline
-        void store_result(SrcObject object, std::set<RetObject>* set) const
+        static void store_result(SrcObject object, std::set<RetObject>* set)
         { set->insert(std::move(object)); }
         template<typename SrcObject, typename RetObject> inline
-        void store_result(SrcObject object, std::unordered_set<RetObject>* set) const
+        static void store_result(SrcObject object, std::unordered_set<RetObject>* set)
         { set->insert(std::move(object)); }
     private:
-        struct Item {
-            base::FRect rect;
-            Object object;
-        };
-        using ItemList = std::vector<Item>;
+        using ItemList = std::vector<ItemType>;
         FRect mRect;
         unsigned mRows = 0;
         unsigned mCols = 0;

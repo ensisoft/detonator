@@ -42,7 +42,7 @@ namespace game
         virtual void BeginInsert() = 0;
         virtual bool Insert(const FRect& rect, T* object) = 0;
         virtual void EndInsert() = 0;
-        virtual void Erase(const std::set<T*> killset) = 0;
+        virtual void Erase(const std::set<T*>& killset) = 0;
 
         // Query interface functions for specific query parameters
         // and result container types.
@@ -81,7 +81,7 @@ namespace game
             virtual void Execute(const base::QuadTree<T*>& tree) override
             { QueryQuadTree(mPredicate, tree, mResult); }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) override
-            { grid.FindObjects(mPredicate, mResult); }
+            { grid.Find(mPredicate, mResult); }
         private:
             const Predicate mPredicate;
             ResultContainer* mResult = nullptr;
@@ -110,7 +110,7 @@ namespace game
         { return mTree.Insert(rect, object); }
         virtual void EndInsert() override
         {}
-        virtual void Erase(const std::set<T*> killset) override
+        virtual void Erase(const std::set<T*>& killset) override
         {
             mTree.Erase([&killset](T* object, const base::FRect&) {
                 return base::Contains(killset, object);
@@ -138,7 +138,7 @@ namespace game
         { return mGrid.Insert(rect, object); }
         virtual void EndInsert() override
         {}
-        virtual void Erase(const std::set<T*> killset) override
+        virtual void Erase(const std::set<T*>& killset) override
         {
             mGrid.Erase([&killset](T* object, const base::FRect& rect) {
                 return base::Contains(killset, object);

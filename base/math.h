@@ -172,6 +172,22 @@ namespace math
         }
     }
 
+    template<typename T, size_t Seed>
+    struct RandomGenerator {
+        inline T operator()() const noexcept {
+            return math::rand<T, Seed>(min_, max_);
+        }
+        inline T operator()(T min, T max) const noexcept {
+            return math::rand<T, Seed>(min, max);
+        }
+        inline static T rand(T min, T max) noexcept {
+            return math::rand<T, Seed>(min, max);
+        }
+        T min_;
+        T max_;
+     };
+
+
     class NoiseGenerator
     {
     public:
