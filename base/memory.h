@@ -31,7 +31,7 @@
 
 namespace mem
 {
-    inline size_t align(size_t size, size_t boundary = sizeof(intptr_t))
+    inline size_t align(size_t size, size_t boundary = sizeof(intptr_t)) noexcept
     {
         return (size + boundary - 1) & ~(boundary - 1);
     }
@@ -328,12 +328,19 @@ namespace mem
     class MemoryPool final : public Allocator
     {
     public:
-        explicit MemoryPool(size_t pool_size)
-          : mPoolSize(pool_size)
+        MemoryPool() = default;
+
+        explicit MemoryPool(size_t items_per_pool)
+          : mPoolSize(items_per_pool)
         {
-            mPools.emplace_back(pool_size);
+            mPools.emplace_back(items_per_pool);
         }
         MemoryPool(const MemoryPool&) = delete;
+
+        ~MemoryPool() noexcept
+        {
+            ASSERT(mAllocCount == 0);
+        }
 
         virtual void* Allocate(size_t bytes) noexcept override
         {
@@ -379,6 +386,15 @@ namespace mem
         { return mAllocCount; }
         inline size_t GetFreeCount() const noexcept
         { return mPoolSize*PoolCount - mAllocCount; }
+
+        void Resize(size_t items_per_pool)
+        {
+            ASSERT(mAllocCount == 0);
+            mPools.clear();
+            mPools.emplace_back(items_per_pool);
+            mPoolSize = items_per_pool;
+            mCurrentIndex = 0;
+        }
 
         MemoryPool& operator=(const MemoryPool&) = delete;
     private:
