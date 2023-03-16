@@ -32,23 +32,24 @@ namespace math
 {
     const auto Pi = 3.14159265358979323846;
 
-    template <typename T> inline constexpr
-    int signum(T x, std::false_type is_signed) {
-        return T(0) < x;
-    }
+    namespace detail {
+        template <typename T> inline constexpr
+        int signum(T x, std::false_type is_signed) noexcept {
+            return T(0) < x;
+        }
+        template <typename T> inline constexpr
+        int signum(T x, std::true_type is_signed) noexcept {
+            return (T(0) < x) - (x < T(0));
+        }
+    } // namespace
 
     template <typename T> inline constexpr
-    int signum(T x, std::true_type is_signed) {
-        return (T(0) < x) - (x < T(0));
-    }
-
-    template <typename T> inline constexpr
-    int signum(T x) {
-        return signum(x, std::is_signed<T>());
+    int signum(T x) noexcept {
+        return detail::signum(x, std::is_signed<T>());
     }
 
     template<typename T> inline
-    T wrap(T min, T max, T val)
+    T wrap(T min, T max, T val) noexcept
     {
         if (val > max)
             return min;
@@ -58,7 +59,7 @@ namespace math
     }
 
     template<typename T> inline
-    T clamp(T min, T max, T val)
+    T clamp(T min, T max, T val) noexcept
     {
         if (val < min)
             return min;
@@ -68,7 +69,7 @@ namespace math
     }
 
     template<typename T> inline
-    T lerp(const T& y0, const T& y1, float t)
+    T lerp(const T& y0, const T& y1, float t) noexcept
     {
         return (1.0f - t) * y0 + t * y1;
     }
@@ -94,8 +95,8 @@ namespace math
         Deceleration
     };
 
-    template<typename T> inline
-    T interpolate(const T& y0, const T& y1, float t, Interpolation method)
+    template<typename T>
+    T interpolate(const T& y0, const T& y1, float t, Interpolation method) noexcept
     {
         if (method == Interpolation::Step)
             return (t < 0.5f) ? y0 : y1;
@@ -113,7 +114,7 @@ namespace math
 
     // epsilon based check for float equality
     template<typename RealT> inline
-    bool equals(RealT goal, RealT value, RealT epsilon = 0.0001)
+    bool equals(RealT goal, RealT value, RealT epsilon = 0.0001) noexcept
     {
         // maybe the default epsilon needs to be reconsidered ?
         // FYI: powers of 2 can be presented exactly, i.e. 2.0, 4.0, 8.0
@@ -121,8 +122,9 @@ namespace math
         return std::abs(goal - value) <= epsilon;
     }
 
+    // Generate pseudo random numbers based on the given seed.
     template<unsigned Seed, typename T>
-    T rand(T min, T max)
+    T rand(T min, T max) noexcept
     {
         static std::default_random_engine engine(Seed);
         if constexpr (std::is_floating_point<T>::value) {
@@ -137,10 +139,10 @@ namespace math
     // generate a random number in the range of min max (inclusive)
     // the random number generator is automatically seeded.
     template<typename T>
-    T rand(T min, T max)
+    T rand(T min, T max) noexcept
     {
         // if we enable this flag we always give out a deterministic
-        // sequence by initializing the engine with a predeterminted seed.
+        // sequence by initializing the engine with a predetermined seed.
         // this is convenient for example testing purposes, enable this
         // flag and always get the same sequence without having to change
         // the calling code that doesn't really care.
@@ -158,30 +160,16 @@ namespace math
         }
     }
 
-    // Generate pseudo random numbers based on the given seed.
-    template<typename T, size_t Seed>
-    T rand(T min, T max)
-    {
-        static std::default_random_engine engine(Seed);
-        if constexpr (std::is_floating_point<T>::value) {
-            std::uniform_real_distribution<T> dist(min, max);
-            return dist(engine);
-        } else {
-            std::uniform_int_distribution<T> dist(min, max);
-            return dist(engine);
-        }
-    }
-
     template<typename T, size_t Seed>
     struct RandomGenerator {
         inline T operator()() const noexcept {
-            return math::rand<T, Seed>(min_, max_);
+            return math::rand<Seed, T>(min_, max_);
         }
         inline T operator()(T min, T max) const noexcept {
-            return math::rand<T, Seed>(min, max);
+            return math::rand<Seed, T>(min, max);
         }
         inline static T rand(T min, T max) noexcept {
-            return math::rand<T, Seed>(min, max);
+            return math::rand<Seed, T>(min, max);
         }
         T min_;
         T max_;
