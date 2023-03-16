@@ -26,10 +26,12 @@
 #include "base/types.h"
 #include "base/trace.h"
 
-#include "base/json.cpp"
-#include "base/utility.cpp"
-#include "base/trace.cpp"
-#include "base/assert.cpp"
+#if !defined(UNIT_TEST_BUNDLE)
+#  include "base/json.cpp"
+#  include "base/utility.cpp"
+#  include "base/trace.cpp"
+#  include "base/assert.cpp"
+#endif
 
 bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
 {
@@ -61,6 +63,8 @@ bool operator==(const base::Rect<T>& lhs,
 template<typename T>
 void unit_test_rect()
 {
+    TEST_CASE(test::Type::Feature)
+
     using R = base::Rect<T>;
     R r;
     TEST_REQUIRE(r.IsEmpty());
@@ -90,6 +94,8 @@ void unit_test_rect()
 
 void unit_test_rect_quadrants()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         base::FRect rect(0.0f, 0.0f, 100.0f, 50.0f);
         const auto [q0, q1, q2, q3] = rect.GetQuadrants();
@@ -113,6 +119,8 @@ void unit_test_rect_quadrants()
 template<typename T>
 void unit_test_rect_intersect()
 {
+    TEST_CASE(test::Type::Feature)
+
     using R = base::Rect<T>;
 
     struct TestCase {
@@ -193,6 +201,8 @@ void unit_test_rect_intersect()
 template<typename T>
 void unit_test_rect_union()
 {
+    TEST_CASE(test::Type::Feature)
+
     using R = base::Rect<T>;
 
     struct TestCase {
@@ -245,6 +255,8 @@ void unit_test_rect_union()
 template<typename T>
 void unit_test_rect_test_point()
 {
+    TEST_CASE(test::Type::Feature)
+
     using R = base::Rect<T>;
     using P = base::Point<T>;
 
@@ -309,6 +321,7 @@ void unit_test_trace()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_rect<int>();
@@ -322,3 +335,4 @@ int test_main(int argc, char* argv[])
     unit_test_trace();
     return 0;
 }
+) // TEST_MAIN
