@@ -64,7 +64,7 @@ namespace base
 
         // Clear the tree. After this the tree is empty
         // and contains no nodes.
-        void Clear()
+        void Clear() noexcept
         {
             mParents.clear();
             mChildren.clear();
@@ -173,13 +173,13 @@ namespace base
 
         // Get the parent node of a child node.
         // The child node must exist in the tree.
-        Element* GetParent(const Element* child)
+        Element* GetParent(const Element* child) noexcept
         {
             auto it = mParents.find(child);
             ASSERT(it != mParents.end());
             return const_cast<Element*>(it->second);
         }
-        const Element* GetParent(const Element* child) const
+        const Element* GetParent(const Element* child) const noexcept
         {
             auto it = mParents.find(child);
             ASSERT(it != mParents.end());
@@ -187,7 +187,7 @@ namespace base
         }
 
         // Returns true if this node exists in this tree.
-        bool HasNode(const Element* node) const
+        bool HasNode(const Element* node) const noexcept
         {
             // all nodes have a parent, thus if the node exists
             // in the tree it also exists in the child->Parent map
@@ -196,7 +196,7 @@ namespace base
 
         // Returns true if the node has a parent. All nodes except
         // for the *Root* node have a parent.
-        bool HasParent(const Element* node) const
+        bool HasParent(const Element* node) const noexcept
         {
             return mParents.find(node) != mParents.end();
         }
@@ -269,21 +269,53 @@ namespace base
     };
 
     namespace detail {
+        template<typename T>
+        struct QuadTreeItemTraits {
+            static constexpr auto CacheRect = true;
+        };
+        template<typename T, bool CacheRect>
+        struct QuadTreeItem;
+
+        template<typename T>
+        struct QuadTreeItem<T, true> {
+            base::FRect rect;
+            T object;
+        };
+        template<typename T>
+        struct QuadTreeItem<T, false> {
+            T object;
+        };
+
         template<typename Object>
         class QuadTreeNode
         {
         public:
+            using ItemTraits = QuadTreeItemTraits<Object>;
+            using ItemType   = QuadTreeItem<Object, ItemTraits::CacheRect>;
+
             QuadTreeNode(const QuadTreeNode&) = delete;
-            QuadTreeNode(const base::FRect& rect)
+            QuadTreeNode() = default;
+            explicit QuadTreeNode(const base::FRect& rect) noexcept
                 : mRect(rect)
             {}
-            ~QuadTreeNode()
+            ~QuadTreeNode() noexcept
             {
                 ASSERT(mQuadrants[0] == nullptr &&
                        mQuadrants[1] == nullptr &&
                        mQuadrants[2] == nullptr &&
                        mQuadrants[3] == nullptr);
+                ASSERT(mItems.empty());
             }
+            void Reshape(const base::FRect& rect) noexcept
+            {
+                ASSERT(mQuadrants[0] == nullptr &&
+                       mQuadrants[1] == nullptr &&
+                       mQuadrants[2] == nullptr &&
+                       mQuadrants[3] == nullptr);
+                ASSERT(mItems.empty());
+                mRect = rect;
+            }
+
             bool Insert(const base::FRect& rect, Object object, mem::Allocator& alloc,
                         unsigned max_items, unsigned level)
             {
@@ -295,8 +327,10 @@ namespace base
                 // if this node holds less than max capacity items store here.
                 if (!HasChildren() && mItems.size() < max_items)
                 {
-                    Item item;
-                    item.rect = rect;
+                    ItemType item;
+                    if constexpr (ItemTraits::CacheRect)
+                        item.rect = rect;
+
                     item.object = object;
                     mItems.push_back(item);
                     return true;
@@ -305,8 +339,9 @@ namespace base
                 // and stop further sub-divisions of space.
                 if (level == 0)
                 {
-                    Item item;
-                    item.rect = rect;
+                    ItemType item;
+                    if constexpr(ItemTraits::CacheRect)
+                        item.rect = rect;
                     item.object = object;
                     mItems.push_back(item);
                     return true;
@@ -315,7 +350,7 @@ namespace base
                 // split the rect into 4 smaller quadrants
                 const auto [q0, q1, q2, q3] = mRect.GetQuadrants();
                 const base::FRect quadrant_rects[4] = {
-                        q0, q1, q2, q3
+                    q0, q1, q2, q3
                 };
 
                 // create quadrants if not yet created.
@@ -334,7 +369,7 @@ namespace base
                         for (int i = 0; i < 4; ++i)
                         {
                             const auto& quadrant_rect = quadrant_rects[i];
-                            const auto& intersection = base::Intersect(quadrant_rect, item.rect);
+                            const auto& intersection = base::Intersect(quadrant_rect, GetItemRect(item));
                             if (intersection.IsEmpty())
                                 continue;
                             auto& quadrant = mQuadrants[i];
@@ -357,7 +392,7 @@ namespace base
                 }
                 return true;
             }
-            void Clear(mem::Allocator& alloc)
+            void Clear(mem::Allocator& alloc) noexcept
             {
                 mItems.clear();
                 for (int i = 0; i < 4; ++i)
@@ -372,12 +407,12 @@ namespace base
                 }
             }
             template<typename Predicate>
-            void Erase(const Predicate& predicate, mem::Allocator& alloc, unsigned max_items)
+            void Erase(Predicate predicate, mem::Allocator& alloc, unsigned max_items) noexcept
             {
                 for (auto it = mItems.begin(); it != mItems.end();)
                 {
                     auto& item = *it;
-                    if (predicate(item.object, item.rect))
+                    if (predicate(item.object, GetItemRect(item)))
                         it = mItems.erase(it);
                     else ++it;
                 }
@@ -410,41 +445,44 @@ namespace base
                 }
             }
 
-            inline bool HasChildren() const
+            inline bool HasChildren() const noexcept
             { return !!mQuadrants[0]; }
-            inline bool HasItems() const
+            inline bool HasItems() const noexcept
             { return !mItems.empty(); }
-            const QuadTreeNode* GetChildQuadrant(size_t i) const
+            const QuadTreeNode* GetChildQuadrant(size_t i) const noexcept
             { return mQuadrants[i]; }
-            const base::FRect& GetRect() const
+            const base::FRect& GetRect() const noexcept
             { return mRect; }
-            const base::FRect& GetItemRect(size_t index) const
-            { return base::SafeIndex(mItems, index).rect; }
-            Object GetItemObject(size_t index) const
+            base::FRect GetItemRect(size_t index) const noexcept
+            { return GetItemRect(base::SafeIndex(mItems,index));  }
+            Object GetItemObject(size_t index) const noexcept
             { return base::SafeIndex(mItems, index).object; }
-            std::size_t GetNumItems() const
+            std::size_t GetNumItems() const noexcept
             { return mItems.size(); }
-            std::size_t GetSize() const
+            std::size_t GetNumItemsCumulative() const noexcept
             {
                 size_t ret = mItems.size();
                 for (int i=0; i<4; ++i)
                 {
                     if (mQuadrants[i])
-                        ret += mQuadrants[i]->GetSize();
+                        ret += mQuadrants[i]->GetNumItemsCumulative();
                 }
                 return ret;
             }
             QuadTreeNode& operator=(const QuadTreeNode&) = delete;
         private:
-            struct Item {
-                base::FRect rect;
-                Object object;
-            };
-            void MoveItems(std::vector<Item>& out) const
+            constexpr static decltype(auto) GetItemRect(const ItemType& item) noexcept
+            {
+                if constexpr(ItemTraits::CacheRect)
+                    return item.rect;
+                else return GetQuadTreeObjectRect(item.object);
+            }
+
+            void MoveItems(std::vector<ItemType>& out) const
             { base::AppendVector(out, std::move(mItems)); }
         private:
-            const base::FRect mRect;
-            std::vector<Item> mItems;
+            base::FRect mRect;
+            std::vector<ItemType> mItems;
             QuadTreeNode* mQuadrants[4] = { nullptr, nullptr,
                                             nullptr, nullptr };
         };
@@ -458,10 +496,11 @@ namespace base
     public:
         using TreeNode = detail::QuadTreeNode<Object>;
         using NodePool = mem::MemoryPool<TreeNode>;
+
         static constexpr auto DefaultMaxItems  = 4;
         static constexpr auto DefaultMaxLevels = 3;
-
-        QuadTree(const base::FRect& rect, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
+        QuadTree() = default;
+        explicit QuadTree(const base::FRect& rect, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
           : mMaxItems(max_items)
           , mMaxLevels(max_levels)
           , mRoot(rect)
@@ -485,7 +524,7 @@ namespace base
           , mRoot(base::FRect(pos, size))
           , mPool(FindMaxNumNodes(max_levels))
         {}
-        QuadTree(const base::FSize& size, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
+        explicit QuadTree(const base::FSize& size, unsigned max_items = DefaultMaxItems, unsigned max_levels = DefaultMaxLevels)
           : mMaxItems(max_items)
           , mMaxLevels(max_levels)
           , mRoot(base::FRect(0.0f, 0.0f, size))
@@ -495,33 +534,46 @@ namespace base
         {
             mRoot.Clear(mPool);
         }
+        void Reshape(const base::FRect& rect, unsigned max_items, unsigned max_levels)
+        {
+            mMaxItems  = max_items;
+            mMaxLevels = max_levels;
+            mRoot.Clear(mPool);
+            mRoot.Reshape(rect);
+            mPool.Resize(FindMaxNumNodes(max_levels));
+        }
+
         bool Insert(const base::FRect& rect, Object object)
         { return mRoot.Insert(rect, object, mPool, mMaxItems, mMaxLevels-1);  }
-        void Clear()
+        void Clear() noexcept
         { mRoot.Clear(mPool); }
         template<typename Predicate>
-        void Erase(const Predicate& predicate)
-        { mRoot.Erase(predicate, mPool, mMaxItems); }
+        void Erase(Predicate predicate) noexcept
+        { mRoot.Erase(std::move(predicate), mPool, mMaxItems); }
 
-        const TreeNode& GetRoot() const
+        const TreeNode& GetRoot() const noexcept
         { return mRoot; }
-        const TreeNode* operator->() const
+        const TreeNode* operator->() const noexcept
         { return &mRoot; }
-        size_t GetSize() const
-        { return mRoot.GetSize(); }
+        size_t GetNumItems() const noexcept
+        { return mRoot.GetNumItemsCumulative(); }
+        unsigned GetMaxItems() const noexcept
+        { return mMaxItems; }
+        unsigned GetMaxLevels() const noexcept
+        { return mMaxLevels; }
 
-        static unsigned FindMaxNumNodes(unsigned levels)
+        static unsigned FindMaxNumNodes(unsigned levels) noexcept
         {
             unsigned nodes = 0;
             for (unsigned i = 0; i < levels; ++i)
             {
-                nodes += std::pow(4, i);
+                nodes += static_cast<unsigned>(std::pow(4, i));
             }
             return nodes;
         }
     private:
-        const unsigned mMaxItems = 0;
-        const unsigned mMaxLevels = 0;
+        unsigned mMaxItems = 0;
+        unsigned mMaxLevels = 0;
         TreeNode mRoot;
         NodePool mPool;
     };

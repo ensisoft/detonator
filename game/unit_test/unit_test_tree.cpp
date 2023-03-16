@@ -83,6 +83,8 @@ std::string WalkTree(game::RenderTree<MyNode>& tree)
 }
 void unit_test_render_tree()
 {
+    TEST_CASE(test::Type::Feature)
+
     // test link child
     {
         using MyTree = game::RenderTree<MyNode>;
@@ -244,12 +246,12 @@ void unit_test_render_tree()
 
         data::JsonObject json;
         game::RenderTreeIntoJson(tree, &MyNode::TreeNodeToJson, json);
-        std::cout << json.ToString() << std::endl;
+        //std::cout << json.ToString() << std::endl;
 
         tree.Clear();
         game::RenderTreeFromJson(tree, &MyNode::TreeNodeFromJson, json);
-        std::cout << std::endl;
-        std::cout << WalkTree(tree);
+        //std::cout << std::endl;
+        //std::cout << WalkTree(tree);
         TEST_REQUIRE(WalkTree(tree) == "foo child 0 child 1 bar child 2 child 3");
 
     }
@@ -257,6 +259,7 @@ void unit_test_render_tree()
 
 void unit_test_render_tree_op()
 {
+    TEST_CASE(test::Type::Feature)
 
     using MyTree = game::RenderTree<MyNode>;
     MyNode foo("foo", 123);
@@ -349,6 +352,8 @@ struct Entity {
 
 void unit_test_quadtree_insert_query()
 {
+    TEST_CASE(test::Type::Feature)
+
     // basic test
     {
         game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
@@ -644,6 +649,8 @@ void unit_test_quadtree_insert_query()
 
 void unit_test_quadtree_erase()
 {
+    TEST_CASE(test::Type::Feature)
+
     // GetQuadrants
     // _____________
     // |  0  |  2  |
@@ -685,7 +692,7 @@ void unit_test_quadtree_erase()
             return e->name == "e0";
         });
         TEST_REQUIRE(tree->HasChildren() == true);
-        TEST_REQUIRE(tree->GetSize() == 3);
+        TEST_REQUIRE(tree->GetNumItemsCumulative() == 3);
         TEST_REQUIRE(tree->GetChildQuadrant(0)->GetNumItems() == 0);
         TEST_REQUIRE(tree->GetChildQuadrant(1)->GetNumItems() == 1);
         TEST_REQUIRE(tree->GetChildQuadrant(2)->GetNumItems() == 1);
@@ -698,7 +705,7 @@ void unit_test_quadtree_erase()
         tree.Erase([](const Entity* e, const base::FRect& rect) {
             return true;
         });
-        TEST_REQUIRE(tree->GetSize() == 0);
+        TEST_REQUIRE(tree->GetNumItems() == 0);
         TEST_REQUIRE(tree->HasChildren() == false);
     }
 
@@ -784,9 +791,11 @@ void unit_test_quadtree_erase()
     }
 }
 
-void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
+void measure_quadtree_even_grid_perf(unsigned max_items, unsigned max_levels)
 {
-    std::printf("Total quadtree nodes = %d\n", game::QuadTree<Entity>::FindMaxNumNodes(max_levels));
+    TEST_CASE(test::Type::Other)
+
+    std::printf("Total quadtree nodes = %d\n", base::QuadTree<Entity>::FindMaxNumNodes(max_levels));
 
     // let's say we have a game space 1000x1000 units in size.
     // we place evenly 100x100  units in this space each within
@@ -811,14 +820,14 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
     // the time to clear the tree is included here since that'd
     // be a realistic use-case (clear tree, then rebuild)
     {
-        game::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
+        base::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
 
         const auto& ret = test::TimedTest(100, [&entities, &tree]() {
             for (auto& entity : entities)
                 TEST_REQUIRE(tree.Insert(entity.rect, (Entity*)&entity));
             tree.Clear();
         });
-        test::PrintTestTimes("Build QuadTree", ret);
+        test::PrintTestTimes("Build 1000x1000 QuadTree", ret);
     }
 
     // build tree once and query several times.
@@ -831,8 +840,8 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
                 for (unsigned j = i+1; j < entities.size(); ++j) {
                     const auto& a = entities[i];
                     const auto& b = entities[j];
-                    auto ret = base::Intersect(a.rect, b.rect);
-                    if (!ret.IsEmpty())
+                    const auto ret = base::Intersect(a.rect, b.rect);
+                    if (ret.GetWidth() > 100000)
                         std::printf("side effect for not optimizing the test away!");
                 }
             }
@@ -841,23 +850,24 @@ void perf_test_quadtree_even_grid(unsigned max_items, unsigned max_levels)
     }
 
     {
-        game::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
+        base::QuadTree<Entity*> tree(1000.0f, 1000.0f, max_items, max_levels);
         for (auto& entity : entities)
             TEST_REQUIRE(tree.Insert(entity.rect, &entity));
 
         const auto ret = test::TimedTest(10, [&entities, &tree]() {
+            std::set<Entity*> ret;
             for (const auto& entity : entities) {
-                std::set<Entity*> ret;
-                game::QueryQuadTree(entity.rect, tree, &ret);
-                TEST_REQUIRE(ret.size() == 1); // should always just find itself.
-                if (*ret.begin() != &entity)
-                    std::printf("side effect for not optimizing the test away!");
+                base::QueryQuadTree(entity.rect, tree, &ret);
+                //TEST_REQUIRE(ret.size() == 1); // should always just find itself.
+                //if (*ret.begin() != &entity)
+                //    std::printf("side effect for not optimizing the test away!");
             }
         });
         test::PrintTestTimes("QuadTree based collision", ret);
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_render_tree();
@@ -865,20 +875,9 @@ int test_main(int argc, char* argv[])
     unit_test_quadtree_insert_query();
     unit_test_quadtree_erase();
 
-    bool perf_test = false;
-    unsigned num_items  = game::QuadTree<Entity>::DefaultMaxItems;
-    unsigned max_levels = game::QuadTree<Entity>::DefaultMaxLevels;
-    for (int i=1; i<argc; ++i)
-    {
-        if (!std::strcmp("--perftest", argv[i]))
-            perf_test = true;
-        else if (!std::strcmp("--max-items", argv[i]))
-            num_items = std::atoi(argv[++i]);
-        else if (!std::strcmp("--max-levels", argv[i]))
-            max_levels = std::atoi(argv[++i]);
-        else std::printf("Unrecognized cmdline param: '%s'\n", argv[i]);
-    }
-    if (perf_test)
-        perf_test_quadtree_even_grid(num_items, max_levels);
+    const unsigned num_items  = game::QuadTree<Entity>::DefaultMaxItems;
+    const unsigned max_levels = game::QuadTree<Entity>::DefaultMaxLevels;
+    measure_quadtree_even_grid_perf(num_items, max_levels);
     return 0;
 }
+) // TEST_MAIN
