@@ -570,10 +570,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
-    GetUserProperty(resource, "spatial_rect_xpos", mUI.spRectX);
-    GetUserProperty(resource, "spatial_rect_ypos", mUI.spRectY);
-    GetUserProperty(resource, "spatial_rect_width", mUI.spRectW);
-    GetUserProperty(resource, "spatial_rect_height", mUI.spRectH);
     GetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
     GetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
     GetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
@@ -587,8 +583,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
     GetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
     GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    GetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
-    GetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
     GetUserProperty(resource, "bloom_threshold", &mBloom.threshold);
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
     GetUserProperty(resource, "bloom_green",     &mBloom.green);
@@ -682,8 +676,6 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
     settings.SaveWidget("Scene", mUI.sceneBoundsGroup);
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
-    settings.SaveWidget("Scene", mUI.quadTreeGroup);
-    settings.SaveWidget("Scene", mUI.denseGridGroup);
     settings.SaveWidget("Scene", mUI.effectsGroup);
     settings.SaveWidget("Scene", mUI.bloomGroup);
     return true;
@@ -714,8 +706,6 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
     settings.LoadWidget("Scene", mUI.sceneBoundsGroup);
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
-    settings.LoadWidget("Scene", mUI.quadTreeGroup);
-    settings.LoadWidget("Scene", mUI.denseGridGroup);
     settings.LoadWidget("Scene", mUI.effectsGroup);
     settings.LoadWidget("Scene", mUI.bloomGroup);
 
@@ -1059,23 +1049,6 @@ void SceneWidget::on_cmbSpatialIndex_currentIndexChanged(int)
     DisplaySceneProperties();
 }
 
-void SceneWidget::on_spRectX_valueChanged(double value)
-{
-    SetSpatialIndexParams();
-}
-void SceneWidget::on_spRectY_valueChanged(double value)
-{
-    SetSpatialIndexParams();
-}
-void SceneWidget::on_spRectW_valueChanged(double value)
-{
-    SetSpatialIndexParams();
-}
-void SceneWidget::on_spRectH_valueChanged(double value)
-{
-    SetSpatialIndexParams();
-}
-
 void SceneWidget::on_spQuadMaxLevels_valueChanged(int)
 {
     SetSpatialIndexParams();
@@ -1233,10 +1206,6 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
     SetUserProperty(resource, "widget", mUI.widget);
-    SetUserProperty(resource, "spatial_rect_xpos", mUI.spRectX);
-    SetUserProperty(resource, "spatial_rect_ypos", mUI.spRectY);
-    SetUserProperty(resource, "spatial_rect_width", mUI.spRectW);
-    SetUserProperty(resource, "spatial_rect_height", mUI.spRectH);
     SetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
     SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
     SetUserProperty(resource, "densegrid_num_rows", mUI.spDenseGridRows);
@@ -1248,8 +1217,6 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
     SetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
     SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    SetUserProperty(resource, "quad_tree_group", mUI.quadTreeGroup);
-    SetUserProperty(resource, "dense_grid_group", mUI.denseGridGroup);
     SetUserProperty(resource, "bloom_threshold", mBloom.threshold);
     SetUserProperty(resource, "bloom_red",       mBloom.red);
     SetUserProperty(resource, "bloom_green",     mBloom.green);
@@ -2310,38 +2277,24 @@ void SceneWidget::DisplaySceneProperties()
     const auto index = mState.scene->GetDynamicSpatialIndex();
     if (index == game::SceneClass::SpatialIndex::Disabled)
     {
-        SetEnabled(mUI.spRectX,        false);
-        SetEnabled(mUI.spRectY,        false);
-        SetEnabled(mUI.spRectW,        false);
-        SetEnabled(mUI.spRectH,        false);
-        SetEnabled(mUI.quadTreePage,   false);
-        SetEnabled(mUI.denseGridPage,  false);
+        SetEnabled(mUI.spQuadMaxItems,  false);
+        SetEnabled(mUI.spQuadMaxLevels, false);
+        SetEnabled(mUI.spDenseGridCols, false);
+        SetEnabled(mUI.spDenseGridRows, false);
     }
     else if (index == game::SceneClass::SpatialIndex::QuadTree)
     {
-        SetEnabled(mUI.spRectX,        true);
-        SetEnabled(mUI.spRectY,        true);
-        SetEnabled(mUI.spRectW,        true);
-        SetEnabled(mUI.spRectH,        true);
-        SetEnabled(mUI.quadTreePage,   true);
-        SetEnabled(mUI.denseGridPage,  false);
+        SetEnabled(mUI.spQuadMaxItems,  true);
+        SetEnabled(mUI.spQuadMaxLevels, true);
+        SetEnabled(mUI.spDenseGridCols, false);
+        SetEnabled(mUI.spDenseGridRows, false);
     }
     else if (index == game::SceneClass::SpatialIndex::DenseGrid)
     {
-        SetEnabled(mUI.spRectX,        true);
-        SetEnabled(mUI.spRectY,        true);
-        SetEnabled(mUI.spRectW,        true);
-        SetEnabled(mUI.spRectH,        true);
-        SetEnabled(mUI.quadTreePage,   false);
-        SetEnabled(mUI.denseGridPage,  true);
-    }
-
-    if (const auto* rect = mState.scene->GetDynamicSpatialRect())
-    {
-        SetValue(mUI.spRectX, rect->GetX());
-        SetValue(mUI.spRectY, rect->GetY());
-        SetValue(mUI.spRectW, rect->GetWidth());
-        SetValue(mUI.spRectH, rect->GetHeight());
+        SetEnabled(mUI.spQuadMaxItems,  false);
+        SetEnabled(mUI.spQuadMaxLevels, false);
+        SetEnabled(mUI.spDenseGridCols, true);
+        SetEnabled(mUI.spDenseGridRows, true);
     }
 
     if (const auto* ptr = mState.scene->GetQuadTreeArgs())
@@ -2522,15 +2475,6 @@ void SceneWidget::SetSpatialIndexParams()
 {
     mState.scene->SetDynamicSpatialIndex(GetValue(mUI.cmbSpatialIndex));
 
-    if (const auto* ptr = mState.scene->GetDynamicSpatialRect())
-    {
-        auto rect = *ptr;
-        rect.SetX(GetValue(mUI.spRectX));
-        rect.SetY(GetValue(mUI.spRectY));
-        rect.SetWidth(GetValue(mUI.spRectW));
-        rect.SetHeight(GetValue(mUI.spRectH));
-        mState.scene->SetDynamicSpatialRect(rect);
-    }
     if (const auto* ptr = mState.scene->GetQuadTreeArgs())
     {
         auto args = *ptr;

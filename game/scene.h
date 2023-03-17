@@ -433,7 +433,6 @@ namespace game
         { return mRenderTree; }
         SpatialIndex GetDynamicSpatialIndex() const noexcept
         { return mDynamicSpatialIndex; }
-        const FRect* GetDynamicSpatialRect() const;
         const QuadTreeArgs* GetQuadTreeArgs() const;
         const DenseGridArgs* GetDenseGridArgs() const;
         const float* GetLeftBoundary() const;
@@ -444,7 +443,6 @@ namespace game
         void SetDynamicSpatialIndex(SpatialIndex index);
         void SetDynamicSpatialIndexArgs(const DenseGridArgs& args);
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
-        void SetDynamicSpatialRect(const FRect& rect);
 
         void SetBloom(const BloomFilter& bloom) noexcept
         { mBloomFilter = bloom; }
@@ -530,9 +528,6 @@ namespace game
         std::vector<ScriptVar> mScriptVars;
         // Dynamic spatial index (for entity nodes with spatial nodes) setting.
         SpatialIndex mDynamicSpatialIndex = SpatialIndex::Disabled;
-        // Optional (only when spatial index is not disabled) rectangle
-        // that covers the scene area that is covered by the spatial index.
-        std::optional<FRect> mDynamicSpatialRect;
         // Spatial index type specific arguments for the data structure.
         std::optional<SpatialIndexArgs> mDynamicSpatialIndexArgs;
         // Bounds of the scene if any.

@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -253,7 +253,6 @@ SceneClass::SceneClass(const SceneClass& other)
     mScriptFile              = other.mScriptFile;
     mScriptVars              = other.mScriptVars;
     mDynamicSpatialIndex     = other.mDynamicSpatialIndex;
-    mDynamicSpatialRect      = other.mDynamicSpatialRect;
     mDynamicSpatialIndexArgs = other.mDynamicSpatialIndexArgs;
     mLeftBoundary            = other.mLeftBoundary;
     mRightBoundary           = other.mRightBoundary;
@@ -664,12 +663,8 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mTilemap);
     hash = base::hash_combine(hash, mDynamicSpatialIndex);
-    hash = base::hash_combine(hash, mDynamicSpatialRect.has_value());
-    hash = base::hash_combine(hash, mDynamicSpatialIndexArgs.has_value());
-    if (const auto* ptr = GetDynamicSpatialRect())
-    {
-        hash = base::hash_combine(hash, *ptr);
-    }
+    hash = base::hash_combine(hash, mDynamicSpatialIndexArgs);
+
     if (const auto* ptr = GetQuadTreeArgs())
     {
         hash = base::hash_combine(hash, ptr->max_levels);
@@ -698,12 +693,6 @@ size_t SceneClass::GetHash() const
     return hash;
 }
 
-const FRect* SceneClass::GetDynamicSpatialRect() const
-{
-    if (!mDynamicSpatialRect.has_value())
-        return nullptr;
-    return &mDynamicSpatialRect.value();
-}
 const SceneClass::QuadTreeArgs* SceneClass::GetQuadTreeArgs() const
 {
     if (!mDynamicSpatialIndexArgs.has_value())
@@ -749,7 +738,6 @@ void SceneClass::SetDynamicSpatialIndex(SpatialIndex index)
 
     if (index == SpatialIndex::Disabled)
     {
-        mDynamicSpatialRect.reset();
         mDynamicSpatialIndexArgs.reset();
         mDynamicSpatialIndex = index;
         return;
@@ -765,9 +753,6 @@ void SceneClass::SetDynamicSpatialIndex(SpatialIndex index)
         if (!GetDenseGridArgs())
             mDynamicSpatialIndexArgs = DenseGridArgs{};
     }
-    if (!GetDynamicSpatialRect())
-        mDynamicSpatialRect = FRect();
-
     mDynamicSpatialIndex = index;
 }
 void SceneClass::SetDynamicSpatialIndexArgs(const DenseGridArgs& args)
@@ -780,12 +765,6 @@ void SceneClass::SetDynamicSpatialIndexArgs(const QuadTreeArgs& args)
     ASSERT(mDynamicSpatialIndex == SpatialIndex::QuadTree);
     mDynamicSpatialIndexArgs = args;
 }
-void SceneClass::SetDynamicSpatialRect(const FRect& rect)
-{
-    ASSERT(mDynamicSpatialIndex != SpatialIndex::Disabled);
-    mDynamicSpatialRect = rect;
-}
-
 void SceneClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mClassId);
@@ -793,10 +772,6 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("script_file", mScriptFile);
     data.Write("tilemap", mTilemap);
     data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
-    if (const auto* ptr = GetDynamicSpatialRect())
-    {
-        data.Write("dynamic_spatial_rect", *ptr);
-    }
     if (const auto* ptr = GetQuadTreeArgs())
     {
         data.Write("quadtree_max_items", ptr->max_items);
@@ -863,13 +838,6 @@ bool SceneClass::FromJson(const data::Reader& data)
         else WARN("Failed to load scene bloom filter property. [scene='%1']", mName);
     }
 
-    if (data.HasValue("dynamic_spatial_rect"))
-    {
-        base::FRect rect;
-        if (data.Read("dynamic_spatial_rect", &rect))
-            mDynamicSpatialRect = rect;
-        else WARN("Failed to load scene spatial rect property. [scene='%1']", mName);
-    }
     if (mDynamicSpatialIndex == SpatialIndex::QuadTree)
     {
         QuadTreeArgs quadtree_args;
@@ -953,7 +921,6 @@ SceneClass SceneClass::Clone() const
     ret.mScriptFile              = mScriptFile;
     ret.mTilemap                 = mTilemap;
     ret.mName                    = mName;
-    ret.mDynamicSpatialRect      = mDynamicSpatialRect;
     ret.mDynamicSpatialIndex     = mDynamicSpatialIndex;
     ret.mDynamicSpatialIndexArgs = mDynamicSpatialIndexArgs;
     ret.mLeftBoundary            = mLeftBoundary;
@@ -981,7 +948,6 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     mScriptVars              = std::move(tmp.mScriptVars);
     mRenderTree              = std::move(tmp.mRenderTree);
     mDynamicSpatialIndex     = std::move(tmp.mDynamicSpatialIndex);
-    mDynamicSpatialRect      = std::move(tmp.mDynamicSpatialRect);
     mDynamicSpatialIndexArgs = std::move(tmp.mDynamicSpatialIndexArgs);
     mLeftBoundary            = std::move(tmp.mLeftBoundary);
     mRightBoundary           = std::move(tmp.mRightBoundary);
@@ -1094,19 +1060,17 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
     const auto index = mClass->GetDynamicSpatialIndex();
     if (index == SceneClass::SpatialIndex::QuadTree)
     {
-        const auto* rect = mClass->GetDynamicSpatialRect();
         const auto* args = mClass->GetQuadTreeArgs();
-        ASSERT(args && rect);
-        mSpatialIndex.reset(new QuadTreeIndex<EntityNode>(*rect, args->max_items, args->max_levels));
+        ASSERT(args);
+        mSpatialIndex.reset(new QuadTreeIndex<EntityNode>(args->max_items, args->max_levels));
         DEBUG("Created scene spatial index. [type=%1, max_items=%2, max_levels=%3]",
               index, args->max_items, args->max_levels);
     }
     else if (index == SceneClass::SpatialIndex::DenseGrid)
     {
-        const auto* rect = mClass->GetDynamicSpatialRect();
         const auto* args = mClass->GetDenseGridArgs();
-        ASSERT(args && rect);
-        mSpatialIndex.reset(new DenseGridIndex<EntityNode>(*rect, args->num_rows, args->num_cols));
+        ASSERT(args);
+        mSpatialIndex.reset(new DenseGridIndex<EntityNode>(args->num_rows, args->num_cols));
         DEBUG("Created scene spatial index. [type=%1, rows=%2, cols=%3]",
               index, args->num_rows, args->num_cols);
     }
@@ -1535,32 +1499,36 @@ void Scene::Update(float dt, std::vector<Event>* events)
 
 void Scene::Rebuild()
 {
-    using SpatialIndex = Scene::SpatialIndex;
-
     const auto* left_boundary  = mClass->GetLeftBoundary();
     const auto* right_boundary = mClass->GetRightBoundary();
     const auto* top_boundary   = mClass->GetTopBoundary();
     const auto* bottom_boundary = mClass->GetBottomBoundary();
 
-    if (!mSpatialIndex &&
-        !left_boundary && !right_boundary &&
-        !top_boundary && !bottom_boundary)
+    const bool has_boundary_condition = left_boundary ||
+                                        right_boundary ||
+                                        top_boundary ||
+                                        bottom_boundary;
+    // If there's no spatial index and no boundary condition of any kind
+    // we can skip all the work here because there's no dynamic spatial
+    // index to update and nothing needs to be checked against any boundary
+    // condition.
+    if (!mSpatialIndex && !has_boundary_condition)
         return;
 
-    if (mSpatialIndex)
-        mSpatialIndex->BeginInsert();
-
-    // iterate over the render tree and look for
-    // entity nodes that have SpatialNode attachment.
-    // for the nodes with spatial node compute the nodes
-    // AABB and place the node into the spatial index.
-    class Visitor : public RenderTree::Visitor {
+    // Iterate over the render tree and look for entity nodes that have
+    // SpatialNode attachment. For the nodes with spatial node compute
+    // the node's AABB and place that node into the spatial index.
+    class Visitor final : public RenderTree::Visitor {
     public:
         Visitor(SpatialIndex* index, Scene* scene, float left, float right, float top, float bottom)
             : mLeftBound(left)
             , mRightBound(right)
             , mTopBound(top)
             , mBottomBound(bottom)
+            , mLeft(std::numeric_limits<double>::max())
+            , mRight(std::numeric_limits<double>::lowest())
+            , mTop(std::numeric_limits<double>::max())
+            , mBottom(std::numeric_limits<double>::lowest())
             , mIndex(index)
             , mScene(scene)
         {}
@@ -1591,12 +1559,20 @@ void Scene::Rebuild()
                 const auto& node = entity->GetNode(i);
                 mTransform.Push(entity->FindNodeModelTransform(&node));
                 const auto& aabb = ComputeBoundingRect(mTransform.GetAsMatrix());
-                if (const auto* spatial = node.GetSpatialNode())
+                if (const auto* spatial = node.GetSpatialNode(); spatial && mIndex)
                 {
+                    const auto left   = (double)aabb.GetX();
+                    const auto right  = (double)aabb.GetX() + aabb.GetWidth();
+                    const auto top    = (double)aabb.GetY();
+                    const auto bottom = (double)aabb.GetY() + aabb.GetHeight();
+                    mLeft   = std::min(mLeft, left);
+                    mRight  = std::max(mRight, right);
+                    mTop    = std::min(mTop, top);
+                    mBottom = std::max(mBottom, bottom);
+
                     if (spatial->GetShape() == SpatialNode::Shape::AABB)
                     {
-                        if (mIndex)
-                            mIndex->Insert(aabb, const_cast<EntityNode*>(&node));
+                        mItems.push_back({const_cast<EntityNode*>(&node), aabb});
                     } else BUG("Unimplemented spatial shape insertion.");
                 }
                 rect = base::Union(rect, aabb);
@@ -1612,10 +1588,10 @@ void Scene::Rebuild()
                 return;
 
             // check against the scene's boundary values.
-            const double left   = double(rect.GetX());
-            const double right  = double(rect.GetX()) + rect.GetWidth();
-            const double top    = double(rect.GetY());
-            const double bottom = double(rect.GetY()) + rect.GetHeight();
+            const auto left   = (double)rect.GetX();
+            const auto right  = (double)rect.GetX() + rect.GetWidth();
+            const auto top    = (double)rect.GetY();
+            const auto bottom = (double)rect.GetY() + rect.GetHeight();
             if ((left > mRightBound) || (right < mLeftBound) ||
                 (top > mBottomBound) || (bottom < mTopBound))
             {
@@ -1630,40 +1606,54 @@ void Scene::Rebuild()
             if (const auto* parent = GetParent())
                 mTransform.Pop();
         }
+        void Update() const
+        {
+            if (mIndex)
+            {
+                const auto xpos   = mLeft;
+                const auto ypos   = mTop;
+                const auto width  = mRight - mLeft;
+                const auto height = mBottom - mTop;
+                mIndex->Insert(FRect(xpos, ypos, width, height), mItems);
+            }
+        }
     private:
-        Entity* GetParent() const
+        Entity* GetParent() const noexcept
         {
             if (mParents.empty())
                 return nullptr;
             return mParents.top();
         }
     private:
-        const double mLeftBound = 0.0f;
-        const double mRightBound = 0.0f;
-        const double mTopBound   = 0.0f;
-        const double mBottomBound = 0.0f;
+        using SpatialIndexItem = game::SpatialIndex<EntityNode>::Item;
+
+        const double mLeftBound;
+        const double mRightBound;
+        const double mTopBound;
+        const double mBottomBound;
+        double mLeft;
+        double mRight;
+        double mTop;
+        double mBottom;
+
+        std::vector<SpatialIndexItem> mItems;
         std::stack<Entity*> mParents;
         Transform mTransform;
         SpatialIndex* mIndex = nullptr;
         Scene* mScene = nullptr;
     };
 
-    const auto left_boundary_value =  left_boundary
-        ? *left_boundary : std::numeric_limits<float>::lowest();
-    const auto right_boundary_value = right_boundary
-        ? *right_boundary : std::numeric_limits<float>::max();
-    const auto top_boundary_value = top_boundary
-        ? *top_boundary : std::numeric_limits<float>::lowest();
-    const auto bottom_boundary_value = bottom_boundary
-        ? *bottom_boundary : std::numeric_limits<float>::max();
+    const auto left_boundary_value   = left_boundary   ? *left_boundary   : std::numeric_limits<float>::lowest();
+    const auto right_boundary_value  = right_boundary  ? *right_boundary  : std::numeric_limits<float>::max();
+    const auto top_boundary_value    = top_boundary    ? *top_boundary    : std::numeric_limits<float>::lowest();
+    const auto bottom_boundary_value = bottom_boundary ? *bottom_boundary : std::numeric_limits<float>::max();
 
     Visitor visitor(mSpatialIndex.get(), this,
         left_boundary_value, right_boundary_value,
         top_boundary_value, bottom_boundary_value);
     mRenderTree.PreOrderTraverse(visitor);
 
-    if (mSpatialIndex)
-        mSpatialIndex->EndInsert();
+    visitor.Update();
 }
 
 std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass)

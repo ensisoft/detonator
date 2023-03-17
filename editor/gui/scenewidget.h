@@ -118,10 +118,6 @@ namespace gui
         void on_cmbScripts_currentIndexChanged(int);
         void on_cmbTilemaps_currentIndexChanged(int);
         void on_cmbSpatialIndex_currentIndexChanged(int);
-        void on_spRectX_valueChanged(double value);
-        void on_spRectY_valueChanged(double value);
-        void on_spRectW_valueChanged(double value);
-        void on_spRectH_valueChanged(double value);
         void on_spQuadMaxLevels_valueChanged(int);
         void on_spQuadMaxItems_valueChanged(int);
         void on_spDenseGridRows_valueChanged(int);
