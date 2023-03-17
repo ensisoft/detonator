@@ -1,30 +1,24 @@
 {
     "2rSIWqteXS": {
-        "checked_for_packing": 1
     },
     "6M7kjbtJOK": {
-        "checked_for_packing": 1,
         "comment_FXED8Wa7Of": ""
     },
     "7zQLUleDer": {
-        "checked_for_packing": 1
     },
     "9jMLWUyAWj": {
         "checked_for_packing": 1
     },
     "ETnTKLXRXi": {
-        "checked_for_packing": 1,
         "comment_fTLOPJMsQ3": ""
     },
     "EnPRIQkKBO": {
-        "checked_for_packing": 1
+        "comment_vY9O53eRKB": ""
     },
     "EsFlY7oEfM": {
-        "checked_for_packing": 1,
         "comment_1MPsnG38m5": ""
     },
     "Fwn9yS1gWF": {
-        "checked_for_packing": 1,
         "comment_a0Pfoh2tIx": "",
         "comment_xw2qQ4qDJe": ""
     },
@@ -35,9 +29,11 @@
         "checked_for_packing": 1
     },
     "TfojPSWQmJ": {
-        "checked_for_packing": 1,
         "comment_SGHkKNqZ8G": "",
-        "comment_mh4szTs1tr": ""
+        "comment_mh4szTs1tr": "",
+        "comment_uNSbgrIAfJ": ""
+    },
+    "UWnXOsuD6o": {
     },
     "Xg0GdRiaQU": {
         "checked_for_packing": 1
@@ -46,28 +42,23 @@
         "checked_for_packing": 1
     },
     "a8UWU1fUNZ": {
-        "checked_for_packing": 1,
         "comment_x5LUp0CItR": ""
     },
     "dK1EdyK1h8": {
-        "checked_for_packing": 1,
         "comment_6w1qxl64Dk": ""
     },
     "dgq5ss7Iy9": {
-        "checked_for_packing": 1,
         "comment_xPnegFZrhB": ""
     },
     "f7S1HTDAgE": {
-        "checked_for_packing": 1
     },
     "fy5aapEM0F": {
-        "checked_for_packing": 1
+        "comment_jpk3WllX74": ""
     },
     "k4Stm2rLJJ": {
         "checked_for_packing": 1
     },
     "kpR98Mlxaz": {
-        "checked_for_packing": 1,
         "comment_FFW46rIdfi": "",
         "comment_QeRCmrPDmR": "",
         "comment_kMOWg6MbOn": ""
@@ -76,17 +67,19 @@
         "checked_for_packing": 1
     },
     "lCSj0gMTqU": {
+        "checked_for_packing": 1,
         "comment_fBdB6MvNul": "",
         "comment_xAMylSIBUS": ""
     },
     "lTi7YXjdsz": {
-        "checked_for_packing": 1
+    },
+    "oC0fUUJnzk": {
+        "comment_OWBR9G82wD": ""
     },
     "pATaRMBTR7": {
-        "checked_for_packing": 1
     },
     "pK3rRC7a5h": {
-        "checked_for_packing": 1
+        "comment_dqzf0vCHTn": ""
     },
     "project": {
         "application_identifier": "I1ULdjZPMrzH",
@@ -160,8 +153,9 @@
         "window_width": 1024,
         "working_folder": "${workspace}"
     },
+    "uhYlthZ4sC": {
+    },
     "v8AR2h5m8R": {
-        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
