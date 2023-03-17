@@ -104,6 +104,13 @@ namespace engine
         Color4f color;
         float width = 1.0f;
     };
+    struct DebugDrawRect {
+        FPoint top_left;
+        FPoint bottom_right;
+        Color4f color;
+        float width = 1.0f;
+    };
+
     struct EnableEffectAction {
         std::string name;
         bool value = false;
@@ -121,6 +128,7 @@ namespace engine
             DebugPrintAction,
             DebugClearAction,
             DebugDrawLine,
+            DebugDrawRect,
             DelayAction,
             ShowDebugAction,
             ShowMouseAction,
