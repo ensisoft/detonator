@@ -38,15 +38,17 @@ namespace game
     class SpatialIndex
     {
     public:
+        struct Item {
+            T* object;
+            FRect rect;
+        };
+
         virtual ~SpatialIndex() = default;
-        virtual void BeginInsert() = 0;
-        virtual bool Insert(const FRect& rect, T* object) = 0;
-        virtual void EndInsert() = 0;
+        virtual void Insert(const FRect& rect, const std::vector<Item>& items) = 0;
         virtual void Erase(const std::set<T*>& killset) = 0;
 
         // Query interface functions for specific query parameters
         // and result container types.
-
         inline void Query(const FRect& area, std::set<T*>* result)
         { query(area, result); }
         inline void Query(const FRect& area, std::set<const T*>*result) const
@@ -98,18 +100,25 @@ namespace game
     };
 
     template<typename T>
-    class QuadTreeIndex : public SpatialIndex<T>
+    class QuadTreeIndex final : public SpatialIndex<T>
     {
     public:
-        QuadTreeIndex(const game::FRect& area, unsigned max_items, unsigned max_levels)
-          : mTree(area, max_items, max_levels)
+        using Item = typename SpatialIndex<T>::Item;
+
+        QuadTreeIndex(unsigned max_items, unsigned max_levels)
+          : mMaxItems(max_items)
+          , mMaxLevels(max_levels)
         {}
-        virtual void BeginInsert() override
-        { mTree.Clear(); }
-        virtual bool Insert(const FRect& rect, T* object) override
-        { return mTree.Insert(rect, object); }
-        virtual void EndInsert() override
-        {}
+        virtual void Insert(const FRect& rect, const std::vector<Item>& items) override
+        {
+            // todo: re-compute the tree parameters ?
+            // todo: find some way to balance the tree ?
+            mTree.Clear();
+            mTree.Reshape(rect, mMaxItems, mMaxLevels);
+            for (const auto& item : items)
+                mTree.Insert(item.rect, item.object);
+        }
+
         virtual void Erase(const std::set<T*>& killset) override
         {
             mTree.Erase([&killset](T* object, const base::FRect&) {
@@ -121,23 +130,31 @@ namespace game
         virtual void ExecuteQuery(SpatialQuery& query) const override
         { query.Execute(mTree); }
     private:
+        const unsigned mMaxItems = 0;
+        const unsigned mMaxLevels = 0;
         QuadTree<T*> mTree;
-        size_t mNumItems = 0;
     };
 
     template<typename T>
-    class DenseGridIndex : public SpatialIndex<T>
+    class DenseGridIndex final : public SpatialIndex<T>
     {
     public:
-        DenseGridIndex(const game::FRect& area, unsigned rows, unsigned cols)
-          : mGrid(area, rows, cols)
+        using Item = typename SpatialIndex<T>::Item;
+
+        DenseGridIndex(unsigned rows, unsigned cols)
+          : mNumRows(rows)
+          , mNumCols(cols)
         {}
-        virtual void BeginInsert() override
-        { mGrid.Clear(); }
-        virtual bool Insert(const FRect& rect, T* object) override
-        { return mGrid.Insert(rect, object); }
-        virtual void EndInsert() override
-        {}
+        virtual void Insert(const FRect& rect, const std::vector<Item>& items) override
+        {
+            // todo: re-compute the grid parameters ?
+            // todo: find some way to balance the grid ?
+            mGrid.Clear();
+            mGrid.Reshape(rect, mNumRows, mNumCols);
+            for (const auto& item : items)
+                mGrid.Insert(item.rect, item.object);
+        }
+
         virtual void Erase(const std::set<T*>& killset) override
         {
             mGrid.Erase([&killset](T* object, const base::FRect& rect) {
@@ -149,6 +166,8 @@ namespace game
         virtual void ExecuteQuery(SpatialQuery& query) const override
         { query.Execute(mGrid); }
     private:
+        const unsigned mNumRows = 0;
+        const unsigned mNumCols = 0;
         base::DenseSpatialGrid<T*> mGrid;
     };
 

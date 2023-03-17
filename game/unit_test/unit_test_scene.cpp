@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2023 Sami Väisänen
+// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ std::string WalkTree(const game::Scene& scene)
 
 void unit_test_node()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::SceneNodeClass node;
     node.SetName("root");
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
@@ -114,6 +116,8 @@ void unit_test_node()
 
 void unit_test_scene_class()
 {
+    TEST_CASE(test::Type::Feature)
+
     // make a small entity for testing.
     auto entity = std::make_shared<game::EntityClass>();
     {
@@ -140,7 +144,6 @@ void unit_test_scene_class()
     klass.SetScriptFileId("script.lua");
     klass.SetDynamicSpatialIndex(game::SceneClass::SpatialIndex::QuadTree);
     klass.SetDynamicSpatialIndexArgs(quadtree);
-    klass.SetDynamicSpatialRect(game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
     klass.SetLeftBoundary(-100.0f);
     klass.SetRightBoundary(200.0f);
     klass.SetTopBoundary(300.0f);
@@ -215,7 +218,6 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetQuadTreeArgs()->max_items == 10);
     TEST_REQUIRE(klass.GetQuadTreeArgs()->max_levels == 8);
     TEST_REQUIRE(klass.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
-    TEST_REQUIRE(*klass.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
     TEST_REQUIRE(*klass.GetLeftBoundary()   == real::float32(-100.0f));
     TEST_REQUIRE(*klass.GetRightBoundary()  == real::float32(200.0f));
     TEST_REQUIRE(*klass.GetTopBoundary()    == real::float32(300.0f));
@@ -266,7 +268,6 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret.GetQuadTreeArgs()->max_items == 10);
         TEST_REQUIRE(ret.GetQuadTreeArgs()->max_levels == 8);
         TEST_REQUIRE(ret.GetDynamicSpatialIndex() == game::SceneClass::SpatialIndex::QuadTree);
-        TEST_REQUIRE(*ret.GetDynamicSpatialRect() == game::FRect(0.0f, 0.0f, 100.0f, 100.0f));
         TEST_REQUIRE(*ret.GetLeftBoundary()   == real::float32(-100.0f));
         TEST_REQUIRE(*ret.GetRightBoundary()  == real::float32(200.0f));
         TEST_REQUIRE(*ret.GetTopBoundary()    == real::float32(300.0f));
@@ -384,6 +385,8 @@ void unit_test_scene_class()
 
 void unit_test_scene_instance_create()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetFlag(game::EntityClass::Flags::TickEntity, true);
     entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
@@ -477,6 +480,8 @@ void unit_test_scene_instance_create()
 
 void unit_test_scene_instance_spawn()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
 
     game::SceneClass klass;
@@ -557,6 +562,8 @@ void unit_test_scene_instance_spawn()
 
 void unit_test_scene_instance_kill()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
 
     game::SceneClass klass;
@@ -731,6 +738,8 @@ void unit_test_scene_instance_kill()
 
 void unit_test_scene_instance_transform()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity0 = std::make_shared<game::EntityClass>();
     {
         game::EntityNodeClass parent;
@@ -892,6 +901,8 @@ void unit_test_scene_instance_transform()
 
 void unit_test_scene_instance_kill_at_boundary()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("entity");
     {
@@ -977,6 +988,8 @@ void unit_test_scene_instance_kill_at_boundary()
 
 void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity0 = std::make_shared<game::EntityClass>();
     {
         game::EntityNodeClass parent;
@@ -1025,7 +1038,6 @@ void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
     }
 
     klass.SetDynamicSpatialIndex(index);
-    klass.SetDynamicSpatialRect(game::FRect(-800.0f, -800.0f, 1600.0f, 1600.0f));
 
     auto scene = game::CreateSceneInstance(klass);
     TEST_REQUIRE(scene->HasSpatialIndex());
@@ -1071,12 +1083,15 @@ void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
 
 void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
 {
+    TEST_CASE(test::Type::Feature)
+
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("entity");
     {
         game::EntityNodeClass node;
         node.SetName("node");
-        node.SetSize(glm::vec2(10.0f, 10.0f));
+        node.SetTranslation(0.0f, 0.0f);
+        node.SetSize(10.0f, 10.0f);
         node.CreateSpatialNode();
         entity->LinkChild(nullptr, entity->AddNode(node));
     }
@@ -1085,7 +1100,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
 
     game::SceneClass klass;
     klass.SetDynamicSpatialIndex(index);
-    klass.SetDynamicSpatialRect(rect);
+
     auto scene = game::CreateSceneInstance(klass);
     TEST_REQUIRE(scene->HasSpatialIndex());
 
@@ -1096,15 +1111,19 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
         // to the scene on the *next* frame that follows
         // the frame that spawns them.
         scene->BeginLoop();
-        for (unsigned i=0; i<100; ++i)
+        for (unsigned j=0; j<100; ++j)
         {
-            const auto x = math::rand<5231211>(5.0f, 995.0f);
-            const auto y = math::rand<8882239>(5.0f, 995.0f);
+            // because of possibility of floating point instability close to the
+            // edge values (i.e. edge of our world bounding box computation in the
+            // scene) we're clipping values and the precision here by using initially
+            // integers and then converting to float.
+            const float x = math::rand<5231211, int>(5, 995);
+            const float y = math::rand<8882239, int>(5, 995);
             game::EntityArgs args;
             args.position.x = x;
             args.position.y = y;
-            args.id = std::to_string(i);
-            args.name = std::to_string(i);
+            args.id = std::to_string(j);
+            args.name = std::to_string(j);
             args.klass = entity;
             scene->SpawnEntity(args);
         }
@@ -1200,6 +1219,7 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
 
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_node();
@@ -1215,3 +1235,4 @@ int test_main(int argc, char* argv[])
     unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::DenseGrid);
     return 0;
 }
+) // TEST-MAIN
