@@ -3027,6 +3027,7 @@ void BindGameLib(sol::state& L)
     entity_args["position"] = sol::property(&EntityArgs::position);
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
     entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
+    entity_args["layer"]    = sol::property(&EntityArgs::layer);
 
     using DynamicSpatialQueryResultSet = ResultSet<EntityNode*>;
     auto query_result_set = table.new_usertype<DynamicSpatialQueryResultSet>("SpatialQueryResultSet");

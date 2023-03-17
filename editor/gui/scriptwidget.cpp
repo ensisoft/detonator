@@ -1195,6 +1195,7 @@ void InitDoc()
                                       "Default is 0.0 (i.e no rotation).");
     DOC_OBJECT_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
                                    "Default is true.");
+    DOC_OBJECT_PROPERTY("int", "layer", "The scene layer index for the entity. Default is 0.");
 
     DOC_TABLE("game.SpatialQueryResultSet");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the result set is an empty set or not.");
