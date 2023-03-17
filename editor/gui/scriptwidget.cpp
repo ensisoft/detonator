@@ -854,6 +854,8 @@ void InitDoc()
                  "glm.vec2|base.FPoint", "a", "glm.vec2|base.FPoint", "b", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_6("void", "DebugDrawLine", "Draw a debug line from point x0,y0 to x1,y1.",
                  "float", "x0", "float", "y0", "float", "x1", "float", "y1", "base.Color4f", "color", "float", "line_width");
+    DOC_METHOD_4("void", "DebugDrawRect", "Draw a debug rect from top left corner to bottom right corner.",
+                 "glm.vec2|base.FPoint", "top_left", "glm.vec2|base.FPoint", "bottom_right", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_0("void", "DebugClear", "Clear all previous debug prints from the game window.");
     DOC_METHOD_1("uik.Window", "OpenUI", "Open a new uik.Window and place it on the top of the UI Window stack.<br>"
                                          "The window will remain open until CloseUI is called.<br>"

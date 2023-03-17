@@ -294,6 +294,17 @@ public:
                     {
                         gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
                     }
+                    if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
+                    {
+                        const auto& top_left  = ptr->top_left;
+                        const auto& bot_right = ptr->bottom_right;
+                        const auto& top_right = base::FPoint(bot_right.GetX(), top_left.GetY());
+                        const auto& bot_left  = base::FPoint(top_left.GetX(), bot_right.GetY());
+                        gfx::DrawLine(*mPainter, top_left, top_right, ptr->color, ptr->width);
+                        gfx::DrawLine(*mPainter, bot_left, bot_right, ptr->color, ptr->width);
+                        gfx::DrawLine(*mPainter, top_left, bot_left, ptr->color, ptr->width);
+                        gfx::DrawLine(*mPainter, top_right, bot_right, ptr->color, ptr->width);
+                    }
                 }
             );
             mDebugDraws.clear();
@@ -1001,8 +1012,13 @@ private:
     }
     void OnAction(const engine::DebugDrawLine& draw)
     {
-        mDebugDraws.push_back(draw);
+        mDebugDraws.emplace_back(draw);
     }
+    void OnAction(const engine::DebugDrawRect& draw)
+    {
+        mDebugDraws.emplace_back(draw);
+    }
+
     void OnAction(const engine::EnableEffectAction& action)
     {
         DEBUG("Enable disable rendering effect. [name='%1', value=%2]", action.name, action.value ? "enable" : "disable");
@@ -1243,7 +1259,7 @@ private:
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // Debug draw actions.
-    using DebugDraw = std::variant<engine::DebugDrawLine>;
+    using DebugDraw = std::variant<engine::DebugDrawLine, engine::DebugDrawRect>;
     // Current debug draw actions that are queued for the
     // next draw. next call to draw will draw them and clear
     // the vector.
