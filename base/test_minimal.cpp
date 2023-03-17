@@ -113,13 +113,16 @@ const char* GetFileName(const char* file)
 
 const char* GetTestName(const char* function_name)
 {
-    // skip over the return type in the function name
-    function_name = std::strstr(function_name, " ");
-    function_name++;
-    // skip over calling convention declaration
-    if (std::strstr(function_name, "__cdecl ") == function_name)
-        function_name += std::strlen("__cdecl ");
     return function_name;
+
+    // this for __PRETTY_FUNCTION__
+    // skip over the return type in the function name
+    //function_name = std::strstr(function_name, " ");
+    //function_name++;
+    //// skip over calling convention declaration
+    //if (std::strstr(function_name, "__cdecl ") == function_name)
+    //    function_name += std::strlen("__cdecl ");
+    //return function_name;
 }
 
 void BlurpFailure(const char* expression, const char* file, const char* function, int line, bool fatality)

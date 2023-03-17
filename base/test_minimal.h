@@ -147,7 +147,7 @@ private:
     {}
 
 #define TEST_CASE(type) \
-    test::TestCaseReporter test_case_reporter(__FILE__, __PRETTY_FUNCTION__, type); \
+    test::TestCaseReporter test_case_reporter(__FILE__, __FUNCTION__, type); \
     if (!test::IsEnabledByType(type))                                               \
         return;                                                                     \
     if (!test::IsEnabledByName(test::GetTestName(__PRETTY_FUNCTION__)))             \
