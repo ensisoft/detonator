@@ -1,8 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
-
-local _num_scenes = 7
-local _cur_scene  = 0
+local _num_scenes = 8
+local _cur_scene = 0
 
 local TestTable = {}
 
@@ -17,6 +16,7 @@ function LoadGame()
     TestTable[4] = 'Phys Test 4'
     TestTable[5] = 'Phys Test 5'
     TestTable[6] = 'Phys Test 6'
+    TestTable[7] = 'Spatial Query Test'
 
     Game:DebugPrint('LoadGame called.')
     Game:SetViewport(-500.0, -400.0, 1000.0, 800.0)
@@ -34,7 +34,7 @@ end
 -- Called before the application exist.
 -- This is the last chance to persist any state that should
 -- be restored on next game run. 
-function SaveGame() 
+function SaveGame()
     Game:DebugPrint('SaveGame called')
 end
 
@@ -49,7 +49,6 @@ end
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay called.')
 end
-
 
 -- Called as a response to Game:EndPlay when the game play ends.
 function EndPlay(scene)
@@ -90,26 +89,25 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
-    if symbol == wdk.Keys.ArrowRight then 
+    if symbol == wdk.Keys.ArrowRight then
         _cur_scene = _cur_scene + 1
-        if _cur_scene >= _num_scenes then 
+        if _cur_scene >= _num_scenes then
             _cur_scene = 0
         end
-    elseif symbol == wdk.Keys.ArrowLeft then 
+    elseif symbol == wdk.Keys.ArrowLeft then
         _cur_scene = _cur_scene - 1
-        if _cur_scene < 0 then 
-            _cur_scene = _num_scenes -1
+        if _cur_scene < 0 then
+            _cur_scene = _num_scenes - 1
         end
     else
         return
     end
 
-
-    local name  = TestTable[_cur_scene]
+    local name = TestTable[_cur_scene]
     local scene = ClassLib:FindSceneClassByName(name)
     local gravity = glm.vec2:new(0.0, 0.0)
     local variable = scene:FindScriptVarByName('gravity')
-    if variable ~= nil then         
+    if variable ~= nil then
         gravity = variable:GetValue()
     end
     Physics:SetGravity(gravity)
