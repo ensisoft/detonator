@@ -2799,6 +2799,7 @@ void BindGameLib(sol::state& L)
     entity_node["GetClassId"]     = &EntityNode::GetClassId;
     entity_node["GetClassName"]   = &EntityNode::GetClassName;
     entity_node["GetTranslation"] = &EntityNode::GetTranslation;
+    entity_node["GetSize"]        = &EntityNode::GetSize;
     entity_node["GetScale"]       = &EntityNode::GetScale;
     entity_node["GetRotation"]    = &EntityNode::GetRotation;
     entity_node["HasRigidBody"]   = &EntityNode::HasRigidBody;

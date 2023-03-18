@@ -998,6 +998,8 @@ void InitDoc()
     DOC_METHOD_0("string", "GetClassName", "Get the name of the entity node's class type.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity node's class type.");
     DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to its parent.");
+    DOC_METHOD_0("glm.vec2", "GetSize", "Get the node's size. Remember that this might not be the same as the node's world size "
+                                        "because there might be a scaling transform at some point.");
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the node's scaling factor that applies to this node and all of its children.");
     DOC_METHOD_0("float", "GetRotation", "Get the node's rotation relative to its parent.");
     DOC_METHOD_0("bool", "HasRigidBody", "Checks whether the node has a rigid body.");
