@@ -262,9 +262,7 @@ void InitDoc()
     DOC_FUNCTION_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
                                      "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
                                      "int", "seed");
-    DOC_FUNCTION_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>"
-                                        "This is an overloaded function and takes either ints or floats for min/max.<br>"
-                                        "The type of the returned value depends on the type of min/max parameters.",
+    DOC_FUNCTION_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>",
                  "int|float", "min", "int|float", "max");
     DOC_FUNCTION_2("string", "JoinPath", "Concatenate file system paths together.<br>"
                                        "No assumption is made regarding the validity of the paths.",
@@ -285,6 +283,13 @@ void InitDoc()
                  "string", "fmt", "...", "args");
     DOC_FUNCTION_2("string", "Join", "Concatenate and join the items in a string array together with a separator.",
                    "util.StringArrayInterface", "array", "string", "separator");
+
+    DOC_TABLE("util.RandomEngine");
+    DOC_METHOD_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
+                                       "For any given seed the generated pseudo random number sequence will always be the same on every platform.",
+                 "int", "seed");
+    DOC_METHOD_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>",
+                 "int|float", "min", "int|float", "max");
 
     DOC_TABLE("util.FBox");
     DOC_METHOD_2("util.FBox", "new", "Construct a new object aligned FBox.",
