@@ -1,6 +1,6 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
-local _num_scenes = 8
+local _num_scenes = 9
 local _cur_scene = 0
 
 local TestTable = {}
@@ -9,14 +9,15 @@ local TestTable = {}
 -- This is the place where you might want to load some 
 -- previous/initial game state. 
 function LoadGame()
-    TestTable[0] = 'Phys Test 0'
-    TestTable[1] = 'Phys Test 1'
-    TestTable[2] = 'Phys Test 2'
-    TestTable[3] = 'Phys Test 3'
-    TestTable[4] = 'Phys Test 4'
-    TestTable[5] = 'Phys Test 5'
-    TestTable[6] = 'Phys Test 6'
-    TestTable[7] = 'Spatial Query Test'
+    TestTable[0] = 'Kinematic C Velocity Balls'
+    TestTable[1] = 'Dynamic C Velocity Balls'
+    TestTable[2] = 'Dynamic Balls'
+    TestTable[3] = 'Distance Joint'
+    TestTable[4] = 'Downhill Balls'
+    TestTable[5] = 'Wrecking Ball'
+    TestTable[6] = 'Raycast'
+    TestTable[7] = 'Fixture Widget'
+    TestTable[8] = 'Spatial Query'
 
     Game:DebugPrint('LoadGame called.')
     Game:SetViewport(-500.0, -400.0, 1000.0, 800.0)

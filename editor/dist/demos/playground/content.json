@@ -12,10 +12,98 @@
         "WantsKeyEvents": true,
         "WantsMouseEvents": false
       },
+      "id": "zFZFKpipES",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Kinematic Constant Speed Ball",
+      "nodes": [
+        {
+          "class": "BAaFunDDPL",
+          "drawable_item": {
+            "drawable": "_circle",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Green",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": true,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Circle",
+            "simulation": "Kinematic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "BAaFunDDPL"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "zFZFKpipES",
+      "resource_name": "Kinematic Constant Speed Ball",
+      "script_file": "67oHYYDttT",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": false
+      },
       "id": "a8UWU1fUNZ",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Constant Speed Ball",
+      "name": "Dynamic Constant Speed Ball",
       "nodes": [
         {
           "class": "x5LUp0CItR",
@@ -84,7 +172,7 @@
         "node": null
       },
       "resource_id": "a8UWU1fUNZ",
-      "resource_name": "Constant Speed Ball",
+      "resource_name": "Dynamic Constant Speed Ball",
       "script_file": "9jMLWUyAWj",
       "tag": ""
     },
@@ -964,7 +1052,7 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "_checkerboard",
+            "material": "_Silver",
             "renderpass": "DrawColor",
             "renderstyle": "Solid",
             "timescale": 1.0
@@ -1578,8 +1666,816 @@
   "scenes": [
     {
       "dynamic_spatial_index": "Disabled",
+      "id": "n9hH3dGv20",
+      "name": "Kinematic C Velocity Balls",
+      "nodes": [
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "MTf8Rasjnf",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -500.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "dK1EdyK1h8",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "D3nxdDA2zN",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Vertical Wall_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 500.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "Fwn9yS1gWF",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "pevGqwKQWR",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Block_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -150.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "Fwn9yS1gWF",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "43sC4K1kkC",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Block_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 250.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "Y76u2F01hp",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "ETnTKLXRXi",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "aALrSMrj7L",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Horizontal Wall_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "fy5aapEM0F",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "zY5assaRzl",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "message_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "zFZFKpipES",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "JXiSGUudAB",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Kinematic Constant Speed Ball_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -250.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "zFZFKpipES",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "iyiYfgfPUO",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Kinematic Constant Speed Ball_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -150.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "zFZFKpipES",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "CilvdBGLqg",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Kinematic Constant Speed Ball_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 300.0,
+            "y": -100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "zFZFKpipES",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "f6gq5OOPXx",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Kinematic Constant Speed Ball_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "ILtGGvhIB0",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -50.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "aTOzMO6SbF",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 50.0,
+            "y": 100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "ijLUEuo4O9",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": -100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "eQL5jy6UtN",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "RTbeTmCmB8",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "LHggCP7fez",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_5",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "6M7kjbtJOK",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "HzFxJTgZUs",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dynamic Ball_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -250.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "MTf8Rasjnf"
+            }
+          },
+          {
+            "node": {
+              "id": "D3nxdDA2zN"
+            }
+          },
+          {
+            "node": {
+              "id": "pevGqwKQWR"
+            }
+          },
+          {
+            "node": {
+              "id": "43sC4K1kkC"
+            }
+          },
+          {
+            "node": {
+              "id": "Y76u2F01hp"
+            }
+          },
+          {
+            "node": {
+              "id": "aALrSMrj7L"
+            }
+          },
+          {
+            "node": {
+              "id": "zY5assaRzl"
+            }
+          },
+          {
+            "node": {
+              "id": "JXiSGUudAB"
+            }
+          },
+          {
+            "node": {
+              "id": "iyiYfgfPUO"
+            }
+          },
+          {
+            "node": {
+              "id": "CilvdBGLqg"
+            }
+          },
+          {
+            "node": {
+              "id": "f6gq5OOPXx"
+            }
+          },
+          {
+            "node": {
+              "id": "ILtGGvhIB0"
+            }
+          },
+          {
+            "node": {
+              "id": "aTOzMO6SbF"
+            }
+          },
+          {
+            "node": {
+              "id": "ijLUEuo4O9"
+            }
+          },
+          {
+            "node": {
+              "id": "eQL5jy6UtN"
+            }
+          },
+          {
+            "node": {
+              "id": "RTbeTmCmB8"
+            }
+          },
+          {
+            "node": {
+              "id": "LHggCP7fez"
+            }
+          },
+          {
+            "node": {
+              "id": "HzFxJTgZUs"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "n9hH3dGv20",
+      "resource_name": "Kinematic C Velocity Balls",
+      "script_file": "",
+      "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
       "id": "lTi7YXjdsz",
-      "name": "Phys Test 0",
+      "name": "Dynamic C Velocity Balls",
       "nodes": [
         {
           "entity": "dK1EdyK1h8",
@@ -2028,14 +2924,14 @@
         "node": null
       },
       "resource_id": "lTi7YXjdsz",
-      "resource_name": "Phys Test 0",
+      "resource_name": "Dynamic C Velocity Balls",
       "script_file": "",
       "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
       "id": "XwQTFkhxPJ",
-      "name": "Phys Test 1",
+      "name": "Dynamic Balls",
       "nodes": [
         {
           "entity": "6M7kjbtJOK",
@@ -3364,14 +4260,14 @@
         "node": null
       },
       "resource_id": "XwQTFkhxPJ",
-      "resource_name": "Phys Test 1",
+      "resource_name": "Dynamic Balls",
       "script_file": "",
       "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
       "id": "7zQLUleDer",
-      "name": "Phys Test 2",
+      "name": "Distance Joint",
       "nodes": [
         {
           "entity": "kpR98Mlxaz",
@@ -3644,14 +4540,14 @@
         "node": null
       },
       "resource_id": "7zQLUleDer",
-      "resource_name": "Phys Test 2",
+      "resource_name": "Distance Joint",
       "script_file": "",
       "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
       "id": "pATaRMBTR7",
-      "name": "Phys Test 3",
+      "name": "Downhill Balls",
       "nodes": [
         {
           "entity": "ETnTKLXRXi",
@@ -4188,7 +5084,7 @@
         "node": null
       },
       "resource_id": "pATaRMBTR7",
-      "resource_name": "Phys Test 3",
+      "resource_name": "Downhill Balls",
       "script_file": "",
       "tilemap": "",
       "vars": [
@@ -4214,7 +5110,7 @@
     {
       "dynamic_spatial_index": "Disabled",
       "id": "v8AR2h5m8R",
-      "name": "Phys Test 4",
+      "name": "Wrecking Ball",
       "nodes": [
         {
           "entity": "ETnTKLXRXi",
@@ -4795,7 +5691,7 @@
         "node": null
       },
       "resource_id": "v8AR2h5m8R",
-      "resource_name": "Phys Test 4",
+      "resource_name": "Wrecking Ball",
       "script_file": "",
       "tilemap": "",
       "vars": [
@@ -4821,7 +5717,7 @@
     {
       "dynamic_spatial_index": "QuadTree",
       "id": "UWnXOsuD6o",
-      "name": "Spatial Query Test",
+      "name": "Spatial Query",
       "nodes": [
         {
           "entity": "ETnTKLXRXi",
@@ -5624,14 +6520,14 @@
         "node": null
       },
       "resource_id": "UWnXOsuD6o",
-      "resource_name": "Spatial Query Test",
+      "resource_name": "Spatial Query",
       "script_file": "uhYlthZ4sC",
       "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
       "id": "2rSIWqteXS",
-      "name": "Phys Test 5",
+      "name": "Raycast",
       "nodes": [
         {
           "entity": "ETnTKLXRXi",
@@ -6212,14 +7108,14 @@
         "node": null
       },
       "resource_id": "2rSIWqteXS",
-      "resource_name": "Phys Test 5",
+      "resource_name": "Raycast",
       "script_file": "k4Stm2rLJJ",
       "tilemap": ""
     },
     {
       "dynamic_spatial_index": "Disabled",
       "id": "f7S1HTDAgE",
-      "name": "Phys Test 6",
+      "name": "Fixture Widget",
       "nodes": [
         {
           "entity": "ETnTKLXRXi",
@@ -6492,7 +7388,7 @@
         "node": null
       },
       "resource_id": "f7S1HTDAgE",
-      "resource_name": "Phys Test 6",
+      "resource_name": "Fixture Widget",
       "script_file": "",
       "tilemap": ""
     }
@@ -6509,10 +7405,10 @@
     },
     {
       "id": "9jMLWUyAWj",
-      "name": "Constant Speed Ball",
+      "name": "Dynamic Constant Speed Ball",
       "owner": "",
       "resource_id": "9jMLWUyAWj",
-      "resource_name": "Constant Speed Ball",
+      "resource_name": "Dynamic Constant Speed Ball",
       "type": "Unspecified",
       "uri": "ws://lua/9jMLWUyAWj.lua"
     },
@@ -6551,48 +7447,15 @@
       "resource_name": "Spatial Query Test",
       "type": "Unspecified",
       "uri": "ws://lua/uhYlthZ4sC.lua"
-    }
-  ],
-  "shapes": [
+    },
     {
-      "draws": [
-        {
-          "count": 4,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
-      "id": "Kv8Ml9IlfK",
-      "name": "My Shape",
-      "resource_id": "Kv8Ml9IlfK",
-      "resource_name": "My Shape",
-      "static": true,
-      "vertices": [
-        {
-          "s": 0.34939759969711304,
-          "t": 0.24946846067905426,
-          "x": 0.34939759969711304,
-          "y": -0.24946846067905426
-        },
-        {
-          "s": 0.14953933656215668,
-          "t": 0.4493267238140106,
-          "x": 0.14953933656215668,
-          "y": -0.4493267238140106
-        },
-        {
-          "s": 0.14953933656215668,
-          "t": 0.6995038986206055,
-          "x": 0.14953933656215668,
-          "y": -0.6995038986206055
-        },
-        {
-          "s": 0.3997165262699127,
-          "t": 0.6995038986206055,
-          "x": 0.3997165262699127,
-          "y": -0.6995038986206055
-        }
-      ]
+      "id": "67oHYYDttT",
+      "name": "Kinematic Constant Speed Ball",
+      "owner": "",
+      "resource_id": "67oHYYDttT",
+      "resource_name": "Kinematic Constant Speed Ball",
+      "type": "Unspecified",
+      "uri": "ws://lua/67oHYYDttT.lua"
     }
   ]
 }
