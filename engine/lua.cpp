@@ -836,24 +836,44 @@ void BindActuatorInterface(sol::usertype<Actuator>& actuator)
 // "... math.randomseed will call the underlying C function srand ..."
 class RandomEngine {
 public:
-    static void Seed(int seed)
+    void Seed(int seed)
     { mTwister = boost::random::mt19937(seed); }
-    static int NextInt()
+    int NextInt()
     { return NextInt(INT_MIN, INT_MAX); }
-    static int NextInt(int min, int max)
+    int NextInt(int min, int max)
     {
         boost::random::uniform_int_distribution<int> dist(min, max);
         return dist(mTwister);
     }
-    static float NextFloat(float min, float max)
+    float NextFloat(float min, float max)
     {
         boost::random::uniform_real_distribution<float> dist(min, max);
         return dist(mTwister);
     }
+    static RandomEngine& Get()
+    {
+        static RandomEngine instance;
+        return instance;
+    }
+    static void SeedGlobal(int seed)
+    {
+        Get().Seed(seed);
+    }
+    static int NextIntGlobal()
+    {
+        return Get().NextInt();
+    }
+    static int NextIntGlobal(int min, int max)
+    {
+        return Get().NextInt(min, max);
+    }
+    static float NextFloatGlobal(float min, float max)
+    {
+        return Get().NextFloat(min, max);
+    }
 private:
-    static boost::random::mt19937 mTwister;
+    boost::random::mt19937 mTwister;
 };
-boost::random::mt19937 RandomEngine::mTwister;
 
 template<typename Writer>
 void BindDataWriterInterface(sol::usertype<Writer>& writer)
@@ -2042,19 +2062,36 @@ void BindUtil(sol::state& L)
     };
 
     // see comments at RandomEngine about why this is done.
-    util["RandomSeed"] = &RandomEngine::Seed;
+    util["RandomSeed"] = &RandomEngine::SeedGlobal;
     util["Random"] = sol::overload(
         [](sol::this_state state) {
             sol::state_view view(state);
-            return sol::make_object(view, RandomEngine::NextInt());
+            return sol::make_object(view, RandomEngine::NextIntGlobal());
         },
         [](sol::this_state state, int min, int max) {
             sol::state_view view(state);
-            return sol::make_object(view, RandomEngine::NextInt(min, max));
+            return sol::make_object(view, RandomEngine::NextIntGlobal(min, max));
         },
         [](sol::this_state state, float min, float max) {
             sol::state_view view(state);
-            return sol::make_object(view, RandomEngine::NextFloat(min, max));
+            return sol::make_object(view, RandomEngine::NextFloatGlobal(min, max));
+        });
+
+    sol::constructors<RandomEngine()> random_engine_ctor;
+    auto random_engine = util.new_usertype<RandomEngine>("RandomEngine", random_engine_ctor);
+    random_engine["Seed"] = &RandomEngine::Seed;
+    random_engine["Random"] = sol::overload(
+        [](RandomEngine& engine, sol::this_state state) {
+            sol::state_view view(state);
+            return sol::make_object(view, engine.NextInt());
+        },
+        [](RandomEngine& engine, sol::this_state state, int min, int max) {
+            sol::state_view view(state);
+            return sol::make_object(view, engine.NextInt(min, max));
+        },
+        [](RandomEngine& engine, sol::this_state state, float min, float max) {
+            sol::state_view view(state);
+            return sol::make_object(view, engine.NextFloat(min, max));
         });
 
     sol::constructors<FBox(),
