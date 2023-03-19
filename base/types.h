@@ -21,6 +21,8 @@
 #include <algorithm> // for min, max
 #include <tuple>
 
+#include "base/math.h"
+
 namespace base
 {
     template<typename T>
@@ -219,9 +221,9 @@ namespace base
         T GetY() const noexcept
         { return mY; }
         Point<T> GetPosition() const noexcept
-        { return Point<T>(mX, mY); }
+        { return {mX, mY}; }
         Size<T> GetSize() const noexcept
-        { return Size<T>(mWidth, mHeight); }
+        { return {mWidth, mHeight}; }
         void SetX(T value) noexcept
         { mX = value; }
         void SetY(T value) noexcept
@@ -294,7 +296,7 @@ namespace base
         // coordinate system.
         Point<T> MapToGlobal(T x, T y) const noexcept
         {
-            return Point<T>(mX + x, mY + y);
+            return { mX + x, mY + y };
         }
 
         // Map a local point relative to the rect origin
@@ -302,7 +304,7 @@ namespace base
         // coordinate system
         Point<T> MapToGlobal(const Point<T>& p) const noexcept
         {
-            return Point<T>(mX + p.GetX(), mY + p.GetY());
+            return { mX + p.GetX(), mY + p.GetY() };
         }
 
         // Map a global point relative to the origin of the
@@ -310,14 +312,14 @@ namespace base
         // origin of the rect.
         Point<T> MapToLocal(T x, T y) const noexcept
         {
-            return Point<T>(x - mX, y - mY);
+            return { x - mX, y - mY };
         }
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
         Point<T> MapToLocal(const Point<T>& p) const noexcept
         {
-            return Point<T>(p.GetX() - mX, p.GetY() - mY);
+            return { p.GetX() - mX, p.GetY() - mY };
         }
 
         // Normalize the rectangle with respect to the given
@@ -328,7 +330,7 @@ namespace base
             const float y = mY / space.GetHeight();
             const float w = mWidth / space.GetWidth();
             const float h = mHeight / space.GetHeight();
-            return Rect<float>(x, y, w, h);
+            return {x, y, w, h};
         }
 
         // Inverse of Normalize. Assuming a normalized rectangle
@@ -341,7 +343,7 @@ namespace base
             const F y = mY * space.GetHeight();
             const F w = mWidth * space.GetWidth();
             const F h = mHeight * space.GetHeight();
-            return Rect<F>(x, y, w, h);
+            return {x, y, w, h};
         }
         // Inverse of Normalize. Assuming a normalized rectangle
         // expand it to a non-normalized rectangle given the
@@ -358,7 +360,7 @@ namespace base
             const unsigned y = std::max(mY, T(0)) * space.GetHeight();
             const unsigned w = mWidth * space.GetWidth();
             const unsigned h = mHeight * space.GetHeight();
-            return Rect<unsigned>(x, y, w, h);
+            return {x, y, w, h};
         }
         // Split the rect into 4 sub-quadrants.
         std::tuple<Rect, Rect, Rect, Rect> GetQuadrants() const noexcept
@@ -384,7 +386,7 @@ namespace base
         PointT GetCenter() const noexcept
         {
             const auto half = T(2);
-            return PointT(mX + mWidth/half, mY + mHeight/half);
+            return {mX + mWidth/half, mY + mHeight/half};
         }
     private:
         T mX = 0;
@@ -393,9 +395,82 @@ namespace base
         T mHeight = 0;
     };
 
+    template<typename T>
+    class Circle
+    {
+    public:
+        Circle() = default;
+        Circle(float x, float y, float radius) noexcept
+          : mX(x)
+          , mY(y)
+          , mRadius(radius)
+        {}
+        Circle(const Point<T>& pos, float radius) noexcept
+          : mX(pos.GetX())
+          , mY(pos.GetY())
+          , mRadius(radius)
+        {}
+        inline T GetRadius() const noexcept
+        { return mRadius; }
+        inline T GetX() const noexcept
+        { return mX; }
+        inline T GetY() const noexcept
+        { return mY; }
+        inline Point<T> GetCenter() const noexcept
+        { return {mX, mY}; }
+        inline void SetX(T x) noexcept
+        { mX = x; }
+        inline void SetY(T y) noexcept
+        { mY = y; }
+        inline void SetRadius(T radius) noexcept
+        { mRadius = radius; }
+        bool IsEmpty() const noexcept
+        {
+            return mRadius != T();
+        }
+        bool TestPoint(const Point<T>& p) const noexcept
+        {
+            const auto radius_squared = mRadius*mRadius;
+            const auto dist_x = p.GetX() - mX;
+            const auto dist_y = p.GetY() - mY;
+            const auto dist_squared = dist_x*dist_x + dist_y*dist_y;
+            return dist_squared < radius_squared;
+        }
+        void Translate(const Point<T>& p) noexcept
+        {
+            mX += p.GetX();
+            mY += p.GetY();
+        }
+        void Translate(T x, T y) noexcept
+        {
+            mX += x;
+            mY += y;
+        }
+        void Move(T x, T y) noexcept
+        {
+            mX = x;
+            mY = y;
+        }
+        void Move(const Point<T>& pos) noexcept
+        {
+            mX = pos.GetX();
+            mY = pos.GetY();
+        }
+        Rect<T> Inscribe() const noexcept
+        {
+            const auto size  = mRadius + mRadius;
+            return {mX-mRadius, mY-mRadius, size, size};
+        }
+    private:
+        T mX = 0;
+        T mY = 0;
+        T mRadius = 0;
+    };
+
     using URect = Rect<unsigned>;
     using FRect = Rect<float>;
     using IRect = Rect<int>;
+    using FCircle = Circle<float>;
 
     inline bool operator==(const URect& lhs, const URect& rhs) noexcept
     {
@@ -489,6 +564,18 @@ namespace base
             return false;
         return true;
     }
+
+    template<typename T>
+    bool DoesIntersect(const Rect<T>& rect, const Circle<T>& circle) noexcept
+    {
+        return math::CheckRectCircleIntersection(
+                rect.GetX(), rect.GetX() + rect.GetWidth(),
+                rect.GetY(), rect.GetY() + rect.GetHeight(),
+                circle.GetX(), circle.GetY(), circle.GetRadius());
+    }
+    template<typename T>
+    bool DoesIntersect(const Circle<T>& circle, const Rect<T>& rect) noexcept
+    { return DoesIntersect(rect, circle); }
 
     template<typename T>
     Rect<T> Union(const Rect<T>& lhs, const Rect<T>& rhs) noexcept
