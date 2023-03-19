@@ -76,6 +76,25 @@ namespace base
     using FSize = Size<float>;
     using ISize = Size<int>;
 
+    inline bool operator==(const USize& lhs, const USize& rhs) noexcept
+    {
+        return lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator==(const ISize& lhs, const ISize& rhs) noexcept
+    {
+        return lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator!=(const USize& lhs, const USize& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+    inline bool operator!=(const ISize& lhs, const ISize& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
     template<typename T>
     class Point
     {
@@ -127,6 +146,25 @@ namespace base
     using UPoint = Point<unsigned>;
     using FPoint = Point<float>;
     using IPoint = Point<int>;
+
+    inline bool operator==(const UPoint& lhs, const UPoint& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY();
+    }
+    inline bool operator==(const IPoint& lhs, const IPoint& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY();
+    }
+    inline bool operator!=(const UPoint& lhs, const UPoint& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+    inline bool operator!=(const IPoint& lhs, const IPoint& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
 
     // simple rectangle definition
     template<typename T>
@@ -356,6 +394,31 @@ namespace base
     using URect = Rect<unsigned>;
     using FRect = Rect<float>;
     using IRect = Rect<int>;
+
+    inline bool operator==(const URect& lhs, const URect& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY() &&
+               lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator!=(const URect& lhs, const URect& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+    inline bool operator==(const IRect& lhs, const IRect& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY() &&
+               lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator!=(const IRect& lhs, const IRect& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
 
     // Test whether the rectangle A contains rectangle B completely.
     template<typename T>
