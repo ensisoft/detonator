@@ -2254,7 +2254,7 @@ void BindBase(sol::state& L)
     rect["GetCenter"]      = &base::FRect::GetCenter;
     rect["Combine"]        = &base::Union<float>;
     rect["Intersect"]      = &base::Intersect<float>;
-    rect["TestIntersect"]  = &base::DoesIntersect<float>;
+    rect["TestIntersect"]  = [](const base::FRect& lhs, const base::FRect& rhs) { return base::DoesIntersect(lhs, rhs); };
     rect.set_function(sol::meta_function::to_string, [](const FRect& rect) {
         return base::ToString(rect);
     });
