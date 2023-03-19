@@ -21,6 +21,8 @@
 #include "warnpush.h"
 #include "warnpop.h"
 
+#include "base/assert.h"
+
 #include <type_traits>
 #include <random>
 #include <cmath>
@@ -259,8 +261,8 @@ namespace math
         // https://www.element84.com/blog/determining-the-winding-of-a-polygon-given-as-a-set-of-ordered-points
 
         // positive area indicates clockwise winding.
-        // negative area indicates counter clockwise winding.n
-        // zero area is degerate case and the vertices are collinear (not linearly independent)
+        // negative area indicates counter-clockwise winding.
+        // zero area is degenerate case and the vertices are collinear (not linearly independent)
         const float ret = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
         if (ret > 0.0f)
             return TriangleWindingOrder::Clockwise;
@@ -272,7 +274,7 @@ namespace math
     template<typename Vertex>
     std::vector<Vertex> FindConvexHull(const Vertex* verts, size_t num_verts)
     {
-        // this is the so called "Jarvis March."
+        // this is the so-called "Jarvis March."
 
         std::vector<Vertex> hull;
 
@@ -300,7 +302,7 @@ namespace math
 
             // we can imagine there to be a line from the current vertex to the
             // next vertex. then we look for vertices that are to the left of this line.
-            // any such vertex will become the next new guess and then we repeat.
+            // any such vertex will become the next new guess, and then we repeat.
             // so this will always choose the "leftmost" vertex with respect to the
             // current line segment between current and next.
             //
@@ -314,7 +316,7 @@ namespace math
             //
             // when looking from A to B X is to the left and Y is to the right.
             // we can test for this by checking the polygon winding order.
-            // triangle (a, b, x) will have counter clockwise winding order while
+            // triangle (a, b, x) will have counter-clockwise winding order while
             // triangle (a, b, y) will have clockwise winding order.
             //
             // note that for this algorithm it doesn't matter if we choose left or right since
@@ -348,5 +350,30 @@ namespace math
             return {};
         return FindConvexHull(&verts[0], verts.size());
     }
+
+    static bool CheckRectCircleIntersection(float left, float right, float top, float bottom, float x, float y, float radius)
+    {
+        ASSERT(right >= left);
+        ASSERT(bottom >= top);
+
+        // find the point closest to the center of the circle inside the rectangle
+        const auto pointX = clamp(left, right, x);
+        const auto pointY = clamp(top, bottom, y);
+
+        // if the distance from the center of the circle to the closest
+        // point inside the rectangle is less than the radius of the circle
+        // then the shapes are in collision.
+        const auto distX = x - pointX;
+        const auto distY = y - pointY;
+
+        // Pythagoras theorem applies, a² + b² = c²
+        // using a squared radius allows us to avoid computing the actual distance
+        // using a square root which is expensive. the results are the same.
+        const auto distance_squared = distX*distX + distY*distY;
+        const auto radius_squared = radius*radius;
+        const auto collision = distance_squared < radius_squared;
+        return collision;
+    }
+
 
 } // namespace
