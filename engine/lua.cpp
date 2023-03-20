@@ -3166,9 +3166,19 @@ void BindGameLib(sol::state& L)
             scene.QuerySpatialNodes(point, &result);
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
+        [](Scene& scene, const base::FPoint& point, float radius) {
+            std::set<EntityNode*> result;
+            scene.QuerySpatialNodes(point, radius, &result);
+            return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
+        },
         [](Scene& scene, const glm::vec2& point) {
             std::set<EntityNode*> result;
             scene.QuerySpatialNodes(base::FPoint(point.x, point.y), &result);
+            return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
+        },
+        [](Scene& scene, const glm::vec2& point, float radius) {
+            std::set<EntityNode*> result;
+            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), radius, &result);
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
         [](Scene& scene, const base::FRect& rect) {

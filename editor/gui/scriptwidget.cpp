@@ -1311,6 +1311,9 @@ void InitDoc()
     DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
                                                                     "whose spatial nodes intersect with the given point.",
                  "base.FPoint|glm.vec2", "point");
+    DOC_METHOD_2("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
+                                                                    "whose spatial nodes intersect with the given point within the given radius from the point.",
+                 "base.FPoint|glm.vec2", "point", "float", "radius");
 
     DOC_TABLE("game.RayCastResult");
     DOC_OBJECT_PROPERTY("game.EntityNode", "node", "The entity node (with rigid body) that intersected with the ray.");

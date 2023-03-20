@@ -49,54 +49,93 @@ namespace game
 
         // Query interface functions for specific query parameters
         // and result container types.
+
+        // Query by rectangle intersection test.
         inline void Query(const FRect& area, std::set<T*>* result)
-        { query(area, result); }
+        { ExecuteQuery(RectangleQuery<std::set<T*>>(area, result)); }
         inline void Query(const FRect& area, std::set<const T*>*result) const
-        { query(area, result); }
+        { ExecuteQuery(RectangleQuery<std::set<const T*>>(area, result)); }
         inline void Query(const FRect& area, std::vector<T*>* result)
-        { query(area, result); }
+        { ExecuteQuery(RectangleQuery<std::vector<T*>>(area, result)); }
         inline void Query(const FRect& area, std::vector<const T*>*result) const
-        { query(area, result); }
+        { ExecuteQuery(RectangleQuery<std::vector<const T*>>(area, result)); }
+
+        // Query by point rectangle containment test.
         inline void Query(const FPoint& point, std::set<T*>* result)
-        { query(point, result); }
+        { ExecuteQuery(PointQuery<std::set<T*>>(point, result)); }
         inline void Query(const FPoint& point, std::set<const T*>* result) const
-        { query(point, result); }
+        { ExecuteQuery(PointQuery<std::set<const T*>>(point, result)); }
         inline void Query(const FPoint& point, std::vector<T*>* result)
-        { query(point, result); }
+        { ExecuteQuery(PointQuery<std::vector<T*>>(point, result)); }
         inline void Query(const FPoint& point, std::vector<const T*>* result) const
-        { query(point, result); }
+        { ExecuteQuery(PointQuery<std::vector<const T*>>(point, result)); }
+
+        // Query by point-radius hit test.
+        inline void Query(const FPoint& point, float radius, std::set<T*>* result)
+        { ExecuteQuery(PointRadiusQuery<std::set<T*>>(point, radius, result)); }
+        inline void Query(const FPoint& point, float radius, std::set<const T*>* result) const
+        { ExecuteQuery(PointRadiusQuery<std::set<const T*>>(point, radius, result)); }
+        inline void Query(const FPoint& point, float radius, std::vector<T*>* result)
+        { ExecuteQuery(PointRadiusQuery<std::vector<T*>>(point, radius, result)); }
+        inline void Query(const FPoint& point, float radius, std::vector<const T*>* result) const
+        { ExecuteQuery(PointRadiusQuery<std::vector<const T*>>(point, radius, result)); }
     protected:
         class SpatialQuery {
         public:
             virtual ~SpatialQuery() = default;
-            virtual void Execute(const base::QuadTree<T*>& tree) = 0;
-            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) = 0;
+            virtual void Execute(const base::QuadTree<T*>& tree) const = 0;
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const = 0;
         private:
         };
-        template<typename Predicate, typename ResultContainer>
-        class QueryTemplate : public SpatialQuery {
+        template<typename ResultContainer>
+        class RectangleQuery final : public SpatialQuery {
         public:
-            QueryTemplate(const Predicate& predicate, ResultContainer* result)
-               : mPredicate(predicate)
+            RectangleQuery(const FRect& rect, ResultContainer* result)
+               : mRect(rect)
                , mResult(result)
             {}
-            virtual void Execute(const base::QuadTree<T*>& tree) override
-            { QueryQuadTree(mPredicate, tree, mResult); }
-            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) override
-            { grid.Find(mPredicate, mResult); }
+            virtual void Execute(const base::QuadTree<T*>& tree) const override
+            { QueryQuadTree(mRect, tree, mResult); }
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
+            { grid.Find(mRect, mResult); }
         private:
-            const Predicate mPredicate;
-            ResultContainer* mResult = nullptr;
+            const FRect mRect;
+            ResultContainer* mResult;
+        };
+        template<typename ResultContainer>
+        class PointQuery final : public SpatialQuery {
+        public:
+            PointQuery(const FPoint& point, ResultContainer* result)
+              : mPoint(point)
+              , mResult(result)
+            {}
+            virtual void Execute(const base::QuadTree<T*>& tree) const override
+            { QueryQuadTree(mPoint, tree, mResult); }
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
+            { grid.Find(mPoint, mResult); }
+        private:
+            const FPoint mPoint;
+            ResultContainer* mResult;
+        };
+        template<typename ResultContainer>
+        class PointRadiusQuery final : public SpatialQuery {
+        public:
+            PointRadiusQuery(const FPoint& point, float radius, ResultContainer* result)
+              : mPoint(point)
+              , mRadius(radius)
+              , mResult(result)
+            {}
+            virtual void Execute(const base::QuadTree<T*>& tree) const override
+            { QueryQuadTree(mPoint, mRadius, tree, mResult); }
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
+            { grid.Find(mPoint, mRadius, mResult); }
+        private:
+            const FPoint mPoint;
+            const float mRadius;
+            ResultContainer* mResult;
         };
     protected:
-        virtual void ExecuteQuery(SpatialQuery& query) const = 0;
-    private:
-        template<typename Predicate, typename ResultContainer>
-        void query(const Predicate& predicate, ResultContainer* container) const
-        {
-            QueryTemplate<Predicate, ResultContainer> q(predicate, container);
-            ExecuteQuery(q);
-        }
+        virtual void ExecuteQuery(const SpatialQuery& query) const = 0;
     };
 
     template<typename T>
@@ -127,7 +166,7 @@ namespace game
         }
     protected:
         using SpatialQuery = typename SpatialIndex<T>::SpatialQuery;
-        virtual void ExecuteQuery(SpatialQuery& query) const override
+        virtual void ExecuteQuery(const SpatialQuery& query) const override
         { query.Execute(mTree); }
     private:
         const unsigned mMaxItems = 0;
@@ -163,7 +202,7 @@ namespace game
         }
     protected:
         using SpatialQuery = typename SpatialIndex<T>::SpatialQuery;
-        virtual void ExecuteQuery(SpatialQuery& query) const override
+        virtual void ExecuteQuery(const SpatialQuery& query) const override
         { query.Execute(mGrid); }
     private:
         const unsigned mNumRows = 0;
