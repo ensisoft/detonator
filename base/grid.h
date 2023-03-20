@@ -201,6 +201,7 @@ namespace base
         template<typename RetObject>
         inline void Find(const FRect& rect, std::unordered_set<Object*> result) const
         { find_objects_by_rect(rect, result); }
+
         template<typename RetObject>
         inline void Find(const FPoint& point, std::vector<RetObject>* result) const
         { find_objects_by_point(point, result); }
@@ -210,6 +211,16 @@ namespace base
         template<typename RetObject>
         inline void Find(const FPoint& point, std::unordered_set<RetObject>* result) const
         { find_objects_by_point(point, result); }
+
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::vector<RetObject>* result) const
+        { find_objects_by_point(point, radius, result); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::set<RetObject>* result) const
+        { find_objects_by_point(point, radius, result); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::unordered_set<RetObject>* result) const
+        { find_objects_by_point(point, radius, result); }
 
         Object& GetObject(unsigned row, unsigned col, unsigned item) noexcept
         { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
@@ -346,6 +357,35 @@ namespace base
                 const auto& item_rect = GetItemRect(item);
                 if (item_rect.TestPoint(point))
                     store_result(item.object, result);
+            }
+        }
+
+        template<typename Container>
+        void find_objects_by_point(const FPoint& point, float radius, Container* result) const
+        {
+            const FCircle circle(point, radius);
+
+            const auto sub_rect = Intersect(mRect, circle.Inscribe());
+            if (sub_rect.IsEmpty())
+                return;
+            const auto map_rect = MapRect(sub_rect);
+            const auto start_x = map_rect.GetX();
+            const auto start_y = map_rect.GetY();
+            const auto end_x = start_x + map_rect.GetWidth();
+            const auto end_y = start_y + map_rect.GetHeight();
+
+            for (unsigned row=start_y; row<end_y; ++row)
+            {
+                for (unsigned col=start_x; col<end_x; ++col)
+                {
+                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
+                    for (auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (DoesIntersect(item_rect, circle))
+                            store_result(item.object, result);
+                    }
+                }
             }
         }
 
