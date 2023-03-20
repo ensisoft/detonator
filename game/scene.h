@@ -693,21 +693,31 @@ namespace game
         void Rebuild();
 
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<EntityNode*>* result)
-        { query_spatial_nodes(area_of_interest, result); }
+        { query_spatial_nodes_by_rect(area_of_interest, result); }
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::set<const EntityNode*>* result) const
-        { query_spatial_nodes(area_of_interest, result); }
+        { query_spatial_nodes_by_rect(area_of_interest, result); }
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::vector<EntityNode*>* result)
-        { query_spatial_nodes(area_of_interest, result); }
+        { query_spatial_nodes_by_rect(area_of_interest, result); }
         inline void QuerySpatialNodes(const FRect& area_of_interest, std::vector<const EntityNode*>* result) const
-        { query_spatial_nodes(area_of_interest, result); }
+        { query_spatial_nodes_by_rect(area_of_interest, result); }
+
         inline void QuerySpatialNodes(const FPoint& point, std::set<EntityNode*>* result)
-        { query_spatial_nodes(point, result); }
+        { query_spatial_nodes_by_point(point, result); }
         inline void QuerySpatialNodes(const FPoint& point, std::set<const EntityNode*>* result) const
-        { query_spatial_nodes(point, result); }
+        { query_spatial_nodes_by_point(point, result); }
         inline void QuerySpatialNodes(const FPoint& point, std::vector<EntityNode*>* result)
-        { query_spatial_nodes(point, result); }
+        { query_spatial_nodes_by_point(point, result); }
         inline void QuerySpatialNodes(const FPoint& point, std::vector<const EntityNode*>* result) const
-        { query_spatial_nodes(point, result); }
+        { query_spatial_nodes_by_point(point, result); }
+
+        inline void QuerySpatialNodes(const FPoint& point, float radius, std::set<EntityNode*>* result)
+        { query_spatial_nodes_by_point_radius(point, radius, result); }
+        inline void QuerySpatialNodes(const FPoint& point, float radius, std::set<const EntityNode*>* result) const
+        { query_spatial_nodes_by_point_radius(point, radius, result); }
+        inline void QuerySpatialNodes(const FPoint& point, float radius, std::vector<EntityNode*>* result)
+        { query_spatial_nodes_by_point_radius(point, radius, result); }
+        inline void QuerySpatialNodes(const FPoint& point, float radius, std::vector<const EntityNode*>* result) const
+        { query_spatial_nodes_by_point_radius(point, radius, result); }
 
         const SpatialIndex* GetSpatialIndex() const noexcept
         { return mSpatialIndex.get(); }
@@ -747,12 +757,25 @@ namespace game
         // Disabled.
         Scene& operator=(const Scene&) = delete;
     private:
-        template<typename Predicate, typename ResultContainer>
-        void query_spatial_nodes(const Predicate& predicate, ResultContainer* result) const
+        template<typename ResultContainer>
+        void query_spatial_nodes_by_point(const FPoint& point, ResultContainer* result) const
         {
             if (mSpatialIndex)
-                mSpatialIndex->Query(predicate, result);
+                mSpatialIndex->Query(point, result);
         }
+        template<typename ResultContainer>
+        void query_spatial_nodes_by_point_radius(const FPoint& point, float radius, ResultContainer* result) const
+        {
+            if (mSpatialIndex)
+                mSpatialIndex->Query(point, radius, result);
+        }
+        template<typename ResultContainer>
+        void query_spatial_nodes_by_rect(const FRect& rect, ResultContainer* result) const
+        {
+            if (mSpatialIndex)
+                mSpatialIndex->Query(rect, result);
+        }
+
 
     private:
         // the class object.
