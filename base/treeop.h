@@ -23,6 +23,8 @@
 #include <unordered_set>
 
 #include "base/tree.h"
+#include "base/math.h"
+#include "base/types.h"
 
 namespace base
 {
@@ -185,6 +187,27 @@ namespace detail {
         }
     }
 
+    template<typename Object, typename Container>
+    void QueryQuadTree(const base::FCircle& circle, const QuadTreeNode<Object>& node, Container* result)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (base::DoesIntersect(rect, circle))
+                StoreObject(node.GetItemObject(i), result);
+        }
+        if (!node.HasChildren())
+            return;
+        for (size_t i=0; i<4; ++i)
+        {
+            const auto* quad = node.GetChildQuadrant(i);
+            const auto& rect = quad->GetRect();
+            if (base::DoesIntersect(rect, circle))
+                QueryQuadTree(circle, *quad, result);
+        }
+    }
+
+
 } // namespace detail
 
 template<typename SrcObject, typename RetObject> inline
@@ -211,5 +234,16 @@ template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
 { detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
 
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result)
+{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
+
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result)
+{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
+
+template<typename SrcObject, typename RetObject> inline
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
+{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
 
 } // namespace
