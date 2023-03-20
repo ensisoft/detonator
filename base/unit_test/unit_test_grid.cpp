@@ -316,6 +316,33 @@ void unit_test_insert_query()
 
     }
 
+    // point radius query
+    {
+        base::DenseSpatialGrid<Entity*> grid(100.0f, 100.0f, 10, 10);
+
+        std::vector<Entity*> ret;
+        grid.Find(base::FPoint(0.0f, 0.0f), 5.0f, &ret);
+        grid.Find(base::FPoint(90.0f, 90.0f), 5.0f, &ret);
+        grid.Find(base::FPoint(100.0f, 100.0f), 5.0f, &ret);
+
+        Entity e;
+        grid.Insert(base::FRect(50.0f, 50.0f, 20.0f , 20.0f), &e);
+
+        grid.Find(base::FPoint(50.0f, 50.0f), 5.0f, &ret);
+        TEST_REQUIRE(ret.size() == 1);
+
+        ret.clear();
+        grid.Find(base::FPoint(40.0f, 40.0f), 10.0f, &ret);
+        TEST_REQUIRE(ret.empty());
+
+        grid.Find(base::FPoint(40.0f, 40.0f), 20.0f, &ret);
+        TEST_REQUIRE(ret.size() == 1);
+
+        // outside the space partition
+        grid.Find(base::FPoint(150.0f, 150.0f), 5.0f, &ret);
+
+    }
+
     // erase nothing
     {
         base::DenseSpatialGrid<Entity*> grid(100.0f, 100.0f, 2, 2);
