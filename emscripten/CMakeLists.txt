@@ -27,8 +27,13 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 
 add_executable(UnitTest
     ../base/test_minimal.cpp
+    ../base/unit_test/unit_test_math.cpp
+    ../base/unit_test/unit_test.cpp
+    ../base/unit_test/unit_test_grid.cpp
     ../base/unit_test/unit_test_memory.cpp
     ../game/unit_test/unit_test_entity.cpp
+    ../game/unit_test/unit_test_scene.cpp
+    ../base/trace.cpp
     ../base/logging.cpp
     ../base/assert.cpp
     ../base/json.cpp
