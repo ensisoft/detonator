@@ -1315,12 +1315,14 @@ void InitDoc()
     DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
                                                                     "whose spatial nodes intersect with the given search rectangle.",
                  "base.FRect", "area_of_interest");
-    DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
-                                                                    "whose spatial nodes intersect with the given point.",
-                 "base.FPoint|glm.vec2", "point");
     DOC_METHOD_2("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
-                                                                    "whose spatial nodes intersect with the given point within the given radius from the point.",
-                 "base.FPoint|glm.vec2", "point", "float", "radius");
+                                                                    "whose spatial nodes intersect with the given point.<br>"
+                                                                    "Mode defines distance based filtering for the found objects. Use 'All' to find all objects or 'Closest' to find  the closest only.",
+                 "base.FPoint|glm.vec2", "point", "string", "mode");
+    DOC_METHOD_3("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
+                                                                    "whose spatial nodes intersect with the given point within the given radius from the point."
+                                                                    "Mode defines distance based filtering for the found objects. Use 'All' to find all objects or 'Closest' to find the closest only.",
+                 "base.FPoint|glm.vec2", "point", "float", "radius", "string", "mode");
 
     DOC_TABLE("game.RayCastResult");
     DOC_OBJECT_PROPERTY("game.EntityNode", "node", "The entity node (with rigid body) that intersected with the ray.");

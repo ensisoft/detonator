@@ -846,7 +846,7 @@ void measure_quadtree_even_grid_perf(unsigned max_items, unsigned max_levels)
                 }
             }
         });
-        test::PrintTestTimes("Baseline O(N²) collision", baseline);
+        test::PrintTestTimes("Baseline O(N²) collision 10k items", baseline);
     }
 
     {
@@ -863,7 +863,7 @@ void measure_quadtree_even_grid_perf(unsigned max_items, unsigned max_levels)
                 //    std::printf("side effect for not optimizing the test away!");
             }
         });
-        test::PrintTestTimes("QuadTree based collision", ret);
+        test::PrintTestTimes("QuadTree based collision 10k items", ret);
     }
 }
 

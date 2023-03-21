@@ -60,25 +60,29 @@ namespace game
         inline void Query(const FRect& area, std::vector<const T*>*result) const
         { ExecuteQuery(RectangleQuery<std::vector<const T*>>(area, result)); }
 
+        enum class QueryMode {
+            Closest, All
+        };
+
         // Query by point rectangle containment test.
-        inline void Query(const FPoint& point, std::set<T*>* result)
-        { ExecuteQuery(PointQuery<std::set<T*>>(point, result)); }
-        inline void Query(const FPoint& point, std::set<const T*>* result) const
-        { ExecuteQuery(PointQuery<std::set<const T*>>(point, result)); }
-        inline void Query(const FPoint& point, std::vector<T*>* result)
-        { ExecuteQuery(PointQuery<std::vector<T*>>(point, result)); }
-        inline void Query(const FPoint& point, std::vector<const T*>* result) const
-        { ExecuteQuery(PointQuery<std::vector<const T*>>(point, result)); }
+        inline void Query(const FPoint& point, std::set<T*>* result, QueryMode mode)
+        { ExecuteQuery(PointQuery<std::set<T*>>(point, mode, result)); }
+        inline void Query(const FPoint& point, std::set<const T*>* result, QueryMode mode) const
+        { ExecuteQuery(PointQuery<std::set<const T*>>(point, mode, result)); }
+        inline void Query(const FPoint& point, std::vector<T*>* result, QueryMode mode)
+        { ExecuteQuery(PointQuery<std::vector<T*>>(point, mode, result)); }
+        inline void Query(const FPoint& point, std::vector<const T*>* result, QueryMode mode) const
+        { ExecuteQuery(PointQuery<std::vector<const T*>>(point, mode, result)); }
 
         // Query by point-radius hit test.
-        inline void Query(const FPoint& point, float radius, std::set<T*>* result)
-        { ExecuteQuery(PointRadiusQuery<std::set<T*>>(point, radius, result)); }
-        inline void Query(const FPoint& point, float radius, std::set<const T*>* result) const
-        { ExecuteQuery(PointRadiusQuery<std::set<const T*>>(point, radius, result)); }
-        inline void Query(const FPoint& point, float radius, std::vector<T*>* result)
-        { ExecuteQuery(PointRadiusQuery<std::vector<T*>>(point, radius, result)); }
-        inline void Query(const FPoint& point, float radius, std::vector<const T*>* result) const
-        { ExecuteQuery(PointRadiusQuery<std::vector<const T*>>(point, radius, result)); }
+        inline void Query(const FPoint& point, float radius, std::set<T*>* result, QueryMode mode)
+        { ExecuteQuery(PointRadiusQuery<std::set<T*>>(point, radius, mode, result)); }
+        inline void Query(const FPoint& point, float radius, std::set<const T*>* result, QueryMode mode) const
+        { ExecuteQuery(PointRadiusQuery<std::set<const T*>>(point, radius, mode, result)); }
+        inline void Query(const FPoint& point, float radius, std::vector<T*>* result, QueryMode mode)
+        { ExecuteQuery(PointRadiusQuery<std::vector<T*>>(point, radius, mode, result)); }
+        inline void Query(const FPoint& point, float radius, std::vector<const T*>* result, QueryMode mode) const
+        { ExecuteQuery(PointRadiusQuery<std::vector<const T*>>(point, radius, mode, result)); }
     protected:
         class SpatialQuery {
         public:
@@ -105,33 +109,57 @@ namespace game
         template<typename ResultContainer>
         class PointQuery final : public SpatialQuery {
         public:
-            PointQuery(const FPoint& point, ResultContainer* result)
+            PointQuery(const FPoint& point, QueryMode mode, ResultContainer* result)
               : mPoint(point)
+              , mMode(mode)
               , mResult(result)
             {}
             virtual void Execute(const base::QuadTree<T*>& tree) const override
-            { QueryQuadTree(mPoint, tree, mResult); }
+            {
+                if (mMode == QueryMode::Closest)
+                    QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::Closest);
+                else if (mMode == QueryMode::All)
+                    QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::All);
+            }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
-            { grid.Find(mPoint, mResult); }
+            {
+                if (mMode == QueryMode::Closest)
+                    grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::Closest);
+                else if (mMode == QueryMode::All)
+                    grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::All);
+            }
         private:
             const FPoint mPoint;
+            const QueryMode mMode;
             ResultContainer* mResult;
         };
         template<typename ResultContainer>
         class PointRadiusQuery final : public SpatialQuery {
         public:
-            PointRadiusQuery(const FPoint& point, float radius, ResultContainer* result)
+            PointRadiusQuery(const FPoint& point, float radius, QueryMode mode, ResultContainer* result)
               : mPoint(point)
               , mRadius(radius)
+              , mMode(mode)
               , mResult(result)
             {}
             virtual void Execute(const base::QuadTree<T*>& tree) const override
-            { QueryQuadTree(mPoint, mRadius, tree, mResult); }
+            {
+                if (mMode == QueryMode::Closest)
+                    QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::Closest);
+                else if (mMode == QueryMode::All)
+                    QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::All);
+            }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
-            { grid.Find(mPoint, mRadius, mResult); }
+            {
+                if (mMode == QueryMode::Closest)
+                    grid.Find(mPoint, mRadius, mResult, base::DenseSpatialGrid<T*>::FindMode::Closest);
+                else if (mMode == QueryMode::All)
+                    grid.Find(mPoint, mRadius, mResult, base::DenseSpatialGrid<T*>::FindMode::All);
+            }
         private:
             const FPoint mPoint;
             const float mRadius;
+            const QueryMode mMode;
             ResultContainer* mResult;
         };
     protected:
