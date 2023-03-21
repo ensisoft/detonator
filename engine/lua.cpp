@@ -2272,6 +2272,11 @@ void BindBase(sol::state& L)
     auto point = base.new_usertype<base::FPoint>("FPoint", point_ctors);
     point["GetX"] = &base::FPoint::GetX;
     point["GetY"] = &base::FPoint::GetY;
+    point["SetX"] = &base::FPoint::SetX;
+    point["SetY"] = &base::FPoint::SetY;
+    point["Distance"] = &base::Distance;
+    point["SquareDistance"] = &base::Distance;
+
     point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
     point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
     point.set_function(sol::meta_function::to_string, [](const base::FPoint& point) { return base::ToString(point); });

@@ -460,9 +460,16 @@ void InitDoc()
     DOC_METHOD_2("base.FPoint", "new", "Construct a new point with the given x,y position.", "float", "x", "float", "y");
     DOC_METHOD_0("float", "GetX", "Get the x position.");
     DOC_METHOD_0("float", "GetY", "Get the y position.");
+    DOC_METHOD_1("void", "SetX", "Set the x position.", "float", "x");
+    DOC_METHOD_1("void", "SetY", "Set the y position.", "float", "x");
     DOC_META_METHOD_2("base.FPoint", "operator +", "Lua addition meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
     DOC_META_METHOD_2("base.FPoint", "operator -", "Lua subtraction meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.FPoint", "point");
+    DOC_FUNCTION_2("float", "Distance", "Compute the actual distance between two points.", "base.FPoint", "a", "base.FPoint", "b");
+    DOC_FUNCTION_2("float", "SquareDistance", "Compute the square distance between two points. This function offers better performance than Distance <br>"
+                                              "when only a comparable value is needed and not the actual distance.<br>"
+                                              "A squared distance is sufficient for example when finding a closest object to any other object.",
+                   "base.FPoint", "a", "base.FPoint", "b");
 
     DOC_TABLE("base.Colors");
     for (const auto& color : magic_enum::enum_values<base::Color>())

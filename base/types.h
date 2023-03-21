@@ -20,6 +20,7 @@
 
 #include <algorithm> // for min, max
 #include <tuple>
+#include <cmath>
 
 #include "base/math.h"
 
@@ -112,8 +113,14 @@ namespace base
           , mY(other.GetY())
         {}
 
-        T GetX() const noexcept { return mX; }
-        T GetY() const noexcept { return mY; }
+        inline T GetX() const noexcept
+        { return mX; }
+        inline T GetY() const noexcept
+        { return mY; }
+        inline void SetX(T x) noexcept
+        { mX = x; }
+        inline void SetY(T y) noexcept
+        { mY = y; }
 
         Point& operator+=(const Point& other) noexcept
         {
@@ -166,6 +173,21 @@ namespace base
     inline bool operator!=(const IPoint& lhs, const IPoint& rhs) noexcept
     {
         return !(lhs == rhs);
+    }
+    inline float Distance(const FPoint& a, const FPoint& b) noexcept
+    {
+        const auto ret = a - b;
+        const auto y = ret.GetY();
+        const auto x = ret.GetX();
+        return std::sqrt(x*x + y*y);
+    }
+
+    inline float SquareDistance(const FPoint& a, const FPoint& b) noexcept
+    {
+        const auto ret = b - a;
+        const auto x = ret.GetX();
+        const auto y = ret.GetY();
+        return x*x + y*y;
     }
 
     // simple rectangle definition
