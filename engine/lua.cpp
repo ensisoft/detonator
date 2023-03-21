@@ -3166,24 +3166,40 @@ void BindGameLib(sol::state& L)
         [](Scene& scene, const EntityArgs& args) { return scene.SpawnEntity(args, true); },
         [](Scene& scene, const EntityArgs& args, bool link) { return scene.SpawnEntity(args, link); });
     scene["QuerySpatialNodes"] = sol::overload(
-        [](Scene& scene, const base::FPoint& point) {
+        [](Scene& scene, const base::FPoint& point, const std::string& mode) {
+            const auto enum_val = magic_enum::enum_cast<game::Scene::SpatialQueryMode>(mode);
+            if (!enum_val.has_value())
+                throw GameError("No such spatial query mode: " + mode);
+
             std::set<EntityNode*> result;
-            scene.QuerySpatialNodes(point, &result);
+            scene.QuerySpatialNodes(point, &result, enum_val.value());
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
-        [](Scene& scene, const base::FPoint& point, float radius) {
+        [](Scene& scene, const base::FPoint& point, float radius, const std::string& mode) {
+            const auto enum_val = magic_enum::enum_cast<game::Scene::SpatialQueryMode>(mode);
+            if (!enum_val.has_value())
+                throw GameError("No such spatial query mode: " + mode);
+
             std::set<EntityNode*> result;
-            scene.QuerySpatialNodes(point, radius, &result);
+            scene.QuerySpatialNodes(point, radius, &result, enum_val.value());
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
-        [](Scene& scene, const glm::vec2& point) {
+        [](Scene& scene, const glm::vec2& point, const std::string& mode) {
+            const auto enum_val = magic_enum::enum_cast<game::Scene::SpatialQueryMode>(mode);
+            if (!enum_val.has_value())
+                throw GameError("No such spatial query mode: " + mode);
+
             std::set<EntityNode*> result;
-            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), &result);
+            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), &result, enum_val.value());
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
-        [](Scene& scene, const glm::vec2& point, float radius) {
+        [](Scene& scene, const glm::vec2& point, float radius, const std::string& mode) {
+            const auto enum_val = magic_enum::enum_cast<game::Scene::SpatialQueryMode>(mode);
+            if (!enum_val.has_value())
+                throw GameError("No such spatial query mode: " + mode);
+
             std::set<EntityNode*> result;
-            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), radius, &result);
+            scene.QuerySpatialNodes(base::FPoint(point.x, point.y), radius, &result, enum_val.value());
             return std::make_unique<DynamicSpatialQueryResultSet>(std::move(result));
         },
         [](Scene& scene, const base::FRect& rect) {
