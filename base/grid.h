@@ -22,6 +22,7 @@
 #include <tuple>
 #include <set>
 #include <type_traits>
+#include <optional>
 #include <cmath>
 
 #include "base/assert.h"
@@ -95,26 +96,14 @@ namespace base
             if (!Contains(mRect, rect))
                 return false;
 
-            const auto sub_rect = Intersect(mRect, rect);
-            const auto map_rect = MapRect(sub_rect);
-            const auto start_y = map_rect.GetY();
-            const auto start_x = map_rect.GetX();
-            const auto end_y = start_y + map_rect.GetHeight();
-            const auto end_x = start_x + map_rect.GetWidth();
+            for_each_cell(Intersect(mRect, rect), [&rect, object](const auto& items) {
+                ItemType item;
+                if constexpr (ItemTraits::CacheRect)
+                    item.rect = rect;
 
-            for (unsigned row=start_y; row<end_y; ++row)
-            {
-                for (unsigned col=start_x; col<end_x; ++col)
-                {
-                    ItemType item;
-                    if constexpr (ItemTraits::CacheRect)
-                        item.rect = rect;
-
-                    item.object = std::move(object);
-                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
-                    items.push_back(std::move(item));
-                }
-            }
+                item.object = std::move(object);
+                const_cast<ItemList&>(items).push_back(std::move(item));
+            });
             return true;
         }
         template<typename Predicate>
@@ -144,27 +133,17 @@ namespace base
             if (sub_rect.IsEmpty())
                 return;
 
-            const auto map_rect = MapRect(sub_rect);
-            const auto start_y = map_rect.GetY();
-            const auto start_x = map_rect.GetX();
-            const auto end_y = start_y + map_rect.GetHeight();
-            const auto end_x = start_x + map_rect.GetWidth();
-
-            for (unsigned row=start_y; row<end_y; ++row)
-            {
-                for (unsigned col=start_x; col<end_x; ++col)
+            for_each_cell(sub_rect, [&sub_rect](const auto& c_items) {
+                auto& items = const_cast<ItemList&>(c_items);
+                for (auto it = items.begin(); it != items.end();)
                 {
-                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
-                    for (auto it = items.begin(); it != items.end();)
-                    {
-                        const auto& item = *it;
-                        const auto& item_rect = GetItemRect(item);
-                        if (DoesIntersect(item_rect, sub_rect))
-                            it = items.erase(it);
-                        else ++it;
-                    }
+                    const auto& item = *it;
+                    const auto& item_rect = GetItemRect(item);
+                    if (DoesIntersect(item_rect, sub_rect))
+                        it = items.erase(it);
+                    else ++it;
                 }
-            }
+            });
         }
         // Erase objects whose rects contain the given point.
         void Erase(const base::FPoint& point)  noexcept
@@ -202,25 +181,29 @@ namespace base
         inline void Find(const FRect& rect, std::unordered_set<Object*> result) const
         { find_objects_by_rect(rect, result); }
 
-        template<typename RetObject>
-        inline void Find(const FPoint& point, std::vector<RetObject>* result) const
-        { find_objects_by_point(point, result); }
-        template<typename RetObject>
-        inline void Find(const FPoint& point, std::set<RetObject>* result) const
-        { find_objects_by_point(point, result); }
-        template<typename RetObject>
-        inline void Find(const FPoint& point, std::unordered_set<RetObject>* result) const
-        { find_objects_by_point(point, result); }
+        enum class FindMode {
+            Closest, All
+        };
 
         template<typename RetObject>
-        inline void Find(const FPoint& point, float radius, std::vector<RetObject>* result) const
-        { find_objects_by_point(point, radius, result); }
+        inline void Find(const FPoint& point, std::vector<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point(point, result, mode); }
         template<typename RetObject>
-        inline void Find(const FPoint& point, float radius, std::set<RetObject>* result) const
-        { find_objects_by_point(point, radius, result); }
+        inline void Find(const FPoint& point, std::set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point(point, result, mode); }
         template<typename RetObject>
-        inline void Find(const FPoint& point, float radius, std::unordered_set<RetObject>* result) const
-        { find_objects_by_point(point, radius, result); }
+        inline void Find(const FPoint& point, std::unordered_set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point(point, result, mode); }
+
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::vector<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point_radius(point, radius, result, mode); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point_radius(point, radius, result, mode); }
+        template<typename RetObject>
+        inline void Find(const FPoint& point, float radius, std::unordered_set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_point_radius(point, radius, result, mode); }
 
         Object& GetObject(unsigned row, unsigned col, unsigned item) noexcept
         { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
@@ -319,72 +302,125 @@ namespace base
         template<typename Container>
         void find_objects_by_rect(const FRect& rect, Container* result) const
         {
-            const auto sub_rect = Intersect(mRect, rect);
+            const auto& sub_rect = Intersect(mRect, rect);
             if (sub_rect.IsEmpty())
                 return;
 
-            const auto map_rect = MapRect(sub_rect);
-            const auto start_y = map_rect.GetY();
-            const auto start_x = map_rect.GetX();
-            const auto end_x = start_x + map_rect.GetWidth();
-            const auto end_y = start_y + map_rect.GetHeight();
-
-            for (unsigned row=start_y; row<end_y; ++row)
-            {
-                for (unsigned col=start_x; col<end_x; ++col)
+            for_each_cell(sub_rect, [&sub_rect, result](const auto& items) {
+                for (auto& item : items)
                 {
-                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
-                    for (auto& item : items)
-                    {
-                        const auto& item_rect = GetItemRect(item);
-                        if (DoesIntersect(item_rect, sub_rect))
-                            store_result(item.object, result);
-                    }
+                    const auto& item_rect = GetItemRect(item);
+                    if (DoesIntersect(item_rect, sub_rect))
+                        store_result(item.object, result);
                 }
-            }
+            });
         }
         template<typename Container>
-        void find_objects_by_point(const FPoint& point, Container* result) const
+        void find_objects_by_point(const FPoint& point, Container* result, FindMode mode) const
         {
             if (!mRect.TestPoint(point))
                 return;
+
             const auto map = MapPoint(point);
             const auto col = map.GetX();
             const auto row = map.GetY();
-            auto& items = mGrid[row * mCols + col];
-            for (auto& item : items)
+            const auto& items = mGrid[row * mCols + col];
+
+            if (mode == FindMode::All)
             {
-                const auto& item_rect = GetItemRect(item);
-                if (item_rect.TestPoint(point))
-                    store_result(item.object, result);
+                for (const auto& item: items)
+                {
+                    const auto& item_rect = GetItemRect(item);
+                    if (item_rect.TestPoint(point))
+                        store_result(item.object, result);
+                }
             }
+            else if (mode == FindMode::Closest)
+            {
+                if (items.empty())
+                    return;
+                float best_dist = std::numeric_limits<float>::max();
+                std::optional<Object> best_object;
+
+                for (const auto& item : items)
+                {
+                    const auto& item_rect = GetItemRect(item);
+                    if (!item_rect.TestPoint(point))
+                        continue;
+
+                    const float dist = SquareDistance(point, item_rect.GetCenter());
+                    if (dist < best_dist)
+                    {
+                        best_object = item.object;
+                        best_dist   = dist;
+                    }
+                }
+                if (best_object)
+                    store_result(best_object.value(), result);
+
+            } else BUG("Missing FindMode implementation");
         }
 
         template<typename Container>
-        void find_objects_by_point(const FPoint& point, float radius, Container* result) const
+        void find_objects_by_point_radius(const FPoint& point, float radius, Container* result, FindMode mode) const
         {
             const FCircle circle(point, radius);
 
-            const auto sub_rect = Intersect(mRect, circle.Inscribe());
+            const auto& sub_rect = Intersect(mRect, circle.Inscribe());
             if (sub_rect.IsEmpty())
                 return;
-            const auto map_rect = MapRect(sub_rect);
-            const auto start_x = map_rect.GetX();
-            const auto start_y = map_rect.GetY();
-            const auto end_x = start_x + map_rect.GetWidth();
-            const auto end_y = start_y + map_rect.GetHeight();
 
-            for (unsigned row=start_y; row<end_y; ++row)
+            if (mode == FindMode::All)
             {
-                for (unsigned col=start_x; col<end_x; ++col)
-                {
-                    auto& items = base::SafeIndex(mGrid, row * mCols + col);
-                    for (auto& item : items)
+                for_each_cell(sub_rect, [&circle, result](const auto& items) {
+                    for (const auto& item: items)
                     {
                         const auto& item_rect = GetItemRect(item);
                         if (DoesIntersect(item_rect, circle))
                             store_result(item.object, result);
                     }
+                });
+            }
+            else if (mode == FindMode::Closest)
+            {
+                float best_dist = std::numeric_limits<float>::max();
+                std::optional<Object> best_found;
+                for_each_cell(sub_rect, [&circle, &best_found, &best_dist](const auto& items) {
+                    for (const auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (!DoesIntersect(item_rect, circle))
+                            continue;
+
+                        const float dist = SquareDistance(circle.GetCenter(), item_rect.GetCenter());
+                        if (dist < best_dist)
+                        {
+                            best_found = item.object;
+                            best_dist  = dist;
+                        }
+                    }
+                });
+                if (best_found)
+                    store_result(best_found.value(), result);
+
+            } else BUG("Missing FindMode implementation");
+        }
+        template<typename Callback>
+        void for_each_cell(const FRect& sub_rect, Callback callback) const
+        {
+            const auto map_rect = MapRect(sub_rect);
+            const auto start_x = map_rect.GetX();
+            const auto start_y = map_rect.GetY();
+            const auto end_x = start_x + map_rect.GetWidth();
+            const auto end_y = start_y + map_rect.GetHeight();
+
+            for (unsigned row=start_y; row<end_y; ++row)
+            {
+                for (unsigned col=start_x; col<end_x; ++col)
+                {
+                    ASSERT(row * mCols + col < mGrid.size());
+                    const auto& items = mGrid[row * mCols + col];
+                    callback(items);
                 }
             }
         }
