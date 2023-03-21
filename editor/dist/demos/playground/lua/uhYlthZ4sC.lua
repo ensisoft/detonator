@@ -5,6 +5,16 @@
 local mouse_down = nil
 local mouse_pos = nil
 
+local SelectionMode = {
+    Rectangle = 'Rectangle',
+    AllPoint = 'AllPoints',
+    AllPointWithRadius = 'AllPointsWithRadius',
+    ClosestPoint = 'ClosestPoint',
+    ClosestPointWithRadius = 'ClosestPointWithRadius'
+}
+
+local selection_mode = SelectionMode.Rectangle
+
 -- Called when the scene begins play.
 function BeginPlay(spatial_query_test)
 end
@@ -35,7 +45,14 @@ function Update(spatial_query_test, game_time, dt)
     end
 
     local pink = base.Color4f.FromEnum('HotPink')
-    Game:DebugDrawRect(mouse_down, mouse_pos, pink, 2.0)
+
+    if selection_mode == SelectionMode.Rectangle then
+        Game:DebugDrawRect(mouse_down, mouse_pos, pink, 2.0)
+    elseif selection_mode == SelectionMode.AllPointWithRadius then
+        Game:DebugDrawLine(mouse_down, mouse_pos, pink, 2.0)
+    elseif selection_mode == SelectionMode.ClosestPointWithRadius then
+        Game:DebugDrawLine(mouse_down, mouse_pos, pink, 2.0)
+    end
 end
 
 -- Called on collision events with other objects.
@@ -49,6 +66,18 @@ end
 
 -- Called on key down events.
 function OnKeyDown(spatial_query_test, symbol, modifier_bits)
+    if symbol == wdk.Keys.Key1 then
+        selection_mode = SelectionMode.Rectangle
+    elseif symbol == wdk.Keys.Key2 then
+        selection_mode = SelectionMode.AllPoint
+    elseif symbol == wdk.Keys.Key3 then
+        selection_mode = SelectionMode.AllPointWithRadius
+    elseif symbol == wdk.Keys.Key4 then
+        selection_mode = SelectionMode.ClosestPoint
+    elseif symbol == wdk.Keys.Key5 then
+        selection_mode = SelectionMode.ClosestPointWithRadius
+    end
+    Game:DebugPrint('Selection mode ' .. tostring(selection_mode))
 end
 
 -- Called on key up events.
@@ -74,8 +103,21 @@ function OnMouseRelease(spatial_query_test, mouse)
     local width = max_x - min_x
     local height = max_y - min_y
 
-    local nodes = Scene:QuerySpatialNodes(
-                      base.FRect:new(min_x, min_y, width, height))
+    local nodes = nil
+    if selection_mode == SelectionMode.Rectangle then
+        nodes = Scene:QuerySpatialNodes(base.FRect:new(min_x, min_y, width,
+                                                       height))
+    elseif selection_mode == SelectionMode.AllPoint then
+        nodes = Scene:QuerySpatialNodes(mouse_pos, 'All')
+    elseif selection_mode == SelectionMode.AllPointWithRadius then
+        local radius = glm.length(mouse_pos - mouse_down)
+        nodes = Scene:QuerySpatialNodes(mouse_down, radius, 'All')
+    elseif selection_mode == SelectionMode.ClosestPoint then
+        nodes = Scene:QuerySpatialNodes(mouse_down, 'Closest')
+    elseif selection_mode == SelectionMode.ClosestPointWithRadius then
+        local radius = glm.length(mouse_pos - mouse_down)
+        nodes = Scene:QuerySpatialNodes(mouse_down, radius, 'Closest')
+    end
 
     while (nodes:HasNext()) do
         local node = nodes:GetNext()
