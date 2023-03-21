@@ -61,7 +61,7 @@ namespace game
         { ExecuteQuery(RectangleQuery<std::vector<const T*>>(area, result)); }
 
         enum class QueryMode {
-            Closest, All
+            Closest, All, First
         };
 
         // Query by point rectangle containment test.
@@ -120,6 +120,8 @@ namespace game
                     QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::Closest);
                 else if (mMode == QueryMode::All)
                     QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::All);
+                else if (mMode == QueryMode::First)
+                    QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::First);
             }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
             {
@@ -127,6 +129,8 @@ namespace game
                     grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::Closest);
                 else if (mMode == QueryMode::All)
                     grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::All);
+                else if (mMode == QueryMode::First)
+                    grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::First);
             }
         private:
             const FPoint mPoint;
@@ -148,6 +152,9 @@ namespace game
                     QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::Closest);
                 else if (mMode == QueryMode::All)
                     QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::All);
+                else if (mMode == QueryMode::First)
+                    QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::First);
+
             }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
             {
@@ -155,6 +162,8 @@ namespace game
                     grid.Find(mPoint, mRadius, mResult, base::DenseSpatialGrid<T*>::FindMode::Closest);
                 else if (mMode == QueryMode::All)
                     grid.Find(mPoint, mRadius, mResult, base::DenseSpatialGrid<T*>::FindMode::All);
+                else if (mMode == QueryMode::First)
+                    grid.Find(mPoint, mResult, base::DenseSpatialGrid<T*>::FindMode::First);
             }
         private:
             const FPoint mPoint;

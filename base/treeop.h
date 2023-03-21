@@ -133,7 +133,7 @@ bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* pa
 
 namespace detail {
     enum class QuadTreeFindMode {
-        Closest, All
+        Closest, All, First
     };
 
     // use distinct types for the objects that are stored it the quad tree
@@ -211,6 +211,62 @@ namespace detail {
         }
     }
 
+    template<typename Object, typename Container>
+    bool QuadTreeFindFirst(const base::FPoint& point, const QuadTreeNode<Object>& node, Container* result)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (rect.TestPoint(point))
+            {
+                StoreObject(node.GetItemObject(i), result);
+                return true;
+            }
+        }
+        if (!node.HasChildren())
+            return false;
+
+        for (size_t i=0; i<4; ++i)
+        {
+            const auto* quad = node.GetChildQuadrant(i);
+            const auto& rect = quad->GetRect();
+            if (rect.TestPoint(point))
+            {
+                if (QuadTreeFindFirst(point, *quad, result))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    template<typename Object, typename Container>
+    bool QuadTreeFindFirst(const base::FCircle& circle, const QuadTreeNode<Object>& node, Container* result)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (base::DoesIntersect(rect, circle))
+            {
+                StoreObject(node.GetItemObject(i), result);
+                return true;
+            }
+        }
+        if (!node.HasChildren())
+            return false;
+
+        for (size_t i=0; i<4; ++i)
+        {
+            const auto* quad = node.GetChildQuadrant(i);
+            const auto& rect = quad->GetRect();
+            if (base::DoesIntersect(rect, circle))
+            {
+                if (QuadTreeFindFirst(circle, *quad, result))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     template<typename Object>
     void QuadTreeFindClosest(const base::FPoint& point, const QuadTreeNode<Object>& node, float& best_distance, std::optional<Object>& best_found)
     {
@@ -274,6 +330,10 @@ namespace detail {
         if (mode == QuadTreeFindMode::All)
         {
             QuadTreeFindAll(pred, node, result);
+        }
+        else if (mode == QuadTreeFindMode::First)
+        {
+            QuadTreeFindFirst(pred, node, result);
         }
         else if (mode == QuadTreeFindMode::Closest)
         {
