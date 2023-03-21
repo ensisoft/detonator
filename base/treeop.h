@@ -21,6 +21,7 @@
 #include <vector>
 #include <set>
 #include <unordered_set>
+#include <optional>
 
 #include "base/tree.h"
 #include "base/math.h"
@@ -131,6 +132,10 @@ bool SearchParent(const RenderTree<Node>& tree, const Node* node, const Node* pa
 }
 
 namespace detail {
+    enum class QuadTreeFindMode {
+        Closest, All
+    };
+
     // use distinct types for the objects that are stored it the quad tree
     // vs the objects that are stored during query operation, so that simple
     // thing such as converting from T* to const T* work easily.
@@ -146,13 +151,12 @@ namespace detail {
     { set->insert(std::move(object)); }
 
     template<typename Object, typename Container>
-    void QueryQuadTree(const base::FRect& area_of_interest, const QuadTreeNode<Object>& node, Container* result)
+    void QuadTreeFindAll(const base::FRect& area_of_interest, const QuadTreeNode<Object>& node, Container* result)
     {
         for (size_t i=0; i<node.GetNumItems(); ++i)
         {
             const auto& rect = node.GetItemRect(i);
-            const auto& test = base::Intersect(area_of_interest, rect);
-            if (!test.IsEmpty())
+            if (DoesIntersect(area_of_interest, rect))
                 StoreObject(node.GetItemObject(i), result);
         }
         if (!node.HasChildren())
@@ -163,12 +167,12 @@ namespace detail {
             const auto& rect = quad->GetRect();
             const auto& area = base::Intersect(area_of_interest, rect);
             if (!area.IsEmpty())
-                QueryQuadTree(area, *quad, result);
+                QuadTreeFindAll(area, *quad, result);
         }
     }
 
     template<typename Object, typename Container>
-    void QueryQuadTree(const base::FPoint& point, const QuadTreeNode<Object>& node, Container* result)
+    void QuadTreeFindAll(const base::FPoint& point, const QuadTreeNode<Object>& node, Container* result)
     {
         for (size_t i=0; i<node.GetNumItems(); ++i)
         {
@@ -183,12 +187,12 @@ namespace detail {
             const auto* quad = node.GetChildQuadrant(i);
             const auto& rect = quad->GetRect();
             if (rect.TestPoint(point))
-                QueryQuadTree(point, *quad, result);
+                QuadTreeFindAll(point, *quad, result);
         }
     }
 
     template<typename Object, typename Container>
-    void QueryQuadTree(const base::FCircle& circle, const QuadTreeNode<Object>& node, Container* result)
+    void QuadTreeFindAll(const base::FCircle& circle, const QuadTreeNode<Object>& node, Container* result)
     {
         for (size_t i=0; i<node.GetNumItems(); ++i)
         {
@@ -203,47 +207,122 @@ namespace detail {
             const auto* quad = node.GetChildQuadrant(i);
             const auto& rect = quad->GetRect();
             if (base::DoesIntersect(rect, circle))
-                QueryQuadTree(circle, *quad, result);
+                QuadTreeFindAll(circle, *quad, result);
         }
     }
 
+    template<typename Object>
+    void QuadTreeFindClosest(const base::FPoint& point, const QuadTreeNode<Object>& node, float& best_distance, std::optional<Object>& best_found)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (!rect.TestPoint(point))
+                continue;
+
+            const float dist = SquareDistance(point, rect.GetCenter());
+            if (dist < best_distance) {
+                best_distance = dist;
+                best_found = node.GetItemObject(i);
+            }
+        }
+        if (!node.HasChildren())
+            return;
+
+        for (size_t i=0; i<4; ++i)
+        {
+            if (const auto* quad = node.GetChildQuadrant(i))
+            {
+                const auto& rect = quad->GetRect();
+                if (rect.TestPoint(point))
+                    QuadTreeFindClosest(point, *quad, best_distance, best_found);
+            }
+        }
+    }
+
+    template<typename Object>
+    void QuadTreeFindClosest(const base::FCircle& circle, const QuadTreeNode<Object>& node, float& best_distance, std::optional<Object>& best_found)
+    {
+        for (size_t i=0; i<node.GetNumItems(); ++i)
+        {
+            const auto& rect = node.GetItemRect(i);
+            if (!DoesIntersect(circle, rect))
+                continue;
+            const float dist = SquareDistance(circle.GetCenter(), rect.GetCenter());
+            if (dist < best_distance) {
+                best_distance = dist;
+                best_found = node.GetItemObject(i);
+            }
+        }
+        if(!node.HasChildren())
+            return;
+
+        for (size_t i=0; i<4; ++i)
+        {
+            if (const auto* quad = node.GetChildQuadrant(i))
+            {
+                const auto& rect = quad->GetRect();
+                if (DoesIntersect(rect, circle))
+                    QuadTreeFindClosest(circle, *quad, best_distance, best_found);
+            }
+        }
+    }
+
+    template<typename Predicate, typename Object, typename Container>
+    void QuadTreeFind(const Predicate& pred, const QuadTreeNode<Object>& node, Container* result, QuadTreeFindMode mode)
+    {
+        if (mode == QuadTreeFindMode::All)
+        {
+            QuadTreeFindAll(pred, node, result);
+        }
+        else if (mode == QuadTreeFindMode::Closest)
+        {
+            float best_distance = std::numeric_limits<float>::max();
+            std::optional<Object> best_object;
+            detail::QuadTreeFindClosest(pred, node, best_distance, best_object);
+            if (best_object.has_value())
+                detail::StoreObject(best_object.value(), result);
+        } else BUG("Missing quad tree find mode.");
+    }
 
 } // namespace detail
 
+using QuadTreeQueryMode = detail::QuadTreeFindMode;
+
 template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result)
-{ detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
+{ detail::QuadTreeFindAll(area_of_interest, quadtree.GetRoot(), result); }
 
 template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result)
-{ detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
+{ detail::QuadTreeFindAll(area_of_interest, quadtree.GetRoot(), result); }
 
 template<typename SrcObject, typename RetObject> inline
 void QueryQuadTree(const base::FRect& area_of_interest, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
-{ detail::QueryQuadTree(area_of_interest, quadtree.GetRoot(), result); }
+{ detail::QuadTreeFindAll(area_of_interest, quadtree.GetRoot(), result); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result)
-{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(point, quadtree.GetRoot(), result, mode); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result)
-{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(point, quadtree.GetRoot(), result, mode); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
-{ detail::QueryQuadTree(point, quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(point, quadtree.GetRoot(), result, mode); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result)
-{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree,  std::vector<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(FCircle(point, radius), quadtree.GetRoot(), result, mode); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result)
-{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::set<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(FCircle(point, radius), quadtree.GetRoot(), result, mode); }
 
 template<typename SrcObject, typename RetObject> inline
-void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result)
-{ detail::QueryQuadTree(FCircle(point, radius), quadtree.GetRoot(), result); }
+void QueryQuadTree(const base::FPoint& point, float radius, const QuadTree<SrcObject>& quadtree, std::unordered_set<RetObject>* result, QuadTreeQueryMode mode = QuadTreeQueryMode::All)
+{ detail::QuadTreeFind(FCircle(point, radius), quadtree.GetRoot(), result, mode); }
 
 } // namespace
