@@ -382,6 +382,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -419,6 +420,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -456,6 +458,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -493,6 +496,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -585,6 +589,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -639,6 +644,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -676,6 +682,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -908,6 +915,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -955,22 +963,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "floats": [
             -500.0
           ],
           "id": "hFhxI5uRXf",
-          "name": "velocity",
-          "readonly": true
+          "name": "velocity"
         },
         {
-          "array": false,
           "bools": [
             1
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "Gb9JXeOtbb",
-          "name": "red",
-          "readonly": true
+          "name": "red"
         }
       ]
     },
@@ -998,6 +1012,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1055,6 +1070,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1092,6 +1108,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1129,6 +1146,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1166,6 +1184,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1203,6 +1222,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1389,10 +1409,13 @@
       ],
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "wAKwhKlI98",
           "name": "velocity",
-          "readonly": false,
           "vec2s": [
             {
               "object": {
@@ -1403,13 +1426,16 @@
           ]
         },
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "Xt8WfHILKd",
           "ints": [
             100
           ],
-          "name": "score",
-          "readonly": false
+          "name": "score"
         }
       ]
     },
@@ -1437,6 +1463,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1507,6 +1534,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1587,13 +1615,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "floats": [
             30.0
           ],
           "id": "NvQJb17Mlj",
-          "name": "radius",
-          "readonly": false
+          "name": "radius"
         }
       ]
     },
@@ -1621,6 +1652,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1691,6 +1723,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1761,6 +1794,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1808,22 +1842,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "floats": [
             500.0
           ],
           "id": "CGpy59Lkmy",
-          "name": "velocity",
-          "readonly": false
+          "name": "velocity"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "LjhZ24Oglo",
-          "name": "red",
-          "readonly": true
+          "name": "red"
         }
       ]
     },
@@ -1851,6 +1891,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1948,6 +1989,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1985,6 +2027,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": false,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2117,6 +2160,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": true,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -2312,6 +2356,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -2373,6 +2418,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2425,6 +2471,7 @@
           "text_item": {
             "flags": {
               "BlinkText": true,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -2491,6 +2538,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2561,6 +2609,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2651,6 +2700,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Ship3/1.png",
           "flags": {
             "AllowPacking": true,
@@ -2669,6 +2721,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Ship3/2.png",
           "flags": {
             "AllowPacking": true,
@@ -2687,6 +2742,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Ship3/3.png",
           "flags": {
             "AllowPacking": true,
@@ -2705,6 +2763,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Ship3/4.png",
           "flags": {
             "AllowPacking": true,
@@ -2723,6 +2784,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Ship3/5.png",
           "flags": {
             "AllowPacking": true,
@@ -2770,6 +2834,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Red/bullet.png",
         "flags": {
           "AllowPacking": true,
@@ -2824,6 +2891,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Blue/Ship2/0.png",
         "flags": {
           "AllowPacking": true,
@@ -2878,6 +2948,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Asteroids/asteroid_dark.png",
         "flags": {
           "AllowPacking": true,
@@ -2946,6 +3019,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_0.png",
           "flags": {
             "AllowPacking": true,
@@ -2964,6 +3040,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_1.png",
           "flags": {
             "AllowPacking": true,
@@ -2982,6 +3061,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_2.png",
           "flags": {
             "AllowPacking": true,
@@ -3000,6 +3082,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_3.png",
           "flags": {
             "AllowPacking": true,
@@ -3018,6 +3103,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_4.png",
           "flags": {
             "AllowPacking": true,
@@ -3036,6 +3124,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_5.png",
           "flags": {
             "AllowPacking": true,
@@ -3054,6 +3145,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_6.png",
           "flags": {
             "AllowPacking": true,
@@ -3072,6 +3166,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_7.png",
           "flags": {
             "AllowPacking": true,
@@ -3090,6 +3187,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_8.png",
           "flags": {
             "AllowPacking": true,
@@ -3108,6 +3208,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_9.png",
           "flags": {
             "AllowPacking": true,
@@ -3126,6 +3229,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_10.png",
           "flags": {
             "AllowPacking": true,
@@ -3144,6 +3250,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_11.png",
           "flags": {
             "AllowPacking": true,
@@ -3162,6 +3271,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_12.png",
           "flags": {
             "AllowPacking": true,
@@ -3180,6 +3292,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_13.png",
           "flags": {
             "AllowPacking": true,
@@ -3198,6 +3313,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_14.png",
           "flags": {
             "AllowPacking": true,
@@ -3216,6 +3334,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_15.png",
           "flags": {
             "AllowPacking": true,
@@ -3234,6 +3355,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Red Explosion/1_16.png",
           "flags": {
             "AllowPacking": true,
@@ -3295,6 +3419,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_0.png",
           "flags": {
             "AllowPacking": true,
@@ -3313,6 +3440,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_1.png",
           "flags": {
             "AllowPacking": true,
@@ -3331,6 +3461,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_2.png",
           "flags": {
             "AllowPacking": true,
@@ -3349,6 +3482,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_3.png",
           "flags": {
             "AllowPacking": true,
@@ -3367,6 +3503,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_4.png",
           "flags": {
             "AllowPacking": true,
@@ -3385,6 +3524,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_5.png",
           "flags": {
             "AllowPacking": true,
@@ -3403,6 +3545,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_6.png",
           "flags": {
             "AllowPacking": true,
@@ -3421,6 +3566,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_7.png",
           "flags": {
             "AllowPacking": true,
@@ -3439,6 +3587,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_8.png",
           "flags": {
             "AllowPacking": true,
@@ -3457,6 +3608,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_9.png",
           "flags": {
             "AllowPacking": true,
@@ -3475,6 +3629,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_10.png",
           "flags": {
             "AllowPacking": true,
@@ -3493,6 +3650,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_11.png",
           "flags": {
             "AllowPacking": true,
@@ -3511,6 +3671,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_12.png",
           "flags": {
             "AllowPacking": true,
@@ -3529,6 +3692,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_13.png",
           "flags": {
             "AllowPacking": true,
@@ -3547,6 +3713,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_14.png",
           "flags": {
             "AllowPacking": true,
@@ -3565,6 +3734,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_15.png",
           "flags": {
             "AllowPacking": true,
@@ -3583,6 +3755,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Effects/Blue Explosion/1_16.png",
           "flags": {
             "AllowPacking": true,
@@ -3630,6 +3805,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Blue/bullet.png",
         "flags": {
           "AllowPacking": true,
@@ -3698,6 +3876,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Spacemine/1.png",
           "flags": {
             "AllowPacking": true,
@@ -3716,6 +3897,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Red/Spacemine/2.png",
           "flags": {
             "AllowPacking": true,
@@ -3761,6 +3945,9 @@
           "sampler_name": "kTexture0",
           "texture": {
             "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
             "file": "ws://textures/ParticlePack/spark_06.png",
             "flags": {
               "AllowPacking": true,
@@ -3904,6 +4091,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Background/bg_1_1.png",
         "flags": {
           "AllowPacking": true,
@@ -4026,6 +4216,9 @@
               "vertical_alignment": "AlignCenter",
               "width": 635
             },
+            "effects": {
+              "Blur": false
+            },
             "id": "JQw78NDo0F",
             "name": "TextBuffer",
             "type": "TextBuffer"
@@ -4080,6 +4273,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Menu Screen/optionst_buttons.png",
         "flags": {
           "AllowPacking": true,
@@ -4134,6 +4330,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Menu Screen/Creditst_buttons.png",
         "flags": {
           "AllowPacking": true,
@@ -4188,6 +4387,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Menu Screen/play_buttons.png",
         "flags": {
           "AllowPacking": true,
@@ -4242,6 +4444,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Menu Screen/exit_buttons.png",
         "flags": {
           "AllowPacking": true,
@@ -4296,6 +4501,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/cursor/crosshair158.png",
         "flags": {
           "AllowPacking": true,
@@ -4348,6 +4556,9 @@
           "sampler_name": "kTexture",
           "texture": {
             "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
             "file": "ws://textures/Menu Screen/Creditst_buttons.png",
             "flags": {
               "AllowPacking": true,
@@ -4391,6 +4602,9 @@
           "sampler_name": "kTexture",
           "texture": {
             "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
             "file": "ws://textures/Menu Screen/optionst_buttons.png",
             "flags": {
               "AllowPacking": true,
@@ -4434,6 +4648,9 @@
           "sampler_name": "kTexture",
           "texture": {
             "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
             "file": "ws://textures/Menu Screen/exit_buttons.png",
             "flags": {
               "AllowPacking": true,
@@ -4477,6 +4694,9 @@
           "sampler_name": "kTexture",
           "texture": {
             "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
             "file": "ws://textures/Menu Screen/play_buttons.png",
             "flags": {
               "AllowPacking": true,
@@ -4522,6 +4742,9 @@
       "surface": "Emissive",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/SmokeParticle.png",
         "flags": {
           "AllowPacking": true,
@@ -4576,6 +4799,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/RoundParticle.png",
         "flags": {
           "AllowPacking": true,
@@ -4649,6 +4875,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Lasers/02.png",
         "flags": {
           "AllowPacking": true,
@@ -4846,12 +5075,6 @@
     {
       "bottom_boundary": 500.0,
       "dynamic_spatial_index": "QuadTree",
-      "dynamic_spatial_rect": {
-        "h": 800.0,
-        "w": 1200.0,
-        "x": -600.0,
-        "y": -400.0
-      },
       "id": "UWF4u1fYHa",
       "name": "Game",
       "nodes": [
@@ -5090,13 +5313,16 @@
       "top_boundary": -500.0,
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "7OIIPrIlIQ",
           "ints": [
             0
           ],
-          "name": "score",
-          "readonly": false
+          "name": "score"
         }
       ]
     },
