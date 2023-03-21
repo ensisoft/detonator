@@ -103,6 +103,7 @@ namespace base
 
                 item.object = std::move(object);
                 const_cast<ItemList&>(items).push_back(std::move(item));
+                return true;
             });
             return true;
         }
@@ -143,6 +144,7 @@ namespace base
                         it = items.erase(it);
                     else ++it;
                 }
+                return true;
             });
         }
         // Erase objects whose rects contain the given point.
@@ -182,7 +184,7 @@ namespace base
         { find_objects_by_rect(rect, result); }
 
         enum class FindMode {
-            Closest, All
+            Closest, All, First
         };
 
         template<typename RetObject>
@@ -313,6 +315,7 @@ namespace base
                     if (DoesIntersect(item_rect, sub_rect))
                         store_result(item.object, result);
                 }
+                return true;
             });
         }
         template<typename Container>
@@ -325,6 +328,8 @@ namespace base
             const auto col = map.GetX();
             const auto row = map.GetY();
             const auto& items = mGrid[row * mCols + col];
+            if (items.empty())
+                return;
 
             if (mode == FindMode::All)
             {
@@ -337,8 +342,6 @@ namespace base
             }
             else if (mode == FindMode::Closest)
             {
-                if (items.empty())
-                    return;
                 float best_dist = std::numeric_limits<float>::max();
                 std::optional<Object> best_object;
 
@@ -358,7 +361,20 @@ namespace base
                 if (best_object)
                     store_result(best_object.value(), result);
 
-            } else BUG("Missing FindMode implementation");
+            }
+            else if (mode == FindMode::First)
+            {
+                for (const auto& item : items)
+                {
+                    const auto& item_rect = GetItemRect(item);
+                    if (!item_rect.TestPoint(point))
+                        continue;
+
+                    store_result(item.object, result);
+                    return;
+                }
+            }
+            else BUG("Missing FindMode implementation");
         }
 
         template<typename Container>
@@ -379,6 +395,22 @@ namespace base
                         if (DoesIntersect(item_rect, circle))
                             store_result(item.object, result);
                     }
+                    return true;
+                });
+            }
+            else if (mode == FindMode::First)
+            {
+                for_each_cell(sub_rect, [&circle, result](const auto& items) {
+                    for (const auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (!DoesIntersect(item_rect, circle))
+                            continue;
+
+                        store_result(item.object, result);
+                        return false;
+                    }
+                    return true;
                 });
             }
             else if (mode == FindMode::Closest)
@@ -399,6 +431,7 @@ namespace base
                             best_dist  = dist;
                         }
                     }
+                    return true;
                 });
                 if (best_found)
                     store_result(best_found.value(), result);
@@ -420,7 +453,8 @@ namespace base
                 {
                     ASSERT(row * mCols + col < mGrid.size());
                     const auto& items = mGrid[row * mCols + col];
-                    callback(items);
+                    if (!callback(items))
+                        return;
                 }
             }
         }

@@ -1200,7 +1200,8 @@ void InitDoc()
     DOC_OBJECT_PROPERTY("string", "id", "The instance ID of the entity.<br>"
                                         "The ID should be unique in the current scene across the entities and entity nodes.<br>"
                                         "If no ID is set (id is an empty string) one will be generated when the entity is spawned.");
-    DOC_OBJECT_PROPERTY("string", "name", "The instance name of the entity.");
+    DOC_OBJECT_PROPERTY("string", "name", "The instance name of the entity.<br>"
+                                          "Default is an empty string (no name).");
     DOC_OBJECT_PROPERTY("glm.vec2", "scale", "The scaling factor that will apply to all of the entity nodes.<br>"
                                       "Default is (1.0, 1.0).");
     DOC_OBJECT_PROPERTY("glm.vec2", "position", "The initial position of the entity in the scene.<br>"
@@ -1317,11 +1318,16 @@ void InitDoc()
                  "base.FRect", "area_of_interest");
     DOC_METHOD_2("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
                                                                     "whose spatial nodes intersect with the given point.<br>"
-                                                                    "Mode defines distance based filtering for the found objects. Use 'All' to find all objects or 'Closest' to find  the closest only.",
+                                                                    "Mode defines distance based filtering for the found objects.<br>"
+                                                                    " - 'All' to find all objects.<br>"
+                                                                    " - 'Closest' to find  the closest only.<br>"
+                                                                    " - 'First' to find the first object",
                  "base.FPoint|glm.vec2", "point", "string", "mode");
     DOC_METHOD_3("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
-                                                                    "whose spatial nodes intersect with the given point within the given radius from the point."
-                                                                    "Mode defines distance based filtering for the found objects. Use 'All' to find all objects or 'Closest' to find the closest only.",
+                                                                    "whose spatial nodes intersect with the given point within the given radius from the point.<br>"
+                                                                    " - 'All' to find all objects.<br>"
+                                                                    " - 'Closest' to find  the closest only.<br>"
+                                                                    " - 'First' to find the first object",
                  "base.FPoint|glm.vec2", "point", "float", "radius", "string", "mode");
 
     DOC_TABLE("game.RayCastResult");
