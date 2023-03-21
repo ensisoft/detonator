@@ -110,6 +110,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -129,23 +130,6 @@
           "position": {
             "x": 0.0,
             "y": -0.0
-          },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
           },
           "rotation": 0.0,
           "scale": {
@@ -174,22 +158,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "floats": [
             0.0
           ],
           "id": "Sd8W5Swonw",
-          "name": "position",
-          "readonly": false
+          "name": "position"
         },
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "floats": [
             0.0
           ],
           "id": "QRIOhDMMW8",
-          "name": "velocity",
-          "readonly": false
+          "name": "velocity"
         }
       ]
     },
@@ -427,6 +417,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -446,23 +437,6 @@
           "position": {
             "x": 0.0,
             "y": 0.0
-          },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": true,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": false,
-              "Sensor": false
-            },
-            "friction": 0.0,
-            "linear_damping": 0.0,
-            "polygon": "",
-            "restitution": 0.0,
-            "shape": "Circle",
-            "simulation": "Dynamic"
           },
           "rotation": 0.0,
           "scale": {
@@ -491,31 +465,57 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "vJBkUv4ab7",
-          "name": "demo_ball",
-          "readonly": false
+          "name": "demo_ball"
         },
         {
-          "array": false,
+          "bools": [
+            1
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "YoP9S1z7tC",
+          "name": "enabled"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "EgBXCrYrPd",
+          "name": "velocity",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
           "bools": [
             0
           ],
-          "id": "rmaviKxieZ",
-          "name": "contact",
-          "readonly": false
-        },
-        {
-          "array": false,
-          "floats": [
-            10.0
-          ],
-          "id": "w2uXtk4g4Z",
-          "name": "speed",
-          "readonly": true
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "KdTzB7jrkG",
+          "name": "launched"
         }
       ]
     },
@@ -543,6 +543,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -563,23 +564,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -588,6 +572,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -607,13 +597,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             1
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "ixZGSIICeW",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -641,6 +634,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -661,23 +655,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.0,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -686,6 +663,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -705,22 +688,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "BZmL4Gyum0",
           "ints": [
             2
           ],
-          "name": "hit_count",
-          "readonly": false
+          "name": "hit_count"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "py40Ln0bAb",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -748,6 +737,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -768,23 +758,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.0,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -793,6 +766,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -812,22 +791,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "JIbEPOZkCZ",
           "ints": [
             1
           ],
-          "name": "hit_count",
-          "readonly": false
+          "name": "hit_count"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "bxFqM6Xyxb",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -855,6 +840,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -875,23 +861,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -900,6 +869,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -919,22 +894,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "5UG4twU3FH",
           "ints": [
             3
           ],
-          "name": "hit_count",
-          "readonly": false
+          "name": "hit_count"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "vCxEuX7z0Z",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -962,6 +943,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -982,23 +964,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -1007,6 +972,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -1026,22 +997,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "JGbawtMq25",
           "ints": [
             4
           ],
-          "name": "hit_count",
-          "readonly": false
+          "name": "hit_count"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "u8klgFThAx",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -1069,6 +1046,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1089,23 +1067,6 @@
             "x": 0.0,
             "y": 0.0
           },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Static"
-          },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
@@ -1114,6 +1075,12 @@
           "size": {
             "x": 40.0,
             "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
           }
         }
       ],
@@ -1133,22 +1100,28 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "Txs5644Cfr",
           "ints": [
             1
           ],
-          "name": "hit_count",
-          "readonly": false
+          "name": "hit_count"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "yyokeFraaw",
-          "name": "immortal",
-          "readonly": true
+          "name": "immortal"
         }
       ]
     },
@@ -1176,6 +1149,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1213,6 +1187,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1290,6 +1265,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1327,6 +1303,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1560,6 +1537,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -1751,6 +1729,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/paddleBlu.png",
         "flags": {
           "AllowPacking": true,
@@ -1805,6 +1786,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/ballBlue.png",
         "flags": {
           "AllowPacking": true,
@@ -1859,6 +1843,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_blue_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -1913,6 +1900,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_red_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -1967,6 +1957,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_green_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -2021,6 +2014,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_purple_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -2075,6 +2071,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_yellow_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -2129,6 +2128,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/element_grey_rectangle_glossy.png",
         "flags": {
           "AllowPacking": true,
@@ -2183,6 +2185,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://backgrounds/22.png",
         "flags": {
           "AllowPacking": true,
@@ -2251,6 +2256,9 @@
           "vertical_alignment": "AlignCenter",
           "width": 302
         },
+        "effects": {
+          "Blur": false
+        },
         "id": "Ak4590r5r6",
         "name": "TextBuffer",
         "type": "TextBuffer"
@@ -2313,6 +2321,9 @@
           "vertical_alignment": "AlignCenter",
           "width": 100
         },
+        "effects": {
+          "Blur": false
+        },
         "id": "vb3YqX0vi5",
         "name": "TextBuffer",
         "type": "TextBuffer"
@@ -2374,6 +2385,9 @@
           ],
           "vertical_alignment": "AlignCenter",
           "width": 100
+        },
+        "effects": {
+          "Blur": false
         },
         "id": "85bOvrxy8S",
         "name": "TextBuffer",
@@ -2475,13 +2489,9 @@
   ],
   "scenes": [
     {
-      "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
+      "dense_grid_cols": 20,
+      "dense_grid_rows": 7,
+      "dynamic_spatial_index": "DenseGrid",
       "id": "q9wPieFpP5",
       "name": "Level 4",
       "nodes": [
@@ -4609,13 +4619,9 @@
       "tilemap": ""
     },
     {
-      "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
+      "dense_grid_cols": 17,
+      "dense_grid_rows": 2,
+      "dynamic_spatial_index": "DenseGrid",
       "id": "EjfqiKs7A1",
       "name": "Level 2",
       "nodes": [
@@ -6391,13 +6397,9 @@
       "tilemap": ""
     },
     {
-      "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
+      "dense_grid_cols": 17,
+      "dense_grid_rows": 3,
+      "dynamic_spatial_index": "DenseGrid",
       "id": "xZLaeqWePM",
       "name": "Level 3",
       "nodes": [
@@ -8921,13 +8923,9 @@
       "tilemap": ""
     },
     {
-      "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
+      "dense_grid_cols": 21,
+      "dense_grid_rows": 2,
+      "dynamic_spatial_index": "DenseGrid",
       "id": "7kkLq83FnE",
       "name": "Level 1",
       "nodes": [
@@ -11055,13 +11053,9 @@
       "tilemap": ""
     },
     {
-      "dynamic_spatial_index": "Disabled",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
+      "dense_grid_cols": 25,
+      "dense_grid_rows": 40,
+      "dynamic_spatial_index": "DenseGrid",
       "id": "kZPKqhUrT6",
       "name": "MainMenu",
       "nodes": [
@@ -16244,7 +16238,7 @@
           "parent_render_tree_node": "",
           "position": {
             "x": 0.0,
-            "y": 0.0
+            "y": -0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -17608,8 +17602,8 @@
           "name": "Ball_1",
           "parent_render_tree_node": "",
           "position": {
-            "x": -160.0,
-            "y": -200.0
+            "x": -30.0,
+            "y": -190.0
           },
           "rotation": 0.0,
           "scale": {
@@ -17696,474 +17690,6 @@
           "position": {
             "x": 280.0,
             "y": -120.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "3YX9J9dqgd",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_4",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -100.0,
-            "y": 260.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "R2wLANLkOg",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_13",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -60.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "IWjeCRnxzQ",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_14",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -60.0,
-            "y": 260.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "1w5JPHG9oq",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_17",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -100.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "gEN1gLpnoo",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_18",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -20.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "weXw0oF0Gh",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_13",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 100.0,
-            "y": 260.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "dtLHmqI5yK",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_15",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 60.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "YL51nh1lFj",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_16",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 100.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "BeUF4H1idg",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_18",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 20.0,
-            "y": 260.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "8oibBDuNg4",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_19",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 60.0,
-            "y": 260.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "YOZ0Sp88fq",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "9F4t8fYF95",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Red Brick_20",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 20.0,
-            "y": 240.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        },
-        {
-          "entity": "kkBOwiYNRn",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "L2KOGRZEI3",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "Purple Brick_3",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": -20.0,
-            "y": 260.0
           },
           "rotation": 0.0,
           "scale": {
@@ -19023,72 +18549,72 @@
             "node": {
               "id": "wM99ozA0mL"
             }
-          },
-          {
-            "node": {
-              "id": "3YX9J9dqgd"
-            }
-          },
-          {
-            "node": {
-              "id": "R2wLANLkOg"
-            }
-          },
-          {
-            "node": {
-              "id": "IWjeCRnxzQ"
-            }
-          },
-          {
-            "node": {
-              "id": "1w5JPHG9oq"
-            }
-          },
-          {
-            "node": {
-              "id": "gEN1gLpnoo"
-            }
-          },
-          {
-            "node": {
-              "id": "weXw0oF0Gh"
-            }
-          },
-          {
-            "node": {
-              "id": "dtLHmqI5yK"
-            }
-          },
-          {
-            "node": {
-              "id": "YL51nh1lFj"
-            }
-          },
-          {
-            "node": {
-              "id": "BeUF4H1idg"
-            }
-          },
-          {
-            "node": {
-              "id": "8oibBDuNg4"
-            }
-          },
-          {
-            "node": {
-              "id": "9F4t8fYF95"
-            }
-          },
-          {
-            "node": {
-              "id": "L2KOGRZEI3"
-            }
           }
         ],
         "node": null
       },
       "resource_id": "kZPKqhUrT6",
       "resource_name": "MainMenu",
+      "script_file": "",
+      "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "ZnDr4JGpLL",
+      "name": "_Ball_preview_scene_",
+      "nodes": [
+        {
+          "entity": "ltMbxDy6wk",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "onnFWP6kdf",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Paddle",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 350.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "onnFWP6kdf"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "ZnDr4JGpLL",
+      "resource_name": "_Ball_preview_scene_",
       "script_file": "",
       "tilemap": ""
     }
@@ -19233,7 +18759,7 @@
                   "name": "play",
                   "position": {
                     "x": 400.0,
-                    "y": 480.0
+                    "y": 550.0
                   },
                   "size": {
                     "h": 50.0,
@@ -19254,7 +18780,7 @@
                   "name": "exit",
                   "position": {
                     "x": 400.0,
-                    "y": 550.0
+                    "y": 650.0
                   },
                   "size": {
                     "h": 48.0,

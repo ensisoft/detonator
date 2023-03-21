@@ -18,6 +18,7 @@ function _SpawnBall()
     args.class = ClassLib:FindEntityClassByName('Ball')
     args.name = 'ball'
     args.position = glm.vec2:new(0.0, 340.0)
+    args.layer = 2
     Scene:SpawnEntity(args, true)
 end
 
@@ -91,17 +92,17 @@ function OnKeyDown(symbol, modifier_bits)
 end
 
 function OnKeyUp(symbol, modifier_bits)
-    Game:DebugPrint('KeyUp ' .. wdk.KeyStr(symbol))
+    -- Game:DebugPrint('KeyUp ' .. wdk.KeyStr(symbol))
 end
 
 -- Called on mouse button press events.
 function OnMousePress(mouse)
-    Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
+    -- Game:DebugPrint('MousePress ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse button release events.
 function OnMouseRelease(mouse)
-    Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
+    -- Game:DebugPrint('MouseRelease ' .. wdk.BtnStr(mouse.button))
 end
 
 -- Called on mouse move events.
