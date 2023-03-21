@@ -5944,8 +5944,8 @@
           "name": "Dynamic Block_1",
           "parent_render_tree_node": "",
           "position": {
-            "x": 200.0,
-            "y": -50.0
+            "x": 186.0,
+            "y": -47.0
           },
           "rotation": 0.0,
           "scale": {
@@ -6420,6 +6420,123 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "6UCmHkEuk4",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Copy of Dynamic Block_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": -0.0
+          },
+          "rotation": -1.5771467685699463,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "kpG3RwS5vk",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Copy of Dynamic Block_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -150.0
+          },
+          "rotation": -0.8203017711639404,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "EsFlY7oEfM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "qsywnPPU6y",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Copy of Dynamic Block_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": -200.0
+          },
+          "rotation": 0.8001031875610352,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "quadtree_max_items": 4,
@@ -6514,6 +6631,21 @@
           {
             "node": {
               "id": "536eOztUmR"
+            }
+          },
+          {
+            "node": {
+              "id": "6UCmHkEuk4"
+            }
+          },
+          {
+            "node": {
+              "id": "kpG3RwS5vk"
+            }
+          },
+          {
+            "node": {
+              "id": "qsywnPPU6y"
             }
           }
         ],
@@ -7441,10 +7573,10 @@
     },
     {
       "id": "uhYlthZ4sC",
-      "name": "Spatial Query Test",
+      "name": "Spatial Query",
       "owner": "",
       "resource_id": "uhYlthZ4sC",
-      "resource_name": "Spatial Query Test",
+      "resource_name": "Spatial Query",
       "type": "Unspecified",
       "uri": "ws://lua/uhYlthZ4sC.lua"
     },
