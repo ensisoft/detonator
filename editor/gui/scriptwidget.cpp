@@ -1189,6 +1189,9 @@ void InitDoc()
     DOC_METHOD_1("void", "PostEvent", "Post an event to this entity.<br>"
                                       "The entity will be able to process this event in its OnEvent callback.",
                  "game.EntityEvent", "event");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by its ID. Returns nil if no such variable was found.", "string", "id");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable byt its name. Returns nil if no such variable was found.", "string", "name");
+
 
     DOC_TABLE("game.EntityEvent");
     DOC_OBJECT_PROPERTY("string", "message", "Free form message string.");
@@ -1329,6 +1332,8 @@ void InitDoc()
                                                                     " - 'Closest' to find  the closest only.<br>"
                                                                     " - 'First' to find the first object",
                  "base.FPoint|glm.vec2", "point", "float", "radius", "string", "mode");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by its ID. Returns nil if no such variable was found.", "string", "id");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable byt its name. Returns nil if no such variable was found.", "string", "name");
 
     DOC_TABLE("game.RayCastResult");
     DOC_OBJECT_PROPERTY("game.EntityNode", "node", "The entity node (with rigid body) that intersected with the ray.");
