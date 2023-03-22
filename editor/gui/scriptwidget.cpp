@@ -1230,6 +1230,9 @@ void InitDoc()
     DOC_METHOD_0("bool|float|string|int|vec2", "GetValue", "Get the value of the script variable.");
     DOC_METHOD_0("string", "GetName", "Get the script variable name.");
     DOC_METHOD_0("string", "GetId", "Get the script variable ID.");
+    DOC_METHOD_0("bool", "IsReadOnly", "Check whether this variable is read only or not.");
+    DOC_METHOD_0("bool", "IsArray", "Check whether this variable is an array or not.");
+    DOC_METHOD_0("bool", "IsPrivate", "Check whether this variable is private or not.");
 
     DOC_TABLE("game.SceneClass");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
