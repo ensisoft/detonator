@@ -495,9 +495,10 @@ int Main(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+    int ret = 0;
     try
     {
-        return Main(argc, argv);
+        ret = Main(argc, argv);
     }
     catch (const std::exception& e)
     {
@@ -507,5 +508,5 @@ int main(int argc, char* argv[])
     }
     std::cout << "Have a good day.\n";
     std::cout << std::endl;
-    return 0;
+    return ret;
 }
