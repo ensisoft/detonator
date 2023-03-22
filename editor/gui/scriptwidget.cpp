@@ -839,6 +839,29 @@ void InitDoc()
     DOC_METHOD_1("game.Scene", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.<br>"
                                        "Returns a reference to the new scene for convenience.",
                  "game.SceneClass|string", "klass|name");
+    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene.<br>"
+                                               "Spawning a new entity doesn't immediately place the entity in the scene but will only add it to the list of "
+                                               "entities to be spawned at the start of the next iteration of the game loop.<br>"
+                                               "Then each entity that was just spawned will have their HasBeenSpawned flag on.<br>"
+                                               "If link is true the entity is linked to the current scene's entity hierarchy.<br>"
+                                               "If link is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
+                                               "The args table is a Lua table for packing all the spawn arguments with the following keys.<br>"
+                                               " id, string, the ID for the entity. Default = '' <br>"
+                                               " name, string, the name for the entity. Default = ''<br>"
+                                               " sx, float, scale factor for X axis. Default = 1.0<br>"
+                                               " sy, float, scale factor for Y axis. Default = 1.0<br>"
+                                               " x, float, translation on the X axis. Default = 0.0<br>"
+                                               " y, float, translation on the Y axis. Default = 0.0<br>"
+                                               " r, float, rotation in radians around the Z axis. Default = 0.0<br>"
+                                               " pos, glm.vec2 translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
+                                               " scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
+                                               " logging, bool, Flag to enable/disable entity logging. Default = false<br>"
+                                               " layer, int, Scene layer index. Default = 0<br>"
+                                               " link, bool, Flag to control linking to scene root in scene graph. Default = true",
+                 "string", "klass_name", "table", "args");
+    DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene with default arguments for everything.<br>",
+                 "string", "klass_name");
+
     // todo: resume/suspend
     DOC_METHOD_0("void", "EndPlay", "End the play of the current scene. Will invoke EndPlay callbacks and end game play cleanly.");
     DOC_METHOD_1("void", "Quit", "Quit the game by asking the host application to exit.", "int", "exit_code");
@@ -1292,12 +1315,13 @@ void InitDoc()
                                        "for one more iteration of the game loop until it's deleted at the end of this *next* iteration.<br>"
                                        "This two step design allows any engine subsystems (or game) to realize and react to entities being killed by looking at the kill flag state.",
                                        "game.Entity", "carcass");
-    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene. Spawning an entity doesn't immediately place it in the scene "
-                                               "but will only add it to the list of objects to be spawned at the start of the next iteration of game loop."
-                                               "At the start of the next game loop each entity that was spawned will have their spawn flag set.<br>"
-                                               "This two step design allows any engine subsystem to realize and react to entities being spawned.<br>"
-                                               "If link_to_root is true the entity is linked to the root of the scene's entity hierarchy.<br>"
-                                               "If link_to_root is false the entity is not linked to the scene hierarchy at all and you should manually call LinkChild later.",
+    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene.<br>"
+                                               "Spawning a new entity doesn't immediately place the entity in the scene but will only add it to the list of "
+                                               "entities to be spawned at the start of the next iteration of the game loop.<br>"
+                                               "Then each entity that was just spawned will have their HasBeenSpawned flag on.<br>"
+                                               "If link_to_root is true the entity is linked to the current scene's entity hierarchy.<br>"
+                                               "If link_to_root is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
+                                               "This is a low level method of spawning and you're likely better off using Engine.SpawnEntity instead which is more convenient to use.",
                  "game.EntityArgs", "args", "bool", "link_to_root = true");
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",
                  "game.Entity", "entity");
