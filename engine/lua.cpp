@@ -3084,9 +3084,12 @@ void BindGameLib(sol::state& L)
     query_result_set["GetNext"] = &DynamicSpatialQueryResultSet::GetNext;
 
     auto script_var = table.new_usertype<ScriptVar>("ScriptVar");
-    script_var["GetValue"] = ObjectFromScriptVarValue;
-    script_var["GetName"]  = &ScriptVar::GetName;
-    script_var["GetId"]    = &ScriptVar::GetId;
+    script_var["GetValue"]   = ObjectFromScriptVarValue;
+    script_var["GetName"]    = &ScriptVar::GetName;
+    script_var["GetId"]      = &ScriptVar::GetId;
+    script_var["IsReadOnly"] = &ScriptVar::IsReadOnly;
+    script_var["IsArray"]    = &ScriptVar::IsArray;
+    script_var["IsPrivate"]  = &ScriptVar::IsPrivate;
 
     auto scene_class = table.new_usertype<SceneClass>("SceneClass",
         sol::meta_function::index,     &GetScriptVar<SceneClass>);
