@@ -1194,6 +1194,8 @@ void LuaRuntime::Init()
                 args.position.y = args_table.get_or("y", 0.0f);
                 args.rotation = args_table.get_or("r", 0.0f);
                 args.enable_logging = args_table.get_or("logging", false);
+                args.layer = args_table.get_or("layer", 0);
+                const bool link_to_root = args_table.get_or("link", true);
                 const glm::vec2* pos = nullptr;
                 const glm::vec2* scale = nullptr;
                 if (const auto* ptr = args_table.get_or("pos", pos))
@@ -1201,7 +1203,7 @@ void LuaRuntime::Init()
                 if (const auto* ptr = args_table.get_or("scale", scale))
                     args.scale = *ptr;
 
-                return self.mScene->SpawnEntity(args);
+                return self.mScene->SpawnEntity(args, link_to_root);
             },
             [](const LuaRuntime& self, const std::string& klass) {
                 if (!self.mScene)
