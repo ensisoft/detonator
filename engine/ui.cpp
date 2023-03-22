@@ -662,6 +662,7 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
     const auto  font_size = GetWidgetProperty(id, ps, "text-size",16);
     const auto va = GetWidgetProperty(id, ps, "text-vertical-align", UIStyle::VerticalTextAlign::Center);
     const auto ha = GetWidgetProperty(id, ps, "text-horizontal-align", UIStyle::HorizontalTextAlign::Center);
+    line_height = GetWidgetProperty(id, ps, "text-line-height", line_height);
 
     unsigned alignment  = 0;
     unsigned properties = 0;
