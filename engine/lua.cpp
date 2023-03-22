@@ -3019,6 +3019,8 @@ void BindGameLib(sol::state& L)
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
     entity["GetScene"]             = (Scene*(Entity::*)(void))&Entity::GetScene;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
+    entity["FindScriptVarById"]    = (ScriptVar*(Entity::*)(const std::string&))&Entity::FindScriptVarById;
+    entity["FindScriptVarByName"]  = (ScriptVar*(Entity::*)(const std::string&))&Entity::FindScriptVarByName;
     entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
     entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
     entity["FindNodeByInstanceId"] = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByInstanceId;
@@ -3148,6 +3150,8 @@ void BindGameLib(sol::state& L)
     scene["GetEntity"]                  = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
     scene["FindEntityByInstanceId"]     = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
     scene["FindEntityByInstanceName"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
+    scene["FindScriptVarById"]          = (ScriptVar*(Scene::*)(const std::string&))&Scene::FindScriptVarById;
+    scene["FindScriptVarByName"]        = (ScriptVar*(Scene::*)(const std::string&))&Scene::FindScriptVarByName;
     scene["KillEntity"]                 = &Scene::KillEntity;
     scene["FindEntityTransform"]        = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]    = &Scene::FindEntityNodeTransform;
