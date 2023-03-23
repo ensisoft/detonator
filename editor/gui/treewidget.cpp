@@ -160,6 +160,11 @@ void TreeWidget::SelectItemById(const QString& id)
     emit currentRowChanged();
 }
 
+void TreeWidget::SelectItemById(const std::string& id)
+{
+    SelectItemById(QString::fromUtf8(id.c_str()));
+}
+
 void TreeWidget::ClearSelection()
 {
     mSelected = nullptr;

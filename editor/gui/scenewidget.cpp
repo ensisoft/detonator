@@ -418,7 +418,7 @@ public:
         auto* child = mState.scene->AddNode(std::move(node));
         mState.scene->LinkChild(nullptr, child);
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(child->GetId()));
+        mState.view->SelectItemById(child->GetId());
         mState.last_placed_entity = app::FromUtf8(mClass->GetId());
         DEBUG("Added new entity '%1'", name);
         // return false to indicate that another object can be placed.
@@ -868,7 +868,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     });
 
     mUI.tree->Rebuild();
-    mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
+    mUI.tree->SelectItemById(paste_root->GetId());
 }
 
 void SceneWidget::Undo()
@@ -1237,6 +1237,8 @@ void SceneWidget::on_actionFind_triggered()
         return;
 
     FindNode(node);
+    mUI.tree->SelectItemById(node->GetId());
+    mUI.widget->setFocus();
 }
 
 void SceneWidget::on_actionPreview_triggered()
@@ -1316,7 +1318,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
+        mState.view->SelectItemById(dupe->GetId());
     }
 }
 
@@ -1344,6 +1346,8 @@ void SceneWidget::on_actionNodeFind_triggered()
     if (auto* node = GetCurrentNode())
     {
         FindNode(node);
+        mUI.tree->SelectItemById(node->GetId());
+        mUI.widget->setFocus();
     }
 }
 
@@ -2063,7 +2067,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
             if (auto* selection = SelectNode(click_point))
             {
                 mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size));
-                mUI.tree->SelectItemById(app::FromUtf8(selection->GetId()));
+                mUI.tree->SelectItemById(selection->GetId());
             }
             else
             {
