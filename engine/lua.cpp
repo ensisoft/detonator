@@ -984,13 +984,13 @@ public:
     { mBegin = mResult.begin(); }
     ResultSet()
     { mBegin = mResult.begin(); }
-    const T& GetCurrent() const
+    T GetCurrent() const
     {
         if (mBegin == mResult.end())
             throw GameError("ResultSet iteration error.");
         return *mBegin;
     }
-    const T& GetNext()
+    T GetNext()
     {
         if (mBegin == mResult.end())
             throw GameError("ResultSet iteration error.");
@@ -1006,6 +1006,11 @@ public:
     {
         ++mBegin;
         return mBegin != mResult.end();
+    }
+    void EraseCurrent()
+    {
+        ASSERT(mBegin != mResult.end());
+        mBegin = mResult.erase(mBegin);
     }
 private:
     Set mResult;
@@ -3093,6 +3098,26 @@ void BindGameLib(sol::state& L)
     query_result_set["Begin"]   = &DynamicSpatialQueryResultSet::BeginIteration;
     query_result_set["Get"]     = &DynamicSpatialQueryResultSet::GetCurrent;
     query_result_set["GetNext"] = &DynamicSpatialQueryResultSet::GetNext;
+    query_result_set["Find"]    = [](DynamicSpatialQueryResultSet& results, const sol::function& predicate) {
+        while (results.HasNext()) {
+            EntityNode* node = results.GetNext();
+            const bool this_is_it = predicate(node);
+            if (this_is_it)
+                return node;
+        }
+        return (EntityNode*)nullptr;
+    };
+    query_result_set["Filter"] = [](DynamicSpatialQueryResultSet& results, const sol::function& predicate) {
+        results.BeginIteration();
+        while (results.HasNext()) {
+            EntityNode* node = results.GetCurrent();
+            const bool keep_this = predicate(node);
+            if (keep_this) {
+                results.Next();
+            } else  results.EraseCurrent();
+        }
+        results.BeginIteration();
+    };
 
     auto script_var = table.new_usertype<ScriptVar>("ScriptVar");
     script_var["GetValue"]   = ObjectFromScriptVarValue;

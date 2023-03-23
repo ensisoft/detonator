@@ -321,13 +321,35 @@ end
 
 }
 
+void function_from_lua()
+{
+    sol::state L;
+    L.open_libraries();
+
+    L["keke"] = [](sol::function f) {
+        f();
+    };
+
+    L.script(R"(
+print('hello')
+
+function my_function()
+  print('my function says hi!')
+end
+
+keke(my_function)
+
+    )");
+}
+
 int main(int argc, char* argv[])
 {
     //vector_test();
     //array_type_test();
     //environment_variable_test();
+    //environment_variable_test_entity();
 
-    environment_variable_test_entity();
+    function_from_lua();
 
     return 0;
 }

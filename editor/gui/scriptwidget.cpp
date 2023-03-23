@@ -1248,6 +1248,17 @@ void InitDoc()
                                   "So this only needs to be called if restarting.");
     DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
     DOC_METHOD_0("game.EntityNode", "GetNext", "Get the current item and move onto next item in the result set.");
+    DOC_METHOD_1("game.EntityNode", "Find", "Find an entity node in the result set by invoking the specified Lua callback on each entity node in the set.<br>"
+                                            "Your callback Lua function should return true to indicate the object having been found or false to indicate no match.<br>"
+                                            "The found object is then returned from the Find function for convenience. In case nothing matched nil is returned.<br>"
+                                            "The iteration of the of the result set is done from whatever is the current position and it stops when a match is found or"
+                                            "when the iteration has reached the end.<br>",
+                                            "function", "predicate");
+    DOC_METHOD_1("void", "Filter", "Filter the result set by invoking the specified Lua callback on each entity node in the set.<br>"
+                                   "The callback function should return true to keep the node in the set or false to have it removed.<br>"
+                                   "This function always begins and ends the iteration at the beginning. I.e. the iteration is restarted both when "
+                                   "starting and finishing the filtering.",
+                 "function", "predicate");
 
     DOC_TABLE("game.ScriptVar");
     DOC_METHOD_0("bool|float|string|int|vec2", "GetValue", "Get the value of the script variable.");
