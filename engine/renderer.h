@@ -211,7 +211,7 @@ namespace engine
             std::shared_ptr<gfx::Drawable> text_drawable;
             std::shared_ptr<gfx::Material> item_material;
             std::shared_ptr<gfx::Drawable> item_drawable;
-            glm::vec2 world_size;
+            glm::vec2 world_scale;
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
             EntityRef     entity;

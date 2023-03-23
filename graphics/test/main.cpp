@@ -1977,6 +1977,39 @@ private:
     std::unique_ptr<gfx::Material> mMaterialPremultAlpha;
 };
 
+class PrecisionTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        // test transformation precision by rendering overlapping
+        // objects after doing different transformations. the green
+        // rectangle rendered after the red rectangle should completely
+        // cover the red rectangle.
+        {
+            gfx::Transform t;
+            t.Resize(200.0f, 200.0f);
+            t.Translate(300.0f, 300.0f);
+            painter.Draw(gfx::Rectangle(), t, gfx::CreateMaterialFromColor(gfx::Color::Red));
+        }
+
+        {
+            gfx::Transform t;
+            t.Resize(200.0f, 200.0f);
+            t.Translate(-100.0f, -100.0f);
+            t.Rotate(math::Pi);
+            t.Translate(100.0f, 100.0f);
+            t.Translate(300.0f, 300.0f);
+            painter.Draw(gfx::Rectangle(), t, gfx::CreateMaterialFromColor(gfx::Color::Green));
+        }
+
+    }
+    virtual std::string GetName() const override
+    { return "PrecisionTest"; }
+    virtual bool IsFeatureTest() const override
+    { return true; }
+private:
+};
 
 int main(int argc, char* argv[])
 {
@@ -2143,6 +2176,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new sRGBColorGradientTest);
     tests.emplace_back(new sRGBTextureTest);
     tests.emplace_back(new PremultiplyAlphaTest);
+    tests.emplace_back(new PrecisionTest);
 
     bool stop_for_input = false;
 
