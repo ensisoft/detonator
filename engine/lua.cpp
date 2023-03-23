@@ -1934,34 +1934,43 @@ void LuaRuntime::DispatchMouseEvent(const std::string& method, const MouseEvent&
 sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args args)
 {
     sol::environment* env = nullptr;
+    std::string target_name;
+    std::string target_type;
     if (object.is<game::Scene*>())
     {
+        auto* scene = object.as<game::Scene*>();
         env = mSceneEnv.get();
+        target_name = scene->GetClassName();
+        target_type = "Scene";
     }
     else if (object.is<game::Entity*>())
     {
         auto* entity = object.as<game::Entity*>();
         env = GetTypeEnv(entity->GetClass());
+        target_name = entity->GetClassName();
+        target_type = "Entity";
     }
     else if (object.is<uik::Window*>())
     {
         auto* window = object.as<uik::Window*>();
         env = GetTypeEnv(*window);
+        target_name = window->GetName();
+        target_type = "Window";
     }
-    else throw GameError("Unsupported object type in Lua method call. Only entity, scene or window object is supported.");
+    else throw GameError("Unsupported object type CallMethod method call. Only entity, scene or window object is supported.");
 
     if (env == nullptr)
-        throw GameError("Method call target object doesn't have a Lua environment.");
+        throw GameError(base::FormatString("CallMethod method call target '%1/%2' object doesn't have a Lua environment.", target_type, target_name));
 
     sol::protected_function func = (*env)[method];
     if (!func.valid())
-        throw GameError(base::FormatString("No such method ('%1') was found. ", method));
+        throw GameError(base::FormatString("No such CallMethod method '%1' was found. ", method));
 
     const auto& result = func(object, args);
     if (!result.valid())
     {
         const sol::error err = result;
-        throw GameError(base::FormatString("Method ('%1') call failed. %2", method, err.what()));
+        throw GameError(base::FormatString("CallMethod method '%1' failed. %2", method, err.what()));
     }
     // todo: how to return any number of return values ?
     if (result.return_count() == 1)
