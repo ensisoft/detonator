@@ -396,7 +396,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     const auto* text = node.GetTextItem();
 
     gfx::Transform transform;
-    transform.Scale(paint_node.world_size);
+    transform.Scale(paint_node.world_scale);
     transform.Rotate(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
@@ -499,8 +499,8 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
 
                 auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
                 paint_node.visited        = true;
-                paint_node.world_pos      = box.GetCenter();
-                paint_node.world_size     = box.GetSize();
+                paint_node.world_pos      = box.GetTopLeft();
+                paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
                 paint_node.entity_node    = node;
                 paint_node.entity         = &mEntity;
@@ -614,7 +614,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             if (paint_node.item_drawable)
             {
                 gfx::Transform transform;
-                transform.Scale(paint_node.world_size);
+                transform.Scale(paint_node.world_scale);
                 transform.Rotate(paint_node.world_rotation);
                 transform.Translate(paint_node.world_pos);
 
@@ -667,7 +667,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
 
     gfx::Transform transform;
-    transform.Scale(paint_node.world_size);
+    transform.Scale(paint_node.world_scale);
     transform.Rotate(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 

@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include <vector>
+
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
@@ -26,6 +28,7 @@
 #include "graphics/transform.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#include "game/util.h"
 #include "engine/renderer.h"
 #include "engine/classlib.h"
 
@@ -201,6 +204,8 @@ void main() {
     {
         if (id == "rect")
             return std::make_shared<gfx::RectangleClass>();
+        else if (id == "circle")
+            return std::make_shared<gfx::CircleClass>();
         else if (id == "particles")
             return std::make_shared<gfx::KinematicsParticleEngineClass>();
         TEST_REQUIRE(!"OOPS");
@@ -219,13 +224,15 @@ void main() {
 private:
 };
 
-std::shared_ptr<gfx::Device> CreateDevice()
+std::shared_ptr<gfx::Device> CreateDevice(unsigned width=256, unsigned height=256)
 {
-    return dev::CreateDevice(std::make_shared<TestContext>(256, 256))->GetSharedGraphicsDevice();
+    return dev::CreateDevice(std::make_shared<TestContext>(width, height))->GetSharedGraphicsDevice();
 }
 
 void unit_test_drawable_item()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
@@ -481,6 +488,8 @@ void unit_test_text_item()
 
 void unit_test_entity_layering()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
@@ -563,11 +572,15 @@ void unit_test_entity_layering()
 
 void unit_test_scene_layering()
 {
+
+
     // todo:
 }
 
 void unit_test_entity_lifecycle()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
@@ -681,6 +694,99 @@ void unit_test_entity_lifecycle()
     }
 }
 
+// test the precision of the entity (node) transformations.
+void unit_test_transform_precision()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto device = CreateDevice(1024, 1024);
+    auto painter = gfx::Painter::Create(device);
+    painter->SetEditingMode(false);
+    painter->SetOrthographicProjection(1024, 1024);
+    painter->SetViewport(0, 0, 1024, 1024);
+    painter->SetSurfaceSize(1024, 1024);
+
+    game::EntityClass entity;
+    // first node has a transformation without rotation.
+    {
+        game::DrawableItemClass drawable;
+        drawable.SetMaterialId("red");
+        drawable.SetDrawableId("circle");
+        drawable.SetLayer(0);
+
+        game::EntityNodeClass node;
+        node.SetName("first");
+        node.SetSize(glm::vec2(200.0f, 200.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(0.0f); // radians
+        node.SetDrawable(drawable);
+        entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+    }
+    // second node has a transformation with rotation.
+    // the transformation relative to the parent should be such that
+    // this node completely covers the first node.
+    {
+        game::DrawableItemClass drawable;
+        drawable.SetMaterialId("green");
+        drawable.SetDrawableId("circle");
+        drawable.SetLayer(1);
+
+        game::EntityNodeClass node;
+        node.SetName("second");
+        node.SetSize(glm::vec2(200.0f, 200.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(math::Pi); // Pi radians, i.e. 180 degrees.
+        node.SetDrawable(drawable);
+        entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+    }
+
+    DummyClassLib classlib;
+
+    engine::Renderer renderer(&classlib);
+    renderer.SetEditingMode(false);
+
+    gfx::Transform view;
+    view.Scale(1.0f, 1.0f); // scaling
+    view.Scale(1.0f, 1.0f); // zoom
+    view.Rotate(0.0f);
+    view.Translate(512.0f, 512.0f);
+    painter->SetViewMatrix(view.GetAsMatrix());
+
+    {
+        class Hook : public engine::EntityClassDrawHook {
+        public:
+            virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& packet) override
+            {
+                mPackets.push_back(packet);
+                return true;
+            }
+            void Test()
+            {
+                TEST_REQUIRE(mPackets.size() == 2);
+                const auto& rect0 = game::ComputeBoundingRect(mPackets[0].transform);
+                const auto& rect1 = game::ComputeBoundingRect(mPackets[1].transform);
+                TEST_REQUIRE(rect0 == rect1);
+            }
+        private:
+            std::vector<engine::DrawPacket> mPackets;
+        } hook;
+
+        gfx::Transform t;
+
+        device->BeginFrame();
+        device->ClearColor(gfx::Color::Black);
+
+        renderer.BeginFrame();
+            renderer.Draw(entity, *painter, t, &hook);
+        renderer.EndFrame();
+
+        hook.Test();
+
+        device->EndFrame(true);
+    }
+}
+
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_drawable_item();
@@ -688,5 +794,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_layering();
     unit_test_scene_layering();
     unit_test_entity_lifecycle();
+    unit_test_transform_precision();
     return 0;
 }
+) // TEST_MAIN

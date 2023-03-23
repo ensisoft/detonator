@@ -883,6 +883,45 @@ void unit_test_entity_class_coords()
 
 }
 
+// test the precision of the entity (node) transformations.
+void unit_test_entity_transformation_precision()
+{
+    TEST_CASE(test::Type::Feature)
+
+    game::EntityClass entity;
+
+    // first node has a transformation without rotation.
+    {
+        game::EntityNodeClass node;
+        node.SetName("first");
+        node.SetSize(glm::vec2(200.0f, 200.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(0.0f); // radians
+        entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+    }
+    // second node has a transformation with rotation.
+    // the transformation relative to the parent should be such that
+    // this node completely covers the first node.
+    {
+        game::EntityNodeClass node;
+        node.SetName("second");
+        node.SetSize(glm::vec2(200.0f, 200.0f));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+        node.SetRotation(math::Pi); // Pi radians, i.e. 180 degrees.
+        entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+    }
+
+    // checking the node bounding rect (AABB)
+    // note that this also really checks the matrix transforms
+    // since the AABB computation is based on matrix transforms.
+    {
+        const auto& first = entity.FindNodeBoundingRect(entity.FindNodeByName("first"));
+        const auto& second = entity.FindNodeBoundingRect(entity.FindNodeByName("second"));
+        TEST_REQUIRE(first == second);
+    }
+}
+
+
 struct PerfTestDrawableTag{};
 
 namespace mem {
@@ -1035,6 +1074,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_instance();
     unit_test_entity_clone_track_bug();
     unit_test_entity_class_coords();
+    unit_test_entity_transformation_precision();
 
     measure_item_allocation_time();
     measure_entity_allocation_time();
