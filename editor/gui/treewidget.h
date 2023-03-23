@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 class QPalette;
 class QPainter;
@@ -137,6 +138,7 @@ namespace gui
         { mModel = model; }
 
         void SelectItemById(const QString& id);
+        void SelectItemById(const std::string& id);
 
         void ClearSelection();
 
