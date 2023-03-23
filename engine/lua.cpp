@@ -2884,6 +2884,9 @@ void BindGameLib(sol::state& L)
         [](EntityNode& node, const glm::vec2& delta) { node.Translate(delta); },
         [](EntityNode& node, float dx, float dy) { node.Translate(dx, dy); });
     entity_node["Rotate"] = &EntityNode::Rotate;
+    entity_node["Grow"] = sol::overload(
+        [](EntityNode& node, const glm::vec2& size) { node.Grow(size); },
+        [](EntityNode& node, float dx, float dy) { node.Grow(dx, dy); } );
 
     auto entity_class = table.new_usertype<EntityClass>("EntityClass",
        sol::meta_function::index, &GetScriptVar<EntityClass>);

@@ -1057,6 +1057,8 @@ void InitDoc()
     DOC_METHOD_1("void", "Translate", "Translate the node relative to its current translation.", "glm.vec2", "delta");
     DOC_METHOD_2("void", "Translate", "Translate the node relative to its current translation.", "float", "dx", "float", "dy");
     DOC_METHOD_1("void", "Rotate", "Rotate the node in radians relative to its current rotation.", "float", "delta");
+    DOC_METHOD_1("void", "Grow", "Grow the node in size by some amount.", "glm.vec2", "size");
+    DOC_METHOD_2("void", "Grow", "Grow the node in size by some amount.", "float", "dx", "float", "dy");
 
     DOC_TABLE("game.EntityClass");
     DOC_METHOD_0("string", "GetId", "Get the entity class ID.");

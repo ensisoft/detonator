@@ -1142,6 +1142,10 @@ namespace game
         { mPosition += glm::vec2(dx, dy); }
         void Rotate(float dr) noexcept
         { mRotation += dr; }
+        void Grow(const glm::vec2& vec) noexcept
+        { mSize += vec; }
+        void Grow(float dx, float dy) noexcept
+        { mSize += glm::vec2(dx, dy); }
 
         // instance getters.
         const std::string& GetId() const noexcept
