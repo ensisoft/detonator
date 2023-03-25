@@ -313,6 +313,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(QtColorWidgets PRIVATE -Wno-deprecated-declarations)
 endif()
 
+add_library(tree-sitter third_party/tree-sitter/src/lib.c
+        third_party/tree-sitter/lua/parser.c
+        third_party/tree-sitter/lua/scanner.c)
+target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
+
 # Editor application.
 add_executable(Detonator
     editor/app/event.h
@@ -335,6 +340,7 @@ add_executable(Detonator
     editor/app/process.cpp
     editor/app/ipc.cpp
     editor/app/resource.cpp
+    editor/app/lua-tools.cpp
     editor/app/lua-doc.cpp
     editor/gui/audiowidget.h
     editor/gui/audiowidget.ui
@@ -515,6 +521,7 @@ target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
@@ -524,6 +531,7 @@ target_link_libraries(Detonator QtColorWidgets)
 target_link_libraries(Detonator QuaZip)
 target_link_libraries(Detonator ${CONAN_LIBS})
 target_link_libraries(Detonator cmake_git_version_tracking)
+target_link_libraries(Detonator tree-sitter)
 install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # game host application which provides a host process to load the game
@@ -714,6 +722,13 @@ add_executable(unit_test_ipc
         editor/app/process.cpp)
 target_include_directories(unit_test_ipc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
 
+add_executable(unit_test_lua_tool
+        editor/app/unit_test/unit_test_lua_tool.cpp
+        editor/app/utility.cpp
+        editor/app/lua-tools.cpp
+        base/assert.cpp)
+target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
+
 add_executable(unit_test_resource
         editor/app/unit_test/unit_test_resource.cpp
         editor/app/utility.cpp
@@ -754,18 +769,21 @@ target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/edit
 target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 
+add_test(NAME unit_test_lua_tool  COMMAND unit_test_lua_tool)
 add_test(NAME unit_test_gui       COMMAND unit_test_gui)
 add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
 add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
 add_test(NAME unit_test_resource  COMMAND unit_test_resource)
 add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
 add_test(NAME unit_test_event_log COMMAND unit_test_event_log)
+target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_gui       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+target_link_libraries(unit_test_lua_tool Qt5::Widgets Qt5::Core tree-sitter)
 target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_gui EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
