@@ -335,6 +335,7 @@ add_executable(Detonator
     editor/app/process.cpp
     editor/app/ipc.cpp
     editor/app/resource.cpp
+    editor/app/lua-doc.cpp
     editor/gui/audiowidget.h
     editor/gui/audiowidget.ui
     editor/gui/audiowidget.cpp
