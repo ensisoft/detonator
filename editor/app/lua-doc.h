@@ -20,10 +20,14 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QSortFilterProxyModel>
+#  include <QAbstractTableModel>
 #include "warnpop.h"
 
 #include <string>
 #include <vector>
+
+#include "base/bitflag.h"
 
 namespace app
 {
@@ -53,7 +57,76 @@ namespace app
     std::size_t GetNumLuaMethodDocs();
     const LuaMemberDoc& GetLuaMethodDoc(size_t index);
 
+    QString FormatArgHelp(const LuaMemberDoc& doc);
+    QString FormatArgCompletion(const LuaMemberDoc& doc);
     QString ParseLuaDocTypeString(const QString& str);
     QString ParseLuaDocTypeString(const std::string& str);
+    QString GenerateLuaDocHtml();
+    QString FindLuaDocTableMatch(const QString& text);
+
+    class LuaDocTableModel : public QAbstractTableModel
+    {
+    public:
+        enum class Mode {
+            HelpView, CodeCompletion
+        };
+        explicit LuaDocTableModel(Mode mode = Mode::HelpView)
+          : mMode(mode)
+        {}
+
+        virtual QVariant data(const QModelIndex& index, int role) const override;
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        virtual int rowCount(const QModelIndex&) const override;
+        virtual int columnCount(const QModelIndex&) const override;
+
+        const LuaMemberDoc& GetDocItem(size_t index) const;
+        const LuaMemberDoc& GetDocItem(const QModelIndex& index)  const;
+    private:
+        const Mode mMode = Mode::HelpView;
+    };
+
+    class LuaDocModelProxy : public QSortFilterProxyModel
+    {
+    public:
+        using Show = app::LuaMemberType;
+
+        LuaDocModelProxy()
+        { mBits.set_from_value(~0u); }
+
+        void SetVisible(Show what, bool on_off)
+        { mBits.set(what, on_off); }
+        void SetVisible(unsigned bits)
+        { mBits.set_from_value(bits); }
+
+        void ClearFilter()
+        {
+            mBits.set_from_value(~0u);
+            mFindString.clear();
+            mTableName.clear();
+            mFieldName.clear();
+        }
+        void SetTableModel(LuaDocTableModel* model)
+        {
+            mModel = model;
+            setSourceModel(model);
+        }
+        void SetFindFilter(const QString& filter);
+        void SetTableNameFilter(const QString& name);
+        void SetFieldNameFilter(const QString& name);
+
+        const auto& GetDocItemFromSource(size_t index) const
+        { return mModel->GetDocItem(index); }
+        const auto& GetDocItemFromSource(const QModelIndex& index) const
+        { return mModel->GetDocItem(index); }
+
+    protected:
+        virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+    private:
+        std::string mFindString;
+        std::string mTableName;
+        std::string mFieldName;
+        LuaDocTableModel* mModel = nullptr;
+        base::bitflag<Show> mBits;
+    };
 
 } // namespace

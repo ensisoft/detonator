@@ -20,9 +20,13 @@
 
 #include "warnpush.h"
 #  include <QPlainTextEdit>
+#  include <QCompleter>
+#  include "ui_completer.h"
 #include "warnpop.h"
 
 #include <optional>
+
+#include "editor/app/lua-doc.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -38,6 +42,36 @@ namespace app {
 
 namespace gui
 {
+    class CodeCompleter : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        explicit CodeCompleter(QWidget* parent);
+
+        void Open(const QRect& rect);
+
+        bool IsOpen() const;
+
+        void Close();
+
+        void SetModel(app::LuaDocModelProxy* model);
+    signals:
+        void Complete(const QString& text, const QModelIndex& index);
+
+    private slots:
+        void on_lineEdit_textChanged(const QString& text);
+        void TableSelectionChanged(const QItemSelection&, const QItemSelection&);
+    private:
+        bool eventFilter(QObject* destination, QEvent* event);
+        void UpdateHelp();
+    private:
+        Ui::Completer mUI;
+        bool mOpen = false;
+    private:
+        app::LuaDocModelProxy* mModel = nullptr;
+    };
+
     // simple text editor widget for simplistic editing functionality.
     // intended for out of the box support for Lua scripts and GLSL.
     class TextEditor : public QPlainTextEdit
@@ -81,6 +115,8 @@ namespace gui
         { mFontSize.reset(); }
         void Reparse();
 
+        bool CancelCompletion();
+
         static void SetDefaultSettings(const Settings& settings);
         static void GetDefaultSettings(Settings* settings);
     protected:
@@ -93,17 +129,24 @@ namespace gui
         void HighlightCurrentLine();
         void CopyAvailable(bool yes_no);
         void UndoAvailable(bool yes_no);
+        void Complete(const QString& text, const QModelIndex& index);
+    private:
+        QString GetCurrentWord() const;
+
     private:
         static Settings mSettings;
     private:
-        QWidget* mLineNumberArea = nullptr;
         app::LuaParser* mHighlighter = nullptr;
+        app::LuaDocTableModel mDocModel;
+        app::LuaDocModelProxy mDocProxy;
+        std::unique_ptr<CodeCompleter> mCompleter;
+        QWidget* mLineNumberArea = nullptr;
         QTextDocument* mDocument = nullptr;
-        bool mCanCopy = false;
-        bool mCanUndo = false;
         QFont mFont;
         std::optional<QString> mFontName;
         std::optional<int> mFontSize;
+        bool mCanCopy = false;
+        bool mCanUndo = false;
     };
 
 } // namespace

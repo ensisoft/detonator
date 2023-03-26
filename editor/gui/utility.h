@@ -98,6 +98,13 @@ private:
 
 };
 
+template<typename T>
+void Connect(QTableView* view, T* recv, void (T::*selection_changed)(const QItemSelection&, const QItemSelection&))
+{
+    QObject::connect(view->selectionModel(), &QItemSelectionModel::selectionChanged, recv, selection_changed);
+}
+
+
 inline glm::vec4 ToVec4(const QPoint& point)
 { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
 inline glm::vec2 ToVec2(const QPoint& point)
