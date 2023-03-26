@@ -45,6 +45,18 @@ std::vector<LuaMemberDoc> g_method_docs;
 void SetTable(const QString& name)
 {
     table_name = name;
+
+    if (const auto i = name.indexOf("."); i != -1)
+    {
+        const auto& parent_table = name.mid(0, i);
+        const auto& child_table = name.mid(i+1);
+        LuaMemberDoc doc;
+        doc.type  = LuaMemberType::Table;
+        doc.table = parent_table;
+        doc.name  = child_table;
+        doc.desc  = app::toString("Nested table '%1'", child_table);
+        g_method_docs.push_back(doc);
+    }
 }
 
 void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc)

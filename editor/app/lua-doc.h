@@ -40,7 +40,8 @@ namespace app
         ObjectProperty,
         Function,
         Method,
-        MetaMethod
+        MetaMethod,
+        Table
     };
 
     struct LuaMemberDoc {
