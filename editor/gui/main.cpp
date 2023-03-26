@@ -86,9 +86,9 @@ void copyright()
     INFO("https://github.com/mbasaglia/Qt-Color-Widgets");
     INFO("Qt Color Widgets");
 
-    INFO("Copyright (c) 2019-2020 Waqar Ahmed -- <waqar.17a@gmail.com>");
-    INFO("https://github.com/Waqar144/QSourceHighlite");
-    INFO("Qt syntax highlighter");
+    INFO("Copyright (c) 2018-2021 Max Brunsfeld");
+    INFO("https://github.com/tree-sitter/tree-sitter");
+    INFO("Tree-sitter parser generator and incremental parsing library.");
 
     INFO("Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)");
     INFO("https://github.com/g-truc/glm");
