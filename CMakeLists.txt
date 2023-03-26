@@ -507,9 +507,6 @@ add_executable(Detonator
     editor/gui/utility.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
-    third_party/QSourceHighlight/languagedata.cpp
-    third_party/QSourceHighlight/qsourcehighliter.cpp
-    third_party/QSourceHighlight/qsourcehighliterthemes.cpp
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # suppress some noise coming from Qt (Qt-Color-Widgets)
